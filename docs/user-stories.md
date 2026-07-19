@@ -1,5 +1,19 @@
 # User Stories — Ronu (MVP)
 
+## 0. Autenticação (cadastro e login)
+
+**Como** visitante do Ronu
+**Quero** criar uma conta e fazer login
+**Para** acessar meus dados e dietas de forma segura
+
+**Critérios de aceite:**
+- Sistema permite cadastro com nome, email e senha
+- Senha é armazenada com hash, nunca em texto plano
+- Sistema permite login com email e senha
+- Usuário não autenticado não acessa dados de outros usuários
+
+---
+
 ## 1. Cadastro de dados corporais e objetivo
 
 **Como** usuário do Ronu
