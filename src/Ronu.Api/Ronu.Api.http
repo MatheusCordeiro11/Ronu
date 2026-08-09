@@ -50,3 +50,17 @@ Authorization: Bearer {{token}}
 ### Listar minhas modalidades (protegido)
 GET {{baseUrl}}/api/usuarios/modalidades
 Authorization: Bearer {{token}}
+
+### Criar preferência alimentar (protegido)
+POST {{baseUrl}}/api/preferencias-alimentares
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "alimento": "brócolis",
+  "tipo": "evitar"
+}
+
+### Listar minhas preferências (protegido)
+GET {{baseUrl}}/api/preferencias-alimentares
+Authorization: Bearer {{token}}
