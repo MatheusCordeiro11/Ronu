@@ -7,5 +7,5 @@ public class DietaIA
     public required string ConteudoJson { get; set; }
 
     public int UsuarioId { get; set; }
-    public required Usuario Usuario { get; set; }
+    public Usuario Usuario { get; set; } = null!;
 }

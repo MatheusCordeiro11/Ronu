@@ -1,4 +1,5 @@
 @baseUrl = http://localhost:5011
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiTWF0aGV1cyBDb3JkZWlybyIsImV4cCI6MTc4NjI1MzYyNn0.b2rW-x00Bpbm7wjihB3FzISsxEqXa9l8D3lZUIs2RCo
 
 ### Cadastro
 POST {{baseUrl}}/api/auth/cadastro
@@ -6,7 +7,7 @@ Content-Type: application/json
 
 {
   "nome": "Matheus Cordeiro",
-  "email": "matheus.teste@gmail.com",
+  "email": "matheus.teste2@gmail.com",
   "senha": "MinhaSenh@123"
 }
 
@@ -18,3 +19,17 @@ Content-Type: application/json
   "email": "matheus.teste@gmail.com",
   "senha": "MinhaSenh@123"
 }
+
+### Criar objetivo (protegido)
+POST {{baseUrl}}/api/objetivos
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "peso": 78.5,
+  "objetivo": "ganhar peso"
+}
+
+### Consultar objetivo atual (protegido)
+GET {{baseUrl}}/api/objetivos/atual
+Authorization: Bearer {{token}}
