@@ -33,3 +33,20 @@ Authorization: Bearer {{token}}
 ### Consultar objetivo atual (protegido)
 GET {{baseUrl}}/api/objetivos/atual
 Authorization: Bearer {{token}}
+
+### Listar todas as modalidades (pública)
+GET {{baseUrl}}/api/modalidades
+
+### Adicionar modalidade praticada (protegido)
+POST {{baseUrl}}/api/usuarios/modalidades
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "modalidadeId": 1,
+  "frequenciaSemanal": 5
+}
+
+### Listar minhas modalidades (protegido)
+GET {{baseUrl}}/api/usuarios/modalidades
+Authorization: Bearer {{token}}
