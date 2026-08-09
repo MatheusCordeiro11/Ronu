@@ -1,6 +1,20 @@
-@Ronu.Api_HostAddress = http://localhost:5011
+@baseUrl = http://localhost:5011
 
-GET {{Ronu.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Cadastro
+POST {{baseUrl}}/api/auth/cadastro
+Content-Type: application/json
 
-###
+{
+  "nome": "Matheus Cordeiro",
+  "email": "matheus.teste@gmail.com",
+  "senha": "MinhaSenh@123"
+}
+
+### Login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "matheus.teste@gmail.com",
+  "senha": "MinhaSenh@123"
+}
