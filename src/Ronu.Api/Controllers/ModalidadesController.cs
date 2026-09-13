@@ -8,6 +8,12 @@ using System.Security.Claims;
 
 namespace Ronu.Api.Controllers;
 
+/// <summary>
+/// Expõe o catálogo de modalidades e a relação entre um usuário e as modalidades
+/// que ele pratica. A listagem do catálogo é pública (qualquer um pode ver as
+/// modalidades disponíveis), mas vincular/consultar modalidades de um usuário
+/// específico exige autenticação.
+/// </summary>
 [ApiController]
 public class ModalidadesController : ControllerBase
 {
@@ -18,9 +24,15 @@ public class ModalidadesController : ControllerBase
         _context = context;
     }
 
+    // O Id do usuário logado vem sempre do claim do token JWT, nunca do corpo da
+    // requisição: se viesse do corpo, um usuário mal-intencionado poderia informar
+    // o Id de outra pessoa e manipular dados que não são dele.
     private int UsuarioIdLogado =>
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
+    // Sem [Authorize]: o catálogo de modalidades é informação do sistema (não é
+    // dado de nenhum usuário específico), então pode ser consultado por qualquer
+    // cliente, autenticado ou não.
     [HttpGet("api/modalidades")]
     public async Task<IActionResult> ListarTodas()
     {
@@ -36,6 +48,10 @@ public class ModalidadesController : ControllerBase
         return Ok(modalidades);
     }
 
+    /// <summary>
+    /// Vincula uma modalidade existente do catálogo ao usuário logado, com a
+    /// frequência semanal informada.
+    /// </summary>
     [Authorize]
     [HttpPost("api/usuarios/modalidades")]
     public async Task<IActionResult> AdicionarModalidade(UsuarioModalidadeRequest request)
@@ -59,12 +75,18 @@ public class ModalidadesController : ControllerBase
         return Ok(new { usuarioModalidade.Id, usuarioModalidade.ModalidadeId, usuarioModalidade.FrequenciaSemanal });
     }
 
+    /// <summary>
+    /// Lista as modalidades vinculadas ao usuário logado, já com os dados de
+    /// cada modalidade (nome, MET) embutidos na resposta.
+    /// </summary>
     [Authorize]
     [HttpGet("api/usuarios/modalidades")]
     public async Task<IActionResult> ListarMinhasModalidades()
     {
         var modalidades = await _context.UsuarioModalidades
             .Where(um => um.UsuarioId == UsuarioIdLogado)
+            // .Include() é necessário para carregar o objeto Modalidade completo:
+            // por padrão o EF Core só traz o ModalidadeId, não a entidade relacionada.
             .Include(um => um.Modalidade)
             .Select(um => new UsuarioModalidadeResponse
             {

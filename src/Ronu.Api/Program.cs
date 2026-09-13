@@ -12,11 +12,16 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+// Registra o ApplicationDbContext usando PostgreSQL (via Npgsql) como provedor,
+// lendo a string de conexão da configuração (appsettings/variáveis de ambiente).
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var chaveJwt = builder.Configuration["Jwt:ChaveSecreta"]!;
 
+// Configura a autenticação baseada em JWT Bearer: o servidor valida a assinatura
+// do token (com a mesma chave usada para gerá-lo) e a expiração, mas não valida
+// issuer/audience pois a API ainda não distingue múltiplos emissores/consumidores.
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -34,6 +39,8 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+// A ordem importa: autenticação (identifica quem é o usuário a partir do token)
+// precisa vir antes da autorização (decide se esse usuário pode acessar a rota).
 app.UseAuthentication();
 app.UseAuthorization();
 

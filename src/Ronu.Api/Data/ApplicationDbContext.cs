@@ -3,6 +3,10 @@ using Ronu.Api.Models;
 
 namespace Ronu.Api.Data;
 
+/// <summary>
+/// Contexto do Entity Framework Core que representa a conexão com o banco de dados
+/// (PostgreSQL) e expõe cada tabela do sistema como um DbSet.
+/// </summary>
 public class ApplicationDbContext : DbContext
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)

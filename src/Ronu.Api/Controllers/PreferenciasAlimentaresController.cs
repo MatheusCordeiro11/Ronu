@@ -8,6 +8,10 @@ using System.Security.Claims;
 
 namespace Ronu.Api.Controllers;
 
+/// <summary>
+/// Gerencia as preferências alimentares do usuário logado. Todas as rotas exigem
+/// autenticação, pois os dados aqui pertencem sempre a um usuário específico.
+/// </summary>
 [ApiController]
 [Route("api/preferencias-alimentares")]
 [Authorize]
@@ -20,9 +24,15 @@ public class PreferenciasAlimentaresController : ControllerBase
         _context = context;
     }
 
+    // O Id do usuário logado vem sempre do claim do token JWT, nunca do corpo da
+    // requisição: assim um usuário não consegue criar ou consultar preferências
+    // de outra pessoa informando um Id diferente do seu.
     private int UsuarioIdLogado =>
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
+    /// <summary>
+    /// Registra uma nova preferência alimentar para o usuário logado.
+    /// </summary>
     [HttpPost]
     public async Task<IActionResult> Criar(PreferenciaAlimentarRequest request)
     {
@@ -46,6 +56,9 @@ public class PreferenciasAlimentaresController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary>
+    /// Lista todas as preferências alimentares cadastradas pelo usuário logado.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Listar()
     {

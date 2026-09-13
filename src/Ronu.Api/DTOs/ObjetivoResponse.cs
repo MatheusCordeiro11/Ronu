@@ -1,5 +1,8 @@
 namespace Ronu.Api.DTOs;
 
+/// <summary>
+/// Representação pública de um ObjetivoUsuario, retornada pela API.
+/// </summary>
 public class ObjetivoResponse
 {
     public int Id { get; set; }
