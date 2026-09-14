@@ -14,6 +14,9 @@
 # Impeccable design skill install (agent tooling, not project source)
 .agents/
 
+# Impeccable per-developer local override (hook consent, machine-specific buildPath)
+.impeccable/config.local.json
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

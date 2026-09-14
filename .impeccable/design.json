@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-13T00:00:00Z",
+  "title": "Design System: Ronu",
+  "extensions": {
+    "colorMeta": {
+      "tatame-noturno": {
+        "role": "neutral",
+        "displayName": "Tatame Noturno",
+        "canonical": "#121820",
+        "tonalRamp": ["#0a0d11", "#121820", "#1b232d", "#2a333f", "#4a5563", "#71808f", "#9fabb8", "#c9d1da"]
+      },
+      "painel-academia": {
+        "role": "neutral",
+        "displayName": "Painel de Academia",
+        "canonical": "#1B232D",
+        "tonalRamp": ["#0a0d11", "#121820", "#1b232d", "#2a333f", "#4a5563", "#71808f", "#9fabb8", "#c9d1da"]
+      },
+      "corda-crua": {
+        "role": "neutral",
+        "displayName": "Corda Crua",
+        "canonical": "#EDE7DA",
+        "tonalRamp": ["#2a2718", "#4d4830", "#726b49", "#a89d78", "#c9bfa0", "#dcd4c0", "#ede7da", "#f7f4ec"]
+      },
+      "poeira-tatame": {
+        "role": "neutral",
+        "displayName": "Poeira de Tatame",
+        "canonical": "#8F98A3",
+        "tonalRamp": ["#20242a", "#363c44", "#4f5761", "#697380", "#8f98a3", "#b1b8c0", "#d3d7dc", "#eceef0"]
+      },
+      "ouro-faixa": {
+        "role": "primary",
+        "displayName": "Ouro de Faixa",
+        "canonical": "#C9A227",
+        "tonalRamp": ["#332107", "#5c3b0d", "#8a5912", "#b8931f", "#c9a227", "#d9b755", "#e7cd8a", "#f3e4bd"]
+      },
+      "linha-demarcacao": {
+        "role": "neutral",
+        "displayName": "Linha de Demarcação",
+        "canonical": "#2A333F",
+        "tonalRamp": ["#0a0d11", "#12161c", "#1b232d", "#2a333f", "#4a5563", "#71808f", "#9fabb8", "#c9d1da"]
+      },
+      "ferrugem-ferro": {
+        "role": "error",
+        "displayName": "Ferrugem de Ferro",
+        "canonical": "#A8462F",
+        "tonalRamp": ["#2c120a", "#4f2013", "#75301c", "#a8462f", "#c05f45", "#d38670", "#e4b3a5", "#f2dad2"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Títulos de hero e headings de seção (h1–h2)." },
+      "body": { "displayName": "Body", "purpose": "Parágrafo corrido, sempre neutro para não competir com o display." },
+      "label": { "displayName": "Label", "purpose": "Rótulo de campo, eyebrow, texto de botão, item de navegação." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "ease-standard", "value": "ease 0.15s", "purpose": "Transição padrão de color/border-color/background-color em hovers e foco." }
+    ],
+    "breakpoints": [
+      { "name": "md", "value": "960px" },
+      { "name": "sm", "value": "720px" },
+      { "name": "xs", "value": "640px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "CTA principal (ex: 'Criar minha dieta').",
+      "html": "<button class=\"ds-btn-primary\">Criar minha dieta</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 0.75rem; padding: 16px 32px; font-family: 'Inter', sans-serif; font-size: 0.875rem; font-weight: 600; border-radius: 4px; border: 1px solid #C9A227; background: #C9A227; color: #121820; cursor: pointer; white-space: nowrap; transition: background-color 0.15s ease, border-color 0.15s ease; } .ds-btn-primary:hover { background: #b8931f; border-color: #b8931f; } .ds-btn-primary:focus-visible { outline: 2px solid #EDE7DA; outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Ação secundária/ghost (ex: 'Já tenho uma conta').",
+      "html": "<button class=\"ds-btn-secondary\">Já tenho uma conta</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 0.75rem; padding: 16px 32px; font-family: 'Inter', sans-serif; font-size: 0.875rem; font-weight: 600; border-radius: 4px; border: 1px solid #2A333F; background: transparent; color: #EDE7DA; cursor: pointer; white-space: nowrap; transition: border-color 0.15s ease; } .ds-btn-secondary:hover { border-color: #8F98A3; } .ds-btn-secondary:focus-visible { outline: 2px solid #EDE7DA; outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "field-input",
+      "description": "Campo de formulário padrão (auth, onboarding), com rótulo acima.",
+      "html": "<div class=\"ds-field\"><label for=\"ds-peso\">Peso (kg)</label><input id=\"ds-peso\" type=\"text\" placeholder=\"Ex: 78\"></div>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 0.5rem; font-family: 'Inter', sans-serif; } .ds-field label { font-size: 0.875rem; font-weight: 500; color: #EDE7DA; } .ds-field input { background: #121820; border: 1px solid #2A333F; border-radius: 4px; padding: 1rem; font-size: 1rem; color: #EDE7DA; } .ds-field input::placeholder { color: #8F98A3; } .ds-field input:focus-visible { outline: none; border-color: #C9A227; }"
+    },
+    {
+      "name": "Error Field",
+      "kind": "input",
+      "refersTo": "field-input-error",
+      "description": "Estado de erro do campo, com mensagem abaixo.",
+      "html": "<div class=\"ds-field ds-field-error\"><label for=\"ds-email\">Email</label><input id=\"ds-email\" type=\"text\" value=\"email-invalido\"><span class=\"ds-field-error-message\">Digite um email válido.</span></div>",
+      "css": ".ds-field-error input { border-color: #A8462F; } .ds-field-error-message { font-size: 0.875rem; color: #A8462F; }"
+    },
+    {
+      "name": "Eyebrow Label",
+      "kind": "custom",
+      "refersTo": "eyebrow",
+      "description": "Rótulo curto acima de um título — único lugar onde o dourado aparece em texto corrido.",
+      "html": "<p class=\"ds-eyebrow\">Feito por quem treina, não por quem só estuda dieta</p>",
+      "css": ".ds-eyebrow { display: inline-flex; align-items: center; gap: 0.75rem; font-family: 'Inter', sans-serif; font-size: 0.875rem; font-weight: 500; color: #C9A227; } .ds-eyebrow::before { content: ''; width: 14px; height: 1px; background: #C9A227; flex-shrink: 0; }"
+    },
+    {
+      "name": "Highlight Blockquote",
+      "kind": "custom",
+      "refersTo": "problem-highlight",
+      "description": "Citação/destaque editorial com borda esquerda em dourado — usado para condensar a proposta de valor em uma frase.",
+      "html": "<div class=\"ds-highlight\"><p>Treino e nutrição calculados juntos, não em planilhas separadas.</p></div>",
+      "css": ".ds-highlight { padding-left: 1.5rem; border-left: 2px solid #C9A227; } .ds-highlight p { color: #EDE7DA; font-family: 'Space Grotesk', serif; font-size: 1.125rem; font-weight: 500; line-height: 1.4; }"
+    },
+    {
+      "name": "Card / Panel",
+      "kind": "card",
+      "refersTo": "surface-panel",
+      "description": "Superfície elevada sem sombra — separação só por contraste de tom e borda de 1px.",
+      "html": "<div class=\"ds-panel\"><p class=\"ds-panel-label\">Gasto calórico semanal</p><p class=\"ds-panel-value\">2.340 kcal</p></div>",
+      "css": ".ds-panel { background: #1B232D; border: 1px solid #2A333F; border-radius: 4px; padding: 1.5rem; } .ds-panel-label { font-family: 'Inter', sans-serif; font-size: 0.875rem; color: #8F98A3; margin: 0 0 0.5rem; } .ds-panel-value { font-family: 'Space Grotesk', serif; font-size: 1.75rem; font-weight: 600; color: #EDE7DA; font-variant-numeric: tabular-nums; margin: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "A Súmula do Tatame",
+    "overview": "A súmula é a ficha oficial de uma luta: preenchida à mão, sem espaço para floreio, cada número nela é exato porque decide um resultado. É essa mistura que define o Ronu — a seriedade do tatame, a precisão de uma pesagem oficial e o hábito de registrar treino como um logbook de atleta, tudo em um único documento visual. Nada aqui existe para impressionar; existe para estar certo.\n\nO sistema é escuro, denso e de baixo contraste decorativo: um fundo quase preto, texto num branco quente (cor de corda crua, não um branco de tela), e um único acento dourado — a cor de faixa — usado como um selo, não como papel de parede. Bordas finas de 1px substituem sombra; a profundidade vem do contraste entre painel e fundo, nunca de um blur suave. Cantos ficam quase retos (4px): o suficiente para não cortar o dedo, não o bastante para virar decoração.",
+    "keyCharacteristics": [
+      "Escuro, denso, sem gradiente decorativo — a cor sobra para o dourado, não para o fundo.",
+      "Um acento só (dourado), usado como carimbo raro: CTA, eyebrow, borda de destaque.",
+      "Tipografia forte no display (Space Grotesk), neutra e legível no corpo (Inter).",
+      "Zero sombra. Profundidade = contraste de superfície + linha de 1px.",
+      "Números (peso, frequência, calorias) sempre em tabular-nums — a súmula não deixa o dado \"dançar\"."
+    ],
+    "rules": [
+      { "name": "A Regra do Ouro Raro", "body": "O dourado nunca preenche uma área grande — ele pontua (texto de eyebrow, borda de CTA, foco de input), nunca decora. Se uma tela tem mais de um elemento dourado grande por vez, tem dourado demais.", "section": "colors" },
+      { "name": "A Regra do Número Estável", "body": "Todo número que representa uma métrica do usuário — peso, frequência semanal, calorias — usa font-variant-numeric: tabular-nums (classe .num). Uma súmula não deixa o dado \"dançar\" quando o dígito muda.", "section": "typography" },
+      { "name": "A Regra Sem Sombra", "body": "Nenhum componente recebe box-shadow, blur ou glow difuso. Se um elemento precisa se destacar, ele muda de tom de fundo ou ganha uma borda — nunca uma sombra.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do manter o dourado (#C9A227) restrito a pontuação: CTA primário, eyebrow, foco de input, borda de destaque em citação.",
+      "Do usar tabular-nums em qualquer número que represente peso, frequência ou calorias.",
+      "Do separar seções com uma linha de 1px em Linha de Demarcação, nunca com um card flutuante ou sombra.",
+      "Do manter o raio em 4px em todos os componentes — botão, input, card, slot de imagem."
+    ],
+    "donts": [
+      "Don't usar gradiente roxo/azul-arroxeado ou qualquer gradiente decorativo fora do sutil overlay dourado já definido no slot de imagem do hero.",
+      "Don't adicionar box-shadow, glow ou blur em qualquer componente — profundidade vem só de contraste de superfície.",
+      "Don't arredondar cantos além de 4px — nada de cards ou botões \"pill\".",
+      "Don't usar branco puro (#FFFFFF) para texto — o texto principal é sempre Corda Crua (#EDE7DA).",
+      "Don't inventar prova social (depoimentos, fotos de atletas, números de usuários) — nenhum conteúdo real existe ainda; usar placeholders explícitos como o slot de imagem do hero."
+    ]
+  }
+}
