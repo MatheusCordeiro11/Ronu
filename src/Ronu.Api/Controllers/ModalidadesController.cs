@@ -50,7 +50,9 @@ public class ModalidadesController : ControllerBase
 
     /// <summary>
     /// Vincula uma modalidade existente do catálogo ao usuário logado, com a
-    /// frequência semanal informada.
+    /// frequência semanal informada. Se o usuário já pratica essa modalidade,
+    /// atualiza a frequência em vez de criar um vínculo duplicado (upsert) — o
+    /// onboarding pode reenviar a mesma modalidade se o usuário voltar uma etapa.
     /// </summary>
     [Authorize]
     [HttpPost("api/usuarios/modalidades")]
@@ -62,14 +64,28 @@ public class ModalidadesController : ControllerBase
             return NotFound(new { mensagem = "Modalidade não encontrada." });
         }
 
-        var usuarioModalidade = new UsuarioModalidade
-        {
-            UsuarioId = UsuarioIdLogado,
-            ModalidadeId = request.ModalidadeId,
-            FrequenciaSemanal = request.FrequenciaSemanal
-        };
+        var usuarioModalidadeExistente = await _context.UsuarioModalidades
+            .FirstOrDefaultAsync(um => um.UsuarioId == UsuarioIdLogado && um.ModalidadeId == request.ModalidadeId);
 
-        _context.UsuarioModalidades.Add(usuarioModalidade);
+        UsuarioModalidade usuarioModalidade;
+
+        if (usuarioModalidadeExistente is not null)
+        {
+            usuarioModalidadeExistente.FrequenciaSemanal = request.FrequenciaSemanal;
+            usuarioModalidade = usuarioModalidadeExistente;
+        }
+        else
+        {
+            usuarioModalidade = new UsuarioModalidade
+            {
+                UsuarioId = UsuarioIdLogado,
+                ModalidadeId = request.ModalidadeId,
+                FrequenciaSemanal = request.FrequenciaSemanal
+            };
+
+            _context.UsuarioModalidades.Add(usuarioModalidade);
+        }
+
         await _context.SaveChangesAsync();
 
         return Ok(new { usuarioModalidade.Id, usuarioModalidade.ModalidadeId, usuarioModalidade.FrequenciaSemanal });

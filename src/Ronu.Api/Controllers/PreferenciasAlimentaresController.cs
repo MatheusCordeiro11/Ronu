@@ -31,19 +31,38 @@ public class PreferenciasAlimentaresController : ControllerBase
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
     /// <summary>
-    /// Registra uma nova preferência alimentar para o usuário logado.
+    /// Registra uma preferência alimentar para o usuário logado. Se o usuário já
+    /// tem uma preferência para o mesmo alimento (comparação sem diferenciar
+    /// maiúsculas/minúsculas), atualiza o tipo em vez de duplicar (upsert) — o
+    /// onboarding pode reenviar o mesmo alimento se o usuário voltar uma etapa.
     /// </summary>
     [HttpPost]
     public async Task<IActionResult> Criar(PreferenciaAlimentarRequest request)
     {
-        var preferencia = new PreferenciaAlimentar
-        {
-            Alimento = request.Alimento,
-            Tipo = request.Tipo,
-            UsuarioId = UsuarioIdLogado
-        };
+        var alimento = request.Alimento.Trim();
 
-        _context.PreferenciasAlimentares.Add(preferencia);
+        var preferenciaExistente = await _context.PreferenciasAlimentares
+            .FirstOrDefaultAsync(p => p.UsuarioId == UsuarioIdLogado && p.Alimento.ToLower() == alimento.ToLower());
+
+        PreferenciaAlimentar preferencia;
+
+        if (preferenciaExistente is not null)
+        {
+            preferenciaExistente.Tipo = request.Tipo;
+            preferencia = preferenciaExistente;
+        }
+        else
+        {
+            preferencia = new PreferenciaAlimentar
+            {
+                Alimento = request.Alimento,
+                Tipo = request.Tipo,
+                UsuarioId = UsuarioIdLogado
+            };
+
+            _context.PreferenciasAlimentares.Add(preferencia);
+        }
+
         await _context.SaveChangesAsync();
 
         var response = new PreferenciaAlimentarResponse
