@@ -1,0 +1,225 @@
+/*
+  Ronu — Onboarding (objetivo, modalidades, preferências)
+  Depende de frontend/css/styles.css e frontend/css/auth.css
+  (reaproveita o shell .auth-page / .auth-brand / .auth-form-panel).
+*/
+
+/* ---------- Stepper ---------- */
+.stepper {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--sp-6);
+}
+
+.stepper-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+}
+
+.stepper-item + .stepper-item {
+  margin-left: var(--sp-2);
+}
+
+.stepper-item + .stepper-item::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: var(--border-width);
+  background: var(--border);
+  margin-right: var(--sp-2);
+}
+
+.stepper-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.stepper-item.is-current {
+  color: var(--text);
+}
+
+.stepper-item.is-current .stepper-index {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.stepper-item.is-done .stepper-index {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
+/* ---------- Passos ---------- */
+.onboarding-step .auth-title {
+  font-size: var(--fs-xl);
+}
+
+/* ---------- Grupo de opções (objetivo / tipo de preferência) ---------- */
+.option-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.option-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--sp-2) var(--sp-3);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.option-pill input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.option-pill:has(input:checked) {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.option-pill:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Lista de modalidades ---------- */
+.modalidade-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
+}
+
+.modalidade-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color 0.15s ease;
+}
+
+.modalidade-row:has(input[type="checkbox"]:checked) {
+  border-color: var(--accent);
+}
+
+.modalidade-check {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-sm);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.modalidade-check input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+.modalidade-frequencia {
+  width: 92px;
+  background: var(--bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--sp-1) var(--sp-2);
+  font-size: var(--fs-xs);
+  color: var(--text);
+  text-align: center;
+}
+
+.modalidade-frequencia::placeholder {
+  color: var(--text-muted);
+}
+
+.modalidade-frequencia:disabled {
+  opacity: 0.4;
+}
+
+.modalidade-frequencia:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.modalidade-catalog-message {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+/* ---------- Preferências alimentares ---------- */
+.preferencia-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-5);
+}
+
+.preferencia-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.preferencia-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  font-size: var(--fs-xs);
+}
+
+.preferencia-alimento {
+  color: var(--text);
+}
+
+.preferencia-tipo {
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: var(--fs-2xs);
+  white-space: nowrap;
+}
+
+.preferencia-item[data-tipo="evitar"] .preferencia-tipo {
+  color: var(--danger);
+}
+
+/* ---------- Navegação entre passos ---------- */
+.onboarding-nav {
+  display: flex;
+  gap: var(--sp-3);
+  margin-top: var(--sp-6);
+}
+
+.onboarding-nav .btn {
+  flex: 1;
+}

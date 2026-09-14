@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ronu — Complete seu cadastro</title>
+  <meta name="description" content="Conte seu objetivo, suas modalidades de treino e suas preferências alimentares pra gerar sua dieta.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/onboarding.css">
+</head>
+<body>
+
+  <div class="auth-page">
+
+    <aside class="auth-brand">
+      <a href="landing/v1/index.html" class="wordmark">ronu<span>.</span></a>
+      <div class="auth-brand-visual" role="img" aria-label="Espaço reservado para imagem de atleta em treino"></div>
+      <p class="auth-brand-quote">Treino, objetivo e preferências — o que a IA precisa pra montar sua dieta.</p>
+    </aside>
+
+    <main class="auth-form-panel">
+      <div class="auth-form-wrap">
+
+        <ol class="stepper" id="stepper">
+          <li class="stepper-item" data-step="1"><span class="stepper-index">1</span><span>Objetivo</span></li>
+          <li class="stepper-item" data-step="2"><span class="stepper-index">2</span><span>Modalidades</span></li>
+          <li class="stepper-item" data-step="3"><span class="stepper-index">3</span><span>Preferências</span></li>
+        </ol>
+
+        <div class="form-message form-message-error" id="form-error" hidden></div>
+
+        <section class="onboarding-step" id="step-1" data-step="1">
+          <h1 class="auth-title">Qual é o seu objetivo?</h1>
+          <p class="auth-subtitle">Usamos isso pra calcular sua necessidade calórica.</p>
+
+          <div class="field">
+            <label for="peso">Peso (kg)</label>
+            <input type="number" id="peso" name="peso" inputmode="decimal" step="0.1" min="20" max="300" required>
+          </div>
+
+          <div class="field">
+            <label>Objetivo</label>
+            <div class="option-group" role="radiogroup" aria-label="Objetivo">
+              <label class="option-pill">
+                <input type="radio" name="objetivo" value="ganhar peso">
+                <span>Ganhar peso</span>
+              </label>
+              <label class="option-pill">
+                <input type="radio" name="objetivo" value="perder peso">
+                <span>Perder peso</span>
+              </label>
+              <label class="option-pill">
+                <input type="radio" name="objetivo" value="manter peso">
+                <span>Manter peso</span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section class="onboarding-step" id="step-2" data-step="2" hidden>
+          <h1 class="auth-title">Quais modalidades você pratica?</h1>
+          <p class="auth-subtitle">Selecione uma ou mais e informe a frequência semanal.</p>
+
+          <div class="modalidade-list" id="modalidade-list">
+            <p class="modalidade-catalog-message">Carregando modalidades...</p>
+          </div>
+        </section>
+
+        <section class="onboarding-step" id="step-3" data-step="3" hidden>
+          <h1 class="auth-title">Alguma preferência alimentar?</h1>
+          <p class="auth-subtitle">Opcional — adicione o que você gosta ou quer evitar.</p>
+
+          <div class="preferencia-form">
+            <div class="field">
+              <label for="alimento">Alimento</label>
+              <input type="text" id="alimento" name="alimento" placeholder="Ex: brócolis" required>
+            </div>
+
+            <div class="option-group" role="radiogroup" aria-label="Tipo de preferência">
+              <label class="option-pill">
+                <input type="radio" name="tipo-preferencia" value="preferido" checked>
+                <span>Prefiro</span>
+              </label>
+              <label class="option-pill">
+                <input type="radio" name="tipo-preferencia" value="evitar">
+                <span>Evitar</span>
+              </label>
+            </div>
+
+            <button type="button" class="btn btn-secondary" id="adicionar-preferencia-btn">
+              <span class="btn-label">Adicionar</span>
+            </button>
+          </div>
+
+          <ul class="preferencia-list" id="preferencia-list"></ul>
+        </section>
+
+        <div class="onboarding-nav">
+          <button type="button" class="btn btn-secondary" id="btn-voltar" hidden>Voltar</button>
+          <button type="button" class="btn btn-primary" id="btn-avancar">
+            <span class="btn-label">Avançar</span>
+          </button>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/onboarding.js"></script>
+</body>
+</html>

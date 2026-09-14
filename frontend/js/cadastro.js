@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       await ronuCadastrar(nome, email, senha);
       await ronuLogin(email, senha);
-      window.location.href = 'dashboard.html';
+      await ronuRedirecionarPosAuth();
     } catch (erro) {
       ronuMostrarErroFormulario(formError, erro.message);
       ronuDefinirCarregando(submitBtn, false);

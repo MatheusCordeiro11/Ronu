@@ -11,8 +11,9 @@
 *.sln.docstates
 *.env
 
-# Impeccable design skill install (agent tooling, not project source)
+# Claude Code / Impeccable design skill install (agent tooling, not project source)
 .agents/
+.claude/
 
 # Impeccable per-developer local override (hook consent, machine-specific buildPath)
 .impeccable/config.local.json

@@ -55,6 +55,55 @@ async function ronuCadastrar(nome, email, senha) {
   return dados;
 }
 
+// Faz uma chamada autenticada, anexando o Bearer token guardado na sessão.
+// Se a API responder 401 (token ausente/expirado), limpa a sessão e manda
+// pro login com um aviso — nenhuma tela protegida deveria seguir renderizando
+// depois de um 401, então isso já interrompe o fluxo com um throw.
+async function ronuFetchAutenticado(caminho, opcoes = {}) {
+  const headers = new Headers(opcoes.headers || {});
+  headers.set('Authorization', `Bearer ${localStorage.getItem(RONU_TOKEN_KEY)}`);
+
+  const resposta = await fetch(`${RONU_API_BASE}${caminho}`, { ...opcoes, headers });
+
+  if (resposta.status === 401) {
+    ronuLimparSessao();
+    window.location.href = 'login.html?sessao=expirada';
+    throw new Error('Sessão expirada.');
+  }
+
+  return resposta;
+}
+
+// Um cadastro é considerado completo quando o usuário já tem objetivo/peso
+// registrado e pelo menos uma modalidade vinculada (preferências é opcional).
+// Usado logo após login/cadastro e ao abrir o onboarding, pra decidir entre
+// mandar o usuário pro onboarding ou direto pro dashboard.
+async function ronuChecarCadastroCompleto() {
+  const [respostaObjetivo, respostaModalidades] = await Promise.all([
+    ronuFetchAutenticado('/objetivos/atual'),
+    ronuFetchAutenticado('/usuarios/modalidades')
+  ]);
+
+  const temObjetivo = respostaObjetivo.status === 200;
+  const modalidades = respostaModalidades.ok ? await respostaModalidades.json() : [];
+  const temModalidade = Array.isArray(modalidades) && modalidades.length > 0;
+
+  return temObjetivo && temModalidade;
+}
+
+// Chamado depois de um login/cadastro bem-sucedido. Se a checagem de
+// completude falhar por erro de rede (não 401, que ronuFetchAutenticado já
+// trata sozinho), assume o caminho mais seguro: manda pro onboarding, que
+// vai mostrar o próprio erro se a API realmente estiver fora do ar.
+async function ronuRedirecionarPosAuth() {
+  try {
+    const completo = await ronuChecarCadastroCompleto();
+    window.location.href = completo ? 'dashboard.html' : 'onboarding.html';
+  } catch (erro) {
+    window.location.href = 'onboarding.html';
+  }
+}
+
 function ronuMostrarErroFormulario(elemento, mensagem) {
   elemento.textContent = mensagem;
   elemento.hidden = false;

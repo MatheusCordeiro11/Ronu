@@ -5,6 +5,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const formError = document.getElementById('form-error');
   const submitBtn = document.getElementById('submit-btn');
 
+  if (new URLSearchParams(window.location.search).get('sessao') === 'expirada') {
+    ronuMostrarErroFormulario(formError, 'Sua sessão expirou. Entre novamente.');
+  }
+
   form.addEventListener('submit', async (evento) => {
     evento.preventDefault();
 
@@ -22,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       await ronuLogin(email, senha);
-      window.location.href = 'dashboard.html';
+      await ronuRedirecionarPosAuth();
     } catch (erro) {
       ronuMostrarErroFormulario(formError, erro.message);
       ronuDefinirCarregando(submitBtn, false);
