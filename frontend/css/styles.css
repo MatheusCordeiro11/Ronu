@@ -1,0 +1,285 @@
+/*
+  Ronu — Design Tokens & Base
+  Referência: tatame de competição — sério, disciplinado, cientificamente embasado.
+  Sem gradientes roxos, sem sombras suaves genéricas, sem cantos muito arredondados.
+*/
+
+:root {
+  /* Cor */
+  --bg: #121820;
+  --surface: #1B232D;
+  --text: #EDE7DA;
+  --text-muted: #8F98A3;
+  --accent: #C9A227;
+  --accent-text: #121820; /* texto sobre fundo dourado */
+  --danger: #A8462F;
+  --border: #2A333F;
+
+  /* Tipografia */
+  --font-display: 'Space Grotesk', 'Space Grotesk Fallback', Georgia, serif;
+  --font-body: 'Inter', 'Inter Fallback', -apple-system, sans-serif;
+
+  /* Escala tipográfica */
+  --fs-2xs: 0.75rem;
+  --fs-xs: 0.875rem;
+  --fs-sm: 1rem;
+  --fs-md: 1.125rem;
+  --fs-lg: 1.375rem;
+  --fs-xl: 1.75rem;
+  --fs-2xl: 2.5rem;
+  --fs-3xl: 3.5rem;
+  --fs-4xl: 4.5rem;
+
+  /* Espaçamento — escala base 8px */
+  --sp-1: 0.5rem;
+  --sp-2: 0.75rem;
+  --sp-3: 1rem;
+  --sp-4: 1.5rem;
+  --sp-5: 2rem;
+  --sp-6: 3rem;
+  --sp-7: 4rem;
+  --sp-8: 6rem;
+  --sp-9: 8rem;
+
+  /* Layout */
+  --radius: 4px;
+  --border-width: 1px;
+  --container-width: 1200px;
+  --container-pad: var(--sp-4);
+}
+
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+img, svg {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+}
+
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ---------- Tipografia ---------- */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.1;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.text-strong {
+  color: var(--text);
+}
+
+/* Números (peso, frequência, métricas) sempre em tabular-nums, para não "dançar" */
+.num, .tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.eyebrow::before {
+  content: '';
+  width: 14px;
+  height: var(--border-width);
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+/* ---------- Layout ---------- */
+.container {
+  width: 100%;
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding-left: var(--container-pad);
+  padding-right: var(--container-pad);
+}
+
+.section {
+  padding-top: var(--sp-8);
+  padding-bottom: var(--sp-8);
+}
+
+.border-t {
+  border-top: var(--border-width) solid var(--border);
+}
+
+.border-b {
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+/* ---------- Botões ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-5);
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  border-radius: var(--radius);
+  border: var(--border-width) solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+
+.btn-primary:hover {
+  background: #b8931f;
+  border-color: #b8931f;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.btn-secondary:hover {
+  border-color: var(--text-muted);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* ---------- Formulários (usados nas telas de auth) ---------- */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-4);
+}
+
+.field label {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--text);
+}
+
+.field input {
+  background: var(--bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--sp-3);
+  font-size: var(--fs-sm);
+}
+
+.field input::placeholder {
+  color: var(--text-muted);
+}
+
+.field input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.field-error input {
+  border-color: var(--danger);
+}
+
+.field-error-message {
+  font-size: var(--fs-xs);
+  color: var(--danger);
+}
+
+.form-message {
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--sp-3);
+  font-size: var(--fs-xs);
+  margin-bottom: var(--sp-4);
+}
+
+.form-message-error {
+  border-color: var(--danger);
+  color: var(--text);
+  background: rgba(168, 70, 47, 0.1);
+}
+
+.form-message-success {
+  border-color: var(--accent);
+  color: var(--text);
+  background: rgba(201, 162, 39, 0.08);
+}
+
+/* ---------- Utilitários ---------- */
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  :root {
+    --container-pad: var(--sp-3);
+  }
+
+  .section {
+    padding-top: var(--sp-6);
+    padding-bottom: var(--sp-6);
+  }
+}

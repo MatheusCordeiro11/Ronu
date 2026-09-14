@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ronu — Entrar</title>
+  <meta name="description" content="Entre na sua conta Ronu para acessar suas dietas e seu histórico de treino.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+
+  <div class="auth-page">
+
+    <aside class="auth-brand">
+      <a href="landing/v1/index.html" class="wordmark">ronu<span>.</span></a>
+      <div class="auth-brand-visual" role="img" aria-label="Espaço reservado para imagem de atleta em treino"></div>
+      <p class="auth-brand-quote">Treino e nutrição calculados juntos, não em planilhas separadas.</p>
+    </aside>
+
+    <main class="auth-form-panel">
+      <div class="auth-form-wrap">
+        <h1 class="auth-title">Entrar</h1>
+        <p class="auth-subtitle">Acesse sua dieta e seu histórico de treino.</p>
+
+        <div class="form-message form-message-error" id="form-error" hidden></div>
+
+        <form id="login-form" novalidate>
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" autocomplete="email" required>
+          </div>
+
+          <div class="field">
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" name="senha" autocomplete="current-password" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="submit-btn">
+            <span class="btn-label">Entrar</span>
+          </button>
+        </form>
+
+        <p class="auth-switch">Ainda não tem conta? <a href="cadastro.html" class="auth-switch-link">Criar conta</a></p>
+      </div>
+    </main>
+
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>

@@ -11,6 +11,9 @@
 *.sln.docstates
 *.env
 
+# Impeccable design skill install (agent tooling, not project source)
+.agents/
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

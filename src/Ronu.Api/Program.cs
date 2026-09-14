@@ -8,6 +8,22 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+const string FrontendCorsPolicy = "FrontendLocal";
+
+// O frontend é servido como arquivos estáticos (fora do ASP.NET), então o navegador
+// trata cada porta como uma origem diferente. Liberamos só as origens usadas em
+// desenvolvimento local (ex.: Live Server), nunca "*", para não abrir a API geral.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(FrontendCorsPolicy, policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5500", "http://127.0.0.1:5500")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -38,6 +54,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+// CORS precisa vir antes de autenticação/autorização para que o navegador já
+// receba os headers liberando a origem na resposta (inclusive no preflight).
+app.UseCors(FrontendCorsPolicy);
 
 // A ordem importa: autenticação (identifica quem é o usuário a partir do token)
 // precisa vir antes da autorização (decide se esse usuário pode acessar a rota).

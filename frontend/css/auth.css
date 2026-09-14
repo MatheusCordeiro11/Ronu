@@ -1,0 +1,196 @@
+/*
+  Ronu — Auth (cadastro / login / placeholder pós-login)
+  Depende de frontend/css/styles.css (tokens + base).
+*/
+
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+/* ---------- Painel de marca ---------- */
+.auth-brand {
+  position: relative;
+  background: var(--surface);
+  border-left: var(--border-width) solid var(--border);
+  padding: var(--sp-6) var(--sp-7);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.auth-brand .wordmark {
+  font-size: var(--fs-md);
+  text-decoration: none;
+}
+
+.auth-brand-visual {
+  position: relative;
+  flex: 1;
+  margin: var(--sp-6) 0;
+  border-radius: var(--radius);
+  border: var(--border-width) solid var(--border);
+  overflow: hidden;
+  background:
+    linear-gradient(160deg, rgba(201, 162, 39, 0.22) 0%, rgba(201, 162, 39, 0) 60%),
+    linear-gradient(0deg, var(--surface) 0%, var(--bg) 100%);
+}
+
+.auth-brand-visual::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--text-muted) 1px, transparent 1px),
+    linear-gradient(90deg, var(--text-muted) 1px, transparent 1px);
+  background-size: 100% 33.33%, 33.33% 100%;
+  opacity: 0.22;
+}
+
+.auth-brand-visual::before {
+  content: '';
+  position: absolute;
+  inset: var(--sp-4);
+  z-index: 1;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-image:
+    linear-gradient(var(--accent), var(--accent)), linear-gradient(var(--accent), var(--accent)),
+    linear-gradient(var(--accent), var(--accent)), linear-gradient(var(--accent), var(--accent)),
+    linear-gradient(var(--accent), var(--accent)), linear-gradient(var(--accent), var(--accent)),
+    linear-gradient(var(--accent), var(--accent)), linear-gradient(var(--accent), var(--accent));
+  background-size:
+    20px 2px, 2px 20px,
+    20px 2px, 2px 20px,
+    20px 2px, 2px 20px,
+    20px 2px, 2px 20px;
+  background-position:
+    top left, top left,
+    top right, top right,
+    bottom left, bottom left,
+    bottom right, bottom right;
+  opacity: 0.6;
+}
+
+.auth-brand-quote {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+  max-width: 32ch;
+  padding-left: var(--sp-4);
+  border-left: 2px solid var(--accent);
+}
+
+/* ---------- Painel de formulário ---------- */
+.auth-form-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-6) var(--container-pad);
+}
+
+.auth-form-wrap {
+  width: 100%;
+  max-width: 380px;
+}
+
+.auth-title {
+  font-size: var(--fs-2xl);
+}
+
+.auth-subtitle {
+  margin-top: var(--sp-2);
+  margin-bottom: var(--sp-6);
+  color: var(--text-muted);
+}
+
+.auth-form-wrap form {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-switch {
+  margin-top: var(--sp-5);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.auth-switch-link {
+  color: var(--text);
+  text-decoration-line: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.15s ease;
+}
+
+.auth-switch-link:hover {
+  text-decoration-color: var(--text-muted);
+}
+
+/* Estado de envio: o texto do botão muda (ver auth.js), sem spinner decorativo */
+.btn[data-loading="true"] {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* ---------- Header simples (placeholder pós-login) ---------- */
+.simple-header {
+  padding-top: var(--sp-4);
+  padding-bottom: var(--sp-4);
+}
+
+.simple-header .wordmark {
+  font-size: var(--fs-md);
+  text-decoration: none;
+}
+
+/* ---------- Placeholder de área logada ---------- */
+.dashboard-placeholder {
+  min-height: calc(100vh - 73px);
+  display: flex;
+  align-items: center;
+}
+
+.dashboard-placeholder-inner {
+  max-width: 480px;
+}
+
+.dashboard-title {
+  font-size: var(--fs-2xl);
+  margin-top: var(--sp-3);
+}
+
+.dashboard-subtitle {
+  margin-top: var(--sp-3);
+  margin-bottom: var(--sp-6);
+  max-width: 48ch;
+}
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 960px) {
+  .auth-page {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-brand {
+    border-left: none;
+    border-bottom: var(--border-width) solid var(--border);
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--sp-4) var(--container-pad);
+  }
+
+  .auth-brand-visual,
+  .auth-brand-quote {
+    display: none;
+  }
+
+  .auth-form-panel {
+    padding: var(--sp-6) var(--container-pad);
+  }
+}

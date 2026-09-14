@@ -1,0 +1,264 @@
+/*
+  Ronu — Landing v1
+  Depende de frontend/css/styles.css (tokens + base).
+*/
+
+/* ---------- Header ---------- */
+.site-header {
+  padding-top: var(--sp-4);
+  padding-bottom: var(--sp-4);
+}
+
+.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wordmark {
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.wordmark span {
+  color: var(--accent);
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+
+.header-nav a {
+  font-size: var(--fs-xs);
+  text-decoration: none;
+  color: var(--text-muted);
+  transition: color 0.15s ease;
+}
+
+.header-nav a:hover {
+  color: var(--text);
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  padding-top: var(--sp-7);
+  padding-bottom: var(--sp-8);
+}
+
+.hero .container {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+  gap: var(--sp-8);
+  align-items: center;
+}
+
+.hero-copy .eyebrow {
+  margin-bottom: var(--sp-4);
+}
+
+.hero-title {
+  font-size: var(--fs-4xl);
+  max-width: 15ch;
+}
+
+.hero-lede {
+  margin-top: var(--sp-4);
+  font-size: var(--fs-md);
+  max-width: 42ch;
+  color: var(--text-muted);
+}
+
+.hero-actions {
+  margin-top: var(--sp-6);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  flex-wrap: wrap;
+}
+
+.hero-secondary-link {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  text-decoration-line: underline;
+  text-decoration-color: var(--border);
+  text-decoration-thickness: var(--border-width);
+  text-underline-offset: 3px;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.hero-secondary-link:hover {
+  color: var(--text);
+  text-decoration-color: var(--text-muted);
+}
+
+/* Espaço reservado para a imagem definitiva do hero.
+   Proporção 4:5 (retrato) — condizente com uma foto de atleta em pé/tatame.
+   Grade + marcas de canto deixam claro que é um placeholder proposital
+   (motivo de "grade calculada", não decoração) até a imagem real entrar aqui. */
+.hero-image-slot {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius);
+  border: var(--border-width) solid var(--border);
+  background:
+    linear-gradient(160deg, rgba(201, 162, 39, 0.22) 0%, rgba(201, 162, 39, 0) 60%),
+    linear-gradient(0deg, var(--surface) 0%, var(--bg) 100%);
+  overflow: hidden;
+}
+
+.hero-image-slot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--text-muted) 1px, transparent 1px),
+    linear-gradient(90deg, var(--text-muted) 1px, transparent 1px);
+  background-size: 100% 33.33%, 33.33% 100%;
+  opacity: 0.22;
+}
+
+.hero-image-slot::before {
+  content: '';
+  position: absolute;
+  inset: var(--sp-4);
+  z-index: 1;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-image:
+    linear-gradient(var(--accent), var(--accent)), linear-gradient(var(--accent), var(--accent)),
+    linear-gradient(var(--accent), var(--accent)), linear-gradient(var(--accent), var(--accent)),
+    linear-gradient(var(--accent), var(--accent)), linear-gradient(var(--accent), var(--accent)),
+    linear-gradient(var(--accent), var(--accent)), linear-gradient(var(--accent), var(--accent));
+  background-size:
+    20px 2px, 2px 20px,
+    20px 2px, 2px 20px,
+    20px 2px, 2px 20px,
+    20px 2px, 2px 20px;
+  background-position:
+    top left, top left,
+    top right, top right,
+    bottom left, bottom left,
+    bottom right, bottom right;
+  opacity: 0.6;
+}
+
+/* ---------- Problema (seção editorial, sem grid de ícones) ---------- */
+.problem {
+  background: var(--surface);
+}
+
+.problem .container {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: var(--sp-8);
+}
+
+.problem-heading {
+  font-size: var(--fs-2xl);
+  max-width: 14ch;
+}
+
+.problem-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.problem-body p {
+  font-size: var(--fs-md);
+  color: var(--text-muted);
+  max-width: 56ch;
+}
+
+.problem-body p strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.problem-highlight {
+  margin-top: var(--sp-2);
+  padding-left: var(--sp-4);
+  border-left: 2px solid var(--accent);
+}
+
+.problem-highlight p {
+  color: var(--text);
+  font-size: var(--fs-md);
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* ---------- CTA final ---------- */
+.final-cta {
+  text-align: center;
+}
+
+.final-cta .container {
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-5);
+}
+
+.final-cta-title {
+  font-size: var(--fs-2xl);
+}
+
+/* ---------- Footer ---------- */
+.site-footer {
+  padding-top: var(--sp-5);
+  padding-bottom: var(--sp-5);
+}
+
+.site-footer .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+
+.footer-copy {
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+}
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 960px) {
+  .hero .container,
+  .problem .container {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-title {
+    max-width: none;
+  }
+
+  .hero-image-slot {
+    aspect-ratio: 16 / 10;
+    order: -1;
+  }
+
+  .problem-heading {
+    max-width: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-title {
+    font-size: var(--fs-3xl);
+  }
+
+  .header-nav span {
+    display: none;
+  }
+}
