@@ -153,6 +153,30 @@
   display: block;
 }
 
+/* Pulso dos pontos: transform-box: fill-box faz o scale() usar o próprio
+   centro do círculo (cx/cy), não a origem do viewBox — sem isso todo ponto
+   "puxaria" na direção do canto superior esquerdo ao escalar. */
+.ronu-spiral-dot {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0.3;
+  animation: ronu-spiral-pulso var(--ronu-spiral-duracao, 4s) cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation-delay: var(--ronu-spiral-atraso, 0s);
+}
+
+@keyframes ronu-spiral-pulso {
+  0%,
+  100% {
+    transform: scale(0.5);
+    opacity: 0.15;
+  }
+
+  50% {
+    transform: scale(1.5);
+    opacity: 1;
+  }
+}
+
 .hero-image-slot::before {
   content: '';
   position: absolute;

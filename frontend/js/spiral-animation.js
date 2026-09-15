@@ -3,6 +3,13 @@
  * usada como elemento visual no hero da landing page.
  * Baseada em https://21st.dev/@jahed/components/spiral-animation, adaptada
  * de React para JS puro (o projeto não usa React) e com prefers-reduced-motion.
+ *
+ * O pulso de cada ponto roda em CSS (@keyframes em landing.css via
+ * transform/opacity), não em SMIL (<animate>): SMIL não entra no
+ * compositor da GPU do jeito que transform/opacity entram, então com
+ * centenas de pontos x 2 animações cada o navegador tinha que recalcular
+ * estilo e repintar a cada frame. Aqui o JS só posiciona os pontos e grava
+ * o atraso de cada um numa custom property; quem anima é o CSS.
  */
 (function () {
   const SVG_NS = "http://www.w3.org/2000/svg";
@@ -29,6 +36,10 @@
     svg.setAttribute("width", "100%");
     svg.setAttribute("height", "100%");
     svg.setAttribute("aria-hidden", "true");
+    // Duração é a mesma pra todos os pontos — fica uma vez no <svg> e cada
+    // círculo animado só herda; só o atraso (--ronu-spiral-atraso) varia
+    // por ponto, pra manter o efeito de "acender" em espiral.
+    svg.style.setProperty("--ronu-spiral-duracao", `${duration}s`);
 
     const center = size / 2;
     const maxRadius = center - margin - dotRadius;
@@ -46,35 +57,15 @@
       circle.setAttribute("cy", y.toFixed(2));
       circle.setAttribute("r", dotRadius.toString());
       circle.setAttribute("fill", dotColor);
-      circle.setAttribute("opacity", reduceMotion ? "0.6" : "0.3");
-      svg.appendChild(circle);
 
-      if (!reduceMotion) {
-        const begin = `${frac * duration}s`;
-
-        const animR = document.createElementNS(SVG_NS, "animate");
-        animR.setAttribute("attributeName", "r");
-        animR.setAttribute(
-          "values",
-          `${dotRadius * 0.5};${dotRadius * 1.5};${dotRadius * 0.5}`
-        );
-        animR.setAttribute("dur", `${duration}s`);
-        animR.setAttribute("begin", begin);
-        animR.setAttribute("repeatCount", "indefinite");
-        animR.setAttribute("calcMode", "spline");
-        animR.setAttribute("keySplines", "0.4 0 0.6 1;0.4 0 0.6 1");
-        circle.appendChild(animR);
-
-        const animO = document.createElementNS(SVG_NS, "animate");
-        animO.setAttribute("attributeName", "opacity");
-        animO.setAttribute("values", "0.15;1;0.15");
-        animO.setAttribute("dur", `${duration}s`);
-        animO.setAttribute("begin", begin);
-        animO.setAttribute("repeatCount", "indefinite");
-        animO.setAttribute("calcMode", "spline");
-        animO.setAttribute("keySplines", "0.4 0 0.6 1;0.4 0 0.6 1");
-        circle.appendChild(animO);
+      if (reduceMotion) {
+        circle.setAttribute("opacity", "0.6");
+      } else {
+        circle.classList.add("ronu-spiral-dot");
+        circle.style.setProperty("--ronu-spiral-atraso", `${frac * duration}s`);
       }
+
+      svg.appendChild(circle);
     }
 
     container.innerHTML = "";
