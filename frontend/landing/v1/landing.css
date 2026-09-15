@@ -124,6 +124,35 @@
   opacity: 0.22;
 }
 
+/* Espiral de pontos (phyllotaxis) como fundo decorativo atrás do título —
+   fica atrás do texto (z-index negativo), com opacidade baixa para não
+   atrapalhar a leitura. */
+.hero-title-wrap {
+  position: relative;
+  isolation: isolate;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.hero-title-spiral {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 125%;
+  aspect-ratio: 1 / 1;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  opacity: 0.4;
+  pointer-events: none;
+  color: var(--accent);
+}
+
+.hero-title-spiral svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 .hero-image-slot::before {
   content: '';
   position: absolute;

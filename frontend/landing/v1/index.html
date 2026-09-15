@@ -32,7 +32,10 @@
       <div class="container">
         <div class="hero-copy">
           <p class="eyebrow">Feito por quem treina, não por quem só estuda dieta</p>
-          <h1 class="hero-title">Sua dieta calcula o que seu treino realmente gasta.</h1>
+          <div class="hero-title-wrap">
+            <div class="hero-title-spiral" id="heroSpiral" aria-hidden="true"></div>
+            <h1 class="hero-title">Sua dieta calcula o que seu treino realmente gasta.</h1>
+          </div>
           <p class="hero-lede">
             O Ronu foi construído para quem treina jiu-jitsu e outras artes marciais.
             A gente calcula o gasto calórico real de cada modalidade e frequência de treino,
@@ -89,5 +92,16 @@
     </div>
   </footer>
 
+  <script src="../../js/spiral-animation.js"></script>
+  <script>
+    initSpiralAnimation(document.getElementById('heroSpiral'), {
+      totalDots: 420,
+      size: 400,
+      dotRadius: 2,
+      margin: 2,
+      duration: 5,
+      dotColor: 'var(--accent)',
+    });
+  </script>
 </body>
 </html>
