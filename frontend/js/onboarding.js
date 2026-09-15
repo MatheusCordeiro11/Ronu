@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   async function carregarCatalogoModalidades() {
     try {
-      const resposta = await fetch(`${RONU_API_BASE}/modalidades`);
+      const resposta = await fetch(`${RONU_CONFIG.API_BASE}/modalidades`);
       if (!resposta.ok) throw new Error();
 
       const modalidades = await resposta.json();

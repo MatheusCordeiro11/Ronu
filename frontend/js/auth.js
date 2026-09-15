@@ -3,7 +3,13 @@
 // (POST /api/auth/cadastro, POST /api/auth/login) e utilitários de sessão/formulário
 // compartilhados entre cadastro.html, login.html e dashboard.html.
 
-const RONU_API_BASE = 'http://localhost:5011/api';
+// Único ponto de configuração do frontend — ao fazer deploy, troque
+// API_BASE aqui (não há build step/variável de ambiente neste projeto,
+// então esse valor tem que ser editado à mão por ambiente).
+const RONU_CONFIG = {
+  API_BASE: 'http://localhost:5011/api',
+};
+
 const RONU_TOKEN_KEY = 'ronu:token';
 const RONU_USUARIO_KEY = 'ronu:usuario';
 
@@ -23,7 +29,7 @@ function ronuUsuarioLogado() {
 }
 
 async function ronuLogin(email, senha) {
-  const resposta = await fetch(`${RONU_API_BASE}/auth/login`, {
+  const resposta = await fetch(`${RONU_CONFIG.API_BASE}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, senha })
@@ -40,7 +46,7 @@ async function ronuLogin(email, senha) {
 }
 
 async function ronuCadastrar(nome, email, senha) {
-  const resposta = await fetch(`${RONU_API_BASE}/auth/cadastro`, {
+  const resposta = await fetch(`${RONU_CONFIG.API_BASE}/auth/cadastro`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ nome, email, senha })
@@ -63,7 +69,7 @@ async function ronuFetchAutenticado(caminho, opcoes = {}) {
   const headers = new Headers(opcoes.headers || {});
   headers.set('Authorization', `Bearer ${localStorage.getItem(RONU_TOKEN_KEY)}`);
 
-  const resposta = await fetch(`${RONU_API_BASE}${caminho}`, { ...opcoes, headers });
+  const resposta = await fetch(`${RONU_CONFIG.API_BASE}${caminho}`, { ...opcoes, headers });
 
   if (resposta.status === 401) {
     ronuLimparSessao();
