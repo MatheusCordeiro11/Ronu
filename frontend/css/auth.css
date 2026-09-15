@@ -3,6 +3,46 @@
   Depende de frontend/css/styles.css (tokens + base).
 */
 
+/* ---------- Transição entre login.html e cadastro.html ---------- */
+/* Cada página tem [data-auth-tela] fixo, então a direção do slide também é
+   fixa por página — não depende de de onde o usuário veio. Sem suporte
+   (fora do Chromium), a navegação simplesmente ocorre sem animação. */
+@view-transition {
+  navigation: auto;
+}
+
+html[data-auth-tela="entrar"]::view-transition-old(root) {
+  animation: ronu-auth-sai-esquerda 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+html[data-auth-tela="entrar"]::view-transition-new(root) {
+  animation: ronu-auth-entra-esquerda 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+html[data-auth-tela="cadastro"]::view-transition-old(root) {
+  animation: ronu-auth-sai-direita 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+html[data-auth-tela="cadastro"]::view-transition-new(root) {
+  animation: ronu-auth-entra-direita 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes ronu-auth-sai-esquerda {
+  to { transform: translateX(-100%); }
+}
+
+@keyframes ronu-auth-entra-esquerda {
+  from { transform: translateX(-100%); }
+}
+
+@keyframes ronu-auth-sai-direita {
+  to { transform: translateX(100%); }
+}
+
+@keyframes ronu-auth-entra-direita {
+  from { transform: translateX(100%); }
+}
+
 .auth-page {
   min-height: 100vh;
   display: grid;
