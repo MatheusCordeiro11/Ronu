@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Ronu.Api.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Ronu.Api.Services.IA;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +35,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var chaveJwt = builder.Configuration["Jwt:ChaveSecreta"]!;
+
+var geminiOptions = new GeminiOptions { ApiKey = builder.Configuration["Gemini:ApiKey"]! };
+builder.Services.AddSingleton(geminiOptions);
+builder.Services.AddHttpClient<IGeradorDietaIA, GeradorDietaGemini>();
+builder.Services.AddScoped<ICalculadoraGastoCalorico, CalculadoraGastoCalorico>();
+builder.Services.AddScoped<IContextoDietaBuilder, ContextoDietaBuilder>();
 
 // Configura a autenticação baseada em JWT Bearer: o servidor valida a assinatura
 // do token (com a mesma chave usada para gerá-lo) e a expiração, mas não valida
