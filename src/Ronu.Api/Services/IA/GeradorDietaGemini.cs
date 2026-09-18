@@ -24,12 +24,12 @@ public class GeradorDietaGemini : IGeradorDietaIA
 
     public async Task<DietaSemanalDto> GerarDietaAsync(ContextoDietaDto contexto)
     {
-        var gastoTotalSemanal = contexto.Modalidades
+        var gastoTreinoSemanal = contexto.Modalidades
             .Sum(m => _calculadora.CalcularGastoSemanal(m.MetReferencia, contexto.Peso, m.FrequenciaSemanal));
 
-        var metaCaloriasDiaria = gastoTotalSemanal / 7;
+        var metaMacros = CalcularMetaMacros(gastoTreinoSemanal, contexto);
 
-        var prompt = MontarPrompt(contexto, metaCaloriasDiaria);
+        var prompt = MontarPrompt(contexto, metaMacros.Calorias);
         var schema = MontarSchema();
 
         var corpoRequisicao = new
@@ -47,7 +47,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
 
         using var mensagem = new HttpRequestMessage(
             HttpMethod.Post,
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent");
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent");
 
         mensagem.Headers.Add("x-goog-api-key", _options.ApiKey);
         mensagem.Content = JsonContent.Create(corpoRequisicao);
@@ -74,9 +74,8 @@ public class GeradorDietaGemini : IGeradorDietaIA
         {
             Dias = respostaIa.Dias,
             // MetaDiariaCalculada NUNCA vem da IA — é sempre calculada em C#,
-            // com fórmula determinística, para garantir precisão (ver
-            // CalcularMetaMacros abaixo).
-            MetaDiariaCalculada = CalcularMetaMacros(metaCaloriasDiaria, contexto.Peso)
+            // com fórmula determinística, para garantir precisão.
+            MetaDiariaCalculada = metaMacros
         };
     }
 
@@ -103,8 +102,9 @@ public class GeradorDietaGemini : IGeradorDietaIA
             - Altura: {contexto.Altura} cm
             - Objetivo: {contexto.Objetivo}
             - Modalidades praticadas: {modalidadesTexto}
-            - Meta calórica diária: {metaCaloriasDiaria:F0} kcal (calculada a partir do gasto
-              calórico real das atividades acima — respeite este valor rigorosamente)
+            - Meta calórica diária: {metaCaloriasDiaria:F0} kcal (calculada a partir da taxa
+              metabólica basal e do gasto calórico real das atividades acima — respeite este
+              valor rigorosamente)
 
             Alimentos que a pessoa prefere (inclua quando fizer sentido nutricionalmente): {(string.IsNullOrEmpty(preferidosTexto) ? "nenhuma preferência informada" : preferidosTexto)}
 
@@ -185,21 +185,46 @@ public class GeradorDietaGemini : IGeradorDietaIA
         };
     }
 
-    private static MacrosDto CalcularMetaMacros(decimal metaCalorias, decimal pesoKg)
+    private static MacrosDto CalcularMetaMacros(decimal gastoTreinoSemanal, ContextoDietaDto contexto)
     {
+        var gastoTreinoDiario = gastoTreinoSemanal / 7;
+
+        // Mifflin-St Jeor: fórmula de TMB (Taxa Metabólica Basal) mais precisa e
+        // validada cientificamente — representa 60-75% do gasto calórico diário
+        // total, a maior fatia, então precisa entrar na conta (o gasto do treino
+        // sozinho não é o suficiente para representar a necessidade real do dia).
+        var tmb = contexto.Sexo == "Masculino"
+            ? (10 * contexto.Peso) + (6.25m * contexto.Altura) - (5 * contexto.Idade) + 5
+            : (10 * contexto.Peso) + (6.25m * contexto.Altura) - (5 * contexto.Idade) - 161;
+
+        var manutencao = tmb + gastoTreinoDiario;
+
+        // Ajuste de superávit/déficit moderado sobre a manutenção (evidência:
+        // Aragon & Schoenfeld), nunca agressivo, para preservar massa magra e
+        // evitar ganho excessivo de gordura. Objetivo vem de um conjunto fixo
+        // de valores definidos no onboarding do frontend (radio buttons), não
+        // texto livre — por isso o match direto de string é seguro aqui.
+        const decimal AjustePercentualMvp = 0.15m;
+
+        var metaCalorias = contexto.Objetivo switch
+        {
+            "ganhar peso" => manutencao * (1 + AjustePercentualMvp),
+            "perder peso" => manutencao * (1 - AjustePercentualMvp),
+            "manter peso" => manutencao,
+            _ => manutencao
+        };
+
         // Baseado em diretrizes de nutrição esportiva (ACSM): proteína e gordura
         // calculadas por peso corporal (mais preciso que percentual fixo de
         // calorias), carboidrato preenche o restante calórico.
-        // MVP: valores fixos dentro das faixas recomendadas para treino de força/
-        // luta. V2: permitir ajuste por objetivo (emagrecimento vs. hipertrofia).
         const decimal ProteinaGramasPorKgMvp = 1.8m;
         const decimal GorduraGramasPorKgMvp = 1.0m;
         const decimal CaloriasPorGramaProteina = 4m;
         const decimal CaloriasPorGramaGordura = 9m;
         const decimal CaloriasPorGramaCarboidrato = 4m;
 
-        var proteinaG = pesoKg * ProteinaGramasPorKgMvp;
-        var gorduraG = pesoKg * GorduraGramasPorKgMvp;
+        var proteinaG = contexto.Peso * ProteinaGramasPorKgMvp;
+        var gorduraG = contexto.Peso * GorduraGramasPorKgMvp;
 
         var caloriasProteina = proteinaG * CaloriasPorGramaProteina;
         var caloriasGordura = gorduraG * CaloriasPorGramaGordura;
