@@ -1,0 +1,318 @@
+/*
+  Ronu — Dashboard (área do atleta)
+  Depende de frontend/css/styles.css e frontend/css/auth.css (reaproveita
+  tokens, .simple-header, .btn, .form-message, .eyebrow, .num).
+*/
+
+/* ---------- Header ---------- */
+.dashboard-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ---------- Shell ---------- */
+.dashboard {
+  min-height: calc(100vh - 73px);
+  padding-top: var(--sp-6);
+  padding-bottom: var(--sp-8);
+}
+
+/* ---------- Estados vazios (carregando / erro / sem dieta) ---------- */
+/* :not([hidden]) em vez de aplicar display direto na classe: como esses
+   elementos são escondidos via atributo `hidden` (ver dashboard.js), um
+   `display` declarado direto na classe venceria o `display: none` padrão
+   do navegador para [hidden] — o elemento ficaria visível mesmo "escondido". */
+.dashboard-loading {
+  min-height: 50vh;
+}
+
+.dashboard-loading:not([hidden]) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dashboard-empty {
+  min-height: 50vh;
+  max-width: 520px;
+}
+
+.dashboard-empty:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.dashboard-empty-title {
+  font-size: var(--fs-2xl);
+  margin-top: var(--sp-3);
+}
+
+.dashboard-empty-subtitle {
+  margin-top: var(--sp-3);
+  margin-bottom: var(--sp-6);
+  max-width: 52ch;
+}
+
+.dashboard-empty .btn {
+  align-self: flex-start;
+}
+
+/* ---------- Barra de ferramentas (versão + gerar) ---------- */
+.dashboard-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-5);
+}
+
+/* :not([hidden]) pelo mesmo motivo do bloco de estados vazios acima —
+   este elemento também é escondido via atributo `hidden` (dashboard.js). */
+.version-switch:not([hidden]) {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.version-pill {
+  padding: var(--sp-1) var(--sp-3);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.version-pill[aria-selected="true"] {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.version-pill:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Carimbo de meta diária ---------- */
+.meta-stamp {
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: var(--sp-4) var(--sp-5);
+  margin-bottom: var(--sp-6);
+}
+
+.meta-stamp-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4);
+}
+
+.meta-stamp-label {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.meta-stamp-date {
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+}
+
+.meta-stamp-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 0;
+}
+
+.meta-stamp-item {
+  padding: 0 var(--sp-4);
+  border-left: var(--border-width) solid var(--border);
+}
+
+.meta-stamp-item:first-child {
+  padding-left: 0;
+  border-left: none;
+}
+
+.meta-stamp-item dt {
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+  margin: 0 0 var(--sp-1);
+}
+
+.meta-stamp-item dd {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+/* ---------- Fileira de dias ---------- */
+.day-row {
+  display: flex;
+  gap: var(--sp-2);
+  overflow-x: auto;
+  padding-bottom: var(--sp-2);
+  margin-bottom: var(--sp-5);
+}
+
+.day-pill {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  min-width: 92px;
+  padding: var(--sp-2) var(--sp-3);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.day-pill-label {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.day-pill-kcal {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+
+.day-pill[aria-selected="true"] {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.day-pill:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Painel do dia ---------- */
+.day-total {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-4);
+  margin-bottom: var(--sp-4);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+.day-total strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.meal-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.meal-card {
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: var(--sp-4);
+}
+
+.meal-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-4);
+  margin-bottom: var(--sp-3);
+  padding-bottom: var(--sp-3);
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+.meal-name {
+  font-size: var(--fs-md);
+}
+
+.meal-macros {
+  display: flex;
+  gap: var(--sp-3);
+  margin: 0;
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+}
+
+.meal-macros > div {
+  display: flex;
+  gap: 2px;
+}
+
+.meal-macros dt,
+.meal-macros dd {
+  display: inline;
+  margin: 0;
+}
+
+.meal-macros dd {
+  color: var(--text);
+}
+
+.meal-food-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.meal-food-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  font-size: var(--fs-sm);
+}
+
+.meal-food-name {
+  color: var(--text);
+}
+
+.meal-food-qty {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+}
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 720px) {
+  .meta-stamp-grid {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: var(--sp-4);
+  }
+
+  .meta-stamp-item:nth-child(3) {
+    padding-left: 0;
+    border-left: none;
+  }
+
+  .dashboard-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .meal-card-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ronu — Área do atleta</title>
+  <meta name="description" content="Sua dieta semanal calculada a partir do gasto real do seu treino.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,21 +12,86 @@
 
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/dashboard.css">
 </head>
 <body>
 
   <header class="simple-header border-b">
-    <div class="container">
+    <div class="container dashboard-header-inner">
       <a href="landing/v1/index.html" class="wordmark">ronu<span>.</span></a>
+      <button type="button" id="logout-btn" class="btn btn-secondary">Sair</button>
     </div>
   </header>
 
-  <main class="dashboard-placeholder">
-    <div class="container dashboard-placeholder-inner">
-      <p class="eyebrow">Área do atleta</p>
-      <h1 class="dashboard-title" id="boas-vindas">Carregando...</h1>
-      <p class="dashboard-subtitle">O painel de treino, objetivo e dietas ainda está sendo construído. Por enquanto, isso confirma que seu login funcionou.</p>
-      <button type="button" id="logout-btn" class="btn btn-secondary">Sair</button>
+  <main class="dashboard">
+    <div class="container">
+
+      <h1 class="visually-hidden">Área do atleta — dieta da semana</h1>
+
+      <div class="form-message form-message-error" id="dashboard-gerar-error" role="alert" hidden></div>
+
+      <div class="dashboard-loading" id="dashboard-loading" aria-live="polite">
+        <p class="text-muted">Carregando sua súmula...</p>
+      </div>
+
+      <section class="dashboard-empty" id="dashboard-load-error" hidden>
+        <p class="eyebrow">Área do atleta</p>
+        <h2 class="dashboard-empty-title">Não foi possível carregar seus dados</h2>
+        <p class="dashboard-empty-subtitle">Verifique sua conexão e tente novamente.</p>
+        <button type="button" class="btn btn-secondary" id="btn-tentar-novamente">
+          <span class="btn-label">Tentar novamente</span>
+        </button>
+      </section>
+
+      <section class="dashboard-empty" id="dashboard-empty" hidden>
+        <p class="eyebrow">Área do atleta</p>
+        <h2 class="dashboard-empty-title">Sua primeira dieta ainda não foi gerada</h2>
+        <p class="dashboard-empty-subtitle">A IA monta um cardápio de 7 dias a partir do seu objetivo, peso e do gasto calórico real das suas modalidades de treino.</p>
+        <button type="button" class="btn btn-primary" id="btn-gerar-vazio">
+          <span class="btn-label">Gerar minha primeira dieta</span>
+        </button>
+      </section>
+
+      <div class="dashboard-content" id="dashboard-content" hidden>
+
+        <div class="dashboard-toolbar">
+          <div class="version-switch" id="version-switch" role="tablist" aria-label="Versão da dieta" hidden></div>
+          <button type="button" class="btn btn-secondary" id="btn-gerar">
+            <span class="btn-label">Gerar nova dieta</span>
+          </button>
+        </div>
+
+        <section class="meta-stamp" aria-label="Meta diária calculada">
+          <div class="meta-stamp-head">
+            <p class="meta-stamp-label">Meta diária calculada</p>
+            <p class="meta-stamp-date" id="meta-data"></p>
+          </div>
+          <dl class="meta-stamp-grid">
+            <div class="meta-stamp-item">
+              <dt>Calorias</dt>
+              <dd class="num" id="meta-calorias"></dd>
+            </div>
+            <div class="meta-stamp-item">
+              <dt>Proteína</dt>
+              <dd class="num" id="meta-proteina"></dd>
+            </div>
+            <div class="meta-stamp-item">
+              <dt>Carboidrato</dt>
+              <dd class="num" id="meta-carbo"></dd>
+            </div>
+            <div class="meta-stamp-item">
+              <dt>Gordura</dt>
+              <dd class="num" id="meta-gordura"></dd>
+            </div>
+          </dl>
+        </section>
+
+        <nav class="day-row" id="day-row" role="tablist" aria-label="Dias da semana"></nav>
+
+        <section class="day-panel" id="day-panel" aria-live="polite"></section>
+
+      </div>
+
     </div>
   </main>
 
