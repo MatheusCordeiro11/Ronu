@@ -41,6 +41,7 @@ builder.Services.AddSingleton(geminiOptions);
 builder.Services.AddHttpClient<IGeradorDietaIA, GeradorDietaGemini>();
 builder.Services.AddScoped<ICalculadoraGastoCalorico, CalculadoraGastoCalorico>();
 builder.Services.AddScoped<IContextoDietaBuilder, ContextoDietaBuilder>();
+builder.Services.AddScoped<IRepositorioDietaIA, RepositorioDietaIA>();
 
 // Configura a autenticação baseada em JWT Bearer: o servidor valida a assinatura
 // do token (com a mesma chave usada para gerá-lo) e a expiração, mas não valida
