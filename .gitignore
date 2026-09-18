@@ -434,3 +434,5 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+src/Ronu.Api/Ronu.Api.http
