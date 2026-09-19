@@ -80,21 +80,27 @@ async function ronuFetchAutenticado(caminho, opcoes = {}) {
   return resposta;
 }
 
-// Um cadastro é considerado completo quando o usuário já tem objetivo/peso
-// registrado e pelo menos uma modalidade vinculada (preferências é opcional).
-// Usado logo após login/cadastro e ao abrir o onboarding, pra decidir entre
-// mandar o usuário pro onboarding ou direto pro dashboard.
+// Um cadastro é considerado completo quando o usuário já tem perfil (altura,
+// sexo, data de nascimento), objetivo/peso registrado e pelo menos uma
+// modalidade vinculada (preferências é opcional). Usado logo após
+// login/cadastro e ao abrir o onboarding, pra decidir entre mandar o usuário
+// pro onboarding ou direto pro dashboard.
 async function ronuChecarCadastroCompleto() {
-  const [respostaObjetivo, respostaModalidades] = await Promise.all([
+  const [respostaPerfil, respostaObjetivo, respostaModalidades] = await Promise.all([
+    ronuFetchAutenticado('/perfil'),
     ronuFetchAutenticado('/objetivos/atual'),
     ronuFetchAutenticado('/usuarios/modalidades')
   ]);
 
+  const perfil = respostaPerfil.ok ? await respostaPerfil.json() : null;
+  const perfilCompleto = Boolean(
+    perfil && perfil.altura != null && perfil.sexo != null && perfil.dataNascimento != null
+  );
   const temObjetivo = respostaObjetivo.status === 200;
   const modalidades = respostaModalidades.ok ? await respostaModalidades.json() : [];
   const temModalidade = Array.isArray(modalidades) && modalidades.length > 0;
 
-  return temObjetivo && temModalidade;
+  return perfilCompleto && temObjetivo && temModalidade;
 }
 
 // Chamado depois de um login/cadastro bem-sucedido. Se a checagem de

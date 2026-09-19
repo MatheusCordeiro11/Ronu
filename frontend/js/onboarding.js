@@ -1,5 +1,5 @@
-// Ronu — Onboarding (objetivo, modalidades, preferências)
-// Wizard de 3 passos: cada um só avança depois de salvar com sucesso na API.
+// Ronu — Onboarding (perfil, objetivo, modalidades, preferências)
+// Wizard de 4 passos: cada um só avança depois de salvar com sucesso na API.
 // Voltar não re-busca dados da API — os campos ficam no DOM (só ocultos),
 // então o que foi digitado nesta sessão permanece ao ir e voltar de passo.
 
@@ -46,40 +46,60 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     ronuOcultarErroFormulario(formError);
     btnVoltar.hidden = passo === 1;
-    btnAvancar.querySelector('.btn-label').textContent = passo === 3 ? 'Concluir' : 'Avançar';
+    btnAvancar.querySelector('.btn-label').textContent = passo === 4 ? 'Concluir' : 'Avançar';
 
     const primeiroCampo = document.querySelector(`.onboarding-step[data-step="${passo}"] input`);
     if (primeiroCampo) primeiroCampo.focus();
   }
 
-  // ---------- Passo 1: objetivo ----------
+  // ---------- Passo 1: perfil ----------
 
-  function validarPasso1() {
-    const peso = document.getElementById('peso');
-    const objetivoSelecionado = document.querySelector('input[name="objetivo"]:checked');
+  // Data de nascimento não pode ser hoje/futuro nem implicar uma idade
+  // absurda — mesmo espírito das faixas de min/max já usadas no campo peso.
+  function definirFaixaDataNascimento() {
+    const input = document.getElementById('data-nascimento');
+    const hoje = new Date();
+    const cemAnosAtras = new Date(hoje.getFullYear() - 100, hoje.getMonth(), hoje.getDate());
 
-    if (!peso.reportValidity()) {
-      return null;
-    }
-
-    if (!objetivoSelecionado) {
-      ronuMostrarErroFormulario(formError, 'Selecione um objetivo.');
-      return null;
-    }
-
-    return { peso: parseFloat(peso.value), objetivo: objetivoSelecionado.value };
+    input.max = hoje.toISOString().split('T')[0];
+    input.min = cemAnosAtras.toISOString().split('T')[0];
   }
 
-  async function avancarPasso1() {
-    const dados = validarPasso1();
+  function validarPassoPerfil() {
+    const altura = document.getElementById('altura');
+    const sexoSelecionado = document.querySelector('input[name="sexo"]:checked');
+    const dataNascimento = document.getElementById('data-nascimento');
+
+    if (!altura.reportValidity()) {
+      return null;
+    }
+
+    if (!sexoSelecionado) {
+      ronuMostrarErroFormulario(formError, 'Selecione seu sexo.');
+      return null;
+    }
+
+    if (!dataNascimento.reportValidity()) {
+      return null;
+    }
+
+    return {
+      altura: parseFloat(altura.value),
+      sexo: sexoSelecionado.value,
+      dataNascimento: dataNascimento.value
+    };
+  }
+
+  async function avancarPassoPerfil() {
+    const dados = validarPassoPerfil();
     if (!dados) return;
 
     ronuOcultarErroFormulario(formError);
     ronuDefinirCarregando(btnAvancar, true, 'Salvando...');
 
     try {
-      const resposta = await ronuFetchAutenticado('/objetivos', {
-        method: 'POST',
+      const resposta = await ronuFetchAutenticado('/perfil', {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dados)
       });
@@ -97,7 +117,52 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // ---------- Passo 2: modalidades ----------
+  // ---------- Passo 2: objetivo ----------
+
+  function validarPassoObjetivo() {
+    const peso = document.getElementById('peso');
+    const objetivoSelecionado = document.querySelector('input[name="objetivo"]:checked');
+
+    if (!peso.reportValidity()) {
+      return null;
+    }
+
+    if (!objetivoSelecionado) {
+      ronuMostrarErroFormulario(formError, 'Selecione um objetivo.');
+      return null;
+    }
+
+    return { peso: parseFloat(peso.value), objetivo: objetivoSelecionado.value };
+  }
+
+  async function avancarPassoObjetivo() {
+    const dados = validarPassoObjetivo();
+    if (!dados) return;
+
+    ronuOcultarErroFormulario(formError);
+    ronuDefinirCarregando(btnAvancar, true, 'Salvando...');
+
+    try {
+      const resposta = await ronuFetchAutenticado('/objetivos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+      });
+
+      if (!resposta.ok) {
+        const corpo = await resposta.json().catch(() => null);
+        throw new Error(corpo?.mensagem || 'Não foi possível salvar. Tente novamente.');
+      }
+
+      mostrarPasso(3);
+    } catch (erro) {
+      ronuMostrarErroFormulario(formError, erro.message);
+    } finally {
+      ronuDefinirCarregando(btnAvancar, false);
+    }
+  }
+
+  // ---------- Passo 3: modalidades ----------
 
   function criarLinhaModalidade(modalidade) {
     const linha = document.createElement('div');
@@ -157,7 +222,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  async function avancarPasso2() {
+  async function avancarPassoModalidades() {
     const linhas = Array.from(document.querySelectorAll('.modalidade-row'));
     const selecionadas = linhas
       .map((linha) => ({
@@ -197,7 +262,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }));
 
-      mostrarPasso(3);
+      mostrarPasso(4);
     } catch (erro) {
       ronuMostrarErroFormulario(formError, erro.message);
     } finally {
@@ -205,7 +270,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // ---------- Passo 3: preferências alimentares ----------
+  // ---------- Passo 4: preferências alimentares ----------
 
   function adicionarItemNaLista(preferencia) {
     const lista = document.getElementById('preferencia-list');
@@ -279,14 +344,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   btnAvancar.addEventListener('click', () => {
     if (passoAtual === 1) {
-      avancarPasso1();
+      avancarPassoPerfil();
     } else if (passoAtual === 2) {
-      avancarPasso2();
+      avancarPassoObjetivo();
+    } else if (passoAtual === 3) {
+      avancarPassoModalidades();
     } else {
       window.location.href = 'dashboard.html';
     }
   });
 
+  definirFaixaDataNascimento();
   await carregarCatalogoModalidades();
   mostrarPasso(1);
 });

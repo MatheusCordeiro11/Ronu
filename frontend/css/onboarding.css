@@ -5,9 +5,15 @@
 */
 
 /* ---------- Stepper ---------- */
+/* flex-wrap: com 4 passos, os rótulos por extenso ("Modalidades",
+   "Preferências") não cabem numa linha só dentro do --auth-form-wrap
+   (max-width: 380px, fixo mesmo fora do mobile) — sem wrap, o stepper
+   estouraria o container. */
 .stepper {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  row-gap: var(--sp-2);
   list-style: none;
   padding: 0;
   margin: 0 0 var(--sp-6);
@@ -64,6 +70,13 @@
 /* ---------- Passos ---------- */
 .onboarding-step .auth-title {
   font-size: var(--fs-xl);
+}
+
+/* color-scheme: dark força o ícone/popup nativo do calendário a renderizar
+   em tom claro — sem isso, o navegador desenha um ícone escuro sobre o
+   fundo escuro do campo (--bg), praticamente invisível. */
+.field input[type="date"] {
+  color-scheme: dark;
 }
 
 /* ---------- Grupo de opções (objetivo / tipo de preferência) ---------- */

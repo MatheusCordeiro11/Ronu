@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ronu — Complete seu cadastro</title>
-  <meta name="description" content="Conte seu objetivo, suas modalidades de treino e suas preferências alimentares pra gerar sua dieta.">
+  <meta name="description" content="Conte seus dados pessoais, objetivo, modalidades de treino e preferências alimentares pra gerar sua dieta.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,14 +28,44 @@
       <div class="auth-form-wrap">
 
         <ol class="stepper" id="stepper">
-          <li class="stepper-item" data-step="1"><span class="stepper-index">1</span><span>Objetivo</span></li>
-          <li class="stepper-item" data-step="2"><span class="stepper-index">2</span><span>Modalidades</span></li>
-          <li class="stepper-item" data-step="3"><span class="stepper-index">3</span><span>Preferências</span></li>
+          <li class="stepper-item" data-step="1"><span class="stepper-index">1</span><span>Perfil</span></li>
+          <li class="stepper-item" data-step="2"><span class="stepper-index">2</span><span>Objetivo</span></li>
+          <li class="stepper-item" data-step="3"><span class="stepper-index">3</span><span>Modalidades</span></li>
+          <li class="stepper-item" data-step="4"><span class="stepper-index">4</span><span>Preferências</span></li>
         </ol>
 
         <div class="form-message form-message-error" id="form-error" hidden></div>
 
         <section class="onboarding-step" id="step-1" data-step="1">
+          <h1 class="auth-title">Seus dados pessoais</h1>
+          <p class="auth-subtitle">Usamos isso pra calcular sua taxa metabólica basal.</p>
+
+          <div class="field">
+            <label for="altura">Altura (cm)</label>
+            <input type="number" id="altura" name="altura" inputmode="decimal" step="0.1" min="100" max="250" required>
+          </div>
+
+          <div class="field">
+            <label>Sexo</label>
+            <div class="option-group" role="radiogroup" aria-label="Sexo">
+              <label class="option-pill">
+                <input type="radio" name="sexo" value="Masculino">
+                <span>Masculino</span>
+              </label>
+              <label class="option-pill">
+                <input type="radio" name="sexo" value="Feminino">
+                <span>Feminino</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="data-nascimento">Data de nascimento</label>
+            <input type="date" id="data-nascimento" name="data-nascimento" required>
+          </div>
+        </section>
+
+        <section class="onboarding-step" id="step-2" data-step="2" hidden>
           <h1 class="auth-title">Qual é o seu objetivo?</h1>
           <p class="auth-subtitle">Usamos isso pra calcular sua necessidade calórica.</p>
 
@@ -63,7 +93,7 @@
           </div>
         </section>
 
-        <section class="onboarding-step" id="step-2" data-step="2" hidden>
+        <section class="onboarding-step" id="step-3" data-step="3" hidden>
           <h1 class="auth-title">Quais modalidades você pratica?</h1>
           <p class="auth-subtitle">Selecione uma ou mais e informe a frequência semanal.</p>
 
@@ -72,7 +102,7 @@
           </div>
         </section>
 
-        <section class="onboarding-step" id="step-3" data-step="3" hidden>
+        <section class="onboarding-step" id="step-4" data-step="4" hidden>
           <h1 class="auth-title">Alguma preferência alimentar?</h1>
           <p class="auth-subtitle">Opcional — adicione o que você gosta ou quer evitar.</p>
 
