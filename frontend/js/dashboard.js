@@ -29,10 +29,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnGerarVazio = document.getElementById('btn-gerar-vazio');
   const btnTentarNovamente = document.getElementById('btn-tentar-novamente');
   const btnLogout = document.getElementById('logout-btn');
+  const elAvatarLink = document.getElementById('avatar-link');
 
   let historico = [];
   let versaoSelecionada = 0;
   let diaSelecionado = 0;
+
+  elAvatarLink.textContent = ronuIniciais(usuario.nome);
+  elAvatarLink.setAttribute('aria-label', `Configurações da conta — ${usuario.nome}`);
+  elAvatarLink.title = 'Configurações';
 
   btnLogout.addEventListener('click', () => {
     ronuLimparSessao();

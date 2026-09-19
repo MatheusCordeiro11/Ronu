@@ -11,6 +11,43 @@
   justify-content: space-between;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+/* Iniciais do usuário — acesso a configuracoes.html. Circular por decisão
+   explícita de produto (avatar de conta), não uma pill genérica: é o único
+   elemento com esse raio no sistema. */
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: var(--border-width) solid var(--border);
+  background: var(--surface);
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-decoration: none;
+  transition: border-color 0.15s ease;
+}
+
+.avatar:hover {
+  border-color: var(--accent);
+}
+
+.avatar:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* ---------- Shell ---------- */
 .dashboard {
   min-height: calc(100vh - 73px);
