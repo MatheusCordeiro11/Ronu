@@ -93,4 +93,27 @@ public class PreferenciasAlimentaresController : ControllerBase
 
         return Ok(preferencias);
     }
+
+    /// <summary>
+    /// Remove uma preferência alimentar do usuário logado. Busca sempre filtrando
+    /// também por UsuarioIdLogado (não só pelo Id) para impedir que um usuário
+    /// apague a preferência de outro só adivinhando um Id — se o registro existir
+    /// mas pertencer a outro usuário, o resultado é o mesmo de não existir.
+    /// </summary>
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Remover(int id)
+    {
+        var preferencia = await _context.PreferenciasAlimentares
+            .FirstOrDefaultAsync(p => p.Id == id && p.UsuarioId == UsuarioIdLogado);
+
+        if (preferencia is null)
+        {
+            return NotFound(new { mensagem = "Preferência não encontrada." });
+        }
+
+        _context.PreferenciasAlimentares.Remove(preferencia);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
 }
