@@ -28,6 +28,15 @@ function ronuUsuarioLogado() {
   return bruto ? JSON.parse(bruto) : null;
 }
 
+// Duas iniciais (primeiro + último nome) para o avatar do header. Usado por
+// dashboard.html — nome com uma palavra só usa as duas primeiras letras dela.
+function ronuIniciais(nome) {
+  const partes = nome.trim().split(/\s+/).filter(Boolean);
+  if (partes.length === 0) return '';
+  if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase();
+  return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
+}
+
 async function ronuLogin(email, senha) {
   const resposta = await fetch(`${RONU_CONFIG.API_BASE}/auth/login`, {
     method: 'POST',
@@ -136,6 +145,26 @@ function ronuLimparCampoInvalido(campoEl, mensagemEl) {
   campoEl.classList.remove('field-error');
   mensagemEl.hidden = true;
   mensagemEl.textContent = '';
+}
+
+// O campo de altura é digitado em metros (hábito natural em pt-BR, ex: "1,74"),
+// mas a API sempre recebe/devolve centímetros (PerfilRequest/PerfilResponse não
+// mudam) — a conversão fica isolada aqui pra ser usada igual no onboarding e em
+// configurações. Aceita vírgula ou ponto como separador decimal. Retorna null
+// se o texto não for um número válido (quem chama decide a mensagem de erro).
+function ronuParseAlturaCm(texto) {
+  const normalizado = texto.trim().replace(',', '.');
+  const metros = parseFloat(normalizado);
+  if (Number.isNaN(metros)) return null;
+  // Arredonda pra 1 casa decimal de cm (mesma granularidade que o campo em cm
+  // já usava) evitando erro de ponto flutuante (ex: 1.74 * 100 = 173.99999...).
+  return Math.round(metros * 1000) / 10;
+}
+
+// Inverso de ronuParseAlturaCm — usado ao carregar um valor salvo, pra
+// preencher o campo já em metros com vírgula (ex: 174 -> "1,74").
+function ronuFormatarAlturaMetros(alturaCm) {
+  return (alturaCm / 100).toFixed(2).replace('.', ',');
 }
 
 function ronuDefinirCarregando(botao, carregando, textoCarregando) {

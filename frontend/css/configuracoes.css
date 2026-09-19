@@ -1,0 +1,150 @@
+/*
+  Ronu — Configurações (conta)
+  Depende de styles.css, auth.css, dashboard.css (.simple-header,
+  .header-actions) e onboarding.css (.field, .option-pill,
+  .preferencia-form/.preferencia-list/.preferencia-item).
+*/
+
+.config-page {
+  min-height: calc(100vh - 73px);
+  padding-top: var(--sp-6);
+  padding-bottom: var(--sp-8);
+}
+
+.config-page-head {
+  margin-bottom: var(--sp-7);
+}
+
+.config-page-title {
+  font-size: var(--fs-2xl);
+}
+
+.config-page-head p {
+  margin-top: var(--sp-2);
+}
+
+.config-section {
+  padding-top: var(--sp-6);
+  padding-bottom: var(--sp-6);
+  max-width: 560px;
+}
+
+.config-section.border-t {
+  margin-top: var(--sp-2);
+}
+
+.config-section-head {
+  margin-bottom: var(--sp-5);
+}
+
+.config-section-title {
+  font-size: var(--fs-xl);
+}
+
+.config-section-subtitle {
+  margin-top: var(--sp-2);
+  max-width: 60ch;
+}
+
+#perfil-form .btn {
+  margin-top: var(--sp-2);
+}
+
+/* ---------- Preferências: cada item ganha uma ação de remover ---------- */
+.preferencia-info {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+.preferencia-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-shrink: 0;
+  margin-left: var(--sp-3);
+}
+
+.preferencia-remove-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-2xs);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.preferencia-remove-btn:hover {
+  color: var(--danger);
+  text-decoration-color: var(--danger);
+}
+
+.preferencia-remove-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Estado de confirmação: substitui o botão "Remover" no lugar, sem modal —
+   coerente com o sistema plano (nenhum componente flutuante/sombra). */
+.preferencia-confirm-text {
+  font-size: var(--fs-2xs);
+  color: var(--danger);
+  white-space: nowrap;
+}
+
+.preferencia-confirm-btn,
+.preferencia-cancel-btn {
+  background: transparent;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  padding: 2px var(--sp-2);
+  font-size: var(--fs-2xs);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+
+.preferencia-confirm-btn {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.preferencia-confirm-btn:hover {
+  background: rgba(168, 70, 47, 0.1);
+}
+
+.preferencia-cancel-btn {
+  color: var(--text-muted);
+}
+
+.preferencia-cancel-btn:hover {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
+.preferencia-confirm-btn:focus-visible,
+.preferencia-cancel-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.preferencia-item.is-removing {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+@media (max-width: 720px) {
+  .preferencia-item {
+    flex-wrap: wrap;
+  }
+
+  .preferencia-actions {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

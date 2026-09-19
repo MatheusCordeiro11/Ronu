@@ -40,9 +40,10 @@
           <h1 class="auth-title">Seus dados pessoais</h1>
           <p class="auth-subtitle">Usamos isso pra calcular sua taxa metabólica basal.</p>
 
-          <div class="field">
-            <label for="altura">Altura (cm)</label>
-            <input type="number" id="altura" name="altura" inputmode="decimal" step="0.1" min="100" max="250" required>
+          <div class="field" id="field-altura">
+            <label for="altura">Altura (m)</label>
+            <input type="text" id="altura" name="altura" inputmode="decimal" placeholder="Ex: 1,74" required>
+            <span class="field-error-message" id="altura-error" hidden></span>
           </div>
 
           <div class="field">

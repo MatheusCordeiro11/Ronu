@@ -67,10 +67,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function validarPassoPerfil() {
     const altura = document.getElementById('altura');
+    const campoAltura = document.getElementById('field-altura');
+    const alturaErro = document.getElementById('altura-error');
     const sexoSelecionado = document.querySelector('input[name="sexo"]:checked');
     const dataNascimento = document.getElementById('data-nascimento');
 
+    ronuLimparCampoInvalido(campoAltura, alturaErro);
+
     if (!altura.reportValidity()) {
+      return null;
+    }
+
+    // Campo é texto (pra aceitar vírgula), então a faixa 1,00–2,50 m não pode
+    // ser validada via min/max nativo — checada manualmente em centímetros.
+    const alturaCm = ronuParseAlturaCm(altura.value);
+    if (alturaCm === null || alturaCm < 100 || alturaCm > 250) {
+      ronuMarcarCampoInvalido(campoAltura, alturaErro, 'Informe uma altura entre 1,00 e 2,50 m.');
       return null;
     }
 
@@ -84,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     return {
-      altura: parseFloat(altura.value),
+      altura: alturaCm,
       sexo: sexoSelecionado.value,
       dataNascimento: dataNascimento.value
     };
