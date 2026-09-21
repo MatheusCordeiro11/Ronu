@@ -264,6 +264,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function iniciar() {
     mostrarSomente(elLoading);
 
+    // Checagem de perfil/objetivo feita com GETs simples — nunca chamando
+    // POST /dietas/gerar só pra validar, o que gastaria cota da Gemini à toa.
     try {
       const [respostaPerfil, respostaObjetivo] = await Promise.all([
         ronuFetchAutenticado('/perfil'),
@@ -281,6 +283,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
     } catch (erro) {
+      // Em caso de 401, ronuFetchAutenticado já redirecionou pro login
+      // sozinho — não sobrescrever esse redirecionamento com outro (mesmo
+      // cuidado já tomado em onboarding.js). Qualquer outro erro (rede fora
+      // do ar) mostra o estado de erro desta própria tela.
       if (erro.message !== 'Sessão expirada.') {
         mostrarSomente(elLoadError);
       }
