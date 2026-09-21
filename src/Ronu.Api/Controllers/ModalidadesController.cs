@@ -127,7 +127,8 @@ public class ModalidadesController : ControllerBase
     /// outro só adivinhando um Id — se o registro existir mas pertencer a
     /// outro usuário, o resultado é o mesmo de não existir.
     /// </summary>
-    [HttpDelete("{id}")]
+    [Authorize]
+    [HttpDelete("api/usuarios/modalidades/{id}")]
     public async Task<IActionResult> Remover(int id)
     {
         var usuarioModalidade = await _context.UsuarioModalidades
