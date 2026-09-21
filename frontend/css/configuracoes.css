@@ -184,9 +184,10 @@
   color: var(--text);
 }
 
-.modalidade-item-frequencia {
+.modalidade-item-detalhes {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--sp-2);
 }
 

@@ -115,20 +115,36 @@ document.addEventListener('DOMContentLoaded', async () => {
   elPerfilForm.addEventListener('submit', salvarPerfil);
 
   // ---------- Modalidades ----------
-  // Cada modalidade praticada é um vínculo (UsuarioModalidade) com frequência
-  // semanal editável e ação de remover; "adicionar" só oferece as modalidades
-  // do catálogo que o usuário ainda não pratica. Reaproveita a mecânica de
-  // "Remover -> Sim/Cancelar" de Preferências, mas com classes próprias —
-  // seção independente, sem acoplar às internals da outra.
+  // Cada modalidade praticada é um vínculo (UsuarioModalidade) com dias da
+  // semana + duração média editáveis e ação de remover; "adicionar" só
+  // oferece as modalidades do catálogo que o usuário ainda não pratica. Os
+  // toggles de dia (.dia-toggle/.modalidade-dias) e o campo de duração
+  // (.modalidade-duracao) vêm de onboarding.css, já carregado nesta página —
+  // mesmo widget usado no Passo 3 do onboarding, sem duplicar CSS. Reaproveita
+  // a mecânica de "Remover -> Sim/Cancelar" de Preferências, mas com classes
+  // próprias — seção independente, sem acoplar às internals da outra.
 
   const elModalidadesLoading = document.getElementById('modalidades-loading');
   const elModalidadesError = document.getElementById('modalidades-error');
   const elModalidadeList = document.getElementById('modalidade-config-list');
   const elModalidadeAddForm = document.getElementById('modalidade-add-form');
   const elModalidadeAddOptions = document.getElementById('modalidade-add-options');
-  const elModalidadeAddFrequencia = document.getElementById('modalidade-add-frequencia');
+  const elModalidadeAddDias = document.getElementById('modalidade-add-dias');
+  const elModalidadeAddDuracao = document.getElementById('modalidade-add-duracao');
   const elModalidadesCatalogoCompleto = document.getElementById('modalidades-catalogo-completo');
   const btnAdicionarModalidade = document.getElementById('btn-adicionar-modalidade');
+
+  // 1=Segunda ... 7=Domingo (ISO 8601, mesmo padrão do backend e do
+  // onboarding — abreviação de 3 letras pra não colidir em pt-BR).
+  const DIAS_SEMANA = [
+    { valor: 1, rotulo: 'SEG', nomeCompleto: 'segunda-feira' },
+    { valor: 2, rotulo: 'TER', nomeCompleto: 'terça-feira' },
+    { valor: 3, rotulo: 'QUA', nomeCompleto: 'quarta-feira' },
+    { valor: 4, rotulo: 'QUI', nomeCompleto: 'quinta-feira' },
+    { valor: 5, rotulo: 'SEX', nomeCompleto: 'sexta-feira' },
+    { valor: 6, rotulo: 'SÁB', nomeCompleto: 'sábado' },
+    { valor: 7, rotulo: 'DOM', nomeCompleto: 'domingo' }
+  ];
 
   let catalogoModalidades = [];
 
@@ -179,6 +195,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     item.className = 'modalidade-item';
     item.dataset.vinculoId = vinculo.id;
     item.dataset.modalidadeId = vinculo.modalidade.id;
+    // Baseline pra saber se os dias mudaram desde o último salvo — dataset
+    // (não uma const capturada no closure) porque salvarModalidade() roda
+    // fora deste escopo, disparada pela delegação de evento da lista.
+    item.dataset.diasSalvos = JSON.stringify(vinculo.diasSemana.slice().sort((a, b) => a - b));
 
     const info = document.createElement('div');
     info.className = 'modalidade-item-info';
@@ -187,35 +207,69 @@ document.addEventListener('DOMContentLoaded', async () => {
     nomeSpan.className = 'modalidade-item-nome';
     nomeSpan.textContent = vinculo.modalidade.nome;
 
-    const frequenciaWrap = document.createElement('div');
-    frequenciaWrap.className = 'modalidade-item-frequencia';
+    const detalhes = document.createElement('div');
+    detalhes.className = 'modalidade-item-detalhes';
 
-    const frequenciaInput = document.createElement('input');
-    frequenciaInput.type = 'number';
-    frequenciaInput.className = 'modalidade-frequencia num';
-    frequenciaInput.min = '1';
-    frequenciaInput.max = '7';
-    frequenciaInput.value = vinculo.frequenciaSemanal;
-    frequenciaInput.dataset.valorSalvo = String(vinculo.frequenciaSemanal);
-    frequenciaInput.setAttribute('aria-label', `Frequência semanal de ${vinculo.modalidade.nome}`);
+    const diasGroup = document.createElement('div');
+    diasGroup.className = 'modalidade-dias';
+    diasGroup.setAttribute('role', 'group');
+    diasGroup.setAttribute('aria-label', `Dias da semana de treino de ${vinculo.modalidade.nome}`);
 
-    const btnSalvarFrequencia = document.createElement('button');
-    btnSalvarFrequencia.type = 'button';
-    btnSalvarFrequencia.className = 'modalidade-save-btn';
-    btnSalvarFrequencia.dataset.acao = 'salvar-frequencia';
-    btnSalvarFrequencia.textContent = 'Salvar';
-    btnSalvarFrequencia.disabled = true;
+    const diasAtivos = new Set(vinculo.diasSemana);
+    const btnSalvar = document.createElement('button');
 
-    // Só habilita "Salvar" quando o valor difere do último salvo — evita
-    // autosave silencioso, consistente com o resto da página (Perfil e
-    // Preferências também só salvam num clique explícito).
-    frequenciaInput.addEventListener('input', () => {
-      btnSalvarFrequencia.disabled =
-        frequenciaInput.value === frequenciaInput.dataset.valorSalvo || frequenciaInput.value === '';
+    function diasSelecionadosOrdenados() {
+      return Array.from(diasGroup.querySelectorAll('.dia-toggle'))
+        .filter((botao) => botao.getAttribute('aria-pressed') === 'true')
+        .map((botao) => Number(botao.dataset.dia))
+        .sort((a, b) => a - b);
+    }
+
+    // Só habilita "Salvar" quando dias OU duração diferem do último salvo —
+    // evita autosave silencioso, consistente com o resto da página.
+    function atualizarEstadoSalvar() {
+      const diasMudaram = JSON.stringify(diasSelecionadosOrdenados()) !== item.dataset.diasSalvos;
+      const duracaoMudou = duracaoInput.value !== duracaoInput.dataset.valorSalvo;
+      btnSalvar.disabled = (!diasMudaram && !duracaoMudou) || duracaoInput.value === '';
+    }
+
+    DIAS_SEMANA.forEach(({ valor, rotulo, nomeCompleto }) => {
+      const botao = document.createElement('button');
+      botao.type = 'button';
+      botao.className = 'dia-toggle';
+      botao.dataset.dia = valor;
+      botao.setAttribute('aria-pressed', String(diasAtivos.has(valor)));
+      botao.setAttribute('aria-label', nomeCompleto);
+      botao.textContent = rotulo;
+
+      botao.addEventListener('click', () => {
+        const pressionado = botao.getAttribute('aria-pressed') === 'true';
+        botao.setAttribute('aria-pressed', String(!pressionado));
+        atualizarEstadoSalvar();
+      });
+
+      diasGroup.appendChild(botao);
     });
 
-    frequenciaWrap.append(frequenciaInput, btnSalvarFrequencia);
-    info.append(nomeSpan, frequenciaWrap);
+    const duracaoInput = document.createElement('input');
+    duracaoInput.type = 'number';
+    duracaoInput.className = 'modalidade-duracao num';
+    duracaoInput.min = '0.25';
+    duracaoInput.max = '5';
+    duracaoInput.step = '0.25';
+    duracaoInput.value = vinculo.duracaoMediaHoras;
+    duracaoInput.dataset.valorSalvo = String(vinculo.duracaoMediaHoras);
+    duracaoInput.setAttribute('aria-label', `Duração média por sessão de ${vinculo.modalidade.nome}, em horas`);
+    duracaoInput.addEventListener('input', atualizarEstadoSalvar);
+
+    btnSalvar.type = 'button';
+    btnSalvar.className = 'modalidade-save-btn';
+    btnSalvar.dataset.acao = 'salvar-modalidade';
+    btnSalvar.textContent = 'Salvar';
+    btnSalvar.disabled = true;
+
+    detalhes.append(diasGroup, duracaoInput, btnSalvar);
+    info.append(nomeSpan, detalhes);
 
     const acoes = document.createElement('div');
     acoes.className = 'modalidade-item-actions';
@@ -252,8 +306,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       elModalidadeAddOptions.appendChild(pill);
     });
 
-    elModalidadeAddFrequencia.value = '';
-    elModalidadeAddFrequencia.disabled = true;
+    Array.from(elModalidadeAddDias.querySelectorAll('.dia-toggle')).forEach((botao) => {
+      botao.setAttribute('aria-pressed', 'false');
+      botao.disabled = true;
+    });
+    elModalidadeAddDuracao.value = '';
+    elModalidadeAddDuracao.disabled = true;
 
     const temDisponiveis = disponiveis.length > 0;
     elModalidadeAddForm.hidden = !temDisponiveis;
@@ -262,8 +320,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   elModalidadeAddOptions.addEventListener('change', (evento) => {
     if (evento.target.name !== 'modalidade-add-escolha') return;
-    elModalidadeAddFrequencia.disabled = false;
-    elModalidadeAddFrequencia.focus();
+    const botoesDia = Array.from(elModalidadeAddDias.querySelectorAll('.dia-toggle'));
+    botoesDia.forEach((botao) => { botao.disabled = false; });
+    elModalidadeAddDuracao.disabled = false;
+    botoesDia[0].focus();
+  });
+
+  elModalidadeAddDias.addEventListener('click', (evento) => {
+    const botao = evento.target.closest('.dia-toggle');
+    if (!botao) return;
+    const pressionado = botao.getAttribute('aria-pressed') === 'true';
+    botao.setAttribute('aria-pressed', String(!pressionado));
   });
 
   async function carregarModalidades() {
@@ -298,7 +365,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       ronuMostrarErroFormulario(elModalidadesError, 'Selecione uma modalidade.');
       return;
     }
-    if (!elModalidadeAddFrequencia.reportValidity()) return;
+
+    const diasSemana = Array.from(elModalidadeAddDias.querySelectorAll('.dia-toggle'))
+      .filter((botao) => botao.getAttribute('aria-pressed') === 'true')
+      .map((botao) => Number(botao.dataset.dia));
+
+    if (diasSemana.length === 0) {
+      ronuMostrarErroFormulario(elModalidadesError, 'Selecione pelo menos um dia da semana.');
+      return;
+    }
+
+    if (!elModalidadeAddDuracao.reportValidity()) return;
 
     ronuOcultarErroFormulario(elModalidadesError);
     ronuDefinirCarregando(btnAdicionarModalidade, true, 'Adicionando...');
@@ -309,7 +386,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           modalidadeId: Number(escolhida.value),
-          frequenciaSemanal: Number(elModalidadeAddFrequencia.value)
+          diasSemana,
+          duracaoMediaHoras: Number(elModalidadeAddDuracao.value)
         })
       });
 
@@ -332,11 +410,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   btnAdicionarModalidade.addEventListener('click', adicionarModalidade);
 
-  async function salvarFrequenciaModalidade(input, botao) {
-    if (!input.reportValidity()) return;
+  async function salvarModalidade(item, botao) {
+    const duracaoInput = item.querySelector('.modalidade-duracao');
+    if (!duracaoInput.reportValidity()) return;
 
-    const modalidadeId = Number(input.closest('.modalidade-item').dataset.modalidadeId);
-    const frequencia = Number(input.value);
+    const diasSemana = Array.from(item.querySelectorAll('.dia-toggle'))
+      .filter((b) => b.getAttribute('aria-pressed') === 'true')
+      .map((b) => Number(b.dataset.dia))
+      .sort((a, b) => a - b);
+
+    if (diasSemana.length === 0) {
+      const nome = item.querySelector('.modalidade-item-nome').textContent;
+      ronuMostrarErroFormulario(elModalidadesError, `Selecione pelo menos um dia da semana para ${nome}.`);
+      return;
+    }
+
+    const modalidadeId = Number(item.dataset.modalidadeId);
+    const duracaoMediaHoras = Number(duracaoInput.value);
 
     botao.disabled = true;
     const textoOriginal = botao.textContent;
@@ -347,7 +437,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const resposta = await ronuFetchAutenticado('/usuarios/modalidades', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ modalidadeId, frequenciaSemanal: frequencia })
+        body: JSON.stringify({ modalidadeId, diasSemana, duracaoMediaHoras })
       });
 
       if (!resposta.ok) {
@@ -355,7 +445,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         throw new Error(corpo?.mensagem || 'Não foi possível salvar. Tente novamente.');
       }
 
-      input.dataset.valorSalvo = String(frequencia);
+      duracaoInput.dataset.valorSalvo = String(duracaoMediaHoras);
+      item.dataset.diasSalvos = JSON.stringify(diasSemana);
       botao.textContent = textoOriginal;
     } catch (erro) {
       botao.disabled = false;
@@ -396,8 +487,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const item = botao.closest('.modalidade-item');
 
-    if (botao.dataset.acao === 'salvar-frequencia') {
-      salvarFrequenciaModalidade(item.querySelector('.modalidade-frequencia'), botao);
+    if (botao.dataset.acao === 'salvar-modalidade') {
+      salvarModalidade(item, botao);
       return;
     }
 
