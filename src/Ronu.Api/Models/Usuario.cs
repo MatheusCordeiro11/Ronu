@@ -10,11 +10,17 @@ public class Usuario
     public required string Nome { get; set; }
     public required string Email { get; set; }
 
-    // Nunca armazenamos a senha em texto puro, apenas o hash gerado pelo BCrypt no cadastro.
-    public required string SenhaHash { get; set; }
+    // Nulo para contas criadas via login com Google, que não têm senha
+    // própria — só é obrigatório para contas criadas via cadastro tradicional
+    // (email/senha), preenchido nesse momento pelo AuthController.
+    public string? SenhaHash { get; set; }
 
-    // Altura, data de nascimento e sexo são opcionais porque não são coletados no
-    // cadastro inicial: esses dados são preenchidos depois, durante o onboarding.
+    // Identificador único da conta Google vinculada (claim "sub" do token),
+    // nulo para contas que nunca usaram login com Google. Não usamos o email
+    // como chave de vínculo com o Google porque o "sub" nunca muda, mesmo que
+    // o usuário troque o email da conta Google no futuro.
+    public string? GoogleId { get; set; }
+
     public decimal? Altura { get; set; }
     public DateOnly? DataNascimento { get; set; }
     public string? Sexo { get; set; }
