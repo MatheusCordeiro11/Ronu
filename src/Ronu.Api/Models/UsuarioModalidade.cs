@@ -20,4 +20,6 @@ public class UsuarioModalidade
     public Modalidade Modalidade { get; set; } = null!;
 
     public int FrequenciaSemanal { get; set; }
+
+    public decimal DuracaoMediaHoras { get; set; }
 }

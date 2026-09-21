@@ -38,7 +38,8 @@ public class ContextoDietaBuilder : IContextoDietaBuilder
             {
                 Nome = m.Modalidade.Nome,
                 FrequenciaSemanal = m.FrequenciaSemanal,
-                MetReferencia = m.Modalidade.MetReferencia
+                MetReferencia = m.Modalidade.MetReferencia,
+                DuracaoHoras = m.DuracaoMediaHoras
             })
             .ToListAsync();
 

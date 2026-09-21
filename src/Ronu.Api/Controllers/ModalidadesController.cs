@@ -72,6 +72,7 @@ public class ModalidadesController : ControllerBase
         if (usuarioModalidadeExistente is not null)
         {
             usuarioModalidadeExistente.FrequenciaSemanal = request.FrequenciaSemanal;
+            usuarioModalidadeExistente.DuracaoMediaHoras = request.DuracaoMediaHoras;
             usuarioModalidade = usuarioModalidadeExistente;
         }
         else
@@ -80,7 +81,8 @@ public class ModalidadesController : ControllerBase
             {
                 UsuarioId = UsuarioIdLogado,
                 ModalidadeId = request.ModalidadeId,
-                FrequenciaSemanal = request.FrequenciaSemanal
+                FrequenciaSemanal = request.FrequenciaSemanal,
+                DuracaoMediaHoras = request.DuracaoMediaHoras
             };
 
             _context.UsuarioModalidades.Add(usuarioModalidade);
@@ -88,7 +90,7 @@ public class ModalidadesController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        return Ok(new { usuarioModalidade.Id, usuarioModalidade.ModalidadeId, usuarioModalidade.FrequenciaSemanal });
+        return Ok(new { usuarioModalidade.Id, usuarioModalidade.ModalidadeId, usuarioModalidade.FrequenciaSemanal, usuarioModalidade.DuracaoMediaHoras });
     }
 
     /// <summary>
@@ -108,6 +110,7 @@ public class ModalidadesController : ControllerBase
             {
                 Id = um.Id,
                 FrequenciaSemanal = um.FrequenciaSemanal,
+                DuracaoMediaHoras = um.DuracaoMediaHoras,
                 Modalidade = new ModalidadeResponse
                 {
                     Id = um.Modalidade.Id,

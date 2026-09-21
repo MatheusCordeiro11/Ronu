@@ -9,4 +9,5 @@ public class ModalidadeContextoDto
     public required string Nome { get; set; }
     public required int FrequenciaSemanal { get; set; }
     public required decimal MetReferencia { get; set; }
+    public required decimal DuracaoHoras { get; set; }
 }

@@ -25,7 +25,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
     public async Task<DietaSemanalDto> GerarDietaAsync(ContextoDietaDto contexto)
     {
         var gastoTreinoSemanal = contexto.Modalidades
-            .Sum(m => _calculadora.CalcularGastoSemanal(m.MetReferencia, contexto.Peso, m.FrequenciaSemanal));
+            .Sum(m => _calculadora.CalcularGastoSemanal(m.MetReferencia, contexto.Peso, m.FrequenciaSemanal, m.DuracaoHoras));
 
         var metaMacros = CalcularMetaMacros(gastoTreinoSemanal, contexto);
 
