@@ -20,7 +20,39 @@
 
     <aside class="auth-brand">
       <a href="landing/v1/index.html" class="wordmark">ronu<span>.</span></a>
-      <div class="auth-brand-visual" role="img" aria-label="Espaço reservado para imagem de atleta em treino"></div>
+      <div class="auth-brand-visual hero-carousel" id="authCarousel">
+        <ul class="hero-carousel-track">
+          <li class="hero-carousel-slide is-active">
+            <img src="img/modalidades/basquete.png" alt="Jogadores disputando a bola em um treino de basquete" loading="eager">
+          </li>
+          <li class="hero-carousel-slide">
+            <img src="img/modalidades/muay-thai.png" alt="Lutadores em clinch durante um treino de muay thai" loading="lazy">
+          </li>
+          <li class="hero-carousel-slide">
+            <img src="img/modalidades/boxe.png" alt="Lutadores trocando golpes em um treino de boxe" loading="lazy">
+          </li>
+          <li class="hero-carousel-slide">
+            <img src="img/modalidades/jiu-jitsu.png" alt="Atleta finalizando um golpe de jiu-jitsu no tatame" loading="lazy">
+          </li>
+          <li class="hero-carousel-slide">
+            <img src="img/modalidades/musculacao.png" alt="Atleta levantando peso em um treino de musculação" loading="lazy">
+          </li>
+          <li class="hero-carousel-slide">
+            <img src="img/modalidades/futebol.png" alt="Jogadores disputando a bola em um treino de futebol" loading="lazy">
+          </li>
+        </ul>
+
+        <div class="hero-carousel-controls">
+          <div class="hero-carousel-dots" role="tablist" aria-label="Selecionar modalidade">
+            <button type="button" class="hero-carousel-dot is-active" role="tab" aria-selected="true" aria-label="Basquete"></button>
+            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Muay thai"></button>
+            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Boxe"></button>
+            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Jiu-jitsu"></button>
+            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Musculação"></button>
+            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Futebol"></button>
+          </div>
+        </div>
+      </div>
       <p class="auth-brand-quote">Treino, objetivo e preferências — o que a IA precisa pra montar sua dieta.</p>
     </aside>
 
@@ -146,5 +178,12 @@
 
   <script src="js/auth.js"></script>
   <script src="js/onboarding.js"></script>
+  <script src="js/hero-carousel.js"></script>
+  <script>
+    initHeroCarousel(document.getElementById('authCarousel'), {
+      autoDelay: 5000,
+      resumeDelay: 8000,
+    });
+  </script>
 </body>
 </html>
