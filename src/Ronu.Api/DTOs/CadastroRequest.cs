@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Ronu.Api.DTOs;
 
 /// <summary>
@@ -12,5 +14,9 @@ public class CadastroRequest
 
     // Senha em texto puro recebida do cliente; é convertida em hash (BCrypt) no
     // controller antes de ser persistida, nunca é salva como está.
+    // MinLength valida o tamanho automaticamente (ApiController já habilita
+    // validação de ModelState) — se a senha vier curta, a API devolve 400
+    // sozinha, sem precisar de checagem manual no AuthController.
+    [MinLength(8, ErrorMessage = "A senha deve ter pelo menos 8 caracteres.")]
     public required string Senha { get; set; }
 }
