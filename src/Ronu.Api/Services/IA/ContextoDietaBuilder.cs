@@ -19,10 +19,6 @@ public class ContextoDietaBuilder : IContextoDietaBuilder
 
     public async Task<ContextoDietaDto> ConstruirAsync(int usuarioId)
     {
-        // FirstAsync (não FirstOrDefaultAsync) de propósito: quem chama este
-        // método (DietasController) já valida antes que o usuário tem perfil
-        // completo e pelo menos um objetivo registrado. Se isso falhar aqui,
-        // é inconsistência real, não caso esperado.
         var usuario = await _context.Usuarios
             .FirstAsync(u => u.Id == usuarioId);
 
@@ -37,9 +33,9 @@ public class ContextoDietaBuilder : IContextoDietaBuilder
             .Select(m => new ModalidadeContextoDto
             {
                 Nome = m.Modalidade.Nome,
-                FrequenciaSemanal = m.FrequenciaSemanal,
                 MetReferencia = m.Modalidade.MetReferencia,
-                DuracaoHoras = m.DuracaoMediaHoras
+                DuracaoHoras = m.DuracaoMediaHoras,
+                DiasSemana = m.DiasSemana
             })
             .ToListAsync();
 
@@ -52,9 +48,6 @@ public class ContextoDietaBuilder : IContextoDietaBuilder
             })
             .ToListAsync();
 
-        // Idade calculada a partir da DataNascimento porque o valor real
-        // muda a cada aniversário — armazenar uma "Idade" fixa no banco
-        // ficaria desatualizado com o tempo.
         var idade = DateTime.UtcNow.Year - usuario.DataNascimento!.Value.Year;
         if (DateOnly.FromDateTime(DateTime.UtcNow) < usuario.DataNascimento.Value.AddYears(idade))
         {

@@ -11,6 +11,12 @@ namespace Ronu.Api.Services.IA;
 /// </summary>
 public class GeradorDietaGemini : IGeradorDietaIA
 {
+    private static readonly string[] NomesDias =
+    {
+        "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira",
+        "Sexta-feira", "Sábado", "Domingo"
+    };
+
     private readonly HttpClient _httpClient;
     private readonly ICalculadoraGastoCalorico _calculadora;
     private readonly GeminiOptions _options;
@@ -24,12 +30,9 @@ public class GeradorDietaGemini : IGeradorDietaIA
 
     public async Task<DietaSemanalDto> GerarDietaAsync(ContextoDietaDto contexto)
     {
-        var gastoTreinoSemanal = contexto.Modalidades
-            .Sum(m => _calculadora.CalcularGastoSemanal(m.MetReferencia, contexto.Peso, m.FrequenciaSemanal, m.DuracaoHoras));
+        var metasPorDia = CalcularMetasPorDia(contexto, _calculadora);
 
-        var metaMacros = CalcularMetaMacros(gastoTreinoSemanal, contexto);
-
-        var prompt = MontarPrompt(contexto, metaMacros.Calorias);
+        var prompt = MontarPrompt(contexto, metasPorDia);
         var schema = MontarSchema();
 
         var corpoRequisicao = new
@@ -70,19 +73,99 @@ public class GeradorDietaGemini : IGeradorDietaIA
         var opcoesDesserializacao = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         var respostaIa = JsonSerializer.Deserialize<RespostaDiasIaDto>(textoJson, opcoesDesserializacao)!;
 
-        return new DietaSemanalDto
+        // Casamos a meta calculada (C#) com o dia devolvido pela IA PELO NOME,
+        // nunca pela posição no array — mais robusto que confiar em ordem: se
+        // a IA devolver um nome de dia que não bate com nenhum dos 7
+        // esperados, isso falha alto e claro aqui, em vez de silenciosamente
+        // atribuir a meta errada a um dia por engano de posição.
+        var dias = respostaIa.Dias.Select(d => new DiaDietaDto
         {
-            Dias = respostaIa.Dias,
-            // MetaDiariaCalculada NUNCA vem da IA — é sempre calculada em C#,
-            // com fórmula determinística, para garantir precisão.
-            MetaDiariaCalculada = metaMacros
+            DiaSemana = d.DiaSemana,
+            Refeicoes = d.Refeicoes,
+            TotalDoDia = d.TotalDoDia,
+            MetaCalculada = metasPorDia.TryGetValue(d.DiaSemana.Trim(), out var meta)
+                ? meta
+                : throw new InvalidOperationException(
+                    $"Dia '{d.DiaSemana}' retornado pela IA não corresponde a nenhum dos 7 dias esperados.")
+        }).ToList();
+
+        return new DietaSemanalDto { Dias = dias };
+    }
+
+    private static Dictionary<string, MacrosDto> CalcularMetasPorDia(
+        ContextoDietaDto contexto, ICalculadoraGastoCalorico calculadora)
+    {
+        // Mifflin-St Jeor: fórmula de TMB, mais precisa e validada
+        // cientificamente. É a mesma para todos os dias (não depende de
+        // treino) — só o gasto de treino varia por dia.
+        var tmb = contexto.Sexo == "Masculino"
+            ? (10 * contexto.Peso) + (6.25m * contexto.Altura) - (5 * contexto.Idade) + 5
+            : (10 * contexto.Peso) + (6.25m * contexto.Altura) - (5 * contexto.Idade) - 161;
+
+        var metas = new Dictionary<string, MacrosDto>(StringComparer.OrdinalIgnoreCase);
+
+        for (int dia = 1; dia <= 7; dia++)
+        {
+            var gastoTreinoDia = contexto.Modalidades
+                .Where(m => m.DiasSemana.Contains(dia))
+                .Sum(m => calculadora.CalcularGastoSessao(m.MetReferencia, contexto.Peso, m.DuracaoHoras));
+
+            var manutencao = tmb + gastoTreinoDia;
+            var metaCalorias = AplicarAjusteObjetivo(manutencao, contexto.Objetivo);
+
+            metas[NomesDias[dia - 1]] = MontarMacros(metaCalorias, contexto.Peso);
+        }
+
+        return metas;
+    }
+
+    private static decimal AplicarAjusteObjetivo(decimal manutencao, string objetivo)
+    {
+        // Ajuste de superávit/déficit moderado (evidência: Aragon &
+        // Schoenfeld). Objetivo vem de um conjunto fixo de valores definidos
+        // no frontend (radio buttons), não texto livre — match direto seguro.
+        const decimal AjustePercentualMvp = 0.15m;
+
+        return objetivo switch
+        {
+            "ganhar peso" => manutencao * (1 + AjustePercentualMvp),
+            "perder peso" => manutencao * (1 - AjustePercentualMvp),
+            "manter peso" => manutencao,
+            _ => manutencao
         };
     }
 
-    private static string MontarPrompt(ContextoDietaDto contexto, decimal metaCaloriasDiaria)
+    private static MacrosDto MontarMacros(decimal metaCalorias, decimal pesoKg)
+    {
+        // Baseado em diretrizes de nutrição esportiva (ACSM): proteína e
+        // gordura por peso corporal, carboidrato preenche o restante.
+        const decimal ProteinaGramasPorKgMvp = 1.8m;
+        const decimal GorduraGramasPorKgMvp = 1.0m;
+        const decimal CaloriasPorGramaProteina = 4m;
+        const decimal CaloriasPorGramaGordura = 9m;
+        const decimal CaloriasPorGramaCarboidrato = 4m;
+
+        var proteinaG = pesoKg * ProteinaGramasPorKgMvp;
+        var gorduraG = pesoKg * GorduraGramasPorKgMvp;
+
+        var caloriasProteina = proteinaG * CaloriasPorGramaProteina;
+        var caloriasGordura = gorduraG * CaloriasPorGramaGordura;
+        var caloriasCarboidrato = metaCalorias - caloriasProteina - caloriasGordura;
+        var carboidratoG = caloriasCarboidrato / CaloriasPorGramaCarboidrato;
+
+        return new MacrosDto
+        {
+            Calorias = metaCalorias,
+            ProteinasG = proteinaG,
+            CarboidratosG = carboidratoG,
+            GordurasG = gorduraG
+        };
+    }
+
+    private static string MontarPrompt(ContextoDietaDto contexto, Dictionary<string, MacrosDto> metasPorDia)
     {
         var modalidadesTexto = string.Join(", ", contexto.Modalidades
-            .Select(m => $"{m.Nome} ({m.FrequenciaSemanal}x por semana)"));
+            .Select(m => $"{m.Nome} ({string.Join(", ", m.DiasSemana.OrderBy(d => d).Select(d => NomesDias[d - 1]))})"));
 
         var preferidosTexto = string.Join(", ", contexto.Preferencias
             .Where(p => p.Tipo == "preferido")
@@ -91,6 +174,9 @@ public class GeradorDietaGemini : IGeradorDietaIA
         var evitarTexto = string.Join(", ", contexto.Preferencias
             .Where(p => p.Tipo == "evitar")
             .Select(p => p.Alimento));
+
+        var metasTexto = string.Join("\n", NomesDias.Select(nome =>
+            $"- {nome}: {metasPorDia[nome].Calorias:F0} kcal"));
 
         return $"""
             Você é um nutricionista esportivo. Monte um plano alimentar semanal (7 dias)
@@ -101,10 +187,12 @@ public class GeradorDietaGemini : IGeradorDietaIA
             - Peso: {contexto.Peso} kg
             - Altura: {contexto.Altura} cm
             - Objetivo: {contexto.Objetivo}
-            - Modalidades praticadas: {modalidadesTexto}
-            - Meta calórica diária: {metaCaloriasDiaria:F0} kcal (calculada a partir da taxa
-              metabólica basal e do gasto calórico real das atividades acima — respeite este
-              valor rigorosamente)
+            - Modalidades praticadas (com os dias da semana de cada uma): {modalidadesTexto}
+
+            Metas calóricas diárias (calculadas a partir da taxa metabólica basal + gasto
+            real de treino de CADA dia específico — dias de treino têm meta mais alta que
+            dias de descanso):
+            {metasTexto}
 
             Alimentos que a pessoa prefere (inclua quando fizer sentido nutricionalmente): {(string.IsNullOrEmpty(preferidosTexto) ? "nenhuma preferência informada" : preferidosTexto)}
 
@@ -112,11 +200,12 @@ public class GeradorDietaGemini : IGeradorDietaIA
             quantidade, nem como ingrediente de outro prato): {(string.IsNullOrEmpty(evitarTexto) ? "nenhuma restrição informada" : evitarTexto)}
 
             Regras obrigatórias:
-            1. A soma de calorias de cada dia deve ficar entre {metaCaloriasDiaria * 0.95m:F0} e {metaCaloriasDiaria * 1.05m:F0} kcal (margem de 5% para mais ou para menos).
+            1. A soma de calorias de cada dia deve ficar dentro de uma margem de 5% (para mais ou para menos) da meta ESPECÍFICA daquele dia, listada acima — cada dia tem uma meta diferente, não use um valor único para todos os 7.
             2. Nunca inclua nenhum alimento da lista de restrição, em nenhuma refeição, em nenhum dia.
-            3. Varie a fonte principal de proteína entre os dias da semana (ex: frango, carne vermelha, peixe, ovos, leguminosas) — não repita a mesma fonte de proteína em dias consecutivos.
+            3. Varie a fonte principal de proteína entre os dias da semana — não repita a mesma fonte de proteína em dias consecutivos.
             4. Não repita a mesma refeição (mesmos alimentos) em dois dias seguidos.
             5. Retorne quantidades realistas e mensuráveis para cada alimento (em gramas, mililitros ou unidades).
+            6. Use EXATAMENTE os nomes dos dias como escritos acima (ex: "Segunda-feira") no campo diaSemana de cada dia — precisa corresponder exatamente a um dos 7 nomes listados.
             """;
     }
 
@@ -171,9 +260,6 @@ public class GeradorDietaGemini : IGeradorDietaIA
             required = new[] { "diaSemana", "refeicoes", "totalDoDia" }
         };
 
-        // Só "dias" no schema — MetaDiariaCalculada NÃO é pedida à IA, porque já
-        // temos o valor exato calculado em C#. Deixar a IA "ecoar" esse número de
-        // volta no JSON criaria risco de um valor levemente diferente do real.
         return new
         {
             type = "OBJECT",
@@ -185,65 +271,17 @@ public class GeradorDietaGemini : IGeradorDietaIA
         };
     }
 
-    private static MacrosDto CalcularMetaMacros(decimal gastoTreinoSemanal, ContextoDietaDto contexto)
-    {
-        var gastoTreinoDiario = gastoTreinoSemanal / 7;
-
-        // Mifflin-St Jeor: fórmula de TMB (Taxa Metabólica Basal) mais precisa e
-        // validada cientificamente — representa 60-75% do gasto calórico diário
-        // total, a maior fatia, então precisa entrar na conta (o gasto do treino
-        // sozinho não é o suficiente para representar a necessidade real do dia).
-        var tmb = contexto.Sexo == "Masculino"
-            ? (10 * contexto.Peso) + (6.25m * contexto.Altura) - (5 * contexto.Idade) + 5
-            : (10 * contexto.Peso) + (6.25m * contexto.Altura) - (5 * contexto.Idade) - 161;
-
-        var manutencao = tmb + gastoTreinoDiario;
-
-        // Ajuste de superávit/déficit moderado sobre a manutenção (evidência:
-        // Aragon & Schoenfeld), nunca agressivo, para preservar massa magra e
-        // evitar ganho excessivo de gordura. Objetivo vem de um conjunto fixo
-        // de valores definidos no onboarding do frontend (radio buttons), não
-        // texto livre — por isso o match direto de string é seguro aqui.
-        const decimal AjustePercentualMvp = 0.15m;
-
-        var metaCalorias = contexto.Objetivo switch
-        {
-            "ganhar peso" => manutencao * (1 + AjustePercentualMvp),
-            "perder peso" => manutencao * (1 - AjustePercentualMvp),
-            "manter peso" => manutencao,
-            _ => manutencao
-        };
-
-        // Baseado em diretrizes de nutrição esportiva (ACSM): proteína e gordura
-        // calculadas por peso corporal (mais preciso que percentual fixo de
-        // calorias), carboidrato preenche o restante calórico.
-        const decimal ProteinaGramasPorKgMvp = 1.8m;
-        const decimal GorduraGramasPorKgMvp = 1.0m;
-        const decimal CaloriasPorGramaProteina = 4m;
-        const decimal CaloriasPorGramaGordura = 9m;
-        const decimal CaloriasPorGramaCarboidrato = 4m;
-
-        var proteinaG = contexto.Peso * ProteinaGramasPorKgMvp;
-        var gorduraG = contexto.Peso * GorduraGramasPorKgMvp;
-
-        var caloriasProteina = proteinaG * CaloriasPorGramaProteina;
-        var caloriasGordura = gorduraG * CaloriasPorGramaGordura;
-        var caloriasCarboidrato = metaCalorias - caloriasProteina - caloriasGordura;
-        var carboidratoG = caloriasCarboidrato / CaloriasPorGramaCarboidrato;
-
-        return new MacrosDto
-        {
-            Calorias = metaCalorias,
-            ProteinasG = proteinaG,
-            CarboidratosG = carboidratoG,
-            GordurasG = gorduraG
-        };
-    }
-
-    // Classe auxiliar interna, só para desserializar o formato reduzido que a
-    // Gemini devolve (sem MetaDiariaCalculada, calculada separadamente em C#).
+    // Classes auxiliares internas, só para desserializar o formato reduzido
+    // que a Gemini devolve (sem MetaCalculada, calculada separadamente em C#).
     private class RespostaDiasIaDto
     {
-        public required List<DiaDietaDto> Dias { get; set; }
+        public required List<DiaDietaIaDto> Dias { get; set; }
+    }
+
+    private class DiaDietaIaDto
+    {
+        public required string DiaSemana { get; set; }
+        public required List<RefeicaoDto> Refeicoes { get; set; }
+        public required MacrosDto TotalDoDia { get; set; }
     }
 }

@@ -24,15 +24,9 @@ public class ModalidadesController : ControllerBase
         _context = context;
     }
 
-    // O Id do usuário logado vem sempre do claim do token JWT, nunca do corpo da
-    // requisição: se viesse do corpo, um usuário mal-intencionado poderia informar
-    // o Id de outra pessoa e manipular dados que não são dele.
     private int UsuarioIdLogado =>
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-    // Sem [Authorize]: o catálogo de modalidades é informação do sistema (não é
-    // dado de nenhum usuário específico), então pode ser consultado por qualquer
-    // cliente, autenticado ou não.
     [HttpGet("api/modalidades")]
     public async Task<IActionResult> ListarTodas()
     {
@@ -49,10 +43,11 @@ public class ModalidadesController : ControllerBase
     }
 
     /// <summary>
-    /// Vincula uma modalidade existente do catálogo ao usuário logado, com a
-    /// frequência semanal informada. Se o usuário já pratica essa modalidade,
-    /// atualiza a frequência em vez de criar um vínculo duplicado (upsert) — o
-    /// onboarding pode reenviar a mesma modalidade se o usuário voltar uma etapa.
+    /// Vincula uma modalidade existente do catálogo ao usuário logado, com os
+    /// dias da semana e a duração média informados. Se o usuário já pratica
+    /// essa modalidade, atualiza os dados em vez de criar um vínculo duplicado
+    /// (upsert) — o onboarding pode reenviar a mesma modalidade se o usuário
+    /// voltar uma etapa.
     /// </summary>
     [Authorize]
     [HttpPost("api/usuarios/modalidades")]
@@ -64,6 +59,16 @@ public class ModalidadesController : ControllerBase
             return NotFound(new { mensagem = "Modalidade não encontrada." });
         }
 
+        if (request.DiasSemana.Any(d => d < 1 || d > 7))
+        {
+            return BadRequest(new { mensagem = "Os dias da semana devem estar entre 1 (Segunda) e 7 (Domingo)." });
+        }
+
+        if (request.DiasSemana.Distinct().Count() != request.DiasSemana.Length)
+        {
+            return BadRequest(new { mensagem = "Não é possível repetir o mesmo dia da semana." });
+        }
+
         var usuarioModalidadeExistente = await _context.UsuarioModalidades
             .FirstOrDefaultAsync(um => um.UsuarioId == UsuarioIdLogado && um.ModalidadeId == request.ModalidadeId);
 
@@ -71,7 +76,7 @@ public class ModalidadesController : ControllerBase
 
         if (usuarioModalidadeExistente is not null)
         {
-            usuarioModalidadeExistente.FrequenciaSemanal = request.FrequenciaSemanal;
+            usuarioModalidadeExistente.DiasSemana = request.DiasSemana;
             usuarioModalidadeExistente.DuracaoMediaHoras = request.DuracaoMediaHoras;
             usuarioModalidade = usuarioModalidadeExistente;
         }
@@ -81,7 +86,7 @@ public class ModalidadesController : ControllerBase
             {
                 UsuarioId = UsuarioIdLogado,
                 ModalidadeId = request.ModalidadeId,
-                FrequenciaSemanal = request.FrequenciaSemanal,
+                DiasSemana = request.DiasSemana,
                 DuracaoMediaHoras = request.DuracaoMediaHoras
             };
 
@@ -90,7 +95,13 @@ public class ModalidadesController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        return Ok(new { usuarioModalidade.Id, usuarioModalidade.ModalidadeId, usuarioModalidade.FrequenciaSemanal, usuarioModalidade.DuracaoMediaHoras });
+        return Ok(new
+        {
+            usuarioModalidade.Id,
+            usuarioModalidade.ModalidadeId,
+            usuarioModalidade.DiasSemana,
+            usuarioModalidade.DuracaoMediaHoras
+        });
     }
 
     /// <summary>
@@ -103,13 +114,11 @@ public class ModalidadesController : ControllerBase
     {
         var modalidades = await _context.UsuarioModalidades
             .Where(um => um.UsuarioId == UsuarioIdLogado)
-            // .Include() é necessário para carregar o objeto Modalidade completo:
-            // por padrão o EF Core só traz o ModalidadeId, não a entidade relacionada.
             .Include(um => um.Modalidade)
             .Select(um => new UsuarioModalidadeResponse
             {
                 Id = um.Id,
-                FrequenciaSemanal = um.FrequenciaSemanal,
+                DiasSemana = um.DiasSemana,
                 DuracaoMediaHoras = um.DuracaoMediaHoras,
                 Modalidade = new ModalidadeResponse
                 {
@@ -125,10 +134,8 @@ public class ModalidadesController : ControllerBase
 
     /// <summary>
     /// Remove uma modalidade praticada pelo usuário logado. Busca sempre
-    /// filtrando também por UsuarioIdLogado (não só pelo Id do registro em
-    /// UsuarioModalidade) para impedir que um usuário remova a modalidade de
-    /// outro só adivinhando um Id — se o registro existir mas pertencer a
-    /// outro usuário, o resultado é o mesmo de não existir.
+    /// filtrando também por UsuarioIdLogado para impedir que um usuário
+    /// remova a modalidade de outro só adivinhando um Id.
     /// </summary>
     [Authorize]
     [HttpDelete("api/usuarios/modalidades/{id}")]

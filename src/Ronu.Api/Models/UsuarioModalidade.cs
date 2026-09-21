@@ -1,25 +1,23 @@
 namespace Ronu.Api.Models;
 
 /// <summary>
-/// Tabela de associação entre Usuario e Modalidade (relação N:N), guardando também
-/// a frequência semanal com que o usuário pratica aquela modalidade.
+/// Tabela de associação entre Usuario e Modalidade (relação N:N).
 /// </summary>
 public class UsuarioModalidade
 {
     public int Id { get; set; }
 
     public int UsuarioId { get; set; }
-
-    // Inicializada com "= null!" em vez de "required": o EF Core só precisa do
-    // UsuarioId (a FK) para persistir o registro. O objeto Usuario completo só é
-    // preenchido quando a consulta usa .Include(), então não faz sentido exigi-lo
-    // como obrigatório na criação do objeto em memória.
     public Usuario Usuario { get; set; } = null!;
 
     public int ModalidadeId { get; set; }
     public Modalidade Modalidade { get; set; } = null!;
 
-    public int FrequenciaSemanal { get; set; }
+    // Dias da semana em que a modalidade é praticada (1=Segunda ... 7=Domingo,
+    // padrão ISO 8601). Não existe mais um campo separado de frequência — ela
+    // é sempre calculada como DiasSemana.Length, para nunca haver
+    // inconsistência entre "quantos dias" e "quais dias".
+    public int[] DiasSemana { get; set; } = Array.Empty<int>();
 
     public decimal DuracaoMediaHoras { get; set; }
 }
