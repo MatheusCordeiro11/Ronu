@@ -176,6 +176,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ---------- Passo 3: modalidades ----------
 
+  // 1=Segunda ... 7=Domingo (ISO 8601, mesmo padrão do backend). Abreviação
+  // de 3 letras — com 1 letra só, "Segunda/Sexta/Sábado" colidem todas em
+  // "S" e "Quarta/Quinta" colidem em "Q", o que ficaria ambíguo em pt-BR.
+  const DIAS_SEMANA = [
+    { valor: 1, rotulo: 'SEG', nomeCompleto: 'segunda-feira' },
+    { valor: 2, rotulo: 'TER', nomeCompleto: 'terça-feira' },
+    { valor: 3, rotulo: 'QUA', nomeCompleto: 'quarta-feira' },
+    { valor: 4, rotulo: 'QUI', nomeCompleto: 'quinta-feira' },
+    { valor: 5, rotulo: 'SEX', nomeCompleto: 'sexta-feira' },
+    { valor: 6, rotulo: 'SÁB', nomeCompleto: 'sábado' },
+    { valor: 7, rotulo: 'DOM', nomeCompleto: 'domingo' }
+  ];
+
   function criarLinhaModalidade(modalidade) {
     const linha = document.createElement('div');
     linha.className = 'modalidade-row';
@@ -192,24 +205,61 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     label.append(checkbox, nomeSpan);
 
-    const frequenciaInput = document.createElement('input');
-    frequenciaInput.type = 'number';
-    frequenciaInput.className = 'modalidade-frequencia';
-    frequenciaInput.min = '1';
-    frequenciaInput.max = '7';
-    frequenciaInput.placeholder = 'x/semana';
-    frequenciaInput.disabled = true;
-    frequenciaInput.setAttribute('aria-label', `Frequência semanal de ${modalidade.nome}`);
+    const detalhes = document.createElement('div');
+    detalhes.className = 'modalidade-details';
+
+    const diasGroup = document.createElement('div');
+    diasGroup.className = 'modalidade-dias';
+    diasGroup.setAttribute('role', 'group');
+    diasGroup.setAttribute('aria-label', `Dias da semana de treino de ${modalidade.nome}`);
+
+    const botoesDia = DIAS_SEMANA.map(({ valor, rotulo, nomeCompleto }) => {
+      const botao = document.createElement('button');
+      botao.type = 'button';
+      botao.className = 'dia-toggle';
+      botao.dataset.dia = valor;
+      botao.setAttribute('aria-pressed', 'false');
+      botao.setAttribute('aria-label', nomeCompleto);
+      botao.disabled = true;
+      botao.textContent = rotulo;
+
+      botao.addEventListener('click', () => {
+        const pressionado = botao.getAttribute('aria-pressed') === 'true';
+        botao.setAttribute('aria-pressed', String(!pressionado));
+      });
+
+      diasGroup.appendChild(botao);
+      return botao;
+    });
+
+    const duracaoInput = document.createElement('input');
+    duracaoInput.type = 'number';
+    duracaoInput.className = 'modalidade-duracao num';
+    duracaoInput.min = '0.25';
+    duracaoInput.max = '5';
+    duracaoInput.step = '0.25';
+    duracaoInput.placeholder = 'Duração (h)';
+    duracaoInput.disabled = true;
+    duracaoInput.setAttribute('aria-label', `Duração média por sessão de ${modalidade.nome}, em horas`);
+
+    detalhes.append(diasGroup, duracaoInput);
 
     checkbox.addEventListener('change', () => {
-      frequenciaInput.disabled = !checkbox.checked;
-      frequenciaInput.required = checkbox.checked;
+      botoesDia.forEach((botao) => { botao.disabled = !checkbox.checked; });
+      duracaoInput.disabled = !checkbox.checked;
+      duracaoInput.required = checkbox.checked;
+
       if (checkbox.checked) {
-        frequenciaInput.focus();
+        botoesDia[0].focus();
+      } else {
+        // Desmarcar a modalidade limpa a seleção de dias e a duração, pra
+        // não reenviar dias escolhidos antes de desmarcar sem querer.
+        botoesDia.forEach((botao) => botao.setAttribute('aria-pressed', 'false'));
+        duracaoInput.value = '';
       }
     });
 
-    linha.append(label, frequenciaInput);
+    linha.append(label, detalhes);
     return linha;
   }
 
@@ -239,7 +289,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const selecionadas = linhas
       .map((linha) => ({
         checkbox: linha.querySelector('input[type="checkbox"]'),
-        frequenciaInput: linha.querySelector('.modalidade-frequencia')
+        nome: linha.querySelector('.modalidade-check span').textContent,
+        botoesDia: Array.from(linha.querySelectorAll('.dia-toggle')),
+        duracaoInput: linha.querySelector('.modalidade-duracao')
       }))
       .filter((linha) => linha.checkbox.checked);
 
@@ -249,7 +301,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     for (const linha of selecionadas) {
-      if (!linha.frequenciaInput.reportValidity()) {
+      const temDiaSelecionado = linha.botoesDia.some((botao) => botao.getAttribute('aria-pressed') === 'true');
+
+      if (!temDiaSelecionado) {
+        ronuMostrarErroFormulario(formError, `Selecione pelo menos um dia da semana para ${linha.nome}.`);
+        return;
+      }
+
+      if (!linha.duracaoInput.reportValidity()) {
         return;
       }
     }
@@ -259,12 +318,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
       await Promise.all(selecionadas.map(async (linha) => {
+        const diasSemana = linha.botoesDia
+          .filter((botao) => botao.getAttribute('aria-pressed') === 'true')
+          .map((botao) => Number(botao.dataset.dia));
+
         const resposta = await ronuFetchAutenticado('/usuarios/modalidades', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             modalidadeId: Number(linha.checkbox.dataset.modalidadeId),
-            frequenciaSemanal: Number(linha.frequenciaInput.value)
+            diasSemana,
+            duracaoMediaHoras: Number(linha.duracaoInput.value)
           })
         });
 

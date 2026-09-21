@@ -123,11 +123,12 @@
   margin-bottom: var(--sp-2);
 }
 
+/* Coluna, não linha: checkbox+nome em cima, dias da semana + duração embaixo
+   — não cabe tudo numa linha só dentro dos 380px fixos do .auth-form-wrap. */
 .modalidade-row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-3);
+  flex-direction: column;
+  gap: var(--sp-2);
   padding: var(--sp-2) var(--sp-3);
   border: var(--border-width) solid var(--border);
   border-radius: var(--radius);
@@ -180,6 +181,76 @@
 .modalidade-catalog-message {
   font-size: var(--fs-xs);
   color: var(--text-muted);
+}
+
+/* Dias da semana + duração — só aparecem habilitados quando a modalidade
+   está marcada, mesmo espírito do antigo .modalidade-frequencia:disabled. */
+.modalidade-details {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.modalidade-dias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+}
+
+.dia-toggle {
+  min-width: 40px;
+  padding: var(--sp-1) var(--sp-2);
+  background: var(--bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  font-size: var(--fs-2xs);
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+
+.dia-toggle[aria-pressed="true"] {
+  border-color: var(--accent);
+  color: var(--text);
+  background: rgba(201, 162, 39, 0.1);
+}
+
+.dia-toggle:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.dia-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.modalidade-duracao {
+  width: 92px;
+  flex-shrink: 0;
+  background: var(--bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--sp-1) var(--sp-2);
+  font-size: var(--fs-xs);
+  color: var(--text);
+  text-align: center;
+}
+
+.modalidade-duracao::placeholder {
+  color: var(--text-muted);
+}
+
+.modalidade-duracao:disabled {
+  opacity: 0.4;
+}
+
+.modalidade-duracao:focus-visible {
+  outline: none;
+  border-color: var(--accent);
 }
 
 /* ---------- Preferências alimentares ---------- */
