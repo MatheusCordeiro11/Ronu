@@ -64,9 +64,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ---------- Render: carimbo de meta diária ----------
 
+  // A meta agora varia por dia (dia de treino vs. dia de descanso), então lê
+  // sempre do dia atualmente selecionado (dietaResponse.dieta.dias[diaSelecionado]),
+  // não mais de um campo único da dieta inteira — esse campo não existe mais
+  // no backend (cada dia carrega sua própria meta calculada).
   function renderizarMetaStamp(dietaResponse) {
-    const meta = dietaResponse.dieta.metaDiariaCalculada;
-    elMetaData.textContent = `Gerada em ${formatarData(dietaResponse.dataGeracao)}`;
+    const dia = dietaResponse.dieta.dias[diaSelecionado];
+    const meta = dia.metaCalculada;
+    elMetaData.textContent = `${dia.diaSemana} · gerada em ${formatarData(dietaResponse.dataGeracao)}`;
     elMetaCalorias.textContent = `${formatarNumero(meta.calorias)} kcal`;
     elMetaProteina.textContent = `${formatarNumero(meta.proteinasG)} g`;
     elMetaCarbo.textContent = `${formatarNumero(meta.carboidratosG)} g`;
@@ -119,8 +124,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       botao.append(label, kcal);
 
+      // Trocar de dia agora também atualiza o carimbo de meta do topo (a
+      // meta varia por dia), além do painel de refeições que já atualizava.
       botao.addEventListener('click', () => {
         diaSelecionado = indice;
+        renderizarMetaStamp(dietaResponse);
         renderizarDayPanel(dietaResponse);
         Array.from(elDayRow.children).forEach((filho, i) => {
           filho.setAttribute('aria-selected', String(i === diaSelecionado));
@@ -256,8 +264,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function iniciar() {
     mostrarSomente(elLoading);
 
-    // Checagem de perfil/objetivo feita com GETs simples — nunca chamando
-    // POST /dietas/gerar só pra validar, o que gastaria cota da Gemini à toa.
     try {
       const [respostaPerfil, respostaObjetivo] = await Promise.all([
         ronuFetchAutenticado('/perfil'),
@@ -275,10 +281,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
     } catch (erro) {
-      // Em caso de 401, ronuFetchAutenticado já redirecionou pro login
-      // sozinho — não sobrescrever esse redirecionamento com outro (mesmo
-      // cuidado já tomado em onboarding.js). Qualquer outro erro (rede fora
-      // do ar) mostra o estado de erro desta própria tela.
       if (erro.message !== 'Sessão expirada.') {
         mostrarSomente(elLoadError);
       }
