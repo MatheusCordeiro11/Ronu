@@ -232,17 +232,28 @@ document.addEventListener('DOMContentLoaded', async () => {
       return botao;
     });
 
+    const duracaoField = document.createElement('div');
+    duracaoField.className = 'modalidade-duracao-field';
+
+    const duracaoLabel = document.createElement('label');
+    duracaoLabel.textContent = 'Duração média por sessão (h)';
+    duracaoLabel.htmlFor = `modalidade-duracao-${modalidade.id}`;
+
     const duracaoInput = document.createElement('input');
     duracaoInput.type = 'number';
+    duracaoInput.id = `modalidade-duracao-${modalidade.id}`;
     duracaoInput.className = 'modalidade-duracao num';
     duracaoInput.min = '0.25';
     duracaoInput.max = '5';
     duracaoInput.step = '0.25';
-    duracaoInput.placeholder = 'Duração (h)';
+    duracaoInput.placeholder = 'Ex: 1,5';
     duracaoInput.disabled = true;
+    // aria-label prevalece sobre o <label> visível pra leitor de tela — texto
+    // mais específico (com o nome da modalidade) do que o rótulo compartilhado.
     duracaoInput.setAttribute('aria-label', `Duração média por sessão de ${modalidade.nome}, em horas`);
 
-    detalhes.append(diasGroup, duracaoInput);
+    duracaoField.append(duracaoLabel, duracaoInput);
+    detalhes.append(diasGroup, duracaoField);
 
     const colapsavel = document.createElement('div');
     colapsavel.className = 'modalidade-collapse';

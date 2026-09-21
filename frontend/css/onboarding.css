@@ -250,6 +250,22 @@
   outline-offset: 2px;
 }
 
+/* Rótulo pequeno acima do campo de duração — sem ele, "Duração (h)" sozinho
+   (só como placeholder) não deixava claro se era por sessão ou total
+   semanal. Fonte no tamanho dos toggles de dia vizinhos (fs-2xs), não do
+   rótulo de campo padrão (fs-xs), pra caber na linha compacta. */
+.modalidade-duracao-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.modalidade-duracao-field label {
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 .modalidade-duracao {
   width: 92px;
   flex-shrink: 0;

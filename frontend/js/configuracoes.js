@@ -252,16 +252,28 @@ document.addEventListener('DOMContentLoaded', async () => {
       diasGroup.appendChild(botao);
     });
 
+    const duracaoField = document.createElement('div');
+    duracaoField.className = 'modalidade-duracao-field';
+
+    const duracaoLabel = document.createElement('label');
+    duracaoLabel.textContent = 'Duração média por sessão (h)';
+    duracaoLabel.htmlFor = `modalidade-duracao-${vinculo.id}`;
+
     const duracaoInput = document.createElement('input');
     duracaoInput.type = 'number';
+    duracaoInput.id = `modalidade-duracao-${vinculo.id}`;
     duracaoInput.className = 'modalidade-duracao num';
     duracaoInput.min = '0.25';
     duracaoInput.max = '5';
     duracaoInput.step = '0.25';
     duracaoInput.value = vinculo.duracaoMediaHoras;
     duracaoInput.dataset.valorSalvo = String(vinculo.duracaoMediaHoras);
+    // aria-label prevalece sobre o <label> visível pra leitor de tela — texto
+    // mais específico (com o nome da modalidade) do que o rótulo compartilhado.
     duracaoInput.setAttribute('aria-label', `Duração média por sessão de ${vinculo.modalidade.nome}, em horas`);
     duracaoInput.addEventListener('input', atualizarEstadoSalvar);
+
+    duracaoField.append(duracaoLabel, duracaoInput);
 
     btnSalvar.type = 'button';
     btnSalvar.className = 'modalidade-save-btn';
@@ -269,7 +281,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnSalvar.textContent = 'Salvar';
     btnSalvar.disabled = true;
 
-    detalhes.append(diasGroup, duracaoInput, btnSalvar);
+    detalhes.append(diasGroup, duracaoField, btnSalvar);
     info.append(nomeSpan, detalhes);
 
     const acoes = document.createElement('div');
