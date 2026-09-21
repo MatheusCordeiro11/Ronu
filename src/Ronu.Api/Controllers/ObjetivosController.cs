@@ -86,4 +86,37 @@ public class ObjetivosController : ControllerBase
 
         return Ok(response);
     }
+
+    /// <summary>
+    /// Remove um registro específico de objetivo/peso do usuário logado.
+    /// Bloqueia a remoção se for o único registro restante — sem isso, o
+    /// usuário ficaria sem nenhum objetivo cadastrado, reabrindo o mesmo loop
+    /// de onboarding indevido que já corrigimos para Altura/Sexo/DataNascimento.
+    /// Busca sempre filtrando também por UsuarioIdLogado, para impedir que um
+    /// usuário remova o registro de outro só adivinhando um Id.
+    /// </summary>
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Remover(int id)
+    {
+        var totalRegistros = await _context.ObjetivosUsuario
+            .CountAsync(o => o.UsuarioId == UsuarioIdLogado);
+
+        if (totalRegistros <= 1)
+        {
+            return BadRequest(new { mensagem = "Você precisa manter pelo menos um objetivo registrado." });
+        }
+
+        var objetivo = await _context.ObjetivosUsuario
+            .FirstOrDefaultAsync(o => o.Id == id && o.UsuarioId == UsuarioIdLogado);
+
+        if (objetivo is null)
+        {
+            return NotFound(new { mensagem = "Objetivo não encontrado." });
+        }
+
+        _context.ObjetivosUsuario.Remove(objetivo);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
 }
