@@ -148,3 +148,167 @@
     justify-content: flex-end;
   }
 }
+
+/* ---------- Modalidades: item com frequência editável e ação de remover ----------
+   Seção independente das demais (mesmo princípio do topo do arquivo: cada uma
+   carrega/falha por conta própria) — por isso não reaproveita as classes
+   .preferencia-* diretamente, mesmo com mecânica de remover idêntica. */
+.modalidade-config-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--sp-5);
+}
+
+.modalidade-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  font-size: var(--fs-xs);
+}
+
+.modalidade-item-info {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+
+.modalidade-item-nome {
+  color: var(--text);
+}
+
+.modalidade-item-frequencia {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.modalidade-save-btn {
+  background: transparent;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  padding: 2px var(--sp-2);
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+
+.modalidade-save-btn:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.modalidade-save-btn:not(:disabled):hover {
+  background: rgba(201, 162, 39, 0.1);
+}
+
+.modalidade-save-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.modalidade-save-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.modalidade-item-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-shrink: 0;
+}
+
+.modalidade-remove-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-2xs);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.modalidade-remove-btn:hover {
+  color: var(--danger);
+  text-decoration-color: var(--danger);
+}
+
+.modalidade-remove-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.modalidade-confirm-text {
+  font-size: var(--fs-2xs);
+  color: var(--danger);
+  white-space: nowrap;
+}
+
+.modalidade-confirm-btn,
+.modalidade-cancel-btn {
+  background: transparent;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  padding: 2px var(--sp-2);
+  font-size: var(--fs-2xs);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+
+.modalidade-confirm-btn {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.modalidade-confirm-btn:hover {
+  background: rgba(168, 70, 47, 0.1);
+}
+
+.modalidade-cancel-btn {
+  color: var(--text-muted);
+}
+
+.modalidade-cancel-btn:hover {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
+.modalidade-confirm-btn:focus-visible,
+.modalidade-cancel-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.modalidade-item.is-removing {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.modalidade-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+@media (max-width: 720px) {
+  .modalidade-item {
+    flex-wrap: wrap;
+  }
+
+  .modalidade-item-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

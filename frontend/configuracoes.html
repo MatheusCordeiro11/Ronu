@@ -80,6 +80,38 @@
         </form>
       </section>
 
+      <!-- ---------- Modalidades ---------- -->
+      <section class="config-section border-t" aria-labelledby="modalidades-heading">
+        <div class="config-section-head">
+          <h2 id="modalidades-heading" class="config-section-title">Modalidades praticadas</h2>
+          <p class="config-section-subtitle">Usadas pra calcular o gasto calórico do seu treino.</p>
+        </div>
+
+        <p class="text-muted" id="modalidades-loading">Carregando...</p>
+
+        <div class="form-message form-message-error" id="modalidades-error" hidden></div>
+
+        <ul class="modalidade-config-list" id="modalidade-config-list" hidden></ul>
+
+        <div class="modalidade-add-form" id="modalidade-add-form" hidden>
+          <div class="field">
+            <label>Adicionar modalidade</label>
+            <div class="option-group" role="radiogroup" aria-label="Modalidade a adicionar" id="modalidade-add-options"></div>
+          </div>
+
+          <div class="field">
+            <label for="modalidade-add-frequencia">Frequência semanal</label>
+            <input type="number" id="modalidade-add-frequencia" class="modalidade-frequencia num" min="1" max="7" placeholder="x/semana" disabled>
+          </div>
+
+          <button type="button" class="btn btn-secondary" id="btn-adicionar-modalidade">
+            <span class="btn-label">Adicionar</span>
+          </button>
+        </div>
+
+        <p class="text-muted" id="modalidades-catalogo-completo" hidden>Todas as modalidades do catálogo já estão adicionadas.</p>
+      </section>
+
       <!-- ---------- Preferências alimentares ---------- -->
       <section class="config-section border-t" aria-labelledby="preferencias-heading">
         <div class="config-section-head">

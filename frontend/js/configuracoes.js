@@ -1,7 +1,8 @@
 // Ronu — Configurações (conta)
-// Duas seções independentes: perfil (editar, PUT /perfil) e preferências
-// alimentares (listar/adicionar/remover). Cada seção carrega e falha por
-// conta própria — um erro numa não deve impedir a outra de funcionar.
+// Três seções independentes: perfil (editar, PUT /perfil), modalidades
+// (listar/adicionar/remover/editar frequência) e preferências alimentares
+// (listar/adicionar/remover). Cada seção carrega e falha por conta própria —
+// um erro numa não deve impedir as outras de funcionar.
 
 document.addEventListener('DOMContentLoaded', async () => {
   const usuario = ronuUsuarioLogado();
@@ -112,6 +113,306 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   elPerfilForm.addEventListener('submit', salvarPerfil);
+
+  // ---------- Modalidades ----------
+  // Cada modalidade praticada é um vínculo (UsuarioModalidade) com frequência
+  // semanal editável e ação de remover; "adicionar" só oferece as modalidades
+  // do catálogo que o usuário ainda não pratica. Reaproveita a mecânica de
+  // "Remover -> Sim/Cancelar" de Preferências, mas com classes próprias —
+  // seção independente, sem acoplar às internals da outra.
+
+  const elModalidadesLoading = document.getElementById('modalidades-loading');
+  const elModalidadesError = document.getElementById('modalidades-error');
+  const elModalidadeList = document.getElementById('modalidade-config-list');
+  const elModalidadeAddForm = document.getElementById('modalidade-add-form');
+  const elModalidadeAddOptions = document.getElementById('modalidade-add-options');
+  const elModalidadeAddFrequencia = document.getElementById('modalidade-add-frequencia');
+  const elModalidadesCatalogoCompleto = document.getElementById('modalidades-catalogo-completo');
+  const btnAdicionarModalidade = document.getElementById('btn-adicionar-modalidade');
+
+  let catalogoModalidades = [];
+
+  function modalidadesJaAdicionadas() {
+    return new Set(
+      Array.from(elModalidadeList.querySelectorAll('.modalidade-item')).map(
+        (item) => Number(item.dataset.modalidadeId)
+      )
+    );
+  }
+
+  function renderizarAcaoRemoverModalidade(elAcoes) {
+    elAcoes.innerHTML = '';
+
+    const botao = document.createElement('button');
+    botao.type = 'button';
+    botao.className = 'modalidade-remove-btn';
+    botao.dataset.acao = 'remover';
+    botao.textContent = 'Remover';
+
+    elAcoes.appendChild(botao);
+  }
+
+  function renderizarConfirmacaoRemoverModalidade(elAcoes) {
+    elAcoes.innerHTML = '';
+
+    const texto = document.createElement('span');
+    texto.className = 'modalidade-confirm-text';
+    texto.textContent = 'Remover?';
+
+    const btnConfirmar = document.createElement('button');
+    btnConfirmar.type = 'button';
+    btnConfirmar.className = 'modalidade-confirm-btn';
+    btnConfirmar.dataset.acao = 'confirmar';
+    btnConfirmar.textContent = 'Sim';
+
+    const btnCancelar = document.createElement('button');
+    btnCancelar.type = 'button';
+    btnCancelar.className = 'modalidade-cancel-btn';
+    btnCancelar.dataset.acao = 'cancelar';
+    btnCancelar.textContent = 'Cancelar';
+
+    elAcoes.append(texto, btnConfirmar, btnCancelar);
+  }
+
+  function criarItemModalidade(vinculo) {
+    const item = document.createElement('li');
+    item.className = 'modalidade-item';
+    item.dataset.vinculoId = vinculo.id;
+    item.dataset.modalidadeId = vinculo.modalidade.id;
+
+    const info = document.createElement('div');
+    info.className = 'modalidade-item-info';
+
+    const nomeSpan = document.createElement('span');
+    nomeSpan.className = 'modalidade-item-nome';
+    nomeSpan.textContent = vinculo.modalidade.nome;
+
+    const frequenciaWrap = document.createElement('div');
+    frequenciaWrap.className = 'modalidade-item-frequencia';
+
+    const frequenciaInput = document.createElement('input');
+    frequenciaInput.type = 'number';
+    frequenciaInput.className = 'modalidade-frequencia num';
+    frequenciaInput.min = '1';
+    frequenciaInput.max = '7';
+    frequenciaInput.value = vinculo.frequenciaSemanal;
+    frequenciaInput.dataset.valorSalvo = String(vinculo.frequenciaSemanal);
+    frequenciaInput.setAttribute('aria-label', `Frequência semanal de ${vinculo.modalidade.nome}`);
+
+    const btnSalvarFrequencia = document.createElement('button');
+    btnSalvarFrequencia.type = 'button';
+    btnSalvarFrequencia.className = 'modalidade-save-btn';
+    btnSalvarFrequencia.dataset.acao = 'salvar-frequencia';
+    btnSalvarFrequencia.textContent = 'Salvar';
+    btnSalvarFrequencia.disabled = true;
+
+    // Só habilita "Salvar" quando o valor difere do último salvo — evita
+    // autosave silencioso, consistente com o resto da página (Perfil e
+    // Preferências também só salvam num clique explícito).
+    frequenciaInput.addEventListener('input', () => {
+      btnSalvarFrequencia.disabled =
+        frequenciaInput.value === frequenciaInput.dataset.valorSalvo || frequenciaInput.value === '';
+    });
+
+    frequenciaWrap.append(frequenciaInput, btnSalvarFrequencia);
+    info.append(nomeSpan, frequenciaWrap);
+
+    const acoes = document.createElement('div');
+    acoes.className = 'modalidade-item-actions';
+    renderizarAcaoRemoverModalidade(acoes);
+
+    item.append(info, acoes);
+    return item;
+  }
+
+  function mostrarListaModalidades() {
+    elModalidadeList.hidden = elModalidadeList.children.length === 0;
+  }
+
+  // Recalculada a cada adição/remoção: as pills de "adicionar" só mostram
+  // modalidades do catálogo que ainda não estão na lista de praticadas.
+  function renderizarOpcoesAdicionar() {
+    const jaAdicionadas = modalidadesJaAdicionadas();
+    const disponiveis = catalogoModalidades.filter((modalidade) => !jaAdicionadas.has(modalidade.id));
+
+    elModalidadeAddOptions.innerHTML = '';
+    disponiveis.forEach((modalidade) => {
+      const pill = document.createElement('label');
+      pill.className = 'option-pill';
+
+      const radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'modalidade-add-escolha';
+      radio.value = String(modalidade.id);
+
+      const span = document.createElement('span');
+      span.textContent = modalidade.nome;
+
+      pill.append(radio, span);
+      elModalidadeAddOptions.appendChild(pill);
+    });
+
+    elModalidadeAddFrequencia.value = '';
+    elModalidadeAddFrequencia.disabled = true;
+
+    const temDisponiveis = disponiveis.length > 0;
+    elModalidadeAddForm.hidden = !temDisponiveis;
+    elModalidadesCatalogoCompleto.hidden = temDisponiveis;
+  }
+
+  elModalidadeAddOptions.addEventListener('change', (evento) => {
+    if (evento.target.name !== 'modalidade-add-escolha') return;
+    elModalidadeAddFrequencia.disabled = false;
+    elModalidadeAddFrequencia.focus();
+  });
+
+  async function carregarModalidades() {
+    try {
+      const [respostaCatalogo, respostaPraticadas] = await Promise.all([
+        fetch(`${RONU_CONFIG.API_BASE}/modalidades`),
+        ronuFetchAutenticado('/usuarios/modalidades')
+      ]);
+
+      if (!respostaCatalogo.ok || !respostaPraticadas.ok) throw new Error();
+
+      catalogoModalidades = await respostaCatalogo.json();
+      const praticadas = await respostaPraticadas.json();
+
+      elModalidadeList.innerHTML = '';
+      praticadas.forEach((vinculo) => elModalidadeList.appendChild(criarItemModalidade(vinculo)));
+
+      elModalidadesLoading.hidden = true;
+      mostrarListaModalidades();
+      renderizarOpcoesAdicionar();
+    } catch (erro) {
+      if (erro.message !== 'Sessão expirada.') {
+        elModalidadesLoading.textContent = 'Não foi possível carregar suas modalidades. Recarregue a página.';
+      }
+    }
+  }
+
+  async function adicionarModalidade() {
+    const escolhida = elModalidadeAddOptions.querySelector('input[name="modalidade-add-escolha"]:checked');
+
+    if (!escolhida) {
+      ronuMostrarErroFormulario(elModalidadesError, 'Selecione uma modalidade.');
+      return;
+    }
+    if (!elModalidadeAddFrequencia.reportValidity()) return;
+
+    ronuOcultarErroFormulario(elModalidadesError);
+    ronuDefinirCarregando(btnAdicionarModalidade, true, 'Adicionando...');
+
+    try {
+      const resposta = await ronuFetchAutenticado('/usuarios/modalidades', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          modalidadeId: Number(escolhida.value),
+          frequenciaSemanal: Number(elModalidadeAddFrequencia.value)
+        })
+      });
+
+      if (!resposta.ok) {
+        const corpo = await resposta.json().catch(() => null);
+        throw new Error(corpo?.mensagem || 'Não foi possível adicionar. Tente novamente.');
+      }
+
+      const vinculoSalvo = await resposta.json();
+      const modalidade = catalogoModalidades.find((m) => m.id === vinculoSalvo.modalidadeId);
+      elModalidadeList.appendChild(criarItemModalidade({ ...vinculoSalvo, modalidade }));
+      mostrarListaModalidades();
+      renderizarOpcoesAdicionar();
+    } catch (erro) {
+      ronuMostrarErroFormulario(elModalidadesError, erro.message);
+    } finally {
+      ronuDefinirCarregando(btnAdicionarModalidade, false);
+    }
+  }
+
+  btnAdicionarModalidade.addEventListener('click', adicionarModalidade);
+
+  async function salvarFrequenciaModalidade(input, botao) {
+    if (!input.reportValidity()) return;
+
+    const modalidadeId = Number(input.closest('.modalidade-item').dataset.modalidadeId);
+    const frequencia = Number(input.value);
+
+    botao.disabled = true;
+    const textoOriginal = botao.textContent;
+    botao.textContent = 'Salvando...';
+    ronuOcultarErroFormulario(elModalidadesError);
+
+    try {
+      const resposta = await ronuFetchAutenticado('/usuarios/modalidades', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ modalidadeId, frequenciaSemanal: frequencia })
+      });
+
+      if (!resposta.ok) {
+        const corpo = await resposta.json().catch(() => null);
+        throw new Error(corpo?.mensagem || 'Não foi possível salvar. Tente novamente.');
+      }
+
+      input.dataset.valorSalvo = String(frequencia);
+      botao.textContent = textoOriginal;
+    } catch (erro) {
+      botao.disabled = false;
+      botao.textContent = textoOriginal;
+      ronuMostrarErroFormulario(elModalidadesError, erro.message);
+    }
+  }
+
+  // Bloqueia a remoção da última modalidade restante: sem isso, o usuário
+  // ficaria com o cadastro "incompleto" (ronuChecarCadastroCompleto exige ao
+  // menos uma) e cairia de volta no loop do onboarding no próximo login.
+  async function removerModalidade(item) {
+    const vinculoId = item.dataset.vinculoId;
+    item.classList.add('is-removing');
+    ronuOcultarErroFormulario(elModalidadesError);
+
+    try {
+      const resposta = await ronuFetchAutenticado(`/usuarios/modalidades/${vinculoId}`, { method: 'DELETE' });
+
+      if (!resposta.ok && resposta.status !== 404) {
+        const corpo = await resposta.json().catch(() => null);
+        throw new Error(corpo?.mensagem || 'Não foi possível remover. Tente novamente.');
+      }
+
+      item.remove();
+      mostrarListaModalidades();
+      renderizarOpcoesAdicionar();
+    } catch (erro) {
+      item.classList.remove('is-removing');
+      renderizarAcaoRemoverModalidade(item.querySelector('.modalidade-item-actions'));
+      ronuMostrarErroFormulario(elModalidadesError, erro.message);
+    }
+  }
+
+  elModalidadeList.addEventListener('click', (evento) => {
+    const botao = evento.target.closest('button[data-acao]');
+    if (!botao) return;
+
+    const item = botao.closest('.modalidade-item');
+
+    if (botao.dataset.acao === 'salvar-frequencia') {
+      salvarFrequenciaModalidade(item.querySelector('.modalidade-frequencia'), botao);
+      return;
+    }
+
+    if (botao.dataset.acao === 'remover') {
+      if (elModalidadeList.children.length <= 1) {
+        ronuMostrarErroFormulario(elModalidadesError, 'Você precisa manter pelo menos uma modalidade.');
+        return;
+      }
+      renderizarConfirmacaoRemoverModalidade(item.querySelector('.modalidade-item-actions'));
+    } else if (botao.dataset.acao === 'cancelar') {
+      renderizarAcaoRemoverModalidade(item.querySelector('.modalidade-item-actions'));
+    } else if (botao.dataset.acao === 'confirmar') {
+      removerModalidade(item);
+    }
+  });
 
   // ---------- Preferências alimentares ----------
 
@@ -305,5 +606,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   definirFaixaDataNascimento();
-  await Promise.all([carregarPerfil(), carregarPreferencias()]);
+  await Promise.all([carregarPerfil(), carregarModalidades(), carregarPreferencias()]);
 });
