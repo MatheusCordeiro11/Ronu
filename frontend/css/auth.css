@@ -226,6 +226,35 @@ html[data-auth-tela="cadastro"]::view-transition-new(root) {
   flex-direction: column;
 }
 
+/* Divisor entre o formulário tradicional e o login com Google — linha de 1px
+   nos dois lados (Regra Sem Sombra: separação por linha, nunca sombra),
+   mesma cor de borda usada no resto do sistema. */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin: var(--sp-5) 0;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: var(--border-width);
+  background: var(--border);
+}
+
+/* O botão em si é um iframe renderizado pelo próprio Google (Identity
+   Services) — não dá pra restilizar seu miolo além dos parâmetros que a API
+   deles aceita (theme/size/width/text, já configurados no HTML). Aqui só
+   centraliza o slot dentro do formulário. */
+.google-signin-slot {
+  display: flex;
+  justify-content: center;
+}
+
 .auth-switch {
   margin-top: var(--sp-5);
   font-size: var(--fs-xs);

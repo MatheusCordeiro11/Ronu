@@ -54,6 +54,27 @@ async function ronuLogin(email, senha) {
   return dados;
 }
 
+// Recebe o credential (ID token) que o Google Identity Services devolve no
+// callback do botão "Entrar/Cadastrar com Google" e troca por uma sessão
+// Ronu — o backend é quem valida a assinatura do token junto ao Google antes
+// de confiar em qualquer dado nele; o frontend só repassa.
+async function ronuLoginComGoogle(idToken) {
+  const resposta = await fetch(`${RONU_CONFIG.API_BASE}/auth/google`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ idToken })
+  });
+
+  const dados = await resposta.json().catch(() => null);
+
+  if (!resposta.ok) {
+    throw new Error(dados?.mensagem || 'Não foi possível entrar com o Google. Tente novamente.');
+  }
+
+  ronuSalvarSessao(dados.token, dados.usuario);
+  return dados;
+}
+
 async function ronuCadastrar(nome, email, senha) {
   const resposta = await fetch(`${RONU_CONFIG.API_BASE}/auth/cadastro`, {
     method: 'POST',

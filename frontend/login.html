@@ -12,6 +12,7 @@
 
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/auth.css">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -78,6 +79,9 @@
           </button>
         </form>
 
+        <div class="auth-divider"><span>ou</span></div>
+        <div id="google-signin-button" class="google-signin-slot"></div>
+
         <p class="auth-switch">Ainda não tem conta? <a href="cadastro.html" class="auth-switch-link">Criar conta</a></p>
       </div>
     </main>
@@ -88,9 +92,28 @@
   <script src="js/login.js"></script>
   <script src="js/hero-carousel.js"></script>
   <script>
-    initHeroCarousel(document.getElementById('authCarousel'), {
-      autoDelay: 5000,
-      resumeDelay: 8000,
+    function ronuTratarCredencialGoogle(response) {
+      ronuLoginComGoogle(response.credential)
+        .then(() => ronuRedirecionarPosAuth())
+        .catch((erro) => {
+          ronuMostrarErroFormulario(document.getElementById('form-error'), erro.message);
+        });
+    }
+
+    window.addEventListener('load', () => {
+      google.accounts.id.initialize({
+        client_id: '718933216357-u2b86snquurf6ie5m1hb9lbhu7do3opi.apps.googleusercontent.com',
+        callback: ronuTratarCredencialGoogle
+      });
+      google.accounts.id.renderButton(
+        document.getElementById('google-signin-button'),
+        { theme: 'filled_black', size: 'large', width: 320, text: 'signin_with' }
+      );
+
+      initHeroCarousel(document.getElementById('authCarousel'), {
+        autoDelay: 5000,
+        resumeDelay: 8000,
+      });
     });
   </script>
 </body>
