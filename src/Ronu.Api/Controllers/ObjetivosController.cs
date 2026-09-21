@@ -98,20 +98,20 @@ public class ObjetivosController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Remover(int id)
     {
-        var totalRegistros = await _context.ObjetivosUsuario
-            .CountAsync(o => o.UsuarioId == UsuarioIdLogado);
-
-        if (totalRegistros <= 1)
-        {
-            return BadRequest(new { mensagem = "Você precisa manter pelo menos um objetivo registrado." });
-        }
-
         var objetivo = await _context.ObjetivosUsuario
             .FirstOrDefaultAsync(o => o.Id == id && o.UsuarioId == UsuarioIdLogado);
 
         if (objetivo is null)
         {
             return NotFound(new { mensagem = "Objetivo não encontrado." });
+        }
+
+        var totalRegistros = await _context.ObjetivosUsuario
+            .CountAsync(o => o.UsuarioId == UsuarioIdLogado);
+
+        if (totalRegistros <= 1)
+        {
+            return BadRequest(new { mensagem = "Você precisa manter pelo menos um objetivo registrado." });
         }
 
         _context.ObjetivosUsuario.Remove(objetivo);
