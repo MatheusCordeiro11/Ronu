@@ -119,4 +119,28 @@ public class ModalidadesController : ControllerBase
 
         return Ok(modalidades);
     }
+
+    /// <summary>
+    /// Remove uma modalidade praticada pelo usuário logado. Busca sempre
+    /// filtrando também por UsuarioIdLogado (não só pelo Id do registro em
+    /// UsuarioModalidade) para impedir que um usuário remova a modalidade de
+    /// outro só adivinhando um Id — se o registro existir mas pertencer a
+    /// outro usuário, o resultado é o mesmo de não existir.
+    /// </summary>
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Remover(int id)
+    {
+        var usuarioModalidade = await _context.UsuarioModalidades
+            .FirstOrDefaultAsync(m => m.Id == id && m.UsuarioId == UsuarioIdLogado);
+
+        if (usuarioModalidade is null)
+        {
+            return NotFound(new { mensagem = "Modalidade não encontrada." });
+        }
+
+        _context.UsuarioModalidades.Remove(usuarioModalidade);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
 }
