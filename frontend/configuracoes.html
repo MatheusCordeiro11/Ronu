@@ -99,22 +99,26 @@
             <div class="option-group" role="radiogroup" aria-label="Modalidade a adicionar" id="modalidade-add-options"></div>
           </div>
 
-          <div class="field">
-            <label>Dias da semana</label>
-            <div class="modalidade-dias" role="group" aria-label="Dias da semana a adicionar" id="modalidade-add-dias">
-              <button type="button" class="dia-toggle" data-dia="1" aria-pressed="false" aria-label="segunda-feira" disabled>SEG</button>
-              <button type="button" class="dia-toggle" data-dia="2" aria-pressed="false" aria-label="terça-feira" disabled>TER</button>
-              <button type="button" class="dia-toggle" data-dia="3" aria-pressed="false" aria-label="quarta-feira" disabled>QUA</button>
-              <button type="button" class="dia-toggle" data-dia="4" aria-pressed="false" aria-label="quinta-feira" disabled>QUI</button>
-              <button type="button" class="dia-toggle" data-dia="5" aria-pressed="false" aria-label="sexta-feira" disabled>SEX</button>
-              <button type="button" class="dia-toggle" data-dia="6" aria-pressed="false" aria-label="sábado" disabled>SÁB</button>
-              <button type="button" class="dia-toggle" data-dia="7" aria-pressed="false" aria-label="domingo" disabled>DOM</button>
-            </div>
-          </div>
+          <div class="modalidade-collapse" id="modalidade-add-collapse">
+            <div class="modalidade-collapse-inner">
+              <div class="field">
+                <label>Dias da semana</label>
+                <div class="modalidade-dias" role="group" aria-label="Dias da semana a adicionar" id="modalidade-add-dias">
+                  <button type="button" class="dia-toggle" data-dia="1" aria-pressed="false" aria-label="segunda-feira" disabled>SEG</button>
+                  <button type="button" class="dia-toggle" data-dia="2" aria-pressed="false" aria-label="terça-feira" disabled>TER</button>
+                  <button type="button" class="dia-toggle" data-dia="3" aria-pressed="false" aria-label="quarta-feira" disabled>QUA</button>
+                  <button type="button" class="dia-toggle" data-dia="4" aria-pressed="false" aria-label="quinta-feira" disabled>QUI</button>
+                  <button type="button" class="dia-toggle" data-dia="5" aria-pressed="false" aria-label="sexta-feira" disabled>SEX</button>
+                  <button type="button" class="dia-toggle" data-dia="6" aria-pressed="false" aria-label="sábado" disabled>SÁB</button>
+                  <button type="button" class="dia-toggle" data-dia="7" aria-pressed="false" aria-label="domingo" disabled>DOM</button>
+                </div>
+              </div>
 
-          <div class="field">
-            <label for="modalidade-add-duracao">Duração média (h)</label>
-            <input type="number" id="modalidade-add-duracao" class="modalidade-duracao num" min="0.25" max="5" step="0.25" placeholder="Ex: 1,5" disabled>
+              <div class="field">
+                <label for="modalidade-add-duracao">Duração média (h)</label>
+                <input type="number" id="modalidade-add-duracao" class="modalidade-duracao num" min="0.25" max="5" step="0.25" placeholder="Ex: 1,5" disabled>
+              </div>
+            </div>
           </div>
 
           <button type="button" class="btn btn-secondary" id="btn-adicionar-modalidade">

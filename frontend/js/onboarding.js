@@ -244,10 +244,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     detalhes.append(diasGroup, duracaoInput);
 
+    const colapsavel = document.createElement('div');
+    colapsavel.className = 'modalidade-collapse';
+    colapsavel.appendChild(detalhes);
+
     checkbox.addEventListener('change', () => {
       botoesDia.forEach((botao) => { botao.disabled = !checkbox.checked; });
       duracaoInput.disabled = !checkbox.checked;
       duracaoInput.required = checkbox.checked;
+      colapsavel.classList.toggle('is-aberto', checkbox.checked);
 
       if (checkbox.checked) {
         botoesDia[0].focus();
@@ -259,7 +264,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
 
-    linha.append(label, detalhes);
+    linha.append(label, colapsavel);
     return linha;
   }
 

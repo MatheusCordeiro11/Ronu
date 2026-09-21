@@ -303,6 +303,18 @@
   gap: var(--sp-4);
 }
 
+/* .modalidade-collapse (mecânica de grid-rows) vem de onboarding.css, já
+   carregado nesta página. Só o miolo — dois .field empilhados — é específico
+   daqui, já que o onboarding usa .modalidade-details (uma linha só) como
+   filho direto em vez de um wrapper com duas seções. */
+.modalidade-collapse-inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  overflow: hidden;
+  min-height: 0;
+}
+
 @media (max-width: 720px) {
   .modalidade-item {
     flex-wrap: wrap;

@@ -129,6 +129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const elModalidadeList = document.getElementById('modalidade-config-list');
   const elModalidadeAddForm = document.getElementById('modalidade-add-form');
   const elModalidadeAddOptions = document.getElementById('modalidade-add-options');
+  const elModalidadeAddCollapse = document.getElementById('modalidade-add-collapse');
   const elModalidadeAddDias = document.getElementById('modalidade-add-dias');
   const elModalidadeAddDuracao = document.getElementById('modalidade-add-duracao');
   const elModalidadesCatalogoCompleto = document.getElementById('modalidades-catalogo-completo');
@@ -312,6 +313,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     elModalidadeAddDuracao.value = '';
     elModalidadeAddDuracao.disabled = true;
+    elModalidadeAddCollapse.classList.remove('is-aberto');
 
     const temDisponiveis = disponiveis.length > 0;
     elModalidadeAddForm.hidden = !temDisponiveis;
@@ -320,6 +322,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   elModalidadeAddOptions.addEventListener('change', (evento) => {
     if (evento.target.name !== 'modalidade-add-escolha') return;
+    elModalidadeAddCollapse.classList.add('is-aberto');
     const botoesDia = Array.from(elModalidadeAddDias.querySelectorAll('.dia-toggle'));
     botoesDia.forEach((botao) => { botao.disabled = false; });
     elModalidadeAddDuracao.disabled = false;

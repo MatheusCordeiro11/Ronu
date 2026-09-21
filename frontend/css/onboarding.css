@@ -183,14 +183,36 @@
   color: var(--text-muted);
 }
 
-/* Dias da semana + duração — só aparecem habilitados quando a modalidade
-   está marcada, mesmo espírito do antigo .modalidade-frequencia:disabled. */
+/* Accordion: dias da semana + duração ficam colapsados (altura zero) até a
+   modalidade ser marcada, em vez de aparecer sempre desabilitado — evita uma
+   tela longa e carregada quando o catálogo tem várias modalidades. Técnica
+   grid-template-rows 0fr/1fr anima até a altura real do conteúdo sem
+   precisar medir "auto" via JS; o filho direto precisa de overflow:hidden
+   pra não vazar durante a transição. */
+.modalidade-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.25s ease;
+}
+
+.modalidade-collapse.is-aberto {
+  grid-template-rows: 1fr;
+}
+
 .modalidade-details {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: var(--sp-2);
+  overflow: hidden;
+  min-height: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modalidade-collapse {
+    transition: none;
+  }
 }
 
 .modalidade-dias {
