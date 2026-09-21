@@ -189,6 +189,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     { valor: 7, rotulo: 'DOM', nomeCompleto: 'domingo' }
   ];
 
+  const MINUTOS_PERMITIDOS = [0, 15, 30, 45];
+
+  // A API só aceita um decimal (DuracaoMediaHoras) — a UI coleta horas e
+  // minutos separados (minutos travado em múltiplos de 15, sem digitação
+  // livre) e converte só na hora de montar o payload. Sem inverso aqui: o
+  // onboarding nunca pré-carrega um valor já salvo (isso só acontece na
+  // edição em configuracoes.js).
+  function horasMinutosParaDecimal(horas, minutos) {
+    return horas + minutos / 60;
+  }
+
   function criarLinhaModalidade(modalidade) {
     const linha = document.createElement('div');
     linha.className = 'modalidade-row';
@@ -234,25 +245,47 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const duracaoField = document.createElement('div');
     duracaoField.className = 'modalidade-duracao-field';
+    duracaoField.setAttribute('role', 'group');
+    duracaoField.setAttribute('aria-label', `Duração média por sessão de ${modalidade.nome}`);
 
-    const duracaoLabel = document.createElement('label');
-    duracaoLabel.textContent = 'Duração média por sessão (h)';
-    duracaoLabel.htmlFor = `modalidade-duracao-${modalidade.id}`;
+    const duracaoTitulo = document.createElement('span');
+    duracaoTitulo.className = 'modalidade-duracao-titulo';
+    duracaoTitulo.textContent = 'Duração média por sessão';
 
-    const duracaoInput = document.createElement('input');
-    duracaoInput.type = 'number';
-    duracaoInput.id = `modalidade-duracao-${modalidade.id}`;
-    duracaoInput.className = 'modalidade-duracao num';
-    duracaoInput.min = '0.25';
-    duracaoInput.max = '5';
-    duracaoInput.step = '0.25';
-    duracaoInput.placeholder = 'Ex: 1,5';
-    duracaoInput.disabled = true;
-    // aria-label prevalece sobre o <label> visível pra leitor de tela — texto
-    // mais específico (com o nome da modalidade) do que o rótulo compartilhado.
-    duracaoInput.setAttribute('aria-label', `Duração média por sessão de ${modalidade.nome}, em horas`);
+    const duracaoGrupo = document.createElement('div');
+    duracaoGrupo.className = 'modalidade-duracao-grupo';
 
-    duracaoField.append(duracaoLabel, duracaoInput);
+    const labelHoras = document.createElement('label');
+    labelHoras.className = 'modalidade-duracao-unidade';
+    const spanHoras = document.createElement('span');
+    spanHoras.textContent = 'Horas';
+    const horasInput = document.createElement('input');
+    horasInput.type = 'number';
+    horasInput.className = 'modalidade-duracao-horas num';
+    horasInput.min = '0';
+    horasInput.max = '5';
+    horasInput.step = '1';
+    horasInput.value = '0';
+    horasInput.disabled = true;
+    labelHoras.append(spanHoras, horasInput);
+
+    const labelMinutos = document.createElement('label');
+    labelMinutos.className = 'modalidade-duracao-unidade';
+    const spanMinutos = document.createElement('span');
+    spanMinutos.textContent = 'Min';
+    const minutosSelect = document.createElement('select');
+    minutosSelect.className = 'modalidade-duracao-minutos num';
+    MINUTOS_PERMITIDOS.forEach((valor) => {
+      const opcao = document.createElement('option');
+      opcao.value = String(valor);
+      opcao.textContent = String(valor);
+      minutosSelect.appendChild(opcao);
+    });
+    minutosSelect.disabled = true;
+    labelMinutos.append(spanMinutos, minutosSelect);
+
+    duracaoGrupo.append(labelHoras, labelMinutos);
+    duracaoField.append(duracaoTitulo, duracaoGrupo);
     detalhes.append(diasGroup, duracaoField);
 
     const colapsavel = document.createElement('div');
@@ -261,8 +294,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     checkbox.addEventListener('change', () => {
       botoesDia.forEach((botao) => { botao.disabled = !checkbox.checked; });
-      duracaoInput.disabled = !checkbox.checked;
-      duracaoInput.required = checkbox.checked;
+      horasInput.disabled = !checkbox.checked;
+      minutosSelect.disabled = !checkbox.checked;
       colapsavel.classList.toggle('is-aberto', checkbox.checked);
 
       if (checkbox.checked) {
@@ -271,7 +304,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Desmarcar a modalidade limpa a seleção de dias e a duração, pra
         // não reenviar dias escolhidos antes de desmarcar sem querer.
         botoesDia.forEach((botao) => botao.setAttribute('aria-pressed', 'false'));
-        duracaoInput.value = '';
+        horasInput.value = '0';
+        minutosSelect.value = '0';
       }
     });
 
@@ -307,7 +341,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         checkbox: linha.querySelector('input[type="checkbox"]'),
         nome: linha.querySelector('.modalidade-check span').textContent,
         botoesDia: Array.from(linha.querySelectorAll('.dia-toggle')),
-        duracaoInput: linha.querySelector('.modalidade-duracao')
+        horasInput: linha.querySelector('.modalidade-duracao-horas'),
+        minutosSelect: linha.querySelector('.modalidade-duracao-minutos')
       }))
       .filter((linha) => linha.checkbox.checked);
 
@@ -324,7 +359,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      if (!linha.duracaoInput.reportValidity()) {
+      if (!linha.horasInput.reportValidity()) {
+        return;
+      }
+
+      // Horas e minutos são válidos isoladamente (0-5h, 0/15/30/45min), mas a
+      // SOMA pode ficar fora da faixa que a API aceita (ex: 0h+0min=0, abaixo
+      // do mínimo; 5h+45min=5.75, acima do máximo) — por isso valida o total.
+      const duracaoTotal = horasMinutosParaDecimal(Number(linha.horasInput.value || 0), Number(linha.minutosSelect.value));
+      if (duracaoTotal < 0.25 || duracaoTotal > 5) {
+        ronuMostrarErroFormulario(formError, `Informe uma duração entre 15 minutos e 5 horas para ${linha.nome}.`);
         return;
       }
     }
@@ -338,13 +382,15 @@ document.addEventListener('DOMContentLoaded', async () => {
           .filter((botao) => botao.getAttribute('aria-pressed') === 'true')
           .map((botao) => Number(botao.dataset.dia));
 
+        const duracaoMediaHoras = horasMinutosParaDecimal(Number(linha.horasInput.value || 0), Number(linha.minutosSelect.value));
+
         const resposta = await ronuFetchAutenticado('/usuarios/modalidades', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             modalidadeId: Number(linha.checkbox.dataset.modalidadeId),
             diasSemana,
-            duracaoMediaHoras: Number(linha.duracaoInput.value)
+            duracaoMediaHoras
           })
         });
 

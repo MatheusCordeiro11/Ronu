@@ -118,8 +118,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Cada modalidade praticada é um vínculo (UsuarioModalidade) com dias da
   // semana + duração média editáveis e ação de remover; "adicionar" só
   // oferece as modalidades do catálogo que o usuário ainda não pratica. Os
-  // toggles de dia (.dia-toggle/.modalidade-dias) e o campo de duração
-  // (.modalidade-duracao) vêm de onboarding.css, já carregado nesta página —
+  // toggles de dia (.dia-toggle/.modalidade-dias) e os campos de duração
+  // (horas + minutos, .modalidade-duracao-horas/-minutos) vêm de
+  // onboarding.css, já carregado nesta página —
   // mesmo widget usado no Passo 3 do onboarding, sem duplicar CSS. Reaproveita
   // a mecânica de "Remover -> Sim/Cancelar" de Preferências, mas com classes
   // próprias — seção independente, sem acoplar às internals da outra.
@@ -131,7 +132,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const elModalidadeAddOptions = document.getElementById('modalidade-add-options');
   const elModalidadeAddCollapse = document.getElementById('modalidade-add-collapse');
   const elModalidadeAddDias = document.getElementById('modalidade-add-dias');
-  const elModalidadeAddDuracao = document.getElementById('modalidade-add-duracao');
+  const elModalidadeAddDuracaoHoras = document.getElementById('modalidade-add-duracao-horas');
+  const elModalidadeAddDuracaoMinutos = document.getElementById('modalidade-add-duracao-minutos');
   const elModalidadesCatalogoCompleto = document.getElementById('modalidades-catalogo-completo');
   const btnAdicionarModalidade = document.getElementById('btn-adicionar-modalidade');
 
@@ -146,6 +148,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     { valor: 6, rotulo: 'SÁB', nomeCompleto: 'sábado' },
     { valor: 7, rotulo: 'DOM', nomeCompleto: 'domingo' }
   ];
+
+  const MINUTOS_PERMITIDOS = [0, 15, 30, 45];
+
+  // A API só aceita um decimal (DuracaoMediaHoras) — a UI coleta horas e
+  // minutos separados (minutos travado em múltiplos de 15, sem digitação
+  // livre) e converte só na hora de montar o payload.
+  function horasMinutosParaDecimal(horas, minutos) {
+    return horas + minutos / 60;
+  }
+
+  // Inverso — usado ao carregar um vínculo já salvo, pra preencher os dois
+  // campos de edição. Arredonda pro múltiplo de 15 min mais próximo, já que
+  // o select só aceita esses valores (o decimal salvo pode ter vindo de
+  // antes dessa mudança, com minutos "soltos", ex: 1.4h).
+  function decimalParaHorasMinutos(decimal) {
+    const totalMinutos = Math.round((decimal * 60) / 15) * 15;
+    return { horas: Math.floor(totalMinutos / 60), minutos: totalMinutos % 60 };
+  }
 
   let catalogoModalidades = [];
 
@@ -200,6 +220,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // (não uma const capturada no closure) porque salvarModalidade() roda
     // fora deste escopo, disparada pela delegação de evento da lista.
     item.dataset.diasSalvos = JSON.stringify(vinculo.diasSemana.slice().sort((a, b) => a - b));
+    item.dataset.duracaoSalva = String(vinculo.duracaoMediaHoras);
 
     const info = document.createElement('div');
     info.className = 'modalidade-item-info';
@@ -230,8 +251,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // evita autosave silencioso, consistente com o resto da página.
     function atualizarEstadoSalvar() {
       const diasMudaram = JSON.stringify(diasSelecionadosOrdenados()) !== item.dataset.diasSalvos;
-      const duracaoMudou = duracaoInput.value !== duracaoInput.dataset.valorSalvo;
-      btnSalvar.disabled = (!diasMudaram && !duracaoMudou) || duracaoInput.value === '';
+      const duracaoAtual = horasMinutosParaDecimal(Number(horasInput.value || 0), Number(minutosSelect.value));
+      const duracaoMudou = String(duracaoAtual) !== item.dataset.duracaoSalva;
+      btnSalvar.disabled = (!diasMudaram && !duracaoMudou) || horasInput.value === '';
     }
 
     DIAS_SEMANA.forEach(({ valor, rotulo, nomeCompleto }) => {
@@ -252,28 +274,53 @@ document.addEventListener('DOMContentLoaded', async () => {
       diasGroup.appendChild(botao);
     });
 
+    const { horas: horasIniciais, minutos: minutosIniciais } = decimalParaHorasMinutos(vinculo.duracaoMediaHoras);
+
     const duracaoField = document.createElement('div');
     duracaoField.className = 'modalidade-duracao-field';
+    duracaoField.setAttribute('role', 'group');
+    duracaoField.setAttribute('aria-label', `Duração média por sessão de ${vinculo.modalidade.nome}`);
 
-    const duracaoLabel = document.createElement('label');
-    duracaoLabel.textContent = 'Duração média por sessão (h)';
-    duracaoLabel.htmlFor = `modalidade-duracao-${vinculo.id}`;
+    const duracaoTitulo = document.createElement('span');
+    duracaoTitulo.className = 'modalidade-duracao-titulo';
+    duracaoTitulo.textContent = 'Duração média por sessão';
 
-    const duracaoInput = document.createElement('input');
-    duracaoInput.type = 'number';
-    duracaoInput.id = `modalidade-duracao-${vinculo.id}`;
-    duracaoInput.className = 'modalidade-duracao num';
-    duracaoInput.min = '0.25';
-    duracaoInput.max = '5';
-    duracaoInput.step = '0.25';
-    duracaoInput.value = vinculo.duracaoMediaHoras;
-    duracaoInput.dataset.valorSalvo = String(vinculo.duracaoMediaHoras);
-    // aria-label prevalece sobre o <label> visível pra leitor de tela — texto
-    // mais específico (com o nome da modalidade) do que o rótulo compartilhado.
-    duracaoInput.setAttribute('aria-label', `Duração média por sessão de ${vinculo.modalidade.nome}, em horas`);
-    duracaoInput.addEventListener('input', atualizarEstadoSalvar);
+    const duracaoGrupo = document.createElement('div');
+    duracaoGrupo.className = 'modalidade-duracao-grupo';
 
-    duracaoField.append(duracaoLabel, duracaoInput);
+    const labelHoras = document.createElement('label');
+    labelHoras.className = 'modalidade-duracao-unidade';
+    const spanHoras = document.createElement('span');
+    spanHoras.textContent = 'Horas';
+    const horasInput = document.createElement('input');
+    horasInput.type = 'number';
+    horasInput.className = 'modalidade-duracao-horas num';
+    horasInput.min = '0';
+    horasInput.max = '5';
+    horasInput.step = '1';
+    horasInput.value = String(horasIniciais);
+    labelHoras.append(spanHoras, horasInput);
+
+    const labelMinutos = document.createElement('label');
+    labelMinutos.className = 'modalidade-duracao-unidade';
+    const spanMinutos = document.createElement('span');
+    spanMinutos.textContent = 'Min';
+    const minutosSelect = document.createElement('select');
+    minutosSelect.className = 'modalidade-duracao-minutos num';
+    MINUTOS_PERMITIDOS.forEach((valor) => {
+      const opcao = document.createElement('option');
+      opcao.value = String(valor);
+      opcao.textContent = String(valor);
+      minutosSelect.appendChild(opcao);
+    });
+    minutosSelect.value = String(minutosIniciais);
+    labelMinutos.append(spanMinutos, minutosSelect);
+
+    horasInput.addEventListener('input', atualizarEstadoSalvar);
+    minutosSelect.addEventListener('change', atualizarEstadoSalvar);
+
+    duracaoGrupo.append(labelHoras, labelMinutos);
+    duracaoField.append(duracaoTitulo, duracaoGrupo);
 
     btnSalvar.type = 'button';
     btnSalvar.className = 'modalidade-save-btn';
@@ -323,8 +370,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       botao.setAttribute('aria-pressed', 'false');
       botao.disabled = true;
     });
-    elModalidadeAddDuracao.value = '';
-    elModalidadeAddDuracao.disabled = true;
+    elModalidadeAddDuracaoHoras.value = '0';
+    elModalidadeAddDuracaoHoras.disabled = true;
+    elModalidadeAddDuracaoMinutos.value = '0';
+    elModalidadeAddDuracaoMinutos.disabled = true;
     elModalidadeAddCollapse.classList.remove('is-aberto');
 
     const temDisponiveis = disponiveis.length > 0;
@@ -337,7 +386,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     elModalidadeAddCollapse.classList.add('is-aberto');
     const botoesDia = Array.from(elModalidadeAddDias.querySelectorAll('.dia-toggle'));
     botoesDia.forEach((botao) => { botao.disabled = false; });
-    elModalidadeAddDuracao.disabled = false;
+    elModalidadeAddDuracaoHoras.disabled = false;
+    elModalidadeAddDuracaoMinutos.disabled = false;
     botoesDia[0].focus();
   });
 
@@ -390,7 +440,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    if (!elModalidadeAddDuracao.reportValidity()) return;
+    if (!elModalidadeAddDuracaoHoras.reportValidity()) return;
+
+    // Horas e minutos são válidos isoladamente (0-5h, 0/15/30/45min), mas a
+    // SOMA pode ficar fora da faixa que a API aceita (ex: 0h+0min=0, abaixo
+    // do mínimo; 5h+45min=5.75, acima do máximo) — por isso valida o total.
+    const duracaoMediaHoras = horasMinutosParaDecimal(
+      Number(elModalidadeAddDuracaoHoras.value || 0),
+      Number(elModalidadeAddDuracaoMinutos.value)
+    );
+
+    if (duracaoMediaHoras < 0.25 || duracaoMediaHoras > 5) {
+      ronuMostrarErroFormulario(elModalidadesError, 'Informe uma duração entre 15 minutos e 5 horas.');
+      return;
+    }
 
     ronuOcultarErroFormulario(elModalidadesError);
     ronuDefinirCarregando(btnAdicionarModalidade, true, 'Adicionando...');
@@ -402,7 +465,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         body: JSON.stringify({
           modalidadeId: Number(escolhida.value),
           diasSemana,
-          duracaoMediaHoras: Number(elModalidadeAddDuracao.value)
+          duracaoMediaHoras
         })
       });
 
@@ -426,8 +489,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   btnAdicionarModalidade.addEventListener('click', adicionarModalidade);
 
   async function salvarModalidade(item, botao) {
-    const duracaoInput = item.querySelector('.modalidade-duracao');
-    if (!duracaoInput.reportValidity()) return;
+    const horasInput = item.querySelector('.modalidade-duracao-horas');
+    const minutosSelect = item.querySelector('.modalidade-duracao-minutos');
+    if (!horasInput.reportValidity()) return;
+
+    const duracaoMediaHoras = horasMinutosParaDecimal(Number(horasInput.value || 0), Number(minutosSelect.value));
+
+    // Horas e minutos são válidos isoladamente (0-5h, 0/15/30/45min), mas a
+    // SOMA pode ficar fora da faixa que a API aceita — por isso valida o total.
+    if (duracaoMediaHoras < 0.25 || duracaoMediaHoras > 5) {
+      ronuMostrarErroFormulario(elModalidadesError, 'Informe uma duração entre 15 minutos e 5 horas.');
+      return;
+    }
 
     const diasSemana = Array.from(item.querySelectorAll('.dia-toggle'))
       .filter((b) => b.getAttribute('aria-pressed') === 'true')
@@ -441,7 +514,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const modalidadeId = Number(item.dataset.modalidadeId);
-    const duracaoMediaHoras = Number(duracaoInput.value);
 
     botao.disabled = true;
     const textoOriginal = botao.textContent;
@@ -460,7 +532,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         throw new Error(corpo?.mensagem || 'Não foi possível salvar. Tente novamente.');
       }
 
-      duracaoInput.dataset.valorSalvo = String(duracaoMediaHoras);
+      item.dataset.duracaoSalva = String(duracaoMediaHoras);
       item.dataset.diasSalvos = JSON.stringify(diasSemana);
       botao.textContent = textoOriginal;
     } catch (erro) {

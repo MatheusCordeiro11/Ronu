@@ -250,25 +250,40 @@
   outline-offset: 2px;
 }
 
-/* Rótulo pequeno acima do campo de duração — sem ele, "Duração (h)" sozinho
-   (só como placeholder) não deixava claro se era por sessão ou total
-   semanal. Fonte no tamanho dos toggles de dia vizinhos (fs-2xs), não do
-   rótulo de campo padrão (fs-xs), pra caber na linha compacta. */
+/* Duração dividida em Horas (número livre, 0-5) + Minutos (select fechado em
+   0/15/30/45 — sem digitação livre, mesmo espírito "sem ambiguidade" dos
+   toggles de dia: sessão real de treino cai em blocos de 15 min). Rótulo
+   pequeno (fs-2xs), tamanho dos toggles de dia vizinhos, pra caber na linha
+   compacta — não o rótulo de campo padrão (fs-xs, usado em telas menos
+   apertadas como Perfil/Objetivo). */
 .modalidade-duracao-field {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.modalidade-duracao-field label {
+.modalidade-duracao-titulo {
   font-size: var(--fs-2xs);
   color: var(--text-muted);
   white-space: nowrap;
 }
 
-.modalidade-duracao {
-  width: 92px;
-  flex-shrink: 0;
+.modalidade-duracao-grupo {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-2);
+}
+
+.modalidade-duracao-unidade {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+}
+
+.modalidade-duracao-horas,
+.modalidade-duracao-minutos {
   background: var(--bg);
   border: var(--border-width) solid var(--border);
   border-radius: var(--radius);
@@ -278,15 +293,37 @@
   text-align: center;
 }
 
-.modalidade-duracao::placeholder {
-  color: var(--text-muted);
+.modalidade-duracao-horas {
+  width: 52px;
 }
 
-.modalidade-duracao:disabled {
+/* Select fechado (0/15/30/45): remove a seta nativa do SO e desenha uma só
+   com gradiente (funcional, não decorativo — Regra Sem Sombra não veta um
+   indicador de "abre lista"). O popup aberto continua com o chrome padrão
+   do navegador — restylizar isso por completo exigiria uma listbox
+   customizada em JS, desproporcional pra um seletor de 4 opções. */
+.modalidade-duracao-minutos {
+  width: 66px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+    linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+  background-position: calc(100% - 14px) 55%, calc(100% - 9px) 55%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: var(--sp-4);
+  cursor: pointer;
+}
+
+.modalidade-duracao-horas:disabled,
+.modalidade-duracao-minutos:disabled {
   opacity: 0.4;
+  cursor: default;
 }
 
-.modalidade-duracao:focus-visible {
+.modalidade-duracao-horas:focus-visible,
+.modalidade-duracao-minutos:focus-visible {
   outline: none;
   border-color: var(--accent);
 }
