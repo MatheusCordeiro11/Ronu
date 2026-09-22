@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ronu — Progresso de peso</title>
+  <meta name="description" content="Acompanhe a tendência suavizada do seu peso ao longo do tempo.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/progresso.css">
+</head>
+<body>
+
+  <header class="simple-header border-b">
+    <div class="container dashboard-header-inner">
+      <a href="landing/v1/index.html" class="wordmark">ronu<span>.</span></a>
+      <div class="header-actions">
+        <a href="dashboard.html" class="btn btn-secondary">Voltar ao dashboard</a>
+        <button type="button" id="logout-btn" class="btn btn-secondary">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="progresso-page">
+    <div class="container">
+
+      <div class="progresso-page-head">
+        <h1 class="progresso-page-title">Progresso de peso</h1>
+        <p class="text-muted">A tendência suavizada do seu peso, sem o ruído de cada pesagem isolada.</p>
+      </div>
+
+      <p class="text-muted" id="progresso-loading">Carregando...</p>
+
+      <div class="form-message form-message-error" id="progresso-error" hidden></div>
+
+      <section class="progresso-empty" id="progresso-empty" hidden>
+        <p class="eyebrow">Progresso</p>
+        <h2 class="progresso-empty-title">Nenhum peso registrado ainda</h2>
+        <p class="progresso-empty-subtitle">Seu peso é registrado no cadastro inicial. Complete seu cadastro pra começar a acompanhar sua evolução aqui.</p>
+        <a href="onboarding.html" class="btn btn-primary">Completar cadastro</a>
+      </section>
+
+      <div class="progresso-content" id="progresso-content" hidden>
+
+        <section class="meta-stamp" id="peso-stamp" aria-label="Resumo do peso">
+          <div class="meta-stamp-head">
+            <p class="meta-stamp-label">Peso de tendência</p>
+            <p class="meta-stamp-date" id="peso-stamp-data"></p>
+          </div>
+          <dl class="meta-stamp-grid">
+            <div class="meta-stamp-item">
+              <dt>Tendência atual</dt>
+              <dd class="num" id="peso-stamp-tendencia"></dd>
+            </div>
+            <div class="meta-stamp-item">
+              <dt>Última pesagem</dt>
+              <dd class="num" id="peso-stamp-bruto"></dd>
+            </div>
+            <div class="meta-stamp-item">
+              <dt>Variação total</dt>
+              <dd class="num" id="peso-stamp-variacao"></dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="peso-grafico-panel" aria-label="Gráfico de evolução do peso">
+          <div class="peso-grafico-head">
+            <h2 class="peso-grafico-title">Evolução</h2>
+            <div class="peso-legenda">
+              <span class="peso-legenda-item"><span class="peso-legenda-marca peso-legenda-marca-bruto"></span>Peso bruto</span>
+              <span class="peso-legenda-item"><span class="peso-legenda-marca peso-legenda-marca-tendencia"></span>Tendência</span>
+            </div>
+          </div>
+          <svg class="peso-grafico" id="peso-grafico" role="img" aria-labelledby="peso-grafico-titulo">
+            <title id="peso-grafico-titulo">Gráfico de peso bruto e peso de tendência ao longo do tempo</title>
+          </svg>
+        </section>
+
+        <section class="peso-historico-section">
+          <h2 class="peso-historico-title">Histórico</h2>
+          <ul class="peso-historico-list" id="peso-historico-list"></ul>
+        </section>
+
+      </div>
+
+    </div>
+  </main>
+
+  <script src="js/auth.js"></script>
+  <script src="js/progresso.js"></script>
+</body>
+</html>

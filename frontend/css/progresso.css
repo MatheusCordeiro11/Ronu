@@ -1,0 +1,225 @@
+/*
+  Ronu — Progresso de peso
+  Depende de styles.css, auth.css e dashboard.css (.simple-header,
+  .header-actions, .meta-stamp e derivados — reaproveitados aqui como
+  carimbo de peso, só com um grid de 3 colunas em vez de 4).
+*/
+
+.progresso-page {
+  min-height: calc(100vh - 73px);
+  padding-top: var(--sp-6);
+  padding-bottom: var(--sp-8);
+}
+
+.progresso-page-head {
+  margin-bottom: var(--sp-6);
+}
+
+.progresso-page-title {
+  font-size: var(--fs-2xl);
+}
+
+.progresso-page-head p {
+  margin-top: var(--sp-2);
+}
+
+/* Carimbo de peso: mesma família visual do meta-stamp do dashboard, só que
+   com 3 colunas (tendência / última pesagem / variação) em vez de 4. */
+#peso-stamp .meta-stamp-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* ---------- Estado vazio ---------- */
+.progresso-empty {
+  min-height: 40vh;
+  max-width: 520px;
+}
+
+.progresso-empty:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.progresso-empty-title {
+  font-size: var(--fs-2xl);
+  margin-top: var(--sp-3);
+}
+
+.progresso-empty-subtitle {
+  margin-top: var(--sp-3);
+  margin-bottom: var(--sp-5);
+  max-width: 52ch;
+}
+
+.progresso-empty .btn {
+  align-self: flex-start;
+}
+
+/* ---------- Conteúdo ---------- */
+.progresso-content:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+
+/* ---------- Gráfico ---------- */
+.peso-grafico-panel {
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: var(--sp-4) var(--sp-5);
+}
+
+.peso-grafico-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-4);
+  margin-bottom: var(--sp-4);
+}
+
+.peso-grafico-title {
+  font-size: var(--fs-lg);
+}
+
+.peso-legenda {
+  display: flex;
+  gap: var(--sp-4);
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+}
+
+.peso-legenda-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+
+.peso-legenda-marca {
+  width: 12px;
+  height: 2px;
+  flex-shrink: 0;
+}
+
+.peso-legenda-marca-bruto {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  opacity: 0.6;
+}
+
+.peso-legenda-marca-tendencia {
+  background: var(--accent);
+}
+
+.peso-grafico {
+  display: block;
+  width: 100%;
+  height: 280px;
+}
+
+.peso-grid-linha {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+/* O JS mede a caixa real do SVG (em px) e monta o viewBox nessa mesma
+   escala a cada render/resize — então 1 unidade de viewBox = 1px real,
+   e este font-size em px vale como px de verdade em qualquer breakpoint,
+   sem distorcer nem encolher junto com o gráfico. */
+.peso-eixo-label {
+  fill: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.peso-ponto-bruto {
+  fill: var(--text-muted);
+  opacity: 0.55;
+}
+
+.peso-linha-tendencia {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+/* ---------- Histórico ---------- */
+.peso-historico-title {
+  font-size: var(--fs-lg);
+  margin-bottom: var(--sp-3);
+}
+
+.peso-historico-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.peso-historico-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  font-size: var(--fs-xs);
+}
+
+.peso-historico-data {
+  color: var(--text-muted);
+}
+
+.peso-historico-valores {
+  display: flex;
+  gap: var(--sp-4);
+  flex-shrink: 0;
+}
+
+.peso-historico-valores dt {
+  display: inline;
+  color: var(--text-muted);
+  margin-right: 2px;
+}
+
+.peso-historico-valores dd {
+  display: inline;
+  margin: 0;
+  color: var(--text);
+}
+
+@media (max-width: 720px) {
+  #peso-stamp .meta-stamp-grid {
+    grid-template-columns: 1fr;
+    row-gap: var(--sp-4);
+  }
+
+  #peso-stamp .meta-stamp-item {
+    padding-left: 0;
+    border-left: none;
+  }
+
+  .peso-grafico {
+    height: 220px;
+  }
+
+  .peso-historico-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-1);
+  }
+
+  .peso-historico-valores {
+    gap: var(--sp-3);
+  }
+}
