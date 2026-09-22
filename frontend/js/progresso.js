@@ -28,7 +28,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const btnLogout = document.getElementById('logout-btn');
 
+  const btnToggleRegistrar = document.getElementById('peso-registrar-toggle');
+  const formRegistrar = document.getElementById('peso-registrar-form');
+  const inputPesoRegistrar = document.getElementById('peso-registrar-valor');
+  const elRegistrarError = document.getElementById('peso-registrar-error');
+  const elRegistrarSucesso = document.getElementById('peso-registrar-sucesso');
+  const btnSalvarPeso = document.getElementById('btn-registrar-peso');
+  const btnCancelarRegistrar = document.getElementById('btn-cancelar-registrar-peso');
+
   let pontos = [];
+  let objetivoAtual = null;
 
   btnLogout.addEventListener('click', () => {
     ronuLimparSessao();
@@ -232,14 +241,42 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderizarGrafico();
   }
 
+  async function carregarTendencia() {
+    const resposta = await ronuFetchAutenticado('/objetivos/tendencia');
+    if (!resposta.ok) throw new Error('Não foi possível carregar seu progresso de peso.');
+    pontos = await resposta.json();
+    renderizarTudo();
+  }
+
+  // Busca o objetivo atual só pra pré-selecionar o radio do formulário de
+  // registrar peso. Falha aqui não derruba a tela — o formulário só abre
+  // sem nada pré-selecionado. Guarda a própria promise (em vez de só
+  // aguardá-la aqui) porque ela corre em paralelo com carregarTendencia():
+  // se o usuário abrir o formulário antes dela terminar, abrirFormularioRegistrar
+  // precisa ter como esperar por ela também, e não só confiar que já rodou.
+  let objetivoAtualPromise = null;
+
+  function carregarObjetivoAtual() {
+    objetivoAtualPromise = (async () => {
+      try {
+        const resposta = await ronuFetchAutenticado('/objetivos/atual');
+        if (resposta.ok) {
+          const objetivo = await resposta.json();
+          objetivoAtual = objetivo.objetivo;
+        }
+      } catch (erro) {
+        // Sessão expirada já foi tratada (redirecionamento) dentro de
+        // ronuFetchAutenticado — nada a fazer aqui além de seguir sem objetivo.
+      }
+    })();
+    return objetivoAtualPromise;
+  }
+
   async function iniciar() {
     mostrarSomente(elLoading);
 
     try {
-      const resposta = await ronuFetchAutenticado('/objetivos/tendencia');
-      if (!resposta.ok) throw new Error('Não foi possível carregar seu progresso de peso.');
-      pontos = await resposta.json();
-      renderizarTudo();
+      await Promise.all([carregarTendencia(), carregarObjetivoAtual()]);
     } catch (erro) {
       if (erro.message !== 'Sessão expirada.') {
         ronuMostrarErroFormulario(elError, erro.message);
@@ -247,6 +284,91 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
   }
+
+  // ---------- Registrar peso ----------
+  // Tela é só de leitura, exceto por esta ação: lançar uma nova pesagem sem
+  // sair da tela. POST /objetivos faz upsert por data no back-end (se já
+  // existe um registro de hoje, atualiza em vez de duplicar), então não há
+  // necessidade de escolher entre criar/editar aqui.
+
+  async function abrirFormularioRegistrar() {
+    ronuOcultarErroFormulario(elRegistrarError);
+    elRegistrarSucesso.hidden = true;
+
+    btnToggleRegistrar.hidden = true;
+    btnToggleRegistrar.setAttribute('aria-expanded', 'true');
+    formRegistrar.hidden = false;
+    inputPesoRegistrar.focus();
+
+    // Se o usuário abriu o formulário rápido demais (antes da carga inicial
+    // terminar de buscar o objetivo atual), espera essa mesma requisição em
+    // vez de deixar o radio sem nada pré-selecionado.
+    if (objetivoAtualPromise) await objetivoAtualPromise;
+
+    if (objetivoAtual) {
+      const radioAtual = formRegistrar.querySelector(
+        `input[name="peso-registrar-objetivo"][value="${objetivoAtual}"]`
+      );
+      if (radioAtual) radioAtual.checked = true;
+    }
+  }
+
+  function fecharFormularioRegistrar() {
+    formRegistrar.hidden = true;
+    btnToggleRegistrar.hidden = false;
+    btnToggleRegistrar.setAttribute('aria-expanded', 'false');
+    formRegistrar.reset();
+    ronuOcultarErroFormulario(elRegistrarError);
+  }
+
+  btnToggleRegistrar.addEventListener('click', abrirFormularioRegistrar);
+  btnCancelarRegistrar.addEventListener('click', fecharFormularioRegistrar);
+
+  formRegistrar.addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+
+    if (!inputPesoRegistrar.reportValidity()) return;
+
+    const objetivoSelecionado = formRegistrar.querySelector('input[name="peso-registrar-objetivo"]:checked');
+    if (!objetivoSelecionado) {
+      ronuMostrarErroFormulario(elRegistrarError, 'Selecione um objetivo.');
+      return;
+    }
+
+    ronuOcultarErroFormulario(elRegistrarError);
+    ronuDefinirCarregando(btnSalvarPeso, true, 'Salvando...');
+
+    try {
+      const resposta = await ronuFetchAutenticado('/objetivos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          peso: parseFloat(inputPesoRegistrar.value),
+          objetivo: objetivoSelecionado.value
+        })
+      });
+
+      if (!resposta.ok) {
+        const corpo = await resposta.json().catch(() => null);
+        throw new Error(corpo?.mensagem || 'Não foi possível registrar seu peso. Tente novamente.');
+      }
+
+      const objetivoSalvo = await resposta.json();
+      objetivoAtual = objetivoSalvo.objetivo;
+
+      fecharFormularioRegistrar();
+      elRegistrarSucesso.textContent = 'Peso registrado.';
+      elRegistrarSucesso.hidden = false;
+
+      await carregarTendencia();
+    } catch (erro) {
+      if (erro.message !== 'Sessão expirada.') {
+        ronuMostrarErroFormulario(elRegistrarError, erro.message);
+      }
+    } finally {
+      ronuDefinirCarregando(btnSalvarPeso, false);
+    }
+  });
 
   await iniciar();
 });

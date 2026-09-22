@@ -1,8 +1,10 @@
 /*
   Ronu — Progresso de peso
-  Depende de styles.css, auth.css e dashboard.css (.simple-header,
+  Depende de styles.css, auth.css, dashboard.css (.simple-header,
   .header-actions, .meta-stamp e derivados — reaproveitados aqui como
-  carimbo de peso, só com um grid de 3 colunas em vez de 4).
+  carimbo de peso, só com um grid de 3 colunas em vez de 4) e onboarding.css
+  (.field, .option-group, .option-pill — reaproveitados no formulário
+  inline de registrar peso).
 */
 
 .progresso-page {
@@ -21,12 +23,54 @@
 
 .progresso-page-head p {
   margin-top: var(--sp-2);
+  max-width: 68ch;
+}
+
+.progresso-page-head .btn {
+  margin-top: var(--sp-4);
 }
 
 /* Carimbo de peso: mesma família visual do meta-stamp do dashboard, só que
    com 3 colunas (tendência / última pesagem / variação) em vez de 4. */
 #peso-stamp .meta-stamp-grid {
   grid-template-columns: repeat(3, 1fr);
+}
+
+/* ---------- Registrar peso (formulário inline, sem modal) ---------- */
+.peso-registrar-form {
+  margin-top: var(--sp-5);
+  padding-top: var(--sp-5);
+  border-top: var(--border-width) solid var(--border);
+}
+
+.peso-registrar-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  align-items: flex-end;
+}
+
+.peso-registrar-fields .field {
+  margin-bottom: 0;
+}
+
+.peso-registrar-fields input[type="number"] {
+  width: 120px;
+}
+
+.peso-registrar-form .form-message-error {
+  margin-top: var(--sp-4);
+}
+
+.peso-registrar-actions {
+  display: flex;
+  gap: var(--sp-3);
+  margin-top: var(--sp-4);
+}
+
+#peso-registrar-sucesso {
+  margin-top: var(--sp-5);
+  margin-bottom: 0;
 }
 
 /* ---------- Estado vazio ---------- */
@@ -207,6 +251,18 @@
   #peso-stamp .meta-stamp-item {
     padding-left: 0;
     border-left: none;
+  }
+
+  .peso-registrar-fields input[type="number"] {
+    width: 100%;
+  }
+
+  .peso-registrar-actions {
+    flex-direction: column-reverse;
+  }
+
+  .peso-registrar-actions .btn {
+    width: 100%;
   }
 
   .peso-grafico {

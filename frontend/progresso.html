@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/auth.css">
   <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/onboarding.css">
   <link rel="stylesheet" href="css/progresso.css">
 </head>
 <body>
@@ -32,7 +33,8 @@
 
       <div class="progresso-page-head">
         <h1 class="progresso-page-title">Progresso de peso</h1>
-        <p class="text-muted">A tendência suavizada do seu peso, sem o ruído de cada pesagem isolada.</p>
+        <p class="text-muted">A tendência suavizada do seu peso, sem o ruído de cada pesagem isolada. Ele varia por água, comida e hora do dia — a tendência mostra a direção real por trás dessas oscilações.</p>
+        <button type="button" class="btn btn-secondary" id="peso-registrar-toggle" aria-expanded="false" aria-controls="peso-registrar-form">Registrar peso</button>
       </div>
 
       <p class="text-muted" id="progresso-loading">Carregando...</p>
@@ -67,6 +69,44 @@
               <dd class="num" id="peso-stamp-variacao"></dd>
             </div>
           </dl>
+
+          <div class="form-message form-message-success" id="peso-registrar-sucesso" hidden></div>
+
+          <form class="peso-registrar-form" id="peso-registrar-form" hidden>
+            <div class="peso-registrar-fields">
+              <div class="field">
+                <label for="peso-registrar-valor">Peso (kg)</label>
+                <input type="number" id="peso-registrar-valor" name="peso" inputmode="decimal" step="0.1" min="20" max="300" required>
+              </div>
+
+              <div class="field">
+                <label>Objetivo</label>
+                <div class="option-group" role="radiogroup" aria-label="Objetivo">
+                  <label class="option-pill">
+                    <input type="radio" name="peso-registrar-objetivo" value="ganhar peso">
+                    <span>Ganhar peso</span>
+                  </label>
+                  <label class="option-pill">
+                    <input type="radio" name="peso-registrar-objetivo" value="perder peso">
+                    <span>Perder peso</span>
+                  </label>
+                  <label class="option-pill">
+                    <input type="radio" name="peso-registrar-objetivo" value="manter peso">
+                    <span>Manter peso</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-message form-message-error" id="peso-registrar-error" hidden></div>
+
+            <div class="peso-registrar-actions">
+              <button type="submit" class="btn btn-primary" id="btn-registrar-peso">
+                <span class="btn-label">Salvar</span>
+              </button>
+              <button type="button" class="btn btn-secondary" id="btn-cancelar-registrar-peso">Cancelar</button>
+            </div>
+          </form>
         </section>
 
         <section class="peso-grafico-panel" aria-label="Gráfico de evolução do peso">
