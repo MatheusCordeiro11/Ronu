@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Ronu.Api.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Ronu.Api.Services;
 using Ronu.Api.Services.IA;
 using System.Text;
 
@@ -40,6 +41,7 @@ var geminiOptions = new GeminiOptions { ApiKey = builder.Configuration["Gemini:A
 builder.Services.AddSingleton(geminiOptions);
 builder.Services.AddHttpClient<IGeradorDietaIA, GeradorDietaGemini>();
 builder.Services.AddScoped<ICalculadoraGastoCalorico, CalculadoraGastoCalorico>();
+builder.Services.AddScoped<ICalculadoraPesoTendencia, CalculadoraPesoTendencia>();
 builder.Services.AddScoped<IContextoDietaBuilder, ContextoDietaBuilder>();
 builder.Services.AddScoped<IRepositorioDietaIA, RepositorioDietaIA>();
 

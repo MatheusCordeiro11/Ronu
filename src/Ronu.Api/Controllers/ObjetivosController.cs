@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Ronu.Api.Data;
 using Ronu.Api.DTOs;
 using Ronu.Api.Models;
+using Ronu.Api.Services;
 using System.Security.Claims;
 
 namespace Ronu.Api.Controllers;
@@ -18,10 +19,12 @@ namespace Ronu.Api.Controllers;
 public class ObjetivosController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
+    private readonly ICalculadoraPesoTendencia _calculadoraPesoTendencia;
 
-    public ObjetivosController(ApplicationDbContext context)
+    public ObjetivosController(ApplicationDbContext context, ICalculadoraPesoTendencia calculadoraPesoTendencia)
     {
         _context = context;
+        _calculadoraPesoTendencia = calculadoraPesoTendencia;
     }
 
     // O Id do usuário logado vem sempre do claim do token JWT, nunca do corpo da
@@ -85,6 +88,24 @@ public class ObjetivosController : ControllerBase
         };
 
         return Ok(response);
+    }
+
+    /// <summary>
+    /// Retorna o histórico de peso do usuário logado com o peso de tendência
+    /// (suavizado) calculado ao lado de cada registro bruto — usado pelo
+    /// frontend para renderizar o gráfico de evolução de peso.
+    /// </summary>
+    [HttpGet("tendencia")]
+    public async Task<IActionResult> ObterTendencia()
+    {
+        var registros = await _context.ObjetivosUsuario
+            .Where(o => o.UsuarioId == UsuarioIdLogado)
+            .Select(o => new RegistroPesoDto { Data = o.DataRegistro, Peso = o.Peso })
+            .ToListAsync();
+
+        var resultado = _calculadoraPesoTendencia.Calcular(registros);
+
+        return Ok(resultado);
     }
 
     /// <summary>
