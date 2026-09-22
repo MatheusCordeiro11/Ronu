@@ -34,20 +34,47 @@ public class ObjetivosController : ControllerBase
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
     /// <summary>
-    /// Registra um novo objetivo/peso para o usuário logado, na data atual.
+    /// Registra um novo objetivo/peso para o usuário logado. Se já existe um
+    /// registro com a mesma data (no calendário UTC) para este usuário, atualiza
+    /// esse registro em vez de criar um novo — evita duplicatas no mesmo dia, que
+    /// não agregam nada à suavização de peso de tendência (que já ignora
+    /// múltiplos registros no mesmo dia matematicamente) e só poluiriam o
+    /// histórico visualmente. Refinamento consciente da regra original de "nunca
+    /// fazer upsert": a granularidade do histórico passa a ser por dia, não por
+    /// chamada de API — dias diferentes continuam sempre gerando registros
+    /// distintos, preservando a evolução real ao longo do tempo.
     /// </summary>
     [HttpPost]
     public async Task<IActionResult> Criar(ObjetivoRequest request)
     {
-        var objetivo = new ObjetivoUsuario
-        {
-            Peso = request.Peso,
-            Objetivo = request.Objetivo,
-            DataRegistro = DateTime.UtcNow,
-            UsuarioId = UsuarioIdLogado
-        };
+        var hojeUtc = DateOnly.FromDateTime(DateTime.UtcNow);
 
-        _context.ObjetivosUsuario.Add(objetivo);
+        var objetivoDeHoje = await _context.ObjetivosUsuario
+            .Where(o => o.UsuarioId == UsuarioIdLogado)
+            .Where(o => DateOnly.FromDateTime(o.DataRegistro) == hojeUtc)
+            .FirstOrDefaultAsync();
+
+        ObjetivoUsuario objetivo;
+
+        if (objetivoDeHoje is not null)
+        {
+            objetivoDeHoje.Peso = request.Peso;
+            objetivoDeHoje.Objetivo = request.Objetivo;
+            objetivo = objetivoDeHoje;
+        }
+        else
+        {
+            objetivo = new ObjetivoUsuario
+            {
+                Peso = request.Peso,
+                Objetivo = request.Objetivo,
+                DataRegistro = DateTime.UtcNow,
+                UsuarioId = UsuarioIdLogado
+            };
+
+            _context.ObjetivosUsuario.Add(objetivo);
+        }
+
         await _context.SaveChangesAsync();
 
         var response = new ObjetivoResponse
