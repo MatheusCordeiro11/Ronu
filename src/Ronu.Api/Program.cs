@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Ronu.Api.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Ronu.Api.Middleware;
 using Ronu.Api.Services;
 using Ronu.Api.Services.IA;
 using System.Text;
@@ -63,7 +64,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
+
+// Precisa vir antes de qualquer outro middleware, para capturar exceções
+// que aconteçam em qualquer ponto do pipeline abaixo (CORS, autenticação,
+// controllers).
+app.UseExceptionHandler();
 
 // CORS precisa vir antes de autenticação/autorização para que o navegador já
 // receba os headers liberando a origem na resposta (inclusive no preflight).
