@@ -42,6 +42,7 @@ public class AuthController : ControllerBase
         {
             Nome = request.Nome,
             Email = request.Email,
+            Estado = request.Estado,
             SenhaHash = BCrypt.Net.BCrypt.HashPassword(request.Senha)
         };
 

@@ -19,4 +19,6 @@ public class CadastroRequest
     // sozinha, sem precisar de checagem manual no AuthController.
     [MinLength(8, ErrorMessage = "A senha deve ter pelo menos 8 caracteres.")]
     public required string Senha { get; set; }
+
+    public required string Estado { get; init; }
 }

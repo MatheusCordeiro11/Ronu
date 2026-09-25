@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Ronu.Api.Models;
 
 /// <summary>
@@ -24,6 +26,8 @@ public class Usuario
     public decimal? Altura { get; set; }
     public DateOnly? DataNascimento { get; set; }
     public string? Sexo { get; set; }
+    [MaxLength(2)]
+    public string Estado { get; set; } = string.Empty;
 
     public ICollection<UsuarioModalidade> UsuarioModalidades { get; set; } = new List<UsuarioModalidade>();
     public ICollection<ObjetivoUsuario> ObjetivosUsuario { get; set; } = new List<ObjetivoUsuario>();
