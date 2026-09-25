@@ -75,11 +75,11 @@ async function ronuLoginComGoogle(idToken) {
   return dados;
 }
 
-async function ronuCadastrar(nome, email, senha) {
+async function ronuCadastrar(nome, email, senha, estado) {
   const resposta = await fetch(`${RONU_CONFIG.API_BASE}/auth/cadastro`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ nome, email, senha })
+    body: JSON.stringify({ nome, email, senha, estado })
   });
 
   const dados = await resposta.json().catch(() => null);

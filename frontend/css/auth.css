@@ -234,6 +234,43 @@ html[data-auth-tela="cadastro"]::view-transition-new(root) {
   min-height: 0;
 }
 
+/* Select no mesmo formato do .field input (styles.css). Classe própria em
+   vez de ".field select" porque o select de minutos das configurações também
+   fica dentro de um .field e tem estilo próprio. Seta desenhada com o mesmo
+   gradiente do .modalidade-duracao-minutos (onboarding.css); color-scheme
+   dark pra lista aberta seguir o fundo escuro, como no input de data. */
+.field-select {
+  background-color: var(--bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--sp-3);
+  padding-right: var(--sp-6);
+  font-size: var(--fs-sm);
+  color-scheme: dark;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+    linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 55%, calc(100% - 13px) 55%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.field-select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.field-select:invalid {
+  color: var(--text-muted);
+}
+
+.field-select option {
+  color: var(--text);
+}
+
 /* Divisor entre o formulário tradicional e o login com Google — linha de 1px
    nos dois lados (Regra Sem Sombra: separação por linha, nunca sombra),
    mesma cor de borda usada no resto do sistema. */

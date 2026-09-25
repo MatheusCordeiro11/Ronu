@@ -17,12 +17,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // esconde o que o usuário já digitou nos seguintes; o checkValidity() do
   // submit é quem barra campo vazio nesse caso.
   const etapas = Array.from(form.querySelectorAll('[data-etapa-cadastro]'));
-  const camposEmOrdem = ['nome', 'email', 'senha', 'confirmar-senha']
+  const camposEmOrdem = ['nome', 'email', 'senha', 'confirmar-senha', 'estado']
     .map((id) => document.getElementById(id));
 
   function revelarEtapa(etapa) {
     if (!etapa || etapa.classList.contains('is-aberto')) return;
-    etapa.querySelectorAll('input, button').forEach((controle) => { controle.disabled = false; });
+    etapa.querySelectorAll('input, select, button').forEach((controle) => { controle.disabled = false; });
     etapa.classList.add('is-aberto');
   }
 
@@ -64,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const email = document.getElementById('email').value.trim();
     const senha = document.getElementById('senha').value;
     const confirmarSenha = document.getElementById('confirmar-senha').value;
+    const estado = document.getElementById('estado').value;
 
     if (confirmarSenha !== senha) {
       ronuMarcarCampoInvalido(campoConfirmarSenha, confirmarSenhaErro, 'As senhas não coincidem.');
@@ -73,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ronuDefinirCarregando(submitBtn, true, 'Criando conta...');
 
     try {
-      await ronuCadastrar(nome, email, senha);
+      await ronuCadastrar(nome, email, senha, estado);
       await ronuLogin(email, senha);
       await ronuRedirecionarPosAuth();
     } catch (erro) {
