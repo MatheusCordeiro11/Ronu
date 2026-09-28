@@ -8,6 +8,7 @@ public class LoginResponse
 {
     public required string Token { get; set; }
     public required UsuarioResumo Usuario { get; set; }
+    public bool PrecisaInformarEstado { get; set; }
 }
 
 /// <summary>

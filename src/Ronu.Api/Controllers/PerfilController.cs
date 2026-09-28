@@ -69,4 +69,34 @@ public class PerfilController : ControllerBase
             DataNascimento = usuario.DataNascimento
         });
     }
+
+    private static readonly HashSet<string> SiglasUf = new()
+    {
+        "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA",
+        "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+    };
+
+    /// <summary>
+    /// Define o estado (UF) do usuário logado. Usado pelo fluxo pós-login
+    /// quando o LoginResponse indica PrecisaInformarEstado — contas criadas
+    /// via Google ou antes da coluna Estado existir ficam com o campo vazio.
+    /// </summary>
+    [HttpPut("estado")]
+    public async Task<IActionResult> AtualizarEstado(EstadoRequest request)
+    {
+        var sigla = request.Estado.Trim().ToUpperInvariant();
+
+        if (!SiglasUf.Contains(sigla))
+        {
+            return BadRequest(new { mensagem = "Estado inválido." });
+        }
+
+        var usuario = await _context.Usuarios.FirstAsync(u => u.Id == UsuarioIdLogado);
+
+        usuario.Estado = sigla;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new { estado = usuario.Estado });
+    }
 }

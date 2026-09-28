@@ -75,7 +75,8 @@ public class AuthController : ControllerBase
         var response = new LoginResponse
         {
             Token = token,
-            Usuario = new UsuarioResumo { Id = usuario.Id, Nome = usuario.Nome }
+            Usuario = new UsuarioResumo { Id = usuario.Id, Nome = usuario.Nome },
+            PrecisaInformarEstado = string.IsNullOrEmpty(usuario.Estado)
         };
 
         return Ok(response);
@@ -136,7 +137,8 @@ public class AuthController : ControllerBase
         var response = new LoginResponse
         {
             Token = token,
-            Usuario = new UsuarioResumo { Id = usuario.Id, Nome = usuario.Nome }
+            Usuario = new UsuarioResumo { Id = usuario.Id, Nome = usuario.Nome },
+            PrecisaInformarEstado = string.IsNullOrEmpty(usuario.Estado)
         };
 
         return Ok(response);
