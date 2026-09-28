@@ -1,0 +1,26 @@
+/*
+  Ronu — Tela "Só mais um passo" (estado.html)
+  Reaproveita o shell de auth (auth.css) e os campos/botões de styles.css;
+  aqui só os dois ajustes que a tela precisa.
+*/
+
+/* O eyebrow é inline-flex — sem isso ele cola no título logo abaixo. */
+.estado-eyebrow {
+  margin-bottom: var(--sp-3);
+}
+
+/* "Sair" é uma ação (limpa a sessão), então é um <button>, mas com a mesma
+   aparência do link .auth-switch-link do login/cadastro. */
+.estado-sair {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.estado-sair:focus-visible {
+  outline: var(--border-width) solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius);
+}

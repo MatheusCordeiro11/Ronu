@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ronu — Informar estado</title>
+  <meta name="description" content="Informe seu estado para o Ronu adaptar sua dieta à sua região.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/estado.css">
+</head>
+<body>
+
+  <div class="auth-page">
+
+    <aside class="auth-brand">
+      <a href="landing/v1/index.html" class="wordmark">ronu<span>.</span></a>
+      <div class="auth-brand-visual hero-carousel" id="authCarousel">
+        <ul class="hero-carousel-track">
+          <li class="hero-carousel-slide is-active">
+            <img src="img/modalidades/jiu-jitsu.png" alt="Atleta finalizando um golpe de jiu-jitsu no tatame" loading="eager">
+          </li>
+          <li class="hero-carousel-slide">
+            <img src="img/modalidades/muay-thai.png" alt="Lutadores em clinch durante um treino de muay thai" loading="lazy">
+          </li>
+          <li class="hero-carousel-slide">
+            <img src="img/modalidades/musculacao.png" alt="Atleta levantando peso em um treino de musculação" loading="lazy">
+          </li>
+          <li class="hero-carousel-slide">
+            <img src="img/modalidades/boxe.png" alt="Lutadores trocando golpes em um treino de boxe" loading="lazy">
+          </li>
+          <li class="hero-carousel-slide">
+            <img src="img/modalidades/futebol.png" alt="Jogadores disputando a bola em um treino de futebol" loading="lazy">
+          </li>
+          <li class="hero-carousel-slide">
+            <img src="img/modalidades/basquete.png" alt="Jogadores disputando a bola em um treino de basquete" loading="lazy">
+          </li>
+        </ul>
+
+        <div class="hero-carousel-controls">
+          <div class="hero-carousel-dots" role="tablist" aria-label="Selecionar modalidade">
+            <button type="button" class="hero-carousel-dot is-active" role="tab" aria-selected="true" aria-label="Jiu-jitsu"></button>
+            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Muay thai"></button>
+            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Musculação"></button>
+            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Boxe"></button>
+            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Futebol"></button>
+            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Basquete"></button>
+          </div>
+        </div>
+      </div>
+      <p class="auth-brand-quote">Sua dieta calcula o que seu treino realmente gasta.</p>
+    </aside>
+
+    <main class="auth-form-panel">
+      <!-- Oculto até estado.js confirmar que o usuário realmente precisa
+           informar o estado — evita a tela piscar antes de um redirecionamento. -->
+      <div class="auth-form-wrap" id="estado-conteudo" hidden>
+        <p class="eyebrow estado-eyebrow">Só mais um passo</p>
+        <h1 class="auth-title">Em que estado você mora?</h1>
+        <p class="auth-subtitle">Usamos o seu estado para adaptar os nomes e os alimentos da sua dieta à sua região.</p>
+
+        <div class="form-message form-message-error" id="form-error" role="alert" hidden></div>
+
+        <form id="estado-form" novalidate>
+          <div class="field">
+            <label for="estado">Estado</label>
+            <select id="estado" name="estado" class="field-select" autocomplete="address-level1" required>
+              <option value="" disabled selected>Selecione seu estado</option>
+              <option value="AC">Acre</option>
+              <option value="AL">Alagoas</option>
+              <option value="AP">Amapá</option>
+              <option value="AM">Amazonas</option>
+              <option value="BA">Bahia</option>
+              <option value="CE">Ceará</option>
+              <option value="DF">Distrito Federal</option>
+              <option value="ES">Espírito Santo</option>
+              <option value="GO">Goiás</option>
+              <option value="MA">Maranhão</option>
+              <option value="MT">Mato Grosso</option>
+              <option value="MS">Mato Grosso do Sul</option>
+              <option value="MG">Minas Gerais</option>
+              <option value="PA">Pará</option>
+              <option value="PB">Paraíba</option>
+              <option value="PR">Paraná</option>
+              <option value="PE">Pernambuco</option>
+              <option value="PI">Piauí</option>
+              <option value="RJ">Rio de Janeiro</option>
+              <option value="RN">Rio Grande do Norte</option>
+              <option value="RS">Rio Grande do Sul</option>
+              <option value="RO">Rondônia</option>
+              <option value="RR">Roraima</option>
+              <option value="SC">Santa Catarina</option>
+              <option value="SP">São Paulo</option>
+              <option value="SE">Sergipe</option>
+              <option value="TO">Tocantins</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="submit-btn">
+            <span class="btn-label">Continuar</span>
+          </button>
+        </form>
+
+        <p class="auth-switch">Não é você? <button type="button" class="auth-switch-link estado-sair" id="sair-btn">Sair</button></p>
+      </div>
+    </main>
+
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/estado.js"></script>
+  <script src="js/hero-carousel.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      initHeroCarousel(document.getElementById('authCarousel'), {
+        autoDelay: 5000,
+        resumeDelay: 8000,
+      });
+    });
+  </script>
+</body>
+</html>

@@ -12,6 +12,9 @@ const RONU_CONFIG = {
 
 const RONU_TOKEN_KEY = 'ronu:token';
 const RONU_USUARIO_KEY = 'ronu:usuario';
+// 'true' quando o último login avisou que a conta ainda não tem estado (UF) —
+// contas via Google ou anteriores ao campo. Lido por ronuRedirecionarPosAuth.
+const RONU_PRECISA_ESTADO_KEY = 'ronu:precisaEstado';
 
 function ronuSalvarSessao(token, usuario) {
   localStorage.setItem(RONU_TOKEN_KEY, token);
@@ -21,6 +24,7 @@ function ronuSalvarSessao(token, usuario) {
 function ronuLimparSessao() {
   localStorage.removeItem(RONU_TOKEN_KEY);
   localStorage.removeItem(RONU_USUARIO_KEY);
+  localStorage.removeItem(RONU_PRECISA_ESTADO_KEY);
 }
 
 function ronuUsuarioLogado() {
@@ -51,6 +55,7 @@ async function ronuLogin(email, senha) {
   }
 
   ronuSalvarSessao(dados.token, dados.usuario);
+  localStorage.setItem(RONU_PRECISA_ESTADO_KEY, String(dados.precisaInformarEstado));
   return dados;
 }
 
@@ -72,6 +77,7 @@ async function ronuLoginComGoogle(idToken) {
   }
 
   ronuSalvarSessao(dados.token, dados.usuario);
+  localStorage.setItem(RONU_PRECISA_ESTADO_KEY, String(dados.precisaInformarEstado));
   return dados;
 }
 
@@ -138,12 +144,36 @@ async function ronuChecarCadastroCompleto() {
 // trata sozinho), assume o caminho mais seguro: manda pro onboarding, que
 // vai mostrar o próprio erro se a API realmente estiver fora do ar.
 async function ronuRedirecionarPosAuth() {
+  if (localStorage.getItem(RONU_PRECISA_ESTADO_KEY) === 'true') {
+    window.location.href = 'estado.html';
+    return;
+  }
+
   try {
     const completo = await ronuChecarCadastroCompleto();
     window.location.href = completo ? 'dashboard.html' : 'onboarding.html';
   } catch (erro) {
     window.location.href = 'onboarding.html';
   }
+}
+
+// PUT /perfil/estado — usado por estado.html. A API normaliza e valida a UF;
+// em 400 devolve { mensagem }, repassada aqui como Error pra tela exibir.
+async function ronuSalvarEstado(estado) {
+  const resposta = await ronuFetchAutenticado('/perfil/estado', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ estado })
+  });
+
+  const dados = await resposta.json().catch(() => null);
+
+  if (!resposta.ok) {
+    throw new Error(dados?.mensagem || 'Não foi possível salvar seu estado. Tente novamente.');
+  }
+
+  localStorage.removeItem(RONU_PRECISA_ESTADO_KEY);
+  return dados;
 }
 
 function ronuMostrarErroFormulario(elemento, mensagem) {
