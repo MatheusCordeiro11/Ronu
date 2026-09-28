@@ -62,7 +62,8 @@ public class ContextoDietaBuilder : IContextoDietaBuilder
             Peso = objetivo.Peso,
             Objetivo = objetivo.Objetivo,
             Modalidades = modalidades,
-            Preferencias = preferencias
+            Preferencias = preferencias,
+            Estado = usuario.Estado
         };
     }
 }

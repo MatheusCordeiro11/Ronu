@@ -178,6 +178,12 @@ public class GeradorDietaGemini : IGeradorDietaIA
         var metasTexto = string.Join("\n", NomesDias.Select(nome =>
             $"- {nome}: {metasPorDia[nome].Calorias:F0} kcal"));
 
+        // Contas via Google ou anteriores ao campo podem estar sem estado —
+        // nesse caso a linha some do perfil (sem deixar linha em branco).
+        var estadoTexto = string.IsNullOrEmpty(contexto.Estado)
+            ? string.Empty
+            : $"\n- Estado onde mora (UF): {contexto.Estado}";
+
         return $"""
             Você é um nutricionista esportivo. Monte um plano alimentar semanal (7 dias)
             para uma pessoa com o seguinte perfil:
@@ -187,14 +193,14 @@ public class GeradorDietaGemini : IGeradorDietaIA
             - Peso: {contexto.Peso} kg
             - Altura: {contexto.Altura} cm
             - Objetivo: {contexto.Objetivo}
-            - Modalidades praticadas (com os dias da semana de cada uma): {modalidadesTexto}
+            - Modalidades praticadas (com os dias da semana de cada uma): {modalidadesTexto}{estadoTexto}
 
             Metas calóricas diárias (calculadas a partir da taxa metabólica basal + gasto
             real de treino de CADA dia específico — dias de treino têm meta mais alta que
             dias de descanso):
             {metasTexto}
 
-            Alimentos que a pessoa prefere (inclua quando fizer sentido nutricionalmente): {(string.IsNullOrEmpty(preferidosTexto) ? "nenhuma preferência informada" : preferidosTexto)}
+            Alimentos que a pessoa gosta (use como base do plano, mas NÃO se limite a eles: complete com outros alimentos comuns e adequados ao objetivo, variando as opções ao longo da semana): {(string.IsNullOrEmpty(preferidosTexto) ? "nenhuma preferência informada" : preferidosTexto)}
 
             Alimentos que a pessoa deve evitar (NUNCA inclua nenhum destes, nem em pequena
             quantidade, nem como ingrediente de outro prato): {(string.IsNullOrEmpty(evitarTexto) ? "nenhuma restrição informada" : evitarTexto)}
@@ -206,6 +212,10 @@ public class GeradorDietaGemini : IGeradorDietaIA
             4. Não repita a mesma refeição (mesmos alimentos) em dois dias seguidos.
             5. Retorne quantidades realistas e mensuráveis para cada alimento (em gramas, mililitros ou unidades).
             6. Use EXATAMENTE os nomes dos dias como escritos acima (ex: "Segunda-feira") no campo diaSemana de cada dia — precisa corresponder exatamente a um dos 7 nomes listados.
+            7. Adeque o plano ao hábito alimentar brasileiro: use as refeições típicas (café da manhã, lanche da manhã, almoço, lanche da tarde, jantar e, se fizer sentido, ceia leve) e combinações que um brasileiro realmente consome. Bebidas com cafeína (café, chá preto, chá mate, energéticos) apenas de manhã e no início da tarde, nunca no jantar nem na ceia.
+            8. Bebida alcoólica só pode aparecer se estiver entre os alimentos preferidos da pessoa, no máximo uma vez na semana, no sábado ou no domingo, em quantidade moderada (por exemplo, uma lata ou long neck), com as calorias contabilizadas no dia.
+            9. Use os nomes de alimentos e pratos como são chamados na região da pessoa (exemplo: em Minas Gerais o feijão é chamado apenas de "feijão", sem especificar o tipo; macaxeira, aipim e mandioca variam conforme a região). Se o estado não foi informado, use os nomes mais comuns no Brasil.
+            10. Para um mesmo alimento, use sempre a mesma unidade de medida em todas as refeições e dias da semana. Itens contáveis (ovo, fruta inteira, fatia de pão) sempre em unidades; alimentos sólidos em gramas; líquidos em mililitros. Nunca escreva o mesmo alimento em gramas em um lugar e em unidades em outro.
             """;
     }
 

@@ -15,4 +15,5 @@ public class ContextoDietaDto
     public required string Objetivo { get; set; }
     public required List<ModalidadeContextoDto> Modalidades { get; set; }
     public required List<PreferenciaContextoDto> Preferencias { get; set; }
+    public string Estado { get; set; } = string.Empty;
 }
