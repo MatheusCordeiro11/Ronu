@@ -357,7 +357,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       objetivoAtual = objetivoSalvo.objetivo;
 
       fecharFormularioRegistrar();
-      elRegistrarSucesso.textContent = 'Peso registrado.';
+      elRegistrarSucesso.textContent = 'Peso registrado. A tendência se ajusta aos poucos, para refletir a direção real, não picos de um dia.';
       elRegistrarSucesso.hidden = false;
 
       await carregarTendencia();
