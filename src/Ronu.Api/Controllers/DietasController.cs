@@ -25,17 +25,20 @@ public class DietasController : ControllerBase
     private readonly IContextoDietaBuilder _contextoBuilder;
     private readonly IGeradorDietaIA _geradorDieta;
     private readonly IRepositorioDietaIA _repositorioDieta;
+    private readonly ILogger<DietasController> _logger;
 
     public DietasController(
         ApplicationDbContext context,
         IContextoDietaBuilder contextoBuilder,
         IGeradorDietaIA geradorDieta,
-        IRepositorioDietaIA repositorioDieta)
+        IRepositorioDietaIA repositorioDieta,
+        ILogger<DietasController> logger)
     {
         _context = context;
         _contextoBuilder = contextoBuilder;
         _geradorDieta = geradorDieta;
         _repositorioDieta = repositorioDieta;
+        _logger = logger;
     }
 
     private int UsuarioIdLogado =>
@@ -70,7 +73,26 @@ public class DietasController : ControllerBase
         }
 
         var contexto = await _contextoBuilder.ConstruirAsync(UsuarioIdLogado);
-        var dieta = await _geradorDieta.GerarDietaAsync(contexto);
+        // Falhas de comunicação com o Gemini (rede, status de erro como 503,
+        // timeout) viram um 503 com mensagem amigável. Qualquer outra exceção
+        // (ex: InvalidOperationException de dia inválido na resposta) continua
+        // subindo para o GlobalExceptionHandler.
+        DietaSemanalDto dieta;
+        try
+        {
+            dieta = await _geradorDieta.GerarDietaAsync(contexto);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogWarning(ex, "Falha ao chamar o Gemini para gerar dieta do usuário {UsuarioId}", UsuarioIdLogado);
+            return StatusCode(503, new { mensagem = "Não foi possível gerar sua dieta agora. Tente novamente em alguns instantes." });
+        }
+        catch (TaskCanceledException ex)
+        {
+            _logger.LogWarning(ex, "Tempo esgotado ao chamar o Gemini para gerar dieta do usuário {UsuarioId}", UsuarioIdLogado);
+            return StatusCode(503, new { mensagem = "Não foi possível gerar sua dieta agora. Tente novamente em alguns instantes." });
+        }
+
         await _repositorioDieta.SalvarAsync(UsuarioIdLogado, dieta);
 
         var response = new DietaResponse
