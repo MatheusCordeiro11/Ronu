@@ -168,6 +168,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     nome.className = 'meal-name';
     nome.textContent = refeicao.nome;
 
+    // Horário antes do nome, como numa agenda. Dietas geradas antes do campo
+    // existir vêm com horario null — aí o card fica só com o nome.
+    const titulo = document.createElement('div');
+    titulo.className = 'meal-title';
+    if (refeicao.horario) {
+      const horario = document.createElement('time');
+      horario.className = 'meal-time num';
+      horario.dateTime = refeicao.horario;
+      horario.textContent = refeicao.horario;
+      titulo.appendChild(horario);
+    }
+    titulo.appendChild(nome);
+
     const macros = document.createElement('dl');
     macros.className = 'meal-macros num';
     macros.innerHTML = `
@@ -177,7 +190,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       <div><dt>G</dt><dd>${formatarNumero(refeicao.macros.gordurasG)}g</dd></div>
     `;
 
-    head.append(nome, macros);
+    head.append(titulo, macros);
 
     const lista = document.createElement('ul');
     lista.className = 'meal-food-list';
@@ -234,8 +247,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function gerarDieta(botao) {
+    // O estado de carregamento só bloqueia o mouse (pointer-events: none) —
+    // Enter/Espaço com o botão em foco disparariam outra geração no meio da
+    // atual, por isso a ativação é ignorada aqui enquanto ele carrega.
+    if (botao.dataset.loading === 'true') return;
+
     ronuOcultarErroFormulario(elGerarError);
     ronuDefinirCarregando(botao, true, 'Montando sua dieta da semana...');
+    botao.setAttribute('aria-busy', 'true');
 
     try {
       const resposta = await ronuFetchAutenticado('/dietas/gerar', { method: 'POST' });
@@ -253,6 +272,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       ronuMostrarErroFormulario(elGerarError, erro.message);
     } finally {
       ronuDefinirCarregando(botao, false);
+      botao.removeAttribute('aria-busy');
     }
   }
 

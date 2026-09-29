@@ -280,8 +280,21 @@
   border-bottom: var(--border-width) solid var(--border);
 }
 
+.meal-title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+}
+
 .meal-name {
   font-size: var(--fs-md);
+}
+
+/* Horário da refeição: marca discreta antes do nome, como numa agenda. */
+.meal-time {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--text-muted);
 }
 
 .meal-macros {
@@ -329,6 +342,72 @@
   color: var(--text-muted);
   font-size: var(--fs-xs);
   white-space: nowrap;
+}
+
+/* ---------- Gerar dieta: traço percorrendo o contorno ----------
+   Só nos dois botões de gerar dieta (.btn-gerar-dieta), sem mexer na regra
+   compartilhada .btn[data-loading] de auth.css. Um traço de 1px dá a volta
+   na borda enquanto a geração roda (20–70 s): um conic-gradient recortado
+   por máscara até sobrar só o anel da borda, com o ângulo animado via
+   @property. Sem sombra nem glow — é a própria linha de 1px do sistema. */
+@property --gerar-angulo {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.btn-gerar-dieta {
+  --gerar-traco: var(--accent);
+  position: relative;
+}
+
+/* Sobre o fundo dourado do botão primário, um traço dourado sumiria. */
+.btn-gerar-dieta.btn-primary {
+  --gerar-traco: var(--bg);
+}
+
+/* Opacidade total no botão (a regra compartilhada deixa em 0.7) para o
+   traço ficar nítido — só o texto fica apagado. */
+.btn-gerar-dieta[data-loading="true"] {
+  opacity: 1;
+}
+
+.btn-gerar-dieta[data-loading="true"] .btn-label {
+  opacity: 0.6;
+}
+
+.btn-gerar-dieta[data-loading="true"]::before {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--border-width));
+  padding: var(--border-width);
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--gerar-angulo),
+    transparent 0deg 210deg,
+    var(--gerar-traco) 290deg 350deg,
+    transparent 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: gerar-contorno 2.4s linear infinite;
+}
+
+@keyframes gerar-contorno {
+  to {
+    --gerar-angulo: 360deg;
+  }
+}
+
+/* Sem movimento: o contorno inteiro fica na cor do traço, parado. */
+@media (prefers-reduced-motion: reduce) {
+  .btn-gerar-dieta[data-loading="true"]::before {
+    animation: none;
+    background: var(--gerar-traco);
+  }
 }
 
 /* ---------- Responsivo ---------- */
