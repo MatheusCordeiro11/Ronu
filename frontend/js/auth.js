@@ -7,7 +7,7 @@
 // API_BASE aqui (não há build step/variável de ambiente neste projeto,
 // então esse valor tem que ser editado à mão por ambiente).
 const RONU_CONFIG = {
-  API_BASE: 'http://localhost:5011/api',
+  API_BASE: 'https://ronu-api-dwcbcwgqgzgdhhag.chilecentral-01.azurewebsites.net/api',
 };
 
 const RONU_TOKEN_KEY = 'ronu:token';
