@@ -16,6 +16,7 @@ Decisões conscientes de escopo do MVP, registradas aqui para não serem esqueci
 
 - **Foto de perfil real não implementada.** O avatar no header usa iniciais do nome (calculadas dinamicamente), sem upload de imagem real. Em andamento: decidido usar Cloudinary (armazenamento gratuito de imagens) — implementação pausada temporariamente por instabilidade do serviço no momento da tentativa de configuração.
 - **Meta calórica não é adaptativa ao progresso real.** O peso de tendência (GET /api/objetivos/tendencia) já existe e é exibido em progresso.html, mas a geração de dieta (GeradorDietaGemini) continua calculando a meta só por fórmula (Mifflin-St Jeor + gasto de treino + ajuste fixo por objetivo), sem considerar se o peso real do usuário está evoluindo como esperado. V2: implementar ajuste adaptativo (inspirado no MacroFactor — pesquisa registrada em conversa anterior), com guard-rails: só ajustar após ~14 dias de histórico real, regressão linear sobre o peso de tendência, passo de ajuste limitado (~5%/semana), e transparência ao usuário sobre por que a meta mudou.
+- **No mobile, o botão "Sair" do header compartilhado (o mesmo usado em perfil.html, treino.html, alimentacao.html e progresso.html) sai da tela pela direita, causando rolagem horizontal indevida.** Problema pré-existente (não introduzido pela divisão de configuracoes.html em 3 páginas), identificado durante o teste visual dessa tarefa. Afeta pelo menos progresso.html também, por usar o mesmo header.
 
 ## Geração de dieta (IA)
 
