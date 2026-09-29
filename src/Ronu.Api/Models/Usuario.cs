@@ -28,6 +28,8 @@ public class Usuario
     public string? Sexo { get; set; }
     [MaxLength(2)]
     public string Estado { get; set; } = string.Empty;
+    [MaxLength(500)]
+    public string? RotinaDiaria { get; set; }
 
     public ICollection<UsuarioModalidade> UsuarioModalidades { get; set; } = new List<UsuarioModalidade>();
     public ICollection<ObjetivoUsuario> ObjetivosUsuario { get; set; } = new List<ObjetivoUsuario>();

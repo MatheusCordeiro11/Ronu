@@ -23,4 +23,12 @@ public class RefeicaoDto
     /// calculados com base nos alimentos e suas quantidades.
     /// </summary>
     public required MacrosDto Macros { get; set; }
+
+    /// <summary>
+    /// Horário sugerido da refeição, no formato HH:mm (ex: "07:30"). Nulo em
+    /// dietas geradas antes deste campo existir — por isso não é required:
+    /// as dietas já salvas em DietasIA.ConteudoJson são desserializadas com
+    /// esta mesma classe e quebrariam se o campo fosse obrigatório.
+    /// </summary>
+    public string? Horario { get; set; }
 }

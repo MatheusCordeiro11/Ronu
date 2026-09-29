@@ -184,6 +184,12 @@ public class GeradorDietaGemini : IGeradorDietaIA
             ? string.Empty
             : $"\n- Estado onde mora (UF): {contexto.Estado}";
 
+        // Rotina é opcional — sem ela o parágrafo some e os horários seguem
+        // o padrão típico brasileiro (regra 11).
+        var rotinaTexto = string.IsNullOrEmpty(contexto.RotinaDiaria)
+            ? string.Empty
+            : $"\n\nRotina diária da pessoa (use para estimar os horários de cada refeição): {contexto.RotinaDiaria}";
+
         return $"""
             Você é um nutricionista esportivo. Monte um plano alimentar semanal (7 dias)
             para uma pessoa com o seguinte perfil:
@@ -203,7 +209,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
             Alimentos que a pessoa gosta (use como base do plano, mas NÃO se limite a eles: complete com outros alimentos comuns e adequados ao objetivo, variando as opções ao longo da semana): {(string.IsNullOrEmpty(preferidosTexto) ? "nenhuma preferência informada" : preferidosTexto)}
 
             Alimentos que a pessoa deve evitar (NUNCA inclua nenhum destes, nem em pequena
-            quantidade, nem como ingrediente de outro prato): {(string.IsNullOrEmpty(evitarTexto) ? "nenhuma restrição informada" : evitarTexto)}
+            quantidade, nem como ingrediente de outro prato): {(string.IsNullOrEmpty(evitarTexto) ? "nenhuma restrição informada" : evitarTexto)}{rotinaTexto}
 
             Regras obrigatórias:
             1. A soma de calorias de cada dia deve ficar dentro de uma margem de 5% (para mais ou para menos) da meta ESPECÍFICA daquele dia, listada acima — cada dia tem uma meta diferente, não use um valor único para todos os 7.
@@ -216,6 +222,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
             8. Bebida alcoólica só pode aparecer se estiver entre os alimentos preferidos da pessoa, no máximo uma vez na semana, no sábado ou no domingo, em quantidade moderada (por exemplo, uma lata ou long neck), com as calorias contabilizadas no dia.
             9. Use os nomes de alimentos e pratos como são chamados na região da pessoa (exemplo: em Minas Gerais o feijão é chamado apenas de "feijão", sem especificar o tipo; macaxeira, aipim e mandioca variam conforme a região). Se o estado não foi informado, use os nomes mais comuns no Brasil.
             10. Para um mesmo alimento, use sempre a mesma unidade de medida em todas as refeições e dias da semana. Itens contáveis (ovo, fruta inteira, fatia de pão) sempre em unidades; alimentos sólidos em gramas; líquidos em mililitros. Nunca escreva o mesmo alimento em gramas em um lugar e em unidades em outro.
+            11. Preencha o campo "horario" de cada refeição no formato HH:mm (ex: "07:30"). Se a rotina diária da pessoa foi informada, baseie os horários nela; caso contrário, use horários típicos do brasileiro (café da manhã entre 6h30 e 8h, almoço entre 12h e 13h30, jantar entre 19h e 21h).
             """;
     }
 
@@ -253,9 +260,10 @@ public class GeradorDietaGemini : IGeradorDietaIA
             {
                 nome = new { type = "STRING" },
                 alimentos = new { type = "ARRAY", items = alimento },
-                macros
+                macros,
+                horario = new { type = "STRING" }
             },
-            required = new[] { "nome", "alimentos", "macros" }
+            required = new[] { "nome", "alimentos", "macros", "horario" }
         };
 
         var dia = new

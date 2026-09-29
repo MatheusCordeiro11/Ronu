@@ -12,4 +12,5 @@ public class PerfilRequest
     public required decimal Altura { get; set; }
     public required string Sexo { get; set; }
     public required DateOnly DataNascimento { get; set; }
+    public string? RotinaDiaria { get; set; }
 }

@@ -11,4 +11,5 @@ public class PerfilResponse
     public decimal? Altura { get; set; }
     public string? Sexo { get; set; }
     public DateOnly? DataNascimento { get; set; }
+    public string? RotinaDiaria { get; set; }
 }
