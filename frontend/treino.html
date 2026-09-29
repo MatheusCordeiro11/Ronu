@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ronu — Treino</title>
+  <meta name="description" content="As modalidades que você pratica, com dias e duração de cada treino.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/onboarding.css">
+  <link rel="stylesheet" href="css/configuracoes.css">
+</head>
+<body>
+
+  <header class="simple-header border-b">
+    <div class="container dashboard-header-inner">
+      <a href="landing/v1/index.html" class="wordmark">ronu<span>.</span></a>
+      <div class="header-actions">
+        <a href="dashboard.html" class="btn btn-secondary">Voltar ao dashboard</a>
+        <button type="button" id="logout-btn" class="btn btn-secondary">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="config-subnav border-b" aria-label="Configurações da conta">
+    <div class="container config-subnav-inner">
+      <a href="perfil.html" class="config-subnav-link">Perfil</a>
+      <a href="treino.html" class="config-subnav-link" aria-current="page">Treino</a>
+      <a href="alimentacao.html" class="config-subnav-link">Alimentação</a>
+    </div>
+  </nav>
+
+  <main class="config-page">
+    <div class="container">
+
+      <!-- ---------- Modalidades ---------- -->
+      <section class="config-section" aria-labelledby="modalidades-heading">
+        <div class="config-section-head">
+          <h1 id="modalidades-heading" class="config-section-title">Modalidades praticadas</h1>
+          <p class="config-section-subtitle">Usadas pra calcular o gasto calórico do seu treino.</p>
+        </div>
+
+        <p class="text-muted" id="modalidades-loading">Carregando...</p>
+
+        <div class="form-message form-message-error" id="modalidades-error" hidden></div>
+
+        <ul class="modalidade-config-list" id="modalidade-config-list" hidden></ul>
+
+        <div class="modalidade-add-form" id="modalidade-add-form" hidden>
+          <div class="field">
+            <label>Adicionar modalidade</label>
+            <div class="option-group" role="radiogroup" aria-label="Modalidade a adicionar" id="modalidade-add-options"></div>
+          </div>
+
+          <div class="modalidade-collapse" id="modalidade-add-collapse">
+            <div class="modalidade-collapse-inner">
+              <div class="field">
+                <label>Dias da semana</label>
+                <div class="modalidade-dias" role="group" aria-label="Dias da semana a adicionar" id="modalidade-add-dias">
+                  <button type="button" class="dia-toggle" data-dia="1" aria-pressed="false" aria-label="segunda-feira" disabled>SEG</button>
+                  <button type="button" class="dia-toggle" data-dia="2" aria-pressed="false" aria-label="terça-feira" disabled>TER</button>
+                  <button type="button" class="dia-toggle" data-dia="3" aria-pressed="false" aria-label="quarta-feira" disabled>QUA</button>
+                  <button type="button" class="dia-toggle" data-dia="4" aria-pressed="false" aria-label="quinta-feira" disabled>QUI</button>
+                  <button type="button" class="dia-toggle" data-dia="5" aria-pressed="false" aria-label="sexta-feira" disabled>SEX</button>
+                  <button type="button" class="dia-toggle" data-dia="6" aria-pressed="false" aria-label="sábado" disabled>SÁB</button>
+                  <button type="button" class="dia-toggle" data-dia="7" aria-pressed="false" aria-label="domingo" disabled>DOM</button>
+                </div>
+              </div>
+
+              <div class="modalidade-duracao-field" role="group" aria-label="Duração média por sessão">
+                <span class="modalidade-duracao-titulo">Duração média por sessão</span>
+                <div class="modalidade-duracao-grupo">
+                  <label class="modalidade-duracao-unidade">
+                    <span>Horas</span>
+                    <input type="number" id="modalidade-add-duracao-horas" class="modalidade-duracao-horas num" min="0" max="5" step="1" value="0" disabled>
+                  </label>
+                  <label class="modalidade-duracao-unidade">
+                    <span>Min</span>
+                    <select id="modalidade-add-duracao-minutos" class="modalidade-duracao-minutos num" disabled>
+                      <option value="0">0</option>
+                      <option value="15">15</option>
+                      <option value="30">30</option>
+                      <option value="45">45</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-secondary" id="btn-adicionar-modalidade">
+            <span class="btn-label">Adicionar</span>
+          </button>
+        </div>
+
+        <p class="text-muted" id="modalidades-catalogo-completo" hidden>Todas as modalidades do catálogo já estão adicionadas.</p>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="js/auth.js"></script>
+  <script src="js/treino.js"></script>
+</body>
+</html>

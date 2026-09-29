@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // minutos separados (minutos travado em múltiplos de 15, sem digitação
   // livre) e converte só na hora de montar o payload. Sem inverso aqui: o
   // onboarding nunca pré-carrega um valor já salvo (isso só acontece na
-  // edição em configuracoes.js).
+  // edição em treino.js).
   function horasMinutosParaDecimal(horas, minutos) {
     return horas + minutos / 60;
   }

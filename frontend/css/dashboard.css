@@ -17,7 +17,7 @@
   gap: var(--sp-3);
 }
 
-/* Iniciais do usuário — acesso a configuracoes.html. Circular por decisão
+/* Iniciais do usuário — acesso a perfil.html. Circular por decisão
    explícita de produto (avatar de conta), não uma pill genérica: é o único
    elemento com esse raio no sistema. */
 .avatar {

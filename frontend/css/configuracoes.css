@@ -1,9 +1,62 @@
 /*
-  Ronu — Configurações (conta)
+  Ronu — Configurações (conta): perfil.html, treino.html e alimentacao.html
   Depende de styles.css, auth.css, dashboard.css (.simple-header,
   .header-actions) e onboarding.css (.field, .option-pill,
   .preferencia-form/.preferencia-list/.preferencia-item).
 */
+
+/* ---------- Sub-navegação entre as três páginas ----------
+   Links de texto, sem pill de fundo (regra de navegação do DESIGN.md). O
+   ativo ganha uma linha de 1px em Ouro de Faixa sobreposta à borda de baixo
+   da faixa, como uma aba — o dourado só pontua (Regra do Ouro Raro). */
+.config-subnav-inner {
+  display: flex;
+  gap: var(--sp-5);
+}
+
+.config-subnav-link {
+  position: relative;
+  display: inline-block;
+  padding: var(--sp-3) 0;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.config-subnav-link:hover,
+.config-subnav-link[aria-current="page"] {
+  color: var(--text);
+}
+
+.config-subnav-link[aria-current="page"]::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(-1 * var(--border-width));
+  height: var(--border-width);
+  background: var(--accent);
+}
+
+.config-subnav-link:focus-visible {
+  outline: var(--border-width) solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius);
+}
+
+@media (max-width: 720px) {
+  .config-subnav-inner {
+    gap: var(--sp-4);
+  }
+}
+
+/* A seção já tem o próprio respiro de cima; sem isto, somaria com o do
+   .config-page e abriria um vão grande entre a sub-navegação e o título. */
+.config-subnav + .config-page {
+  padding-top: 0;
+}
 
 .config-page {
   min-height: calc(100vh - 73px);

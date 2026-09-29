@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ronu — Perfil</title>
+  <meta name="description" content="Seus dados pessoais, usados no cálculo da sua dieta.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/onboarding.css">
+  <link rel="stylesheet" href="css/configuracoes.css">
+</head>
+<body>
+
+  <header class="simple-header border-b">
+    <div class="container dashboard-header-inner">
+      <a href="landing/v1/index.html" class="wordmark">ronu<span>.</span></a>
+      <div class="header-actions">
+        <a href="dashboard.html" class="btn btn-secondary">Voltar ao dashboard</a>
+        <button type="button" id="logout-btn" class="btn btn-secondary">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="config-subnav border-b" aria-label="Configurações da conta">
+    <div class="container config-subnav-inner">
+      <a href="perfil.html" class="config-subnav-link" aria-current="page">Perfil</a>
+      <a href="treino.html" class="config-subnav-link">Treino</a>
+      <a href="alimentacao.html" class="config-subnav-link">Alimentação</a>
+    </div>
+  </nav>
+
+  <main class="config-page">
+    <div class="container">
+
+      <!-- ---------- Perfil ---------- -->
+      <section class="config-section" aria-labelledby="perfil-heading">
+        <div class="config-section-head">
+          <h1 id="perfil-heading" class="config-section-title">Dados pessoais</h1>
+          <p class="config-section-subtitle">Usados pra calcular sua taxa metabólica basal.</p>
+        </div>
+
+        <p class="text-muted" id="perfil-loading">Carregando...</p>
+
+        <div class="form-message form-message-error" id="perfil-error" hidden></div>
+        <div class="form-message form-message-success" id="perfil-success" hidden></div>
+
+        <form id="perfil-form" hidden>
+          <div class="field" id="field-perfil-altura">
+            <label for="perfil-altura">Altura (m)</label>
+            <input type="text" id="perfil-altura" name="altura" inputmode="decimal" placeholder="Ex: 1,74" required>
+            <span class="field-error-message" id="perfil-altura-error" hidden></span>
+          </div>
+
+          <div class="field">
+            <label>Sexo</label>
+            <div class="option-group" role="radiogroup" aria-label="Sexo">
+              <label class="option-pill">
+                <input type="radio" name="perfil-sexo" value="Masculino">
+                <span>Masculino</span>
+              </label>
+              <label class="option-pill">
+                <input type="radio" name="perfil-sexo" value="Feminino">
+                <span>Feminino</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="perfil-data-nascimento">Data de nascimento</label>
+            <input type="date" id="perfil-data-nascimento" name="data-nascimento" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="btn-salvar-perfil">
+            <span class="btn-label">Salvar alterações</span>
+          </button>
+        </form>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="js/auth.js"></script>
+  <script src="js/perfil.js"></script>
+</body>
+</html>
