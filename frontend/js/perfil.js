@@ -27,6 +27,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const elDataNascimento = document.getElementById('perfil-data-nascimento');
   const btnSalvarPerfil = document.getElementById('btn-salvar-perfil');
 
+  // A rotina diária é editada em alimentacao.html, mas o PUT /perfil recebe
+  // tudo junto — guardada do GET e reenviada no PUT, senão salvar só os
+  // dados físicos aqui apagaria a rotina (iria como null).
+  let rotinaDiariaAtual = null;
+
   // Mesma faixa usada no onboarding: data de nascimento não pode ser
   // hoje/futuro nem implicar uma idade absurda.
   function definirFaixaDataNascimento() {
@@ -42,6 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!resposta.ok) throw new Error();
 
       const perfil = await resposta.json();
+      rotinaDiariaAtual = perfil.rotinaDiaria ?? null;
       elAltura.value = perfil.altura != null ? ronuFormatarAlturaMetros(perfil.altura) : '';
       elDataNascimento.value = perfil.dataNascimento ?? '';
       if (perfil.sexo) {
@@ -92,7 +98,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         body: JSON.stringify({
           altura: alturaCm,
           sexo: sexoSelecionado.value,
-          dataNascimento: elDataNascimento.value
+          dataNascimento: elDataNascimento.value,
+          rotinaDiaria: rotinaDiariaAtual
         })
       });
 

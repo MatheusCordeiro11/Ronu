@@ -103,6 +103,57 @@
   margin-top: var(--sp-2);
 }
 
+/* ---------- Rotina diária (alimentacao.html) ----------
+   O sistema não tinha estilo de textarea: segue o mesmo formato do
+   .field input de styles.css (fundo, borda de 1px, raio, foco dourado). */
+.field textarea {
+  background: var(--bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--sp-3);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.field textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.field textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rotina-contador {
+  align-self: flex-end;
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+}
+
+.rotina-contador.is-excedido {
+  color: var(--danger);
+}
+
+#rotina-form .btn {
+  margin-top: var(--sp-2);
+}
+
+#rotina-form .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#rotina-error a {
+  color: var(--text);
+  text-underline-offset: 3px;
+}
+
 /* ---------- Preferências: cada item ganha uma ação de remover ---------- */
 .preferencia-info {
   display: flex;

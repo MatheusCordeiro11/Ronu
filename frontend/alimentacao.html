@@ -75,6 +75,31 @@
         <ul class="preferencia-list" id="preferencia-list" hidden></ul>
       </section>
 
+      <!-- ---------- Rotina diária ---------- -->
+      <section class="config-section border-t" aria-labelledby="rotina-heading">
+        <div class="config-section-head">
+          <h2 id="rotina-heading" class="config-section-title">Rotina diária</h2>
+          <p class="config-section-subtitle">Usamos sua rotina para estimar os horários das refeições da sua dieta.</p>
+        </div>
+
+        <p class="text-muted" id="rotina-loading">Carregando sua rotina...</p>
+
+        <div class="form-message form-message-error" id="rotina-error" hidden></div>
+        <div class="form-message form-message-success" id="rotina-success" hidden></div>
+
+        <form id="rotina-form" novalidate hidden>
+          <div class="field">
+            <label for="rotina-texto">Sua rotina</label>
+            <textarea id="rotina-texto" name="rotina" rows="4" maxlength="500" placeholder="Ex: acordo às 6h, trabalho das 8h às 17h, treino às 19h" aria-describedby="rotina-contador"></textarea>
+            <span class="rotina-contador num" id="rotina-contador">0/500</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="btn-salvar-rotina">
+            <span class="btn-label">Salvar rotina</span>
+          </button>
+        </form>
+      </section>
+
     </div>
   </main>
 

@@ -1,5 +1,6 @@
-// Ronu — Alimentação (preferências alimentares)
-// Listar/adicionar/remover alimentos preferidos ou a evitar. Uma das três
+// Ronu — Alimentação (preferências alimentares + rotina diária)
+// Listar/adicionar/remover alimentos preferidos ou a evitar, e editar a
+// rotina diária usada para estimar os horários das refeições. Uma das três
 // páginas de configurações da conta, ao lado de perfil.html e treino.html.
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -206,5 +207,126 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  await carregarPreferencias();
+  // ---------- Rotina diária ----------
+  // Não tem endpoint próprio: vive no perfil, e o PUT /perfil exige altura,
+  // sexo e data de nascimento junto (required no PerfilRequest). Por isso o
+  // GET guarda esses três para reenviar sem alteração no PUT da rotina.
+
+  const ROTINA_LIMITE = 500;
+
+  const elRotinaLoading = document.getElementById('rotina-loading');
+  const elRotinaError = document.getElementById('rotina-error');
+  const elRotinaSuccess = document.getElementById('rotina-success');
+  const elRotinaForm = document.getElementById('rotina-form');
+  const elRotinaTexto = document.getElementById('rotina-texto');
+  const elRotinaContador = document.getElementById('rotina-contador');
+  const btnSalvarRotina = document.getElementById('btn-salvar-rotina');
+
+  let perfilAltura = null;
+  let perfilSexo = null;
+  let perfilDataNascimento = null;
+
+  function atualizarContadorRotina() {
+    const tamanho = elRotinaTexto.value.length;
+    elRotinaContador.textContent = `${tamanho}/${ROTINA_LIMITE}`;
+    elRotinaContador.classList.toggle('is-excedido', tamanho > ROTINA_LIMITE);
+  }
+
+  // Sem os dados do perfil o PUT sempre falharia — em vez de deixar o
+  // usuário descobrir isso só ao salvar, a seção já abre travada.
+  function bloquearRotina() {
+    elRotinaTexto.disabled = true;
+    btnSalvarRotina.disabled = true;
+  }
+
+  function mostrarPerfilIncompleto() {
+    elRotinaError.textContent = 'Complete seus dados pessoais em ';
+    const link = document.createElement('a');
+    link.href = 'perfil.html';
+    link.textContent = 'Perfil';
+    elRotinaError.append(link, ' antes de salvar sua rotina.');
+    elRotinaError.hidden = false;
+  }
+
+  async function carregarRotina() {
+    try {
+      const resposta = await ronuFetchAutenticado('/perfil');
+      if (!resposta.ok) throw new Error();
+
+      const perfil = await resposta.json();
+      perfilAltura = perfil.altura;
+      perfilSexo = perfil.sexo;
+      perfilDataNascimento = perfil.dataNascimento;
+      elRotinaTexto.value = perfil.rotinaDiaria ?? '';
+      atualizarContadorRotina();
+
+      elRotinaLoading.hidden = true;
+      elRotinaForm.hidden = false;
+
+      if (perfilAltura == null || perfilSexo == null || perfilDataNascimento == null) {
+        mostrarPerfilIncompleto();
+        bloquearRotina();
+      }
+    } catch (erro) {
+      if (erro.message !== 'Sessão expirada.') {
+        elRotinaLoading.hidden = true;
+        ronuMostrarErroFormulario(elRotinaError, 'Não foi possível carregar sua rotina. Recarregue a página.');
+        elRotinaForm.hidden = false;
+        bloquearRotina();
+      }
+    }
+  }
+
+  async function salvarRotina(evento) {
+    evento.preventDefault();
+
+    ronuOcultarErroFormulario(elRotinaError);
+    elRotinaSuccess.hidden = true;
+
+    // maxlength="500" já impede passar do limite no navegador; esta checagem
+    // é só a rede de segurança caso o atributo seja contornado.
+    if (elRotinaTexto.value.length > ROTINA_LIMITE) {
+      ronuMostrarErroFormulario(elRotinaError, `Sua rotina pode ter no máximo ${ROTINA_LIMITE} caracteres.`);
+      return;
+    }
+
+    ronuDefinirCarregando(btnSalvarRotina, true, 'Salvando...');
+
+    // Campo vazio (ou só com espaços) vira null, não "" — "sem rotina"
+    // fica com um único valor no banco.
+    const rotinaDiaria = elRotinaTexto.value.trim() || null;
+
+    try {
+      const resposta = await ronuFetchAutenticado('/perfil', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          altura: perfilAltura,
+          sexo: perfilSexo,
+          dataNascimento: perfilDataNascimento,
+          rotinaDiaria
+        })
+      });
+
+      if (!resposta.ok) {
+        const corpo = await resposta.json().catch(() => null);
+        throw new Error(corpo?.mensagem || 'Não foi possível salvar. Tente novamente.');
+      }
+
+      elRotinaSuccess.textContent = 'Rotina salva.';
+      elRotinaSuccess.hidden = false;
+    } catch (erro) {
+      if (erro.message !== 'Sessão expirada.') {
+        ronuMostrarErroFormulario(elRotinaError, erro.message);
+      }
+    } finally {
+      ronuDefinirCarregando(btnSalvarRotina, false);
+    }
+  }
+
+  elRotinaTexto.addEventListener('input', atualizarContadorRotina);
+  elRotinaForm.addEventListener('submit', salvarRotina);
+
+  // Seções independentes: uma falha numa não impede a outra de carregar.
+  await Promise.all([carregarPreferencias(), carregarRotina()]);
 });
