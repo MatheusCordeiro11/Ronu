@@ -2,7 +2,7 @@
 
 Decisões conscientes de escopo do MVP, registradas aqui para não serem esquecidas nem confundidas com bugs.
 
-## Resolvidas
+## Resolvidas ou descartadas
 
 - ~~Sem edição de perfil, modalidades ou preferências já salvos~~ — **Resolvido.** Perfil tem `GET`/`PUT /api/perfil`, com tela em `configuracoes.html`. Preferências e Modalidades têm CRUD completo (`GET`/`POST` upsert/`DELETE`), com guarda-rail contra remover a última modalidade (evita loop de onboarding).
 - ~~Imagem real ainda não substitui o placeholder da landing hero~~ — **Resolvido.** Carrossel de ilustrações blackwork (6 modalidades), replicado em landing, login, cadastro e onboarding, cada tela com sua própria ordem de exibição.
@@ -12,12 +12,11 @@ Decisões conscientes de escopo do MVP, registradas aqui para não serem esqueci
 - ~~Meta calórica é semanal, não diária por treino específico~~ — **Resolvido.** `FrequenciaSemanal` foi substituída por `DiasSemana` (array de dias específicos); a meta calórica agora é calculada por dia (TMB + gasto do treino daquele dia + ajuste por objetivo), casada com a resposta da IA pelo nome do dia, não pela posição.
 - ~~Login social (Google) planejado, não implementado~~ — **Resolvido.** Login/cadastro com Google via `POST /api/auth/google`, com validação criptográfica real do token (biblioteca oficial `Google.Apis.Auth`) e vínculo automático por email a contas já existentes (sem duplicar conta).
 - ~~Botões em estado de carregamento ainda podem ser acionados pelo teclado~~ — **Resolvido.** O `ronuDefinirCarregando` (auth.js) passou a usar o atributo `disabled` nativo durante o carregamento, o que bloqueia também Enter/Espaço no botão focado e o envio implícito por Enter num campo do formulário, em todas as telas que usam o helper. O `disabled` de antes é guardado e restaurado ao terminar, para não reabilitar um botão desabilitado por outro motivo (perfil incompleto, nada alterado), e uma segunda chamada com `carregando = true` é ignorada.
+- ~~Foto de perfil real não implementada~~ — **Descartado.** Avatar com iniciais do nome já cobre bem o propósito; upload de imagem real (armazenamento, moderação, redimensionamento) não traz ganho proporcional ao esforço para este projeto.
 
 ## Frontend
 
-- **Foto de perfil real não implementada.** O avatar no header usa iniciais do nome (calculadas dinamicamente), sem upload de imagem real. Em andamento: decidido usar Cloudinary (armazenamento gratuito de imagens) — implementação pausada temporariamente por instabilidade do serviço no momento da tentativa de configuração.
 - **Meta calórica não é adaptativa ao progresso real.** O peso de tendência (GET /api/objetivos/tendencia) já existe e é exibido em progresso.html, mas a geração de dieta (GeradorDietaGemini) continua calculando a meta só por fórmula (Mifflin-St Jeor + gasto de treino + ajuste fixo por objetivo), sem considerar se o peso real do usuário está evoluindo como esperado. V2: implementar ajuste adaptativo (inspirado no MacroFactor — pesquisa registrada em conversa anterior), com guard-rails: só ajustar após ~14 dias de histórico real, regressão linear sobre o peso de tendência, passo de ajuste limitado (~5%/semana), e transparência ao usuário sobre por que a meta mudou.
-- **No mobile, o botão "Sair" do header compartilhado (o mesmo usado em perfil.html, treino.html, alimentacao.html e progresso.html) sai da tela pela direita, causando rolagem horizontal indevida.** Problema pré-existente (não introduzido pela divisão de configuracoes.html em 3 páginas), identificado durante o teste visual dessa tarefa. Afeta pelo menos progresso.html também, por usar o mesmo header.
 - **Duas abas abertas podem sobrescrever a rotina diária uma da outra.** A rotina é salva em alimentacao.html e os dados físicos em perfil.html, mas as duas telas usam o mesmo PUT /api/perfil, que grava os quatro campos juntos com os valores carregados quando cada página foi aberta. Se as duas estiverem abertas ao mesmo tempo, a última a salvar sobrescreve o que a outra salvou antes (ex: rotina salva em Alimentação e, depois, Perfil salvo numa aba aberta antes disso volta a rotina antiga). Não afeta o uso normal, uma tela de cada vez.
 
 ## Geração de dieta (IA)

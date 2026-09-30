@@ -346,17 +346,64 @@
   padding-bottom: var(--sp-5);
 }
 
+/* Duas linhas empilhadas: a de cima (wordmark + ©) e a de créditos. Cada
+   linha mantém o layout de antes: um item de cada lado, quebrando para
+   baixo em telas estreitas. */
 .site-footer .container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.footer-linha {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--sp-4);
+  gap: var(--sp-2) var(--sp-4);
   flex-wrap: wrap;
 }
 
 .footer-copy {
   font-size: var(--fs-2xs);
   color: var(--text-muted);
+}
+
+/* Créditos: discretos, no mesmo tamanho e tom do ©. Sem dourado e sem
+   ícones — o único chamado da página é o CTA final, acima. */
+.footer-creditos {
+  align-items: baseline;
+}
+
+.footer-texto {
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+}
+
+.footer-nome {
+  color: var(--text);
+}
+
+/* Mesmo tratamento do link "Já tenho uma conta" do hero. */
+.footer-link {
+  display: inline-block;
+  padding-block: 0.25rem;
+  color: var(--text-muted);
+  text-decoration-line: underline;
+  text-decoration-color: var(--border);
+  text-decoration-thickness: var(--border-width);
+  text-underline-offset: 3px;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.footer-link:hover {
+  color: var(--text);
+  text-decoration-color: var(--text-muted);
+}
+
+.footer-link:focus-visible {
+  outline: var(--border-width) solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius);
 }
 
 /* ---------- Responsivo ---------- */
