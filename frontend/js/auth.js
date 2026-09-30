@@ -218,15 +218,33 @@ function ronuFormatarAlturaMetros(alturaCm) {
   return (alturaCm / 100).toFixed(2).replace('.', ',');
 }
 
+// Estado de envio de um botão. Usa o disabled nativo (não só o
+// pointer-events: none do CSS, que bloqueia o mouse mas não o teclado):
+// assim Enter/Espaço no botão focado e Enter num campo do formulário
+// (envio implícito) também não disparam um segundo envio. Guarda o disabled
+// de antes e o restaura ao terminar — o botão pode já estar desabilitado por
+// outro motivo (perfil incompleto, nada alterado) e não deve ser reabilitado.
 function ronuDefinirCarregando(botao, carregando, textoCarregando) {
   const label = botao.querySelector('.btn-label');
 
   if (carregando) {
+    // Chamada dupla sem terminar a primeira: guardar de novo registraria o
+    // disabled que a primeira acabou de pôr como "estado anterior", e o
+    // botão nunca mais seria reabilitado.
+    if (botao.dataset.loading === 'true') return;
+
     botao.dataset.loading = 'true';
+    botao.dataset.disabledAntes = String(botao.disabled);
+    botao.disabled = true;
     botao.dataset.textoOriginal = label.textContent;
     label.textContent = textoCarregando;
   } else {
     botao.dataset.loading = 'false';
+    // Só restaura se houve um "carregando" antes; senão não mexe no disabled.
+    if ('disabledAntes' in botao.dataset) {
+      botao.disabled = botao.dataset.disabledAntes === 'true';
+      delete botao.dataset.disabledAntes;
+    }
     label.textContent = botao.dataset.textoOriginal || label.textContent;
   }
 }
