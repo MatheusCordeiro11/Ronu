@@ -47,6 +47,13 @@ public class PerfilController : ControllerBase
         });
     }
 
+    // Valores fixos enviados pelas pills de alimentacao.html — sem normalização
+    // (diferente do Estado), porque não vêm de digitação livre.
+    private static readonly HashSet<string> ValoresOrcamentoSemanal = new()
+    {
+        "economico", "moderado", "sem_restricao"
+    };
+
     /// <summary>
     /// Atualiza os dados pessoais do usuário logado. Diferente de
     /// ObjetivoUsuario, não é histórico — sobrescreve os valores atuais,
@@ -56,6 +63,13 @@ public class PerfilController : ControllerBase
     [HttpPut]
     public async Task<IActionResult> Atualizar(PerfilRequest request)
     {
+        // Opcional: nulo ou vazio segue normalmente; qualquer outro valor
+        // precisa ser uma das faixas conhecidas pela regra 12 do prompt.
+        if (!string.IsNullOrEmpty(request.OrcamentoSemanal) && !ValoresOrcamentoSemanal.Contains(request.OrcamentoSemanal))
+        {
+            return BadRequest(new { mensagem = "Orçamento semanal inválido." });
+        }
+
         var usuario = await _context.Usuarios.FirstAsync(u => u.Id == UsuarioIdLogado);
 
         usuario.Altura = request.Altura;
