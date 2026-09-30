@@ -154,6 +154,24 @@
   text-underline-offset: 3px;
 }
 
+/* ---------- Orçamento semanal (alimentacao.html) ----------
+   As pills vêm de onboarding.css; aqui só os estados que a seção precisa
+   e o sistema ainda não tinha (pill e botão desabilitados, link no erro). */
+#orcamento-form .btn {
+  margin-top: var(--sp-2);
+}
+
+#orcamento-form .btn:disabled,
+#orcamento-form .option-pill:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#orcamento-error a {
+  color: var(--text);
+  text-underline-offset: 3px;
+}
+
 /* ---------- Preferências: cada item ganha uma ação de remover ---------- */
 .preferencia-info {
   display: flex;

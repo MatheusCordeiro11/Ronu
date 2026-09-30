@@ -42,7 +42,8 @@ public class PerfilController : ControllerBase
             Altura = usuario.Altura,
             Sexo = usuario.Sexo,
             DataNascimento = usuario.DataNascimento,
-            RotinaDiaria = usuario.RotinaDiaria
+            RotinaDiaria = usuario.RotinaDiaria,
+            OrcamentoSemanal = usuario.OrcamentoSemanal
         });
     }
 
@@ -61,6 +62,7 @@ public class PerfilController : ControllerBase
         usuario.Sexo = request.Sexo;
         usuario.DataNascimento = request.DataNascimento;
         usuario.RotinaDiaria = request.RotinaDiaria;
+        usuario.OrcamentoSemanal = request.OrcamentoSemanal;
 
         await _context.SaveChangesAsync();
 
@@ -69,7 +71,8 @@ public class PerfilController : ControllerBase
             Altura = usuario.Altura,
             Sexo = usuario.Sexo,
             DataNascimento = usuario.DataNascimento,
-            RotinaDiaria = usuario.RotinaDiaria
+            RotinaDiaria = usuario.RotinaDiaria,
+            OrcamentoSemanal = usuario.OrcamentoSemanal
         });
     }
 

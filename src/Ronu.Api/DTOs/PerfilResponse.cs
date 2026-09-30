@@ -12,4 +12,5 @@ public class PerfilResponse
     public string? Sexo { get; set; }
     public DateOnly? DataNascimento { get; set; }
     public string? RotinaDiaria { get; set; }
+    public string? OrcamentoSemanal { get; set; }
 }

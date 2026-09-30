@@ -27,10 +27,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const elDataNascimento = document.getElementById('perfil-data-nascimento');
   const btnSalvarPerfil = document.getElementById('btn-salvar-perfil');
 
-  // A rotina diária é editada em alimentacao.html, mas o PUT /perfil recebe
-  // tudo junto — guardada do GET e reenviada no PUT, senão salvar só os
-  // dados físicos aqui apagaria a rotina (iria como null).
+  // Rotina diária e orçamento semanal são editados em alimentacao.html, mas
+  // o PUT /perfil recebe tudo junto — guardados do GET e reenviados no PUT,
+  // senão salvar só os dados físicos aqui apagaria os dois (iriam como null).
   let rotinaDiariaAtual = null;
+  let orcamentoSemanalAtual = null;
 
   // Mesma faixa usada no onboarding: data de nascimento não pode ser
   // hoje/futuro nem implicar uma idade absurda.
@@ -48,6 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const perfil = await resposta.json();
       rotinaDiariaAtual = perfil.rotinaDiaria ?? null;
+      orcamentoSemanalAtual = perfil.orcamentoSemanal ?? null;
       elAltura.value = perfil.altura != null ? ronuFormatarAlturaMetros(perfil.altura) : '';
       elDataNascimento.value = perfil.dataNascimento ?? '';
       if (perfil.sexo) {
@@ -99,7 +101,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           altura: alturaCm,
           sexo: sexoSelecionado.value,
           dataNascimento: elDataNascimento.value,
-          rotinaDiaria: rotinaDiariaAtual
+          rotinaDiaria: rotinaDiariaAtual,
+          orcamentoSemanal: orcamentoSemanalAtual
         })
       });
 

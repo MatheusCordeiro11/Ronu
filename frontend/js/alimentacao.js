@@ -207,10 +207,56 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  // ---------- Perfil salvo (compartilhado por Rotina e Orçamento) ----------
+  // Rotina e orçamento não têm endpoint próprio: vivem no perfil, e o PUT
+  // /perfil grava todos os campos juntos (altura, sexo e data de nascimento
+  // são required no PerfilRequest). Um único GET carrega o perfil salvo, e
+  // cada seção salva reenviando esse estado com só o próprio campo trocado —
+  // assim salvar uma seção não apaga (nem leva junto, sem salvar) o campo
+  // da outra.
+
+  let perfilSalvo = null;
+
+  function perfilIncompleto() {
+    return perfilSalvo.altura == null || perfilSalvo.sexo == null || perfilSalvo.dataNascimento == null;
+  }
+
+  // Sem os dados do perfil o PUT sempre falharia — em vez de deixar o
+  // usuário descobrir isso só ao salvar, a seção já abre travada.
+  function mostrarPerfilIncompleto(elErro, complemento) {
+    elErro.textContent = 'Complete seus dados pessoais em ';
+    const link = document.createElement('a');
+    link.href = 'perfil.html';
+    link.textContent = 'Perfil';
+    elErro.append(link, ` antes de salvar ${complemento}.`);
+    elErro.hidden = false;
+  }
+
+  async function salvarNoPerfil(alteracoes) {
+    const corpo = {
+      altura: perfilSalvo.altura,
+      sexo: perfilSalvo.sexo,
+      dataNascimento: perfilSalvo.dataNascimento,
+      rotinaDiaria: perfilSalvo.rotinaDiaria ?? null,
+      orcamentoSemanal: perfilSalvo.orcamentoSemanal ?? null,
+      ...alteracoes
+    };
+
+    const resposta = await ronuFetchAutenticado('/perfil', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(corpo)
+    });
+
+    if (!resposta.ok) {
+      const dados = await resposta.json().catch(() => null);
+      throw new Error(dados?.mensagem || 'Não foi possível salvar. Tente novamente.');
+    }
+
+    perfilSalvo = corpo;
+  }
+
   // ---------- Rotina diária ----------
-  // Não tem endpoint próprio: vive no perfil, e o PUT /perfil exige altura,
-  // sexo e data de nascimento junto (required no PerfilRequest). Por isso o
-  // GET guarda esses três para reenviar sem alteração no PUT da rotina.
 
   const ROTINA_LIMITE = 500;
 
@@ -222,59 +268,35 @@ document.addEventListener('DOMContentLoaded', async () => {
   const elRotinaContador = document.getElementById('rotina-contador');
   const btnSalvarRotina = document.getElementById('btn-salvar-rotina');
 
-  let perfilAltura = null;
-  let perfilSexo = null;
-  let perfilDataNascimento = null;
-
   function atualizarContadorRotina() {
     const tamanho = elRotinaTexto.value.length;
     elRotinaContador.textContent = `${tamanho}/${ROTINA_LIMITE}`;
     elRotinaContador.classList.toggle('is-excedido', tamanho > ROTINA_LIMITE);
   }
 
-  // Sem os dados do perfil o PUT sempre falharia — em vez de deixar o
-  // usuário descobrir isso só ao salvar, a seção já abre travada.
   function bloquearRotina() {
     elRotinaTexto.disabled = true;
     btnSalvarRotina.disabled = true;
   }
 
-  function mostrarPerfilIncompleto() {
-    elRotinaError.textContent = 'Complete seus dados pessoais em ';
-    const link = document.createElement('a');
-    link.href = 'perfil.html';
-    link.textContent = 'Perfil';
-    elRotinaError.append(link, ' antes de salvar sua rotina.');
-    elRotinaError.hidden = false;
+  function preencherRotina() {
+    elRotinaTexto.value = perfilSalvo.rotinaDiaria ?? '';
+    atualizarContadorRotina();
+
+    elRotinaLoading.hidden = true;
+    elRotinaForm.hidden = false;
+
+    if (perfilIncompleto()) {
+      mostrarPerfilIncompleto(elRotinaError, 'sua rotina');
+      bloquearRotina();
+    }
   }
 
-  async function carregarRotina() {
-    try {
-      const resposta = await ronuFetchAutenticado('/perfil');
-      if (!resposta.ok) throw new Error();
-
-      const perfil = await resposta.json();
-      perfilAltura = perfil.altura;
-      perfilSexo = perfil.sexo;
-      perfilDataNascimento = perfil.dataNascimento;
-      elRotinaTexto.value = perfil.rotinaDiaria ?? '';
-      atualizarContadorRotina();
-
-      elRotinaLoading.hidden = true;
-      elRotinaForm.hidden = false;
-
-      if (perfilAltura == null || perfilSexo == null || perfilDataNascimento == null) {
-        mostrarPerfilIncompleto();
-        bloquearRotina();
-      }
-    } catch (erro) {
-      if (erro.message !== 'Sessão expirada.') {
-        elRotinaLoading.hidden = true;
-        ronuMostrarErroFormulario(elRotinaError, 'Não foi possível carregar sua rotina. Recarregue a página.');
-        elRotinaForm.hidden = false;
-        bloquearRotina();
-      }
-    }
+  function mostrarFalhaRotina() {
+    elRotinaLoading.hidden = true;
+    ronuMostrarErroFormulario(elRotinaError, 'Não foi possível carregar sua rotina. Recarregue a página.');
+    elRotinaForm.hidden = false;
+    bloquearRotina();
   }
 
   async function salvarRotina(evento) {
@@ -297,21 +319,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rotinaDiaria = elRotinaTexto.value.trim() || null;
 
     try {
-      const resposta = await ronuFetchAutenticado('/perfil', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          altura: perfilAltura,
-          sexo: perfilSexo,
-          dataNascimento: perfilDataNascimento,
-          rotinaDiaria
-        })
-      });
-
-      if (!resposta.ok) {
-        const corpo = await resposta.json().catch(() => null);
-        throw new Error(corpo?.mensagem || 'Não foi possível salvar. Tente novamente.');
-      }
+      await salvarNoPerfil({ rotinaDiaria });
 
       elRotinaSuccess.textContent = 'Rotina salva.';
       elRotinaSuccess.hidden = false;
@@ -327,6 +335,92 @@ document.addEventListener('DOMContentLoaded', async () => {
   elRotinaTexto.addEventListener('input', atualizarContadorRotina);
   elRotinaForm.addEventListener('submit', salvarRotina);
 
+  // ---------- Orçamento semanal ----------
+  // Valores fixos ("economico", "moderado", "sem_restricao"), usados como
+  // estão pela regra 12 do prompt. Opcional: sem escolha salva, nenhuma pill
+  // vem marcada (e não há "limpar" — "moderado" e "não informado" têm o
+  // mesmo efeito na dieta).
+
+  const elOrcamentoLoading = document.getElementById('orcamento-loading');
+  const elOrcamentoError = document.getElementById('orcamento-error');
+  const elOrcamentoSuccess = document.getElementById('orcamento-success');
+  const elOrcamentoForm = document.getElementById('orcamento-form');
+  const btnSalvarOrcamento = document.getElementById('btn-salvar-orcamento');
+  const radiosOrcamento = Array.from(document.querySelectorAll('input[name="orcamento-semanal"]'));
+
+  function bloquearOrcamento() {
+    radiosOrcamento.forEach((radio) => { radio.disabled = true; });
+    btnSalvarOrcamento.disabled = true;
+  }
+
+  function preencherOrcamento() {
+    const radioSalvo = radiosOrcamento.find((radio) => radio.value === perfilSalvo.orcamentoSemanal);
+    if (radioSalvo) radioSalvo.checked = true;
+
+    elOrcamentoLoading.hidden = true;
+    elOrcamentoForm.hidden = false;
+
+    if (perfilIncompleto()) {
+      mostrarPerfilIncompleto(elOrcamentoError, 'seu orçamento');
+      bloquearOrcamento();
+    }
+  }
+
+  function mostrarFalhaOrcamento() {
+    elOrcamentoLoading.hidden = true;
+    ronuMostrarErroFormulario(elOrcamentoError, 'Não foi possível carregar seu orçamento. Recarregue a página.');
+    elOrcamentoForm.hidden = false;
+    bloquearOrcamento();
+  }
+
+  async function salvarOrcamento(evento) {
+    evento.preventDefault();
+
+    ronuOcultarErroFormulario(elOrcamentoError);
+    elOrcamentoSuccess.hidden = true;
+
+    const selecionado = radiosOrcamento.find((radio) => radio.checked);
+    if (!selecionado) {
+      ronuMostrarErroFormulario(elOrcamentoError, 'Selecione uma opção.');
+      return;
+    }
+
+    ronuDefinirCarregando(btnSalvarOrcamento, true, 'Salvando...');
+
+    try {
+      await salvarNoPerfil({ orcamentoSemanal: selecionado.value });
+
+      elOrcamentoSuccess.textContent = 'Orçamento salvo.';
+      elOrcamentoSuccess.hidden = false;
+    } catch (erro) {
+      if (erro.message !== 'Sessão expirada.') {
+        ronuMostrarErroFormulario(elOrcamentoError, erro.message);
+      }
+    } finally {
+      ronuDefinirCarregando(btnSalvarOrcamento, false);
+    }
+  }
+
+  elOrcamentoForm.addEventListener('submit', salvarOrcamento);
+
+  // ---------- Carga do perfil ----------
+
+  async function carregarPerfilSalvo() {
+    try {
+      const resposta = await ronuFetchAutenticado('/perfil');
+      if (!resposta.ok) throw new Error();
+
+      perfilSalvo = await resposta.json();
+      preencherRotina();
+      preencherOrcamento();
+    } catch (erro) {
+      if (erro.message !== 'Sessão expirada.') {
+        mostrarFalhaRotina();
+        mostrarFalhaOrcamento();
+      }
+    }
+  }
+
   // Seções independentes: uma falha numa não impede a outra de carregar.
-  await Promise.all([carregarPreferencias(), carregarRotina()]);
+  await Promise.all([carregarPreferencias(), carregarPerfilSalvo()]);
 });

@@ -190,6 +190,12 @@ public class GeradorDietaGemini : IGeradorDietaIA
             ? string.Empty
             : $"\n\nRotina diária da pessoa (use para estimar os horários de cada refeição): {contexto.RotinaDiaria}";
 
+        // Orçamento é opcional — sem ele o parágrafo some e a regra 12 trata
+        // como "não informado" (bom senso de custo-benefício).
+        var orcamentoTexto = string.IsNullOrEmpty(contexto.OrcamentoSemanal)
+            ? string.Empty
+            : $"\n\nOrçamento semanal da pessoa para alimentação: {contexto.OrcamentoSemanal}";
+
         return $"""
             Você é um nutricionista esportivo. Monte um plano alimentar semanal (7 dias)
             para uma pessoa com o seguinte perfil:
@@ -209,7 +215,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
             Alimentos que a pessoa gosta (use como base do plano, mas NÃO se limite a eles: complete com outros alimentos comuns e adequados ao objetivo, variando as opções ao longo da semana): {(string.IsNullOrEmpty(preferidosTexto) ? "nenhuma preferência informada" : preferidosTexto)}
 
             Alimentos que a pessoa deve evitar (NUNCA inclua nenhum destes, nem em pequena
-            quantidade, nem como ingrediente de outro prato): {(string.IsNullOrEmpty(evitarTexto) ? "nenhuma restrição informada" : evitarTexto)}{rotinaTexto}
+            quantidade, nem como ingrediente de outro prato): {(string.IsNullOrEmpty(evitarTexto) ? "nenhuma restrição informada" : evitarTexto)}{rotinaTexto}{orcamentoTexto}
 
             Regras obrigatórias:
             1. A soma de calorias de cada dia deve ficar dentro de uma margem de 5% (para mais ou para menos) da meta ESPECÍFICA daquele dia, listada acima — cada dia tem uma meta diferente, não use um valor único para todos os 7.
@@ -223,6 +229,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
             9. Use os nomes de alimentos e pratos como são chamados na região da pessoa (exemplo: em Minas Gerais o feijão é chamado apenas de "feijão", sem especificar o tipo; macaxeira, aipim e mandioca variam conforme a região). Se o estado não foi informado, use os nomes mais comuns no Brasil.
             10. Para um mesmo alimento, use sempre a mesma unidade de medida em todas as refeições e dias da semana. Itens contáveis (ovo, fruta inteira, fatia de pão) sempre em unidades; alimentos sólidos em gramas; líquidos em mililitros. Nunca escreva o mesmo alimento em gramas em um lugar e em unidades em outro.
             11. Preencha o campo "horario" de cada refeição no formato HH:mm (ex: "07:30"). Se a rotina diária da pessoa foi informada, baseie os horários nela; caso contrário, use horários típicos do brasileiro (café da manhã entre 6h30 e 8h, almoço entre 12h e 13h30, jantar entre 19h e 21h).
+            12. Se o orçamento semanal informado for "economico", priorize proteínas e ingredientes de menor custo (ex: ovo, frango, peixes populares como tilápia, feijão), evitando itens caros como salmão, camarão ou carnes nobres, sem comprometer a qualidade nutricional. Se for "moderado" ou não informado, use bom senso de custo-benefício. Se for "sem_restricao", não considere custo na escolha dos alimentos.
             """;
     }
 

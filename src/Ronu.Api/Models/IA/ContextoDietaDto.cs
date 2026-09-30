@@ -17,4 +17,5 @@ public class ContextoDietaDto
     public required List<PreferenciaContextoDto> Preferencias { get; set; }
     public string Estado { get; set; } = string.Empty;
     public string? RotinaDiaria { get; set; }
+    public string? OrcamentoSemanal { get; set; }
 }

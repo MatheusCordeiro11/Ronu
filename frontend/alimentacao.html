@@ -100,6 +100,42 @@
         </form>
       </section>
 
+      <!-- ---------- Orçamento semanal ---------- -->
+      <section class="config-section border-t" aria-labelledby="orcamento-heading">
+        <div class="config-section-head">
+          <h2 id="orcamento-heading" class="config-section-title">Orçamento semanal</h2>
+          <p class="config-section-subtitle">Usamos para priorizar alimentos que cabem no seu orçamento.</p>
+        </div>
+
+        <p class="text-muted" id="orcamento-loading">Carregando seu orçamento...</p>
+
+        <div class="form-message form-message-error" id="orcamento-error" hidden></div>
+        <div class="form-message form-message-success" id="orcamento-success" hidden></div>
+
+        <form id="orcamento-form" novalidate hidden>
+          <div class="field">
+            <div class="option-group" role="radiogroup" aria-labelledby="orcamento-heading">
+              <label class="option-pill">
+                <input type="radio" name="orcamento-semanal" value="economico">
+                <span>Econômico</span>
+              </label>
+              <label class="option-pill">
+                <input type="radio" name="orcamento-semanal" value="moderado">
+                <span>Moderado</span>
+              </label>
+              <label class="option-pill">
+                <input type="radio" name="orcamento-semanal" value="sem_restricao">
+                <span>Sem restrição</span>
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-secondary" id="btn-salvar-orcamento">
+            <span class="btn-label">Salvar orçamento</span>
+          </button>
+        </form>
+      </section>
+
     </div>
   </main>
 
