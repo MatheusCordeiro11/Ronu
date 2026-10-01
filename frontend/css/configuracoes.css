@@ -414,6 +414,22 @@
   outline-offset: 2px;
 }
 
+/* "Salvo" de cada modalidade, ao lado do botão Salvar da própria linha
+   (treino.js). O span com role="status" fica sempre no DOM e vazio; o JS
+   coloca um .modalidade-salvo-texto novo a cada salvamento (o elemento
+   novo dispara a entrada) e esvazia ao editar a linha de novo. :empty some
+   com ele para não sobrar o gap do flex. */
+.modalidade-salvo:empty {
+  display: none;
+}
+
+.modalidade-salvo-texto {
+  display: inline-block; /* transform não age em elemento inline */
+  font-size: var(--fs-2xs);
+  color: var(--accent);
+  animation: config-salvo-entra 450ms cubic-bezier(0.33, 1, 0.68, 1) backwards;
+}
+
 .modalidade-item.is-removing {
   opacity: 0.5;
   pointer-events: none;
@@ -445,5 +461,51 @@
   .modalidade-item-actions {
     width: 100%;
     justify-content: flex-end;
+  }
+}
+
+/* ---------- Entrada das mensagens de sucesso ----------
+   Só nas três telas de configuração (este arquivo não é carregado em mais
+   nenhuma) — o progresso e o resto do app usam .form-message-success sem
+   animação. Os JS escondem a mensagem ao começar a salvar e mostram ao dar
+   certo; voltar de [hidden] reinicia a animação, então cada salvamento
+   repete a entrada.
+   - Fade + descida de 16px em 450 ms: a mensagem surge no topo da seção,
+     empurrando o conteúdo para baixo, e desce junto com esse movimento.
+     16px é mais de um terço da altura dela — bem visível.
+   - Curva ease-out cúbica (0.33, 1, 0.68, 1): espalha o movimento pelos
+     primeiros ~300 ms; uma ease-out mais agressiva deixava tudo nos
+     primeiros ~100 ms (lição do auth.css).
+   - "Salvo" do treino: mesma entrada, mas lateral (8px), porque surge ao
+     lado do botão.
+   - prefers-reduced-motion: só um fade curto. */
+.config-page .form-message-success:not([hidden]) {
+  animation: config-sucesso-entra 450ms cubic-bezier(0.33, 1, 0.68, 1) backwards;
+}
+
+@keyframes config-sucesso-entra {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+}
+
+@keyframes config-salvo-entra {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+}
+
+@keyframes config-sucesso-surge {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .config-page .form-message-success:not([hidden]),
+  .modalidade-salvo-texto {
+    animation: config-sucesso-surge 200ms ease-out backwards;
   }
 }

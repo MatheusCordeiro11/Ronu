@@ -142,6 +142,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const diasAtivos = new Set(vinculo.diasSemana);
     const btnSalvar = document.createElement('button');
 
+    // Confirmação "Salvo" desta linha (ver mostrarModalidadeSalva). Fica
+    // sempre no DOM, vazia, para o role="status" anunciar quando receber
+    // conteúdo — e é por linha, então salvar uma modalidade nunca apaga nem
+    // prende a confirmação de outra.
+    const salvoStatus = document.createElement('span');
+    salvoStatus.className = 'modalidade-salvo';
+    salvoStatus.setAttribute('role', 'status');
+
     function diasSelecionadosOrdenados() {
       return Array.from(diasGroup.querySelectorAll('.dia-toggle'))
         .filter((botao) => botao.getAttribute('aria-pressed') === 'true')
@@ -156,6 +164,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const duracaoAtual = horasMinutosParaDecimal(Number(horasInput.value || 0), Number(minutosSelect.value));
       const duracaoMudou = String(duracaoAtual) !== item.dataset.duracaoSalva;
       btnSalvar.disabled = (!diasMudaram && !duracaoMudou) || horasInput.value === '';
+      // Mexeu de novo na linha: o "Salvo" deixa de ser verdade.
+      salvoStatus.textContent = '';
     }
 
     DIAS_SEMANA.forEach(({ valor, rotulo, nomeCompleto }) => {
@@ -230,7 +240,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnSalvar.textContent = 'Salvar';
     btnSalvar.disabled = true;
 
-    detalhes.append(diasGroup, duracaoField, btnSalvar);
+    detalhes.append(diasGroup, duracaoField, btnSalvar, salvoStatus);
     info.append(nomeSpan, detalhes);
 
     const acoes = document.createElement('div');
@@ -390,6 +400,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   btnAdicionarModalidade.addEventListener('click', adicionarModalidade);
 
+  // Um .modalidade-salvo-texto novo a cada salvamento: o elemento recém-
+  // criado é o que dispara a entrada animada (configuracoes.css). O nome da
+  // modalidade vai só para o leitor de tela — visualmente, a linha já diz qual é.
+  function mostrarModalidadeSalva(item, salvoStatus) {
+    const nome = item.querySelector('.modalidade-item-nome').textContent;
+    const texto = document.createElement('span');
+    texto.className = 'modalidade-salvo-texto';
+    const contexto = document.createElement('span');
+    contexto.className = 'visually-hidden';
+    contexto.textContent = `${nome}: `;
+    texto.append(contexto, 'Salvo');
+    salvoStatus.replaceChildren(texto);
+  }
+
   async function salvarModalidade(item, botao) {
     const horasInput = item.querySelector('.modalidade-duracao-horas');
     const minutosSelect = item.querySelector('.modalidade-duracao-minutos');
@@ -416,10 +440,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const modalidadeId = Number(item.dataset.modalidadeId);
+    const salvoStatus = item.querySelector('.modalidade-salvo');
 
     botao.disabled = true;
     const textoOriginal = botao.textContent;
     botao.textContent = 'Salvando...';
+    salvoStatus.textContent = '';
     ronuOcultarErroFormulario(elModalidadesError);
 
     try {
@@ -437,6 +463,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       item.dataset.duracaoSalva = String(duracaoMediaHoras);
       item.dataset.diasSalvos = JSON.stringify(diasSemana);
       botao.textContent = textoOriginal;
+      mostrarModalidadeSalva(item, salvoStatus);
     } catch (erro) {
       botao.disabled = false;
       botao.textContent = textoOriginal;
