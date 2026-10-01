@@ -509,6 +509,82 @@
   }
 }
 
+/* ---------- Gerar dieta: orbe pulsante ----------
+   Indicador funcional que aparece junto com o traço do contorno enquanto a
+   dieta é gerada: uma esfera de pontos que pulsa e gira, à esquerda do
+   texto, DENTRO do botão. Dentro e em fluxo (order: -1 no inline-flex do
+   .btn) de propósito: fora do botão a posição dependeria do que está em
+   volta — com uma dieta só, a troca de versão some e o botão de "Gerar
+   nova dieta" vai para a borda esquerda da coluna.
+   - Desenho: máscara SVG com 17 pontos em anéis, mais "acesos" de um lado
+     para o giro ser visível; a cor vem de --orbe-cor.
+   - Dourado sobre o botão escuro; Tatame Noturno sobre o dourado (mesma
+     lógica do traço). Sem blur nem glow (Regra Sem Sombra): o "brilho" é
+     só a opacidade pulsando.
+   - Movimento calibrado para ser visto desde o primeiro segundo: pulso de
+     escala 0,8–1,15 a cada 1,2 s e uma volta a cada 2,4 s. scale e rotate
+     são propriedades separadas para as duas animações não se anularem.
+   - Pseudo-elemento sem conteúdo: fora da árvore de acessibilidade (o
+     aria-busy do botão já comunica o estado).
+   - prefers-reduced-motion: sem escala nem giro, só a opacidade pulsando. */
+.btn-gerar-dieta {
+  --orbe-cor: var(--accent);
+}
+
+.btn-gerar-dieta.btn-primary {
+  --orbe-cor: var(--bg);
+}
+
+.btn-gerar-dieta[data-loading="true"]::after {
+  content: '';
+  order: -1;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  background-color: var(--orbe-cor);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Ccircle cx='9' cy='9' r='1.7'/%3E%3Ccircle cx='13.2' cy='9' r='1.25' fill-opacity='.95'/%3E%3Ccircle cx='11.1' cy='12.64' r='1.25' fill-opacity='.8'/%3E%3Ccircle cx='6.9' cy='12.64' r='1.2' fill-opacity='.6'/%3E%3Ccircle cx='4.8' cy='9' r='1.1' fill-opacity='.5'/%3E%3Ccircle cx='6.9' cy='5.36' r='1.2' fill-opacity='.6'/%3E%3Ccircle cx='11.1' cy='5.36' r='1.25' fill-opacity='.85'/%3E%3Ccircle cx='16.04' cy='11.29' r='.95' fill-opacity='.9'/%3E%3Ccircle cx='13.35' cy='14.99' r='.9' fill-opacity='.75'/%3E%3Ccircle cx='9' cy='16.4' r='.85' fill-opacity='.55'/%3E%3Ccircle cx='4.65' cy='14.99' r='.8' fill-opacity='.4'/%3E%3Ccircle cx='1.96' cy='11.29' r='.75' fill-opacity='.3'/%3E%3Ccircle cx='1.96' cy='6.71' r='.75' fill-opacity='.3'/%3E%3Ccircle cx='4.65' cy='3.01' r='.8' fill-opacity='.4'/%3E%3Ccircle cx='9' cy='1.6' r='.85' fill-opacity='.55'/%3E%3Ccircle cx='13.35' cy='3.01' r='.9' fill-opacity='.75'/%3E%3Ccircle cx='16.04' cy='6.71' r='.95' fill-opacity='.9'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Ccircle cx='9' cy='9' r='1.7'/%3E%3Ccircle cx='13.2' cy='9' r='1.25' fill-opacity='.95'/%3E%3Ccircle cx='11.1' cy='12.64' r='1.25' fill-opacity='.8'/%3E%3Ccircle cx='6.9' cy='12.64' r='1.2' fill-opacity='.6'/%3E%3Ccircle cx='4.8' cy='9' r='1.1' fill-opacity='.5'/%3E%3Ccircle cx='6.9' cy='5.36' r='1.2' fill-opacity='.6'/%3E%3Ccircle cx='11.1' cy='5.36' r='1.25' fill-opacity='.85'/%3E%3Ccircle cx='16.04' cy='11.29' r='.95' fill-opacity='.9'/%3E%3Ccircle cx='13.35' cy='14.99' r='.9' fill-opacity='.75'/%3E%3Ccircle cx='9' cy='16.4' r='.85' fill-opacity='.55'/%3E%3Ccircle cx='4.65' cy='14.99' r='.8' fill-opacity='.4'/%3E%3Ccircle cx='1.96' cy='11.29' r='.75' fill-opacity='.3'/%3E%3Ccircle cx='1.96' cy='6.71' r='.75' fill-opacity='.3'/%3E%3Ccircle cx='4.65' cy='3.01' r='.8' fill-opacity='.4'/%3E%3Ccircle cx='9' cy='1.6' r='.85' fill-opacity='.55'/%3E%3Ccircle cx='13.35' cy='3.01' r='.9' fill-opacity='.75'/%3E%3Ccircle cx='16.04' cy='6.71' r='.95' fill-opacity='.9'/%3E%3C/svg%3E") center / contain no-repeat;
+  animation:
+    orbe-pulso 1.2s ease-in-out infinite,
+    orbe-giro 2.4s linear infinite;
+}
+
+@keyframes orbe-pulso {
+  0%,
+  100% {
+    scale: 0.8;
+    opacity: 0.55;
+  }
+
+  50% {
+    scale: 1.15;
+    opacity: 1;
+  }
+}
+
+@keyframes orbe-giro {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes orbe-pulso-reduzido {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-gerar-dieta[data-loading="true"]::after {
+    animation: orbe-pulso-reduzido 1.6s ease-in-out infinite;
+  }
+}
+
 /* ---------- Responsivo ---------- */
 @media (max-width: 720px) {
   .meta-stamp-grid {
