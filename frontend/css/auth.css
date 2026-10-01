@@ -211,6 +211,49 @@ html[data-auth-tela="cadastro"]::view-transition-new(root) {
   max-width: 380px;
 }
 
+/* Entrada do formulário: fade + subida de 22px em 550 ms. Bloco único (sem
+   escalonar título e campos) e sem atraso: dá pra clicar e digitar desde o
+   primeiro quadro. Calibrado para ser percebido no primeiro carregamento —
+   a primeira versão, 12px em 450 ms, passou despercebida no teste real
+   (mesma lição das linhas do dashboard).
+   Curva ease-out cúbica (0.33, 1, 0.68, 1): espalha a subida pelos
+   primeiros ~350–400 ms. Uma ease-out mais agressiva (0.16, 1, 0.3, 1)
+   fazia quase todo o movimento nos primeiros ~200 ms e o resto virava uma
+   cauda que o olho não registra — aumentar a duração não ajudava.
+   Não roda quando o slide de página entre login e cadastro já está fazendo
+   a entrada (js/auth-entrada.js marca [data-auth-entrada="transicao"]).
+   Fill "backwards", não "both": depois de terminar, o transform sai do
+   elemento — senão ele viraria contêiner de qualquer position: fixed lá
+   dentro. */
+.auth-form-wrap {
+  animation: ronu-auth-form-entra 550ms cubic-bezier(0.33, 1, 0.68, 1) backwards;
+}
+
+html[data-auth-entrada="transicao"] .auth-form-wrap {
+  animation: none;
+}
+
+@keyframes ronu-auth-form-entra {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+}
+
+@keyframes ronu-auth-form-surge {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Movimento reduzido: sem subida, só um fade curto. */
+@media (prefers-reduced-motion: reduce) {
+  .auth-form-wrap {
+    animation-name: ronu-auth-form-surge;
+    animation-duration: 200ms;
+  }
+}
+
 .auth-title {
   font-size: var(--fs-2xl);
 }
