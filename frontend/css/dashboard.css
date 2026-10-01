@@ -49,10 +49,109 @@
 }
 
 /* ---------- Shell ---------- */
+/* position/isolation/overflow: base para as linhas de fundo abaixo — o SVG
+   fica preso à área do main e nunca gera rolagem lateral. */
 .dashboard {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   min-height: calc(100vh - 73px);
   padding-top: var(--sp-6);
   padding-bottom: var(--sp-8);
+}
+
+.dashboard > .container {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- Linhas de fundo (EXPERIMENTO VISUAL) ----------
+   Exceção consciente ao DESIGN.md, que define o sistema como "inteiramente
+   plano" e sem decoração. Em teste para decidir se formaliza, ajusta ou
+   reverte — por isso NÃO está registrado no DESIGN.md.
+   Regras para não competir com os dados da dieta:
+   - Traço de 1px em Poeira de Tatame, opacidade baixa, sem dourado (a Regra
+     do Ouro Raro não permite dourado decorando uma área grande).
+   - Os cards têm fundo opaco (Painel de Academia): as linhas só aparecem
+     nos espaços entre eles, nunca atrás de números ou texto.
+   - Movimento bem visível (deslize de 140–180px em ciclos de 3,5–5 s,
+     ~55–100px/s; versões anteriores, com 40px em 32–44 s, 60–80px em
+     14–20 s e 140–180px em 7–10 s, pareciam paradas ou lentas demais) e só em transform/opacity nos
+     próprios <svg>, que o navegador compõe na GPU sem redesenhar o traço.
+     As camadas sobram 200px de cada lado do main para o deslize nunca
+     expor a ponta das linhas.
+   - prefers-reduced-motion: tudo parado. */
+.dashboard-linhas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.dashboard-linhas-camada {
+  position: absolute;
+  top: 0;
+  left: -200px;
+  width: calc(100% + 400px);
+  max-width: none; /* styles.css limita todo svg a max-width: 100% */
+  height: 100%;
+  opacity: 0.22;
+  will-change: transform, opacity;
+}
+
+.dashboard-linhas-camada path {
+  fill: none;
+  stroke: var(--text-muted);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+/* --deslize: amplitude de cada camada (no máximo 200px, a folga das bordas). */
+.dashboard-linhas-a {
+  --deslize: -160px;
+  animation: dashboard-linhas-deslize 4s ease-in-out infinite;
+}
+
+.dashboard-linhas-b {
+  --deslize: -140px;
+  animation: dashboard-linhas-deslize 5s ease-in-out -2.5s infinite;
+}
+
+.dashboard-linhas-c {
+  --deslize: -180px;
+  animation: dashboard-linhas-deslize 3.5s ease-in-out -1.2s infinite;
+}
+
+@keyframes dashboard-linhas-deslize {
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 0.16;
+  }
+
+  50% {
+    transform: translateX(var(--deslize));
+    opacity: 0.3;
+  }
+}
+
+/* Elementos com texto que não são cards e tinham fundo transparente: ganham
+   o mesmo fundo da página (visualmente idêntico) só para as linhas não
+   passarem por trás do texto. Os estados selecionados/hover declarados
+   depois neste arquivo continuam valendo por cima. */
+.dashboard .day-pill,
+.dashboard .version-pill,
+.dashboard .btn-secondary,
+.dashboard .day-total,
+.dashboard .dashboard-loading,
+.dashboard .dashboard-empty {
+  background-color: var(--bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-linhas-camada {
+    animation: none;
+  }
 }
 
 /* ---------- Estados vazios (carregando / erro / sem dieta) ---------- */
