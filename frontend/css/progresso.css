@@ -194,6 +194,64 @@
   stroke-linecap: round;
 }
 
+/* ---------- Entrada do gráfico ----------
+   Só no primeiro render da página (o JS só põe .peso-entrada nessa vez):
+   a linha de tendência é desenhada da esquerda para a direita em 800 ms e
+   cada pesagem acende (fade de 200 ms) quando a ponta da linha passa pela
+   posição dela. O resto da tela (carimbo, histórico) já aparece pronto.
+   - Disparo: quando o gráfico entra na tela, não no carregamento (ele
+     costuma ficar abaixo da dobra) — ver [data-entrada="pendente"] abaixo.
+   - Linha: traço do tamanho da linha (--linha-comprimento, medido no JS)
+     com folga maior que ele, deslocado de "invisível" até 0. Começa 4px
+     além do comprimento para a ponta arredondada não deixar uma bolinha
+     no início antes de a animação andar.
+   - Curva: ease-out quadrático exato — o JS inverte essa mesma conta para
+     achar --entrada-fracao de cada ponto. Mudar a curva aqui exige mudar
+     a conta lá.
+   - prefers-reduced-motion: tudo aparece completo, na hora. */
+.peso-grafico {
+  --entrada-duracao: 800ms;
+}
+
+.peso-linha-tendencia.peso-entrada {
+  stroke-dasharray: var(--linha-comprimento) calc(var(--linha-comprimento) + 8px);
+  animation: peso-linha-desenho var(--entrada-duracao) cubic-bezier(0.3333, 0.6667, 0.6667, 1) backwards;
+}
+
+.peso-ponto-bruto.peso-entrada {
+  animation: peso-ponto-surge 200ms ease-out backwards;
+  animation-delay: calc(var(--entrada-fracao, 0) * var(--entrada-duracao));
+}
+
+/* Gráfico ainda fora da tela: a entrada espera parada no primeiro quadro
+   (linha invisível, pontos apagados — o fill "backwards" segura isso). O
+   JS tira o atributo quando ~40% do gráfico fica visível. */
+.peso-grafico[data-entrada="pendente"] .peso-entrada {
+  animation-play-state: paused;
+}
+
+@keyframes peso-linha-desenho {
+  from {
+    stroke-dashoffset: calc(var(--linha-comprimento) + 4px);
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes peso-ponto-surge {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .peso-grafico .peso-entrada {
+    animation: none;
+  }
+}
+
 /* ---------- Histórico ---------- */
 .peso-historico-title {
   font-size: var(--fs-lg);

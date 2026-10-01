@@ -39,6 +39,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   let pontos = [];
   let objetivoAtual = null;
 
+  // A linha de tendência é "desenhada" só na primeira vez que o gráfico
+  // aparece na página. Resize e registro de peso redesenham estático — uma
+  // linha se redesenhando a cada ajuste de janela seria só ruído.
+  let animarEntrada = true;
+
   btnLogout.addEventListener('click', () => {
     ronuLimparSessao();
     window.location.href = 'login.html';
@@ -116,6 +121,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const PAD_DIREITA = 12;
   const PAD_TOPO = 16;
   const PAD_BASE = 28;
+  // Precisa bater com o "+ 4px" do keyframe peso-linha-desenho (progresso.css).
+  const ENTRADA_FOLGA = 4;
 
   function criarElementoSvg(tag, atributos) {
     const el = document.createElementNS(SVG_NS, tag);
@@ -124,6 +131,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function renderizarGrafico() {
+    const animar = animarEntrada;
+    animarEntrada = false;
+    if (animar) aguardarGraficoNaTela();
+
     const caixa = elGrafico.getBoundingClientRect();
     const largura = Math.max(caixa.width, 1);
     const altura = Math.max(caixa.height, 1);
@@ -183,39 +194,88 @@ document.addEventListener('DOMContentLoaded', async () => {
       elGrafico.appendChild(label);
     });
 
+    // Momento (fração da duração da entrada) em que a ponta da linha passa
+    // por cada pesagem — 0 para todas quando não há linha (ponto único).
+    let fracoesEntrada = pontos.map(() => 0);
+
     // Linha de tendência (sólida, cor de faixa) por cima dos pontos brutos
     // esmaecidos — a mesma leitura de MacroFactor/Libra citada no brief.
     if (pontos.length > 1) {
-      const caminho = pontos
-        .map((p) => `${x(new Date(p.data).getTime())},${y(p.pesoTendencia)}`)
-        .join(' ');
-      elGrafico.appendChild(criarElementoSvg('polyline', {
+      const vertices = pontos.map((p) => [x(new Date(p.data).getTime()), y(p.pesoTendencia)]);
+      const linha = criarElementoSvg('polyline', {
         class: 'peso-linha-tendencia',
-        points: caminho
-      }));
+        points: vertices.map(([vx, vy]) => `${vx},${vy}`).join(' ')
+      });
+      elGrafico.appendChild(linha);
+
+      if (animar) {
+        // getTotalLength só mede depois que a linha está no SVG.
+        const comprimento = linha.getTotalLength();
+        linha.style.setProperty('--linha-comprimento', `${comprimento}px`);
+        linha.classList.add('peso-entrada');
+
+        // A entrada usa ease-out quadrático exato (desenhado = 1 − (1 − t)²)
+        // e começa ENTRADA_FOLGA px antes do início da linha (ver CSS), então
+        // dá para inverter a conta e achar o t em que a ponta chega a cada
+        // vértice: t = 1 − √(L·(1 − p) / (L + folga)).
+        let acumulado = 0;
+        fracoesEntrada = vertices.map(([vx, vy], indice) => {
+          if (indice > 0) {
+            const [ax, ay] = vertices[indice - 1];
+            acumulado += Math.hypot(vx - ax, vy - ay);
+          }
+          const p = comprimento > 0 ? Math.min(acumulado / comprimento, 1) : 0;
+          return 1 - Math.sqrt((comprimento * (1 - p)) / (comprimento + ENTRADA_FOLGA));
+        });
+      }
     }
 
     const raioPonto = pontos.length > 20 ? 2.5 : 3.5;
-    pontos.forEach((p) => {
-      elGrafico.appendChild(criarElementoSvg('circle', {
+    pontos.forEach((p, indice) => {
+      elGrafico.appendChild(marcarEntrada(criarElementoSvg('circle', {
         class: 'peso-ponto-bruto',
         cx: x(new Date(p.data).getTime()),
         cy: y(p.pesoBruto),
         r: raioPonto
-      }));
+      }), fracoesEntrada[indice]));
     });
 
     // Único ponto: sem linha pra desenhar, mas o próprio peso de tendência
     // (igual ao bruto no primeiro registro) ainda merece uma marca sólida.
     if (pontos.length === 1) {
-      elGrafico.appendChild(criarElementoSvg('circle', {
+      elGrafico.appendChild(marcarEntrada(criarElementoSvg('circle', {
         class: 'peso-ponto-bruto',
         cx: x(new Date(pontos[0].data).getTime()),
         cy: y(pontos[0].pesoTendencia),
         r: 3.5,
         style: 'fill: var(--accent); opacity: 1;'
-      }));
+      }), 0));
     }
+
+    function marcarEntrada(ponto, fracao) {
+      if (!animar) return ponto;
+      ponto.style.setProperty('--entrada-fracao', fracao.toFixed(4));
+      ponto.classList.add('peso-entrada');
+      return ponto;
+    }
+  }
+
+  // O gráfico costuma estar abaixo da dobra (no mobile, sempre): a entrada
+  // fica pausada no estado "invisível" (data-entrada="pendente", ver CSS) e
+  // só toca quando ~40% dele entra na tela. Se já estiver visível ao
+  // carregar, o observer dispara na hora. Um redesenho antes disso (resize)
+  // sai estático e sem .peso-entrada, então liberar a pausa depois não faz
+  // nada — continua valendo "uma vez por visita".
+  function aguardarGraficoNaTela() {
+    if (!('IntersectionObserver' in window)) return;
+
+    elGrafico.dataset.entrada = 'pendente';
+    const observador = new IntersectionObserver((entradas) => {
+      if (!entradas.some((entrada) => entrada.isIntersecting)) return;
+      delete elGrafico.dataset.entrada;
+      observador.disconnect();
+    }, { threshold: 0.4 });
+    observador.observe(elGrafico);
   }
 
   let redimensionamentoPendente = null;
@@ -282,6 +342,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         ronuMostrarErroFormulario(elError, erro.message);
         mostrarSomente(elError);
       }
+    } finally {
+      // Começou sem pesagem (ou com erro)? O primeiro gráfico, depois de
+      // registrar peso, já não é mais "a entrada da página".
+      animarEntrada = false;
     }
   }
 
