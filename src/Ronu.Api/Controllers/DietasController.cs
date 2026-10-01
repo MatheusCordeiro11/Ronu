@@ -44,14 +44,42 @@ public class DietasController : ControllerBase
     private int UsuarioIdLogado =>
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
+    // Limite de gerações por usuário numa janela móvel de 1 hora. Contado na
+    // própria tabela DietasIA (nada em memória: o App Service no plano F1
+    // reinicia com frequência e perderia o contador). Não pode passar de
+    // RepositorioDietaIA.LimiteDietasPorUsuario (3): a tabela guarda só as 3
+    // dietas mais recentes, então uma contagem maior nunca seria atingida.
+    private const int LimiteGeracoesPorHora = 3;
+    private static readonly TimeSpan JanelaLimiteGeracoes = TimeSpan.FromHours(1);
+
     /// <summary>
     /// Gera uma nova dieta semanal via IA para o usuário logado, com base no
     /// objetivo, modalidades e preferências já cadastrados. Mantém só as 3
-    /// dietas mais recentes por usuário.
+    /// dietas mais recentes por usuário. Limitado a 3 gerações por hora (429).
     /// </summary>
     [HttpPost("gerar")]
     public async Task<IActionResult> Gerar()
     {
+        // Primeira checagem: a mais barata, e evita gastar cota do Gemini.
+        var agora = DateTime.UtcNow;
+        var inicioJanela = agora - JanelaLimiteGeracoes;
+        var geracoesNaJanela = await _context.DietasIA
+            .Where(d => d.UsuarioId == UsuarioIdLogado && d.DataGeracao >= inicioJanela)
+            .Select(d => d.DataGeracao)
+            .ToListAsync();
+
+        if (geracoesNaJanela.Count >= LimiteGeracoesPorHora)
+        {
+            // A vaga volta quando a geração mais antiga da janela completa 1 hora.
+            var libera = geracoesNaJanela.Min() + JanelaLimiteGeracoes;
+            var minutos = Math.Max(1, (int)Math.Ceiling((libera - agora).TotalMinutes));
+            var quando = minutos == 1 ? "1 minuto" : $"{minutos} minutos";
+            return StatusCode(429, new
+            {
+                mensagem = $"Você já gerou {LimiteGeracoesPorHora} dietas na última hora, o limite por hora. Tente novamente em {quando}."
+            });
+        }
+
         var usuario = await _context.Usuarios
             .FirstAsync(u => u.Id == UsuarioIdLogado);
 
