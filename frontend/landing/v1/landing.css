@@ -46,9 +46,16 @@
 }
 
 /* ---------- Hero ---------- */
+/* overflow-x: clip corta só o que passa da borda lateral da seção (que
+   ocupa a largura toda da tela): no mobile, a espiral atrás do título
+   (125% da largura dele) passava 28px da tela à direita e deixava a página
+   com rolagem lateral. "clip", e não "hidden": não transforma a seção numa
+   área rolável nem mexe no eixo vertical. No desktop não corta nada — a
+   espiral termina bem antes da borda. */
 .hero {
   padding-top: var(--sp-7);
   padding-bottom: var(--sp-8);
+  overflow-x: clip;
 }
 
 .hero .container {

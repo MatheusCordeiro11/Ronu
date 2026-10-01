@@ -142,6 +142,7 @@
 .dashboard .day-pill,
 .dashboard .version-pill,
 .dashboard .btn-secondary,
+.dashboard .dashboard-link-progresso,
 .dashboard .day-total,
 .dashboard .dashboard-loading,
 .dashboard .dashboard-empty {
@@ -191,11 +192,51 @@
   max-width: 52ch;
 }
 
-.dashboard-empty .btn {
+.dashboard-empty .btn,
+.dashboard-empty .dashboard-link-progresso {
   align-self: flex-start;
 }
 
-/* ---------- Barra de ferramentas (versão + gerar) ---------- */
+.dashboard-empty .dashboard-link-progresso {
+  margin-top: var(--sp-2);
+}
+
+/* ---------- Link "Ver progresso" ----------
+   Navegação para outra tela, não ação sobre a dieta — por isso link de
+   texto, sem fundo de pill, e não um segundo botão disputando atenção com
+   "Gerar nova dieta".
+   Em Corda Crua, não em Poeira de Tatame como os links de nav do header:
+   ao lado de um botão, em Poeira ele quase sumia. Continua sem dourado
+   (não é ação). Como a cor já é a mais clara do texto, o hover não clareia
+   mais — mostra um sublinhado de 1px em Poeira de Tatame.
+   min-height de 44px: área de toque confortável no celular. Aparece na
+   barra (com dieta) e no estado vazio — o progresso é de peso, e o
+   onboarding já grava o primeiro, então há o que ver antes da 1ª dieta. */
+.dashboard-link-progresso {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--text);
+  text-decoration-line: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: var(--border-width);
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.15s ease;
+}
+
+.dashboard-link-progresso:hover {
+  text-decoration-color: var(--text-muted);
+}
+
+.dashboard-link-progresso:focus-visible {
+  outline: var(--border-width) solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius);
+}
+
+/* ---------- Barra de ferramentas (versão + gerar + ver progresso) ---------- */
 .dashboard-toolbar {
   display: flex;
   align-items: center;
@@ -203,6 +244,22 @@
   gap: var(--sp-3);
   flex-wrap: wrap;
   margin-bottom: var(--sp-5);
+}
+
+/* "Gerar nova dieta" + "Ver progresso". No DOM o botão vem antes (ordem de
+   leitura/Tab); row-reverse põe o link à esquerda e o botão na ponta
+   direita. margin-left: auto mantém o grupo à direita mesmo quando a troca
+   de versão está escondida (dieta única) — sem isso o space-between o
+   jogaria para a esquerda.
+   Gap de 12px: o botão já tem 32px de padding interno, então a distância
+   visível entre os dois textos fica em ~44px — perto o bastante para lerem
+   como uma dupla. */
+.dashboard-toolbar-acoes {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-left: auto;
 }
 
 /* :not([hidden]) pelo mesmo motivo do bloco de estados vazios acima —
@@ -600,6 +657,22 @@
   .dashboard-toolbar {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  /* Lado a lado não cabe: carregando, o botão vira "Montando sua dieta da
+     semana..." com o orbe (~315px). Botão na largura toda e o link
+     centralizado logo abaixo, a 8px: no mesmo eixo do texto do botão, os
+     dois leem como uma unidade (mesmo padrão do "Criar conta" sob o botão
+     do login). À direita, ele parecia solto entre o botão e a meta. */
+  .dashboard-toolbar-acoes {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--sp-1);
+    margin-left: 0;
+  }
+
+  .dashboard-toolbar-acoes .dashboard-link-progresso {
+    align-self: center;
   }
 
   .meal-card-head {

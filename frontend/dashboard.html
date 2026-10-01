@@ -20,7 +20,6 @@
     <div class="container dashboard-header-inner">
       <a href="landing/v1/index.html" class="wordmark">ronu<span>.</span></a>
       <div class="header-actions">
-        <a href="progresso.html" class="btn btn-secondary">Progresso</a>
         <a href="perfil.html" class="avatar" id="avatar-link"></a>
         <button type="button" id="logout-btn" class="btn btn-secondary">Sair</button>
       </div>
@@ -77,15 +76,22 @@
         <button type="button" class="btn btn-primary btn-gerar-dieta" id="btn-gerar-vazio">
           <span class="btn-label">Gerar minha primeira dieta</span>
         </button>
+        <a href="progresso.html" class="dashboard-link-progresso">Ver progresso</a>
       </section>
 
       <div class="dashboard-content" id="dashboard-content" hidden>
 
         <div class="dashboard-toolbar">
           <div class="version-switch" id="version-switch" role="tablist" aria-label="Versão da dieta" hidden></div>
-          <button type="button" class="btn btn-secondary btn-gerar-dieta" id="btn-gerar">
-            <span class="btn-label">Gerar nova dieta</span>
-          </button>
+          <!-- Botão antes do link no DOM (ordem de leitura e de Tab: ação
+               principal primeiro); no desktop o CSS inverte para o link ficar
+               à esquerda e o botão na ponta direita. -->
+          <div class="dashboard-toolbar-acoes">
+            <button type="button" class="btn btn-secondary btn-gerar-dieta" id="btn-gerar">
+              <span class="btn-label">Gerar nova dieta</span>
+            </button>
+            <a href="progresso.html" class="dashboard-link-progresso">Ver progresso</a>
+          </div>
         </div>
 
         <section class="meta-stamp" aria-label="Meta diária calculada">
