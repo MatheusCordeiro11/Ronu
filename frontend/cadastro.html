@@ -25,33 +25,45 @@
       <div class="auth-brand-visual hero-carousel" id="authCarousel">
         <ul class="hero-carousel-track">
           <li class="hero-carousel-slide is-active">
-            <img src="img/modalidades/muay-thai.png" alt="Lutadores em clinch durante um treino de muay thai" loading="eager">
+            <img src="img/modalidades/foto-muaythai-chute.webp" alt="Lutador chutando o saco de pancadas numa academia de muay thai" loading="eager">
           </li>
           <li class="hero-carousel-slide">
-            <img src="img/modalidades/basquete.png" alt="Jogadores disputando a bola em um treino de basquete" loading="lazy">
+            <img src="img/modalidades/foto-academia-puxada.webp" alt="Atleta de regata vermelha num aparelho de puxada" loading="lazy">
           </li>
           <li class="hero-carousel-slide">
-            <img src="img/modalidades/jiu-jitsu.png" alt="Atleta finalizando um golpe de jiu-jitsu no tatame" loading="lazy">
+            <img src="img/modalidades/foto-judo-plateia.webp" alt="Judoca de quimono e faixa preta diante da plateia de um ginásio" loading="lazy">
           </li>
           <li class="hero-carousel-slide">
-            <img src="img/modalidades/musculacao.png" alt="Atleta levantando peso em um treino de musculação" loading="lazy">
+            <img src="img/modalidades/foto-natacao.webp" alt="Nadador submerso visto de baixo, em preto e branco" loading="lazy">
           </li>
           <li class="hero-carousel-slide">
-            <img src="img/modalidades/futebol.png" alt="Jogadores disputando a bola em um treino de futebol" loading="lazy">
+            <img src="img/modalidades/foto-corrida-borrada.webp" alt="Atleta correndo de moletom, borrado pela velocidade" loading="lazy">
           </li>
           <li class="hero-carousel-slide">
-            <img src="img/modalidades/boxe.png" alt="Lutadores trocando golpes em um treino de boxe" loading="lazy">
+            <img src="img/modalidades/foto-futebol-chute.webp" alt="Jogador de futebol acertando a bola no ar" loading="lazy">
+          </li>
+          <li class="hero-carousel-slide">
+            <img src="img/modalidades/foto-giro-2.webp" alt="Atleta girando o corpo num golpe, borrado pela velocidade" loading="lazy">
+          </li>
+          <li class="hero-carousel-slide">
+            <img src="img/modalidades/foto-boxe-ringue.webp" alt="Dois boxeadores frente a frente no ringue antes da luta" loading="lazy">
+          </li>
+          <li class="hero-carousel-slide">
+            <img src="img/modalidades/foto-prancha.webp" alt="Atleta treinando abdômen com rolinho no chão da academia" loading="lazy">
           </li>
         </ul>
 
         <div class="hero-carousel-controls">
-          <div class="hero-carousel-dots" role="tablist" aria-label="Selecionar modalidade">
+          <div class="hero-carousel-dots" role="tablist" aria-label="Selecionar imagem">
             <button type="button" class="hero-carousel-dot is-active" role="tab" aria-selected="true" aria-label="Muay thai"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Basquete"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Jiu-jitsu"></button>
             <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Musculação"></button>
+            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Judô"></button>
+            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Natação"></button>
+            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Corrida"></button>
             <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Futebol"></button>
+            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Movimento"></button>
             <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Boxe"></button>
+            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Abdômen"></button>
           </div>
         </div>
       </div>
@@ -170,19 +182,24 @@
     }
 
     window.addEventListener('load', () => {
-      google.accounts.id.initialize({
-        client_id: '718933216357-u2b86snquurf6ie5m1hb9lbhu7do3opi.apps.googleusercontent.com',
-        callback: ronuTratarCredencialGoogle
-      });
-      google.accounts.id.renderButton(
-        document.getElementById('google-signin-button'),
-        { theme: 'filled_black', size: 'large', width: 320, text: 'signup_with' }
-      );
-
+      // Carrossel primeiro: não depende do script externo do Google.
       initHeroCarousel(document.getElementById('authCarousel'), {
         autoDelay: 5000,
         resumeDelay: 8000,
       });
+
+      // Sem o script do Google (bloqueador, rede), pula o botão em vez de
+      // lançar ReferenceError — o resto da página segue funcionando.
+      if (window.google) {
+        google.accounts.id.initialize({
+          client_id: '718933216357-u2b86snquurf6ie5m1hb9lbhu7do3opi.apps.googleusercontent.com',
+          callback: ronuTratarCredencialGoogle
+        });
+        google.accounts.id.renderButton(
+          document.getElementById('google-signin-button'),
+          { theme: 'filled_black', size: 'large', width: 320, text: 'signup_with' }
+        );
+      }
     });
   </script>
 </body>

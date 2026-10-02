@@ -104,31 +104,18 @@
   text-decoration-color: var(--text-muted);
 }
 
-/* Espaço reservado para a imagem definitiva do hero.
-   Proporção 4:5 (retrato) — condizente com uma foto de atleta em pé/tatame.
-   Grade + marcas de canto deixam claro que é um placeholder proposital
-   (motivo de "grade calculada", não decoração) até a imagem real entrar aqui. */
+/* Espaço do carrossel de fotos do hero. Proporção 4:5 (retrato) no
+   desktop. Fundo liso só enquanto a foto carrega: a grade 3×3 e o degradê
+   dourado eram do placeholder/ilustrações e riscavam as fotos; as marcas
+   de canto (::before, abaixo) ficam como moldura. */
 .hero-image-slot {
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 5;
   border-radius: var(--radius);
   border: var(--border-width) solid var(--border);
-  background:
-    linear-gradient(160deg, rgba(201, 162, 39, 0.22) 0%, rgba(201, 162, 39, 0) 60%),
-    linear-gradient(0deg, var(--surface) 0%, var(--bg) 100%);
+  background: var(--surface);
   overflow: hidden;
-}
-
-.hero-image-slot::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(var(--text-muted) 1px, transparent 1px),
-    linear-gradient(90deg, var(--text-muted) 1px, transparent 1px);
-  background-size: 100% 33.33%, 33.33% 100%;
-  opacity: 0.22;
 }
 
 /* Espiral de pontos (phyllotaxis) como fundo decorativo atrás do título —
@@ -214,6 +201,13 @@
   object-fit: cover;
 }
 
+/* Enquadramento das fotos que perdem o assunto no corte central (os espaços
+   vão de 16:10, landing no mobile, a 4:5): a bola do chute, a cabeça do
+   lutador de muay thai e o rosto do corredor. As demais ficam centralizadas. */
+.hero-carousel-slide img[src*="foto-futebol-chute"] { object-position: 30% 50%; }
+.hero-carousel-slide img[src*="foto-muaythai-chute"] { object-position: 50% 25%; }
+.hero-carousel-slide img[src*="foto-corrida-borrada"] { object-position: 50% 10%; }
+
 .hero-carousel-controls {
   position: absolute;
   left: 0;
@@ -228,10 +222,14 @@
 .hero-carousel-dots {
   display: flex;
   align-items: center;
-  gap: var(--sp-2);
+  gap: var(--sp-3);
 }
 
+/* O quadrado visível continua com 8px; o ::before invisível amplia a área de
+   clique/toque para 24px. Com 16px de gap, as áreas de pontos vizinhos se
+   encostam sem se sobrepor. */
 .hero-carousel-dot {
+  position: relative;
   width: 8px;
   height: 8px;
   padding: 0;
@@ -240,6 +238,12 @@
   background: var(--bg);
   cursor: pointer;
   transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.hero-carousel-dot::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
 }
 
 .hero-carousel-dot:hover {
