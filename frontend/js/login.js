@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const senha = document.getElementById('senha').value;
 
     ronuDefinirCarregando(submitBtn, true, 'Entrando...');
+    const cancelarAvisoDeEspera = ronuAvisoDeEspera(submitBtn.querySelector('.btn-label'));
 
     try {
       await ronuLogin(email, senha);
@@ -30,6 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (erro) {
       ronuMostrarErroFormulario(formError, erro.message);
       ronuDefinirCarregando(submitBtn, false);
+    } finally {
+      cancelarAvisoDeEspera();
     }
   });
 });

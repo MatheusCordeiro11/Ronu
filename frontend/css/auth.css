@@ -350,6 +350,34 @@ html[data-auth-entrada="transicao"] .auth-form-wrap {
   justify-content: center;
 }
 
+/* Login com Google em andamento (ver ronuTratarCredencialGoogle em auth.js):
+   mesmo tratamento do .btn[data-loading]. pointer-events é herdado, então o
+   iframe do Google também para de receber cliques. */
+.google-signin-slot[data-loading="true"] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* O formulário fica inert durante o login com Google — sem isto, o botão
+   Entrar/Criar conta (desabilitado) continuaria com cara de clicável. */
+.auth-form-wrap form[inert] {
+  opacity: 0.5;
+}
+
+/* Linha de status do login com Google. Fica sempre no DOM (região aria-live
+   precisa existir antes do texto mudar pra ser anunciada); vazia, não ocupa
+   espaço. */
+.google-status {
+  margin-top: var(--sp-3);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.google-status:empty {
+  margin-top: 0;
+}
+
 .auth-switch {
   margin-top: var(--sp-5);
   font-size: var(--fs-xs);

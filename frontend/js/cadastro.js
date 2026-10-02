@@ -72,6 +72,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     ronuDefinirCarregando(submitBtn, true, 'Criando conta...');
+    // Um aviso só para o fluxo inteiro (cadastro + login automático +
+    // redirecionamento): a demora pode cair em qualquer uma das chamadas.
+    const cancelarAvisoDeEspera = ronuAvisoDeEspera(submitBtn.querySelector('.btn-label'));
 
     try {
       await ronuCadastrar(nome, email, senha, estado);
@@ -80,6 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (erro) {
       ronuMostrarErroFormulario(formError, erro.message);
       ronuDefinirCarregando(submitBtn, false);
+    } finally {
+      cancelarAvisoDeEspera();
     }
   });
 });

@@ -248,3 +248,70 @@ function ronuDefinirCarregando(botao, carregando, textoCarregando) {
     label.textContent = botao.dataset.textoOriginal || label.textContent;
   }
 }
+
+// Aviso de espera para uma operação que pode cair no cold start da API: ela
+// roda no plano gratuito do Azure e "dorme" sem uso — o primeiro request
+// depois disso levou ~45 s nas medições, contra ~1,5 s com ela acordada. Se a
+// operação passar de 5 s, troca o texto do elemento (o .btn-label de um botão
+// em carregamento, ou a linha de status do login com Google) explicando a
+// demora; aos 15 s, dá a expectativa real de tempo. Devolve a função que
+// cancela os avisos: quem chama TEM de chamá-la ao terminar (no finally), senão
+// um aviso atrasado sobrescreve o texto já restaurado — ou o de um novo envio.
+function ronuAvisoDeEspera(elementoTexto) {
+  const avisos = [
+    [5000, 'Acordando o servidor...'],
+    [15000, 'Pode levar até 1 minuto...']
+  ];
+
+  const temporizadores = avisos.map(([atraso, texto]) => setTimeout(() => {
+    elementoTexto.textContent = texto;
+  }, atraso));
+
+  return () => temporizadores.forEach(clearTimeout);
+}
+
+// true do momento em que uma credencial do Google chega até a página trocar
+// (ou o login falhar). Uma segunda credencial nesse intervalo é ignorada.
+let ronuLoginGoogleEmAndamento = false;
+
+// Callback do Google Identity Services, compartilhado por login.html e
+// cadastro.html (initialize({ callback: ronuTratarCredencialGoogle })). O botão
+// do Google é um iframe deles — não dá pra trocar o texto dele como no botão
+// do formulário —, então o progresso vai numa linha de status logo abaixo
+// (#google-status, role="status", anunciada por leitores de tela). Durante a
+// espera, o slot do Google e o formulário ficam bloqueados: o formulário fica
+// inert (não só o botão desabilitado — no cadastro, digitar reabilitaria o
+// botão via revelarEtapa) para não haver dois logins em paralelo.
+async function ronuTratarCredencialGoogle(response) {
+  const form = document.querySelector('form');
+  const submitBtn = document.getElementById('submit-btn');
+  const formError = document.getElementById('form-error');
+  const slotGoogle = document.getElementById('google-signin-button');
+  const status = document.getElementById('google-status');
+
+  // Login por email/senha já em andamento também conta: só um por vez.
+  if (ronuLoginGoogleEmAndamento || submitBtn.dataset.loading === 'true') return;
+  ronuLoginGoogleEmAndamento = true;
+
+  const submitDesabilitadoAntes = submitBtn.disabled;
+  ronuOcultarErroFormulario(formError);
+  slotGoogle.dataset.loading = 'true';
+  form.inert = true;
+  submitBtn.disabled = true;
+  status.textContent = 'Entrando com o Google...';
+  const cancelarAvisoDeEspera = ronuAvisoDeEspera(status);
+
+  try {
+    await ronuLoginComGoogle(response.credential);
+    await ronuRedirecionarPosAuth();
+  } catch (erro) {
+    status.textContent = '';
+    slotGoogle.dataset.loading = 'false';
+    form.inert = false;
+    submitBtn.disabled = submitDesabilitadoAntes;
+    ronuLoginGoogleEmAndamento = false;
+    ronuMostrarErroFormulario(formError, erro.message);
+  } finally {
+    cancelarAvisoDeEspera();
+  }
+}

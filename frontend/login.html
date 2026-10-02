@@ -94,6 +94,7 @@
 
         <div class="auth-divider"><span>ou</span></div>
         <div id="google-signin-button" class="google-signin-slot"></div>
+        <p class="google-status" id="google-status" role="status" aria-live="polite"></p>
 
         <p class="auth-switch">Ainda não tem conta? <a href="cadastro.html" class="auth-switch-link">Criar conta</a></p>
       </div>
@@ -105,14 +106,7 @@
   <script src="js/login.js"></script>
   <script src="js/hero-carousel.js"></script>
   <script>
-    function ronuTratarCredencialGoogle(response) {
-      ronuLoginComGoogle(response.credential)
-        .then(() => ronuRedirecionarPosAuth())
-        .catch((erro) => {
-          ronuMostrarErroFormulario(document.getElementById('form-error'), erro.message);
-        });
-    }
-
+    // ronuTratarCredencialGoogle (callback abaixo) fica em js/auth.js.
     window.addEventListener('load', () => {
       // Carrossel primeiro: não depende do script externo do Google.
       initHeroCarousel(document.getElementById('authCarousel'), {
