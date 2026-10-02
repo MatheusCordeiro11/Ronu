@@ -140,11 +140,27 @@ html[data-auth-tela="cadastro"]::view-transition-new(root) {
 .hero-carousel-slide img[src*="foto-muaythai-chute"] { object-position: 50% 25%; }
 .hero-carousel-slide img[src*="foto-corrida-borrada"] { object-position: 50% 10%; }
 
+/* Fotos novas, todas fora do centro: a bola do basquete fica na borda
+   esquerda (5%: bola e perfil; o braço direito sai do corte em retrato);
+   voleio e piscina sobem um pouco para não cortar a bola no corte
+   paisagem do celular, mantendo pé do chute e rosto; o alongamento puxa
+   à esquerda para o rosto e a mão com magnésio no joelho caberem no 4:5;
+   a dança puxa à direita e para baixo, onde estão o rosto e o pé de apoio. */
+.hero-carousel-slide img[src*="foto-basquete-movimento"] { object-position: 5% 40%; }
+.hero-carousel-slide img[src*="foto-futebol-voleio"] { object-position: 50% 35%; }
+.hero-carousel-slide img[src*="foto-piscina-bola"] { object-position: 50% 45%; }
+.hero-carousel-slide img[src*="foto-alongamento-magnesio"] { object-position: 40% 50%; }
+.hero-carousel-slide img[src*="foto-danca-movimento"] { object-position: 60% 70%; }
+
+/* A fileira de pontos fica acima dos braços inferiores das marcas de canto
+   (recuo --sp-4 + braço de 20px + respiro --sp-1): com 14 fotos ela mede
+   320px e, na altura das marcas, passaria por cima delas em containers
+   estreitos (landing no celular, login em ~1024px). */
 .hero-carousel-controls {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: var(--sp-4);
+  bottom: calc(var(--sp-4) + 20px + var(--sp-1));
   z-index: 2;
   display: flex;
   align-items: center;

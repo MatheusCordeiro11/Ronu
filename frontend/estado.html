@@ -22,9 +22,22 @@
     <aside class="auth-brand">
       <a href="landing/v1/index.html" class="wordmark">ronu<span>.</span></a>
       <div class="auth-brand-visual hero-carousel" id="authCarousel">
+        <!--
+          Ordem: as 9 fotos anteriores seguem na sequência de antes; as 5 novas entram
+          intercaladas para que nenhuma foto com motion blur forte (basquete, corrida,
+          giro, os dois futebóis e a piscina) encoste em outra, nem as duas de tom
+          quente (futebóis e piscina) ou as duas de estúdio cinza (alongamento e dança).
+          Vale também entre a última e a primeira, porque o carrossel dá a volta.
+          A 1ª foto leva fetchpriority="high": os slides ficam empilhados na área
+          visível (só a opacidade muda), então o loading="lazy" não adia as demais no
+          desktop — elas baixam junto, em prioridade baixa, e a 1ª precisa chegar antes.
+        -->
         <ul class="hero-carousel-track">
           <li class="hero-carousel-slide is-active">
-            <img src="img/modalidades/foto-natacao.webp" alt="Nadador submerso visto de baixo, em preto e branco" loading="eager">
+            <img src="img/modalidades/foto-natacao.webp" alt="Nadador submerso visto de baixo, em preto e branco" loading="eager" fetchpriority="high">
+          </li>
+          <li class="hero-carousel-slide">
+            <img src="img/modalidades/foto-basquete-movimento.webp" alt="Jogador de basquete segurando a bola no alto, borrado pela velocidade, contra um fundo azul e amarelo" loading="lazy">
           </li>
           <li class="hero-carousel-slide">
             <img src="img/modalidades/foto-judo-plateia.webp" alt="Judoca de quimono e faixa preta diante da plateia de um ginásio" loading="lazy">
@@ -33,10 +46,16 @@
             <img src="img/modalidades/foto-academia-puxada.webp" alt="Atleta de regata vermelha num aparelho de puxada" loading="lazy">
           </li>
           <li class="hero-carousel-slide">
+            <img src="img/modalidades/foto-futebol-voleio.webp" alt="Jogador de futebol chutando a bola no ar sobre almofadas vermelhas" loading="lazy">
+          </li>
+          <li class="hero-carousel-slide">
             <img src="img/modalidades/foto-muaythai-chute.webp" alt="Lutador chutando o saco de pancadas numa academia de muay thai" loading="lazy">
           </li>
           <li class="hero-carousel-slide">
             <img src="img/modalidades/foto-prancha.webp" alt="Atleta treinando abdômen com rolinho no chão da academia" loading="lazy">
+          </li>
+          <li class="hero-carousel-slide">
+            <img src="img/modalidades/foto-piscina-bola.webp" alt="Homem dentro de uma piscina olhando a bola no ar, em tons quentes" loading="lazy">
           </li>
           <li class="hero-carousel-slide">
             <img src="img/modalidades/foto-boxe-ringue.webp" alt="Dois boxeadores frente a frente no ringue antes da luta" loading="lazy">
@@ -45,7 +64,13 @@
             <img src="img/modalidades/foto-giro-2.webp" alt="Atleta girando o corpo num golpe, borrado pela velocidade" loading="lazy">
           </li>
           <li class="hero-carousel-slide">
+            <img src="img/modalidades/foto-alongamento-magnesio.webp" alt="Atleta de regata preta com as mãos brancas de magnésio, alongando o braço num estúdio cinza" loading="lazy">
+          </li>
+          <li class="hero-carousel-slide">
             <img src="img/modalidades/foto-futebol-chute.webp" alt="Jogador de futebol acertando a bola no ar" loading="lazy">
+          </li>
+          <li class="hero-carousel-slide">
+            <img src="img/modalidades/foto-danca-movimento.webp" alt="Bailarina equilibrada numa perna, com a outra estendida para trás, num estúdio cinza" loading="lazy">
           </li>
           <li class="hero-carousel-slide">
             <img src="img/modalidades/foto-corrida-borrada.webp" alt="Atleta correndo de moletom, borrado pela velocidade" loading="lazy">
@@ -55,13 +80,18 @@
         <div class="hero-carousel-controls">
           <div class="hero-carousel-dots" role="tablist" aria-label="Selecionar imagem">
             <button type="button" class="hero-carousel-dot is-active" role="tab" aria-selected="true" aria-label="Natação"></button>
+            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Basquete"></button>
             <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Judô"></button>
             <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Musculação"></button>
+            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Voleio"></button>
             <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Muay thai"></button>
             <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Abdômen"></button>
+            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Piscina"></button>
             <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Boxe"></button>
             <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Movimento"></button>
+            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Alongamento"></button>
             <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Futebol"></button>
+            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Dança"></button>
             <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Corrida"></button>
           </div>
         </div>
