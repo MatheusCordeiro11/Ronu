@@ -1,7 +1,8 @@
 // Ronu — Dashboard (área do atleta)
-// Fluxo: guarda de sessão -> checagem de perfil/objetivo (GET, nunca chama
-// a IA só pra validar) -> carrega o histórico de dietas (o item [0] já é a
-// dieta atual, não precisa de uma chamada separada a /dietas/atual) -> renderiza.
+// Fluxo: guarda de sessão -> checagem de cadastro completo (pulada se a marca
+// de cadastro completo já existe; senão GETs simples, nunca chama a IA só pra
+// validar) -> carrega o histórico de dietas (o item [0] já é a dieta atual,
+// não precisa de uma chamada separada a /dietas/atual) -> renderiza.
 
 document.addEventListener('DOMContentLoaded', async () => {
   const usuario = ronuUsuarioLogado();
@@ -284,21 +285,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function iniciar() {
     mostrarSomente(elLoading);
 
-    // Checagem de perfil/objetivo feita com GETs simples — nunca chamando
-    // POST /dietas/gerar só pra validar, o que gastaria cota da Gemini à toa.
+    // Cadastro já visto completo neste navegador (marca gravada pela checagem
+    // pós-login ou por uma abertura anterior): vai direto ao histórico. Sem a
+    // marca (acesso direto, sessão antiga), faz a checagem completa — GETs
+    // simples, nunca POST /dietas/gerar, que gastaria cota da Gemini à toa.
     try {
-      const [respostaPerfil, respostaObjetivo] = await Promise.all([
-        ronuFetchAutenticado('/perfil'),
-        ronuFetchAutenticado('/objetivos/atual')
-      ]);
-
-      const perfil = respostaPerfil.ok ? await respostaPerfil.json() : null;
-      const perfilCompleto = Boolean(
-        perfil && perfil.altura != null && perfil.sexo != null && perfil.dataNascimento != null
-      );
-      const temObjetivo = respostaObjetivo.status === 200;
-
-      if (!perfilCompleto || !temObjetivo) {
+      if (!ronuCadastroJaCompleto() && !(await ronuChecarCadastroCompleto())) {
         window.location.href = 'onboarding.html';
         return;
       }

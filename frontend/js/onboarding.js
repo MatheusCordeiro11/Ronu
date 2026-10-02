@@ -19,9 +19,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   let passoAtual = 1;
 
   // Se o cadastro já estiver completo (ex: usuário voltou a esta URL à toa),
-  // não faz sentido forçar o wizard de novo.
+  // não faz sentido forçar o wizard de novo. Com a marca de cadastro completo
+  // (ver ronuCadastroJaCompleto, auth.js), nem precisa consultar a API.
   try {
-    const completo = await ronuChecarCadastroCompleto();
+    const completo = ronuCadastroJaCompleto() || await ronuChecarCadastroCompleto();
     if (completo) {
       window.location.href = 'dashboard.html';
       return;

@@ -15,6 +15,8 @@ const RONU_USUARIO_KEY = 'ronu:usuario';
 // 'true' quando o último login avisou que a conta ainda não tem estado (UF) —
 // contas via Google ou anteriores ao campo. Lido por ronuRedirecionarPosAuth.
 const RONU_PRECISA_ESTADO_KEY = 'ronu:precisaEstado';
+// Id do usuário cujo cadastro já foi visto completo (ver ronuCadastroJaCompleto).
+const RONU_CADASTRO_COMPLETO_KEY = 'ronu:cadastroCompleto';
 
 function ronuSalvarSessao(token, usuario) {
   localStorage.setItem(RONU_TOKEN_KEY, token);
@@ -25,6 +27,7 @@ function ronuLimparSessao() {
   localStorage.removeItem(RONU_TOKEN_KEY);
   localStorage.removeItem(RONU_USUARIO_KEY);
   localStorage.removeItem(RONU_PRECISA_ESTADO_KEY);
+  localStorage.removeItem(RONU_CADASTRO_COMPLETO_KEY);
 }
 
 function ronuUsuarioLogado() {
@@ -118,9 +121,10 @@ async function ronuFetchAutenticado(caminho, opcoes = {}) {
 
 // Um cadastro é considerado completo quando o usuário já tem perfil (altura,
 // sexo, data de nascimento), objetivo/peso registrado e pelo menos uma
-// modalidade vinculada (preferências é opcional). Usado logo após
-// login/cadastro e ao abrir o onboarding, pra decidir entre mandar o usuário
-// pro onboarding ou direto pro dashboard.
+// modalidade vinculada (preferências é opcional). Fonte única desse critério:
+// usada depois de login/cadastro, ao abrir o onboarding e ao abrir o dashboard
+// sem a marca de cadastro completo, pra decidir entre onboarding e dashboard.
+// Quando dá completo, grava a marca (ver ronuCadastroJaCompleto).
 async function ronuChecarCadastroCompleto() {
   const [respostaPerfil, respostaObjetivo, respostaModalidades] = await Promise.all([
     ronuFetchAutenticado('/perfil'),
@@ -136,7 +140,27 @@ async function ronuChecarCadastroCompleto() {
   const modalidades = respostaModalidades.ok ? await respostaModalidades.json() : [];
   const temModalidade = Array.isArray(modalidades) && modalidades.length > 0;
 
-  return perfilCompleto && temObjetivo && temModalidade;
+  const completo = perfilCompleto && temObjetivo && temModalidade;
+  const usuario = ronuUsuarioLogado();
+  if (completo && usuario) {
+    localStorage.setItem(RONU_CADASTRO_COMPLETO_KEY, String(usuario.id));
+  } else {
+    localStorage.removeItem(RONU_CADASTRO_COMPLETO_KEY);
+  }
+  return completo;
+}
+
+// Atalho para não repetir as 3 chamadas de ronuChecarCadastroCompleto a cada
+// abertura do dashboard/onboarding. Um cadastro completo não volta a ficar
+// incompleto pela interface: o PUT /perfil exige altura, sexo e data de
+// nascimento; a API recusa apagar o último objetivo; e treino.js bloqueia
+// remover a última modalidade. Por isso a marca não expira — só some ao
+// sair da conta (ronuLimparSessao), e vale só para o usuário que a gravou
+// (outro login no mesmo navegador não a herda). Se algo escapar disso, a
+// própria API ainda recusa gerar dieta com perfil/objetivo incompleto.
+function ronuCadastroJaCompleto() {
+  const usuario = ronuUsuarioLogado();
+  return Boolean(usuario) && localStorage.getItem(RONU_CADASTRO_COMPLETO_KEY) === String(usuario.id);
 }
 
 // Chamado depois de um login/cadastro bem-sucedido. Se a checagem de
