@@ -9,4 +9,5 @@ public class ObjetivoResponse
     public decimal Peso { get; set; }
     public required string Objetivo { get; set; }
     public DateTime DataRegistro { get; set; }
+    public string? Aderencia { get; set; }
 }

@@ -12,6 +12,11 @@ public class ObjetivoUsuario
     public required string Objetivo { get; set; }
     public DateTime DataRegistro { get; set; }
 
+    // Opcional: se a pessoa seguiu a dieta no dia ("seguiu", "comeu_mais",
+    // "comeu_menos", "nao_seguiu"). Base da meta calórica adaptativa; validado
+    // no ObjetivosController.
+    public string? Aderencia { get; set; }
+
     public int UsuarioId { get; set; }
 
     // "= null!" em vez de "required": o EF Core só precisa do UsuarioId (FK) para

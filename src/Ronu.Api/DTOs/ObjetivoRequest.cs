@@ -8,4 +8,6 @@ public class ObjetivoRequest
 {
     public required decimal Peso { get; set; }
     public required string Objetivo { get; set; }
+    // Opcional: "seguiu", "comeu_mais", "comeu_menos" ou "nao_seguiu".
+    public string? Aderencia { get; set; }
 }

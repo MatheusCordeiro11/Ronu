@@ -33,6 +33,14 @@ public class ObjetivosController : ControllerBase
     private int UsuarioIdLogado =>
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
+    // Valores fixos da resposta de aderência do registro diário — sem
+    // normalização, porque vêm de opções fixas na tela, não de digitação livre.
+    // "nao_seguiu" é guardado, mas o dia é descartado do cálculo da meta adaptativa.
+    private static readonly HashSet<string> ValoresAderencia = new()
+    {
+        "seguiu", "comeu_mais", "comeu_menos", "nao_seguiu"
+    };
+
     /// <summary>
     /// Registra um novo objetivo/peso para o usuário logado. Se já existe um
     /// registro com a mesma data (no calendário UTC) para este usuário, atualiza
@@ -47,6 +55,13 @@ public class ObjetivosController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Criar(ObjetivoRequest request)
     {
+        // Opcional: nulo ou vazio segue normalmente; qualquer outro valor
+        // precisa ser uma das opções conhecidas.
+        if (!string.IsNullOrEmpty(request.Aderencia) && !ValoresAderencia.Contains(request.Aderencia))
+        {
+            return BadRequest(new { mensagem = "Resposta de aderência inválida." });
+        }
+
         var hojeUtc = DateOnly.FromDateTime(DateTime.UtcNow);
 
         var objetivoDeHoje = await _context.ObjetivosUsuario
@@ -60,6 +75,7 @@ public class ObjetivosController : ControllerBase
         {
             objetivoDeHoje.Peso = request.Peso;
             objetivoDeHoje.Objetivo = request.Objetivo;
+            objetivoDeHoje.Aderencia = request.Aderencia;
             objetivo = objetivoDeHoje;
         }
         else
@@ -68,6 +84,7 @@ public class ObjetivosController : ControllerBase
             {
                 Peso = request.Peso,
                 Objetivo = request.Objetivo,
+                Aderencia = request.Aderencia,
                 DataRegistro = DateTime.UtcNow,
                 UsuarioId = UsuarioIdLogado
             };
@@ -82,7 +99,8 @@ public class ObjetivosController : ControllerBase
             Id = objetivo.Id,
             Peso = objetivo.Peso,
             Objetivo = objetivo.Objetivo,
-            DataRegistro = objetivo.DataRegistro
+            DataRegistro = objetivo.DataRegistro,
+            Aderencia = objetivo.Aderencia
         };
 
         return Ok(response);
@@ -111,7 +129,8 @@ public class ObjetivosController : ControllerBase
             Id = objetivo.Id,
             Peso = objetivo.Peso,
             Objetivo = objetivo.Objetivo,
-            DataRegistro = objetivo.DataRegistro
+            DataRegistro = objetivo.DataRegistro,
+            Aderencia = objetivo.Aderencia
         };
 
         return Ok(response);
