@@ -210,10 +210,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ---------- Perfil salvo (compartilhado por Rotina e Orçamento) ----------
   // Rotina e orçamento não têm endpoint próprio: vivem no perfil, e o PUT
   // /perfil grava todos os campos juntos (altura, sexo e data de nascimento
-  // são required no PerfilRequest). Um único GET carrega o perfil salvo, e
-  // cada seção salva reenviando esse estado com só o próprio campo trocado —
-  // assim salvar uma seção não apaga (nem leva junto, sem salvar) o campo
-  // da outra.
+  // são required no PerfilRequest). Cada seção salva reenviando o perfil com
+  // só o próprio campo trocado — assim salvar uma seção não apaga (nem leva
+  // junto, sem salvar) o campo da outra.
+  // perfilSalvo (do GET ao abrir a página) só preenche a tela e decide se
+  // ela abre travada. Para salvar, o perfil é buscado de novo na hora (ver
+  // salvarNoPerfil).
 
   let perfilSalvo = null;
 
@@ -232,13 +234,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     elErro.hidden = false;
   }
 
+  // Perfil gravado AGORA, logo antes de salvar — não o carregado quando a
+  // página abriu. Com duas abas abertas (esta e perfil.html, por exemplo), a
+  // que salvasse por último mandaria de volta os dados antigos e apagaria o
+  // que a outra salvou. Buscando na hora, a janela cai de minutos/horas para
+  // o intervalo entre este GET e o PUT (menos de 1 s); a solução definitiva
+  // (endpoints separados por seção) está em docs/lacunas-conhecidas.md.
+  // Se o GET falhar, o salvamento é cancelado: cair de volta no perfilSalvo
+  // traria o problema de volta justamente quando a rede está instável.
+  async function buscarPerfilAtual() {
+    let resposta;
+    try {
+      resposta = await ronuFetchAutenticado('/perfil');
+    } catch (erro) {
+      if (erro.message === 'Sessão expirada.') throw erro;
+      throw new Error('Não foi possível salvar. Tente novamente.');
+    }
+    if (!resposta.ok) throw new Error('Não foi possível salvar. Tente novamente.');
+    return resposta.json();
+  }
+
   async function salvarNoPerfil(alteracoes) {
+    const atual = await buscarPerfilAtual();
     const corpo = {
-      altura: perfilSalvo.altura,
-      sexo: perfilSalvo.sexo,
-      dataNascimento: perfilSalvo.dataNascimento,
-      rotinaDiaria: perfilSalvo.rotinaDiaria ?? null,
-      orcamentoSemanal: perfilSalvo.orcamentoSemanal ?? null,
+      altura: atual.altura,
+      sexo: atual.sexo,
+      dataNascimento: atual.dataNascimento,
+      rotinaDiaria: atual.rotinaDiaria ?? null,
+      orcamentoSemanal: atual.orcamentoSemanal ?? null,
       ...alteracoes
     };
 
@@ -253,7 +276,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       throw new Error(dados?.mensagem || 'Não foi possível salvar. Tente novamente.');
     }
 
-    perfilSalvo = corpo;
+    // O PUT devolve o perfil como ficou gravado — fonte mais confiável que o
+    // corpo enviado.
+    perfilSalvo = await resposta.json();
   }
 
   // ---------- Rotina diária ----------

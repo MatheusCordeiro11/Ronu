@@ -28,10 +28,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnSalvarPerfil = document.getElementById('btn-salvar-perfil');
 
   // Rotina diária e orçamento semanal são editados em alimentacao.html, mas
-  // o PUT /perfil recebe tudo junto — guardados do GET e reenviados no PUT,
-  // senão salvar só os dados físicos aqui apagaria os dois (iriam como null).
-  let rotinaDiariaAtual = null;
-  let orcamentoSemanalAtual = null;
+  // o PUT /perfil recebe tudo junto — reenviados no PUT, senão salvar só os
+  // dados físicos aqui apagaria os dois (iriam como null). Vêm de um GET
+  // feito na hora de salvar, não do carregado quando a página abriu: com
+  // alimentacao.html aberta em outra aba, a rotina/orçamento salvos lá
+  // depois seriam sobrescritos pelos valores antigos. A janela cai para o
+  // intervalo entre o GET e o PUT (menos de 1 s); a solução definitiva
+  // (endpoints separados por seção) está em docs/lacunas-conhecidas.md.
+  // Se o GET falhar, o salvamento é cancelado — sem cair nos dados antigos.
+  async function buscarPerfilAtual() {
+    let resposta;
+    try {
+      resposta = await ronuFetchAutenticado('/perfil');
+    } catch (erro) {
+      if (erro.message === 'Sessão expirada.') throw erro;
+      throw new Error('Não foi possível salvar. Tente novamente.');
+    }
+    if (!resposta.ok) throw new Error('Não foi possível salvar. Tente novamente.');
+    return resposta.json();
+  }
 
   // Mesma faixa usada no onboarding: data de nascimento não pode ser
   // hoje/futuro nem implicar uma idade absurda.
@@ -48,8 +63,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!resposta.ok) throw new Error();
 
       const perfil = await resposta.json();
-      rotinaDiariaAtual = perfil.rotinaDiaria ?? null;
-      orcamentoSemanalAtual = perfil.orcamentoSemanal ?? null;
       elAltura.value = perfil.altura != null ? ronuFormatarAlturaMetros(perfil.altura) : '';
       elDataNascimento.value = perfil.dataNascimento ?? '';
       if (perfil.sexo) {
@@ -94,6 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     ronuDefinirCarregando(btnSalvarPerfil, true, 'Salvando...');
 
     try {
+      const atual = await buscarPerfilAtual();
       const resposta = await ronuFetchAutenticado('/perfil', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -101,8 +115,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           altura: alturaCm,
           sexo: sexoSelecionado.value,
           dataNascimento: elDataNascimento.value,
-          rotinaDiaria: rotinaDiariaAtual,
-          orcamentoSemanal: orcamentoSemanalAtual
+          rotinaDiaria: atual.rotinaDiaria ?? null,
+          orcamentoSemanal: atual.orcamentoSemanal ?? null
         })
       });
 
