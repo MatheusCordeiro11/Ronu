@@ -68,6 +68,103 @@
   margin-top: var(--sp-4);
 }
 
+/* ---------- Aderência à dieta (dentro do formulário de registrar peso) ----------
+   Pergunta opcional. As pills reaproveitam .option-pill (onboarding.css), mas
+   numa grade de colunas iguais: a de "Não deu pra seguir" tem uma segunda
+   linha com a dica, e a grade deixa as quatro com a mesma altura em vez de
+   uma pill alta solta numa linha de pills baixas. */
+.aderencia {
+  margin: var(--sp-4) 0 0;
+  padding: 0;
+  border: none;
+  min-width: 0;
+}
+
+/* Mesmo visual do rótulo de campo (.field label, styles.css). */
+.aderencia-pergunta {
+  padding: 0;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* Sem quebra de linha: em tela estreita o texto de apoio quebra ao lado do
+   "Limpar", em vez de o botão descer para uma linha própria que ficaria
+   vazia enquanto ele está oculto. */
+.aderencia-apoio-linha {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-top: 2px;
+}
+
+.aderencia-apoio {
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+}
+
+/* Ação secundária só em texto: aparece apenas com uma resposta marcada.
+   visibility (e não display) reserva o espaço — nada pula quando ela surge
+   — e também tira o botão da ordem de Tab enquanto está oculto. */
+.aderencia-limpar {
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding: var(--sp-1) 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: var(--fs-2xs);
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.aderencia-limpar:hover {
+  color: var(--text);
+}
+
+.aderencia-limpar:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.aderencia:not(:has(input:checked)) .aderencia-limpar {
+  visibility: hidden;
+}
+
+.aderencia-opcoes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+}
+
+/* Peso e cor iguais aos das pills de objetivo logo acima, que herdam de
+   .field label por estarem dentro de um .field — as duas fileiras têm de
+   parecer o mesmo componente. */
+.aderencia-pill {
+  min-height: 44px;
+  line-height: 1.3;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.aderencia-dica {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--fs-2xs);
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.aderencia-objetivo-alterado {
+  margin-top: var(--sp-4);
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+}
+
 #peso-registrar-sucesso {
   margin-top: var(--sp-5);
   margin-bottom: 0;
@@ -315,6 +412,10 @@
     width: 100%;
   }
 
+  .aderencia-opcoes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .peso-registrar-actions {
     flex-direction: column-reverse;
   }
@@ -335,5 +436,13 @@
 
   .peso-historico-valores {
     gap: var(--sp-3);
+  }
+}
+
+/* Em telas estreitas, 2 colunas espremem "Não deu pra seguir" e a dica em
+   cinco linhas; uma coluna mantém cada opção em uma ou duas. */
+@media (max-width: 480px) {
+  .aderencia-opcoes {
+    grid-template-columns: 1fr;
   }
 }

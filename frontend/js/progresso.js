@@ -1,8 +1,10 @@
 // Ronu — Progresso de peso
 // Consome GET /objetivos/tendencia (peso bruto de cada registro + peso de
 // tendência suavizado ao lado) e renderiza um carimbo de resumo, um gráfico
-// SVG (desenhado à mão, sem lib externa) e o histórico completo. Tela só de
-// leitura — registrar/editar/remover peso continua fora daqui.
+// SVG (desenhado à mão, sem lib externa) e o histórico completo. A única
+// escrita é o formulário inline de registrar peso (POST /objetivos), com a
+// pergunta opcional de aderência à dieta; editar/remover registros antigos
+// continua fora daqui.
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -36,8 +38,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnSalvarPeso = document.getElementById('btn-registrar-peso');
   const btnCancelarRegistrar = document.getElementById('btn-cancelar-registrar-peso');
 
+  const fieldsetAderencia = document.getElementById('aderencia-fieldset');
+  const elAderenciaData = document.getElementById('aderencia-data');
+  const btnLimparAderencia = document.getElementById('aderencia-limpar');
+  const elObjetivoAlterado = document.getElementById('aderencia-objetivo-alterado');
+
   let pontos = [];
   let objetivoAtual = null;
+
+  // Vêm do GET /objetivos/atual e são atualizados com a resposta do POST
+  // (mesmo formato). registradoHoje é calculado no back-end com a mesma
+  // regra de "hoje" do upsert — o front nunca compara datas para isso.
+  let aderenciaSalva = null;
+  let registradoHoje = false;
+  let temDieta = false;
 
   // A linha de tendência é "desenhada" só na primeira vez que o gráfico
   // aparece na página. Resize e registro de peso redesenham estático — uma
@@ -63,6 +77,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function formatarDataCurta(isoString) {
     return new Date(isoString).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+  }
+
+  // Para o meio de uma frase ("Desde a pesagem de 28 de setembro, ..."): o
+  // mês abreviado termina em ponto ("28 de set."), que fica ruim antes da
+  // vírgula. Ano só quando não é o atual.
+  function formatarDataPorExtenso(isoString) {
+    const data = new Date(isoString);
+    const opcoes = { day: 'numeric', month: 'long' };
+    if (data.getFullYear() !== new Date().getFullYear()) opcoes.year = 'numeric';
+    return data.toLocaleDateString('pt-BR', opcoes);
   }
 
   // ---------- Estados de topo (mutuamente exclusivos) ----------
@@ -306,6 +330,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!resposta.ok) throw new Error('Não foi possível carregar seu progresso de peso.');
     pontos = await resposta.json();
     renderizarTudo();
+    // Formulário aberto antes da tendência chegar: a data da pesagem
+    // anterior só existe agora.
+    if (!formRegistrar.hidden) atualizarAderencia();
   }
 
   // Busca o objetivo atual só pra pré-selecionar o radio do formulário de
@@ -321,8 +348,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       try {
         const resposta = await ronuFetchAutenticado('/objetivos/atual');
         if (resposta.ok) {
-          const objetivo = await resposta.json();
-          objetivoAtual = objetivo.objetivo;
+          guardarObjetivoSalvo(await resposta.json());
         }
       } catch (erro) {
         // Sessão expirada já foi tratada (redirecionamento) dentro de
@@ -375,6 +401,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       );
       if (radioAtual) radioAtual.checked = true;
     }
+
+    // O POST substitui o registro de hoje inteiro, inclusive a aderência: se
+    // já há resposta salva hoje, ela volta marcada para não ser apagada sem
+    // querer ao corrigir só o peso.
+    if (registradoHoje && aderenciaSalva) {
+      const radioAderencia = fieldsetAderencia.querySelector(
+        `input[name="peso-registrar-aderencia"][value="${aderenciaSalva}"]`
+      );
+      if (radioAderencia) radioAderencia.checked = true;
+    }
+
+    atualizarAderencia();
   }
 
   function fecharFormularioRegistrar() {
@@ -382,11 +420,69 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnToggleRegistrar.hidden = false;
     btnToggleRegistrar.setAttribute('aria-expanded', 'false');
     formRegistrar.reset();
+    fieldsetAderencia.hidden = true;
+    elObjetivoAlterado.hidden = true;
     ronuOcultarErroFormulario(elRegistrarError);
   }
 
   btnToggleRegistrar.addEventListener('click', abrirFormularioRegistrar);
   btnCancelarRegistrar.addEventListener('click', fecharFormularioRegistrar);
+
+  // ---------- Aderência à dieta ----------
+  // A resposta vale para o intervalo desde a pesagem anterior (cada registro
+  // é um ponto no cálculo da meta adaptativa). A pergunta só aparece quando
+  // faz sentido: com dieta gerada (sem dieta não há o que seguir), com uma
+  // pesagem anterior para servir de referência e com o mesmo objetivo já
+  // salvo — trocar o objetivo começa um período novo no cálculo.
+
+  function guardarObjetivoSalvo(objetivo) {
+    objetivoAtual = objetivo.objetivo;
+    aderenciaSalva = objetivo.aderencia;
+    registradoHoje = objetivo.registradoHoje === true;
+    temDieta = objetivo.temDieta === true;
+  }
+
+  // Se o registro de hoje já existe, o último ponto é ele mesmo — a
+  // referência passa a ser o penúltimo.
+  function dataPesagemAnterior() {
+    const indice = registradoHoje ? pontos.length - 2 : pontos.length - 1;
+    return indice >= 0 ? pontos[indice].data : null;
+  }
+
+  function atualizarAderencia() {
+    const dataAnterior = dataPesagemAnterior();
+    const disponivel = temDieta && dataAnterior !== null;
+
+    const objetivoMarcado = formRegistrar.querySelector('input[name="peso-registrar-objetivo"]:checked');
+    const objetivoAlterado = disponivel && Boolean(objetivoMarcado) && objetivoMarcado.value !== objetivoAtual;
+
+    if (disponivel) elAderenciaData.textContent = formatarDataPorExtenso(dataAnterior);
+
+    // Só esconde (não desmarca): voltando ao objetivo salvo, a resposta
+    // continua lá.
+    fieldsetAderencia.hidden = !disponivel || objetivoAlterado;
+    elObjetivoAlterado.hidden = !objetivoAlterado;
+  }
+
+  formRegistrar.querySelectorAll('input[name="peso-registrar-objetivo"]').forEach((radio) => {
+    radio.addEventListener('change', atualizarAderencia);
+  });
+
+  // O botão some assim que nada fica marcado (CSS) — o foco vai para a
+  // primeira opção em vez de se perder junto com ele.
+  btnLimparAderencia.addEventListener('click', () => {
+    const opcoes = fieldsetAderencia.querySelectorAll('input[name="peso-registrar-aderencia"]');
+    opcoes.forEach((radio) => { radio.checked = false; });
+    opcoes[0].focus();
+  });
+
+  // Pergunta escondida = sem resposta: envia null, o que também limpa uma
+  // resposta salva hoje (ex.: objetivo trocado no mesmo envio).
+  function aderenciaParaEnviar() {
+    if (fieldsetAderencia.hidden) return null;
+    const marcada = fieldsetAderencia.querySelector('input[name="peso-registrar-aderencia"]:checked');
+    return marcada ? marcada.value : null;
+  }
 
   formRegistrar.addEventListener('submit', async (evento) => {
     evento.preventDefault();
@@ -408,7 +504,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           peso: parseFloat(inputPesoRegistrar.value),
-          objetivo: objetivoSelecionado.value
+          objetivo: objetivoSelecionado.value,
+          aderencia: aderenciaParaEnviar()
         })
       });
 
@@ -417,8 +514,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         throw new Error(corpo?.mensagem || 'Não foi possível registrar seu peso. Tente novamente.');
       }
 
-      const objetivoSalvo = await resposta.json();
-      objetivoAtual = objetivoSalvo.objetivo;
+      // Mesmo formato do GET /objetivos/atual.
+      guardarObjetivoSalvo(await resposta.json());
 
       fecharFormularioRegistrar();
       elRegistrarSucesso.textContent = 'Peso registrado. A tendência se ajusta aos poucos, para refletir a direção real, não picos de um dia.';

@@ -98,6 +98,37 @@
               </div>
             </div>
 
+            <!-- Aderência à dieta desde a pesagem anterior (opcional). O
+                 progresso.js decide quando mostrar: só com dieta gerada, com
+                 pesagem anterior e com o mesmo objetivo já salvo. -->
+            <fieldset class="aderencia" id="aderencia-fieldset" aria-describedby="aderencia-apoio" hidden>
+              <legend class="aderencia-pergunta">Desde a pesagem de <span id="aderencia-data"></span>, como foi com a dieta?</legend>
+              <div class="aderencia-apoio-linha">
+                <p class="aderencia-apoio" id="aderencia-apoio">Opcional. Ajuda o Ronu a ajustar suas calorias com mais precisão.</p>
+                <button type="button" class="aderencia-limpar" id="aderencia-limpar">Limpar resposta</button>
+              </div>
+              <div class="aderencia-opcoes">
+                <label class="option-pill aderencia-pill">
+                  <input type="radio" name="peso-registrar-aderencia" value="seguiu">
+                  <span>Segui a dieta</span>
+                </label>
+                <label class="option-pill aderencia-pill">
+                  <input type="radio" name="peso-registrar-aderencia" value="comeu_mais">
+                  <span>Comi um pouco mais</span>
+                </label>
+                <label class="option-pill aderencia-pill">
+                  <input type="radio" name="peso-registrar-aderencia" value="comeu_menos">
+                  <span>Comi um pouco menos</span>
+                </label>
+                <label class="option-pill aderencia-pill">
+                  <input type="radio" name="peso-registrar-aderencia" value="nao_seguiu">
+                  <span>Não deu pra seguir <span class="aderencia-dica">viagem, doença, semana sem controle</span></span>
+                </label>
+              </div>
+            </fieldset>
+
+            <p class="aderencia-objetivo-alterado" id="aderencia-objetivo-alterado" hidden>Objetivo alterado: a pergunta sobre a dieta volta na próxima pesagem.</p>
+
             <div class="form-message form-message-error" id="peso-registrar-error" hidden></div>
 
             <div class="peso-registrar-actions">
