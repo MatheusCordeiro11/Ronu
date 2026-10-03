@@ -21,12 +21,12 @@ Lista de endpoints da API, definidos a partir das user stories (`docs/user-stori
 ## Objetivo / dados corporais (histórico)
 
 ### `POST /api/objetivos`
-**Recebe:** `peso`, `objetivo`
-**Devolve:** `id`, `peso`, `objetivo`, `dataRegistro`
-*(`dataRegistro` é preenchida automaticamente pela API, não vem do cliente)*
+**Recebe:** `peso`, `objetivo`, `aderencia` (opcional: `seguiu`, `comeu_mais`, `comeu_menos` ou `nao_seguiu`; nulo ou vazio = sem resposta)
+**Devolve:** `id`, `peso`, `objetivo`, `dataRegistro`, `aderencia`, `registradoHoje`, `temDieta` (mesmo formato do `GET /api/objetivos/atual`)
+*(`dataRegistro` é preenchida automaticamente pela API, não vem do cliente. Se já existe um registro do usuário no mesmo dia, no calendário UTC, ele é atualizado em vez de criar outro — inclusive a `aderencia`, que volta a nulo se não for enviada)*
 
 ### `GET /api/objetivos/atual`
-**Devolve:** o registro mais recente de `ObjetivoUsuario` do usuário logado
+**Devolve:** o registro mais recente de `ObjetivoUsuario` do usuário logado (`id`, `peso`, `objetivo`, `dataRegistro`, `aderencia`), mais `registradoHoje` (se esse registro é o de hoje, no calendário UTC, que o próximo POST vai sobrescrever) e `temDieta` (se o usuário já tem alguma dieta gerada)
 
 ---
 

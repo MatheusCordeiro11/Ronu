@@ -62,12 +62,10 @@ public class ObjetivosController : ControllerBase
             return BadRequest(new { mensagem = "Resposta de aderência inválida." });
         }
 
-        var hojeUtc = DateOnly.FromDateTime(DateTime.UtcNow);
+        // "" chega como "sem resposta": grava null, não uma string vazia.
+        var aderencia = string.IsNullOrEmpty(request.Aderencia) ? null : request.Aderencia;
 
-        var objetivoDeHoje = await _context.ObjetivosUsuario
-            .Where(o => o.UsuarioId == UsuarioIdLogado)
-            .Where(o => DateOnly.FromDateTime(o.DataRegistro) == hojeUtc)
-            .FirstOrDefaultAsync();
+        var objetivoDeHoje = await BuscarObjetivoDeHojeAsync();
 
         ObjetivoUsuario objetivo;
 
@@ -75,7 +73,7 @@ public class ObjetivosController : ControllerBase
         {
             objetivoDeHoje.Peso = request.Peso;
             objetivoDeHoje.Objetivo = request.Objetivo;
-            objetivoDeHoje.Aderencia = request.Aderencia;
+            objetivoDeHoje.Aderencia = aderencia;
             objetivo = objetivoDeHoje;
         }
         else
@@ -84,7 +82,7 @@ public class ObjetivosController : ControllerBase
             {
                 Peso = request.Peso,
                 Objetivo = request.Objetivo,
-                Aderencia = request.Aderencia,
+                Aderencia = aderencia,
                 DataRegistro = DateTime.UtcNow,
                 UsuarioId = UsuarioIdLogado
             };
@@ -94,16 +92,9 @@ public class ObjetivosController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        var response = new ObjetivoResponse
-        {
-            Id = objetivo.Id,
-            Peso = objetivo.Peso,
-            Objetivo = objetivo.Objetivo,
-            DataRegistro = objetivo.DataRegistro,
-            Aderencia = objetivo.Aderencia
-        };
-
-        return Ok(response);
+        // Mesmo formato do GET /atual: o progresso.js atualiza o estado do
+        // formulário com esta resposta.
+        return Ok(await MontarObjetivoAtualResponseAsync(objetivo));
     }
 
     /// <summary>
@@ -124,16 +115,39 @@ public class ObjetivosController : ControllerBase
             return NotFound(new { mensagem = "Nenhum objetivo cadastrado ainda." });
         }
 
-        var response = new ObjetivoResponse
+        return Ok(await MontarObjetivoAtualResponseAsync(objetivo));
+    }
+
+    // Regra única de "hoje" (dia do calendário em UTC): usada no upsert do POST
+    // e no RegistradoHoje da resposta, para os dois nunca divergirem.
+    private Task<ObjetivoUsuario?> BuscarObjetivoDeHojeAsync()
+    {
+        var hojeUtc = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        return _context.ObjetivosUsuario
+            .Where(o => o.UsuarioId == UsuarioIdLogado)
+            .Where(o => DateOnly.FromDateTime(o.DataRegistro) == hojeUtc)
+            .FirstOrDefaultAsync();
+    }
+
+    // Resposta comum ao POST e ao GET /atual. RegistradoHoje compara pelo Id
+    // (não só "existe registro de hoje"): o que importa é se este é o registro
+    // que o próximo POST vai sobrescrever.
+    private async Task<ObjetivoAtualResponse> MontarObjetivoAtualResponseAsync(ObjetivoUsuario objetivo)
+    {
+        var objetivoDeHoje = await BuscarObjetivoDeHojeAsync();
+        var temDieta = await _context.DietasIA.AnyAsync(d => d.UsuarioId == UsuarioIdLogado);
+
+        return new ObjetivoAtualResponse
         {
             Id = objetivo.Id,
             Peso = objetivo.Peso,
             Objetivo = objetivo.Objetivo,
             DataRegistro = objetivo.DataRegistro,
-            Aderencia = objetivo.Aderencia
+            Aderencia = objetivo.Aderencia,
+            RegistradoHoje = objetivoDeHoje?.Id == objetivo.Id,
+            TemDieta = temDieta
         };
-
-        return Ok(response);
     }
 
     /// <summary>
