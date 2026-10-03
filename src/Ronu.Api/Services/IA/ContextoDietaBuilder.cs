@@ -22,10 +22,30 @@ public class ContextoDietaBuilder : IContextoDietaBuilder
         var usuario = await _context.Usuarios
             .FirstAsync(u => u.Id == usuarioId);
 
-        var objetivo = await _context.ObjetivosUsuario
+        // Histórico inteiro de peso (um registro por dia, pelo upsert do
+        // ObjetivosController): a meta adaptativa precisa da série completa para
+        // a tendência assentar antes da janela recente. O mais recente continua
+        // sendo a fonte do peso e do objetivo atuais.
+        var historicoPeso = await _context.ObjetivosUsuario
             .Where(o => o.UsuarioId == usuarioId)
-            .OrderByDescending(o => o.DataRegistro)
-            .FirstAsync();
+            .OrderBy(o => o.DataRegistro)
+            .Select(o => new RegistroPesoAderenciaDto
+            {
+                Data = o.DataRegistro,
+                Peso = o.Peso,
+                Aderencia = o.Aderencia,
+                Objetivo = o.Objetivo
+            })
+            .ToListAsync();
+
+        // O DietasController já exige um objetivo antes de chegar aqui; mesma
+        // exceção que o FirstAsync anterior lançaria se não houvesse nenhum.
+        if (historicoPeso.Count == 0)
+        {
+            throw new InvalidOperationException("Usuário sem nenhum objetivo/peso registrado.");
+        }
+
+        var objetivo = historicoPeso[^1];
 
         var modalidades = await _context.UsuarioModalidades
             .Where(m => m.UsuarioId == usuarioId)
@@ -65,7 +85,8 @@ public class ContextoDietaBuilder : IContextoDietaBuilder
             Preferencias = preferencias,
             Estado = usuario.Estado,
             RotinaDiaria = usuario.RotinaDiaria,
-            OrcamentoSemanal = usuario.OrcamentoSemanal
+            OrcamentoSemanal = usuario.OrcamentoSemanal,
+            HistoricoPeso = historicoPeso
         };
     }
 }

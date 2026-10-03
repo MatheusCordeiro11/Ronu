@@ -8,4 +8,8 @@ namespace Ronu.Api.Models.IA;
 public class DietaSemanalDto
 {
     public required List<DiaDietaDto> Dias { get; set; }
+
+    // Como a meta adaptativa atuou nesta dieta (registro histórico, para o
+    // dashboard). Nulo em dietas geradas antes da meta adaptativa existir.
+    public AjusteAdaptativoDto? AjusteAdaptativo { get; set; }
 }

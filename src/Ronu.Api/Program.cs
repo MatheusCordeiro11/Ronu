@@ -44,6 +44,7 @@ builder.Services.AddSingleton(geminiOptions);
 builder.Services.AddHttpClient<IGeradorDietaIA, GeradorDietaGemini>();
 builder.Services.AddScoped<ICalculadoraGastoCalorico, CalculadoraGastoCalorico>();
 builder.Services.AddScoped<ICalculadoraPesoTendencia, CalculadoraPesoTendencia>();
+builder.Services.AddScoped<ICalculadoraAjusteAdaptativo, CalculadoraAjusteAdaptativo>();
 builder.Services.AddScoped<IContextoDietaBuilder, ContextoDietaBuilder>();
 builder.Services.AddScoped<IRepositorioDietaIA, RepositorioDietaIA>();
 

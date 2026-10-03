@@ -19,18 +19,31 @@ public class GeradorDietaGemini : IGeradorDietaIA
 
     private readonly HttpClient _httpClient;
     private readonly ICalculadoraGastoCalorico _calculadora;
+    private readonly ICalculadoraAjusteAdaptativo _calculadoraAjuste;
     private readonly GeminiOptions _options;
 
-    public GeradorDietaGemini(HttpClient httpClient, ICalculadoraGastoCalorico calculadora, GeminiOptions options)
+    public GeradorDietaGemini(
+        HttpClient httpClient,
+        ICalculadoraGastoCalorico calculadora,
+        ICalculadoraAjusteAdaptativo calculadoraAjuste,
+        GeminiOptions options)
     {
         _httpClient = httpClient;
         _calculadora = calculadora;
+        _calculadoraAjuste = calculadoraAjuste;
         _options = options;
     }
 
     public async Task<DietaSemanalDto> GerarDietaAsync(ContextoDietaDto contexto)
     {
-        var metasPorDia = CalcularMetasPorDia(contexto, _calculadora);
+        // Meta da fórmula (sem mudança) -> ajuste adaptativo sobre ela, a partir
+        // do histórico real de peso -> metas finais, que vão para o prompt e
+        // para a MetaCalculada de cada dia. Ajuste 0% = metas idênticas às da
+        // fórmula.
+        var caloriasBasePorDia = CalcularCaloriasBasePorDia(contexto, _calculadora);
+        var ajuste = _calculadoraAjuste.Calcular(
+            contexto.HistoricoPeso, contexto.Objetivo, caloriasBasePorDia.Values.Average(), DateTime.UtcNow);
+        var metasPorDia = MontarMetasPorDia(caloriasBasePorDia, ajuste.Percentual, contexto.Peso, contexto.Altura);
 
         var prompt = MontarPrompt(contexto, metasPorDia);
         var schema = MontarSchema();
@@ -95,10 +108,12 @@ public class GeradorDietaGemini : IGeradorDietaIA
             };
         }).ToList();
 
-        return new DietaSemanalDto { Dias = dias };
+        return new DietaSemanalDto { Dias = dias, AjusteAdaptativo = ajuste };
     }
 
-    private static Dictionary<string, ResultadoMacros> CalcularMetasPorDia(
+    // Calorias da fórmula por dia (TMB + treino do dia + ajuste por objetivo),
+    // antes da meta adaptativa — o mesmo cálculo de sempre.
+    private static Dictionary<string, decimal> CalcularCaloriasBasePorDia(
         ContextoDietaDto contexto, ICalculadoraGastoCalorico calculadora)
     {
         // Mifflin-St Jeor: fórmula de TMB, mais precisa e validada
@@ -108,7 +123,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
             ? (10 * contexto.Peso) + (6.25m * contexto.Altura) - (5 * contexto.Idade) + 5
             : (10 * contexto.Peso) + (6.25m * contexto.Altura) - (5 * contexto.Idade) - 161;
 
-        var metas = new Dictionary<string, ResultadoMacros>(StringComparer.OrdinalIgnoreCase);
+        var calorias = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
 
         for (int dia = 1; dia <= 7; dia++)
         {
@@ -117,10 +132,24 @@ public class GeradorDietaGemini : IGeradorDietaIA
                 .Sum(m => calculadora.CalcularGastoSessao(m.MetReferencia, contexto.Peso, m.DuracaoHoras));
 
             var manutencao = tmb + gastoTreinoDia;
-            var metaCalorias = AplicarAjusteObjetivo(manutencao, contexto.Objetivo);
+            calorias[NomesDias[dia - 1]] = AplicarAjusteObjetivo(manutencao, contexto.Objetivo);
+        }
 
-            // Divisão em macros com piso de carboidrato (CalculadoraMacros).
-            metas[NomesDias[dia - 1]] = CalculadoraMacros.Calcular(metaCalorias, contexto.Peso, contexto.Altura);
+        return calorias;
+    }
+
+    // Aplica o ajuste adaptativo nas calorias de cada dia e monta os macros.
+    // Proteína e gordura dependem do peso corporal, então o ajuste cai no
+    // carboidrato — até o piso de 100 g (CalculadoraMacros). Percentual 0 =
+    // metas exatamente as da fórmula.
+    private static Dictionary<string, ResultadoMacros> MontarMetasPorDia(
+        Dictionary<string, decimal> caloriasBasePorDia, decimal percentualAjuste, decimal pesoKg, decimal alturaCm)
+    {
+        var metas = new Dictionary<string, ResultadoMacros>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var (dia, caloriasBase) in caloriasBasePorDia)
+        {
+            metas[dia] = CalculadoraMacros.Calcular(caloriasBase * (1 + percentualAjuste), pesoKg, alturaCm);
         }
 
         return metas;

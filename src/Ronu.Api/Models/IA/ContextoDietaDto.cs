@@ -18,4 +18,8 @@ public class ContextoDietaDto
     public string Estado { get; set; } = string.Empty;
     public string? RotinaDiaria { get; set; }
     public string? OrcamentoSemanal { get; set; }
+
+    // Histórico de peso e aderência para a meta calórica adaptativa. Entra só
+    // no cálculo das metas (GeradorDietaGemini), não no prompt.
+    public List<RegistroPesoAderenciaDto> HistoricoPeso { get; set; } = new();
 }
