@@ -18,6 +18,9 @@
 # Impeccable per-developer local override (hook consent, machine-specific buildPath)
 .impeccable/config.local.json
 
+# Saídas locais do scanner de segurança Strix
+strix_runs/
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
