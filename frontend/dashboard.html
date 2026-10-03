@@ -117,6 +117,17 @@
               <dd class="num" id="meta-gordura"></dd>
             </div>
           </dl>
+          <!-- Meta adaptativa: como o progresso mexeu (ou não) nesta dieta.
+               Preenchido por dashboard.js; escondido em dietas sem o campo.
+               O elemento é reaproveitado entre versões, então o "Saiba mais"
+               aberto continua aberto ao trocar de versão. -->
+          <details class="meta-ajuste" id="meta-ajuste" hidden>
+            <summary class="meta-ajuste-resumo">
+              <span class="meta-ajuste-mensagem" id="meta-ajuste-mensagem"></span>
+              <span class="meta-ajuste-toggle">Saiba mais</span>
+            </summary>
+            <div class="meta-ajuste-detalhe" id="meta-ajuste-detalhe"></div>
+          </details>
         </section>
 
         <nav class="day-row" id="day-row" role="tablist" aria-label="Dias da semana"></nav>

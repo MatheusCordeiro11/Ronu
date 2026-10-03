@@ -350,6 +350,152 @@
   margin: 0;
 }
 
+/* ---------- Ajuste pelo progresso (meta adaptativa) ----------
+   Anotação no pé do carimbo, separada dos macros por uma linha de 1px. O
+   <details> envolve a linha inteira: o <summary> é a própria frase (alvo de
+   toque grande, aria-expanded nativo) e a explicação abre por baixo.
+   O estado aparece só no traço de 14px antes da frase: Ouro de Faixa quando
+   a meta foi ajustada, Linha de Demarcação quando não — nunca vermelho ou
+   verde para "menor"/"maior". :not([hidden]) pelo mesmo motivo do
+   .version-switch: o elemento é escondido via atributo `hidden`. */
+.meta-ajuste:not([hidden]) {
+  display: block;
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-3);
+  border-top: var(--border-width) solid var(--border);
+}
+
+.meta-ajuste-resumo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  list-style: none;
+  cursor: pointer;
+}
+
+.meta-ajuste-resumo::-webkit-details-marker {
+  display: none;
+}
+
+.meta-ajuste-resumo:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: var(--radius);
+}
+
+/* Traço posicionado no meio da primeira linha (line-height 1.5 → 0.75em),
+   para continuar alinhado quando a frase quebra no mobile. */
+.meta-ajuste-mensagem {
+  position: relative;
+  padding-left: calc(14px + var(--sp-2));
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.meta-ajuste-mensagem::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.75em;
+  width: 14px;
+  height: var(--border-width);
+  background: var(--border);
+}
+
+.meta-ajuste[data-estado="aplicado"] .meta-ajuste-mensagem {
+  color: var(--text);
+}
+
+.meta-ajuste[data-estado="aplicado"] .meta-ajuste-mensagem::before {
+  background: var(--accent);
+}
+
+.meta-ajuste-mensagem strong {
+  font-weight: 600;
+}
+
+/* "Saiba mais" com a mesma linguagem do link "Ver progresso" (sublinhado
+   que aparece no hover) e uma seta de 1px que vira para cima quando abre. */
+.meta-ajuste-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  flex-shrink: 0;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+  text-decoration-line: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: var(--border-width);
+  text-underline-offset: 4px;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.meta-ajuste-toggle::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-right: var(--border-width) solid currentColor;
+  border-bottom: var(--border-width) solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 0.15s ease;
+}
+
+.meta-ajuste-resumo:hover .meta-ajuste-toggle {
+  color: var(--text);
+  text-decoration-color: var(--text-muted);
+}
+
+.meta-ajuste[open] .meta-ajuste-toggle::after {
+  transform: translateY(1px) rotate(-135deg);
+}
+
+/* Alinhado ao texto da frase (depois do traço), medida de leitura curta. */
+.meta-ajuste-detalhe {
+  max-width: calc(62ch + 14px + var(--sp-2));
+  padding: var(--sp-2) 0 0 calc(14px + var(--sp-2));
+  font-size: var(--fs-xs);
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.meta-ajuste-detalhe p {
+  margin: 0;
+}
+
+.meta-ajuste-detalhe p + p {
+  margin-top: var(--sp-1);
+}
+
+.meta-ajuste-detalhe a {
+  color: var(--text);
+  text-decoration-line: underline;
+  text-decoration-color: var(--text-muted);
+  text-decoration-thickness: var(--border-width);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.15s ease;
+}
+
+.meta-ajuste-detalhe a:hover {
+  text-decoration-color: var(--text);
+}
+
+.meta-ajuste-detalhe a:focus-visible {
+  outline: var(--border-width) solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .meta-ajuste-toggle,
+  .meta-ajuste-toggle::after {
+    transition: none;
+  }
+}
+
 /* ---------- Fileira de dias ---------- */
 .day-row {
   display: flex;
@@ -652,6 +798,19 @@
   .meta-stamp-item:nth-child(3) {
     padding-left: 0;
     border-left: none;
+  }
+
+  /* Frase e "Saiba mais" empilhados; o link alinha com o texto da frase.
+     flex-start no lugar do baseline do desktop: em coluna, o baseline faz o
+     Chrome alinhar os itens pela margem e a frase anda junto com o link. */
+  .meta-ajuste-resumo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-1);
+  }
+
+  .meta-ajuste-toggle {
+    margin-left: calc(14px + var(--sp-2));
   }
 
   .dashboard-toolbar {
