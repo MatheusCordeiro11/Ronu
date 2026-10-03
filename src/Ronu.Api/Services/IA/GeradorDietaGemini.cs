@@ -78,21 +78,27 @@ public class GeradorDietaGemini : IGeradorDietaIA
         // a IA devolver um nome de dia que não bate com nenhum dos 7
         // esperados, isso falha alto e claro aqui, em vez de silenciosamente
         // atribuir a meta errada a um dia por engano de posição.
-        var dias = respostaIa.Dias.Select(d => new DiaDietaDto
+        var dias = respostaIa.Dias.Select(d =>
         {
-            DiaSemana = d.DiaSemana,
-            Refeicoes = d.Refeicoes,
-            TotalDoDia = d.TotalDoDia,
-            MetaCalculada = metasPorDia.TryGetValue(d.DiaSemana.Trim(), out var meta)
-                ? meta
+            var meta = metasPorDia.TryGetValue(d.DiaSemana.Trim(), out var encontrada)
+                ? encontrada
                 : throw new InvalidOperationException(
-                    $"Dia '{d.DiaSemana}' retornado pela IA não corresponde a nenhum dos 7 dias esperados.")
+                    $"Dia '{d.DiaSemana}' retornado pela IA não corresponde a nenhum dos 7 dias esperados.");
+
+            return new DiaDietaDto
+            {
+                DiaSemana = d.DiaSemana,
+                Refeicoes = d.Refeicoes,
+                TotalDoDia = d.TotalDoDia,
+                MetaCalculada = meta.Macros,
+                MetaElevadaPeloPiso = meta.MetaElevadaPeloPiso
+            };
         }).ToList();
 
         return new DietaSemanalDto { Dias = dias };
     }
 
-    private static Dictionary<string, MacrosDto> CalcularMetasPorDia(
+    private static Dictionary<string, ResultadoMacros> CalcularMetasPorDia(
         ContextoDietaDto contexto, ICalculadoraGastoCalorico calculadora)
     {
         // Mifflin-St Jeor: fórmula de TMB, mais precisa e validada
@@ -102,7 +108,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
             ? (10 * contexto.Peso) + (6.25m * contexto.Altura) - (5 * contexto.Idade) + 5
             : (10 * contexto.Peso) + (6.25m * contexto.Altura) - (5 * contexto.Idade) - 161;
 
-        var metas = new Dictionary<string, MacrosDto>(StringComparer.OrdinalIgnoreCase);
+        var metas = new Dictionary<string, ResultadoMacros>(StringComparer.OrdinalIgnoreCase);
 
         for (int dia = 1; dia <= 7; dia++)
         {
@@ -113,7 +119,8 @@ public class GeradorDietaGemini : IGeradorDietaIA
             var manutencao = tmb + gastoTreinoDia;
             var metaCalorias = AplicarAjusteObjetivo(manutencao, contexto.Objetivo);
 
-            metas[NomesDias[dia - 1]] = MontarMacros(metaCalorias, contexto.Peso);
+            // Divisão em macros com piso de carboidrato (CalculadoraMacros).
+            metas[NomesDias[dia - 1]] = CalculadoraMacros.Calcular(metaCalorias, contexto.Peso, contexto.Altura);
         }
 
         return metas;
@@ -135,34 +142,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
         };
     }
 
-    private static MacrosDto MontarMacros(decimal metaCalorias, decimal pesoKg)
-    {
-        // Baseado em diretrizes de nutrição esportiva (ACSM): proteína e
-        // gordura por peso corporal, carboidrato preenche o restante.
-        const decimal ProteinaGramasPorKgMvp = 1.8m;
-        const decimal GorduraGramasPorKgMvp = 1.0m;
-        const decimal CaloriasPorGramaProteina = 4m;
-        const decimal CaloriasPorGramaGordura = 9m;
-        const decimal CaloriasPorGramaCarboidrato = 4m;
-
-        var proteinaG = pesoKg * ProteinaGramasPorKgMvp;
-        var gorduraG = pesoKg * GorduraGramasPorKgMvp;
-
-        var caloriasProteina = proteinaG * CaloriasPorGramaProteina;
-        var caloriasGordura = gorduraG * CaloriasPorGramaGordura;
-        var caloriasCarboidrato = metaCalorias - caloriasProteina - caloriasGordura;
-        var carboidratoG = caloriasCarboidrato / CaloriasPorGramaCarboidrato;
-
-        return new MacrosDto
-        {
-            Calorias = metaCalorias,
-            ProteinasG = proteinaG,
-            CarboidratosG = carboidratoG,
-            GordurasG = gorduraG
-        };
-    }
-
-    private static string MontarPrompt(ContextoDietaDto contexto, Dictionary<string, MacrosDto> metasPorDia)
+    private static string MontarPrompt(ContextoDietaDto contexto, Dictionary<string, ResultadoMacros> metasPorDia)
     {
         var modalidadesTexto = string.Join(", ", contexto.Modalidades
             .Select(m => $"{m.Nome} ({string.Join(", ", m.DiasSemana.OrderBy(d => d).Select(d => NomesDias[d - 1]))})"));
@@ -176,7 +156,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
             .Select(p => p.Alimento));
 
         var metasTexto = string.Join("\n", NomesDias.Select(nome =>
-            $"- {nome}: {metasPorDia[nome].Calorias:F0} kcal"));
+            $"- {nome}: {metasPorDia[nome].Macros.Calorias:F0} kcal"));
 
         // Contas via Google ou anteriores ao campo podem estar sem estado —
         // nesse caso a linha some do perfil (sem deixar linha em branco).

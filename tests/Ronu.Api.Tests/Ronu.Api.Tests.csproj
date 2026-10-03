@@ -9,6 +9,11 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <!-- Alinha com o EF Core 10.0.10 do Ronu.Api: lá ele entra pelo
+         Microsoft.EntityFrameworkCore.Design (PrivateAssets=all), que não passa
+         para cá, e o Npgsql puxaria o 10.0.4 (aviso MSB3277). -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.10" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
@@ -16,6 +21,10 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Ronu.Api\Ronu.Api.csproj" />
   </ItemGroup>
 
 </Project>

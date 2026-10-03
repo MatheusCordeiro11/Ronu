@@ -14,4 +14,9 @@ public class DiaDietaDto
     // deste dia + ajuste por objetivo) — varia entre dias de treino e
     // descanso. Diferente de TotalDoDia, que é o que a IA de fato montou.
     public required MacrosDto MetaCalculada { get; set; }
+
+    // true quando a meta calórica deste dia precisou subir para caber o mínimo
+    // nutricional (proteína + 100 g de carboidrato + gordura mínima) — ver
+    // CalculadoraMacros. Falso em dietas geradas antes do piso existir.
+    public bool MetaElevadaPeloPiso { get; set; }
 }
