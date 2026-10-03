@@ -259,32 +259,12 @@ public class GeradorDietaGemini : IGeradorDietaIA
             tempoMs, tentativas, uso.Entrada, uso.Resposta, uso.Raciocinio ?? 0, uso.Total, desvios);
     }
 
-    // Calorias da fórmula por dia (TMB + treino do dia + ajuste por objetivo),
-    // antes da meta adaptativa — o mesmo cálculo de sempre.
+    // Calorias da fórmula por dia (CalculadoraManutencao), antes da meta
+    // adaptativa, pelo nome do dia.
     private static Dictionary<string, decimal> CalcularCaloriasBasePorDia(
-        ContextoDietaDto contexto, ICalculadoraGastoCalorico calculadora)
-    {
-        // Mifflin-St Jeor: fórmula de TMB, mais precisa e validada
-        // cientificamente. É a mesma para todos os dias (não depende de
-        // treino) — só o gasto de treino varia por dia.
-        var tmb = contexto.Sexo == "Masculino"
-            ? (10 * contexto.Peso) + (6.25m * contexto.Altura) - (5 * contexto.Idade) + 5
-            : (10 * contexto.Peso) + (6.25m * contexto.Altura) - (5 * contexto.Idade) - 161;
-
-        var calorias = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
-
-        for (int dia = 1; dia <= 7; dia++)
-        {
-            var gastoTreinoDia = contexto.Modalidades
-                .Where(m => m.DiasSemana.Contains(dia))
-                .Sum(m => calculadora.CalcularGastoSessao(m.MetReferencia, contexto.Peso, m.DuracaoHoras));
-
-            var manutencao = tmb + gastoTreinoDia;
-            calorias[NomesDias[dia - 1]] = AplicarAjusteObjetivo(manutencao, contexto.Objetivo);
-        }
-
-        return calorias;
-    }
+        ContextoDietaDto contexto, ICalculadoraGastoCalorico calculadora) =>
+        CalculadoraManutencao.CaloriasBasePorDia(contexto, calculadora)
+            .ToDictionary(d => NomesDias[d.Key - 1], d => d.Value, StringComparer.OrdinalIgnoreCase);
 
     // Aplica o ajuste adaptativo nas calorias de cada dia e monta os macros.
     // Proteína e gordura dependem do peso corporal, então o ajuste cai no
@@ -301,22 +281,6 @@ public class GeradorDietaGemini : IGeradorDietaIA
         }
 
         return metas;
-    }
-
-    private static decimal AplicarAjusteObjetivo(decimal manutencao, string objetivo)
-    {
-        // Ajuste de superávit/déficit moderado (evidência: Aragon &
-        // Schoenfeld). Objetivo vem de um conjunto fixo de valores definidos
-        // no frontend (radio buttons), não texto livre — match direto seguro.
-        const decimal AjustePercentualMvp = 0.15m;
-
-        return objetivo switch
-        {
-            "ganhar peso" => manutencao * (1 + AjustePercentualMvp),
-            "perder peso" => manutencao * (1 - AjustePercentualMvp),
-            "manter peso" => manutencao,
-            _ => manutencao
-        };
     }
 
     private static string MontarPrompt(ContextoDietaDto contexto, Dictionary<string, ResultadoMacros> metasPorDia)
@@ -364,8 +328,9 @@ public class GeradorDietaGemini : IGeradorDietaIA
             - Objetivo: {contexto.Objetivo}
             - Modalidades praticadas (com os dias da semana de cada uma): {modalidadesTexto}{estadoTexto}
 
-            Metas calóricas diárias (calculadas a partir da taxa metabólica basal + gasto
-            real de treino de CADA dia específico — dias de treino têm meta mais alta que
+            Metas calóricas diárias (calculadas a partir do gasto em repouso, da atividade
+            do dia a dia fora do treino e do gasto real do treino de CADA dia específico, já
+            com o déficit ou superávit do objetivo — dias de treino têm meta mais alta que
             dias de descanso):
             {metasTexto}
 

@@ -12,9 +12,9 @@ namespace Ronu.Api.Services.IA;
 /// </summary>
 public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
 {
-    // Janela: só o comportamento recente, e só sob o objetivo atual — dados de
+    // Janela: só o comportamento recente, só sob o objetivo atual — dados de
     // outro objetivo (ex.: um período de ganho antes de um de perda) distorceriam
-    // o ritmo esperado.
+    // o ritmo esperado — e só depois da data de corte da fórmula (abaixo).
     public const int JanelaDias = 28;
 
     // Mínimos para confiar na inclinação: com menos pontos ou um intervalo
@@ -28,12 +28,9 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
     public const decimal Teto = 0.05m;
     public const decimal ZonaMorta = 0.01m;
 
-    // 1 kg de gordura ≈ 7700 kcal.
-    private const decimal KcalPorKg = 7700m;
-
-    // Ritmo esperado, em fração do peso corporal por semana.
-    private const decimal RitmoPerderPorSemana = -0.005m;
-    private const decimal RitmoGanharPorSemana = 0.0025m;
+    // Ritmo esperado e kcal por kg vêm de RitmoObjetivo, os mesmos da meta da
+    // fórmula (CalculadoraManutencao).
+    private const decimal KcalPorKg = RitmoObjetivo.KcalPorKg;
 
     private const string NaoSeguiu = "nao_seguiu";
 
@@ -46,11 +43,32 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
         ["comeu_menos"] = 0.85m
     };
 
+    /// <summary>
+    /// Data de corte: dia em que a fórmula de manutenção mudou (fator de
+    /// atividade fora do treino, MET líquido, METs do Compêndio 2024, objetivo
+    /// pelo ritmo esperado, peso de tendência). O cálculo supõe que a pessoa
+    /// comeu a meta base ATUAL durante a janela; pesagens anteriores ao corte
+    /// foram produzidas com a meta antiga, bem menor, e empurrariam a meta nova
+    /// para cima (até o teto de +5%) por até 4 semanas. Por isso a janela só
+    /// começa no corte — como numa troca de objetivo. A tendência continua
+    /// usando o histórico inteiro, para assentar.
+    /// É o dia (UTC) do deploy dessa revisão.
+    /// </summary>
+    public static readonly DateTime InicioFormulaManutencaoAtual = new(2026, 10, 3, 0, 0, 0, DateTimeKind.Utc);
+
     private readonly ICalculadoraPesoTendencia _calculadoraPesoTendencia;
+    private readonly DateTime _inicioDadosValidosUtc;
 
     public CalculadoraAjusteAdaptativo(ICalculadoraPesoTendencia calculadoraPesoTendencia)
+        : this(calculadoraPesoTendencia, InicioFormulaManutencaoAtual)
+    {
+    }
+
+    /// <param name="inicioDadosValidosUtc">Data de corte da janela (testes); em produção, InicioFormulaManutencaoAtual.</param>
+    public CalculadoraAjusteAdaptativo(ICalculadoraPesoTendencia calculadoraPesoTendencia, DateTime inicioDadosValidosUtc)
     {
         _calculadoraPesoTendencia = calculadoraPesoTendencia;
+        _inicioDadosValidosUtc = inicioDadosValidosUtc;
     }
 
     public AjusteAdaptativoDto Calcular(
@@ -81,7 +99,12 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
             inicioObjetivoAtual = i;
         }
 
+        // Últimos 28 dias, mas nunca antes da data de corte da fórmula.
         var inicioJanela = agoraUtc.AddDays(-JanelaDias);
+        if (inicioJanela < _inicioDadosValidosUtc)
+        {
+            inicioJanela = _inicioDadosValidosUtc;
+        }
         var indicesUsados = Enumerable.Range(inicioObjetivoAtual, ordenado.Count - inicioObjetivoAtual)
             .Where(i => ordenado[i].Data >= inicioJanela && ordenado[i].Aderencia != NaoSeguiu)
             .ToList();
@@ -105,12 +128,7 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
 
         // Ritmo esperado sobre o peso de tendência mais recente.
         var pesoAtual = tendencia[^1].PesoTendencia;
-        var ritmoEsperado = objetivoAtual switch
-        {
-            "perder peso" => RitmoPerderPorSemana * pesoAtual,
-            "ganhar peso" => RitmoGanharPorSemana * pesoAtual,
-            _ => 0m
-        };
+        var ritmoEsperado = RitmoObjetivo.KgPorSemana(objetivoAtual, pesoAtual);
 
         // Ingestão estimada relativa à meta (1 = comeu a meta), média dos dias usados.
         var ingestao = indicesUsados.Average(i => MultiplicadorIngestao.GetValueOrDefault(ordenado[i].Aderencia ?? "", 1.00m));

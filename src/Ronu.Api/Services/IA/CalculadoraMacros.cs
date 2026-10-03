@@ -12,9 +12,14 @@ namespace Ronu.Api.Services.IA;
 ///    cetose, inadequado para luta (alta intensidade); 100 g mantém glicogênio
 ///    para o treino seguinte sem apagar o déficit (a RDA de 130 g anularia o
 ///    déficit de pessoas pequenas em dias de descanso).
-/// 3. Gordura com alvo de 1,0 g/kg e mínimo de 0,6 g/kg do peso de referência
-///    (~20–25% das calorias, faixa citada para manter a produção hormonal) —
-///    quando falta caloria, é ela que cede primeiro.
+/// 3. Gordura com alvo de 25% das calorias e mínimo de 0,6 g/kg do peso de
+///    referência (o alvo nunca fica abaixo do mínimo) — quando falta caloria,
+///    é ela que cede primeiro, até o mínimo. 25% fica perto do piso da faixa
+///    de 20–35% da energia do posicionamento ACSM/AND/DC (Thomas, Erdman e
+///    Burke, 2016), que desaconselha ficar abaixo de 20%: sobra espaço para o
+///    carboidrato de quem treina em alta intensidade. Antes o alvo era fixo em
+///    1,0 g/kg, e a gordura ia de 19% (dia de treino pesado) a 41% (descanso)
+///    das calorias.
 /// 4. Se nem proteína + piso de carboidrato + gordura mínima couberem, a meta
 ///    sobe para caber, e o dia é marcado (MetaElevadaPeloPiso).
 ///
@@ -31,7 +36,7 @@ namespace Ronu.Api.Services.IA;
 public static class CalculadoraMacros
 {
     public const decimal ProteinaGramasPorKg = 1.8m;
-    public const decimal GorduraAlvoGramasPorKg = 1.0m;
+    public const decimal GorduraFracaoCalorias = 0.25m;
     public const decimal GorduraMinimaGramasPorKg = 0.6m;
     public const decimal CarboidratoMinimoGramas = 100m;
     public const decimal ImcMaximoReferencia = 30m;
@@ -49,8 +54,8 @@ public static class CalculadoraMacros
         var pesoReferencia = Math.Min(pesoKg, ImcMaximoReferencia * alturaM * alturaM);
 
         var proteinaG = pesoReferencia * ProteinaGramasPorKg;
-        var gorduraAlvoG = pesoReferencia * GorduraAlvoGramasPorKg;
         var gorduraMinimaG = pesoReferencia * GorduraMinimaGramasPorKg;
+        var gorduraAlvoG = Math.Max(metaCalorias * GorduraFracaoCalorias / CaloriasPorGramaGordura, gorduraMinimaG);
 
         var caloriasProteina = proteinaG * CaloriasPorGramaProteina;
         var caloriasPisoCarboidrato = CarboidratoMinimoGramas * CaloriasPorGramaCarboidrato;

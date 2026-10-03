@@ -1,8 +1,8 @@
 namespace Ronu.Api.Services.IA;
 
 /// <summary>
-/// Calcula o gasto calórico de UMA sessão de treino, a partir do MET de
-/// referência, peso e duração. Não recebe mais frequência semanal — quem
+/// Calcula o gasto calórico de UMA sessão de treino ACIMA do repouso (o
+/// repouso já está na TMB), a partir do MET de referência, peso e duração. Não recebe mais frequência semanal — quem
 /// soma quantas vezes isso ocorre na semana é responsabilidade de quem chama
 /// (agora contando dias específicos, não mais um número solto).
 /// </summary>

@@ -11,6 +11,7 @@ public class ContextoDietaDto
     public required decimal Altura { get; set; }
     public required string Sexo { get; set; }
     public required int Idade { get; set; }
+    // Peso de tendência (ContextoDietaBuilder.PesoDeTendencia), não a última pesagem.
     public required decimal Peso { get; set; }
     public required string Objetivo { get; set; }
     public required List<ModalidadeContextoDto> Modalidades { get; set; }

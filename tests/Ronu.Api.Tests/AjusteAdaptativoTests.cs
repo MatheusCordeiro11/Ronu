@@ -18,7 +18,9 @@ public class AjusteAdaptativoTests
     private static readonly DateTime Agora = new(2026, 10, 2, 12, 0, 0, DateTimeKind.Utc);
     private const decimal MetaBase = 2500m;
 
-    private static CalculadoraAjusteAdaptativo NovaCalculadora() => new(new CalculadoraPesoTendencia());
+    // Sem data de corte (DateTime.MinValue): os testes de antes do corte continuam
+    // valendo; os do corte, no fim do arquivo, passam a data explicitamente.
+    private static CalculadoraAjusteAdaptativo NovaCalculadora() => new(new CalculadoraPesoTendencia(), DateTime.MinValue);
 
     private static RegistroPesoAderenciaDto Registro(int diasAtras, decimal peso, string objetivo, string? aderencia = "seguiu") =>
         new() { Data = Agora.AddDays(-diasAtras), Peso = peso, Objetivo = objetivo, Aderencia = aderencia };
@@ -165,8 +167,8 @@ public class AjusteAdaptativoTests
     public async Task Fator_Zero_Mantem_As_Metas_Da_Formula()
     {
         // Masculino, 175 cm, 30 anos, 80 kg, manter peso, sem modalidades:
-        // TMB = 10·80 + 6,25·175 − 5·30 + 5 = 1748,75 kcal todos os dias.
-        // Proteína 1,8·80 = 144 g; gordura 1,0·80 = 80 g; carboidrato (1748,75 − 576 − 720)/4 = 113,1875 g.
+        // TMB = 10·80 + 6,25·175 − 5·30 + 5 = 1748,75; × 1,4 = 2448,25 kcal todos os dias.
+        // Proteína 1,8·80 = 144 g; gordura 25% = 612,06 kcal (68,0 g); carboidrato (2448,25 − 576 − 612,06)/4 ≈ 315,05 g.
         var contexto = ContextoBase(historico: new() { Registro(0, 80, "manter peso") });
         var gerador = new GeradorDietaGemini(
             new HttpClient(new GeminiFalso()), new CalculadoraGastoCalorico(),
@@ -177,19 +179,20 @@ public class AjusteAdaptativoTests
         Assert.Equal(7, dieta.Dias.Count);
         foreach (var dia in dieta.Dias)
         {
-            Assert.Equal(1748.75m, dia.MetaCalculada.Calorias);
+            Assert.Equal(2448.25m, dia.MetaCalculada.Calorias);
             Assert.Equal(144m, dia.MetaCalculada.ProteinasG);
-            Assert.Equal(80m, dia.MetaCalculada.GordurasG);
-            Assert.Equal(113.1875m, dia.MetaCalculada.CarboidratosG);
+            Assert.Equal(2448.25m * 0.25m / 9m, dia.MetaCalculada.GordurasG, 6);
+            Assert.Equal((2448.25m * 0.75m - 576m) / 4m, dia.MetaCalculada.CarboidratosG, 6);
         }
         Assert.NotNull(dieta.AjusteAdaptativo);
         Assert.Equal(0m, dieta.AjusteAdaptativo!.Percentual);
         Assert.Equal(MotivoAjusteAdaptativo.HistoricoInsuficiente, dieta.AjusteAdaptativo.Motivo);
     }
 
-    // Complemento do 7: com ajuste, ele entra na caloria e cai inteiro no carboidrato.
-    // Altura 185 cm (TMB 1811,25): com -5% o carboidrato fica em ~106 g, acima do
-    // piso de 100 g da CalculadoraMacros — abaixo dele, o piso mudaria a divisão.
+    // Complemento do 7: com ajuste, ele entra na caloria e se divide entre gordura
+    // (25%) e carboidrato (o resto); a proteína não muda.
+    // Altura 185 cm (TMB 1811,25, × 1,4 = 2535,75): com -5% o carboidrato fica bem
+    // acima do piso de 100 g da CalculadoraMacros, que mudaria a divisão.
     [Fact]
     public async Task Ajuste_Entra_Na_Caloria_E_Cai_No_Carboidrato()
     {
@@ -201,13 +204,80 @@ public class AjusteAdaptativoTests
 
         foreach (var dia in dieta.Dias)
         {
-            Assert.Equal(1811.25m * 0.95m, dia.MetaCalculada.Calorias);
+            var meta = 2535.75m * 0.95m;
+            Assert.Equal(meta, dia.MetaCalculada.Calorias);
             Assert.Equal(144m, dia.MetaCalculada.ProteinasG);
-            Assert.Equal(80m, dia.MetaCalculada.GordurasG);
-            Assert.Equal((1811.25m * 0.95m - 576m - 720m) / 4m, dia.MetaCalculada.CarboidratosG);
+            Assert.Equal(meta * 0.25m / 9m, dia.MetaCalculada.GordurasG, 6);
+            Assert.Equal((meta * 0.75m - 576m) / 4m, dia.MetaCalculada.CarboidratosG, 6);
             Assert.False(dia.MetaElevadaPeloPiso);
         }
         Assert.Equal(-0.05m, dieta.AjusteAdaptativo!.Percentual);
+    }
+
+    // 9) Data de corte da fórmula: pesagens anteriores não entram na regressão
+    // nem na aderência, e o motivo é o mesmo HistoricoInsuficiente de sempre.
+    [Fact]
+    public void Corte_Ignora_Pesagens_Anteriores()
+    {
+        // 10 pesagens em 27 dias (suficiente sem corte), corte há 10 dias:
+        // sobram as de 9, 6, 3 e 0 dias atrás.
+        var calc = new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia(), Agora.AddDays(-10));
+
+        var resultado = calc.Calcular(Rampa(27, 80, 0, "perder peso"), "perder peso", MetaBase, Agora);
+
+        Assert.Equal(4, resultado.PontosUsados);
+        Assert.Equal(MotivoAjusteAdaptativo.HistoricoInsuficiente, resultado.Motivo);
+        Assert.Equal(0m, resultado.Percentual);
+    }
+
+    // Com 5 pesagens cobrindo 14 dias depois do corte, volta a ajustar.
+    [Fact]
+    public void Corte_Volta_A_Ajustar_Com_Dados_Suficientes_Depois()
+    {
+        // Corte há 20 dias: sobram 7 pesagens (18 a 0 dias atrás), peso parado perdendo peso.
+        var calc = new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia(), Agora.AddDays(-20));
+
+        var resultado = calc.Calcular(Rampa(27, 80, 0, "perder peso"), "perder peso", MetaBase, Agora);
+
+        Assert.Equal(7, resultado.PontosUsados);
+        Assert.Equal(-0.05m, resultado.Percentual);
+    }
+
+    // As pesagens anteriores ao corte ainda alimentam a tendência: um período
+    // a 84 kg antes do corte puxa a tendência do começo da janela para cima.
+    [Fact]
+    public void Corte_Mantem_O_Historico_Anterior_Na_Tendencia()
+    {
+        var corte = Agora.AddDays(-20);
+        var antes = Enumerable.Range(21, 30).Select(d => Registro(d, 84, "perder peso"));
+        var depois = Enumerable.Range(0, 7).Select(i => Registro(i * 3, 80, "perder peso"));
+        var historico = antes.Concat(depois).ToList();
+
+        var comAntigas = new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia(), corte)
+            .Calcular(historico, "perder peso", MetaBase, Agora);
+        var soDepois = new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia(), corte)
+            .Calcular(depois.ToList(), "perder peso", MetaBase, Agora);
+
+        Assert.Equal(7, comAntigas.PontosUsados);
+        Assert.Equal(0m, soDepois.RitmoRealKgSemana);
+        Assert.True(comAntigas.RitmoRealKgSemana < 0m, $"ritmo {comAntigas.RitmoRealKgSemana}");
+    }
+
+    // O construtor da injeção de dependência usa a data de corte da fórmula.
+    [Fact]
+    public void Construtor_Padrao_Usa_A_Data_De_Corte_Da_Formula()
+    {
+        var corte = CalculadoraAjusteAdaptativo.InicioFormulaManutencaoAtual;
+        var agora = corte.AddDays(1);
+        var historico = Enumerable.Range(0, 10)
+            .Select(i => new RegistroPesoAderenciaDto { Data = corte.AddDays(-3 * i), Peso = 80, Objetivo = "perder peso", Aderencia = "seguiu" })
+            .ToList();
+
+        var resultado = new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia())
+            .Calcular(historico, "perder peso", MetaBase, agora);
+
+        Assert.Equal(1, resultado.PontosUsados); // só a pesagem do próprio dia do corte
+        Assert.Equal(MotivoAjusteAdaptativo.HistoricoInsuficiente, resultado.Motivo);
     }
 
     // O enum vai como texto no JSON salvo (contrato com o dashboard)
