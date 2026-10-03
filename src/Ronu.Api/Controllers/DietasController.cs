@@ -102,9 +102,10 @@ public class DietasController : ControllerBase
 
         var contexto = await _contextoBuilder.ConstruirAsync(UsuarioIdLogado);
         // Falhas de comunicação com o Gemini (rede, status de erro como 503,
-        // timeout) viram um 503 com mensagem amigável. Qualquer outra exceção
-        // (ex: InvalidOperationException de dia inválido na resposta) continua
-        // subindo para o GlobalExceptionHandler.
+        // timeout) e respostas inutilizáveis mesmo depois da nova tentativa do
+        // gerador (bloqueada, cortada, JSON inválido, dias errados) viram um
+        // 503 com mensagem amigável. Qualquer outra exceção continua subindo
+        // para o GlobalExceptionHandler.
         DietaSemanalDto dieta;
         try
         {
@@ -118,6 +119,11 @@ public class DietasController : ControllerBase
         catch (TaskCanceledException ex)
         {
             _logger.LogWarning(ex, "Tempo esgotado ao chamar o Gemini para gerar dieta do usuário {UsuarioId}", UsuarioIdLogado);
+            return StatusCode(503, new { mensagem = "Não foi possível gerar sua dieta agora. Tente novamente em alguns instantes." });
+        }
+        catch (RespostaIaInvalidaException ex)
+        {
+            _logger.LogWarning(ex, "Resposta inválida do Gemini (após nova tentativa) ao gerar dieta do usuário {UsuarioId}", UsuarioIdLogado);
             return StatusCode(503, new { mensagem = "Não foi possível gerar sua dieta agora. Tente novamente em alguns instantes." });
         }
 

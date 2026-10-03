@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Logging.Abstractions;
 using Ronu.Api.Models.IA;
 using Ronu.Api.Services;
 using Ronu.Api.Services.IA;
@@ -169,7 +170,7 @@ public class AjusteAdaptativoTests
         var contexto = ContextoBase(historico: new() { Registro(0, 80, "manter peso") });
         var gerador = new GeradorDietaGemini(
             new HttpClient(new GeminiFalso()), new CalculadoraGastoCalorico(),
-            NovaCalculadora(), new GeminiOptions { ApiKey = "teste" });
+            NovaCalculadora(), new GeminiOptions { ApiKey = "teste" }, NullLogger<GeradorDietaGemini>.Instance);
 
         var dieta = await gerador.GerarDietaAsync(contexto);
 
@@ -194,7 +195,7 @@ public class AjusteAdaptativoTests
     {
         var gerador = new GeradorDietaGemini(
             new HttpClient(new GeminiFalso()), new CalculadoraGastoCalorico(),
-            new AjusteFixo(-0.05m), new GeminiOptions { ApiKey = "teste" });
+            new AjusteFixo(-0.05m), new GeminiOptions { ApiKey = "teste" }, NullLogger<GeradorDietaGemini>.Instance);
 
         var dieta = await gerador.GerarDietaAsync(ContextoBase(historico: new(), altura: 185));
 

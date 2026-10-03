@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Globalization;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Ronu.Api.Models.IA;
@@ -21,17 +23,26 @@ public class GeradorDietaGemini : IGeradorDietaIA
     private readonly ICalculadoraGastoCalorico _calculadora;
     private readonly ICalculadoraAjusteAdaptativo _calculadoraAjuste;
     private readonly GeminiOptions _options;
+    private readonly ILogger<GeradorDietaGemini> _logger;
+
+    // Resposta inválida (bloqueada, cortada, JSON quebrado, dias errados) ganha
+    // UMA nova chamada: cada uma leva ~11–19 s, então mesmo com o cold start do
+    // F1 (~45 s) as duas cabem nos 100 s do HttpClient e nos 230 s do Azure.
+    // Falha de rede/HTTP não entra aqui — continua indo direto para o 503.
+    private const int MaximoTentativas = 2;
 
     public GeradorDietaGemini(
         HttpClient httpClient,
         ICalculadoraGastoCalorico calculadora,
         ICalculadoraAjusteAdaptativo calculadoraAjuste,
-        GeminiOptions options)
+        GeminiOptions options,
+        ILogger<GeradorDietaGemini> logger)
     {
         _httpClient = httpClient;
         _calculadora = calculadora;
         _calculadoraAjuste = calculadoraAjuste;
         _options = options;
+        _logger = logger;
     }
 
     public async Task<DietaSemanalDto> GerarDietaAsync(ContextoDietaDto contexto)
@@ -61,6 +72,31 @@ public class GeradorDietaGemini : IGeradorDietaIA
             }
         };
 
+        var cronometro = Stopwatch.StartNew();
+
+        for (var tentativa = 1; ; tentativa++)
+        {
+            try
+            {
+                var (respostaIa, uso) = await ChamarGeminiAsync(corpoRequisicao);
+                var dias = MontarDias(respostaIa, metasPorDia);
+
+                RegistrarGeracao(dias, respostaIa, uso, tentativa, cronometro.ElapsedMilliseconds);
+
+                return new DietaSemanalDto { Dias = dias, AjusteAdaptativo = ajuste };
+            }
+            catch (RespostaIaInvalidaException ex) when (tentativa < MaximoTentativas)
+            {
+                _logger.LogWarning(ex, "Resposta inválida do Gemini na tentativa {Tentativa} ({TempoMs} ms até aqui); tentando de novo",
+                    tentativa, cronometro.ElapsedMilliseconds);
+            }
+        }
+    }
+
+    // Uma chamada ao Gemini. Erro de rede/HTTP sobe como HttpRequestException
+    // (sem nova tentativa); resposta 200 que não serve vira RespostaIaInvalidaException.
+    private async Task<(RespostaDiasIaDto Resposta, UsoTokens Uso)> ChamarGeminiAsync(object corpoRequisicao)
+    {
         using var mensagem = new HttpRequestMessage(
             HttpMethod.Post,
             "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent");
@@ -71,44 +107,156 @@ public class GeradorDietaGemini : IGeradorDietaIA
         var resposta = await _httpClient.SendAsync(mensagem);
         resposta.EnsureSuccessStatusCode();
 
+        JsonElement respostaBruta;
+        try
+        {
+            respostaBruta = await resposta.Content.ReadFromJsonAsync<JsonElement>();
+        }
+        catch (JsonException ex)
+        {
+            throw new RespostaIaInvalidaException("Envelope da resposta do Gemini não é JSON válido.", ex);
+        }
+
         // A resposta da Gemini vem embrulhada em candidates[0].content.parts[0].text,
         // que por sua vez contém (como STRING) o JSON que respeita o schema que
         // enviamos — por isso desserializamos em duas etapas: uma para "desembrulhar"
         // a resposta da API, outra para extrair a dieta estruturada de dentro do texto.
-        var respostaBruta = await resposta.Content.ReadFromJsonAsync<JsonElement>();
-        var textoJson = respostaBruta
-            .GetProperty("candidates")[0]
-            .GetProperty("content")
-            .GetProperty("parts")[0]
-            .GetProperty("text")
-            .GetString()!;
-
-        var opcoesDesserializacao = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        var respostaIa = JsonSerializer.Deserialize<RespostaDiasIaDto>(textoJson, opcoesDesserializacao)!;
-
-        // Casamos a meta calculada (C#) com o dia devolvido pela IA PELO NOME,
-        // nunca pela posição no array — mais robusto que confiar em ordem: se
-        // a IA devolver um nome de dia que não bate com nenhum dos 7
-        // esperados, isso falha alto e claro aqui, em vez de silenciosamente
-        // atribuir a meta errada a um dia por engano de posição.
-        var dias = respostaIa.Dias.Select(d =>
+        // Prompt bloqueado chega sem candidates (o motivo vem em promptFeedback).
+        if (!respostaBruta.TryGetProperty("candidates", out var candidatos)
+            || candidatos.ValueKind != JsonValueKind.Array
+            || candidatos.GetArrayLength() == 0)
         {
-            var meta = metasPorDia.TryGetValue(d.DiaSemana.Trim(), out var encontrada)
-                ? encontrada
-                : throw new InvalidOperationException(
+            var motivoBloqueio = respostaBruta.TryGetProperty("promptFeedback", out var feedback)
+                && feedback.TryGetProperty("blockReason", out var bloqueio)
+                ? bloqueio.ToString()
+                : "não informado";
+            throw new RespostaIaInvalidaException($"Resposta do Gemini sem candidates (blockReason: {motivoBloqueio}).");
+        }
+
+        var candidato = candidatos[0];
+
+        // STOP é o fim normal. MAX_TOKENS (cortada), SAFETY, RECITATION etc.
+        // deixam o JSON incompleto ou ausente, mesmo quando ainda vem algum texto.
+        if (candidato.TryGetProperty("finishReason", out var finishReason) && finishReason.GetString() != "STOP")
+        {
+            throw new RespostaIaInvalidaException($"Gemini encerrou a resposta com finishReason {finishReason.GetString()}.");
+        }
+
+        if (!candidato.TryGetProperty("content", out var conteudo)
+            || !conteudo.TryGetProperty("parts", out var partes)
+            || partes.ValueKind != JsonValueKind.Array
+            || partes.GetArrayLength() == 0
+            || !partes[0].TryGetProperty("text", out var texto)
+            || texto.ValueKind != JsonValueKind.String)
+        {
+            throw new RespostaIaInvalidaException("Resposta do Gemini sem o texto em content.parts[0].text.");
+        }
+
+        RespostaDiasIaDto? respostaIa;
+        try
+        {
+            var opcoesDesserializacao = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            respostaIa = JsonSerializer.Deserialize<RespostaDiasIaDto>(texto.GetString()!, opcoesDesserializacao);
+        }
+        catch (JsonException ex)
+        {
+            throw new RespostaIaInvalidaException("Texto da resposta do Gemini não é um JSON de dieta válido.", ex);
+        }
+
+        if (respostaIa?.Dias is null)
+        {
+            throw new RespostaIaInvalidaException("JSON da resposta do Gemini sem a lista de dias.");
+        }
+
+        return (respostaIa, LerUsoTokens(respostaBruta));
+    }
+
+    // Casamos a meta calculada (C#) com o dia devolvido pela IA PELO NOME,
+    // nunca pela posição no array — mais robusto que confiar em ordem. A
+    // semana precisa vir completa: exatamente 7 dias, cada um com um dos 7
+    // nomes esperados e sem repetição (7 únicos dentre 7 nomes = todos).
+    // O TotalDoDia é recalculado como a soma das refeições: o declarado pela
+    // IA já veio diferente da soma (até 27%) e o dashboard mostra os dois.
+    private static List<DiaDietaDto> MontarDias(RespostaDiasIaDto respostaIa, Dictionary<string, ResultadoMacros> metasPorDia)
+    {
+        if (respostaIa.Dias.Count != NomesDias.Length)
+        {
+            throw new RespostaIaInvalidaException($"Resposta do Gemini com {respostaIa.Dias.Count} dias, em vez de {NomesDias.Length}.");
+        }
+
+        var vistos = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        return respostaIa.Dias.Select(d =>
+        {
+            var nome = d.DiaSemana.Trim();
+
+            if (!metasPorDia.TryGetValue(nome, out var meta))
+            {
+                throw new RespostaIaInvalidaException(
                     $"Dia '{d.DiaSemana}' retornado pela IA não corresponde a nenhum dos 7 dias esperados.");
+            }
+
+            if (!vistos.Add(nome))
+            {
+                throw new RespostaIaInvalidaException($"Dia '{d.DiaSemana}' veio repetido na resposta do Gemini.");
+            }
 
             return new DiaDietaDto
             {
                 DiaSemana = d.DiaSemana,
                 Refeicoes = d.Refeicoes,
-                TotalDoDia = d.TotalDoDia,
+                TotalDoDia = SomarRefeicoes(d.Refeicoes),
                 MetaCalculada = meta.Macros,
                 MetaElevadaPeloPiso = meta.MetaElevadaPeloPiso
             };
         }).ToList();
+    }
 
-        return new DietaSemanalDto { Dias = dias, AjusteAdaptativo = ajuste };
+    private static MacrosDto SomarRefeicoes(List<RefeicaoDto> refeicoes) => new()
+    {
+        Calorias = refeicoes.Sum(r => r.Macros.Calorias),
+        ProteinasG = refeicoes.Sum(r => r.Macros.ProteinasG),
+        CarboidratosG = refeicoes.Sum(r => r.Macros.CarboidratosG),
+        GordurasG = refeicoes.Sum(r => r.Macros.GordurasG)
+    };
+
+    // usageMetadata é só para o log: se faltar algum campo, fica nulo.
+    private static UsoTokens LerUsoTokens(JsonElement respostaBruta)
+    {
+        if (!respostaBruta.TryGetProperty("usageMetadata", out var uso))
+        {
+            return new UsoTokens(null, null, null, null);
+        }
+
+        int? Ler(string campo) =>
+            uso.TryGetProperty(campo, out var valor) && valor.TryGetInt32(out var numero) ? numero : null;
+
+        // thoughtsTokenCount só vem quando o modelo "pensa" antes de responder;
+        // fica fora do candidatesTokenCount, mas entra no total.
+        return new UsoTokens(Ler("promptTokenCount"), Ler("candidatesTokenCount"), Ler("thoughtsTokenCount"), Ler("totalTokenCount"));
+    }
+
+    // Uma linha por geração: tempo total (com eventual nova tentativa), tokens
+    // da chamada que deu certo e, por dia, a soma das refeições contra a meta —
+    // com o total que a IA declarou quando ele não bate com a soma.
+    private void RegistrarGeracao(
+        List<DiaDietaDto> dias, RespostaDiasIaDto respostaIa, UsoTokens uso, int tentativas, long tempoMs)
+    {
+        var declaradoPorDia = respostaIa.Dias.ToDictionary(d => d.DiaSemana.Trim(), d => d.TotalDoDia.Calorias, StringComparer.OrdinalIgnoreCase);
+
+        var desvios = string.Join("; ", dias.Select(d =>
+        {
+            var soma = d.TotalDoDia.Calorias;
+            var meta = d.MetaCalculada.Calorias;
+            var desvio = meta == 0 ? 0 : (soma - meta) / meta * 100;
+            var declarado = declaradoPorDia[d.DiaSemana.Trim()];
+            var aviso = declarado == soma ? string.Empty : $" [IA declarou {declarado.ToString("F0", CultureInfo.InvariantCulture)}]";
+            return string.Create(CultureInfo.InvariantCulture, $"{d.DiaSemana.Trim()} {soma:F0}/{meta:F0} kcal ({desvio:+0.0;-0.0}%){aviso}");
+        }));
+
+        _logger.LogInformation(
+            "Dieta gerada pelo Gemini em {TempoMs} ms ({Tentativas} tentativa(s)); tokens: entrada {TokensEntrada}, resposta {TokensResposta}, raciocínio {TokensRaciocinio}, total {TokensTotal}. Soma das refeições vs. meta por dia: {DesvioPorDia}",
+            tempoMs, tentativas, uso.Entrada, uso.Resposta, uso.Raciocinio ?? 0, uso.Total, desvios);
     }
 
     // Calorias da fórmula por dia (TMB + treino do dia + ajuste por objetivo),
@@ -319,6 +467,12 @@ public class GeradorDietaGemini : IGeradorDietaIA
     {
         public required string DiaSemana { get; set; }
         public required List<RefeicaoDto> Refeicoes { get; set; }
+
+        // O total que a IA declarou: não vai para a dieta (ela recebe a soma das
+        // refeições), só para o log quando os dois não batem.
         public required MacrosDto TotalDoDia { get; set; }
     }
+
+    // usageMetadata da chamada que deu certo (só para o log).
+    private record UsoTokens(int? Entrada, int? Resposta, int? Raciocinio, int? Total);
 }

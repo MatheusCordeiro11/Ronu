@@ -63,6 +63,13 @@ Lista de endpoints da API, definidos a partir das user stories (`docs/user-stori
 **Devolve:** `id`, `dataGeracao`, `conteudoJson` (a dieta estruturada em JSON)
 *(regra de negócio: ao gerar uma nova dieta, se o usuário já tiver mais de 3 dietas salvas, a mais antiga é removida)*
 
+**Respostas de erro** (corpo sempre `{ "mensagem": "<texto para o usuário>" }`):
+
+- **429 Too Many Requests** — limite de 3 gerações por usuário numa janela móvel de 1 hora (contado nas dietas salvas; nenhuma chamada à IA é feita). A mensagem diz quando a próxima vaga libera:
+  `{ "mensagem": "Você já gerou 3 dietas na última hora, o limite por hora. Tente novamente em 12 minutos." }`
+- **503 Service Unavailable** — a IA não gerou uma dieta utilizável: falha de comunicação com o Gemini (rede, status de erro, timeout) ou resposta inválida mesmo depois de uma nova tentativa (bloqueada, cortada, JSON inválido, semana sem exatamente 7 dias únicos com os nomes esperados). Nada é salvo e o detalhe vai só para o log do servidor:
+  `{ "mensagem": "Não foi possível gerar sua dieta agora. Tente novamente em alguns instantes." }`
+
 ### `GET /api/dietas/atual`
 **Devolve:** a dieta mais recente do usuário logado
 
