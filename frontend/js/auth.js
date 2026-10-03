@@ -3,11 +3,18 @@
 // (POST /api/auth/cadastro, POST /api/auth/login) e utilitários de sessão/formulário
 // compartilhados entre cadastro.html, login.html e dashboard.html.
 
-// Único ponto de configuração do frontend — ao fazer deploy, troque
-// API_BASE aqui (não há build step/variável de ambiente neste projeto,
-// então esse valor tem que ser editado à mão por ambiente).
+// Único ponto de configuração do frontend. Não há build step nem variável de
+// ambiente neste projeto, então o ambiente é deduzido do endereço da página:
+// aberta em localhost ou 127.0.0.1 (Live Server), fala com a API local; em
+// qualquer outro endereço, com a de produção. Acesso pelo IP da rede (ex.:
+// celular em 192.168.x.x) cai em produção de propósito — a API local não
+// escuta na rede nem libera essa origem no CORS.
+const RONU_API_LOCAL = 'http://localhost:5011/api';
+const RONU_API_PRODUCAO = 'https://ronu-api-dwcbcwgqgzgdhhag.chilecentral-01.azurewebsites.net/api';
 const RONU_CONFIG = {
-  API_BASE: 'https://ronu-api-dwcbcwgqgzgdhhag.chilecentral-01.azurewebsites.net/api',
+  API_BASE: ['localhost', '127.0.0.1'].includes(window.location.hostname)
+    ? RONU_API_LOCAL
+    : RONU_API_PRODUCAO,
 };
 
 const RONU_TOKEN_KEY = 'ronu:token';

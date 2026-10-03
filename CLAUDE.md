@@ -25,9 +25,14 @@ artes marciais e esportes de combate, a partir do gasto calórico real de cada m
 
 1. Confirmar que os User Secrets do `src/Ronu.Api` apontam para o banco **localhost** antes de qualquer teste.
 2. Subir a API (`dotnet run --project src/Ronu.Api`), que escuta em `http://localhost:5011`.
-3. Trocar temporariamente o `API_BASE` em `frontend/js/auth.js` para `http://localhost:5011/api`. **Nunca commitar essa troca.**
-4. Servir o frontend pelo Live Server na porta 5500. O CORS da API só libera a 5500 e a Vercel.
-5. Testes do backend: `dotnet test`.
+3. Servir o frontend pelo Live Server na porta 5500. O `API_BASE` em `frontend/js/auth.js` é escolhido
+   sozinho pelo endereço da página: em `localhost` ou `127.0.0.1` usa `http://localhost:5011/api`; em
+   qualquer outro endereço, a API de produção. Não há troca manual. O CORS da API libera
+   `http://localhost:5500`, `http://127.0.0.1:5500` e a Vercel.
+4. Abrir pelo celular via IP da rede (`192.168.x.x`) usa a API de **produção**, não a local: a API local
+   não escuta na rede e o CORS não libera essa origem. Para testar mobile contra a API local, usar o
+   modo responsivo do navegador no próprio PC.
+5. Testes do backend: `dotnet test tests/Ronu.Api.Tests` (não há solution na raiz, então `dotnet test` sozinho falha).
 
 Verificação automática com jsdom e screenshots headless (desktop e mobile 390 px) é bem-vinda
 como complemento, mas nunca substitui o teste manual do usuário.
