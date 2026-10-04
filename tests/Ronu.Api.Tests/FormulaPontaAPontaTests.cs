@@ -48,6 +48,9 @@ public class FormulaPontaAPontaTests
         Assert.Equal(3290.5m, metas["Segunda-feira"]);
         Assert.Equal(2474.5m, metas["Quarta-feira"]);
 
+        // A manutenção por dia segue para a MetaDieta (manter peso: igual à meta).
+        Assert.Equal(new[] { 3290.5m, 3290.5m, 2474.5m, 3290.5m, 3290.5m, 2474.5m, 2474.5m }, dieta.ManutencaoPorDia);
+
         // O prompt leva as metas sem casas decimais (F0 arredonda o ,5 para cima).
         Assert.Contains("- Segunda-feira: 3291 kcal", gemini.Prompt);
         Assert.Contains("- Quarta-feira: 2475 kcal", gemini.Prompt);

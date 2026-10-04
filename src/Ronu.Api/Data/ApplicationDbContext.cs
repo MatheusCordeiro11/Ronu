@@ -19,4 +19,5 @@ public class ApplicationDbContext : DbContext
     public DbSet<ObjetivoUsuario> ObjetivosUsuario { get; set; }
     public DbSet<PreferenciaAlimentar> PreferenciasAlimentares { get; set; }
     public DbSet<DietaIA> DietasIA { get; set; }
+    public DbSet<MetaDieta> MetasDieta { get; set; }
 }

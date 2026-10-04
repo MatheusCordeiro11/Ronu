@@ -127,8 +127,17 @@ public class CalculadoraManutencaoTests
         {
             Data = new DateTime(2026, 10, 2, 0, 0, 0, DateTimeKind.Utc).AddDays(-3 * i), Peso = 80, Objetivo = objetivo, Aderencia = "seguiu"
         }).ToList();
-        var adaptativa = new CalculadoraAjusteAdaptativo(new Ronu.Api.Services.CalculadoraPesoTendencia(), DateTime.MinValue)
-            .Calcular(historico, objetivo, 2500m, new DateTime(2026, 10, 2, 12, 0, 0, DateTimeKind.Utc));
+        // Uma dieta constante antes do histórico (meta = base: os ritmos vão no DTO).
+        var dieta = new MetaDietaRegistroDto
+        {
+            DataGeracao = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc),
+            VersaoFormula = CalculadoraManutencao.VersaoFormula,
+            MetasPorDia = Enumerable.Repeat(2500m, 7).ToArray(),
+            ManutencoesPorDia = Enumerable.Repeat(3000m, 7).ToArray()
+        };
+        var adaptativa = new CalculadoraAjusteAdaptativo(new Ronu.Api.Services.CalculadoraPesoTendencia())
+            .Calcular(historico, new[] { dieta }, objetivo, 2500m, Enumerable.Repeat(3000m, 7).ToArray(),
+                new DateTime(2026, 10, 2, 12, 0, 0, DateTimeKind.Utc));
 
         var kcalPorDia = CalculadoraManutencao.AplicarObjetivo(3000m, objetivo, 80) - 3000m;
 

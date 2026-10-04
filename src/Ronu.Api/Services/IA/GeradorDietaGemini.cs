@@ -13,7 +13,8 @@ namespace Ronu.Api.Services.IA;
 /// </summary>
 public class GeradorDietaGemini : IGeradorDietaIA
 {
-    private static readonly string[] NomesDias =
+    // Índice 0 = segunda: a mesma ordem de MetaDieta.MetasPorDia.
+    public static readonly string[] NomesDias =
     {
         "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira",
         "Sexta-feira", "Sábado", "Domingo"
@@ -48,12 +49,15 @@ public class GeradorDietaGemini : IGeradorDietaIA
     public async Task<DietaSemanalDto> GerarDietaAsync(ContextoDietaDto contexto)
     {
         // Meta da fórmula (sem mudança) -> ajuste adaptativo sobre ela, a partir
-        // do histórico real de peso -> metas finais, que vão para o prompt e
-        // para a MetaCalculada de cada dia. Ajuste 0% = metas idênticas às da
-        // fórmula.
+        // do histórico real de peso e das metas das dietas anteriores -> metas
+        // finais, que vão para o prompt e para a MetaCalculada de cada dia.
+        // Ajuste 0% = metas idênticas às da fórmula.
         var caloriasBasePorDia = CalcularCaloriasBasePorDia(contexto, _calculadora);
+        var manutencaoPorDia = CalculadoraManutencao.ManutencaoPorDia(contexto, _calculadora);
+        var metaBaseMedia = caloriasBasePorDia.Values.Average();
         var ajuste = _calculadoraAjuste.Calcular(
-            contexto.HistoricoPeso, contexto.Objetivo, caloriasBasePorDia.Values.Average(), DateTime.UtcNow);
+            contexto.HistoricoPeso, contexto.HistoricoMetas, contexto.Objetivo, metaBaseMedia, manutencaoPorDia, DateTime.UtcNow);
+        RegistrarAjusteAdaptativo(ajuste, metaBaseMedia);
         var metasPorDia = MontarMetasPorDia(caloriasBasePorDia, ajuste.Percentual, contexto.Peso, contexto.Altura);
 
         var prompt = MontarPrompt(contexto, metasPorDia);
@@ -83,7 +87,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
 
                 RegistrarGeracao(dias, respostaIa, uso, tentativa, cronometro.ElapsedMilliseconds);
 
-                return new DietaSemanalDto { Dias = dias, AjusteAdaptativo = ajuste };
+                return new DietaSemanalDto { Dias = dias, AjusteAdaptativo = ajuste, ManutencaoPorDia = manutencaoPorDia };
             }
             catch (RespostaIaInvalidaException ex) when (tentativa < MaximoTentativas)
             {
@@ -234,6 +238,17 @@ public class GeradorDietaGemini : IGeradorDietaIA
         // thoughtsTokenCount só vem quando o modelo "pensa" antes de responder;
         // fica fora do candidatesTokenCount, mas entra no total.
         return new UsoTokens(Ler("promptTokenCount"), Ler("candidatesTokenCount"), Ler("thoughtsTokenCount"), Ler("totalTokenCount"));
+    }
+
+    // Uma linha por geração com o diagnóstico da meta adaptativa, para medir em
+    // produção (os campos de diagnóstico não vão para o JSON salvo).
+    private void RegistrarAjusteAdaptativo(AjusteAdaptativoDto ajuste, decimal metaBaseMedia)
+    {
+        _logger.LogInformation(
+            "Meta adaptativa: {Motivo}, ajuste {Percentual}, fator bruto {FatorBruto}, erro da fórmula {ErroKcal} kcal/dia; ingestão {Ingestao}, manutenção {Manutencao}, meta prescrita {MetaPrescrita} vs base {MetaBase} kcal/dia; {Pontos} pesagens, {Dias} dias com dieta; ritmos no DTO: {Ritmos}",
+            ajuste.Motivo, ajuste.Percentual, ajuste.FatorBruto, ajuste.ErroFormulaKcalDia,
+            ajuste.IngestaoMediaDiaria, ajuste.ManutencaoMediaDiaria, ajuste.MetaPrescritaMediaDiaria, Math.Round(metaBaseMedia, 1),
+            ajuste.PontosUsados, ajuste.DiasComDieta, ajuste.RitmoRealKgSemana is null ? "nulos" : "presentes");
     }
 
     // Uma linha por geração: tempo total (com eventual nova tentativa), tokens

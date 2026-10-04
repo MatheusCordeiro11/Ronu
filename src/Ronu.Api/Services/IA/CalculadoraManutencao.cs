@@ -11,6 +11,16 @@ namespace Ronu.Api.Services.IA;
 public static class CalculadoraManutencao
 {
     /// <summary>
+    /// Versão da fórmula de manutenção, gravada em cada MetaDieta. A meta
+    /// adaptativa só compara a manutenção de dietas da MESMA versão — de outra
+    /// versão, ela mediria a mudança da fórmula, não a pessoa. Toda mudança
+    /// nesta classe, na CalculadoraGastoCalorico, no RitmoObjetivo ou nos METs
+    /// das modalidades exige incrementar (regra no CLAUDE.md).
+    /// 1 = até 2026-10-03 (TMB + MET bruto, ±15%); 2 = revisão de 2026-10-03.
+    /// </summary>
+    public const int VersaoFormula = 2;
+
+    /// <summary>
     /// Mifflin-St Jeor: fórmula de TMB mais precisa e validada
     /// cientificamente. Sexo é "Masculino" ou "Feminino" (PerfilRequest).
     /// </summary>
@@ -68,24 +78,35 @@ public static class CalculadoraManutencao
     }
 
     /// <summary>
+    /// Manutenção (sem o objetivo) de cada dia da semana, índice 0 = segunda
+    /// ... 6 = domingo — o formato guardado em MetaDieta.ManutencoesPorDia.
+    /// </summary>
+    public static decimal[] ManutencaoPorDia(ContextoDietaDto contexto, ICalculadoraGastoCalorico calculadora)
+    {
+        var tmb = Tmb(contexto.Sexo, contexto.Peso, contexto.Altura, contexto.Idade);
+
+        // UsuarioModalidade.DiasSemana usa 1 = segunda ... 7 = domingo (ISO 8601).
+        return Enumerable.Range(1, 7).Select(dia =>
+        {
+            var gastoTreinoDia = contexto.Modalidades
+                .Where(m => m.DiasSemana.Contains(dia))
+                .Sum(m => calculadora.CalcularGastoSessao(m.MetReferencia, contexto.Peso, m.DuracaoHoras));
+
+            return Manutencao(tmb, gastoTreinoDia);
+        }).ToArray();
+    }
+
+    /// <summary>
     /// Calorias da fórmula de cada dia da semana (1 = segunda ... 7 = domingo,
     /// ISO 8601, como em UsuarioModalidade.DiasSemana).
     /// </summary>
     public static IReadOnlyDictionary<int, decimal> CaloriasBasePorDia(
         ContextoDietaDto contexto, ICalculadoraGastoCalorico calculadora)
     {
-        var tmb = Tmb(contexto.Sexo, contexto.Peso, contexto.Altura, contexto.Idade);
-        var calorias = new Dictionary<int, decimal>();
+        var manutencao = ManutencaoPorDia(contexto, calculadora);
 
-        for (var dia = 1; dia <= 7; dia++)
-        {
-            var gastoTreinoDia = contexto.Modalidades
-                .Where(m => m.DiasSemana.Contains(dia))
-                .Sum(m => calculadora.CalcularGastoSessao(m.MetReferencia, contexto.Peso, m.DuracaoHoras));
-
-            calorias[dia] = AplicarObjetivo(Manutencao(tmb, gastoTreinoDia), contexto.Objetivo, contexto.Peso);
-        }
-
-        return calorias;
+        return Enumerable.Range(1, 7).ToDictionary(
+            dia => dia,
+            dia => AplicarObjetivo(manutencao[dia - 1], contexto.Objetivo, contexto.Peso));
     }
 }

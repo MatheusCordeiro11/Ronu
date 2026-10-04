@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Ronu.Api.Models.IA;
 
 /// <summary>
@@ -12,4 +14,10 @@ public class DietaSemanalDto
     // Como a meta adaptativa atuou nesta dieta (registro histórico, para o
     // dashboard). Nulo em dietas geradas antes da meta adaptativa existir.
     public AjusteAdaptativoDto? AjusteAdaptativo { get; set; }
+
+    // Manutenção da fórmula de cada dia (índice 0 = segunda), só para o
+    // RepositorioDietaIA gravar em MetaDieta. Fora do JSON salvo e da resposta
+    // da API: a tabela MetasDieta é o lugar dela.
+    [JsonIgnore]
+    public decimal[]? ManutencaoPorDia { get; set; }
 }

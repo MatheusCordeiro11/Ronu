@@ -23,4 +23,8 @@ public class ContextoDietaDto
     // Histórico de peso e aderência para a meta calórica adaptativa. Entra só
     // no cálculo das metas (GeradorDietaGemini), não no prompt.
     public List<RegistroPesoAderenciaDto> HistoricoPeso { get; set; } = new();
+
+    // Metas de cada dieta já gerada (MetasDieta), para a meta adaptativa saber
+    // o que a pessoa recebeu para comer em cada período. Também fora do prompt.
+    public List<MetaDietaRegistroDto> HistoricoMetas { get; set; } = new();
 }

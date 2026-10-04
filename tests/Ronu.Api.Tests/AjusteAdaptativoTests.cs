@@ -9,18 +9,45 @@ using Ronu.Api.Services.IA;
 namespace Ronu.Api.Tests;
 
 /// <summary>
-/// Meta calórica adaptativa. A calculadora é pura: recebe o histórico, o
-/// objetivo, a meta base e o "agora" por parâmetro e usa a CalculadoraPesoTendencia
-/// real (também pura) — sem banco, sem relógio do sistema, sem Gemini.
+/// Meta calórica adaptativa. A calculadora é pura: recebe o histórico, as metas
+/// das dietas, o objetivo, a meta base e o "agora" por parâmetro e usa a
+/// CalculadoraPesoTendencia real (também pura) — sem banco, sem relógio do
+/// sistema, sem Gemini.
+///
+/// Estes testes vêm do modelo antigo (que supunha a meta atual a janela
+/// inteira) e rodam com METAS CONSTANTES: uma única dieta bem antes da janela,
+/// com meta M = MetaBase e manutenção F = M − ritmo esperado em kcal. Nesse
+/// caso a ingestão por período é exatamente o cálculo antigo — os mesmos
+/// resultados provam a equivalência. Os casos com metas que mudam estão em
+/// AjusteAdaptativoPorPeriodoTests.
 /// </summary>
 public class AjusteAdaptativoTests
 {
     private static readonly DateTime Agora = new(2026, 10, 2, 12, 0, 0, DateTimeKind.Utc);
     private const decimal MetaBase = 2500m;
 
-    // Sem data de corte (DateTime.MinValue): os testes de antes do corte continuam
-    // valendo; os do corte, no fim do arquivo, passam a data explicitamente.
-    private static CalculadoraAjusteAdaptativo NovaCalculadora() => new(new CalculadoraPesoTendencia(), DateTime.MinValue);
+    private static CalculadoraComMetasConstantes NovaCalculadora() => new();
+
+    // A calculadora real com uma dieta constante (versão atual) gerada 400 dias
+    // antes. A manutenção usa o ritmo esperado a 80 kg (peso de todos os casos).
+    private sealed class CalculadoraComMetasConstantes
+    {
+        private readonly CalculadoraAjusteAdaptativo _calc = new(new CalculadoraPesoTendencia());
+
+        public AjusteAdaptativoDto Calcular(
+            IReadOnlyList<RegistroPesoAderenciaDto> historico, string objetivo, decimal metaBase, DateTime agora)
+        {
+            var manutencao = metaBase - RitmoObjetivo.KcalPorDia(objetivo, 80);
+            var dieta = new MetaDietaRegistroDto
+            {
+                DataGeracao = agora.AddDays(-400),
+                VersaoFormula = CalculadoraManutencao.VersaoFormula,
+                MetasPorDia = Enumerable.Repeat(metaBase, 7).ToArray(),
+                ManutencoesPorDia = Enumerable.Repeat(manutencao, 7).ToArray()
+            };
+            return _calc.Calcular(historico, new[] { dieta }, objetivo, metaBase, Enumerable.Repeat(manutencao, 7).ToArray(), agora);
+        }
+    }
 
     private static RegistroPesoAderenciaDto Registro(int diasAtras, decimal peso, string objetivo, string? aderencia = "seguiu") =>
         new() { Data = Agora.AddDays(-diasAtras), Peso = peso, Objetivo = objetivo, Aderencia = aderencia };
@@ -172,7 +199,7 @@ public class AjusteAdaptativoTests
         var contexto = ContextoBase(historico: new() { Registro(0, 80, "manter peso") });
         var gerador = new GeradorDietaGemini(
             new HttpClient(new GeminiFalso()), new CalculadoraGastoCalorico(),
-            NovaCalculadora(), new GeminiOptions { ApiKey = "teste" }, NullLogger<GeradorDietaGemini>.Instance);
+            new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia()), new GeminiOptions { ApiKey = "teste" }, NullLogger<GeradorDietaGemini>.Instance);
 
         var dieta = await gerador.GerarDietaAsync(contexto);
 
@@ -214,79 +241,23 @@ public class AjusteAdaptativoTests
         Assert.Equal(-0.05m, dieta.AjusteAdaptativo!.Percentual);
     }
 
-    // 9) Data de corte da fórmula: pesagens anteriores não entram na regressão
-    // nem na aderência, e o motivo é o mesmo HistoricoInsuficiente de sempre.
-    [Fact]
-    public void Corte_Ignora_Pesagens_Anteriores()
-    {
-        // 10 pesagens em 27 dias (suficiente sem corte), corte há 10 dias:
-        // sobram as de 9, 6, 3 e 0 dias atrás.
-        var calc = new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia(), Agora.AddDays(-10));
-
-        var resultado = calc.Calcular(Rampa(27, 80, 0, "perder peso"), "perder peso", MetaBase, Agora);
-
-        Assert.Equal(4, resultado.PontosUsados);
-        Assert.Equal(MotivoAjusteAdaptativo.HistoricoInsuficiente, resultado.Motivo);
-        Assert.Equal(0m, resultado.Percentual);
-    }
-
-    // Com 5 pesagens cobrindo 14 dias depois do corte, volta a ajustar.
-    [Fact]
-    public void Corte_Volta_A_Ajustar_Com_Dados_Suficientes_Depois()
-    {
-        // Corte há 20 dias: sobram 7 pesagens (18 a 0 dias atrás), peso parado perdendo peso.
-        var calc = new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia(), Agora.AddDays(-20));
-
-        var resultado = calc.Calcular(Rampa(27, 80, 0, "perder peso"), "perder peso", MetaBase, Agora);
-
-        Assert.Equal(7, resultado.PontosUsados);
-        Assert.Equal(-0.05m, resultado.Percentual);
-    }
-
-    // As pesagens anteriores ao corte ainda alimentam a tendência: um período
-    // a 84 kg antes do corte puxa a tendência do começo da janela para cima.
-    [Fact]
-    public void Corte_Mantem_O_Historico_Anterior_Na_Tendencia()
-    {
-        var corte = Agora.AddDays(-20);
-        var antes = Enumerable.Range(21, 30).Select(d => Registro(d, 84, "perder peso"));
-        var depois = Enumerable.Range(0, 7).Select(i => Registro(i * 3, 80, "perder peso"));
-        var historico = antes.Concat(depois).ToList();
-
-        var comAntigas = new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia(), corte)
-            .Calcular(historico, "perder peso", MetaBase, Agora);
-        var soDepois = new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia(), corte)
-            .Calcular(depois.ToList(), "perder peso", MetaBase, Agora);
-
-        Assert.Equal(7, comAntigas.PontosUsados);
-        Assert.Equal(0m, soDepois.RitmoRealKgSemana);
-        Assert.True(comAntigas.RitmoRealKgSemana < 0m, $"ritmo {comAntigas.RitmoRealKgSemana}");
-    }
-
-    // O construtor da injeção de dependência usa a data de corte da fórmula.
-    [Fact]
-    public void Construtor_Padrao_Usa_A_Data_De_Corte_Da_Formula()
-    {
-        var corte = CalculadoraAjusteAdaptativo.InicioFormulaManutencaoAtual;
-        var agora = corte.AddDays(1);
-        var historico = Enumerable.Range(0, 10)
-            .Select(i => new RegistroPesoAderenciaDto { Data = corte.AddDays(-3 * i), Peso = 80, Objetivo = "perder peso", Aderencia = "seguiu" })
-            .ToList();
-
-        var resultado = new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia())
-            .Calcular(historico, "perder peso", MetaBase, agora);
-
-        Assert.Equal(1, resultado.PontosUsados); // só a pesagem do próprio dia do corte
-        Assert.Equal(MotivoAjusteAdaptativo.HistoricoInsuficiente, resultado.Motivo);
-    }
-
-    // O enum vai como texto no JSON salvo (contrato com o dashboard)
+    // O enum vai como texto no JSON salvo (contrato com o dashboard), e o
+    // diagnóstico do log não vai.
     [Fact]
     public void Motivo_Serializa_Como_Texto()
     {
-        var json = JsonSerializer.Serialize(new AjusteAdaptativoDto { Percentual = -0.03m, Motivo = MotivoAjusteAdaptativo.PesoAcimaDoEsperado });
+        var json = JsonSerializer.Serialize(new AjusteAdaptativoDto
+        {
+            Percentual = -0.03m, Motivo = MotivoAjusteAdaptativo.PesoAcimaDoEsperado,
+            FatorBruto = -0.06m, ErroFormulaKcalDia = -150m, IngestaoMediaDiaria = 2500m,
+            ManutencaoMediaDiaria = 2940m, MetaPrescritaMediaDiaria = 2500m, DiasComDieta = 20
+        });
         Assert.Contains("\"Motivo\":\"PesoAcimaDoEsperado\"", json);
         Assert.Contains("\"Aplicado\":true", json);
+        foreach (var campo in new[] { "FatorBruto", "ErroFormulaKcalDia", "IngestaoMediaDiaria", "ManutencaoMediaDiaria", "MetaPrescritaMediaDiaria", "DiasComDieta" })
+        {
+            Assert.DoesNotContain(campo, json);
+        }
     }
 
     private static ContextoDietaDto ContextoBase(List<RegistroPesoAderenciaDto> historico, decimal altura = 175) => new()
@@ -298,7 +269,9 @@ public class AjusteAdaptativoTests
     // Ajuste fixo, para isolar a aplicação do percentual no gerador.
     private sealed class AjusteFixo(decimal percentual) : ICalculadoraAjusteAdaptativo
     {
-        public AjusteAdaptativoDto Calcular(IReadOnlyList<RegistroPesoAderenciaDto> historico, string objetivoAtual, decimal metaBaseMediaDiaria, DateTime agoraUtc) =>
+        public AjusteAdaptativoDto Calcular(
+            IReadOnlyList<RegistroPesoAderenciaDto> historico, IReadOnlyList<MetaDietaRegistroDto> metasDietas, string objetivoAtual,
+            decimal metaBaseMediaDiaria, IReadOnlyList<decimal> manutencaoAtualPorDia, DateTime agoraUtc) =>
             new() { Percentual = percentual, Motivo = MotivoAjusteAdaptativo.PesoAcimaDoEsperado };
     }
 

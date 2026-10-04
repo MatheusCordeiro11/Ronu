@@ -37,14 +37,60 @@ public class RepositorioDietaIA : IRepositorioDietaIA
             _context.DietasIA.RemoveRange(maisAntigas);
         }
 
+        // A dieta e as metas dela vão juntas (ou nenhuma das duas): a MetaDieta
+        // precisa do Id da DietaIA, que só existe depois do primeiro SaveChanges.
+        await using var transacao = await _context.Database.BeginTransactionAsync();
+
+        var dataGeracao = DateTime.UtcNow;
         var novaDieta = new DietaIA
         {
             UsuarioId = usuarioId,
-            DataGeracao = DateTime.UtcNow,
+            DataGeracao = dataGeracao,
             ConteudoJson = JsonSerializer.Serialize(dieta)
         };
 
         _context.DietasIA.Add(novaDieta);
         await _context.SaveChangesAsync();
+
+        var meta = MontarMetaDieta(usuarioId, dataGeracao, dieta);
+        meta.DietaIAId = novaDieta.Id;
+        _context.MetasDieta.Add(meta);
+        await _context.SaveChangesAsync();
+
+        await transacao.CommitAsync();
+    }
+
+    /// <summary>
+    /// As metas de uma dieta para a tabela MetasDieta (sem o DietaIAId, que só
+    /// existe depois de salvar). Os dias vão pela ordem segunda ... domingo,
+    /// casados PELO NOME — a lista da IA pode vir em outra ordem.
+    /// </summary>
+    public static MetaDieta MontarMetaDieta(int usuarioId, DateTime dataGeracao, DietaSemanalDto dieta)
+    {
+        var metas = new decimal[GeradorDietaGemini.NomesDias.Length];
+
+        foreach (var dia in dieta.Dias)
+        {
+            var indice = Array.FindIndex(GeradorDietaGemini.NomesDias,
+                n => string.Equals(n, dia.DiaSemana.Trim(), StringComparison.OrdinalIgnoreCase));
+
+            // O GeradorDietaGemini já garante os 7 nomes, sem repetição.
+            if (indice < 0)
+            {
+                throw new InvalidOperationException($"Dia '{dia.DiaSemana}' fora dos 7 dias esperados.");
+            }
+
+            metas[indice] = dia.MetaCalculada.Calorias;
+        }
+
+        return new MetaDieta
+        {
+            UsuarioId = usuarioId,
+            DataGeracao = dataGeracao,
+            VersaoFormula = CalculadoraManutencao.VersaoFormula,
+            MetasPorDia = metas,
+            ManutencoesPorDia = dieta.ManutencaoPorDia,
+            PercentualAjusteAdaptativo = dieta.AjusteAdaptativo?.Percentual
+        };
     }
 }

@@ -4,17 +4,29 @@ using Ronu.Api.Models.IA;
 namespace Ronu.Api.Services.IA;
 
 /// <summary>
-/// Implementação da meta calórica adaptativa. Modelo "absoluto e sem memória":
-/// o ajuste é sempre calculado do zero sobre a meta da fórmula, a cada dieta
-/// gerada — os mesmos dados dão sempre o mesmo ajuste. Por isso ele não
-/// converge até a correção inteira: com amortecimento de 50% e teto de ±5%, é
-/// um empurrão gradual, nunca uma troca brusca de meta.
+/// Implementação da meta calórica adaptativa. Estima o erro da fórmula de
+/// manutenção na janela — gasto real (o que a pessoa comeu, menos a variação
+/// de peso) menos a manutenção que a fórmula calculou para aqueles dias — e
+/// leva esse erro para a meta de hoje.
+///
+/// "O que a pessoa comeu" é dia a dia: a meta do dia da semana na dieta que
+/// estava ativa naquele dia (MetasDieta, com ajuste adaptativo e piso — o que
+/// ela recebeu), vezes a aderência da pesagem que fecha aquele intervalo.
+/// Antes, o cálculo supunha que ela tinha comido a meta base ATUAL a janela
+/// inteira: mudanças de meta no meio (fórmula, peso, o próprio ajuste
+/// anterior) distorciam o resultado — inclusive desfazendo parte do próprio
+/// ajuste (equilíbrio em ⅓ do erro, em vez de ½).
+///
+/// Modelo "absoluto e sem memória": o ajuste é refeito do zero a cada dieta,
+/// com amortecimento de 50% e teto de ±5% — na prática, uma correção
+/// permanente de metade do erro (ver docs/lacunas-conhecidas.md).
 /// </summary>
 public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
 {
     // Janela: só o comportamento recente, só sob o objetivo atual — dados de
     // outro objetivo (ex.: um período de ganho antes de um de perda) distorceriam
-    // o ritmo esperado — e só depois da data de corte da fórmula (abaixo).
+    // o ritmo esperado — e só a partir da primeira dieta (sem dieta, não se sabe
+    // o que a pessoa comeu).
     public const int JanelaDias = 28;
 
     // Mínimos para confiar na inclinação: com menos pontos ou um intervalo
@@ -28,6 +40,12 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
     public const decimal Teto = 0.05m;
     public const decimal ZonaMorta = 0.01m;
 
+    // Acima desta diferença entre a meta prescrita média da janela e a meta
+    // base atual, os ritmos vão nulos no DTO: o texto detalhado do dashboard
+    // supõe que a pessoa comeu a meta atual e atribuiria à aderência o que é
+    // efeito da meta antiga.
+    public const decimal DiferencaMaximaParaRitmos = 0.01m;
+
     // Ritmo esperado e kcal por kg vêm de RitmoObjetivo, os mesmos da meta da
     // fórmula (CalculadoraManutencao).
     private const decimal KcalPorKg = RitmoObjetivo.KcalPorKg;
@@ -35,7 +53,7 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
     private const string NaoSeguiu = "nao_seguiu";
 
     // Quanto a pessoa comeu em relação à meta, por resposta de aderência. Sem
-    // resposta = 100% (neutro). "nao_seguiu" não entra: o dia é descartado.
+    // resposta = 100% (neutro). "nao_seguiu" não entra: o ponto é descartado.
     private static readonly Dictionary<string, decimal> MultiplicadorIngestao = new()
     {
         ["seguiu"] = 1.00m,
@@ -43,51 +61,33 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
         ["comeu_menos"] = 0.85m
     };
 
-    /// <summary>
-    /// Data de corte: dia em que a fórmula de manutenção mudou (fator de
-    /// atividade fora do treino, MET líquido, METs do Compêndio 2024, objetivo
-    /// pelo ritmo esperado, peso de tendência). O cálculo supõe que a pessoa
-    /// comeu a meta base ATUAL durante a janela; pesagens anteriores ao corte
-    /// foram produzidas com a meta antiga, bem menor, e empurrariam a meta nova
-    /// para cima (até o teto de +5%) por até 4 semanas. Por isso a janela só
-    /// começa no corte — como numa troca de objetivo. A tendência continua
-    /// usando o histórico inteiro, para assentar.
-    /// É o dia (UTC) do deploy dessa revisão.
-    /// </summary>
-    public static readonly DateTime InicioFormulaManutencaoAtual = new(2026, 10, 3, 0, 0, 0, DateTimeKind.Utc);
-
     private readonly ICalculadoraPesoTendencia _calculadoraPesoTendencia;
-    private readonly DateTime _inicioDadosValidosUtc;
 
     public CalculadoraAjusteAdaptativo(ICalculadoraPesoTendencia calculadoraPesoTendencia)
-        : this(calculadoraPesoTendencia, InicioFormulaManutencaoAtual)
-    {
-    }
-
-    /// <param name="inicioDadosValidosUtc">Data de corte da janela (testes); em produção, InicioFormulaManutencaoAtual.</param>
-    public CalculadoraAjusteAdaptativo(ICalculadoraPesoTendencia calculadoraPesoTendencia, DateTime inicioDadosValidosUtc)
     {
         _calculadoraPesoTendencia = calculadoraPesoTendencia;
-        _inicioDadosValidosUtc = inicioDadosValidosUtc;
     }
 
     public AjusteAdaptativoDto Calcular(
         IReadOnlyList<RegistroPesoAderenciaDto> historico,
+        IReadOnlyList<MetaDietaRegistroDto> metasDietas,
         string objetivoAtual,
         decimal metaBaseMediaDiaria,
+        IReadOnlyList<decimal> manutencaoAtualPorDia,
         DateTime agoraUtc)
     {
-        if (historico.Count == 0 || metaBaseMediaDiaria <= 0)
+        if (historico.Count == 0 || metasDietas.Count == 0 || metaBaseMediaDiaria <= 0)
         {
             return SemAjuste(MotivoAjusteAdaptativo.HistoricoInsuficiente, pontos: 0);
         }
 
         var ordenado = historico.OrderBy(r => r.Data).ToList();
+        var dietas = metasDietas.OrderBy(m => m.DataGeracao).ToList();
 
         // Tendência calculada sobre o histórico INTEIRO (inclusive dias
-        // "nao_seguiu" — o peso deles é real) e só depois recortada: a média
-        // móvel começa "presa" ao primeiro peso e precisa de tempo para
-        // assentar. A calculadora devolve os pontos na mesma ordem por data.
+        // "nao_seguiu" e pesagens anteriores à primeira dieta — o peso deles é
+        // real) e só depois recortada: a média móvel começa "presa" ao primeiro
+        // peso e precisa de tempo para assentar. Mesma ordem por data.
         var tendencia = _calculadoraPesoTendencia.Calcular(
             ordenado.Select(r => new RegistroPesoDto { Data = r.Data, Peso = r.Peso }).ToList());
 
@@ -99,11 +99,13 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
             inicioObjetivoAtual = i;
         }
 
-        // Últimos 28 dias, mas nunca antes da data de corte da fórmula.
+        // Últimos 28 dias, mas nunca antes do dia (UTC) da primeira dieta: a
+        // dieta gerada num dia já vale para aquele dia.
         var inicioJanela = agoraUtc.AddDays(-JanelaDias);
-        if (inicioJanela < _inicioDadosValidosUtc)
+        var diaPrimeiraDieta = dietas[0].DataGeracao.Date;
+        if (inicioJanela < diaPrimeiraDieta)
         {
-            inicioJanela = _inicioDadosValidosUtc;
+            inicioJanela = diaPrimeiraDieta;
         }
         var indicesUsados = Enumerable.Range(inicioObjetivoAtual, ordenado.Count - inicioObjetivoAtual)
             .Where(i => ordenado[i].Data >= inicioJanela && ordenado[i].Aderencia != NaoSeguiu)
@@ -130,47 +132,81 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
         var pesoAtual = tendencia[^1].PesoTendencia;
         var ritmoEsperado = RitmoObjetivo.KgPorSemana(objetivoAtual, pesoAtual);
 
-        // Ingestão estimada relativa à meta (1 = comeu a meta), média dos dias usados.
-        var ingestao = indicesUsados.Average(i => MultiplicadorIngestao.GetValueOrDefault(ordenado[i].Aderencia ?? "", 1.00m));
+        // Ingestão e manutenção dia a dia, do dia da primeira pesagem usada até
+        // a véspera da última (o peso de um dia reflete o que se comeu antes).
+        var pontosUsados = indicesUsados.Select(i => ordenado[i]).ToList();
+        var primeiroDia = pontosUsados[0].Data.Date;
+        var ultimoDia = pontosUsados[^1].Data.Date;
+        decimal somaIngestao = 0m, somaManutencao = 0m, somaMetaPrescrita = 0m;
+        var dias = 0;
 
-        // Gasto real    = ingestão · meta − ritmoReal · 7700/7
-        // Meta ideal    = gasto real + ritmoEsperado · 7700/7
-        // Fator bruto   = meta ideal / meta − 1
-        //               = (ingestão − 1) − (ritmoReal − ritmoEsperado) · (7700/7) / meta
-        // A aderência entra em (ingestão − 1): se a pessoa engordou além do
-        // previsto mas comeu mais que a meta, parte do erro é explicada por isso
-        // e a meta cai menos.
-        var fatorBruto = (ingestao - 1m) - (ritmoReal - ritmoEsperado) * (KcalPorKg / 7m) / metaBaseMediaDiaria;
-
-        var ritmoRealArredondado = Math.Round(ritmoReal, 3);
-        var ritmoEsperadoArredondado = Math.Round(ritmoEsperado, 3);
-
-        if (Math.Abs(fatorBruto) < ZonaMorta)
+        for (var dia = primeiroDia; dia < ultimoDia; dia = dia.AddDays(1))
         {
-            return SemAjuste(MotivoAjusteAdaptativo.DentroDoEsperado, indicesUsados.Count, ritmoRealArredondado, ritmoEsperadoArredondado);
+            // Dieta ativa: a mais recente gerada até aquele dia (inclusive).
+            var dieta = dietas.Last(m => m.DataGeracao.Date <= dia);
+            var indiceSemana = ((int)dia.DayOfWeek + 6) % 7; // 0 = segunda
+
+            // Aderência: a da pesagem que fecha o intervalo daquele dia.
+            var fechamento = pontosUsados.First(p => p.Data.Date > dia);
+            var multiplicador = MultiplicadorIngestao.GetValueOrDefault(fechamento.Aderencia ?? "", 1.00m);
+
+            // Manutenção comparável só da mesma versão da fórmula; senão, a
+            // atual (supõe que o gasto real não mudou — o que mudou foi a conta).
+            var manutencao = dieta.VersaoFormula == CalculadoraManutencao.VersaoFormula && dieta.ManutencoesPorDia is { Length: 7 }
+                ? dieta.ManutencoesPorDia[indiceSemana]
+                : manutencaoAtualPorDia[indiceSemana];
+
+            var meta = dieta.MetasPorDia[indiceSemana];
+            somaIngestao += multiplicador * meta;
+            somaManutencao += manutencao;
+            somaMetaPrescrita += meta;
+            dias++;
         }
 
-        // 0,1 ponto percentual de precisão.
-        var percentual = Math.Round(Math.Clamp(Amortecimento * fatorBruto, -Teto, Teto), 3);
+        var ingestaoMedia = somaIngestao / dias;
+        var manutencaoMedia = somaManutencao / dias;
+        var metaPrescritaMedia = somaMetaPrescrita / dias;
+
+        // Gasto real      = ingestão média − ritmoReal · 7700/7
+        // Erro da fórmula = gasto real − manutenção média da fórmula (mesmos dias)
+        // Fator bruto     = erro / meta base atual
+        // Com metas e manutenção constantes (M = F + ritmoEsperado · 7700/7),
+        // é exatamente o cálculo antigo: (ingestão − 1) − (real − esperado) · (7700/7) / M.
+        var erroFormula = ingestaoMedia - ritmoReal * (KcalPorKg / 7m) - manutencaoMedia;
+        var fatorBruto = erroFormula / metaBaseMediaDiaria;
+
+        var mostrarRitmos = Math.Abs(metaPrescritaMedia - metaBaseMediaDiaria) / metaBaseMediaDiaria <= DiferencaMaximaParaRitmos;
+        decimal? ritmoRealDto = mostrarRitmos ? Math.Round(ritmoReal, 3) : null;
+        decimal? ritmoEsperadoDto = mostrarRitmos ? Math.Round(ritmoEsperado, 3) : null;
+
+        // 0,1 ponto percentual de precisão; zona morta -> 0%.
+        var percentual = Math.Abs(fatorBruto) < ZonaMorta
+            ? 0m
+            : Math.Round(Math.Clamp(Amortecimento * fatorBruto, -Teto, Teto), 3);
 
         return new AjusteAdaptativoDto
         {
             Percentual = percentual,
-            Motivo = percentual < 0 ? MotivoAjusteAdaptativo.PesoAcimaDoEsperado : MotivoAjusteAdaptativo.PesoAbaixoDoEsperado,
-            RitmoRealKgSemana = ritmoRealArredondado,
-            RitmoEsperadoKgSemana = ritmoEsperadoArredondado,
-            PontosUsados = indicesUsados.Count
+            Motivo = percentual == 0m ? MotivoAjusteAdaptativo.DentroDoEsperado
+                : percentual < 0 ? MotivoAjusteAdaptativo.PesoAcimaDoEsperado
+                : MotivoAjusteAdaptativo.PesoAbaixoDoEsperado,
+            RitmoRealKgSemana = ritmoRealDto,
+            RitmoEsperadoKgSemana = ritmoEsperadoDto,
+            PontosUsados = indicesUsados.Count,
+            FatorBruto = Math.Round(fatorBruto, 4),
+            ErroFormulaKcalDia = Math.Round(erroFormula, 1),
+            IngestaoMediaDiaria = Math.Round(ingestaoMedia, 1),
+            ManutencaoMediaDiaria = Math.Round(manutencaoMedia, 1),
+            MetaPrescritaMediaDiaria = Math.Round(metaPrescritaMedia, 1),
+            DiasComDieta = dias
         };
     }
 
-    private static AjusteAdaptativoDto SemAjuste(
-        MotivoAjusteAdaptativo motivo, int pontos, decimal? ritmoReal = null, decimal? ritmoEsperado = null) =>
+    private static AjusteAdaptativoDto SemAjuste(MotivoAjusteAdaptativo motivo, int pontos) =>
         new()
         {
             Percentual = 0m,
             Motivo = motivo,
-            RitmoRealKgSemana = ritmoReal,
-            RitmoEsperadoKgSemana = ritmoEsperado,
             PontosUsados = pontos
         };
 }

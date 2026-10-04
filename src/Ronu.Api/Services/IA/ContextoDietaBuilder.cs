@@ -81,6 +81,20 @@ public class ContextoDietaBuilder : IContextoDietaBuilder
             })
             .ToListAsync();
 
+        // Metas de todas as dietas já geradas (tabela pequena, ~1 linha por
+        // dieta): a meta adaptativa escolhe a dieta ativa de cada dia da janela.
+        var historicoMetas = await _context.MetasDieta
+            .Where(m => m.UsuarioId == usuarioId)
+            .OrderBy(m => m.DataGeracao)
+            .Select(m => new MetaDietaRegistroDto
+            {
+                DataGeracao = m.DataGeracao,
+                VersaoFormula = m.VersaoFormula,
+                MetasPorDia = m.MetasPorDia,
+                ManutencoesPorDia = m.ManutencoesPorDia
+            })
+            .ToListAsync();
+
         var preferencias = await _context.PreferenciasAlimentares
             .Where(p => p.UsuarioId == usuarioId)
             .Select(p => new PreferenciaContextoDto
@@ -108,7 +122,8 @@ public class ContextoDietaBuilder : IContextoDietaBuilder
             Estado = usuario.Estado,
             RotinaDiaria = usuario.RotinaDiaria,
             OrcamentoSemanal = usuario.OrcamentoSemanal,
-            HistoricoPeso = historicoPeso
+            HistoricoPeso = historicoPeso,
+            HistoricoMetas = historicoMetas
         };
     }
 }
