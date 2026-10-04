@@ -10,7 +10,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (localStorage.getItem(RONU_PRECISA_ESTADO_KEY) !== 'true') {
-    ronuRedirecionarPosAuth();
+    // O formulário desta tela fica oculto nesse caminho, então um erro da
+    // checagem vai para o dashboard, que tem a tela de erro com "Tentar
+    // novamente" (o 401 já redirecionou pro login sozinho).
+    ronuRedirecionarPosAuth().catch((erro) => {
+      if (erro.message !== 'Sessão expirada.') {
+        window.location.href = 'dashboard.html';
+      }
+    });
     return;
   }
 

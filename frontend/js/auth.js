@@ -126,28 +126,89 @@ async function ronuFetchAutenticado(caminho, opcoes = {}) {
   return resposta;
 }
 
+// Mensagem de quando a checagem de cadastro não consegue uma resposta válida
+// nem na segunda tentativa. Quem chama mostra na área de erro da própria tela.
+const RONU_MSG_FALHA_CHECAGEM = 'Não foi possível carregar seus dados. Tente de novo em instantes.';
+// Espera antes da segunda tentativa: cobre a API ainda subindo depois de um
+// reinício do App Service, quando as primeiras requisições voltam 5xx.
+const RONU_ESPERA_NOVA_TENTATIVA_MS = 2000;
+
+function ronuErroChecagem(temporario) {
+  const erro = new Error(RONU_MSG_FALHA_CHECAGEM);
+  erro.temporario = temporario;
+  return erro;
+}
+
+// Uma rodada das 3 chamadas. Devolve true/false só com respostas válidas:
+// perfil 200 (completo se tiver altura, sexo e data de nascimento), objetivo
+// 200 ou 404 (404 = ainda sem objetivo) e modalidades 200 (lista vazia = sem
+// modalidade). Qualquer outra coisa lança erro, nunca vira "incompleto" —
+// antes, um 5xx logo depois de um reinício da API mandava para o onboarding
+// quem já tinha cadastro completo. 5xx e falha de rede são temporários (vale
+// tentar de novo); outro status inesperado não. O 401 segue como já era:
+// ronuFetchAutenticado redireciona pro login e lança 'Sessão expirada.'.
+async function ronuConsultarCadastro() {
+  let respostas;
+  try {
+    respostas = await Promise.all([
+      ronuFetchAutenticado('/perfil'),
+      ronuFetchAutenticado('/objetivos/atual'),
+      ronuFetchAutenticado('/usuarios/modalidades')
+    ]);
+  } catch (erro) {
+    if (erro.message === 'Sessão expirada.') throw erro;
+    throw ronuErroChecagem(true);
+  }
+
+  const [respostaPerfil, respostaObjetivo, respostaModalidades] = respostas;
+
+  if (respostas.some((resposta) => resposta.status >= 500)) {
+    throw ronuErroChecagem(true);
+  }
+  if (respostaPerfil.status !== 200
+    || (respostaObjetivo.status !== 200 && respostaObjetivo.status !== 404)
+    || respostaModalidades.status !== 200) {
+    throw ronuErroChecagem(false);
+  }
+
+  let perfil;
+  let modalidades;
+  try {
+    perfil = await respostaPerfil.json();
+    modalidades = await respostaModalidades.json();
+  } catch (erro) {
+    // Corpo cortado no meio (conexão caiu) ou que não é JSON.
+    throw ronuErroChecagem(true);
+  }
+
+  const perfilCompleto = Boolean(
+    perfil && perfil.altura != null && perfil.sexo != null && perfil.dataNascimento != null
+  );
+  const temObjetivo = respostaObjetivo.status === 200;
+  const temModalidade = Array.isArray(modalidades) && modalidades.length > 0;
+
+  return perfilCompleto && temObjetivo && temModalidade;
+}
+
 // Um cadastro é considerado completo quando o usuário já tem perfil (altura,
 // sexo, data de nascimento), objetivo/peso registrado e pelo menos uma
 // modalidade vinculada (preferências é opcional). Fonte única desse critério:
 // usada depois de login/cadastro, ao abrir o onboarding e ao abrir o dashboard
 // sem a marca de cadastro completo, pra decidir entre onboarding e dashboard.
 // Quando dá completo, grava a marca (ver ronuCadastroJaCompleto).
+// Em erro temporário (5xx, rede), tenta mais uma vez depois de ~2 s; se falhar
+// de novo, lança Error(RONU_MSG_FALHA_CHECAGEM) e não mexe na marca — quem
+// chama mostra o erro em vez de decidir o caminho.
 async function ronuChecarCadastroCompleto() {
-  const [respostaPerfil, respostaObjetivo, respostaModalidades] = await Promise.all([
-    ronuFetchAutenticado('/perfil'),
-    ronuFetchAutenticado('/objetivos/atual'),
-    ronuFetchAutenticado('/usuarios/modalidades')
-  ]);
+  let completo;
+  try {
+    completo = await ronuConsultarCadastro();
+  } catch (erro) {
+    if (!erro.temporario) throw erro;
+    await new Promise((resolver) => setTimeout(resolver, RONU_ESPERA_NOVA_TENTATIVA_MS));
+    completo = await ronuConsultarCadastro();
+  }
 
-  const perfil = respostaPerfil.ok ? await respostaPerfil.json() : null;
-  const perfilCompleto = Boolean(
-    perfil && perfil.altura != null && perfil.sexo != null && perfil.dataNascimento != null
-  );
-  const temObjetivo = respostaObjetivo.status === 200;
-  const modalidades = respostaModalidades.ok ? await respostaModalidades.json() : [];
-  const temModalidade = Array.isArray(modalidades) && modalidades.length > 0;
-
-  const completo = perfilCompleto && temObjetivo && temModalidade;
   const usuario = ronuUsuarioLogado();
   if (completo && usuario) {
     localStorage.setItem(RONU_CADASTRO_COMPLETO_KEY, String(usuario.id));
@@ -171,21 +232,18 @@ function ronuCadastroJaCompleto() {
 }
 
 // Chamado depois de um login/cadastro bem-sucedido. Se a checagem de
-// completude falhar por erro de rede (não 401, que ronuFetchAutenticado já
-// trata sozinho), assume o caminho mais seguro: manda pro onboarding, que
-// vai mostrar o próprio erro se a API realmente estiver fora do ar.
+// completude falhar (já com a nova tentativa), o erro sobe para quem chamou,
+// que o mostra na área de erro da tela: sem uma resposta válida, não dá para
+// saber se o caminho é o dashboard ou o onboarding. O 401 também sobe, mas
+// ronuFetchAutenticado já redirecionou pro login.
 async function ronuRedirecionarPosAuth() {
   if (localStorage.getItem(RONU_PRECISA_ESTADO_KEY) === 'true') {
     window.location.href = 'estado.html';
     return;
   }
 
-  try {
-    const completo = await ronuChecarCadastroCompleto();
-    window.location.href = completo ? 'dashboard.html' : 'onboarding.html';
-  } catch (erro) {
-    window.location.href = 'onboarding.html';
-  }
+  const completo = await ronuChecarCadastroCompleto();
+  window.location.href = completo ? 'dashboard.html' : 'onboarding.html';
 }
 
 // PUT /perfil/estado — usado por estado.html. A API normaliza e valida a UF;

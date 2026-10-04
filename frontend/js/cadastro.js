@@ -9,6 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const campoConfirmarSenha = document.getElementById('field-confirmar-senha');
   const confirmarSenhaErro = document.getElementById('confirmar-senha-error');
 
+  // Etapas do envio que já deram certo nesta página (ver o submit).
+  let contaCriada = false;
+  let sessaoIniciada = false;
+
   // ---------- Revelação progressiva dos campos ----------
   // Mesmo padrão do accordeon de modalidades do onboarding: cada etapa fica
   // em um .modalidade-collapse fechado, com os controles desabilitados (fora
@@ -77,8 +81,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelarAvisoDeEspera = ronuAvisoDeEspera(submitBtn.querySelector('.btn-label'));
 
     try {
-      await ronuCadastrar(nome, email, senha, estado);
-      await ronuLogin(email, senha);
+      // Um novo envio depois de uma falha retoma de onde parou: se a conta já
+      // foi criada (ex.: a checagem pós-login falhou com a API instável),
+      // repetir o cadastro daria "email já cadastrado".
+      if (!contaCriada) {
+        await ronuCadastrar(nome, email, senha, estado);
+        contaCriada = true;
+      }
+      if (!sessaoIniciada) {
+        await ronuLogin(email, senha);
+        sessaoIniciada = true;
+      }
       await ronuRedirecionarPosAuth();
     } catch (erro) {
       ronuMostrarErroFormulario(formError, erro.message);

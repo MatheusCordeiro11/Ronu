@@ -29,7 +29,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   } catch (erro) {
     // 401 já foi tratado dentro de ronuChecarCadastroCompleto/ronuFetchAutenticado
-    // (redireciona pro login). Qualquer outro erro não deve travar o onboarding.
+    // (redireciona pro login) — não sobrescrever esse redirecionamento. Qualquer
+    // outro erro (API fora do ar, mesmo depois da nova tentativa) NÃO abre o
+    // wizard: sem saber se o cadastro está completo, refazer o passo 1 poderia
+    // apagar rotina e orçamento (o PUT /perfil daqui manda só os dados físicos).
+    // O dashboard tem a tela de erro com "Tentar novamente" e, se a checagem
+    // depois der incompleto, manda de volta pra cá.
+    if (erro.message !== 'Sessão expirada.') {
+      window.location.href = 'dashboard.html';
+    }
+    return;
   }
 
   function mostrarPasso(passo) {
