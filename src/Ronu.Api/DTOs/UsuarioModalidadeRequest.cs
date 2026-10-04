@@ -9,6 +9,7 @@ public class UsuarioModalidadeRequest
     // 1=Segunda ... 7=Domingo (ISO 8601). A validação de faixa (1-7) e de
     // duplicatas é feita no Controller, não aqui, porque DataAnnotations não
     // cobre bem "cada elemento de um array" sem um atributo customizado.
+    [Required(ErrorMessage = "Selecione pelo menos um dia da semana.")]
     [MinLength(1, ErrorMessage = "Selecione pelo menos um dia da semana.")]
     public required int[] DiasSemana { get; set; }
 

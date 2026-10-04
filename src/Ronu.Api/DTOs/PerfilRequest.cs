@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Ronu.Api.DTOs;
 
 /// <summary>
@@ -10,7 +12,10 @@ namespace Ronu.Api.DTOs;
 public class PerfilRequest
 {
     public required decimal Altura { get; set; }
+
+    [Required(ErrorMessage = "Informe seu sexo.")]
     public required string Sexo { get; set; }
+
     public required DateOnly DataNascimento { get; set; }
     public string? RotinaDiaria { get; set; }
     public string? OrcamentoSemanal { get; set; }

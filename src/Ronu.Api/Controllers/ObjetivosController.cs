@@ -43,7 +43,7 @@ public class ObjetivosController : ControllerBase
 
     /// <summary>
     /// Registra um novo objetivo/peso para o usuário logado. Se já existe um
-    /// registro com a mesma data (no calendário UTC) para este usuário, atualiza
+    /// registro de hoje (no fuso do estado do usuário) para ele, atualiza
     /// esse registro em vez de criar um novo — evita duplicatas no mesmo dia, que
     /// não agregam nada à suavização de peso de tendência (que já ignora
     /// múltiplos registros no mesmo dia matematicamente) e só poluiriam o
@@ -118,15 +118,25 @@ public class ObjetivosController : ControllerBase
         return Ok(await MontarObjetivoAtualResponseAsync(objetivo));
     }
 
-    // Regra única de "hoje" (dia do calendário em UTC): usada no upsert do POST
-    // e no RegistradoHoje da resposta, para os dois nunca divergirem.
-    private Task<ObjetivoUsuario?> BuscarObjetivoDeHojeAsync()
+    // Regra única de "hoje" (dia do calendário no fuso do estado do usuário —
+    // ver FusoHorarioEstado; sem estado, Brasília): usada no upsert do POST e
+    // no RegistradoHoje da resposta, para os dois nunca divergirem. Se houver
+    // mais de um registro no mesmo dia local (gravados quando o dia era o UTC,
+    // ex.: um às 20h e outro às 22h de Brasília), vale o mais recente, o mesmo
+    // que o GET /atual devolve.
+    private async Task<ObjetivoUsuario?> BuscarObjetivoDeHojeAsync()
     {
-        var hojeUtc = DateOnly.FromDateTime(DateTime.UtcNow);
+        var estado = await _context.Usuarios
+            .Where(u => u.Id == UsuarioIdLogado)
+            .Select(u => u.Estado)
+            .FirstAsync();
 
-        return _context.ObjetivosUsuario
+        var (inicioUtc, fimUtc) = FusoHorarioEstado.IntervaloUtcDeHoje(estado, DateTime.UtcNow);
+
+        return await _context.ObjetivosUsuario
             .Where(o => o.UsuarioId == UsuarioIdLogado)
-            .Where(o => DateOnly.FromDateTime(o.DataRegistro) == hojeUtc)
+            .Where(o => o.DataRegistro >= inicioUtc && o.DataRegistro < fimUtc)
+            .OrderByDescending(o => o.DataRegistro)
             .FirstOrDefaultAsync();
     }
 

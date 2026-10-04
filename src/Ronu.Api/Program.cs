@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ronu.Api.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -5,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Ronu.Api.Middleware;
 using Ronu.Api.Services;
 using Ronu.Api.Services.IA;
+using Ronu.Api.Validacao;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,7 +30,19 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddControllers();
+// O 400 automático do [ApiController] (DTO inválido) sai no formato dos demais
+// erros da API, { mensagem }, em vez do ValidationProblemDetails padrão, que o
+// frontend não lê. Ver RespostaValidacao.
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = contexto => new BadRequestObjectResult(new
+        {
+            mensagem = RespostaValidacao.PrimeiraMensagem(
+                contexto.ModelState,
+                contexto.ActionDescriptor.Parameters.Select(parametro => parametro.Name))
+        });
+    });
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 

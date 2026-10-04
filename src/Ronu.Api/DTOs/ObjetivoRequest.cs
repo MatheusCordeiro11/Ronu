@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Ronu.Api.DTOs;
 
 /// <summary>
@@ -7,7 +9,10 @@ namespace Ronu.Api.DTOs;
 public class ObjetivoRequest
 {
     public required decimal Peso { get; set; }
+
+    [Required(ErrorMessage = "Informe seu objetivo.")]
     public required string Objetivo { get; set; }
+
     // Opcional: "seguiu", "comeu_mais", "comeu_menos" ou "nao_seguiu".
     public string? Aderencia { get; set; }
 }

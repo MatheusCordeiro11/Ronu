@@ -30,6 +30,14 @@ public class PreferenciasAlimentaresController : ControllerBase
     private int UsuarioIdLogado =>
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
+    // Os únicos tipos que o GeradorDietaGemini reconhece ao montar o prompt.
+    // Sem normalização (como a aderência): vêm de opções fixas na tela, e
+    // qualquer outra grafia ("Evitar") ficaria salva mas seria ignorada na dieta.
+    private static readonly HashSet<string> TiposPreferencia = new()
+    {
+        "preferido", "evitar"
+    };
+
     /// <summary>
     /// Registra uma preferência alimentar para o usuário logado. Se o usuário já
     /// tem uma preferência para o mesmo alimento (comparação sem diferenciar
@@ -39,6 +47,11 @@ public class PreferenciasAlimentaresController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Criar(PreferenciaAlimentarRequest request)
     {
+        if (!TiposPreferencia.Contains(request.Tipo))
+        {
+            return BadRequest(new { mensagem = "Tipo de preferência inválido." });
+        }
+
         var alimento = request.Alimento.Trim();
 
         var preferenciaExistente = await _context.PreferenciasAlimentares

@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Ronu.Api.DTOs;
 
 /// <summary>
@@ -6,6 +8,10 @@ namespace Ronu.Api.DTOs;
 /// </summary>
 public class PreferenciaAlimentarRequest
 {
+    [Required(ErrorMessage = "Informe o alimento.")]
     public required string Alimento { get; set; }
+
+    // "preferido" ou "evitar" — conferido no controller.
+    [Required(ErrorMessage = "Informe o tipo da preferência.")]
     public required string Tipo { get; set; }
 }
