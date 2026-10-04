@@ -252,8 +252,9 @@ public class GeradorDietaGemini : IGeradorDietaIA
     }
 
     // Uma linha por geração: tempo total (com eventual nova tentativa), tokens
-    // da chamada que deu certo e, por dia, a soma das refeições contra a meta —
-    // com o total que a IA declarou quando ele não bate com a soma.
+    // da chamada que deu certo e, por dia, a soma das refeições contra a meta
+    // (kcal e o desvio de cada macro), a divergência entre as kcal e os macros
+    // declarados, e o total de kcal que a IA declarou quando ele não bate com a soma.
     private void RegistrarGeracao(
         List<DiaDietaDto> dias, RespostaDiasIaDto respostaIa, UsoTokens uso, int tentativas, long tempoMs)
     {
@@ -263,16 +264,29 @@ public class GeradorDietaGemini : IGeradorDietaIA
         {
             var soma = d.TotalDoDia.Calorias;
             var meta = d.MetaCalculada.Calorias;
-            var desvio = meta == 0 ? 0 : (soma - meta) / meta * 100;
+            var desvio = DesvioPercentual(soma, meta);
             var declarado = declaradoPorDia[d.DiaSemana.Trim()];
             var aviso = declarado == soma ? string.Empty : $" [IA declarou {declarado.ToString("F0", CultureInfo.InvariantCulture)}]";
-            return string.Create(CultureInfo.InvariantCulture, $"{d.DiaSemana.Trim()} {soma:F0}/{meta:F0} kcal ({desvio:+0.0;-0.0}%){aviso}");
+            var desvioP = DesvioPercentual(d.TotalDoDia.ProteinasG, d.MetaCalculada.ProteinasG);
+            var desvioC = DesvioPercentual(d.TotalDoDia.CarboidratosG, d.MetaCalculada.CarboidratosG);
+            var desvioG = DesvioPercentual(d.TotalDoDia.GordurasG, d.MetaCalculada.GordurasG);
+            // Coerência interna da resposta (só registro, nada é recalculado): as
+            // kcal somadas das refeições contra 4P+4C+9G dos macros declarados. No
+            // g6, uma geração com kcal, carboidrato e gordura idênticos à meta tinha
+            // até +4,7% aqui — sinal de números encaixados na meta.
+            var kcalDosMacros = 4 * d.TotalDoDia.ProteinasG + 4 * d.TotalDoDia.CarboidratosG + 9 * d.TotalDoDia.GordurasG;
+            var divergenciaMacros = DesvioPercentual(kcalDosMacros, soma);
+            return string.Create(CultureInfo.InvariantCulture,
+                $"{d.DiaSemana.Trim()} {soma:F0}/{meta:F0} kcal ({desvio:+0.0;-0.0}%) P {desvioP:+0;-0}% C {desvioC:+0;-0}% G {desvioG:+0;-0}% 4P+4C+9G {divergenciaMacros:+0.0;-0.0}%{aviso}");
         }));
 
         _logger.LogInformation(
-            "Dieta gerada pelo Gemini em {TempoMs} ms ({Tentativas} tentativa(s)); tokens: entrada {TokensEntrada}, resposta {TokensResposta}, raciocínio {TokensRaciocinio}, total {TokensTotal}. Soma das refeições vs. meta por dia: {DesvioPorDia}",
+            "Dieta gerada pelo Gemini em {TempoMs} ms ({Tentativas} tentativa(s)); tokens: entrada {TokensEntrada}, resposta {TokensResposta}, raciocínio {TokensRaciocinio}, total {TokensTotal}. Soma das refeições vs. meta por dia (kcal, desvio de proteína, carboidrato e gordura, e 4P+4C+9G dos macros declarados vs. kcal declaradas): {DesvioPorDia}",
             tempoMs, tentativas, uso.Entrada, uso.Resposta, uso.Raciocinio ?? 0, uso.Total, desvios);
     }
+
+    private static decimal DesvioPercentual(decimal valor, decimal meta) =>
+        meta == 0 ? 0 : (valor - meta) / meta * 100;
 
     // Calorias da fórmula por dia (CalculadoraManutencao), antes da meta
     // adaptativa, pelo nome do dia.
@@ -311,8 +325,14 @@ public class GeradorDietaGemini : IGeradorDietaIA
             .Where(p => p.Tipo == "evitar")
             .Select(p => p.Alimento));
 
+        // Os gramas de cada macro vão junto das calorias (regra 13): sem eles, o
+        // Gemini montava a própria proporção (no g4, gordura em 31% das calorias
+        // contra 25% da meta).
         var metasTexto = string.Join("\n", NomesDias.Select(nome =>
-            $"- {nome}: {metasPorDia[nome].Macros.Calorias:F0} kcal"));
+        {
+            var meta = metasPorDia[nome].Macros;
+            return $"- {nome}: {meta.Calorias:F0} kcal (proteína {meta.ProteinasG:F0} g, carboidrato {meta.CarboidratosG:F0} g, gordura {meta.GordurasG:F0} g)";
+        }));
 
         // Contas via Google ou anteriores ao campo podem estar sem estado —
         // nesse caso a linha some do perfil (sem deixar linha em branco).
@@ -343,10 +363,10 @@ public class GeradorDietaGemini : IGeradorDietaIA
             - Objetivo: {contexto.Objetivo}
             - Modalidades praticadas (com os dias da semana de cada uma): {modalidadesTexto}{estadoTexto}
 
-            Metas calóricas diárias (calculadas a partir do gasto em repouso, da atividade
+            Metas diárias (calorias e macronutrientes), calculadas a partir do gasto em repouso, da atividade
             do dia a dia fora do treino e do gasto real do treino de CADA dia específico, já
             com o déficit ou superávit do objetivo — dias de treino têm meta mais alta que
-            dias de descanso):
+            dias de descanso:
             {metasTexto}
 
             Alimentos que a pessoa gosta (use como base do plano, mas NÃO se limite a eles: complete com outros alimentos comuns e adequados ao objetivo, variando as opções ao longo da semana): {(string.IsNullOrEmpty(preferidosTexto) ? "nenhuma preferência informada" : preferidosTexto)}
@@ -370,6 +390,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
             10. Para um mesmo alimento, use sempre a mesma unidade de medida em todas as refeições e dias da semana. Itens contáveis (ovo, fruta inteira, fatia de pão) sempre em unidades; alimentos sólidos em gramas; líquidos em mililitros. Nunca escreva o mesmo alimento em gramas em um lugar e em unidades em outro.
             11. Preencha o campo "horario" de cada refeição no formato HH:mm (ex: "07:30"). Se a rotina diária da pessoa foi informada, baseie os horários nela; caso contrário, use horários típicos do brasileiro (café da manhã entre 6h30 e 8h, almoço entre 12h e 13h30, jantar entre 19h e 21h).
             12. Se o orçamento semanal informado for "economico", priorize proteínas e ingredientes de menor custo (ex: ovo, frango, peixes populares como tilápia, feijão), evitando itens caros como salmão, camarão ou carnes nobres, sem comprometer a qualidade nutricional. Se for "moderado" ou não informado, use bom senso de custo-benefício. Se for "sem_restricao", não considere custo na escolha dos alimentos.
+            13. A soma de proteína, carboidrato e gordura de cada dia deve ficar dentro de uma margem de 10% (para mais ou para menos) dos gramas da meta ESPECÍFICA daquele dia, listados acima. Se não for possível cumprir tudo ao mesmo tempo, priorize nesta ordem: (1) calorias dentro da margem de 5% da regra 1; (2) proteína; (3) carboidrato e gordura.
             """;
     }
 

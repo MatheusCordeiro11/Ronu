@@ -54,6 +54,13 @@ public class FormulaPontaAPontaTests
         // O prompt leva as metas sem casas decimais (F0 arredonda o ,5 para cima).
         Assert.Contains("- Segunda-feira: 3291 kcal", gemini.Prompt);
         Assert.Contains("- Quarta-feira: 2475 kcal", gemini.Prompt);
+
+        // E os gramas da MetaCalculada de cada dia: proteína 1,8 × 80 = 144 g;
+        // gordura 25% das kcal (3290,5 → 91,4 g; 2474,5 → 68,7 g); carboidrato
+        // com a sobra (472,9 g e 320,0 g).
+        Assert.Contains("- Segunda-feira: 3291 kcal (proteína 144 g, carboidrato 473 g, gordura 91 g)", gemini.Prompt);
+        Assert.Contains("- Quarta-feira: 2475 kcal (proteína 144 g, carboidrato 320 g, gordura 69 g)", gemini.Prompt);
+        Assert.Contains("13. A soma de proteína, carboidrato e gordura de cada dia deve ficar dentro de uma margem de 10%", gemini.Prompt);
         Assert.Contains("atividade\ndo dia a dia fora do treino", gemini.Prompt.Replace("\r\n", "\n"));
         Assert.DoesNotContain("taxa metabólica basal + gasto", gemini.Prompt);
     }
