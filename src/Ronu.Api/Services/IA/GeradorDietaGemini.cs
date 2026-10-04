@@ -84,8 +84,10 @@ public class GeradorDietaGemini : IGeradorDietaIA
             {
                 var (respostaIa, uso) = await ChamarGeminiAsync(corpoRequisicao);
                 var dias = MontarDias(respostaIa, metasPorDia);
+                ValidarBebidaAlcoolica(dias, contexto);
+                var normalizacao = NormalizadorUnidades.Normalizar(dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos));
 
-                RegistrarGeracao(dias, respostaIa, uso, tentativa, cronometro.ElapsedMilliseconds);
+                RegistrarGeracao(dias, respostaIa, uso, normalizacao, tentativa, cronometro.ElapsedMilliseconds);
 
                 return new DietaSemanalDto { Dias = dias, AjusteAdaptativo = ajuste, ManutencaoPorDia = manutencaoPorDia };
             }
@@ -216,6 +218,21 @@ public class GeradorDietaGemini : IGeradorDietaIA
         }).ToList();
     }
 
+    // Regra 8 do prompt: bebida alcoólica só se a pessoa a marcou como
+    // preferida. Fora disso, a resposta é inválida (nova tentativa, depois 503).
+    private static void ValidarBebidaAlcoolica(List<DiaDietaDto> dias, ContextoDietaDto contexto)
+    {
+        var preferidos = contexto.Preferencias.Where(p => p.Tipo == "preferido").Select(p => p.Alimento);
+        var bebida = ValidadorBebidaAlcoolica.EncontrarNaoPermitida(
+            dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos), preferidos);
+
+        if (bebida is not null)
+        {
+            throw new RespostaIaInvalidaException(
+                $"Resposta do Gemini com bebida alcoólica fora das preferências da pessoa: '{bebida}'.");
+        }
+    }
+
     private static MacrosDto SomarRefeicoes(List<RefeicaoDto> refeicoes) => new()
     {
         Calorias = refeicoes.Sum(r => r.Macros.Calorias),
@@ -255,8 +272,10 @@ public class GeradorDietaGemini : IGeradorDietaIA
     // da chamada que deu certo e, por dia, a soma das refeições contra a meta
     // (kcal e o desvio de cada macro), a divergência entre as kcal e os macros
     // declarados, e o total de kcal que a IA declarou quando ele não bate com a soma.
+    // Também as unidades: quantas a normalização reescreveu e as que ficaram fora
+    // de "g"/"ml" (NormalizadorUnidades), que impedem o cálculo daquele alimento.
     private void RegistrarGeracao(
-        List<DiaDietaDto> dias, RespostaDiasIaDto respostaIa, UsoTokens uso, int tentativas, long tempoMs)
+        List<DiaDietaDto> dias, RespostaDiasIaDto respostaIa, UsoTokens uso, ResultadoNormalizacao normalizacao, int tentativas, long tempoMs)
     {
         var declaradoPorDia = respostaIa.Dias.ToDictionary(d => d.DiaSemana.Trim(), d => d.TotalDoDia.Calorias, StringComparer.OrdinalIgnoreCase);
 
@@ -280,9 +299,14 @@ public class GeradorDietaGemini : IGeradorDietaIA
                 $"{d.DiaSemana.Trim()} {soma:F0}/{meta:F0} kcal ({desvio:+0.0;-0.0}%) P {desvioP:+0;-0}% C {desvioC:+0;-0}% G {desvioG:+0;-0}% 4P+4C+9G {divergenciaMacros:+0.0;-0.0}%{aviso}");
         }));
 
+        var foraDoPadrao = normalizacao.ForaDoPadrao.Count == 0
+            ? "nenhuma"
+            : string.Join(", ", normalizacao.ForaDoPadrao.Select(u => $"\"{u.Key}\" x{u.Value}"));
+
         _logger.LogInformation(
-            "Dieta gerada pelo Gemini em {TempoMs} ms ({Tentativas} tentativa(s)); tokens: entrada {TokensEntrada}, resposta {TokensResposta}, raciocínio {TokensRaciocinio}, total {TokensTotal}. Soma das refeições vs. meta por dia (kcal, desvio de proteína, carboidrato e gordura, e 4P+4C+9G dos macros declarados vs. kcal declaradas): {DesvioPorDia}",
-            tempoMs, tentativas, uso.Entrada, uso.Resposta, uso.Raciocinio ?? 0, uso.Total, desvios);
+            "Dieta gerada pelo Gemini em {TempoMs} ms ({Tentativas} tentativa(s)); tokens: entrada {TokensEntrada}, resposta {TokensResposta}, raciocínio {TokensRaciocinio}, total {TokensTotal}. Unidades: {Alimentos} alimentos, {UnidadesCorrigidas} normalizados para g/ml, fora de g/ml: {UnidadesForaDoPadrao}. Soma das refeições vs. meta por dia (kcal, desvio de proteína, carboidrato e gordura, e 4P+4C+9G dos macros declarados vs. kcal declaradas): {DesvioPorDia}",
+            tempoMs, tentativas, uso.Entrada, uso.Resposta, uso.Raciocinio ?? 0, uso.Total,
+            normalizacao.Total, normalizacao.Corrigidos, foraDoPadrao, desvios);
     }
 
     private static decimal DesvioPercentual(decimal valor, decimal meta) =>
@@ -379,7 +403,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
             2. Nunca inclua nenhum alimento da lista de restrição, em nenhuma refeição, em nenhum dia.
             3. Varie a fonte principal de proteína entre os dias da semana — não repita a mesma fonte de proteína em dias consecutivos.
             4. Não repita a mesma refeição (mesmos alimentos) em dois dias seguidos.
-            5. Retorne quantidades realistas e mensuráveis para cada alimento (em gramas, mililitros ou unidades).
+            5. Retorne quantidades realistas e mensuráveis para cada alimento. A quantidade é o peso do alimento PRONTO PARA COMER (ex.: arroz já cozido, frango já grelhado), nunca o peso cru antes do preparo.
             6. Use EXATAMENTE os nomes dos dias como escritos acima (ex: "Segunda-feira") no campo diaSemana de cada dia — precisa corresponder exatamente a um dos 7 nomes listados.
             7. Adeque o plano ao hábito alimentar brasileiro: use as refeições típicas (café da manhã, lanche da manhã, almoço, lanche da tarde, jantar e, se fizer sentido, ceia leve) e combinações que um brasileiro realmente consome. Bebidas com cafeína (café, chá preto, chá mate, energéticos) apenas de manhã e no início da tarde, nunca no jantar nem na ceia.
             8. Bebida alcoólica só pode aparecer se estiver entre os alimentos preferidos da pessoa, no máximo uma vez na semana, no sábado ou no domingo, em quantidade moderada (por exemplo, uma lata ou long neck), com as calorias contabilizadas no dia.
@@ -387,10 +411,11 @@ public class GeradorDietaGemini : IGeradorDietaIA
                - Feijão: nos estados RS, SC e PR, chame de "feijão preto". Em todos os demais estados, ou se o estado não foi informado, chame apenas de "feijão" (sem especificar o tipo).
                - Mandioca: no estado RJ, chame de "aipim". Nos estados AM, PA, AC, RO, RR, AP, TO, MA, PI, CE, RN, PB, PE, AL, SE e BA, chame de "macaxeira". Em todos os demais estados (SP, MG, ES, PR, SC, RS, MT, MS, GO, DF), ou se o estado não foi informado, chame de "mandioca".
                Para qualquer outro alimento não listado aqui, use o nome mais comum no Brasil, sem tentar adivinhar outras variações regionais.
-            10. Para um mesmo alimento, use sempre a mesma unidade de medida em todas as refeições e dias da semana. Itens contáveis (ovo, fruta inteira, fatia de pão) sempre em unidades; alimentos sólidos em gramas; líquidos em mililitros. Nunca escreva o mesmo alimento em gramas em um lugar e em unidades em outro.
+            10. O campo "unidade" aceita só dois valores: "g" ou "ml" (nunca "gramas", "mililitros", "unidades", "fatias" ou colheres). Bebidas (leite, café, chá, suco, vitamina) em "ml"; todo o resto em "g", inclusive azeite, mel e iogurte. Itens contáveis (ovo, fruta inteira, pão, fatia) também vão em "g", com a contagem entre parênteses no nome — ex.: nome "Ovo de galinha cozido (2 unidades)", quantidade 100, unidade "g"; nome "Pão francês (1 unidade)", quantidade 50, unidade "g". Para um mesmo alimento, use a mesma unidade em todas as refeições e dias da semana.
             11. Preencha o campo "horario" de cada refeição no formato HH:mm (ex: "07:30"). Se a rotina diária da pessoa foi informada, baseie os horários nela; caso contrário, use horários típicos do brasileiro (café da manhã entre 6h30 e 8h, almoço entre 12h e 13h30, jantar entre 19h e 21h).
             12. Se o orçamento semanal informado for "economico", priorize proteínas e ingredientes de menor custo (ex: ovo, frango, peixes populares como tilápia, feijão), evitando itens caros como salmão, camarão ou carnes nobres, sem comprometer a qualidade nutricional. Se for "moderado" ou não informado, use bom senso de custo-benefício. Se for "sem_restricao", não considere custo na escolha dos alimentos.
             13. A soma de proteína, carboidrato e gordura de cada dia deve ficar dentro de uma margem de 10% (para mais ou para menos) dos gramas da meta ESPECÍFICA daquele dia, listados acima. Se não for possível cumprir tudo ao mesmo tempo, priorize nesta ordem: (1) calorias dentro da margem de 5% da regra 1; (2) proteína; (3) carboidrato e gordura.
+            14. Nome de cada alimento: genérico, sem marca, em português correto, com a parte, o corte ou a variedade quando isso muda os valores nutricionais (ex.: "Peito de frango sem pele grelhado", "Patinho bovino grelhado", "Arroz branco cozido", "Pão de forma integral", "Leite desnatado", "Maçã fuji", "Banana prata", "Mamão papaia"). Diga SEMPRE o preparo no nome de carnes, aves, peixes, ovos, arroz, feijão, massas, tubérculos e legumes ("cozido", "grelhado", "assado", "refogado", "frito" ou "cru"): escreva "Feijão cozido" (ou "Feijão preto cozido", conforme a regra 9), nunca só "Feijão". Cada item é um alimento só, e preparações com mais de um ingrediente são separadas em itens na mesma refeição: uma salada vira um item por ingrediente (ex.: "Alface crua" e "Tomate cru", nunca "Salada de alface e tomate"); café adoçado vira "Café coado" e "Açúcar" em itens separados; uma vitamina vira a fruta e o leite em itens separados.
             """;
     }
 

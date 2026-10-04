@@ -165,6 +165,78 @@ public class ValidacaoRespostaGeminiTests
         }
     }
 
+    // ---------- Unidades ----------
+
+    [Fact]
+    public async Task Unidades_Da_Resposta_Saem_Normalizadas_E_A_Fora_Do_Padrao_Nao_Rejeita()
+    {
+        var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true, unidade: "gramas")));
+
+        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+
+        Assert.All(dieta.Dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos), a => Assert.Equal("g", a.Unidade));
+
+        var comUnidades = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true, unidade: "unidades")));
+
+        var dietaComUnidades = await NovoGerador(comUnidades).GerarDietaAsync(Contexto());
+
+        Assert.All(dietaComUnidades.Dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos), a => Assert.Equal("unidades", a.Unidade));
+        Assert.Equal(1, comUnidades.Chamadas);
+    }
+
+    // ---------- Bebida alcoólica (regra 8) ----------
+
+    [Fact]
+    public async Task Bebida_Alcoolica_Fora_Das_Preferencias_Tenta_De_Novo_E_Falha()
+    {
+        var texto = TextoDieta(Semana, comRefeicoes: true, alimento: "Cereais cerveja lata (Cerveja pilsen)");
+        var gemini = new GeminiRoteirizado(Envelope(texto), Envelope(texto));
+
+        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarDietaAsync(Contexto()));
+
+        Assert.Contains("bebida alcoólica", ex.Message);
+        Assert.Equal(2, gemini.Chamadas);
+    }
+
+    [Fact]
+    public async Task Bebida_Alcoolica_Na_Segunda_Tentativa_Some_E_Recupera()
+    {
+        var gemini = new GeminiRoteirizado(
+            Envelope(TextoDieta(Semana, comRefeicoes: true, alimento: "Cerveja pilsen")),
+            Envelope(TextoDieta(Semana, comRefeicoes: true)));
+
+        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+
+        Assert.Equal(7, dieta.Dias.Count);
+        Assert.Equal(2, gemini.Chamadas);
+    }
+
+    [Fact]
+    public async Task Bebida_Alcoolica_Preferida_Passa_Na_Primeira()
+    {
+        var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true, alimento: "Cerveja pilsen")));
+        var contexto = Contexto();
+        contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "Cerveja", Tipo = "preferido" });
+
+        var dieta = await NovoGerador(gemini).GerarDietaAsync(contexto);
+
+        Assert.Equal(7, dieta.Dias.Count);
+        Assert.Equal(1, gemini.Chamadas);
+    }
+
+    [Fact]
+    public async Task Bebida_Alcoolica_Marcada_Para_Evitar_Nao_Libera()
+    {
+        var texto = TextoDieta(Semana, comRefeicoes: true, alimento: "Cerveja pilsen");
+        var gemini = new GeminiRoteirizado(Envelope(texto), Envelope(texto));
+        var contexto = Contexto();
+        contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "Cerveja", Tipo = "evitar" });
+
+        await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarDietaAsync(contexto));
+
+        Assert.Equal(2, gemini.Chamadas);
+    }
+
     // ---------- Apoio ----------
 
     private static GeradorDietaGemini NovoGerador(HttpMessageHandler gemini) => new(
@@ -179,12 +251,12 @@ public class ValidacaoRespostaGeminiTests
     };
 
     // O JSON da dieta que a IA põe em candidates[0].content.parts[0].text.
-    private static string TextoDieta(IEnumerable<string> nomes, bool comRefeicoes = false)
+    private static string TextoDieta(IEnumerable<string> nomes, bool comRefeicoes = false, string unidade = "g", string alimento = "Arroz")
     {
         object Refeicao(string nome, decimal kcal, decimal p, decimal c, decimal g) => new
         {
             nome,
-            alimentos = new[] { new { nome = "Arroz", quantidade = 100, unidade = "g" } },
+            alimentos = new[] { new { nome = alimento, quantidade = 100, unidade } },
             macros = new { calorias = kcal, proteinasG = p, carboidratosG = c, gordurasG = g },
             horario = "12:00"
         };
