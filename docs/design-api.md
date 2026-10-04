@@ -4,7 +4,7 @@ Lista de endpoints da API, definidos a partir das user stories (`docs/user-stori
 
 **Convenção geral:** todas as rotas exigem autenticação via token JWT (header `Authorization: Bearer <token>`), exceto `POST /api/auth/cadastro`, `POST /api/auth/login`, `POST /api/auth/google` e `GET /api/modalidades`. O `usuarioId` nunca é enviado pelo cliente — é sempre extraído do token, para evitar que um usuário manipule dados de outra conta. Sem token (ou com token expirado), a resposta é **401**.
 
-**Erros:** os erros de regra de negócio vêm com corpo `{ "mensagem": "<texto para o usuário>" }`. Já os erros de validação automática do modelo (campo obrigatório ausente, `[MinLength]`, `[Range]`) vêm no formato padrão do ASP.NET (`ValidationProblemDetails`, com `errors` por campo), também com status **400**. Exceções não tratadas viram **500** com `{ "mensagem" }` genérica em produção.
+**Erros:** todos os erros vêm com corpo `{ "mensagem": "<texto para o usuário>" }`, em português. Isso vale também para os da validação automática do modelo (**400**): campo obrigatório vazio ou nulo, `[MinLength]`, `[Range]` devolvem a **primeira** mensagem de erro, escrita no atributo do DTO (ex.: `{ "mensagem": "A senha deve ter pelo menos 8 caracteres." }`). Erros que não vêm de um atributo — JSON malformado ou com tipo errado, campo obrigatório ausente do JSON, corpo vazio, parâmetro de rota inválido — devolvem a genérica `{ "mensagem": "Requisição inválida. Confira os dados enviados." }`. Nenhuma mensagem padrão do ASP.NET (em inglês) chega ao cliente (`Validacao/RespostaValidacao.cs`). Exceções não tratadas viram **500** com `{ "mensagem" }` genérica em produção.
 
 ---
 
@@ -13,7 +13,7 @@ Lista de endpoints da API, definidos a partir das user stories (`docs/user-stori
 ### `POST /api/auth/cadastro`
 **Recebe:** `nome`, `email`, `senha` (mínimo 8 caracteres), `estado` (UF)
 **Devolve:** `id`, `nome`, `email` (a senha nunca é retornada, mesmo em hash)
-**Erros:** 409 se o email já está cadastrado; 400 se a senha tiver menos de 8 caracteres.
+**Erros:** 409 se o email já está cadastrado; 400 se a senha tiver menos de 8 caracteres ou se algum campo vier vazio.
 
 ### `POST /api/auth/login`
 **Recebe:** `email`, `senha`
@@ -51,11 +51,11 @@ Lista de endpoints da API, definidos a partir das user stories (`docs/user-stori
 ### `POST /api/objetivos`
 **Recebe:** `peso`, `objetivo`, `aderencia` (opcional: `seguiu`, `comeu_mais`, `comeu_menos` ou `nao_seguiu`; nulo ou vazio = sem resposta)
 **Devolve:** `id`, `peso`, `objetivo`, `dataRegistro`, `aderencia`, `registradoHoje`, `temDieta` (mesmo formato do `GET /api/objetivos/atual`)
-*(`dataRegistro` é preenchida automaticamente pela API, não vem do cliente. Se já existe um registro do usuário no mesmo dia, no calendário UTC, ele é atualizado em vez de criar outro — inclusive a `aderencia`, que volta a nulo se não for enviada)*
+*(`dataRegistro` é preenchida automaticamente pela API, em UTC, não vem do cliente. Se já existe um registro do usuário no mesmo dia — o dia no fuso do estado (UF) do usuário; sem estado, horário de Brasília —, ele é atualizado em vez de criar outro, inclusive a `aderencia`, que volta a nulo se não for enviada)*
 **Erros:** 400 se a `aderencia` não for um dos valores aceitos.
 
 ### `GET /api/objetivos/atual`
-**Devolve:** o registro mais recente de `ObjetivoUsuario` do usuário logado (`id`, `peso`, `objetivo`, `dataRegistro`, `aderencia`), mais `registradoHoje` (se esse registro é o de hoje, no calendário UTC, que o próximo POST vai sobrescrever) e `temDieta` (se o usuário já tem alguma dieta gerada)
+**Devolve:** o registro mais recente de `ObjetivoUsuario` do usuário logado (`id`, `peso`, `objetivo`, `dataRegistro`, `aderencia`), mais `registradoHoje` (se esse registro é o de hoje, no fuso do estado do usuário, que o próximo POST vai sobrescrever — a mesma regra de "hoje" do POST) e `temDieta` (se o usuário já tem alguma dieta gerada)
 **Erros:** 404 se o usuário ainda não registrou nenhum objetivo.
 
 ### `GET /api/objetivos/tendencia`
@@ -94,6 +94,7 @@ Lista de endpoints da API, definidos a partir das user stories (`docs/user-stori
 **Recebe:** `alimento`, `tipo` (`preferido` ou `evitar`)
 **Devolve:** `id`, `alimento`, `tipo`
 *(se o usuário já tem uma preferência para o mesmo alimento, sem diferenciar maiúsculas/minúsculas, atualiza o `tipo` em vez de duplicar)*
+**Erros:** 400 com `{ "mensagem": "Tipo de preferência inválido." }` se o `tipo` não for exatamente `preferido` ou `evitar` (sem normalizar maiúsculas nem espaços: `Evitar` é recusado).
 
 ### `GET /api/preferencias-alimentares`
 **Devolve:** lista de preferências alimentares do usuário logado
