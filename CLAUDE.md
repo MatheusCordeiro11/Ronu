@@ -20,6 +20,8 @@ artes marciais e esportes de combate, a partir do gasto calórico real de cada m
 - Nunca fazer commit, push ou deploy sem pedido explícito. Todo commit vem só depois do teste manual do usuário.
 - Problemas encontrados no caminho devem ser sinalizados, mas não resolvidos sem aprovação.
 - Trabalho grande vai em etapas pequenas, cada uma com seu commit.
+- **Qualquer acesso ao banco de produção, leitura ou escrita, por qualquer caminho (User Secrets, `az`, psql, script), só com confirmação do usuário pedida antes, a cada vez.** Uma autorização para "fazer uma consulta" não dispensa pedir a confirmação no momento do acesso.
+- Toda mudança na fórmula de manutenção (`CalculadoraManutencao`, `CalculadoraGastoCalorico`, `RitmoObjetivo`, METs das modalidades) exige incrementar `CalculadoraManutencao.VersaoFormula`: a meta adaptativa só compara a manutenção de dietas da mesma versão.
 
 ## Teste local
 
@@ -41,13 +43,18 @@ como complemento, mas nunca substitui o teste manual do usuário.
 
 - Usar sempre uma conta descartável.
 - Não existe endpoint de exclusão: a limpeza é feita direto no banco, dentro de uma transação, filtrando por id **e** email juntos. Antes de apagar, listar o que vai ser apagado.
+- A limpeza inclui a tabela `MetasDieta`. Ela apaga em cascata junto com o `Usuario`, mas não tem chave estrangeira para a `DietaIA` (de propósito: guarda todas as dietas, não só as 3 da tela). Ao apagar só as dietas de alguém, apagar também as `MetasDieta` do mesmo usuário, senão a meta adaptativa continua lendo essas metas.
 
 ## Migrations em produção
 
-1. Só com confirmação do usuário, trocar os User Secrets para o banco do Azure.
-2. Rodar `dotnet ef migrations list` para conferir o que está pendente.
+A connection string de produção **nunca é impressa nem gravada em arquivo** (nem nos User Secrets, nem em
+script, log ou saída de comando). Ela é obtida pelo `az` direto numa variável de ambiente da sessão e
+passada ao `dotnet ef` por essa variável (`ConnectionStrings__DefaultConnection`), que é descartada no fim.
+
+1. Só com confirmação do usuário, pedida no momento: carregar a connection string pelo `az` numa variável de ambiente da sessão.
+2. Rodar `dotnet ef migrations list` para conferir o que está pendente. Se houver algo além do esperado, parar.
 3. Aplicar a migration.
-4. Voltar os User Secrets para o localhost.
+4. Descartar a variável e conferir que nenhum arquivo ficou com a connection string.
 
 A migration vai sempre **antes** do deploy do backend que depende dela.
 
