@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Ronu.Api.Middleware;
 using Ronu.Api.Services;
+using Ronu.Api.Services.Email;
 using Ronu.Api.Services.IA;
 using Ronu.Api.Validacao;
 using System.Text;
@@ -61,6 +62,27 @@ builder.Services.AddScoped<ICalculadoraPesoTendencia, CalculadoraPesoTendencia>(
 builder.Services.AddScoped<ICalculadoraAjusteAdaptativo, CalculadoraAjusteAdaptativo>();
 builder.Services.AddScoped<IContextoDietaBuilder, ContextoDietaBuilder>();
 builder.Services.AddScoped<IRepositorioDietaIA, RepositorioDietaIA>();
+
+// Envio de email em segundo plano (FilaEmail + ServicoEnvioEmail). Com
+// credencial (User Secrets ou Application settings), SMTP do Gmail; sem ela,
+// em desenvolvimento o email vai para o log, e fora dele vira só um erro no log.
+var emailOptions = builder.Configuration.GetSection(EmailOptions.Secao).Get<EmailOptions>() ?? new EmailOptions();
+builder.Services.AddSingleton(emailOptions);
+if (emailOptions.Configurado)
+{
+    builder.Services.AddSingleton<IEnviadorEmail, EnviadorEmailSmtp>();
+}
+else if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddSingleton<IEnviadorEmail, EnviadorEmailLog>();
+}
+else
+{
+    builder.Services.AddSingleton<IEnviadorEmail, EnviadorEmailNaoConfigurado>();
+}
+builder.Services.AddSingleton<FilaEmail>();
+builder.Services.AddSingleton<IFilaEmail>(servicos => servicos.GetRequiredService<FilaEmail>());
+builder.Services.AddHostedService<ServicoEnvioEmail>();
 
 // Configura a autenticação baseada em JWT Bearer: o servidor valida a assinatura
 // do token (com a mesma chave usada para gerá-lo) e a expiração, mas não valida
