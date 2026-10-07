@@ -73,6 +73,6 @@ Migration (se houver) → backend no Azure → push do frontend que depende dele
 
 ## Documentação
 
-- `docs/`: `design-api.md`, `lacunas-conhecidas.md` (status de features e pendências ficam **só** aqui), `user-stories.md`, `diagrama-classes.md`, `fluxogramas.md`, DER e fluxos em PNG, `seed-modalidades.sql`.
+- `docs/`: `design-api.md`, `lacunas-conhecidas.md` (status de features e pendências ficam **só** aqui), `user-stories.md`, `diagrama-classes.md`, `fluxogramas.md`, DER e fluxos em PNG, `seed-modalidades.sql`, `fontes-nutricionais.md` (fontes, licenças e método da base nutricional própria).
 - `DESIGN.md`: design system "Súmula do Tatame".
 - `PRODUCT.md`: contexto de produto.
