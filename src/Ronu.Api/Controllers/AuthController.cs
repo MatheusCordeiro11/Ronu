@@ -105,7 +105,8 @@ public class AuthController : ControllerBase
     /// a assinatura, o que seria forjável por qualquer cliente.
     /// Vincula pelo email: se já existe uma conta com o mesmo email (criada
     /// via cadastro tradicional), o login com Google passa a valer para essa
-    /// mesma conta, em vez de criar uma duplicata.
+    /// mesma conta, em vez de criar uma duplicata. Por isso exige o email
+    /// verificado pelo Google (EmailVerified).
     /// </summary>
     [HttpPost("google")]
     public async Task<IActionResult> LoginComGoogle(GoogleLoginRequest request)
@@ -124,6 +125,13 @@ public class AuthController : ControllerBase
         catch (InvalidJwtException)
         {
             return Unauthorized(new { mensagem = "Token do Google inválido." });
+        }
+
+        // O vínculo com uma conta existente é pelo email, e o email também é
+        // o caminho da redefinição de senha: só vale se o Google o verificou.
+        if (!payload.EmailVerified)
+        {
+            return Unauthorized(new { mensagem = "O email da sua conta Google não está verificado. Verifique-o no Google ou entre com email e senha." });
         }
 
         var email = NormalizacaoEmail.Normalizar(payload.Email);
