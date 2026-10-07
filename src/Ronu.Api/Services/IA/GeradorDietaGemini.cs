@@ -26,11 +26,28 @@ public class GeradorDietaGemini : IGeradorDietaIA
     private readonly GeminiOptions _options;
     private readonly ILogger<GeradorDietaGemini> _logger;
 
-    // Resposta inválida (bloqueada, cortada, JSON quebrado, dias errados) ganha
-    // UMA nova chamada: cada uma leva ~11–19 s, então mesmo com o cold start do
-    // F1 (~45 s) as duas cabem nos 100 s do HttpClient e nos 230 s do Azure.
-    // Falha de rede/HTTP não entra aqui — continua indo direto para o 503.
+    // Versão fixa, não o alias gemini-flash-lite-latest: o alias troca de modelo
+    // a cada lançamento (com aviso só por email), o que mudaria o comportamento
+    // do cardápio e os limites do schema sem nenhum deploy nosso. Era também a
+    // versão por trás do alias nas medições g3–g8 e na fase 0 da base nutricional.
+    public const string Modelo = "gemini-3.5-flash-lite";
+
+    // Resposta inválida (bloqueada, cortada, JSON quebrado, dias errados) ou
+    // sem resposta dentro de TimeoutPorTentativa ganha UMA nova chamada. Cada
+    // chamada costuma levar ~20 s ou ~42 s; sem o limite, um Gemini travado
+    // segurava a requisição até os 100 s do HttpClient (2 em 15 gerações de
+    // teste). Pior caso: cold start do F1 (~45 s) + 2 × 60 s = ~165 s, abaixo
+    // dos 230 s do Azure. Falha de rede/HTTP não entra aqui — continua indo
+    // direto para o 503.
     private const int MaximoTentativas = 2;
+
+    public static readonly TimeSpan TimeoutPadraoPorTentativa = TimeSpan.FromSeconds(60);
+
+    /// <summary>
+    /// Limite de cada chamada ao Gemini (envio e leitura da resposta). Só os
+    /// testes mudam este valor.
+    /// </summary>
+    public TimeSpan TimeoutPorTentativa { get; init; } = TimeoutPadraoPorTentativa;
 
     public GeradorDietaGemini(
         HttpClient httpClient,
@@ -82,12 +99,12 @@ public class GeradorDietaGemini : IGeradorDietaIA
         {
             try
             {
-                var (respostaIa, uso) = await ChamarGeminiAsync(corpoRequisicao);
+                var (respostaIa, uso, versaoModelo) = await ChamarGeminiAsync(corpoRequisicao);
                 var dias = MontarDias(respostaIa, metasPorDia);
                 ValidarBebidaAlcoolica(dias, contexto);
                 var normalizacao = NormalizadorUnidades.Normalizar(dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos));
 
-                RegistrarGeracao(dias, respostaIa, uso, normalizacao, tentativa, cronometro.ElapsedMilliseconds);
+                RegistrarGeracao(dias, respostaIa, uso, versaoModelo, normalizacao, tentativa, cronometro.ElapsedMilliseconds);
 
                 return new DietaSemanalDto { Dias = dias, AjusteAdaptativo = ajuste, ManutencaoPorDia = manutencaoPorDia };
             }
@@ -100,23 +117,32 @@ public class GeradorDietaGemini : IGeradorDietaIA
     }
 
     // Uma chamada ao Gemini. Erro de rede/HTTP sobe como HttpRequestException
-    // (sem nova tentativa); resposta 200 que não serve vira RespostaIaInvalidaException.
-    private async Task<(RespostaDiasIaDto Resposta, UsoTokens Uso)> ChamarGeminiAsync(object corpoRequisicao)
+    // (sem nova tentativa); resposta 200 que não serve, ou nenhuma resposta
+    // dentro de TimeoutPorTentativa, vira RespostaIaInvalidaException.
+    private async Task<(RespostaDiasIaDto Resposta, UsoTokens Uso, string? VersaoModelo)> ChamarGeminiAsync(object corpoRequisicao)
     {
         using var mensagem = new HttpRequestMessage(
             HttpMethod.Post,
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent");
+            $"https://generativelanguage.googleapis.com/v1beta/models/{Modelo}:generateContent");
 
         mensagem.Headers.Add("x-goog-api-key", _options.ApiKey);
         mensagem.Content = JsonContent.Create(corpoRequisicao);
 
-        var resposta = await _httpClient.SendAsync(mensagem);
-        resposta.EnsureSuccessStatusCode();
+        // O limite vale para o envio e a leitura da resposta. Fica abaixo do
+        // Timeout do HttpClient (100 s), que assim nunca chega a disparar.
+        using var limite = new CancellationTokenSource(TimeoutPorTentativa);
 
         JsonElement respostaBruta;
         try
         {
-            respostaBruta = await resposta.Content.ReadFromJsonAsync<JsonElement>();
+            var resposta = await _httpClient.SendAsync(mensagem, limite.Token);
+            resposta.EnsureSuccessStatusCode();
+            respostaBruta = await resposta.Content.ReadFromJsonAsync<JsonElement>(limite.Token);
+        }
+        catch (OperationCanceledException ex) when (limite.IsCancellationRequested)
+        {
+            throw new RespostaIaInvalidaException(
+                $"Gemini não respondeu em {TimeoutPorTentativa.TotalSeconds:F0} s.", ex);
         }
         catch (JsonException ex)
         {
@@ -174,7 +200,12 @@ public class GeradorDietaGemini : IGeradorDietaIA
             throw new RespostaIaInvalidaException("JSON da resposta do Gemini sem a lista de dias.");
         }
 
-        return (respostaIa, LerUsoTokens(respostaBruta));
+        // A versão que de fato respondeu (só para o log).
+        var versaoModelo = respostaBruta.TryGetProperty("modelVersion", out var versao) && versao.ValueKind == JsonValueKind.String
+            ? versao.GetString()
+            : null;
+
+        return (respostaIa, LerUsoTokens(respostaBruta), versaoModelo);
     }
 
     // Casamos a meta calculada (C#) com o dia devolvido pela IA PELO NOME,
@@ -268,14 +299,15 @@ public class GeradorDietaGemini : IGeradorDietaIA
             ajuste.PontosUsados, ajuste.DiasComDieta, ajuste.RitmoRealKgSemana is null ? "nulos" : "presentes");
     }
 
-    // Uma linha por geração: tempo total (com eventual nova tentativa), tokens
-    // da chamada que deu certo e, por dia, a soma das refeições contra a meta
+    // Uma linha por geração: versão do modelo que respondeu, tempo total (com
+    // eventual nova tentativa), tokens da chamada que deu certo e, por dia, a
+    // soma das refeições contra a meta
     // (kcal e o desvio de cada macro), a divergência entre as kcal e os macros
     // declarados, e o total de kcal que a IA declarou quando ele não bate com a soma.
     // Também as unidades: quantas a normalização reescreveu e as que ficaram fora
     // de "g"/"ml" (NormalizadorUnidades), que impedem o cálculo daquele alimento.
     private void RegistrarGeracao(
-        List<DiaDietaDto> dias, RespostaDiasIaDto respostaIa, UsoTokens uso, ResultadoNormalizacao normalizacao, int tentativas, long tempoMs)
+        List<DiaDietaDto> dias, RespostaDiasIaDto respostaIa, UsoTokens uso, string? versaoModelo, ResultadoNormalizacao normalizacao, int tentativas, long tempoMs)
     {
         var declaradoPorDia = respostaIa.Dias.ToDictionary(d => d.DiaSemana.Trim(), d => d.TotalDoDia.Calorias, StringComparer.OrdinalIgnoreCase);
 
@@ -304,8 +336,8 @@ public class GeradorDietaGemini : IGeradorDietaIA
             : string.Join(", ", normalizacao.ForaDoPadrao.Select(u => $"\"{u.Key}\" x{u.Value}"));
 
         _logger.LogInformation(
-            "Dieta gerada pelo Gemini em {TempoMs} ms ({Tentativas} tentativa(s)); tokens: entrada {TokensEntrada}, resposta {TokensResposta}, raciocínio {TokensRaciocinio}, total {TokensTotal}. Unidades: {Alimentos} alimentos, {UnidadesCorrigidas} normalizados para g/ml, fora de g/ml: {UnidadesForaDoPadrao}. Soma das refeições vs. meta por dia (kcal, desvio de proteína, carboidrato e gordura, e 4P+4C+9G dos macros declarados vs. kcal declaradas): {DesvioPorDia}",
-            tempoMs, tentativas, uso.Entrada, uso.Resposta, uso.Raciocinio ?? 0, uso.Total,
+            "Dieta gerada pelo Gemini ({VersaoModelo}) em {TempoMs} ms ({Tentativas} tentativa(s)); tokens: entrada {TokensEntrada}, resposta {TokensResposta}, raciocínio {TokensRaciocinio}, total {TokensTotal}. Unidades: {Alimentos} alimentos, {UnidadesCorrigidas} normalizados para g/ml, fora de g/ml: {UnidadesForaDoPadrao}. Soma das refeições vs. meta por dia (kcal, desvio de proteína, carboidrato e gordura, e 4P+4C+9G dos macros declarados vs. kcal declaradas): {DesvioPorDia}",
+            versaoModelo ?? "não informada", tempoMs, tentativas, uso.Entrada, uso.Resposta, uso.Raciocinio ?? 0, uso.Total,
             normalizacao.Total, normalizacao.Corrigidos, foraDoPadrao, desvios);
     }
 

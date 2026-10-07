@@ -101,11 +101,13 @@ public class DietasController : ControllerBase
         }
 
         var contexto = await _contextoBuilder.ConstruirAsync(UsuarioIdLogado);
-        // Falhas de comunicação com o Gemini (rede, status de erro como 503,
-        // timeout) e respostas inutilizáveis mesmo depois da nova tentativa do
-        // gerador (bloqueada, cortada, JSON inválido, dias errados) viram um
-        // 503 com mensagem amigável. Qualquer outra exceção continua subindo
-        // para o GlobalExceptionHandler.
+        // Falhas de comunicação com o Gemini (rede, status de erro como 503) e
+        // respostas inutilizáveis mesmo depois da nova tentativa do gerador
+        // (bloqueada, cortada, JSON inválido, dias errados, ou sem resposta no
+        // limite de cada tentativa) viram um 503 com mensagem amigável. O
+        // TaskCanceledException fica como rede de segurança: o limite por
+        // tentativa do gerador dispara antes do Timeout do HttpClient. Qualquer
+        // outra exceção continua subindo para o GlobalExceptionHandler.
         DietaSemanalDto dieta;
         try
         {

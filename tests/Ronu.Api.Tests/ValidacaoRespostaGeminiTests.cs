@@ -11,9 +11,10 @@ namespace Ronu.Api.Tests;
 /// <summary>
 /// Validação da resposta do Gemini no GeradorDietaGemini: semana completa
 /// (7 dias únicos, com os nomes esperados), resposta bloqueada, cortada ou com
-/// JSON inválido -> uma nova tentativa e depois RespostaIaInvalidaException
-/// (que o DietasController transforma no 503 amigável), e TotalDoDia
-/// recalculado a partir das refeições. Gemini simulado, sem rede.
+/// JSON inválido, ou sem resposta no limite de cada tentativa -> uma nova
+/// tentativa e depois RespostaIaInvalidaException (que o DietasController
+/// transforma no 503 amigável), modelo fixo, e TotalDoDia recalculado a partir
+/// das refeições. Gemini simulado, sem rede.
 /// </summary>
 public class ValidacaoRespostaGeminiTests
 {
@@ -133,6 +134,63 @@ public class ValidacaoRespostaGeminiTests
         Assert.Equal(1, gemini.Chamadas);
     }
 
+    [Fact]
+    public async Task Chamada_Usa_O_Modelo_Fixo_E_Nao_O_Alias_Latest()
+    {
+        var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana)));
+
+        await NovoGerador(gemini).GerarDietaAsync(Contexto());
+
+        Assert.Equal("gemini-3.5-flash-lite", GeradorDietaGemini.Modelo);
+        // Pior caso: cold start (~45 s) + 2 × 60 s = ~165 s, abaixo dos 230 s do Azure.
+        Assert.Equal(TimeSpan.FromSeconds(60), GeradorDietaGemini.TimeoutPadraoPorTentativa);
+        Assert.Contains("/models/gemini-3.5-flash-lite:generateContent", gemini.UltimaUri!.AbsoluteUri);
+        Assert.DoesNotContain("latest", gemini.UltimaUri.AbsoluteUri);
+    }
+
+    // ---------- Timeout por tentativa ----------
+
+    [Fact]
+    public async Task Timeout_Na_Primeira_Tentativa_Recupera_Na_Segunda()
+    {
+        var gemini = new GeminiRoteirizado(GeminiRoteirizado.SemResposta, Envelope(TextoDieta(Semana)));
+
+        var dieta = await NovoGerador(gemini, TimeoutCurto).GerarDietaAsync(Contexto());
+
+        Assert.Equal(7, dieta.Dias.Count);
+        Assert.Equal(2, gemini.Chamadas);
+    }
+
+    // Dois timeouts viram RespostaIaInvalidaException, que o DietasController
+    // transforma no 503 amigável (o mesmo caminho das respostas inválidas).
+    [Fact]
+    public async Task Dois_Timeouts_Viram_Resposta_Invalida()
+    {
+        var gemini = new GeminiRoteirizado(GeminiRoteirizado.SemResposta, GeminiRoteirizado.SemResposta);
+
+        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini, TimeoutCurto).GerarDietaAsync(Contexto()));
+
+        Assert.Contains("não respondeu", ex.Message);
+        Assert.IsAssignableFrom<OperationCanceledException>(ex.InnerException);
+        Assert.Equal(2, gemini.Chamadas);
+    }
+
+    // Timeout e resposta inválida dividem as mesmas 2 tentativas: nunca uma
+    // terceira chamada (o pior caso de tempo conta com no máximo 2).
+    [Fact]
+    public async Task Timeout_E_Resposta_Invalida_Dividem_As_Duas_Tentativas()
+    {
+        var texto = TextoDieta(Semana);
+        var gemini = new GeminiRoteirizado(
+            GeminiRoteirizado.SemResposta,
+            Envelope(texto[..(texto.Length / 2)], finishReason: "MAX_TOKENS"));
+
+        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini, TimeoutCurto).GerarDietaAsync(Contexto()));
+
+        Assert.Contains("MAX_TOKENS", ex.Message);
+        Assert.Equal(2, gemini.Chamadas);
+    }
+
     // Falha de rede/HTTP não é "resposta inválida": sobe na hora, sem nova
     // tentativa (o controller já a trata como 503).
     [Fact]
@@ -239,10 +297,16 @@ public class ValidacaoRespostaGeminiTests
 
     // ---------- Apoio ----------
 
-    private static GeradorDietaGemini NovoGerador(HttpMessageHandler gemini) => new(
+    // Limite curto para os testes de timeout não esperarem os 60 s reais.
+    private static readonly TimeSpan TimeoutCurto = TimeSpan.FromMilliseconds(200);
+
+    private static GeradorDietaGemini NovoGerador(HttpMessageHandler gemini, TimeSpan? timeoutPorTentativa = null) => new(
         new HttpClient(gemini), new CalculadoraGastoCalorico(),
         new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia()),
-        new GeminiOptions { ApiKey = "teste" }, NullLogger<GeradorDietaGemini>.Instance);
+        new GeminiOptions { ApiKey = "teste" }, NullLogger<GeradorDietaGemini>.Instance)
+    {
+        TimeoutPorTentativa = timeoutPorTentativa ?? GeradorDietaGemini.TimeoutPadraoPorTentativa
+    };
 
     private static ContextoDietaDto Contexto() => new()
     {
@@ -284,13 +348,17 @@ public class ValidacaoRespostaGeminiTests
     });
 
     // Responde cada chamada com o próximo corpo da fila (status 200) e conta
-    // as chamadas. Com um status de erro, responde sempre com ele.
+    // as chamadas. Com um status de erro, responde sempre com ele. SemResposta
+    // na fila simula o Gemini travado: a chamada só termina quando é cancelada.
     private sealed class GeminiRoteirizado : HttpMessageHandler
     {
+        public const string SemResposta = "<sem resposta>";
+
         private readonly Queue<string> _respostas;
         private readonly HttpStatusCode _status = HttpStatusCode.OK;
 
         public int Chamadas { get; private set; }
+        public Uri? UltimaUri { get; private set; }
 
         public GeminiRoteirizado(params string[] respostas) => _respostas = new Queue<string>(respostas);
 
@@ -300,14 +368,21 @@ public class ValidacaoRespostaGeminiTests
             _status = status;
         }
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             Chamadas++;
+            UltimaUri = request.RequestUri;
             var corpo = _status == HttpStatusCode.OK ? _respostas.Dequeue() : "{}";
-            return Task.FromResult(new HttpResponseMessage(_status)
+
+            if (corpo == SemResposta)
+            {
+                await Task.Delay(Timeout.Infinite, cancellationToken);
+            }
+
+            return new HttpResponseMessage(_status)
             {
                 Content = new StringContent(corpo, Encoding.UTF8, "application/json")
-            });
+            };
         }
     }
 }
