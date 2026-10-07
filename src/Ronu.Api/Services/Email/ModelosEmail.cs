@@ -8,12 +8,31 @@ namespace Ronu.Api.Services.Email;
 /// </summary>
 public static class ModelosEmail
 {
+    /// <summary>
+    /// "Olá, {nome}." só quando o nome parece um nome. Vazio, igual ao email
+    /// ou com "@" (o cadastro aceita qualquer texto como nome, inclusive o
+    /// próprio email) vira "Olá!".
+    /// </summary>
+    public static string Saudacao(string para, string? nome, bool html = false)
+    {
+        var limpo = nome?.Trim();
+        if (string.IsNullOrEmpty(limpo)
+            || limpo.Contains('@')
+            || string.Equals(limpo, para.Trim(), StringComparison.OrdinalIgnoreCase))
+        {
+            return "Olá!";
+        }
+
+        return $"Olá, {(html ? WebUtility.HtmlEncode(limpo) : limpo)}.";
+    }
+
     public static MensagemEmail LinkRedefinicaoSenha(string para, string nome, string link, int minutosValidade)
     {
         const string assunto = "Redefinição de senha do Ronu";
+        var saudacao = Saudacao(para, nome);
 
         var texto = $"""
-            Olá, {nome}.
+            {saudacao}
 
             Recebemos um pedido para redefinir a senha da sua conta no Ronu. Para criar uma senha nova, abra o link abaixo. Ele vale por {minutosValidade} minutos e só pode ser usado uma vez.
 
@@ -24,10 +43,10 @@ public static class ModelosEmail
             Equipe Ronu
             """;
 
-        var nomeHtml = WebUtility.HtmlEncode(nome);
+        var saudacaoHtml = Saudacao(para, nome, html: true);
         var linkHtml = WebUtility.HtmlEncode(link);
         var html = $"""
-            <p>Olá, {nomeHtml}.</p>
+            <p>{saudacaoHtml}</p>
             <p>Recebemos um pedido para redefinir a senha da sua conta no Ronu. Para criar uma senha nova, abra o link abaixo. Ele vale por {minutosValidade} minutos e só pode ser usado uma vez.</p>
             <p><a href="{linkHtml}">Criar uma senha nova</a></p>
             <p>Se o botão não funcionar, copie este endereço no navegador:<br>{linkHtml}</p>
@@ -41,9 +60,10 @@ public static class ModelosEmail
     public static MensagemEmail AvisoContaGoogle(string para, string nome)
     {
         const string assunto = "Redefinição de senha do Ronu";
+        var saudacao = Saudacao(para, nome);
 
         var texto = $"""
-            Olá, {nome}.
+            {saudacao}
 
             Recebemos um pedido para redefinir a senha da sua conta no Ronu, mas ela usa o login com Google e não tem senha própria. Para entrar, use o botão "Entrar com Google" na tela de login.
 
@@ -52,9 +72,9 @@ public static class ModelosEmail
             Equipe Ronu
             """;
 
-        var nomeHtml = WebUtility.HtmlEncode(nome);
+        var saudacaoHtml = Saudacao(para, nome, html: true);
         var html = $"""
-            <p>Olá, {nomeHtml}.</p>
+            <p>{saudacaoHtml}</p>
             <p>Recebemos um pedido para redefinir a senha da sua conta no Ronu, mas ela usa o login com Google e não tem senha própria. Para entrar, use o botão "Entrar com Google" na tela de login.</p>
             <p>Se você não pediu isso, pode ignorar este email.</p>
             <p>Equipe Ronu</p>

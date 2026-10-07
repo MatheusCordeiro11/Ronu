@@ -284,6 +284,24 @@ public class RedefinicaoSenhaTests
         Assert.Equal("Redefinição de senha do Ronu", email.Assunto);
     }
 
+    [Theory]
+    [InlineData("Fulano de Tal", "Olá, Fulano de Tal.")]
+    [InlineData("Fulano@Gmail.com", "Olá!")]
+    [InlineData("  ", "Olá!")]
+    public void Saudacao_Usa_O_Nome_So_Quando_Ele_Parece_Um_Nome(string nome, string esperada)
+    {
+        var link = ModelosEmail.LinkRedefinicaoSenha("fulano@gmail.com", nome, "http://x/r.html#token=abc", 30);
+        var aviso = ModelosEmail.AvisoContaGoogle("fulano@gmail.com", nome);
+
+        foreach (var email in new[] { link, aviso })
+        {
+            Assert.StartsWith(esperada + "\n", email.Texto.ReplaceLineEndings("\n"));
+            Assert.StartsWith($"<p>{esperada}</p>", email.Html);
+            Assert.DoesNotContain("Olá, .", email.Texto);
+            Assert.DoesNotContain("@", email.Texto.ReplaceLineEndings("\n").Split('\n')[0]);
+        }
+    }
+
     // ---------- Sessões JWT depois da troca ----------
 
     [Fact]
