@@ -58,10 +58,11 @@ se algo falhar no meio.
 
 1. Só com confirmação do usuário, pedida no momento: carregar a connection string pelo `az` numa variável de ambiente da sessão.
 2. Descobrir o IP público atual e criar a regra temporária pelo `az`, com um nome que diga que é temporária (ex.:
-   `az postgres flexible-server firewall-rule create --resource-group ronu-rg --name ronu-db --rule-name temp-migration-AAAAMMDD-HHMM --start-ip-address <ip> --end-ip-address <ip>`).
+   `az postgres flexible-server firewall-rule create --resource-group ronu-rg --server-name ronu-db --name temp-migration-AAAAMMDD-HHMM --start-ip-address <ip> --end-ip-address <ip>`).
+   No PowerShell 5.1, SQL passado ao `psql` por `-c` perde as aspas duplas: passar sempre por arquivo (`-f`).
 3. Rodar `dotnet ef migrations list` para conferir o que está pendente. Se houver algo além do esperado, parar (e ir direto ao passo 5).
 4. Aplicar a migration (e as consultas de checagem que a etapa pedir, antes dela).
-5. **Apagar a regra temporária** (`az postgres flexible-server firewall-rule delete … --yes`) e listar as regras para conferir que ela sumiu.
+5. **Apagar a regra temporária** (`az postgres flexible-server firewall-rule delete --resource-group ronu-rg --server-name ronu-db --name <regra> --yes`) e listar as regras (`firewall-rule list --resource-group ronu-rg --server-name ronu-db`) para conferir que ela sumiu.
 6. Descartar a variável e conferir que nenhum arquivo ficou com a connection string.
 
 A migration vai sempre **antes** do deploy do backend que depende dela.
