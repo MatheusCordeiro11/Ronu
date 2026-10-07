@@ -43,6 +43,7 @@ como complemento, mas nunca substitui o teste manual do usuário.
 
 - Usar sempre uma conta descartável.
 - Não existe endpoint de exclusão: a limpeza é feita direto no banco, dentro de uma transação, filtrando por id **e** email juntos. Antes de apagar, listar o que vai ser apagado.
+- A limpeza inclui a tabela `PedidosRedefinicaoSenha` (apaga em cascata junto com o `Usuario`, mas convém listar e apagar explicitamente).
 - A limpeza inclui a tabela `MetasDieta`. Ela apaga em cascata junto com o `Usuario`, mas não tem chave estrangeira para a `DietaIA` (de propósito: guarda todas as dietas, não só as 3 da tela). Ao apagar só as dietas de alguém, apagar também as `MetasDieta` do mesmo usuário, senão a meta adaptativa continua lendo essas metas.
 
 ## Migrations em produção
@@ -51,10 +52,17 @@ A connection string de produção **nunca é impressa nem gravada em arquivo** (
 script, log ou saída de comando). Ela é obtida pelo `az` direto numa variável de ambiente da sessão e
 passada ao `dotnet ef` por essa variável (`ConnectionStrings__DefaultConnection`), que é descartada no fim.
 
+O firewall do Postgres (`ronu-db`) não libera o IP local, e esse IP muda. Todo acesso daqui ao banco de produção
+(migration ou consulta) abre uma **regra temporária**, só para o IP atual, e a apaga **na mesma janela**, mesmo
+se algo falhar no meio.
+
 1. Só com confirmação do usuário, pedida no momento: carregar a connection string pelo `az` numa variável de ambiente da sessão.
-2. Rodar `dotnet ef migrations list` para conferir o que está pendente. Se houver algo além do esperado, parar.
-3. Aplicar a migration.
-4. Descartar a variável e conferir que nenhum arquivo ficou com a connection string.
+2. Descobrir o IP público atual e criar a regra temporária pelo `az`, com um nome que diga que é temporária (ex.:
+   `az postgres flexible-server firewall-rule create --resource-group ronu-rg --name ronu-db --rule-name temp-migration-AAAAMMDD-HHMM --start-ip-address <ip> --end-ip-address <ip>`).
+3. Rodar `dotnet ef migrations list` para conferir o que está pendente. Se houver algo além do esperado, parar (e ir direto ao passo 5).
+4. Aplicar a migration (e as consultas de checagem que a etapa pedir, antes dela).
+5. **Apagar a regra temporária** (`az postgres flexible-server firewall-rule delete … --yes`) e listar as regras para conferir que ela sumiu.
+6. Descartar a variável e conferir que nenhum arquivo ficou com a connection string.
 
 A migration vai sempre **antes** do deploy do backend que depende dela.
 
