@@ -104,6 +104,7 @@
         <h1 class="auth-title">Entrar</h1>
         <p class="auth-subtitle">Acesse sua dieta e seu histórico de treino.</p>
 
+        <div class="form-message form-message-success" id="form-success" role="status" hidden></div>
         <div class="form-message form-message-error" id="form-error" hidden></div>
 
         <form id="login-form" novalidate>
@@ -112,9 +113,10 @@
             <input type="email" id="email" name="email" autocomplete="email" required>
           </div>
 
-          <div class="field">
+          <div class="field field-com-link">
             <label for="senha">Senha</label>
             <input type="password" id="senha" name="senha" autocomplete="current-password" required>
+            <a href="esqueci-senha.html" class="field-link" id="link-esqueci-senha">Esqueci minha senha</a>
           </div>
 
           <button type="submit" class="btn btn-primary btn-block" id="submit-btn">

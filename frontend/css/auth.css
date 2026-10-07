@@ -419,6 +419,149 @@ html[data-auth-entrada="transicao"] .auth-form-wrap {
   pointer-events: none;
 }
 
+/* ---------- Esqueci minha senha / redefinir senha ---------- */
+/* Foto fixa no painel de marca, no lugar do carrossel: o fluxo é curto e de
+   uma tarefa só. Mesma moldura (.auth-brand-visual e as marcas de canto). */
+.auth-brand-foto img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Campo de senha do login com o link "Esqueci minha senha" na linha do
+   rótulo. No HTML o link vem depois do input, para o Tab seguir email →
+   senha → link → Entrar; o grid é que o põe ao lado do rótulo. */
+.field-com-link {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: var(--sp-3);
+}
+
+.field-com-link label {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.field-com-link input {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+.field-link {
+  grid-column: 2;
+  grid-row: 1;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  text-decoration-line: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 3px;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.field-link:hover {
+  color: var(--text);
+  text-decoration-color: var(--text-muted);
+}
+
+.field-hint {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+/* Cada página é um bloco só que troca de estado no lugar (ronuMostrarEstado
+   em auth.js). A primeira exibição usa a entrada do .auth-form-wrap; as
+   trocas seguintes, esta, mais curta. */
+.auth-estado[data-entrando="true"] {
+  animation: ronu-auth-estado-entra 320ms cubic-bezier(0.33, 1, 0.68, 1) backwards;
+}
+
+@keyframes ronu-auth-estado-entra {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-estado[data-entrando="true"] {
+    animation-name: ronu-auth-form-surge;
+    animation-duration: 150ms;
+  }
+}
+
+/* O título recebe o foco na troca de estado (tabindex="-1"), só para o
+   leitor de tela; não é um controle, então não ganha anel de foco. */
+.auth-title[tabindex="-1"]:focus {
+  outline: none;
+}
+
+.auth-subtitle strong {
+  color: var(--text);
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+/* Orientações do estado "Confira seu email". */
+.auth-notas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin: 0 0 var(--sp-5);
+  padding: var(--sp-3) 0 0;
+  border-top: var(--border-width) solid var(--border);
+  list-style: none;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+.auth-notas strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* Contagem do "Reenviar em 0:59": algarismos de largura fixa, para o texto
+   não tremer a cada segundo. */
+.btn-contagem {
+  font-variant-numeric: tabular-nums;
+}
+
+.btn-contagem:disabled:not([data-loading="true"]) {
+  cursor: default;
+  color: var(--text-muted);
+}
+
+/* Linha de status (reenvio, "Conferindo o link..."). Fica sempre no DOM,
+   como a .google-status; vazia, não ocupa espaço. */
+.auth-status {
+  margin-top: var(--sp-3);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.auth-status:empty {
+  margin-top: 0;
+}
+
+.auth-nota {
+  margin-top: var(--sp-3);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Botão com cara de link ("Usar outro email"). */
+.link-botao {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
 /* ---------- Header simples (placeholder pós-login) ---------- */
 .simple-header {
   padding-top: var(--sp-4);
@@ -474,5 +617,17 @@ html[data-auth-entrada="transicao"] .auth-form-wrap {
 
   .auth-form-panel {
     padding: var(--sp-6) var(--container-pad);
+  }
+
+  /* Telas de redefinição de senha, de conteúdo curto: sem isto, a grade de
+     altura mínima 100vh divide a sobra entre a barra e o formulário, e a
+     barra do topo cresce. A barra fica na altura dela e o bloco começa logo
+     abaixo, como no login. */
+  .auth-page-senha {
+    grid-template-rows: auto 1fr;
+  }
+
+  .auth-page-senha .auth-form-panel {
+    align-items: flex-start;
   }
 }

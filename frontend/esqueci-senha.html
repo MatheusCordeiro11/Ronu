@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ronu — Esqueci minha senha</title>
+  <meta name="description" content="Peça um link para criar uma senha nova na sua conta Ronu.">
+  <meta name="robots" content="noindex">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <script src="js/auth-entrada.js"></script>
+</head>
+<body>
+
+  <div class="auth-page auth-page-senha">
+
+    <aside class="auth-brand">
+      <a href="landing/v1/index.html" class="wordmark">ronu<span>.</span></a>
+      <div class="auth-brand-visual auth-brand-foto">
+        <img src="img/modalidades/foto-judo-plateia.webp" alt="Judoca de quimono e faixa preta diante da plateia de um ginásio" fetchpriority="high">
+      </div>
+      <p class="auth-brand-quote">Senha nova, mesmo histórico: suas dietas e pesagens continuam onde estavam.</p>
+    </aside>
+
+    <main class="auth-form-panel">
+      <div class="auth-form-wrap">
+
+        <section class="auth-estado" id="estado-formulario">
+          <h1 class="auth-title" tabindex="-1">Esqueci minha senha</h1>
+          <p class="auth-subtitle">Informe o email da sua conta. Se ela existir, enviamos um link para criar uma senha nova.</p>
+
+          <div class="form-message form-message-error" id="form-error" role="alert" hidden></div>
+
+          <form id="pedido-form" novalidate>
+            <div class="field">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" autocomplete="email" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" id="submit-btn">
+              <span class="btn-label">Enviar link</span>
+            </button>
+          </form>
+
+          <p class="auth-switch">Lembrou a senha? <a href="login.html" class="auth-switch-link">Entrar</a></p>
+        </section>
+
+        <section class="auth-estado" id="estado-enviado" hidden>
+          <h1 class="auth-title" tabindex="-1">Confira seu email</h1>
+          <p class="auth-subtitle">Se houver uma conta com <strong id="email-enviado"></strong>, enviamos um link para criar uma senha nova. Ele vale por 30 minutos e só funciona uma vez.</p>
+
+          <div class="form-message form-message-error" id="reenvio-error" role="alert" hidden></div>
+
+          <ul class="auth-notas">
+            <li>Não chegou? Confira o spam e a aba de promoções.</li>
+            <li><strong>Pediu mais de uma vez? Só o link mais recente vale.</strong></li>
+          </ul>
+
+          <button type="button" class="btn btn-secondary btn-block btn-contagem" id="reenviar-btn" disabled>
+            <span class="btn-label">Reenviar</span>
+          </button>
+          <p class="auth-status" id="reenvio-status" role="status" aria-live="polite"></p>
+
+          <p class="auth-switch">
+            <button type="button" class="auth-switch-link link-botao" id="outro-email-btn">Usar outro email</button>
+            ·
+            <a href="login.html" class="auth-switch-link">Voltar para o login</a>
+          </p>
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/esqueci-senha.js"></script>
+</body>
+</html>

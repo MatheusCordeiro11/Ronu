@@ -1,7 +1,8 @@
 // Ronu — Auth
 // Cliente mínimo para os endpoints públicos de autenticação da API
-// (POST /api/auth/cadastro, POST /api/auth/login) e utilitários de sessão/formulário
-// compartilhados entre cadastro.html, login.html e dashboard.html.
+// (POST /api/auth/cadastro, POST /api/auth/login, esqueci minha senha) e
+// utilitários de sessão/formulário compartilhados entre cadastro.html,
+// login.html, esqueci-senha.html, redefinir-senha.html e dashboard.html.
 
 // Único ponto de configuração do frontend. Não há build step nem variável de
 // ambiente neste projeto, então o ambiente é deduzido do endereço da página:
@@ -105,6 +106,75 @@ async function ronuCadastrar(nome, email, senha, estado) {
   }
 
   return dados;
+}
+
+// ---------- Esqueci minha senha ----------
+// Email digitado no login, levado para esqueci-senha.html ao clicar em
+// "Esqueci minha senha" (no sessionStorage, nunca na URL).
+const RONU_EMAIL_REDEFINICAO_KEY = 'ronu:emailRedefinicao';
+// Token do link de redefinição, tirado da URL ao abrir redefinir-senha.html.
+// Fica no sessionStorage (só desta aba) para a página sobreviver a um
+// recarregamento; sai ao trocar a senha ou quando o link não vale.
+const RONU_TOKEN_REDEFINICAO_KEY = 'ronu:tokenRedefinicao';
+
+// POST público das rotas de redefinição. Devolve o corpo da resposta 2xx;
+// senão lança Error com status, motivo (link inválido/expirado/usado, só no
+// 400 do link) e temporario (rede ou 5xx). A mensagem é a da API quando ela
+// mandou uma; vazia, quem chama usa o próprio texto.
+async function ronuPostRedefinicao(caminho, corpo) {
+  let resposta;
+  try {
+    resposta = await fetch(`${RONU_CONFIG.API_BASE}${caminho}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(corpo)
+    });
+  } catch (falhaDeRede) {
+    const erro = new Error('');
+    erro.temporario = true;
+    throw erro;
+  }
+
+  const dados = await resposta.json().catch(() => null);
+  if (resposta.ok) return dados;
+
+  const erro = new Error(resposta.status >= 500 ? '' : (dados?.mensagem || ''));
+  erro.status = resposta.status;
+  erro.motivo = dados?.motivo || null;
+  erro.temporario = resposta.status >= 500;
+  throw erro;
+}
+
+// A resposta é sempre a mesma, exista ou não a conta (202).
+function ronuPedirLinkRedefinicao(email) {
+  return ronuPostRedefinicao('/auth/esqueci-senha', { email });
+}
+
+// 200 { email } se o link vale; 400 com motivo se não.
+function ronuVerificarLinkRedefinicao(token) {
+  return ronuPostRedefinicao('/auth/redefinir-senha/verificar', { token });
+}
+
+function ronuRedefinirSenha(token, novaSenha) {
+  return ronuPostRedefinicao('/auth/redefinir-senha', { token, novaSenha });
+}
+
+// Troca de estado nas telas de redefinição: cada página é um bloco só, com
+// uma <section class="auth-estado"> por estado. Mostra a pedida, esconde as
+// outras e, fora da primeira exibição, anima a entrada e leva o foco ao
+// título (o leitor de tela anuncia onde a pessoa está).
+function ronuMostrarEstado(secoes, nome, { focar = true } = {}) {
+  Object.entries(secoes).forEach(([chave, secao]) => {
+    secao.hidden = chave !== nome;
+  });
+
+  const secao = secoes[nome];
+  if (!focar) return secao;
+
+  secao.dataset.entrando = 'true';
+  secao.addEventListener('animationend', () => delete secao.dataset.entrando, { once: true });
+  secao.querySelector('.auth-title')?.focus();
+  return secao;
 }
 
 // Faz uma chamada autenticada, anexando o Bearer token guardado na sessão.

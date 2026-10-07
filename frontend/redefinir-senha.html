@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ronu — Criar senha nova</title>
+  <meta name="description" content="Crie uma senha nova para a sua conta Ronu.">
+  <meta name="robots" content="noindex">
+  <!-- Defesa extra para o token do link: o fragmento (#token=) já não vai no
+       cabeçalho Referer, e esta página não manda Referer nenhum. -->
+  <meta name="referrer" content="no-referrer">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <script src="js/auth-entrada.js"></script>
+</head>
+<body>
+
+  <div class="auth-page auth-page-senha">
+
+    <aside class="auth-brand">
+      <a href="landing/v1/index.html" class="wordmark">ronu<span>.</span></a>
+      <div class="auth-brand-visual auth-brand-foto">
+        <img src="img/modalidades/foto-judo-plateia.webp" alt="Judoca de quimono e faixa preta diante da plateia de um ginásio" fetchpriority="high">
+      </div>
+      <p class="auth-brand-quote">Senha nova, mesmo histórico: suas dietas e pesagens continuam onde estavam.</p>
+    </aside>
+
+    <main class="auth-form-panel">
+      <div class="auth-form-wrap">
+
+        <!-- O formulário só aparece depois que a API confirma que o link vale:
+             ninguém digita a senha nova num link que já não serve. -->
+        <section class="auth-estado" id="estado-verificando">
+          <h1 class="auth-title" tabindex="-1">Criar senha nova</h1>
+          <p class="auth-subtitle" id="verificando-status" role="status" aria-live="polite">Conferindo o link...</p>
+        </section>
+
+        <section class="auth-estado" id="estado-link" hidden>
+          <h1 class="auth-title" tabindex="-1" id="link-titulo">Link inválido</h1>
+          <p class="auth-subtitle" id="link-texto"></p>
+          <a href="esqueci-senha.html" class="btn btn-primary btn-block" id="link-acao-principal">Pedir um novo link</a>
+          <p class="auth-switch"><a href="login.html" class="auth-switch-link" id="link-acao-secundaria">Voltar para o login</a></p>
+        </section>
+
+        <section class="auth-estado" id="estado-erro" hidden>
+          <h1 class="auth-title" tabindex="-1">Criar senha nova</h1>
+          <p class="auth-subtitle">Não foi possível conferir o link agora.</p>
+          <div class="form-message form-message-error" id="verificar-error" role="alert"></div>
+          <button type="button" class="btn btn-primary btn-block" id="tentar-de-novo-btn">
+            <span class="btn-label">Tentar de novo</span>
+          </button>
+        </section>
+
+        <section class="auth-estado" id="estado-formulario" hidden>
+          <h1 class="auth-title" tabindex="-1">Criar senha nova</h1>
+          <p class="auth-subtitle">Escolha a senha que você vai usar para entrar.</p>
+
+          <div class="form-message form-message-error" id="form-error" role="alert" hidden></div>
+
+          <form id="redefinir-form" novalidate>
+            <!-- Email da conta (vem da API ao conferir o link), escondido: é
+                 o que deixa o gerenciador de senhas do navegador salvar a
+                 senha nova na conta certa. -->
+            <input type="email" id="email-conta" name="username" autocomplete="username" readonly hidden>
+
+            <div class="field" id="field-senha-nova">
+              <label for="senha-nova">Senha nova</label>
+              <input type="password" id="senha-nova" name="senha-nova" autocomplete="new-password" minlength="8" maxlength="64" required aria-describedby="senha-nova-dica">
+              <span class="field-hint" id="senha-nova-dica">De 8 a 64 caracteres.</span>
+              <span class="field-error-message" id="senha-nova-error" hidden></span>
+            </div>
+
+            <div class="field" id="field-confirmar-senha">
+              <label for="confirmar-senha">Confirmar senha nova</label>
+              <input type="password" id="confirmar-senha" name="confirmar-senha" autocomplete="new-password" maxlength="64" required>
+              <span class="field-error-message" id="confirmar-senha-error" hidden></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" id="submit-btn">
+              <span class="btn-label">Salvar senha nova</span>
+            </button>
+          </form>
+
+          <p class="auth-nota">Ao salvar, você sai de todos os aparelhos em que estava conectado.</p>
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/redefinir-senha.js"></script>
+</body>
+</html>
