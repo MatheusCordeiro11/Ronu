@@ -42,7 +42,7 @@ O email sai em segundo plano (a resposta não espera o SMTP). Limite por conta: 
 
 ### `POST /api/auth/redefinir-senha/verificar`
 **Recebe:** `token` (o do fragmento do link; no corpo, nunca na URL da API)
-**Devolve:** 200 `{ mensagem }` se o link ainda vale — para a tela mostrar "link expirado" antes de a pessoa digitar a senha nova.
+**Devolve:** 200 `{ mensagem, email }` se o link ainda vale — para a tela mostrar "link expirado" antes de a pessoa digitar a senha nova. O `email` é o da conta: a tela o coloca num campo escondido (`autocomplete="username"`) para o gerenciador de senhas do navegador associar a senha nova à conta certa. Só quem tem o token, que foi enviado para esse mesmo email, chega a essa resposta.
 **Erros:** 400 `{ mensagem, motivo }`, com `motivo` = `invalido` (não existe, ou foi substituído por um pedido mais novo), `expirado` ou `usado`; **429** acima de 20 tentativas por hora do mesmo IP (somadas com o `POST /api/auth/redefinir-senha`).
 
 ### `POST /api/auth/redefinir-senha`

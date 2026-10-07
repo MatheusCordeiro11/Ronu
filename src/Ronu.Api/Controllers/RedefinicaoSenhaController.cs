@@ -37,8 +37,12 @@ public class RedefinicaoSenhaController : ControllerBase
     [EnableRateLimiting(LimitesRedefinicaoSenha.PoliticaLink)]
     public async Task<IActionResult> Verificar(VerificarRedefinicaoSenhaRequest request)
     {
-        var motivo = await _servico.VerificarAsync(request.Token, DateTime.UtcNow);
-        return motivo is null ? Ok(new { mensagem = "Link válido." }) : LinkInvalido(motivo.Value);
+        // O email só chega a quem tem o token (secreto, enviado para esse
+        // mesmo email): serve para o gerenciador de senhas do navegador.
+        var resultado = await _servico.VerificarAsync(request.Token, DateTime.UtcNow);
+        return resultado.Motivo is null
+            ? Ok(new { mensagem = "Link válido.", email = resultado.Email })
+            : LinkInvalido(resultado.Motivo.Value);
     }
 
     [HttpPost("redefinir-senha")]

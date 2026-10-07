@@ -18,6 +18,13 @@ public enum MotivoLinkInvalido
 }
 
 /// <summary>
+/// Resultado da conferência do link: o email da conta quando ele vale (para o
+/// gerenciador de senhas do navegador associar a senha nova à conta), ou o
+/// motivo de não valer.
+/// </summary>
+public record ResultadoVerificacaoLink(string? Email, MotivoLinkInvalido? Motivo);
+
+/// <summary>
 /// "Esqueci minha senha": pedido, conferência do link e troca da senha.
 ///
 /// - Só contas existentes geram pedido e email; email sem conta não deixa
@@ -125,10 +132,19 @@ public class ServicoRedefinicaoSenha
         }
     }
 
-    public async Task<MotivoLinkInvalido?> VerificarAsync(string token, DateTime agora)
+    public async Task<ResultadoVerificacaoLink> VerificarAsync(string token, DateTime agora)
     {
-        var (_, motivo) = await BuscarPedidoValidoAsync(token, agora);
-        return motivo;
+        var (pedido, motivo) = await BuscarPedidoValidoAsync(token, agora);
+        if (pedido is null)
+        {
+            return new ResultadoVerificacaoLink(null, motivo);
+        }
+
+        var email = await _context.Usuarios
+            .Where(u => u.Id == pedido.UsuarioId)
+            .Select(u => u.Email)
+            .FirstAsync();
+        return new ResultadoVerificacaoLink(email, null);
     }
 
     /// <summary>Troca a senha. Nulo = trocada; senão, o motivo do link não servir.</summary>

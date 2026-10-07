@@ -136,8 +136,8 @@ public class RedefinicaoSenhaTests
 
         var primeiro = TokenDoEmail(fila.Mensagens[0]);
         var segundo = TokenDoEmail(fila.Mensagens[1]);
-        Assert.Equal(MotivoLinkInvalido.Invalido, await servico.VerificarAsync(primeiro, Agora.AddMinutes(2)));
-        Assert.Null(await servico.VerificarAsync(segundo, Agora.AddMinutes(2)));
+        Assert.Equal(MotivoLinkInvalido.Invalido, (await servico.VerificarAsync(primeiro, Agora.AddMinutes(2))).Motivo);
+        Assert.Null((await servico.VerificarAsync(segundo, Agora.AddMinutes(2))).Motivo);
     }
 
     [Fact]
@@ -164,9 +164,9 @@ public class RedefinicaoSenhaTests
     {
         var (_, _, servico) = Cenario();
 
-        Assert.Equal(MotivoLinkInvalido.Invalido, await servico.VerificarAsync("token-que-nao-existe", Agora));
-        Assert.Equal(MotivoLinkInvalido.Invalido, await servico.VerificarAsync("", Agora));
-        Assert.Equal(MotivoLinkInvalido.Invalido, await servico.VerificarAsync(new string('a', 500), Agora));
+        Assert.Equal(MotivoLinkInvalido.Invalido, (await servico.VerificarAsync("token-que-nao-existe", Agora)).Motivo);
+        Assert.Equal(MotivoLinkInvalido.Invalido, (await servico.VerificarAsync("", Agora)).Motivo);
+        Assert.Equal(MotivoLinkInvalido.Invalido, (await servico.VerificarAsync(new string('a', 500), Agora)).Motivo);
     }
 
     [Fact]
@@ -177,8 +177,8 @@ public class RedefinicaoSenhaTests
         await servico.SolicitarAsync("fulano@gmail.com", Agora);
         var token = TokenDoEmail(Assert.Single(fila.Mensagens));
 
-        Assert.Null(await servico.VerificarAsync(token, Agora.AddMinutes(29)));
-        Assert.Equal(MotivoLinkInvalido.Expirado, await servico.VerificarAsync(token, Agora.AddMinutes(30)));
+        Assert.Null((await servico.VerificarAsync(token, Agora.AddMinutes(29))).Motivo);
+        Assert.Equal(MotivoLinkInvalido.Expirado, (await servico.VerificarAsync(token, Agora.AddMinutes(30))).Motivo);
         Assert.Equal(MotivoLinkInvalido.Expirado, await servico.RedefinirAsync(token, "senha-nova-123", Agora.AddMinutes(31)));
     }
 
@@ -195,6 +195,23 @@ public class RedefinicaoSenhaTests
 
         Assert.Equal("expirado", Campo(expirado, "motivo"));
         Assert.Equal("invalido", Campo(invalido, "motivo"));
+    }
+
+    [Fact]
+    public async Task Link_Valido_Devolve_O_Email_Da_Conta()
+    {
+        var (contexto, fila, servico) = Cenario();
+        await NovoUsuario(contexto, "fulano@gmail.com", senha: "senha-antiga");
+        await servico.SolicitarAsync("Fulano@Gmail.com", DateTime.UtcNow);
+        var token = TokenDoEmail(Assert.Single(fila.Mensagens));
+        var controller = new RedefinicaoSenhaController(servico);
+
+        var valido = await controller.Verificar(new VerificarRedefinicaoSenhaRequest { Token = token });
+        var invalido = await controller.Verificar(new VerificarRedefinicaoSenhaRequest { Token = "nao-existe" });
+
+        Assert.IsType<OkObjectResult>(valido);
+        Assert.Equal("fulano@gmail.com", Campo(valido, "email"));
+        Assert.Null(Campo(invalido, "email"));
     }
 
     // ---------- Troca da senha ----------
@@ -216,7 +233,7 @@ public class RedefinicaoSenhaTests
         Assert.Equal(Agora.AddMinutes(5), salvo.SenhaAlteradaEm);
 
         // Uso único.
-        Assert.Equal(MotivoLinkInvalido.Usado, await servico.VerificarAsync(token, Agora.AddMinutes(6)));
+        Assert.Equal(MotivoLinkInvalido.Usado, (await servico.VerificarAsync(token, Agora.AddMinutes(6))).Motivo);
         Assert.Equal(MotivoLinkInvalido.Usado, await servico.RedefinirAsync(token, "outra-senha-123", Agora.AddMinutes(6)));
     }
 
