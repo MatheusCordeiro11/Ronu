@@ -2,9 +2,11 @@ using Google.Apis.Auth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 using Ronu.Api.Data;
 using Ronu.Api.DTOs;
 using Ronu.Api.Models;
+using Ronu.Api.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -32,7 +34,9 @@ public class AuthController : ControllerBase
     [HttpPost("cadastro")]
     public async Task<IActionResult> Cadastro(CadastroRequest request)
     {
-        bool emailJaExiste = await _context.Usuarios.AnyAsync(u => u.Email == request.Email);
+        var email = NormalizacaoEmail.Normalizar(request.Email);
+
+        bool emailJaExiste = await _context.Usuarios.AnyAsync(u => u.Email == email);
         if (emailJaExiste)
         {
             return Conflict(new { mensagem = "Este email já está cadastrado." });
@@ -41,13 +45,23 @@ public class AuthController : ControllerBase
         var usuario = new Usuario
         {
             Nome = request.Nome,
-            Email = request.Email,
+            Email = email,
             Estado = request.Estado,
             SenhaHash = BCrypt.Net.BCrypt.HashPassword(request.Senha)
         };
 
         _context.Usuarios.Add(usuario);
-        await _context.SaveChangesAsync();
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
+        {
+            // Dois cadastros com o mesmo email ao mesmo tempo: a checagem acima
+            // passou para os dois, e o índice único barrou o segundo.
+            return Conflict(new { mensagem = "Este email já está cadastrado." });
+        }
 
         return Ok(new { usuario.Id, usuario.Nome, usuario.Email });
     }
@@ -55,7 +69,8 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest request)
     {
-        var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == request.Email);
+        var email = NormalizacaoEmail.Normalizar(request.Email);
+        var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
 
         // Contas criadas via Google não têm SenhaHash — tentar comparar contra
         // null quebraria o BCrypt.Verify, então checamos isso antes, com uma
@@ -111,14 +126,15 @@ public class AuthController : ControllerBase
             return Unauthorized(new { mensagem = "Token do Google inválido." });
         }
 
-        var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == payload.Email);
+        var email = NormalizacaoEmail.Normalizar(payload.Email);
+        var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
 
         if (usuario is null)
         {
             usuario = new Usuario
             {
                 Nome = payload.Name,
-                Email = payload.Email,
+                Email = email,
                 SenhaHash = null,
                 GoogleId = payload.Subject
             };
