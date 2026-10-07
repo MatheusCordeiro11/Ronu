@@ -23,6 +23,11 @@ public class Usuario
     // o usuário troque o email da conta Google no futuro.
     public string? GoogleId { get; set; }
 
+    // Quando a senha foi trocada pela última vez (redefinição). Tokens JWT
+    // emitidos antes disso deixam de valer (ValidacaoSessaoJwt). Nulo se a
+    // senha nunca foi trocada.
+    public DateTime? SenhaAlteradaEm { get; set; }
+
     public decimal? Altura { get; set; }
     public DateOnly? DataNascimento { get; set; }
     public string? Sexo { get; set; }

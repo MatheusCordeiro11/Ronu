@@ -20,6 +20,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<PreferenciaAlimentar> PreferenciasAlimentares { get; set; }
     public DbSet<DietaIA> DietasIA { get; set; }
     public DbSet<MetaDieta> MetasDieta { get; set; }
+    public DbSet<PedidoRedefinicaoSenha> PedidosRedefinicaoSenha { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,5 +32,14 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Usuario>()
             .HasIndex(u => u.Email)
             .IsUnique();
+
+        // O token é procurado pelo hash; o limite por conta conta os pedidos
+        // recentes de cada usuário. Apagar o usuário apaga os pedidos.
+        modelBuilder.Entity<PedidoRedefinicaoSenha>(pedido =>
+        {
+            pedido.HasIndex(p => p.TokenHash).IsUnique();
+            pedido.HasIndex(p => new { p.UsuarioId, p.CriadoEm });
+            pedido.HasOne(p => p.Usuario).WithMany().HasForeignKey(p => p.UsuarioId).OnDelete(DeleteBehavior.Cascade);
+        });
     }
 }
