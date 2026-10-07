@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Ronu.Api.Validacao;
 
 namespace Ronu.Api.DTOs;
 
@@ -23,8 +24,10 @@ public class CadastroRequest
     // MinLength valida o tamanho automaticamente (ApiController já habilita
     // validação de ModelState) — se a senha vier curta, a API devolve 400
     // sozinha, sem precisar de checagem manual no AuthController.
+    // Regras compartilhadas com a redefinição de senha (RegrasSenha).
     [Required(ErrorMessage = "Informe uma senha.")]
-    [MinLength(8, ErrorMessage = "A senha deve ter pelo menos 8 caracteres.")]
+    [MinLength(RegrasSenha.TamanhoMinimo, ErrorMessage = RegrasSenha.MensagemCurta)]
+    [SenhaNaoLongaDemais]
     public required string Senha { get; set; }
 
     [Required(ErrorMessage = "Informe seu estado.")]

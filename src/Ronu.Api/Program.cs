@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ronu.Api.Data;
@@ -84,9 +85,33 @@ builder.Services.AddSingleton<FilaEmail>();
 builder.Services.AddSingleton<IFilaEmail>(servicos => servicos.GetRequiredService<FilaEmail>());
 builder.Services.AddHostedService<ServicoEnvioEmail>();
 
+// "Esqueci minha senha". O endereço do frontend no link do email vem da
+// configuração (nunca dos cabeçalhos da requisição): falha logo na subida se
+// estiver faltando, em vez de só no primeiro pedido.
+if (string.IsNullOrWhiteSpace(builder.Configuration["Frontend:UrlBase"]))
+{
+    throw new InvalidOperationException("Frontend:UrlBase não configurado.");
+}
+builder.Services.AddScoped<ServicoRedefinicaoSenha>();
+builder.Services.AddRateLimiter(LimitesRedefinicaoSenha.Configurar);
+
+// IP e protocolo reais do cliente atrás do proxy do App Service (X-Forwarded-*),
+// para o limite por IP. O proxy não tem IP fixo conhecido, então as listas de
+// proxies confiáveis ficam vazias; com ForwardLimit = 1 (padrão), vale só o
+// último IP da lista, o que o próprio App Service acrescenta — um
+// X-Forwarded-For forjado pelo cliente fica antes dele e é ignorado.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 // Configura a autenticação baseada em JWT Bearer: o servidor valida a assinatura
 // do token (com a mesma chave usada para gerá-lo) e a expiração, mas não valida
 // issuer/audience pois a API ainda não distingue múltiplos emissores/consumidores.
+// Depois disso, ValidacaoSessaoJwt derruba os tokens emitidos antes da última
+// troca de senha (e os de usuários que não existem mais).
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -98,6 +123,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = false,
             ValidateLifetime = true
         };
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = async contexto =>
+            {
+                var banco = contexto.HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
+                if (!await ValidacaoSessaoJwt.SessaoValidaAsync(contexto.Principal!, banco))
+                {
+                    contexto.Fail("Sessão encerrada: a senha foi trocada depois do login.");
+                }
+            }
+        };
     });
 
 builder.Services.AddAuthorization();
@@ -106,6 +142,10 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 var app = builder.Build();
+
+// Primeiro de todos: os demais (limite por IP, redirecionamento HTTPS) já
+// precisam do IP e do protocolo reais.
+app.UseForwardedHeaders();
 
 // Precisa vir antes de qualquer outro middleware, para capturar exceções
 // que aconteçam em qualquer ponto do pipeline abaixo (CORS, autenticação,
@@ -120,6 +160,9 @@ app.UseCors(FrontendCorsPolicy);
 // precisa vir antes da autorização (decide se esse usuário pode acessar a rota).
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Limite por IP das rotas com [EnableRateLimiting] (redefinição de senha).
+app.UseRateLimiter();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

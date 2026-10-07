@@ -7,6 +7,7 @@ using Ronu.Api.Data;
 using Ronu.Api.DTOs;
 using Ronu.Api.Models;
 using Ronu.Api.Services;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -174,10 +175,14 @@ public class AuthController : ControllerBase
         var chave = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(chaveJwt));
         var credenciais = new SigningCredentials(chave, SecurityAlgorithms.HmacSha256);
 
+        // "iat" (quando o token foi emitido): ValidacaoSessaoJwt o compara com
+        // Usuario.SenhaAlteradaEm para derrubar as sessões abertas antes de uma
+        // troca de senha.
         var claims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
-            new Claim(ClaimTypes.Name, usuario.Nome)
+            new Claim(ClaimTypes.Name, usuario.Nome),
+            new Claim(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.UtcNow).ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64)
         };
 
         var token = new JwtSecurityToken(
