@@ -191,6 +191,33 @@
         ],
         "createdAt": "2026-10-17T20:03:11.666Z",
         "reason": "Falso positivo: a regra .entrada-varredura vem do entrada.css compartilhado; a tela de estado não tem esse elemento"
+      },
+      {
+        "rule": "kicker-above-heading",
+        "value": "*",
+        "files": [
+          "frontend/onboarding.html"
+        ],
+        "createdAt": "2026-10-17T23:50:35.518Z",
+        "reason": "Tela aprovada pelo usuário (docs/redesign/telas/Onboarding) tem 'Passo N de 4' acima do título; diz em que passo se está"
+      },
+      {
+        "rule": "codex-grid-background",
+        "value": "*",
+        "files": [
+          "frontend/onboarding.html"
+        ],
+        "createdAt": "2026-10-17T23:50:35.577Z",
+        "reason": "Telas aprovadas pelo usuário em docs/redesign definem a grade quadriculada deslizando como enfeite da identidade"
+      },
+      {
+        "rule": "marquee",
+        "value": "*",
+        "files": [
+          "frontend/onboarding.html"
+        ],
+        "createdAt": "2026-10-17T23:50:35.638Z",
+        "reason": "Falso positivo: a regra .entrada-varredura vem do entrada.css compartilhado; o onboarding não tem esse elemento"
       }
     ]
   }

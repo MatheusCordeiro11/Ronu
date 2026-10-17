@@ -1,7 +1,20 @@
-// Ronu — Onboarding (perfil, objetivo, modalidades, preferências)
-// Wizard de 4 passos: cada um só avança depois de salvar com sucesso na API.
-// Voltar não re-busca dados da API — os campos ficam no DOM (só ocultos),
-// então o que foi digitado nesta sessão permanece ao ir e voltar de passo.
+// Ronu — Onboarding (perfil, objetivo, treino, alimentação e a primeira dieta)
+//
+// Tela aprovada: docs/redesign/telas/Onboarding. Cinco passos; cada um só
+// avança depois de salvar com sucesso na API:
+//   0 Perfil       PUT  /perfil (sexo, altura, nascimento). O peso fica na tela
+//                  e vai no passo seguinte, junto com o objetivo.
+//   1 Objetivo     POST /objetivos (peso + objetivo): a primeira pesagem do
+//                  Progresso. No mesmo dia, um novo POST atualiza o registro.
+//   2 Treino       POST /usuarios/modalidades por modalidade escolhida e DELETE
+//                  das que estavam salvas e foram desmarcadas.
+//   3 Alimentação  POST /preferencias-alimentares por alimento marcado e DELETE
+//                  dos que foram desmarcados (opcional: "Pular por agora").
+//   4 Fim          POST /dietas/gerar e, deu certo, vai para o dashboard.
+// A conta da meta ao lado ("Sua meta se formando") vem da simulação da API
+// (POST /api/metas/simulacao), com o que já foi respondido, a cada mudança.
+// Os dados já salvos são carregados no começo: quem saiu no meio retoma com
+// os passos preenchidos.
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (!ronuUsuarioLogado()) {
@@ -9,18 +22,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  const formError = document.getElementById('form-error');
-  const btnVoltar = document.getElementById('btn-voltar');
-  const btnAvancar = document.getElementById('btn-avancar');
-  const modalidadeListEl = document.getElementById('modalidade-list');
-  const alimentoInput = document.getElementById('alimento');
-  const btnAdicionarPreferencia = document.getElementById('adicionar-preferencia-btn');
-
-  let passoAtual = 1;
-
-  // Se o cadastro já estiver completo (ex: usuário voltou a esta URL à toa),
-  // não faz sentido forçar o wizard de novo. Com a marca de cadastro completo
-  // (ver ronuCadastroJaCompleto, auth.js), nem precisa consultar a API.
+  // Cadastro completo (ex.: voltou a esta URL à toa): vai para o dashboard.
+  // Com a marca de cadastro completo (ronuCadastroJaCompleto, auth.js), nem
+  // precisa consultar a API.
   try {
     const completo = ronuCadastroJaCompleto() || await ronuChecarCadastroCompleto();
     if (completo) {
@@ -28,481 +32,687 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
   } catch (erro) {
-    // 401 já foi tratado dentro de ronuChecarCadastroCompleto/ronuFetchAutenticado
-    // (redireciona pro login) — não sobrescrever esse redirecionamento. Qualquer
-    // outro erro (API fora do ar, mesmo depois da nova tentativa) NÃO abre o
-    // wizard: sem saber se o cadastro está completo, refazer o passo 1 poderia
-    // apagar rotina e orçamento (o PUT /perfil daqui manda só os dados físicos).
-    // O dashboard tem a tela de erro com "Tentar novamente" e, se a checagem
-    // depois der incompleto, manda de volta pra cá.
+    // 401 já redirecionou para o login. Qualquer outro erro (API fora do ar,
+    // mesmo depois da nova tentativa) NÃO abre o assistente: sem saber se o
+    // cadastro está completo, refazer o perfil poderia sobrescrever dados. O
+    // dashboard tem a tela de erro com "Tentar novamente".
     if (erro.message !== 'Sessão expirada.') {
       window.location.href = 'dashboard.html';
     }
     return;
   }
 
-  function mostrarPasso(passo) {
-    passoAtual = passo;
+  const $ = (id) => document.getElementById(id);
+  const pagina = $('ob-pagina');
+  const formError = $('form-error');
+  const btnVoltar = $('btn-voltar');
+  const btnAvancar = $('btn-avancar');
+  const btnPular = $('btn-pular');
+  const numero = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
+  const fmt = (v) => numero.format(Math.round(v));
+  // Sinal de menos tipográfico (−), como nas telas aprovadas.
+  const sinal = (v) => (v < 0 ? '− ' : '+ ') + fmt(Math.abs(v));
 
-    document.querySelectorAll('.onboarding-step').forEach((secao) => {
-      secao.hidden = Number(secao.dataset.step) !== passo;
+  const FAIXAS = ['Faixa branca', 'Faixa azul', 'Faixa roxa', 'Faixa marrom', 'Faixa preta'];
+  const DIAS = [
+    [1, 'Seg', 'segunda-feira'], [2, 'Ter', 'terça-feira'], [3, 'Qua', 'quarta-feira'], [4, 'Qui', 'quinta-feira'],
+    [5, 'Sex', 'sexta-feira'], [6, 'Sáb', 'sábado'], [7, 'Dom', 'domingo']
+  ];
+  const NOMES_OBJETIVO = { 'perder peso': 'perder peso', 'manter peso': 'manter peso', 'ganhar peso': 'ganhar peso' };
+  const COMIDAS_BASE = ['frango', 'arroz', 'feijão', 'ovo', 'banana', 'aveia', 'cuscuz', 'tapioca', 'batata-doce',
+    'carne moída', 'peixe', 'iogurte', 'leite', 'queijo', 'pão francês', 'camarão', 'mandioca', 'abacate'];
+  const ESTADOS = {
+    AC: 'Acre', AL: 'Alagoas', AP: 'Amapá', AM: 'Amazonas', BA: 'Bahia', CE: 'Ceará', DF: 'Distrito Federal',
+    ES: 'Espírito Santo', GO: 'Goiás', MA: 'Maranhão', MT: 'Mato Grosso', MS: 'Mato Grosso do Sul', MG: 'Minas Gerais',
+    PA: 'Pará', PB: 'Paraíba', PR: 'Paraná', PE: 'Pernambuco', PI: 'Piauí', RJ: 'Rio de Janeiro', RN: 'Rio Grande do Norte',
+    RS: 'Rio Grande do Sul', RO: 'Rondônia', RR: 'Roraima', SC: 'Santa Catarina', SP: 'São Paulo', SE: 'Sergipe', TO: 'Tocantins'
+  };
+  // Duração da sessão: de 15 min a 5 h (faixa da API), de 15 em 15. Começa em 1h30.
+  const DURACAO_MIN = 15;
+  const DURACAO_MAX = 300;
+  const DURACAO_PADRAO = 90;
+
+  const estado = {
+    passo: 0,
+    perfilSalvo: null,
+    sexo: null,
+    objetivo: null,
+    catalogo: [],
+    escolhidas: new Map(),        // modalidadeId → { dias: Set, minutos }
+    modalidadesSalvas: new Map(), // modalidadeId → id do vínculo (para o DELETE)
+    comidas: new Map(),           // alimento (minúsculo) → 'gosto' | 'evitar'
+    preferenciasSalvas: new Map(), // alimento (minúsculo) → { id, tipo }
+    simulacao: null
+  };
+
+  // ---------- Carga inicial ----------
+  // Tudo em paralelo; o que falhar (fora o 401, que já redireciona) só deixa
+  // de pré-preencher. O catálogo é público.
+  const json = async (promessa) => {
+    const resposta = await promessa;
+    if (!resposta.ok) throw Object.assign(new Error(), { status: resposta.status });
+    return resposta.json();
+  };
+  const [perfilR, objetivoR, catalogoR, minhasR, prefsR] = await Promise.allSettled([
+    json(ronuFetchAutenticado('/perfil')),
+    json(ronuFetchAutenticado('/objetivos/atual')),
+    json(fetch(`${RONU_CONFIG.API_BASE}/modalidades`)),
+    json(ronuFetchAutenticado('/usuarios/modalidades')),
+    json(ronuFetchAutenticado('/preferencias-alimentares'))
+  ]);
+  if ([perfilR, objetivoR, minhasR, prefsR].some((r) => r.status === 'rejected' && r.reason?.message === 'Sessão expirada.')) return;
+
+  if (perfilR.status === 'fulfilled') {
+    const p = perfilR.value;
+    estado.perfilSalvo = p;
+    if (p.sexo) estado.sexo = p.sexo;
+    if (p.altura != null) $('altura').value = String(Math.round(p.altura));
+    if (p.dataNascimento) $('data-nascimento').value = p.dataNascimento;
+  }
+  if (objetivoR.status === 'fulfilled') {
+    $('peso').value = String(objetivoR.value.peso);
+    if (NOMES_OBJETIVO[objetivoR.value.objetivo]) estado.objetivo = objetivoR.value.objetivo;
+  }
+  if (minhasR.status === 'fulfilled') {
+    minhasR.value.forEach((v) => {
+      estado.escolhidas.set(v.modalidade.id, { dias: new Set(v.diasSemana), minutos: Math.round(v.duracaoMediaHoras * 60) });
+      estado.modalidadesSalvas.set(v.modalidade.id, v.id);
     });
-
-    document.querySelectorAll('.stepper-item').forEach((item) => {
-      const indice = Number(item.dataset.step);
-      item.classList.toggle('is-current', indice === passo);
-      item.classList.toggle('is-done', indice < passo);
+  }
+  if (prefsR.status === 'fulfilled') {
+    prefsR.value.forEach((pref) => {
+      const chave = pref.alimento.trim().toLowerCase();
+      estado.preferenciasSalvas.set(chave, { id: pref.id, tipo: pref.tipo });
+      estado.comidas.set(chave, pref.tipo === 'evitar' ? 'evitar' : 'gosto');
     });
+  }
+  if (catalogoR.status === 'fulfilled') estado.catalogo = catalogoR.value;
 
-    ronuOcultarErroFormulario(formError);
-    btnVoltar.hidden = passo === 1;
-    btnAvancar.querySelector('.btn-label').textContent = passo === 4 ? 'Concluir' : 'Avançar';
+  pagina.hidden = false;
 
-    const primeiroCampo = document.querySelector(`.onboarding-step[data-step="${passo}"] input`);
-    if (primeiroCampo) primeiroCampo.focus();
+  // ---------- Simulação da meta ----------
+  function modalidadesParaApi() {
+    return [...estado.escolhidas.entries()]
+      .filter(([, m]) => m.dias.size > 0)
+      .map(([id, m]) => ({ modalidadeId: id, diasSemana: [...m.dias].sort(), duracaoMediaHoras: m.minutos / 60 }));
   }
 
-  // ---------- Passo 1: perfil ----------
-
-  // Data de nascimento não pode ser hoje/futuro nem implicar uma idade
-  // absurda — mesmo espírito das faixas de min/max já usadas no campo peso.
-  function definirFaixaDataNascimento() {
-    const input = document.getElementById('data-nascimento');
-    const hoje = new Date();
-    const cemAnosAtras = new Date(hoje.getFullYear() - 100, hoje.getMonth(), hoje.getDate());
-
-    input.max = hoje.toISOString().split('T')[0];
-    input.min = cemAnosAtras.toISOString().split('T')[0];
-  }
-
-  function validarPassoPerfil() {
-    const altura = document.getElementById('altura');
-    const campoAltura = document.getElementById('field-altura');
-    const alturaErro = document.getElementById('altura-error');
-    const sexoSelecionado = document.querySelector('input[name="sexo"]:checked');
-    const dataNascimento = document.getElementById('data-nascimento');
-
-    ronuLimparCampoInvalido(campoAltura, alturaErro);
-
-    if (!altura.reportValidity()) {
-      return null;
-    }
-
-    // Campo é texto (pra aceitar vírgula), então a faixa 1,00–2,50 m não pode
-    // ser validada via min/max nativo — checada manualmente em centímetros.
-    const alturaCm = ronuParseAlturaCm(altura.value);
-    if (alturaCm === null || alturaCm < 100 || alturaCm > 250) {
-      ronuMarcarCampoInvalido(campoAltura, alturaErro, 'Informe uma altura entre 1,00 e 2,50 m.');
-      return null;
-    }
-
-    if (!sexoSelecionado) {
-      ronuMostrarErroFormulario(formError, 'Selecione seu sexo.');
-      return null;
-    }
-
-    if (!dataNascimento.reportValidity()) {
-      return null;
-    }
-
+  function corpoSimulacao(objetivo) {
     return {
-      altura: alturaCm,
-      sexo: sexoSelecionado.value,
-      dataNascimento: dataNascimento.value
+      sexo: estado.sexo,
+      altura: Number($('altura').value),
+      dataNascimento: $('data-nascimento').value,
+      peso: Number($('peso').value),
+      objetivo,
+      // Sempre explícito: antes do passo Treino, sem treino nenhum.
+      modalidades: estado.passo >= 2 ? modalidadesParaApi() : []
     };
   }
 
-  async function avancarPassoPerfil() {
-    const dados = validarPassoPerfil();
-    if (!dados) return;
+  async function chamarSimulacao(corpo) {
+    const resposta = await ronuFetchAutenticado('/metas/simulacao', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(corpo)
+    });
+    if (!resposta.ok) throw new Error();
+    return resposta.json();
+  }
+
+  let ultimaSimulacao = 0;
+  let esperaSimulacao = null;
+  function agendarSimulacao() {
+    clearTimeout(esperaSimulacao);
+    esperaSimulacao = setTimeout(simular, 300);
+  }
+
+  async function simular() {
+    if (estado.passo < 1) {
+      desenharMeta(null);
+      return;
+    }
+    const minha = ++ultimaSimulacao;
+    try {
+      const dados = await chamarSimulacao(corpoSimulacao(estado.objetivo || 'manter peso'));
+      // Resposta atrasada de uma mudança anterior: descarta.
+      if (minha !== ultimaSimulacao) return;
+      estado.simulacao = dados;
+      desenharMeta(dados);
+      atualizarResumosTreino();
+    } catch (erro) {
+      // Sem a simulação, a conta fica como estava; ela não impede de avançar.
+    }
+  }
+
+  function desenharMeta(d) {
+    const linhas = $('ob-meta-linhas');
+    const totais = $('ob-meta-totais');
+    const celular = $('ob-meta-celular');
+
+    if (!d) {
+      linhas.innerHTML = '';
+      $('ob-meta-vazia').hidden = false;
+      totais.hidden = true;
+      celular.hidden = true;
+      return;
+    }
+
+    const diaTreino = d.dias.reduce((max, dia) => (dia.treinoKcal > max.treinoKcal ? dia : max), d.dias[0]);
+    const diaDescanso = d.dias.find((dia) => dia.treinoKcal === 0);
+    const temTreino = estado.passo >= 2 && diaTreino.treinoKcal > 0;
+    const referencia = diaDescanso || d.dias[0];
+
+    const partes = [
+      ['Gasto parado', `${fmt(d.gastoRepouso.total)} kcal`],
+      ['Dia a dia', `${sinal(d.atividadeForaDoTreino.kcal)} kcal`]
+    ];
+    if (estado.objetivo) {
+      const v = referencia.objetivoKcal;
+      partes.push([`Objetivo: ${NOMES_OBJETIVO[estado.objetivo]}`, v === 0 ? '± 0 kcal' : `${sinal(v)} kcal`]);
+    }
+    if (temTreino) partes.push(['Treino, no dia que tem', `${sinal(diaTreino.treinoKcal)} kcal`]);
+
+    // Atualiza no lugar: só a parte que acabou de entrar na conta anima
+    // (recriar tudo a cada resposta fazia as linhas piscarem sem parar).
+    const existentes = new Map([...linhas.children].map((l) => [l.dataset.parte, l]));
+    const ordem = partes.map(([rotulo, valor], i) => {
+      const chave = rotulo.startsWith('Objetivo') ? 'objetivo' : rotulo;
+      let linha = existentes.get(chave);
+      if (!linha) {
+        linha = document.createElement('div');
+        linha.className = 'ob-meta-linha ob-entrando';
+        linha.addEventListener('animationend', () => linha.classList.remove('ob-entrando'), { once: true });
+        linha.dataset.parte = chave;
+        linha.append(document.createElement('span'), document.createElement('span'));
+      }
+      linha.children[0].textContent = rotulo;
+      linha.children[1].textContent = valor;
+      linha.classList.toggle('ob-nova', i === partes.length - 1);
+      existentes.delete(chave);
+      return linha;
+    });
+    existentes.forEach((l) => l.remove());
+    // Só move o que está fora do lugar: reinserir um elemento no DOM
+    // reinicia a animação de entrada dele.
+    ordem.forEach((l, i) => {
+      if (linhas.children[i] !== l) linhas.insertBefore(l, linhas.children[i] || null);
+    });
+    $('ob-meta-vazia').hidden = true;
+
+    // Totais só depois de escolher o objetivo: antes disso, seriam de "manter".
+    const mostrarTotais = Boolean(estado.objetivo);
+    totais.hidden = !mostrarTotais;
+    celular.hidden = !mostrarTotais || estado.passo >= 4;
+    if (!mostrarTotais) return;
+
+    const totalA = temTreino ? diaTreino.metaFormula : referencia.metaFormula;
+    $('ob-total-a-rotulo').textContent = temTreino ? 'Dia de treino' : 'Meta por dia';
+    $('ob-total-a').textContent = fmt(totalA);
+    $('ob-cel-a').textContent = fmt(totalA);
+    $('ob-cel-a-rotulo').textContent = temTreino ? 'treino' : 'por dia';
+    const mostrarB = temTreino && Boolean(diaDescanso);
+    $('ob-total-b-bloco').hidden = !mostrarB;
+    $('ob-cel-b-bloco').hidden = !mostrarB;
+    if (mostrarB) {
+      $('ob-total-b').textContent = fmt(diaDescanso.metaFormula);
+      $('ob-cel-b').textContent = fmt(diaDescanso.metaFormula);
+    }
+  }
+
+  // ---------- Passos ----------
+  function mostrarPasso(passo) {
+    estado.passo = passo;
+    pagina.dataset.passo = String(passo);
+    $('ob-faixa-rotulo').textContent = FAIXAS[passo];
+
+    document.querySelectorAll('.ob-passo').forEach((secao) => {
+      secao.hidden = Number(secao.dataset.passo) !== passo;
+    });
+    document.querySelectorAll('#ob-etapas [data-etapa]').forEach((item) => {
+      const i = Number(item.dataset.etapa);
+      item.classList.toggle('feita', i < passo);
+      if (i === passo) item.setAttribute('aria-current', 'step');
+      else item.removeAttribute('aria-current');
+    });
 
     ronuOcultarErroFormulario(formError);
-    ronuDefinirCarregando(btnAvancar, true, 'Salvando...');
+    btnVoltar.disabled = passo === 0;
+    btnVoltar.setAttribute('aria-hidden', String(passo === 0));
+    btnPular.hidden = passo !== 3;
+    $('ob-nav').hidden = passo === 4;
 
+    if (passo === 1) carregarAjustesObjetivo();
+    if (passo === 4) prepararFim();
+
+    const titulo = document.querySelector(`.ob-passo[data-passo="${passo}"] h1`);
+    if (titulo) titulo.focus({ preventScroll: true });
+    window.scrollTo({ top: 0 });
+    agendarSimulacao();
+  }
+
+  function erro(mensagem, campoId) {
+    ronuMostrarErroFormulario(formError, mensagem);
+    if (campoId) {
+      $(campoId).closest('.campo')?.classList.add('field-error');
+      $(campoId).focus();
+    }
+  }
+
+  async function enviar(caminho, metodo, corpo) {
+    const resposta = await ronuFetchAutenticado(caminho, {
+      method: metodo,
+      headers: { 'Content-Type': 'application/json' },
+      body: corpo === undefined ? undefined : JSON.stringify(corpo)
+    });
+    if (!resposta.ok && !(metodo === 'DELETE' && resposta.status === 404)) {
+      const dados = await resposta.json().catch(() => null);
+      throw new Error(dados?.mensagem || 'Não foi possível salvar. Tente novamente.');
+    }
+    return resposta.status === 204 ? null : resposta.json().catch(() => null);
+  }
+
+  // ----- Passo 0: perfil -----
+  function marcarRadios(grupoId, valor) {
+    $(grupoId).querySelectorAll('[role="radio"]').forEach((b) => {
+      b.setAttribute('aria-checked', String(b.dataset.valor === valor));
+      b.tabIndex = b.dataset.valor === valor || (!valor && b === b.parentElement.firstElementChild) ? 0 : -1;
+    });
+  }
+
+  // Grupo de rádios feito de botões: clique e setas do teclado.
+  function ligarRadios(grupoId, aoEscolher) {
+    const grupo = $(grupoId);
+    const botoes = [...grupo.querySelectorAll('[role="radio"]')];
+    grupo.addEventListener('click', (evento) => {
+      const botao = evento.target.closest('[role="radio"]');
+      if (botao) aoEscolher(botao.dataset.valor);
+    });
+    grupo.addEventListener('keydown', (evento) => {
+      const passo = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[evento.key];
+      if (!passo) return;
+      evento.preventDefault();
+      const atual = botoes.indexOf(document.activeElement);
+      const proximo = botoes[(atual + passo + botoes.length) % botoes.length];
+      proximo.focus();
+      aoEscolher(proximo.dataset.valor);
+    });
+  }
+
+  ligarRadios('ob-sexo', (valor) => {
+    estado.sexo = valor;
+    marcarRadios('ob-sexo', valor);
+  });
+  marcarRadios('ob-sexo', estado.sexo);
+
+  // Faixa de idade da API (RegrasDadosCorporais): 18 a 100 anos.
+  const hoje = new Date();
+  const dataIso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  $('data-nascimento').max = dataIso(new Date(hoje.getFullYear() - 18, hoje.getMonth(), hoje.getDate()));
+  $('data-nascimento').min = dataIso(new Date(hoje.getFullYear() - 100, hoje.getMonth(), hoje.getDate()));
+
+  ['altura', 'peso', 'data-nascimento'].forEach((id) => {
+    $(id).addEventListener('input', () => $(id).closest('.campo').classList.remove('field-error'));
+  });
+
+  async function avancarPerfil() {
+    const altura = Number($('altura').value);
+    const peso = Number($('peso').value);
+    const nascimento = $('data-nascimento').value;
+
+    if (!estado.sexo) return erro('Selecione seu sexo.');
+    if (!$('altura').value || altura < 100 || altura > 250) return erro('Informe uma altura entre 100 e 250 cm.', 'altura');
+    if (!$('peso').value || peso < 20 || peso > 300) return erro('Informe um peso entre 20 e 300 kg.', 'peso');
+    if (!nascimento) return erro('Informe sua data de nascimento.', 'data-nascimento');
+    if (nascimento > $('data-nascimento').max) return erro('O Ronu é para maiores de 18 anos.', 'data-nascimento');
+    if (nascimento < $('data-nascimento').min) return erro('Informe uma data de nascimento de até 100 anos atrás.', 'data-nascimento');
+
+    // O PUT grava tudo junto: rotina e orçamento já salvos vão de volta como
+    // estavam, para não serem apagados (lacuna "Duas abas abertas…").
+    await enviar('/perfil', 'PUT', {
+      altura,
+      sexo: estado.sexo,
+      dataNascimento: nascimento,
+      rotinaDiaria: estado.perfilSalvo?.rotinaDiaria ?? null,
+      orcamentoSemanal: estado.perfilSalvo?.orcamentoSemanal ?? null
+    });
+    mostrarPasso(1);
+  }
+
+  // ----- Passo 1: objetivo -----
+  ligarRadios('ob-objetivos', (valor) => {
+    estado.objetivo = valor;
+    marcarRadios('ob-objetivos', valor);
+    agendarSimulacao();
+  });
+  marcarRadios('ob-objetivos', estado.objetivo);
+
+  // O ajuste de cada objetivo, pela mesma conta da dieta (com o teto do
+  // déficit), sem treino: o número que aparece na direita de cada opção.
+  async function carregarAjustesObjetivo() {
+    const botoes = [...$('ob-objetivos').querySelectorAll('[role="radio"]')];
     try {
-      const resposta = await ronuFetchAutenticado('/perfil', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dados)
+      const resultados = await Promise.all(botoes.map((b) => chamarSimulacao({ ...corpoSimulacao(b.dataset.valor), modalidades: [] })));
+      botoes.forEach((b, i) => {
+        const v = resultados[i].dias[0].objetivoKcal;
+        b.querySelector('[data-ajuste]').textContent = v === 0 ? '± 0' : `${sinal(v)} kcal/dia`;
       });
-
-      if (!resposta.ok) {
-        const corpo = await resposta.json().catch(() => null);
-        throw new Error(corpo?.mensagem || 'Não foi possível salvar. Tente novamente.');
-      }
-
-      mostrarPasso(2);
-    } catch (erro) {
-      ronuMostrarErroFormulario(formError, erro.message);
-    } finally {
-      ronuDefinirCarregando(btnAvancar, false);
+    } catch (falha) {
+      botoes.forEach((b) => { b.querySelector('[data-ajuste]').textContent = ''; });
     }
   }
 
-  // ---------- Passo 2: objetivo ----------
-
-  function validarPassoObjetivo() {
-    const peso = document.getElementById('peso');
-    const objetivoSelecionado = document.querySelector('input[name="objetivo"]:checked');
-
-    if (!peso.reportValidity()) {
-      return null;
-    }
-
-    if (!objetivoSelecionado) {
-      ronuMostrarErroFormulario(formError, 'Selecione um objetivo.');
-      return null;
-    }
-
-    return { peso: parseFloat(peso.value), objetivo: objetivoSelecionado.value };
+  async function avancarObjetivo() {
+    if (!estado.objetivo) return erro('Selecione um objetivo.');
+    await enviar('/objetivos', 'POST', { peso: Number($('peso').value), objetivo: estado.objetivo });
+    mostrarPasso(2);
   }
 
-  async function avancarPassoObjetivo() {
-    const dados = validarPassoObjetivo();
-    if (!dados) return;
+  // ----- Passo 2: treino -----
+  const cartoes = new Map(); // modalidadeId → { el, resumo, botoesDia, saida, menos, mais }
+  const duracaoTexto = (min) => {
+    const h = Math.floor(min / 60);
+    const m = min % 60;
+    return [h ? `${h} h` : '', m ? `${m} min` : ''].filter(Boolean).join(' ');
+  };
 
-    ronuOcultarErroFormulario(formError);
-    ronuDefinirCarregando(btnAvancar, true, 'Salvando...');
-
-    try {
-      const resposta = await ronuFetchAutenticado('/objetivos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dados)
-      });
-
-      if (!resposta.ok) {
-        const corpo = await resposta.json().catch(() => null);
-        throw new Error(corpo?.mensagem || 'Não foi possível salvar. Tente novamente.');
-      }
-
-      mostrarPasso(3);
-    } catch (erro) {
-      ronuMostrarErroFormulario(formError, erro.message);
-    } finally {
-      ronuDefinirCarregando(btnAvancar, false);
+  function desenharCatalogo() {
+    const area = $('ob-catalogo');
+    area.innerHTML = '';
+    if (estado.catalogo.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'apoio';
+      p.textContent = 'Não foi possível carregar as modalidades. Recarregue a página.';
+      area.appendChild(p);
+      return;
     }
-  }
-
-  // ---------- Passo 3: modalidades ----------
-
-  // 1=Segunda ... 7=Domingo (ISO 8601, mesmo padrão do backend). Abreviação
-  // de 3 letras — com 1 letra só, "Segunda/Sexta/Sábado" colidem todas em
-  // "S" e "Quarta/Quinta" colidem em "Q", o que ficaria ambíguo em pt-BR.
-  const DIAS_SEMANA = [
-    { valor: 1, rotulo: 'SEG', nomeCompleto: 'segunda-feira' },
-    { valor: 2, rotulo: 'TER', nomeCompleto: 'terça-feira' },
-    { valor: 3, rotulo: 'QUA', nomeCompleto: 'quarta-feira' },
-    { valor: 4, rotulo: 'QUI', nomeCompleto: 'quinta-feira' },
-    { valor: 5, rotulo: 'SEX', nomeCompleto: 'sexta-feira' },
-    { valor: 6, rotulo: 'SÁB', nomeCompleto: 'sábado' },
-    { valor: 7, rotulo: 'DOM', nomeCompleto: 'domingo' }
-  ];
-
-  const MINUTOS_PERMITIDOS = [0, 15, 30, 45];
-
-  // A API só aceita um decimal (DuracaoMediaHoras) — a UI coleta horas e
-  // minutos separados (minutos travado em múltiplos de 15, sem digitação
-  // livre) e converte só na hora de montar o payload. Sem inverso aqui: o
-  // onboarding nunca pré-carrega um valor já salvo (isso só acontece na
-  // edição em treino.js).
-  function horasMinutosParaDecimal(horas, minutos) {
-    return horas + minutos / 60;
-  }
-
-  function criarLinhaModalidade(modalidade) {
-    const linha = document.createElement('div');
-    linha.className = 'modalidade-row';
-
-    const label = document.createElement('label');
-    label.className = 'modalidade-check';
-
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.dataset.modalidadeId = modalidade.id;
-
-    const nomeSpan = document.createElement('span');
-    nomeSpan.textContent = modalidade.nome;
-
-    label.append(checkbox, nomeSpan);
-
-    const detalhes = document.createElement('div');
-    detalhes.className = 'modalidade-details';
-
-    const diasGroup = document.createElement('div');
-    diasGroup.className = 'modalidade-dias';
-    diasGroup.setAttribute('role', 'group');
-    diasGroup.setAttribute('aria-label', `Dias da semana de treino de ${modalidade.nome}`);
-
-    const botoesDia = DIAS_SEMANA.map(({ valor, rotulo, nomeCompleto }) => {
+    estado.catalogo.forEach((mod) => {
       const botao = document.createElement('button');
       botao.type = 'button';
-      botao.className = 'dia-toggle';
-      botao.dataset.dia = valor;
-      botao.setAttribute('aria-pressed', 'false');
-      botao.setAttribute('aria-label', nomeCompleto);
-      botao.disabled = true;
-      botao.textContent = rotulo;
-
+      botao.className = 'chip';
+      botao.textContent = mod.nome;
+      botao.setAttribute('aria-pressed', String(estado.escolhidas.has(mod.id)));
       botao.addEventListener('click', () => {
-        const pressionado = botao.getAttribute('aria-pressed') === 'true';
-        botao.setAttribute('aria-pressed', String(!pressionado));
+        if (estado.escolhidas.has(mod.id)) {
+          estado.escolhidas.delete(mod.id);
+          cartoes.get(mod.id)?.el.remove();
+          cartoes.delete(mod.id);
+        } else {
+          estado.escolhidas.set(mod.id, { dias: new Set(), minutos: DURACAO_PADRAO });
+          criarCartao(mod);
+        }
+        botao.setAttribute('aria-pressed', String(estado.escolhidas.has(mod.id)));
+        agendarSimulacao();
       });
-
-      diasGroup.appendChild(botao);
-      return botao;
+      area.appendChild(botao);
     });
-
-    const duracaoField = document.createElement('div');
-    duracaoField.className = 'modalidade-duracao-field';
-    duracaoField.setAttribute('role', 'group');
-    duracaoField.setAttribute('aria-label', `Duração média por sessão de ${modalidade.nome}`);
-
-    const duracaoTitulo = document.createElement('span');
-    duracaoTitulo.className = 'modalidade-duracao-titulo';
-    duracaoTitulo.textContent = 'Duração média por sessão';
-
-    const duracaoGrupo = document.createElement('div');
-    duracaoGrupo.className = 'modalidade-duracao-grupo';
-
-    const labelHoras = document.createElement('label');
-    labelHoras.className = 'modalidade-duracao-unidade';
-    const spanHoras = document.createElement('span');
-    spanHoras.textContent = 'Horas';
-    const horasInput = document.createElement('input');
-    horasInput.type = 'number';
-    horasInput.className = 'modalidade-duracao-horas num';
-    horasInput.min = '0';
-    horasInput.max = '5';
-    horasInput.step = '1';
-    horasInput.value = '0';
-    horasInput.disabled = true;
-    labelHoras.append(spanHoras, horasInput);
-
-    const labelMinutos = document.createElement('label');
-    labelMinutos.className = 'modalidade-duracao-unidade';
-    const spanMinutos = document.createElement('span');
-    spanMinutos.textContent = 'Min';
-    const minutosSelect = document.createElement('select');
-    minutosSelect.className = 'modalidade-duracao-minutos num';
-    MINUTOS_PERMITIDOS.forEach((valor) => {
-      const opcao = document.createElement('option');
-      opcao.value = String(valor);
-      opcao.textContent = String(valor);
-      minutosSelect.appendChild(opcao);
-    });
-    minutosSelect.disabled = true;
-    labelMinutos.append(spanMinutos, minutosSelect);
-
-    duracaoGrupo.append(labelHoras, labelMinutos);
-    duracaoField.append(duracaoTitulo, duracaoGrupo);
-    detalhes.append(diasGroup, duracaoField);
-
-    const colapsavel = document.createElement('div');
-    colapsavel.className = 'modalidade-collapse';
-    colapsavel.appendChild(detalhes);
-
-    checkbox.addEventListener('change', () => {
-      botoesDia.forEach((botao) => { botao.disabled = !checkbox.checked; });
-      horasInput.disabled = !checkbox.checked;
-      minutosSelect.disabled = !checkbox.checked;
-      colapsavel.classList.toggle('is-aberto', checkbox.checked);
-
-      if (checkbox.checked) {
-        botoesDia[0].focus();
-      } else {
-        // Desmarcar a modalidade limpa a seleção de dias e a duração, pra
-        // não reenviar dias escolhidos antes de desmarcar sem querer.
-        botoesDia.forEach((botao) => botao.setAttribute('aria-pressed', 'false'));
-        horasInput.value = '0';
-        minutosSelect.value = '0';
-      }
-    });
-
-    linha.append(label, colapsavel);
-    return linha;
+    estado.catalogo.filter((mod) => estado.escolhidas.has(mod.id)).forEach(criarCartao);
   }
 
-  async function carregarCatalogoModalidades() {
-    try {
-      const resposta = await fetch(`${RONU_CONFIG.API_BASE}/modalidades`);
-      if (!resposta.ok) throw new Error();
+  function criarCartao(mod) {
+    const escolha = estado.escolhidas.get(mod.id);
+    const el = document.createElement('div');
+    el.className = 'cartao ob-escolhida';
 
-      const modalidades = await resposta.json();
-      modalidadeListEl.innerHTML = '';
+    const cabeca = document.createElement('div');
+    cabeca.className = 'ob-escolhida-cabeca';
+    const nome = document.createElement('span');
+    nome.className = 'ob-escolhida-nome';
+    nome.textContent = mod.nome;
+    const resumo = document.createElement('span');
+    resumo.className = 'apoio num';
+    cabeca.append(nome, resumo);
 
-      if (modalidades.length === 0) {
-        modalidadeListEl.innerHTML = '<p class="modalidade-catalog-message">Nenhuma modalidade disponível no momento.</p>';
+    const dias = document.createElement('div');
+    dias.className = 'dias';
+    dias.setAttribute('role', 'group');
+    dias.setAttribute('aria-label', `Dias de ${mod.nome}`);
+    const botoesDia = DIAS.map(([valor, rotulo, completo]) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = rotulo;
+      b.setAttribute('aria-label', completo);
+      b.setAttribute('aria-pressed', String(escolha.dias.has(valor)));
+      b.addEventListener('click', () => {
+        if (escolha.dias.has(valor)) escolha.dias.delete(valor);
+        else escolha.dias.add(valor);
+        b.setAttribute('aria-pressed', String(escolha.dias.has(valor)));
+        atualizarCartao(mod.id);
+        agendarSimulacao();
+      });
+      dias.appendChild(b);
+      return b;
+    });
+
+    const linhaDuracao = document.createElement('div');
+    linhaDuracao.className = 'ob-duracao-linha';
+    const rotuloDuracao = document.createElement('span');
+    rotuloDuracao.className = 'campo-rotulo';
+    rotuloDuracao.textContent = 'Duração de cada sessão';
+    const controle = document.createElement('div');
+    controle.className = 'ob-duracao';
+    controle.setAttribute('role', 'group');
+    controle.setAttribute('aria-label', `Duração de cada sessão de ${mod.nome}`);
+    const menos = document.createElement('button');
+    menos.type = 'button';
+    menos.textContent = '−';
+    menos.setAttribute('aria-label', 'Diminuir 15 minutos');
+    const saida = document.createElement('output');
+    saida.setAttribute('aria-live', 'polite');
+    const mais = document.createElement('button');
+    mais.type = 'button';
+    mais.textContent = '+';
+    mais.setAttribute('aria-label', 'Aumentar 15 minutos');
+    const mudar = (delta) => {
+      escolha.minutos = Math.min(DURACAO_MAX, Math.max(DURACAO_MIN, escolha.minutos + delta));
+      atualizarCartao(mod.id);
+      agendarSimulacao();
+    };
+    menos.addEventListener('click', () => mudar(-15));
+    mais.addEventListener('click', () => mudar(15));
+    controle.append(menos, saida, mais);
+    linhaDuracao.append(rotuloDuracao, controle);
+
+    el.append(cabeca, dias, linhaDuracao);
+    $('ob-escolhidas').appendChild(el);
+    cartoes.set(mod.id, { el, resumo, saida, menos, mais, botoesDia });
+    atualizarCartao(mod.id);
+  }
+
+  function atualizarCartao(id) {
+    const c = cartoes.get(id);
+    const escolha = estado.escolhidas.get(id);
+    if (!c || !escolha) return;
+    c.saida.textContent = duracaoTexto(escolha.minutos);
+    c.menos.disabled = escolha.minutos <= DURACAO_MIN;
+    c.mais.disabled = escolha.minutos >= DURACAO_MAX;
+    atualizarResumosTreino();
+  }
+
+  // "3x por semana · ~816 kcal por sessão de 1 h 30 min", com as kcal da simulação.
+  function atualizarResumosTreino() {
+    cartoes.forEach((c, id) => {
+      const escolha = estado.escolhidas.get(id);
+      if (!escolha) return;
+      if (escolha.dias.size === 0) {
+        c.resumo.textContent = 'Marque os dias de treino';
         return;
       }
-
-      modalidades.forEach((modalidade) => {
-        modalidadeListEl.appendChild(criarLinhaModalidade(modalidade));
-      });
-    } catch (erro) {
-      modalidadeListEl.innerHTML = '<p class="modalidade-catalog-message">Não foi possível carregar as modalidades. Recarregue a página.</p>';
-    }
+      const daSimulacao = estado.simulacao?.modalidades.find((m) =>
+        m.modalidadeId === id && Math.round(m.duracaoHoras * 60) === escolha.minutos);
+      const kcal = daSimulacao ? ` · ~${fmt(daSimulacao.kcalSessao)} kcal por sessão de ${duracaoTexto(escolha.minutos)}` : '';
+      c.resumo.textContent = `${escolha.dias.size}x por semana${kcal}`;
+    });
   }
 
-  async function avancarPassoModalidades() {
-    const linhas = Array.from(document.querySelectorAll('.modalidade-row'));
-    const selecionadas = linhas
-      .map((linha) => ({
-        checkbox: linha.querySelector('input[type="checkbox"]'),
-        nome: linha.querySelector('.modalidade-check span').textContent,
-        botoesDia: Array.from(linha.querySelectorAll('.dia-toggle')),
-        horasInput: linha.querySelector('.modalidade-duracao-horas'),
-        minutosSelect: linha.querySelector('.modalidade-duracao-minutos')
-      }))
-      .filter((linha) => linha.checkbox.checked);
+  async function avancarTreino() {
+    if (estado.escolhidas.size === 0) return erro('Escolha pelo menos uma modalidade.');
+    const nomes = new Map(estado.catalogo.map((m) => [m.id, m.nome]));
+    for (const [id, escolha] of estado.escolhidas) {
+      if (escolha.dias.size === 0) return erro(`Marque pelo menos um dia para ${nomes.get(id)}.`);
+    }
 
-    if (selecionadas.length === 0) {
-      ronuMostrarErroFormulario(formError, 'Selecione pelo menos uma modalidade.');
+    await Promise.all(modalidadesParaApi().map(async (corpo) => {
+      const salvo = await enviar('/usuarios/modalidades', 'POST', corpo);
+      if (salvo?.id) estado.modalidadesSalvas.set(corpo.modalidadeId, salvo.id);
+    }));
+    // As que estavam salvas e foram desmarcadas saem da API. Sempre sobra pelo
+    // menos uma (a validação acima exige), então nunca se apaga a última.
+    const desmarcadas = [...estado.modalidadesSalvas.entries()].filter(([idMod]) => !estado.escolhidas.has(idMod));
+    await Promise.all(desmarcadas.map(async ([idMod, idVinculo]) => {
+      await enviar(`/usuarios/modalidades/${idVinculo}`, 'DELETE');
+      estado.modalidadesSalvas.delete(idMod);
+    }));
+    mostrarPasso(3);
+  }
+
+  // ----- Passo 3: alimentação -----
+  const MARCAS = {
+    gosto: '<svg class="ob-chip-marca" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 10.5 1.6 6.3A2.6 2.6 0 0 1 6 2.9a2.6 2.6 0 0 1 4.4 3.4z"/></svg>',
+    evitar: '<svg class="ob-chip-marca" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg>'
+  };
+  const ROTULO_ESTADO = { gosto: 'gosto', evitar: 'prefiro evitar' };
+
+  function desenharComidas() {
+    const area = $('ob-comidas');
+    area.innerHTML = '';
+    const nomes = [...COMIDAS_BASE, ...[...estado.comidas.keys()].filter((n) => !COMIDAS_BASE.includes(n))];
+    nomes.forEach((nome) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      const pintar = () => {
+        const valor = estado.comidas.get(nome);
+        b.dataset.estado = valor || '';
+        b.innerHTML = (valor ? MARCAS[valor] : '');
+        b.append(document.createTextNode(nome));
+        b.setAttribute('aria-label', valor ? `${nome}, ${ROTULO_ESTADO[valor]}` : nome);
+      };
+      b.addEventListener('click', () => {
+        const atual = estado.comidas.get(nome);
+        if (!atual) estado.comidas.set(nome, 'gosto');
+        else if (atual === 'gosto') estado.comidas.set(nome, 'evitar');
+        else estado.comidas.delete(nome);
+        pintar();
+        contarComidas();
+      });
+      pintar();
+      area.appendChild(b);
+    });
+    contarComidas();
+  }
+
+  function contarComidas() {
+    const valores = [...estado.comidas.values()];
+    const g = valores.filter((v) => v === 'gosto').length;
+    const e = valores.filter((v) => v === 'evitar').length;
+    $('ob-conta-gosto').textContent = `${g} que você gosta`;
+    $('ob-conta-evitar').textContent = `${e} para evitar`;
+  }
+
+  let tipoOutro = 'gosto';
+  ligarRadios('ob-outro-tipo', (valor) => {
+    tipoOutro = valor;
+    marcarRadios('ob-outro-tipo', valor);
+  });
+  function adicionarOutro() {
+    const nome = $('ob-outro').value.trim().toLowerCase();
+    if (!nome) {
+      $('ob-outro').focus();
       return;
     }
-
-    for (const linha of selecionadas) {
-      const temDiaSelecionado = linha.botoesDia.some((botao) => botao.getAttribute('aria-pressed') === 'true');
-
-      if (!temDiaSelecionado) {
-        ronuMostrarErroFormulario(formError, `Selecione pelo menos um dia da semana para ${linha.nome}.`);
-        return;
-      }
-
-      if (!linha.horasInput.reportValidity()) {
-        return;
-      }
-
-      // Horas e minutos são válidos isoladamente (0-5h, 0/15/30/45min), mas a
-      // SOMA pode ficar fora da faixa que a API aceita (ex: 0h+0min=0, abaixo
-      // do mínimo; 5h+45min=5.75, acima do máximo) — por isso valida o total.
-      const duracaoTotal = horasMinutosParaDecimal(Number(linha.horasInput.value || 0), Number(linha.minutosSelect.value));
-      if (duracaoTotal < 0.25 || duracaoTotal > 5) {
-        ronuMostrarErroFormulario(formError, `Informe uma duração entre 15 minutos e 5 horas para ${linha.nome}.`);
-        return;
-      }
+    estado.comidas.set(nome, tipoOutro);
+    $('ob-outro').value = '';
+    desenharComidas();
+    $('ob-outro').focus();
+  }
+  $('ob-outro-adicionar').addEventListener('click', adicionarOutro);
+  $('ob-outro').addEventListener('keydown', (evento) => {
+    if (evento.key === 'Enter') {
+      evento.preventDefault();
+      adicionarOutro();
     }
+  });
 
-    ronuOcultarErroFormulario(formError);
-    ronuDefinirCarregando(btnAvancar, true, 'Salvando...');
-
-    try {
-      await Promise.all(selecionadas.map(async (linha) => {
-        const diasSemana = linha.botoesDia
-          .filter((botao) => botao.getAttribute('aria-pressed') === 'true')
-          .map((botao) => Number(botao.dataset.dia));
-
-        const duracaoMediaHoras = horasMinutosParaDecimal(Number(linha.horasInput.value || 0), Number(linha.minutosSelect.value));
-
-        const resposta = await ronuFetchAutenticado('/usuarios/modalidades', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            modalidadeId: Number(linha.checkbox.dataset.modalidadeId),
-            diasSemana,
-            duracaoMediaHoras
-          })
-        });
-
-        if (!resposta.ok) {
-          const corpo = await resposta.json().catch(() => null);
-          throw new Error(corpo?.mensagem || 'Não foi possível salvar uma das modalidades.');
-        }
+  async function avancarAlimentacao() {
+    const pedidos = [];
+    estado.comidas.forEach((valor, nome) => {
+      const tipo = valor === 'evitar' ? 'evitar' : 'preferido';
+      if (estado.preferenciasSalvas.get(nome)?.tipo === tipo) return;
+      // O POST atualiza o tipo se o alimento já existe (sem duplicar).
+      pedidos.push(enviar('/preferencias-alimentares', 'POST', { alimento: nome, tipo }).then((salvo) => {
+        if (salvo?.id) estado.preferenciasSalvas.set(nome, { id: salvo.id, tipo });
       }));
+    });
+    estado.preferenciasSalvas.forEach((salvo, nome) => {
+      if (estado.comidas.has(nome)) return;
+      pedidos.push(enviar(`/preferencias-alimentares/${salvo.id}`, 'DELETE').then(() => estado.preferenciasSalvas.delete(nome)));
+    });
+    await Promise.all(pedidos);
+    mostrarPasso(4);
+  }
 
-      mostrarPasso(4);
-    } catch (erro) {
-      ronuMostrarErroFormulario(formError, erro.message);
+  // ----- Passo 4: a primeira dieta -----
+  function prepararFim() {
+    const usuario = ronuUsuarioLogado();
+    const primeiro = (estado.perfilSalvo?.nome || usuario?.nome || '').trim().split(/\s+/)[0];
+    $('ob-nome').textContent = primeiro && !primeiro.includes('@') ? `, ${primeiro}` : '';
+    const uf = estado.perfilSalvo?.estado;
+    $('ob-gerando-regiao').textContent = ESTADOS[uf] ? `Ajustando os nomes para ${ESTADOS[uf]}` : 'Ajustando os nomes para a sua região';
+  }
+
+  $('ob-gerar').addEventListener('click', async () => {
+    const pronto = $('ob-fim-pronto');
+    const gerando = $('ob-fim-gerando');
+    ronuOcultarErroFormulario($('ob-gerar-erro'));
+    pronto.hidden = true;
+    gerando.hidden = false;
+    try {
+      const resposta = await ronuFetchAutenticado('/dietas/gerar', { method: 'POST' });
+      if (!resposta.ok) {
+        const dados = await resposta.json().catch(() => null);
+        throw new Error(dados?.mensagem || 'Não foi possível gerar sua dieta agora. Tente novamente em alguns instantes.');
+      }
+      window.location.href = 'dashboard.html';
+    } catch (falha) {
+      if (falha.message === 'Sessão expirada.') return;
+      gerando.hidden = true;
+      pronto.hidden = false;
+      ronuMostrarErroFormulario($('ob-gerar-erro'), falha.message);
+      $('ob-ir-painel').hidden = false;
+      $('ob-gerar').querySelector('.btn-label').textContent = 'Tentar de novo';
+    }
+  });
+
+  // ---------- Navegação ----------
+  const avancos = [avancarPerfil, avancarObjetivo, avancarTreino, avancarAlimentacao];
+
+  btnAvancar.addEventListener('click', async () => {
+    if (btnAvancar.dataset.loading === 'true') return;
+    ronuOcultarErroFormulario(formError);
+    document.querySelectorAll('.ob-passo .field-error').forEach((c) => c.classList.remove('field-error'));
+    ronuDefinirCarregando(btnAvancar, true, 'Salvando...');
+    try {
+      await avancos[estado.passo]();
+    } catch (falha) {
+      if (falha.message !== 'Sessão expirada.') ronuMostrarErroFormulario(formError, falha.message);
     } finally {
       ronuDefinirCarregando(btnAvancar, false);
     }
-  }
-
-  // ---------- Passo 4: preferências alimentares ----------
-
-  function adicionarItemNaLista(preferencia) {
-    const lista = document.getElementById('preferencia-list');
-    const item = document.createElement('li');
-    item.className = 'preferencia-item';
-    item.dataset.tipo = preferencia.tipo;
-
-    const nomeSpan = document.createElement('span');
-    nomeSpan.className = 'preferencia-alimento';
-    nomeSpan.textContent = preferencia.alimento;
-
-    const tipoSpan = document.createElement('span');
-    tipoSpan.className = 'preferencia-tipo';
-    tipoSpan.textContent = preferencia.tipo === 'evitar' ? 'Evitar' : 'Prefiro';
-
-    item.append(nomeSpan, tipoSpan);
-    lista.appendChild(item);
-  }
-
-  async function adicionarPreferencia() {
-    const alimento = alimentoInput.value.trim();
-    const tipo = document.querySelector('input[name="tipo-preferencia"]:checked').value;
-
-    if (!alimento) {
-      alimentoInput.reportValidity();
-      return;
-    }
-
-    ronuOcultarErroFormulario(formError);
-    ronuDefinirCarregando(btnAdicionarPreferencia, true, 'Adicionando...');
-
-    try {
-      const resposta = await ronuFetchAutenticado('/preferencias-alimentares', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ alimento, tipo })
-      });
-
-      if (!resposta.ok) {
-        const corpo = await resposta.json().catch(() => null);
-        throw new Error(corpo?.mensagem || 'Não foi possível adicionar. Tente novamente.');
-      }
-
-      const preferenciaSalva = await resposta.json();
-      adicionarItemNaLista(preferenciaSalva);
-      alimentoInput.value = '';
-      alimentoInput.focus();
-    } catch (erro) {
-      ronuMostrarErroFormulario(formError, erro.message);
-    } finally {
-      ronuDefinirCarregando(btnAdicionarPreferencia, false);
-    }
-  }
-
-  btnAdicionarPreferencia.addEventListener('click', adicionarPreferencia);
-
-  alimentoInput.addEventListener('keydown', (evento) => {
-    if (evento.key === 'Enter') {
-      evento.preventDefault();
-      adicionarPreferencia();
-    }
   });
 
-  // ---------- Navegação geral ----------
+  // O aviso de erro do passo some assim que a pessoa mexe para corrigir.
+  ['click', 'input'].forEach((tipo) => {
+    document.querySelector('.ob-conteudo').addEventListener(tipo, (evento) => {
+      if (!formError.hidden && !formError.contains(evento.target)) ronuOcultarErroFormulario(formError);
+    });
+  });
 
+  btnPular.addEventListener('click', () => mostrarPasso(4));
   btnVoltar.addEventListener('click', () => {
-    if (passoAtual > 1) {
-      mostrarPasso(passoAtual - 1);
-    }
+    if (estado.passo > 0) mostrarPasso(estado.passo - 1);
   });
 
-  btnAvancar.addEventListener('click', () => {
-    if (passoAtual === 1) {
-      avancarPassoPerfil();
-    } else if (passoAtual === 2) {
-      avancarPassoObjetivo();
-    } else if (passoAtual === 3) {
-      avancarPassoModalidades();
-    } else {
-      window.location.href = 'dashboard.html';
-    }
-  });
-
-  definirFaixaDataNascimento();
-  await carregarCatalogoModalidades();
-  mostrarPasso(1);
+  desenharCatalogo();
+  desenharComidas();
+  mostrarPasso(0);
 });

@@ -1,0 +1,476 @@
+/*
+  Ronu — Onboarding (tela aprovada: docs/redesign/telas/Onboarding, ...Mobile, ...Washi)
+  Depende de tokens, base, componentes e telas/entrada.css (painel e logo).
+
+  Desktop: painel com o quimono (a faixa muda de cor a cada passo) e a conta
+  da meta se formando; à direita, as etapas, o passo atual e a navegação.
+  Celular: faixa com logo e a faixa atual; o resumo da meta vai para baixo
+  do passo e a navegação gruda no pé da tela.
+*/
+
+/* ---------- Faixa do quimono por passo ---------- */
+.ob-pagina { --faixa: var(--faixa-branca); }
+.ob-pagina[data-passo="1"] { --faixa: var(--faixa-azul); }
+.ob-pagina[data-passo="2"] { --faixa: var(--faixa-roxa); }
+.ob-pagina[data-passo="3"] { --faixa: var(--faixa-marrom); }
+.ob-pagina[data-passo="4"] { --faixa: var(--faixa-preta); }
+
+.ob-faixa {
+  fill: var(--faixa);
+  transition: fill 0.8s ease;
+}
+
+/* A branca precisa de contorno para não sumir no quimono claro. */
+.ob-pagina[data-passo="0"] .ob-faixa {
+  stroke: var(--quimono-faixa-borda);
+  stroke-width: 2;
+}
+
+/* ---------- Painel ---------- */
+.ob-painel {
+  min-height: 100svh;
+}
+
+.ob-arte {
+  position: absolute;
+  top: 110px;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  pointer-events: none;
+}
+
+.ob-quimono {
+  width: 230px;
+  height: auto;
+}
+
+.ob-faixa-rotulo {
+  padding: 4px 10px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-pilula);
+  background: var(--fundo);
+  font-size: var(--t-pequeno);
+  color: var(--texto-2);
+}
+
+.ob-meta {
+  position: relative;
+  z-index: 1;
+  max-width: 440px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-card);
+}
+
+.ob-meta h2 {
+  font-family: var(--fonte-corpo);
+}
+
+.ob-meta-linhas {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ob-meta-linhas:empty {
+  display: none;
+}
+
+.ob-meta-linha {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e-4);
+  font-size: var(--t-apoio);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Só a linha que acabou de entrar anima, e a classe sai no fim (onboarding.js):
+   com a animação presa à linha, mesmo terminada, o Chrome a desenhava apagada. */
+.ob-meta-linha.ob-entrando {
+  animation: entra 0.5s var(--curva-saida) backwards;
+}
+
+.ob-meta-linha > span:first-child {
+  color: var(--texto-2);
+}
+
+/* A parte que a última resposta acrescentou. */
+.ob-meta-linha.ob-nova > span:last-child {
+  color: var(--acento-texto);
+  font-weight: 600;
+}
+
+.ob-meta-totais {
+  display: flex;
+  gap: 28px;
+  padding-top: var(--e-3);
+  border-top: 1px solid var(--borda);
+}
+
+.ob-meta-total {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ob-meta-total .numero {
+  font-size: 1.75rem;
+}
+
+/* ---------- Coluna do passo ---------- */
+.ob-principal {
+  min-width: 0;
+  padding: var(--e-8) var(--e-10) var(--e-9);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-8);
+}
+
+.ob-centro {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.ob-conteudo {
+  width: 100%;
+  max-width: 560px;
+}
+
+.ob-passo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-6);
+  animation: entra-lado 450ms var(--curva-saida) both;
+}
+
+.ob-cabeca {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ob-cabeca h1 {
+  font-size: 2.5rem;
+}
+
+.ob-cabeca h1:focus {
+  outline: none;
+}
+
+.ob-cabeca p {
+  font-size: var(--t-corpo-g);
+  line-height: 1.6;
+  color: var(--texto-2);
+}
+
+.ob-tres {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.ob-objetivos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ob-opcao-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ob-objetivos .opcao {
+  padding: 20px 22px;
+}
+
+/* ---------- Treino ---------- */
+.ob-escolhidas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.ob-escolhida {
+  padding: 16px 18px;
+  gap: var(--e-3);
+  animation: entra 0.5s var(--curva-saida) both;
+}
+
+.ob-escolhida-cabeca {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--e-3);
+  flex-wrap: wrap;
+}
+
+.ob-escolhida-nome {
+  font-weight: 600;
+}
+
+.ob-duracao-linha {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--e-3);
+  flex-wrap: wrap;
+}
+
+.ob-duracao {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--borda-campo);
+  border-radius: var(--raio);
+}
+
+.ob-duracao button {
+  width: 42px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--texto);
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.ob-duracao button:disabled {
+  color: var(--texto-3);
+  cursor: not-allowed;
+}
+
+.ob-duracao output {
+  min-width: 88px;
+  line-height: 40px;
+  border-left: 1px solid var(--borda);
+  border-right: 1px solid var(--borda);
+  text-align: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Alimentação ---------- */
+#ob-comidas .chip {
+  cursor: pointer;
+  color: var(--texto-2);
+  border-color: var(--borda);
+}
+
+#ob-comidas .chip[data-estado="gosto"] {
+  background: var(--superficie-3);
+  border-color: var(--acento);
+  color: var(--texto);
+}
+
+#ob-comidas .chip[data-estado="evitar"] {
+  border-style: dashed;
+  border-color: var(--acento);
+  color: var(--acento-texto);
+}
+
+.ob-chip-marca {
+  width: 12px;
+  height: 12px;
+  flex: none;
+}
+
+.ob-contas {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  font-size: var(--t-pequeno);
+  color: var(--texto-2);
+}
+
+.ob-outro {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--e-2);
+  flex-wrap: wrap;
+}
+
+.ob-outro-campo {
+  flex: 1 1 220px;
+}
+
+.ob-outro-tipo > button {
+  min-height: 48px;
+}
+
+.ob-outro .botao {
+  min-height: 48px;
+}
+
+/* ---------- Fim ---------- */
+.ob-fim {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-6);
+}
+
+.ob-fim-acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--e-4);
+  flex-wrap: wrap;
+}
+
+.ob-gerando-titulo {
+  font-size: 2.25rem;
+  line-height: 1.15;
+}
+
+.ob-gerando-linhas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  font-size: var(--t-corpo);
+  color: var(--texto-2);
+}
+
+/* ---------- Navegação ---------- */
+.ob-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--e-4);
+  padding-top: 22px;
+  border-top: 1px solid var(--borda);
+}
+
+.ob-nav-direita {
+  display: flex;
+  align-items: center;
+  gap: var(--e-4);
+}
+
+.ob-nav #btn-voltar[aria-hidden="true"] {
+  visibility: hidden;
+}
+
+.ob-meta-celular {
+  display: none;
+}
+
+/* ---------- Celular ---------- */
+@media (max-width: 960px) {
+  .ob-painel {
+    min-height: 0;
+    padding: var(--e-4) var(--e-5);
+    gap: 0;
+  }
+
+  /* No celular só aparece o selinho da faixa, num chip ao lado do logo. */
+  .ob-arte {
+    position: static;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .ob-quimono {
+    width: 22px;
+    animation: none;
+  }
+
+  .ob-faixa-rotulo {
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+
+  .ob-painel .carimbo {
+    display: none;
+  }
+
+  .ob-meta {
+    display: none;
+  }
+
+  .ob-principal {
+    padding: 0;
+    gap: 0;
+  }
+
+  .ob-etapas {
+    padding: 14px var(--e-5) 0;
+  }
+
+  .ob-centro {
+    padding: var(--e-6) var(--e-5);
+    align-items: flex-start;
+  }
+
+  .ob-cabeca {
+    gap: 8px;
+  }
+
+  .ob-cabeca h1 {
+    font-size: 1.875rem;
+    line-height: 1.15;
+  }
+
+  .ob-tres {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ob-tres .campo:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .ob-meta-celular:not([hidden]) {
+    margin: 0 var(--e-5) var(--e-4);
+    padding: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--e-4);
+    border: 1px solid var(--borda);
+    border-radius: var(--raio-card);
+  }
+
+  .ob-meta-celular-numeros {
+    display: flex;
+    gap: 16px;
+  }
+
+  .ob-meta-celular-numeros > span {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .ob-meta-celular .numero {
+    font-size: 1.25rem;
+  }
+
+  /* Navegação grudada no pé da tela, com Continuar ocupando o resto. */
+  .ob-nav {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    padding: 14px var(--e-5) calc(18px + env(safe-area-inset-bottom));
+    background: var(--fundo);
+  }
+
+  .ob-nav-direita {
+    flex: 1;
+    justify-content: flex-end;
+  }
+
+  .ob-nav #btn-avancar {
+    flex: 1;
+  }
+}

@@ -3,217 +3,217 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ronu — Complete seu cadastro</title>
-  <meta name="description" content="Conte seus dados pessoais, objetivo, modalidades de treino e preferências alimentares pra gerar sua dieta.">
+  <title>Ronu — Primeiros passos</title>
+  <meta name="description" content="Conte seus dados, objetivo, treino e preferências para gerar a sua primeira dieta.">
+
+  <!-- Antes do CSS: aplica o modo escuro/claro antes da primeira pintura. -->
+  <script src="js/base/tema.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/auth.css">
-  <script src="js/auth-entrada.js"></script>
-  <link rel="stylesheet" href="css/onboarding.css">
+  <link rel="stylesheet" href="css/base/tokens.css">
+  <link rel="stylesheet" href="css/base/base.css">
+  <link rel="stylesheet" href="css/componentes.css">
+  <link rel="stylesheet" href="css/telas/entrada.css">
+  <link rel="stylesheet" href="css/telas/onboarding.css">
 </head>
 <body>
+  <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
 
-  <div class="auth-page">
+  <!-- data-passo (0 a 4) muda a cor da faixa do quimono: branca, azul, roxa,
+       marrom e preta. O passo 4 é o fim: gerar a primeira dieta. -->
+  <div class="entrada-pagina ob-pagina" id="ob-pagina" data-passo="0" hidden>
 
-    <aside class="auth-brand">
-      <a href="landing/v1/index.html" class="wordmark">ronu<span>.</span></a>
-      <div class="auth-brand-visual hero-carousel" id="authCarousel">
-        <!--
-          Ordem: as 9 fotos anteriores seguem na sequência de antes; as 5 novas entram
-          intercaladas para que nenhuma foto com motion blur forte (basquete, corrida,
-          giro, os dois futebóis e a piscina) encoste em outra, nem as duas de tom
-          quente (futebóis e piscina) ou as duas de estúdio cinza (alongamento e dança).
-          Vale também entre a última e a primeira, porque o carrossel dá a volta.
-          A 1ª foto leva fetchpriority="high": os slides ficam empilhados na área
-          visível (só a opacidade muda), então o loading="lazy" não adia as demais no
-          desktop — elas baixam junto, em prioridade baixa, e a 1ª precisa chegar antes.
-        -->
-        <ul class="hero-carousel-track">
-          <li class="hero-carousel-slide is-active">
-            <img src="img/modalidades/foto-academia-puxada.webp" alt="Atleta de regata vermelha num aparelho de puxada" loading="eager" fetchpriority="high">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-futebol-chute.webp" alt="Jogador de futebol acertando a bola no ar" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-muaythai-chute.webp" alt="Lutador chutando o saco de pancadas numa academia de muay thai" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-alongamento-magnesio.webp" alt="Atleta de regata preta com as mãos brancas de magnésio, alongando o braço num estúdio cinza" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-corrida-borrada.webp" alt="Atleta correndo de moletom, borrado pela velocidade" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-prancha.webp" alt="Atleta treinando abdômen com rolinho no chão da academia" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-basquete-movimento.webp" alt="Jogador de basquete segurando a bola no alto, borrado pela velocidade, contra um fundo azul e amarelo" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-natacao.webp" alt="Nadador submerso visto de baixo, em preto e branco" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-futebol-voleio.webp" alt="Jogador de futebol chutando a bola no ar sobre almofadas vermelhas" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-boxe-ringue.webp" alt="Dois boxeadores frente a frente no ringue antes da luta" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-piscina-bola.webp" alt="Homem dentro de uma piscina olhando a bola no ar, em tons quentes" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-judo-plateia.webp" alt="Judoca de quimono e faixa preta diante da plateia de um ginásio" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-giro-2.webp" alt="Atleta girando o corpo num golpe, borrado pela velocidade" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-danca-movimento.webp" alt="Bailarina equilibrada numa perna, com a outra estendida para trás, num estúdio cinza" loading="lazy">
-          </li>
-        </ul>
-
-        <div class="hero-carousel-controls">
-          <div class="hero-carousel-dots" role="tablist" aria-label="Selecionar imagem">
-            <button type="button" class="hero-carousel-dot is-active" role="tab" aria-selected="true" aria-label="Musculação"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Futebol"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Muay thai"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Alongamento"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Corrida"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Abdômen"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Basquete"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Natação"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Voleio"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Boxe"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Piscina"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Judô"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Movimento"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Dança"></button>
-          </div>
+    <aside class="entrada-painel grade ob-painel">
+      <div class="entrada-painel-topo">
+        <a class="logo" href="landing/v1/index.html" aria-label="Ronu, página inicial">
+          <span class="logo-selo" aria-hidden="true">浪</span>
+          <span class="logo-nome" aria-hidden="true">RONU</span>
+        </a>
+        <div class="entrada-painel-acoes">
+          <button type="button" class="botao-tema" data-alternar-tema aria-label="Mudar para o modo claro">
+            <svg class="icone-sol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></svg>
+            <svg class="icone-lua" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+          </button>
+          <div class="carimbo" aria-hidden="true"><span>浪</span><span>人</span></div>
         </div>
       </div>
-      <p class="auth-brand-quote">Treino, objetivo e preferências — o que a IA precisa pra montar sua dieta.</p>
+
+      <div class="ob-arte">
+        <svg class="quimono ob-quimono" viewBox="0 0 400 460" width="230" height="265" role="img" aria-labelledby="ob-faixa-rotulo" focusable="false">
+          <path class="q-corpo" d="M150 30 L40 62 L0 192 L70 218 L110 142 L110 440 L290 440 L290 142 L330 218 L400 192 L360 62 L250 30 Q200 52 150 30 Z"/>
+          <path class="q-sombra-1" d="M150 30 L176 30 L256 232 L238 252 Z"/>
+          <path class="q-sombra-2" d="M250 30 L224 30 L150 220 L162 252 Z"/>
+          <path class="q-costura" d="M40 62 L70 218 M360 62 L330 218 M200 280 L200 440"/>
+          <path class="ob-faixa" d="M110 250 L290 250 L290 282 L110 282 Z"/>
+          <path class="ob-faixa" d="M188 282 L166 376 L184 379 L201 286 Z"/>
+          <path class="ob-faixa" d="M212 282 L240 368 L222 373 L203 286 Z"/>
+          <rect class="q-etiqueta" x="232" y="262" width="22" height="9"/>
+        </svg>
+        <span class="ob-faixa-rotulo" id="ob-faixa-rotulo">Faixa branca</span>
+      </div>
+
+      <!-- A conta da meta, montada a cada resposta pela simulação da API
+           (POST /api/metas/simulacao), a mesma conta da dieta. -->
+      <section class="ob-meta" aria-live="polite" aria-labelledby="ob-meta-titulo">
+        <h2 class="rotulo" id="ob-meta-titulo">Sua meta se formando</h2>
+        <div class="ob-meta-linhas" id="ob-meta-linhas"></div>
+        <p class="apoio" id="ob-meta-vazia">Cada resposta acrescenta uma parte da conta aqui.</p>
+        <div class="ob-meta-totais" id="ob-meta-totais" hidden>
+          <div class="ob-meta-total"><span class="apoio" id="ob-total-a-rotulo">Meta por dia</span><span class="numero num" id="ob-total-a">—</span></div>
+          <div class="ob-meta-total" id="ob-total-b-bloco" hidden><span class="apoio">Dia de descanso</span><span class="numero num texto-2" id="ob-total-b">—</span></div>
+        </div>
+      </section>
     </aside>
 
-    <main class="auth-form-panel">
-      <div class="auth-form-wrap">
+    <main class="ob-principal" id="conteudo">
+      <ol class="etapas ob-etapas" id="ob-etapas" aria-label="Etapas até a primeira dieta">
+        <li class="feita">Conta</li>
+        <li data-etapa="0">Perfil</li>
+        <li data-etapa="1">Objetivo</li>
+        <li data-etapa="2">Treino</li>
+        <li data-etapa="3"><span class="so-desktop">Alimentação</span><span class="so-celular">Comida</span></li>
+      </ol>
 
-        <ol class="stepper" id="stepper">
-          <li class="stepper-item" data-step="1"><span class="stepper-index">1</span><span>Perfil</span></li>
-          <li class="stepper-item" data-step="2"><span class="stepper-index">2</span><span>Objetivo</span></li>
-          <li class="stepper-item" data-step="3"><span class="stepper-index">3</span><span>Modalidades</span></li>
-          <li class="stepper-item" data-step="4"><span class="stepper-index">4</span><span>Preferências</span></li>
-        </ol>
+      <div class="ob-centro">
+        <div class="ob-conteudo">
+          <div class="aviso aviso-erro" id="form-error" role="alert" hidden></div>
 
-        <div class="form-message form-message-error" id="form-error" hidden></div>
-
-        <section class="onboarding-step" id="step-1" data-step="1">
-          <h1 class="auth-title">Seus dados pessoais</h1>
-          <p class="auth-subtitle">Usamos isso pra calcular sua taxa metabólica basal.</p>
-
-          <div class="field" id="field-altura">
-            <label for="altura">Altura (m)</label>
-            <input type="text" id="altura" name="altura" inputmode="decimal" placeholder="Ex: 1,74" required>
-            <span class="field-error-message" id="altura-error" hidden></span>
-          </div>
-
-          <div class="field">
-            <label>Sexo</label>
-            <div class="option-group" role="radiogroup" aria-label="Sexo">
-              <label class="option-pill">
-                <input type="radio" name="sexo" value="Masculino">
-                <span>Masculino</span>
-              </label>
-              <label class="option-pill">
-                <input type="radio" name="sexo" value="Feminino">
-                <span>Feminino</span>
-              </label>
+          <!-- ---------- Passo 1: perfil ---------- -->
+          <section class="ob-passo" data-passo="0" aria-labelledby="ob-t0">
+            <div class="ob-cabeca">
+              <span class="rotulo rotulo-acento">Passo 1 de 4</span>
+              <h1 id="ob-t0" tabindex="-1">Primeiro, você.</h1>
+              <p>Com isso o Ronu calcula quanto o seu corpo gasta parado.</p>
             </div>
-          </div>
-
-          <div class="field">
-            <label for="data-nascimento">Data de nascimento</label>
-            <input type="date" id="data-nascimento" name="data-nascimento" required>
-          </div>
-        </section>
-
-        <section class="onboarding-step" id="step-2" data-step="2" hidden>
-          <h1 class="auth-title">Qual é o seu objetivo?</h1>
-          <p class="auth-subtitle">Usamos isso pra calcular sua necessidade calórica.</p>
-
-          <div class="field">
-            <label for="peso">Peso (kg)</label>
-            <input type="number" id="peso" name="peso" inputmode="decimal" step="0.1" min="20" max="300" required>
-          </div>
-
-          <div class="field">
-            <label>Objetivo</label>
-            <div class="option-group" role="radiogroup" aria-label="Objetivo">
-              <label class="option-pill">
-                <input type="radio" name="objetivo" value="ganhar peso">
-                <span>Ganhar peso</span>
-              </label>
-              <label class="option-pill">
-                <input type="radio" name="objetivo" value="perder peso">
-                <span>Perder peso</span>
-              </label>
-              <label class="option-pill">
-                <input type="radio" name="objetivo" value="manter peso">
-                <span>Manter peso</span>
-              </label>
+            <div class="campo">
+              <span class="campo-rotulo" id="l-sexo">Sexo biológico</span>
+              <div class="segmentado segmentado-acento" role="radiogroup" aria-labelledby="l-sexo" id="ob-sexo">
+                <button type="button" role="radio" aria-checked="false" data-valor="Masculino">Masculino</button>
+                <button type="button" role="radio" aria-checked="false" data-valor="Feminino">Feminino</button>
+              </div>
             </div>
-          </div>
-        </section>
-
-        <section class="onboarding-step" id="step-3" data-step="3" hidden>
-          <h1 class="auth-title">Quais modalidades você pratica?</h1>
-          <p class="auth-subtitle">Selecione uma ou mais, marque os dias que treina e informe a duração média da sessão.</p>
-
-          <div class="modalidade-list" id="modalidade-list">
-            <p class="modalidade-catalog-message">Carregando modalidades...</p>
-          </div>
-        </section>
-
-        <section class="onboarding-step" id="step-4" data-step="4" hidden>
-          <h1 class="auth-title">Alguma preferência alimentar?</h1>
-          <p class="auth-subtitle">Opcional — adicione o que você gosta ou quer evitar.</p>
-
-          <div class="preferencia-form">
-            <div class="field">
-              <label for="alimento">Alimento</label>
-              <input type="text" id="alimento" name="alimento" placeholder="Ex: brócolis" required>
+            <div class="ob-tres">
+              <div class="campo" id="field-altura">
+                <label class="campo-rotulo" for="altura">Altura (cm)</label>
+                <input class="entrada" type="number" id="altura" inputmode="numeric" min="100" max="250" step="1" placeholder="178" required>
+              </div>
+              <div class="campo" id="field-peso">
+                <label class="campo-rotulo" for="peso">Peso (kg)</label>
+                <input class="entrada" type="number" id="peso" inputmode="decimal" min="20" max="300" step="0.1" placeholder="80" required>
+              </div>
+              <div class="campo" id="field-nascimento">
+                <label class="campo-rotulo" for="data-nascimento">Nascimento</label>
+                <input class="entrada" type="date" id="data-nascimento" required>
+              </div>
             </div>
+            <p class="apoio">O peso de hoje vira a sua primeira pesagem no Progresso.</p>
+          </section>
 
-            <div class="option-group" role="radiogroup" aria-label="Tipo de preferência">
-              <label class="option-pill">
-                <input type="radio" name="tipo-preferencia" value="preferido" checked>
-                <span>Prefiro</span>
-              </label>
-              <label class="option-pill">
-                <input type="radio" name="tipo-preferencia" value="evitar">
-                <span>Evitar</span>
-              </label>
+          <!-- ---------- Passo 2: objetivo ---------- -->
+          <section class="ob-passo" data-passo="1" aria-labelledby="ob-t1" hidden>
+            <div class="ob-cabeca">
+              <span class="rotulo rotulo-acento">Passo 2 de 4</span>
+              <h1 id="ob-t1" tabindex="-1">Aonde você quer chegar?</h1>
+              <p>Dá para trocar depois, no Perfil.</p>
             </div>
+            <div class="ob-objetivos" role="radiogroup" aria-labelledby="ob-t1" id="ob-objetivos">
+              <button type="button" class="opcao" role="radio" aria-checked="false" data-valor="perder peso">
+                <span class="ob-opcao-texto"><span class="opcao-titulo">Perder peso</span><span class="opcao-dica">Comer um pouco abaixo do que gasta</span></span>
+                <span class="opcao-dica num" data-ajuste></span>
+              </button>
+              <button type="button" class="opcao" role="radio" aria-checked="false" data-valor="manter peso">
+                <span class="ob-opcao-texto"><span class="opcao-titulo">Manter peso</span><span class="opcao-dica">Comer o mesmo que gasta, com foco no treino</span></span>
+                <span class="opcao-dica num" data-ajuste></span>
+              </button>
+              <button type="button" class="opcao" role="radio" aria-checked="false" data-valor="ganhar peso">
+                <span class="ob-opcao-texto"><span class="opcao-titulo">Ganhar peso</span><span class="opcao-dica">Comer um pouco acima, para ganhar massa</span></span>
+                <span class="opcao-dica num" data-ajuste></span>
+              </button>
+            </div>
+          </section>
 
-            <button type="button" class="btn btn-secondary" id="adicionar-preferencia-btn">
-              <span class="btn-label">Adicionar</span>
-            </button>
-          </div>
+          <!-- ---------- Passo 3: treino ---------- -->
+          <section class="ob-passo" data-passo="2" aria-labelledby="ob-t2" hidden>
+            <div class="ob-cabeca">
+              <span class="rotulo rotulo-acento">Passo 3 de 4</span>
+              <h1 id="ob-t2" tabindex="-1">O que você treina?</h1>
+              <p>Escolha as modalidades, os dias e quanto dura cada sessão. Dá para mudar depois, na tela de Treino.</p>
+            </div>
+            <div class="chips" id="ob-catalogo" role="group" aria-label="Modalidades">
+              <p class="apoio">Carregando modalidades...</p>
+            </div>
+            <div class="ob-escolhidas" id="ob-escolhidas"></div>
+          </section>
 
-          <ul class="preferencia-list" id="preferencia-list"></ul>
-        </section>
+          <!-- ---------- Passo 4: alimentação ---------- -->
+          <section class="ob-passo" data-passo="3" aria-labelledby="ob-t3" hidden>
+            <div class="ob-cabeca">
+              <span class="rotulo rotulo-acento">Passo 4 de 4</span>
+              <h1 id="ob-t3" tabindex="-1">Do que você gosta?</h1>
+              <p>Toque uma vez para “gosto”, duas para “prefiro evitar”. Rotina e orçamento ficam para a tela de Alimentação.</p>
+            </div>
+            <div class="chips" id="ob-comidas" role="group" aria-label="Alimentos"></div>
+            <div class="ob-contas" aria-live="polite"><span id="ob-conta-gosto">0 que você gosta</span><span id="ob-conta-evitar">0 para evitar</span></div>
+            <div class="ob-outro">
+              <div class="campo ob-outro-campo">
+                <label class="campo-rotulo" for="ob-outro">Outro alimento</label>
+                <input class="entrada" type="text" id="ob-outro" maxlength="60" autocomplete="off" placeholder="Ex.: camarão, leite, fígado">
+              </div>
+              <div class="segmentado ob-outro-tipo" role="radiogroup" aria-label="Tipo do alimento" id="ob-outro-tipo">
+                <button type="button" role="radio" aria-checked="true" data-valor="gosto">Gosto</button>
+                <button type="button" role="radio" aria-checked="false" data-valor="evitar">Evitar</button>
+              </div>
+              <button type="button" class="botao botao-fantasma" id="ob-outro-adicionar">Adicionar</button>
+            </div>
+            <p class="apoio">Tem alergia? Marque como “prefiro evitar”, mas confira sempre os rótulos: o cardápio é gerado por IA e não substitui orientação médica.</p>
+          </section>
 
-        <div class="onboarding-nav">
-          <button type="button" class="btn btn-secondary" id="btn-voltar" hidden>Voltar</button>
-          <button type="button" class="btn btn-primary" id="btn-avancar">
-            <span class="btn-label">Avançar</span>
-          </button>
+          <!-- ---------- Fim: gerar a primeira dieta ---------- -->
+          <section class="ob-passo" data-passo="4" aria-labelledby="ob-t4" hidden>
+            <div class="ob-fim" id="ob-fim-pronto">
+              <div class="ob-cabeca">
+                <span class="rotulo rotulo-acento">Faixa preta no cadastro</span>
+                <h1 id="ob-t4" tabindex="-1">Tudo pronto<span id="ob-nome"></span>.</h1>
+                <p>A conta da sua meta está do lado. Agora o Ronu monta os cardápios da semana em cima dela.</p>
+              </div>
+              <div class="aviso aviso-erro" id="ob-gerar-erro" role="alert" hidden></div>
+              <div class="ob-fim-acoes">
+                <button type="button" class="botao botao-primario botao-grande" id="ob-gerar"><span class="btn-label">Gerar minha primeira dieta</span></button>
+                <a class="botao-texto" href="dashboard.html" id="ob-ir-painel" hidden>Ir para o painel</a>
+              </div>
+            </div>
+            <div class="ob-fim" id="ob-fim-gerando" role="status" hidden>
+              <h1 class="ob-gerando-titulo">Montando a sua semana…</h1>
+              <div class="carregando" aria-hidden="true"></div>
+              <ul class="ob-gerando-linhas">
+                <li class="entra" style="--atraso: 0ms">Calculando as metas de treino e descanso</li>
+                <li class="entra" style="--atraso: 1200ms">Escolhendo refeições com o que você gosta</li>
+                <li class="entra" style="--atraso: 2400ms" id="ob-gerando-regiao">Ajustando os nomes para a sua região</li>
+              </ul>
+              <p class="apoio">Leva uns segundos. Não feche esta página.</p>
+            </div>
+          </section>
         </div>
+      </div>
 
+      <!-- Resumo compacto da meta: só no celular, onde o painel vira faixa. -->
+      <div class="ob-meta-celular" id="ob-meta-celular" aria-hidden="true" hidden>
+        <span class="apoio">Sua meta até aqui</span>
+        <span class="ob-meta-celular-numeros">
+          <span><span class="numero num" id="ob-cel-a">—</span><span class="apoio" id="ob-cel-a-rotulo">por dia</span></span>
+          <span id="ob-cel-b-bloco" hidden><span class="numero num texto-2" id="ob-cel-b">—</span><span class="apoio">descanso</span></span>
+        </span>
+      </div>
+
+      <div class="ob-nav" id="ob-nav">
+        <button type="button" class="botao botao-fantasma" id="btn-voltar">Voltar</button>
+        <div class="ob-nav-direita">
+          <button type="button" class="botao-texto" id="btn-pular" hidden>Pular por agora</button>
+          <button type="button" class="botao botao-primario" id="btn-avancar"><span class="btn-label">Continuar</span></button>
+        </div>
       </div>
     </main>
 
@@ -221,12 +221,5 @@
 
   <script src="js/auth.js"></script>
   <script src="js/onboarding.js"></script>
-  <script src="js/hero-carousel.js"></script>
-  <script>
-    initHeroCarousel(document.getElementById('authCarousel'), {
-      autoDelay: 5000,
-      resumeDelay: 8000,
-    });
-  </script>
 </body>
 </html>
