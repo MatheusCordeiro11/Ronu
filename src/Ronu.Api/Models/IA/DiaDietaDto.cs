@@ -19,4 +19,9 @@ public class DiaDietaDto
     // nutricional (proteína + 100 g de carboidrato + gordura mínima) — ver
     // CalculadoraMacros. Falso em dietas geradas antes do piso existir.
     public bool MetaElevadaPeloPiso { get; set; }
+
+    // Partes da meta deste dia (gasto em repouso, dia a dia, treino, objetivo,
+    // ajuste pelo progresso, piso), gravadas na geração. Nulo em dietas
+    // anteriores ao campo: o dashboard não mostra a conta nelas.
+    public ComposicaoMetaDto? ComposicaoMeta { get; set; }
 }

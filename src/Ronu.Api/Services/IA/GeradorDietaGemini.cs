@@ -76,6 +76,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
             contexto.HistoricoPeso, contexto.HistoricoMetas, contexto.Objetivo, metaBaseMedia, manutencaoPorDia, DateTime.UtcNow);
         RegistrarAjusteAdaptativo(ajuste, metaBaseMedia);
         var metasPorDia = MontarMetasPorDia(caloriasBasePorDia, ajuste.Percentual, contexto.Peso, contexto.Altura);
+        var composicaoPorDia = MontarComposicaoPorDia(contexto, _calculadora, ajuste.Percentual, metasPorDia);
 
         var prompt = MontarPrompt(contexto, metasPorDia);
         var schema = MontarSchema();
@@ -100,7 +101,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
             try
             {
                 var (respostaIa, uso, versaoModelo) = await ChamarGeminiAsync(corpoRequisicao);
-                var dias = MontarDias(respostaIa, metasPorDia);
+                var dias = MontarDias(respostaIa, metasPorDia, composicaoPorDia);
                 ValidarBebidaAlcoolica(dias, contexto);
                 var normalizacao = NormalizadorUnidades.Normalizar(dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos));
 
@@ -214,7 +215,8 @@ public class GeradorDietaGemini : IGeradorDietaIA
     // nomes esperados e sem repetição (7 únicos dentre 7 nomes = todos).
     // O TotalDoDia é recalculado como a soma das refeições: o declarado pela
     // IA já veio diferente da soma (até 27%) e o dashboard mostra os dois.
-    private static List<DiaDietaDto> MontarDias(RespostaDiasIaDto respostaIa, Dictionary<string, ResultadoMacros> metasPorDia)
+    private static List<DiaDietaDto> MontarDias(
+        RespostaDiasIaDto respostaIa, Dictionary<string, ResultadoMacros> metasPorDia, Dictionary<string, ComposicaoMetaDto> composicaoPorDia)
     {
         if (respostaIa.Dias.Count != NomesDias.Length)
         {
@@ -244,7 +246,8 @@ public class GeradorDietaGemini : IGeradorDietaIA
                 Refeicoes = d.Refeicoes,
                 TotalDoDia = SomarRefeicoes(d.Refeicoes),
                 MetaCalculada = meta.Macros,
-                MetaElevadaPeloPiso = meta.MetaElevadaPeloPiso
+                MetaElevadaPeloPiso = meta.MetaElevadaPeloPiso,
+                ComposicaoMeta = composicaoPorDia[nome]
             };
         }).ToList();
     }
@@ -367,6 +370,16 @@ public class GeradorDietaGemini : IGeradorDietaIA
 
         return metas;
     }
+
+    // Partes da meta de cada dia, pelo nome do dia, a partir das mesmas
+    // parcelas da fórmula que deram a meta (CalculadoraManutencao).
+    private static Dictionary<string, ComposicaoMetaDto> MontarComposicaoPorDia(
+        ContextoDietaDto contexto, ICalculadoraGastoCalorico calculadora, decimal percentualAjuste,
+        Dictionary<string, ResultadoMacros> metasPorDia) =>
+        CalculadoraManutencao.ComposicaoPorDia(contexto, calculadora).ToDictionary(
+            c => NomesDias[c.DiaSemana - 1],
+            c => ComposicaoMeta.Montar(c, percentualAjuste, metasPorDia[NomesDias[c.DiaSemana - 1]].Macros.Calorias),
+            StringComparer.OrdinalIgnoreCase);
 
     private static string MontarPrompt(ContextoDietaDto contexto, Dictionary<string, ResultadoMacros> metasPorDia)
     {

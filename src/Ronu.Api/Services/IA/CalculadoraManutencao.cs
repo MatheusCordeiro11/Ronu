@@ -69,44 +69,89 @@ public static class CalculadoraManutencao
     /// um conjunto fixo de valores definidos no frontend (radio buttons), não
     /// texto livre — match direto seguro.
     /// </summary>
-    public static decimal AplicarObjetivo(decimal manutencao, string objetivo, decimal pesoKg)
+    public static decimal AplicarObjetivo(decimal manutencao, string objetivo, decimal pesoKg) =>
+        manutencao + AjusteDoObjetivo(manutencao, objetivo, pesoKg).Kcal;
+
+    /// <summary>
+    /// A parcela do objetivo sozinha (negativa = déficit) e se o teto do
+    /// déficit cortou o ritmo naquele dia.
+    /// </summary>
+    public static (decimal Kcal, bool TetoAplicado) AjusteDoObjetivo(decimal manutencao, string objetivo, decimal pesoKg)
     {
         var ajuste = RitmoObjetivo.KcalPorDia(objetivo, pesoKg);
         var deficitMaximo = -DeficitMaximoFracaoManutencao * manutencao;
 
-        return manutencao + Math.Max(ajuste, deficitMaximo);
+        return (Math.Max(ajuste, deficitMaximo), deficitMaximo > ajuste);
     }
 
     /// <summary>
-    /// Manutenção (sem o objetivo) de cada dia da semana, índice 0 = segunda
-    /// ... 6 = domingo — o formato guardado em MetaDieta.ManutencoesPorDia.
+    /// As parcelas da meta da fórmula de cada dia da semana (índice 0 =
+    /// segunda ... 6 = domingo). Fonte única das contas: a meta da dieta
+    /// (CaloriasBasePorDia), a manutenção da MetaDieta (ManutencaoPorDia), a
+    /// composição mostrada no dashboard e a simulação (POST /api/metas/simulacao)
+    /// saem daqui, então os números nunca divergem entre elas. Valores exatos,
+    /// sem arredondar (ArredondamentoPartes cuida do que vai para a tela).
     /// </summary>
-    public static decimal[] ManutencaoPorDia(ContextoDietaDto contexto, ICalculadoraGastoCalorico calculadora)
+    public static ComposicaoFormulaDia[] ComposicaoPorDia(ContextoDietaDto contexto, ICalculadoraGastoCalorico calculadora)
     {
         var tmb = Tmb(contexto.Sexo, contexto.Peso, contexto.Altura, contexto.Idade);
 
         // UsuarioModalidade.DiasSemana usa 1 = segunda ... 7 = domingo (ISO 8601).
         return Enumerable.Range(1, 7).Select(dia =>
         {
-            var gastoTreinoDia = contexto.Modalidades
-                .Where(m => m.DiasSemana.Contains(dia))
-                .Sum(m => calculadora.CalcularGastoSessao(m.MetReferencia, contexto.Peso, m.DuracaoHoras));
+            var treinos = contexto.Modalidades
+                .Select((modalidade, indice) => (modalidade, indice))
+                .Where(x => x.modalidade.DiasSemana.Contains(dia))
+                .Select(x => new TreinoDoDia(
+                    x.indice, x.modalidade.Nome, x.modalidade.DuracaoHoras,
+                    calculadora.CalcularGastoSessao(x.modalidade.MetReferencia, contexto.Peso, x.modalidade.DuracaoHoras)))
+                .ToList();
 
-            return Manutencao(tmb, gastoTreinoDia);
+            var manutencao = Manutencao(tmb, treinos.Sum(t => t.Kcal));
+            var (objetivo, tetoAplicado) = AjusteDoObjetivo(manutencao, contexto.Objetivo, contexto.Peso);
+
+            return new ComposicaoFormulaDia(
+                dia, tmb, tmb * (FatorAtividadeForaDoTreino - 1), treinos, manutencao, objetivo, tetoAplicado);
         }).ToArray();
     }
+
+    /// <summary>
+    /// Manutenção (sem o objetivo) de cada dia da semana, índice 0 = segunda
+    /// ... 6 = domingo — o formato guardado em MetaDieta.ManutencoesPorDia.
+    /// </summary>
+    public static decimal[] ManutencaoPorDia(ContextoDietaDto contexto, ICalculadoraGastoCalorico calculadora) =>
+        ComposicaoPorDia(contexto, calculadora).Select(c => c.Manutencao).ToArray();
 
     /// <summary>
     /// Calorias da fórmula de cada dia da semana (1 = segunda ... 7 = domingo,
     /// ISO 8601, como em UsuarioModalidade.DiasSemana).
     /// </summary>
     public static IReadOnlyDictionary<int, decimal> CaloriasBasePorDia(
-        ContextoDietaDto contexto, ICalculadoraGastoCalorico calculadora)
-    {
-        var manutencao = ManutencaoPorDia(contexto, calculadora);
+        ContextoDietaDto contexto, ICalculadoraGastoCalorico calculadora) =>
+        ComposicaoPorDia(contexto, calculadora).ToDictionary(c => c.DiaSemana, c => c.MetaFormula);
+}
 
-        return Enumerable.Range(1, 7).ToDictionary(
-            dia => dia,
-            dia => AplicarObjetivo(manutencao[dia - 1], contexto.Objetivo, contexto.Peso));
-    }
+/// <summary>
+/// Uma sessão de treino de um dia: o índice da modalidade em
+/// ContextoDietaDto.Modalidades (para quem precisa voltar ao Id) e o gasto
+/// líquido da sessão.
+/// </summary>
+public sealed record TreinoDoDia(int IndiceModalidade, string Nome, decimal Horas, decimal Kcal);
+
+/// <summary>
+/// As parcelas da meta da fórmula de um dia (1 = segunda ... 7 = domingo):
+/// gasto em repouso (TMB) + atividade fora do treino (TMB × 0,4) + treinos
+/// = manutenção; manutenção + objetivo = meta da fórmula, antes da meta
+/// adaptativa e do piso de carboidrato.
+/// </summary>
+public sealed record ComposicaoFormulaDia(
+    int DiaSemana,
+    decimal GastoRepouso,
+    decimal AtividadeForaDoTreino,
+    IReadOnlyList<TreinoDoDia> Treinos,
+    decimal Manutencao,
+    decimal Objetivo,
+    bool TetoDeficitAplicado)
+{
+    public decimal MetaFormula => Manutencao + Objetivo;
 }

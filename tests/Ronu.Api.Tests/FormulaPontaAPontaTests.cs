@@ -51,6 +51,20 @@ public class FormulaPontaAPontaTests
         // A manutenção por dia segue para a MetaDieta (manter peso: igual à meta).
         Assert.Equal(new[] { 3290.5m, 3290.5m, 2474.5m, 3290.5m, 3290.5m, 2474.5m, 2474.5m }, dieta.ManutencaoPorDia);
 
+        // A composição salva em cada dia soma a meta mostrada (3290,5 → 3291).
+        var segunda = dieta.Dias.Single(d => d.DiaSemana == "Segunda-feira").ComposicaoMeta!;
+        Assert.Equal((1768, 707, 816, 0, 0, 0, 3291),
+            (segunda.GastoRepouso, segunda.AtividadeForaDoTreino, Assert.Single(segunda.Treino).Kcal,
+             segunda.Objetivo, segunda.AjusteProgresso, segunda.PisoCarboidrato, segunda.Meta));
+        Assert.Equal("Jiu-jitsu", segunda.Treino[0].Nome);
+        var quarta = dieta.Dias.Single(d => d.DiaSemana == "Quarta-feira").ComposicaoMeta!;
+        Assert.Empty(quarta.Treino);
+        Assert.Equal(2475, quarta.Meta);
+        Assert.All(dieta.Dias, d => Assert.Equal(
+            d.ComposicaoMeta!.Meta,
+            d.ComposicaoMeta.GastoRepouso + d.ComposicaoMeta.AtividadeForaDoTreino + d.ComposicaoMeta.Treino.Sum(t => t.Kcal)
+                + d.ComposicaoMeta.Objetivo + d.ComposicaoMeta.AjusteProgresso + d.ComposicaoMeta.PisoCarboidrato));
+
         // O prompt leva as metas sem casas decimais (F0 arredonda o ,5 para cima).
         Assert.Contains("- Segunda-feira: 3291 kcal", gemini.Prompt);
         Assert.Contains("- Quarta-feira: 2475 kcal", gemini.Prompt);
