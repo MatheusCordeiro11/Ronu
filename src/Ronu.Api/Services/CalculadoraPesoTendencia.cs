@@ -31,7 +31,10 @@ public class CalculadoraPesoTendencia : ICalculadoraPesoTendencia
         {
             Data = ordenados[0].Data,
             PesoBruto = ordenados[0].Peso,
-            PesoTendencia = tendenciaAnterior
+            PesoTendencia = tendenciaAnterior,
+            Id = ordenados[0].Id,
+            Objetivo = ordenados[0].Objetivo,
+            Aderencia = ordenados[0].Aderencia
         });
 
         for (int i = 1; i < ordenados.Count; i++)
@@ -49,7 +52,10 @@ public class CalculadoraPesoTendencia : ICalculadoraPesoTendencia
             {
                 Data = ordenados[i].Data,
                 PesoBruto = ordenados[i].Peso,
-                PesoTendencia = novaTendencia
+                PesoTendencia = novaTendencia,
+                Id = ordenados[i].Id,
+                Objetivo = ordenados[i].Objetivo,
+                Aderencia = ordenados[i].Aderencia
             });
 
             tendenciaAnterior = novaTendencia;

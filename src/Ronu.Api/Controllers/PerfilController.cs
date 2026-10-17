@@ -37,15 +37,25 @@ public class PerfilController : ControllerBase
     {
         var usuario = await _context.Usuarios.FirstAsync(u => u.Id == UsuarioIdLogado);
 
-        return Ok(new PerfilResponse
-        {
-            Altura = usuario.Altura,
-            Sexo = usuario.Sexo,
-            DataNascimento = usuario.DataNascimento,
-            RotinaDiaria = usuario.RotinaDiaria,
-            OrcamentoSemanal = usuario.OrcamentoSemanal
-        });
+        return Ok(MontarResposta(usuario));
+
     }
+
+    // Mesma resposta no GET e no PUT.
+    private static PerfilResponse MontarResposta(Models.Usuario usuario) => new()
+    {
+        Altura = usuario.Altura,
+        Sexo = usuario.Sexo,
+        DataNascimento = usuario.DataNascimento,
+        RotinaDiaria = usuario.RotinaDiaria,
+        OrcamentoSemanal = usuario.OrcamentoSemanal,
+        Nome = usuario.Nome,
+        Email = usuario.Email,
+        // A coluna guarda "" quando não há UF; a resposta devolve null.
+        Estado = string.IsNullOrWhiteSpace(usuario.Estado) ? null : usuario.Estado,
+        TemSenha = usuario.SenhaHash is not null,
+        TemGoogle = usuario.GoogleId is not null
+    };
 
     // Valores fixos enviados pelas pills de alimentacao.html — sem normalização
     // (diferente do Estado), porque não vêm de digitação livre.
@@ -80,14 +90,8 @@ public class PerfilController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        return Ok(new PerfilResponse
-        {
-            Altura = usuario.Altura,
-            Sexo = usuario.Sexo,
-            DataNascimento = usuario.DataNascimento,
-            RotinaDiaria = usuario.RotinaDiaria,
-            OrcamentoSemanal = usuario.OrcamentoSemanal
-        });
+        return Ok(MontarResposta(usuario));
+
     }
 
     private static readonly HashSet<string> SiglasUf = new()

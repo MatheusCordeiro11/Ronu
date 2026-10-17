@@ -11,4 +11,11 @@ public class PesoTendenciaDto
     public required DateTime Data { get; set; }
     public required decimal PesoBruto { get; set; }
     public required decimal PesoTendencia { get; set; }
+
+    // Do registro de origem (ObjetivoUsuario), para a tabela "Com a dieta" e
+    // o contador "5 pesagens com o mesmo objetivo" do Progresso. Só
+    // acrescentam campos: o frontend antigo ignora.
+    public int? Id { get; set; }
+    public string? Objetivo { get; set; }
+    public string? Aderencia { get; set; }
 }

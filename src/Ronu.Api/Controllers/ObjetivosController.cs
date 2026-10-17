@@ -170,7 +170,7 @@ public class ObjetivosController : ControllerBase
     {
         var registros = await _context.ObjetivosUsuario
             .Where(o => o.UsuarioId == UsuarioIdLogado)
-            .Select(o => new RegistroPesoDto { Data = o.DataRegistro, Peso = o.Peso })
+            .Select(o => new RegistroPesoDto { Data = o.DataRegistro, Peso = o.Peso, Id = o.Id, Objetivo = o.Objetivo, Aderencia = o.Aderencia })
             .ToListAsync();
 
         var resultado = _calculadoraPesoTendencia.Calcular(registros);
