@@ -1,0 +1,1144 @@
+/*
+  Ronu — Componentes comuns do "Dojo Noturno" / "Washi"
+  Depende de base/tokens.css e base/base.css. Nenhuma cor escrita direto.
+
+  Índice: logo · tema · avatar · cabeçalho · abas do celular · faixa de título
+  · grade · botões · campos · segmentado · opções · chips · dias · cards
+  · avisos · nota · carimbo · quimono · etapas · barras e anéis · carregando
+  · vazio · tabela · rodapé · gráficos que se desenham · entrada
+*/
+
+/* ---------- Logo: quadrado com 浪 + RONU ---------- */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-3);
+  color: var(--texto);
+  text-decoration: none;
+  flex: none;
+}
+
+.logo:hover {
+  color: var(--texto);
+}
+
+.logo-selo {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--acento);
+  color: var(--sobre-acento);
+  border-radius: var(--raio);
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.logo-nome {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+/* ---------- Botão sol/lua ---------- */
+.botao-tema {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  color: var(--texto-2);
+  border: 1px solid var(--borda);
+  border-radius: 50%;
+  transition: color var(--d-rapida) ease, border-color var(--d-rapida) ease;
+}
+
+.botao-tema:hover {
+  color: var(--texto);
+  border-color: var(--borda-hover);
+}
+
+.botao-tema svg {
+  width: 18px;
+  height: 18px;
+  transition: transform var(--d-media) var(--curva-saida);
+}
+
+.botao-tema:active svg {
+  transform: rotate(-25deg) scale(0.9);
+}
+
+/* O ícone mostra para onde o clique leva: no escuro, o sol; no claro, a lua. */
+.botao-tema .icone-lua,
+.botao-tema[data-modo="claro"] .icone-sol {
+  display: none;
+}
+
+.botao-tema[data-modo="claro"] .icone-lua {
+  display: block;
+}
+
+/* ---------- Avatar com iniciais ---------- */
+.avatar {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--superficie-3);
+  border: 1px solid var(--acento);
+  color: var(--acento-texto);
+  font-weight: 600;
+  font-size: var(--t-apoio);
+  text-decoration: none;
+  transition: background-color var(--d-rapida) ease;
+}
+
+.avatar:hover {
+  color: var(--acento-texto);
+  border-color: var(--texto);
+}
+
+/* ---------- Cabeçalho das telas logadas ---------- */
+.cabecalho {
+  border-bottom: 1px solid var(--borda);
+  background: var(--fundo);
+}
+
+.cabecalho-linha {
+  min-height: var(--altura-cabecalho);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-6);
+}
+
+.cabecalho-esquerda {
+  display: flex;
+  align-items: center;
+  gap: var(--e-8);
+  min-width: 0;
+}
+
+.cabecalho-acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+}
+
+.nav-principal {
+  display: flex;
+  gap: var(--e-1);
+  font-size: var(--t-apoio);
+}
+
+.nav-principal a {
+  padding: 10px 14px;
+  border-radius: var(--raio);
+  color: var(--texto-2);
+  text-decoration: none;
+  transition: color var(--d-rapida) ease, background-color var(--d-rapida) ease;
+}
+
+.nav-principal a:hover {
+  color: var(--texto);
+}
+
+.nav-principal a[aria-current="page"] {
+  color: var(--texto);
+  background: var(--superficie-3);
+}
+
+/* ---------- Abas do celular (5, com ícone) ---------- */
+.abas {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .nav-principal {
+    display: none;
+  }
+
+  .cabecalho-linha .logo-selo {
+    width: 28px;
+    height: 28px;
+    font-size: 15px;
+  }
+
+  .cabecalho-linha .logo-nome {
+    font-size: 20px;
+  }
+
+  .cabecalho .avatar,
+  .cabecalho .botao-tema {
+    width: 36px;
+    height: 36px;
+  }
+
+  .abas {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+    background: var(--superficie);
+    border-top: 1px solid var(--borda);
+  }
+
+  .abas a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 0;
+    font-size: 11px;
+    color: var(--texto-2);
+    text-decoration: none;
+    border-radius: var(--raio);
+  }
+
+  .abas a svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .abas a[aria-current="page"] {
+    color: var(--acento-texto);
+    font-weight: 600;
+  }
+
+  /* Espaço para o conteúdo não ficar embaixo das abas. */
+  .com-abas {
+    padding-bottom: calc(var(--altura-abas) + env(safe-area-inset-bottom));
+  }
+}
+
+/* ---------- Faixa de título (topo de cada tela, sobre a grade) ---------- */
+.faixa-titulo {
+  border-bottom: 1px solid var(--borda);
+  position: relative;
+  overflow: hidden;
+}
+
+.faixa-titulo-conteudo {
+  padding-top: var(--e-9);
+  padding-bottom: var(--e-9);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--e-6);
+  flex-wrap: wrap;
+}
+
+.faixa-titulo-texto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  max-width: 640px;
+}
+
+.faixa-titulo-texto p {
+  color: var(--texto-2);
+  font-size: var(--t-corpo-g);
+  line-height: 1.6;
+}
+
+/* Texto sobre a grade ganha o fundo atrás, para a malha não cruzar as letras. */
+.sobre-grade {
+  background: var(--fundo);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+@media (max-width: 720px) {
+  .faixa-titulo-conteudo {
+    padding-top: var(--e-7);
+    padding-bottom: var(--e-7);
+  }
+}
+
+/* ---------- Grade quadriculada que desliza (enfeite) ---------- */
+.grade {
+  background-image:
+    linear-gradient(var(--grade) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grade) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: grade-desliza 18s linear infinite;
+}
+
+@keyframes grade-desliza {
+  to {
+    background-position: 40px 40px, 40px 40px;
+  }
+}
+
+/* ---------- Botões ---------- */
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-2);
+  min-height: 44px;
+  padding: 12px 22px;
+  border: 1px solid transparent;
+  border-radius: var(--raio);
+  font-family: var(--fonte-corpo);
+  font-size: var(--t-corpo);
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  position: relative;
+  transition: filter var(--d-rapida) ease, border-color var(--d-rapida) ease,
+    background-color var(--d-rapida) ease, color var(--d-rapida) ease, transform var(--d-rapida) ease;
+}
+
+.botao:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.botao-primario {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--sobre-acento);
+}
+
+.botao-primario:hover {
+  color: var(--sobre-acento);
+  filter: brightness(1.08);
+}
+
+:root[data-tema="claro"] .botao-primario:hover {
+  filter: brightness(0.92);
+}
+
+.botao-fantasma {
+  background: transparent;
+  border-color: var(--linha);
+  color: var(--texto);
+  font-weight: 500;
+}
+
+.botao-fantasma:hover {
+  color: var(--texto);
+  border-color: var(--borda-forte);
+}
+
+/* Ação discreta: só texto sublinhado ("Pular por agora", "Cancelar"). */
+.botao-texto {
+  min-height: 44px;
+  padding: 0 var(--e-2);
+  background: transparent;
+  border: 0;
+  color: var(--texto-2);
+  font-size: var(--t-corpo);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.botao-texto:hover {
+  color: var(--texto);
+}
+
+.botao-grande {
+  min-height: 52px;
+  padding: 16px 28px;
+  font-size: var(--t-corpo-g);
+}
+
+.botao-pequeno {
+  min-height: 40px;
+  padding: 10px 16px;
+  font-size: var(--t-apoio);
+}
+
+.botao-bloco {
+  width: 100%;
+}
+
+.botao:disabled,
+.botao[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: none;
+}
+
+/* Carregando: o texto continua (o JS troca por "Entrando..." etc.) e uma
+   linha corre embaixo do botão, para o estado ser visível sem girar nada. */
+.botao[aria-busy="true"] {
+  cursor: progress;
+  opacity: 0.85;
+}
+
+.botao[aria-busy="true"]::after {
+  content: '';
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 7px;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+  opacity: 0.6;
+  transform-origin: left;
+  animation: botao-carregando 1.2s var(--curva-suave) infinite;
+}
+
+@keyframes botao-carregando {
+  0% { transform: scaleX(0); }
+  60% { transform: scaleX(1); opacity: 0.6; }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+
+/* ---------- Campos ---------- */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  min-width: 0;
+}
+
+.campo-rotulo {
+  font-size: var(--t-apoio);
+  font-weight: 500;
+  color: var(--texto);
+}
+
+.campo-linha-rotulo {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--e-3);
+}
+
+.entrada {
+  width: 100%;
+  min-height: 48px;
+  padding: 13px 15px;
+  background: var(--superficie);
+  border: 1px solid var(--borda-campo);
+  border-radius: var(--raio);
+  color: var(--texto);
+  font-size: var(--t-corpo-g);
+  line-height: 1.4;
+  transition: border-color var(--d-rapida) ease, background-color var(--d-rapida) ease;
+}
+
+/* Campo sobre card (Progresso, Perfil, Alimentação): fundo da página. */
+.entrada-no-card {
+  background: var(--fundo);
+}
+
+.entrada::placeholder {
+  color: var(--texto-3);
+  opacity: 1;
+}
+
+.entrada:hover {
+  border-color: var(--borda-forte);
+}
+
+.entrada:focus,
+.entrada:focus-visible {
+  outline: none;
+  border-color: var(--acento);
+}
+
+.entrada[aria-invalid="true"] {
+  border-color: var(--erro-campo);
+}
+
+textarea.entrada {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+select.entrada {
+  appearance: none;
+  padding-right: 40px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--texto-2) 50%),
+    linear-gradient(135deg, var(--texto-2) 50%, transparent 50%);
+  background-position: calc(100% - 20px) 52%, calc(100% - 15px) 52%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.campo-dica {
+  font-size: var(--t-pequeno);
+  color: var(--texto-2);
+  line-height: 1.5;
+}
+
+.campo-erro {
+  font-size: var(--t-pequeno);
+  color: var(--acento-texto);
+  line-height: 1.5;
+}
+
+/* ---------- Segmentado (Masculino | Feminino, períodos, versões) ---------- */
+.segmentado {
+  display: flex;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  overflow: hidden;
+  background: var(--fundo);
+}
+
+.segmentado > button {
+  flex: 1;
+  min-height: 46px;
+  padding: 10px 16px;
+  border: 0;
+  background: transparent;
+  color: var(--texto-2);
+  font-size: var(--t-apoio);
+  white-space: nowrap;
+  transition: background-color var(--d-rapida) ease, color var(--d-rapida) ease;
+}
+
+.segmentado > button + button {
+  border-left: 1px solid var(--borda);
+}
+
+.segmentado > button:hover {
+  color: var(--texto);
+}
+
+.segmentado > button[aria-checked="true"],
+.segmentado > button[aria-selected="true"] {
+  background: var(--superficie-3);
+  color: var(--texto);
+}
+
+/* Variante cheia: a escolha fica no acento (sexo, objetivo no registro). */
+.segmentado-acento > button {
+  color: var(--texto);
+  font-size: var(--t-corpo);
+}
+
+.segmentado-acento > button[aria-checked="true"] {
+  background: var(--acento);
+  color: var(--sobre-acento);
+  font-weight: 600;
+}
+
+.segmentado > button:focus-visible {
+  outline-offset: -3px;
+}
+
+/* ---------- Opção em card (objetivo, aderência) ---------- */
+.opcao {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--e-4);
+  width: 100%;
+  padding: 18px 20px;
+  background: transparent;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-2);
+  color: var(--texto);
+  text-align: left;
+  transition: border-color var(--d-rapida) ease, background-color var(--d-rapida) ease;
+}
+
+.opcao:hover {
+  border-color: var(--borda-hover);
+}
+
+.opcao[aria-checked="true"],
+.opcao[aria-pressed="true"] {
+  background: var(--superficie-3);
+  border-color: var(--acento);
+}
+
+.opcao-titulo {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.opcao-dica {
+  font-size: var(--t-apoio);
+  color: var(--texto-2);
+  font-weight: 400;
+}
+
+.opcao[aria-checked="true"] .opcao-dica,
+.opcao[aria-pressed="true"] .opcao-dica {
+  color: var(--texto-2-ativo);
+}
+
+/* ---------- Chips (alimentos, modalidades) ---------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-1);
+  min-height: 36px;
+  padding: 6px 14px;
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-pilula);
+  background: transparent;
+  color: var(--texto);
+  font-size: var(--t-corpo);
+  line-height: 1.3;
+  transition: border-color var(--d-rapida) ease, background-color var(--d-rapida) ease, color var(--d-rapida) ease;
+}
+
+button.chip:hover {
+  border-color: var(--borda-forte);
+}
+
+.chip-pequeno {
+  min-height: 0;
+  padding: 5px 12px;
+  font-size: var(--t-pequeno);
+}
+
+.chip-marcado,
+.chip[aria-pressed="true"] {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--sobre-acento);
+  font-weight: 600;
+}
+
+.chip-gosto {
+  background: var(--superficie-3);
+  border-color: var(--acento);
+}
+
+/* "Prefiro evitar": tracejado no acento, para não depender só da cor. */
+.chip-evitar {
+  border-style: dashed;
+  border-color: var(--acento);
+  color: var(--acento-texto);
+}
+
+.chip-sugestao {
+  border-style: dashed;
+  transition: transform var(--d-media) var(--curva-saida), border-color var(--d-rapida) ease;
+}
+
+.chip-sugestao:hover {
+  transform: translateY(-2px);
+}
+
+.chip-com-remover {
+  padding-right: 4px;
+}
+
+.chip-remover {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  opacity: 0.75;
+}
+
+.chip-remover:hover {
+  opacity: 1;
+  background: var(--superficie-3);
+}
+
+.chip-remover svg {
+  width: 12px;
+  height: 12px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+}
+
+/* ---------- Dias da semana (7 botões) ---------- */
+.dias {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.dias > button,
+.dias > span {
+  min-height: 40px;
+  padding: 8px 0;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: transparent;
+  color: var(--texto);
+  font-size: var(--t-pequeno);
+  font-weight: 600;
+  text-align: center;
+  transition: background-color var(--d-rapida) ease, border-color var(--d-rapida) ease, color var(--d-rapida) ease;
+}
+
+.dias > span {
+  color: var(--texto-2);
+  font-weight: 400;
+}
+
+.dias > button:hover {
+  border-color: var(--borda-hover);
+}
+
+.dias > [aria-pressed="true"],
+.dias > .dia-treino {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--sobre-acento);
+  font-weight: 600;
+}
+
+/* ---------- Cards ---------- */
+.cartao {
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-card);
+  padding: var(--e-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  min-width: 0;
+}
+
+.cartao-cabeca {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--e-4);
+  flex-wrap: wrap;
+}
+
+.cartao-link {
+  font-size: var(--t-pequeno);
+  color: var(--acento-texto);
+}
+
+/* Zoom leve no hover, como nas telas aprovadas. Só em ponteiro fino. */
+@media (hover: hover) and (pointer: fine) {
+  .ergue {
+    transition: transform var(--d-media) var(--curva-saida), border-color var(--d-media) ease;
+  }
+
+  .ergue:hover {
+    transform: scale(1.012);
+    border-color: var(--borda-hover);
+  }
+}
+
+/* ---------- Avisos de formulário ---------- */
+.aviso {
+  padding: 14px 16px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  font-size: var(--t-corpo);
+  line-height: 1.5;
+  color: var(--texto);
+}
+
+.aviso-erro {
+  border-color: var(--erro-borda);
+  background: var(--erro-fundo);
+}
+
+.aviso-sucesso {
+  border-color: var(--sucesso-borda);
+  background: var(--sucesso-fundo);
+}
+
+/* ---------- Nota: traço curto no acento antes do texto ---------- */
+.nota {
+  display: flex;
+  align-items: baseline;
+  gap: var(--e-3);
+  font-size: var(--t-apoio);
+  line-height: 1.55;
+  color: var(--texto-2);
+}
+
+.nota::before {
+  content: '';
+  flex: none;
+  width: 14px;
+  height: 1px;
+  background: var(--acento);
+  transform: translateY(-0.3em);
+}
+
+.nota-forte {
+  color: var(--texto);
+}
+
+/* ---------- Carimbo 浪人 ---------- */
+.carimbo {
+  width: 60px;
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 2px solid var(--acento);
+  border-radius: var(--raio-2);
+  background: var(--fundo);
+  color: var(--acento);
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 24px;
+  line-height: 1.15;
+  transform: rotate(-4deg);
+  animation: carimbo-bate 7s ease-out infinite;
+  user-select: none;
+}
+
+@keyframes carimbo-bate {
+  0%, 62% { transform: rotate(-4deg) scale(1); opacity: 1; }
+  66% { transform: rotate(-8deg) scale(1.35); opacity: 0; }
+  72% { transform: rotate(-4deg) scale(0.92); opacity: 1; }
+  76%, 100% { transform: rotate(-4deg) scale(1); }
+}
+
+.carimbo-pequeno {
+  width: 56px;
+  padding: 10px 0;
+  font-size: 22px;
+}
+
+/* ---------- Quimono (SVG provisório) ---------- */
+.quimono {
+  transform-origin: 50% 40%;
+  animation: quimono-balanca 9s ease-in-out infinite;
+}
+
+@keyframes quimono-balanca {
+  0%, 100% { transform: perspective(900px) rotateY(-14deg) translateY(0); }
+  50% { transform: perspective(900px) rotateY(14deg) translateY(-12px); }
+}
+
+.quimono .q-corpo { fill: var(--quimono); }
+.quimono .q-sombra-1 { fill: var(--quimono-sombra-1); }
+.quimono .q-sombra-2 { fill: var(--quimono-sombra-2); }
+.quimono .q-costura { stroke: var(--quimono-costura); stroke-width: 2; fill: none; }
+.quimono .q-faixa { fill: var(--quimono-faixa); transition: fill 0.8s ease; }
+.quimono .q-etiqueta { fill: var(--acento); }
+
+/* Card que flutua ao lado do quimono ("Hoje · jiu-jitsu 3.056 kcal"). */
+.flutua {
+  background: var(--superficie-2);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-card);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: flutua 6s ease-in-out infinite;
+}
+
+@keyframes flutua {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* ---------- Etapas (Conta · Perfil · Objetivo · Treino · Alimentação) ---------- */
+.etapas {
+  display: grid;
+  grid-template-columns: repeat(var(--etapas, 5), minmax(0, 1fr));
+  gap: var(--e-2);
+}
+
+.etapas li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  font-size: var(--t-rotulo);
+  color: var(--texto-2);
+}
+
+.etapas li::before {
+  content: '';
+  height: 3px;
+  border-radius: 2px;
+  background: var(--linha);
+  transition: background-color 0.4s ease, opacity 0.4s ease;
+}
+
+.etapas .feita {
+  color: var(--texto);
+}
+
+.etapas .feita::before {
+  background: var(--acento);
+}
+
+.etapas [aria-current="step"] {
+  color: var(--texto);
+  font-weight: 600;
+}
+
+.etapas [aria-current="step"]::before {
+  background: var(--acento);
+  opacity: 0.55;
+}
+
+/* ---------- Barras e anéis ---------- */
+.trilho {
+  position: relative;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--borda);
+  overflow: hidden;
+}
+
+.trilho-g {
+  height: 6px;
+  background: var(--superficie-3);
+}
+
+.preenche {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--acento);
+}
+
+.preenche-texto {
+  background: var(--texto);
+}
+
+.preenche-apoio {
+  background: var(--texto-2);
+}
+
+.preenche-negativo {
+  background: var(--borda-forte);
+}
+
+.anel-fundo {
+  stroke: var(--borda);
+  fill: none;
+}
+
+.anel-valor {
+  stroke: var(--acento);
+  fill: none;
+  stroke-linecap: round;
+}
+
+/* ---------- Carregando (barra que corre) ---------- */
+.carregando {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--borda);
+  overflow: hidden;
+}
+
+.carregando::after {
+  content: '';
+  display: block;
+  height: 100%;
+  background: var(--acento);
+  transform-origin: left;
+  animation: carregando 2.4s ease-in-out infinite;
+}
+
+@keyframes carregando {
+  0% { transform: scaleX(0); }
+  60% { transform: scaleX(1); }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+
+/* ---------- Estado vazio ---------- */
+.vazio {
+  padding: var(--e-7);
+  border: 1px dashed var(--linha);
+  border-radius: var(--raio-card);
+  color: var(--texto-2);
+  line-height: 1.6;
+}
+
+/* ---------- Separador "ou" ---------- */
+.separador-ou {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: var(--t-pequeno);
+  color: var(--texto-2);
+}
+
+.separador-ou::before,
+.separador-ou::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--borda);
+}
+
+/* ---------- Tabela ---------- */
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--t-corpo);
+}
+
+.tabela th {
+  padding: 14px 12px;
+  text-align: left;
+  font-size: var(--t-rotulo);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--texto-2);
+}
+
+.tabela td {
+  padding: 14px 12px;
+  border-top: 1px solid var(--divisor);
+}
+
+.tabela th:first-child,
+.tabela td:first-child {
+  padding-left: var(--e-7);
+}
+
+.tabela th:last-child,
+.tabela td:last-child {
+  padding-right: var(--e-7);
+}
+
+/* ---------- Rodapé ---------- */
+.rodape {
+  border-top: 1px solid var(--borda);
+}
+
+.rodape-linha {
+  padding-top: var(--e-6);
+  padding-bottom: var(--e-6);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e-4);
+  flex-wrap: wrap;
+  font-size: var(--t-pequeno);
+  color: var(--texto-2);
+}
+
+/* ---------- Gráficos que se desenham (ver js/base/movimento.js) ----------
+   O estado "antes" só existe com .anima no <html>: sem JS, ou com movimento
+   reduzido, o gráfico aparece pronto. */
+.anima [data-anima-grupo] [data-anima="linha"] {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.anima [data-anima-grupo] [data-anima="barra-h"] {
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.anima [data-anima-grupo] [data-anima="barra-v"] {
+  transform: scaleY(0.08);
+  transform-origin: bottom;
+}
+
+.anima [data-anima-grupo] [data-anima="anel"] {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.anima [data-anima-grupo] [data-anima="surge"],
+.anima [data-anima-grupo] [data-anima="pontos"] {
+  opacity: 0;
+}
+
+.anima .em-cena [data-anima] {
+  animation-duration: var(--d-desenho);
+  animation-timing-function: var(--curva-saida);
+  animation-fill-mode: forwards;
+  animation-delay: var(--atraso, 0ms);
+}
+
+.anima .em-cena [data-anima="linha"] { animation-name: desenha-linha; }
+.anima .em-cena [data-anima="barra-h"] { animation-name: desenha-barra-h; }
+.anima .em-cena [data-anima="barra-v"] { animation-name: desenha-barra-v; }
+.anima .em-cena [data-anima="anel"] { animation-name: desenha-anel; }
+.anima .em-cena [data-anima="surge"] { animation-name: desenha-surge; animation-duration: var(--d-lenta); }
+.anima .em-cena [data-anima="pontos"] { animation-name: desenha-surge; animation-duration: var(--d-lenta); }
+
+@keyframes desenha-linha {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes desenha-barra-h {
+  to { transform: scaleX(1); }
+}
+
+@keyframes desenha-barra-v {
+  to { transform: scaleY(1); }
+}
+
+/* O anel para no valor real: --anel-fim = 1 − fração (ex.: 90% → 0.1). */
+@keyframes desenha-anel {
+  to { stroke-dashoffset: var(--anel-fim, 0); }
+}
+
+@keyframes desenha-surge {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Sem a animação, o anel precisa parar no valor real mesmo assim. */
+[data-anima="anel"] {
+  stroke-dasharray: 1;
+  stroke-dashoffset: var(--anel-fim, 0);
+}
+
+/* ---------- Entrada de conteúdo (uma vez, ao carregar) ---------- */
+.entra {
+  animation: entra var(--d-lenta) var(--curva-saida) both;
+  animation-delay: var(--atraso, 0ms);
+}
+
+@keyframes entra {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+.entra-lado {
+  animation: entra-lado 450ms var(--curva-saida) both;
+}
+
+@keyframes entra-lado {
+  from { opacity: 0; transform: translateX(18px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- Troca de tema: cruzamento curto das cores ---------- */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 280ms;
+  animation-timing-function: var(--curva-suave);
+}

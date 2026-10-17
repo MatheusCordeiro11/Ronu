@@ -1,0 +1,258 @@
+/*
+  Ronu — Base: reset, tipografia e superfícies do navegador.
+  Depende de tokens.css.
+*/
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scrollbar-color: var(--borda-forte) var(--fundo);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte-corpo);
+  font-size: var(--t-corpo);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  caret-color: var(--acento);
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Sem setas laterais nos campos numéricos: o valor continua digitável. */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+dl,
+dd {
+  margin: 0;
+}
+
+/* ---------- Superfícies do navegador ---------- */
+::selection {
+  background: var(--acento);
+  color: var(--sobre-acento);
+}
+
+:focus {
+  outline: none;
+}
+
+/* Um anel só, do acento, para teclado. O mouse não acende o anel. */
+:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: var(--raio-1);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--fundo);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--borda-forte);
+  border: 2px solid var(--fundo);
+  border-radius: var(--raio-pilula);
+}
+
+/* ---------- Tipografia ---------- */
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--t-h1);
+}
+
+h2 {
+  font-size: var(--t-h2);
+}
+
+h3 {
+  font-size: var(--t-h3);
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+  transition: color var(--d-rapida) ease;
+}
+
+a:hover {
+  color: var(--acento-texto);
+}
+
+strong {
+  font-weight: 600;
+}
+
+/* Regra do número estável: peso, kcal e gramas não "dançam" quando o dígito muda. */
+.num,
+table {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Número grande no serifado: metas, pesos, totais. */
+.numero {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.numero-unidade {
+  font-family: var(--fonte-corpo);
+  font-weight: 400;
+  /* Proporcional ao número, mas nunca abaixo de 13px. */
+  font-size: max(0.4em, var(--t-pequeno));
+  color: var(--texto-2);
+}
+
+/* Rótulo curto em maiúsculas espaçadas, como nas telas aprovadas. */
+.rotulo {
+  font-size: var(--t-rotulo);
+  font-weight: 500;
+  letter-spacing: var(--rastreio-rotulo);
+  text-transform: uppercase;
+  color: var(--texto-2);
+}
+
+.rotulo-acento {
+  color: var(--acento-texto);
+}
+
+/* Etiqueta mono, usada só na landing. */
+.mono {
+  font-family: var(--fonte-mono);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.texto-2 {
+  color: var(--texto-2);
+}
+
+.apoio {
+  font-size: var(--t-pequeno);
+  color: var(--texto-2);
+  line-height: 1.5;
+}
+
+/* ---------- Layout ---------- */
+.conteiner {
+  width: 100%;
+  max-width: var(--largura);
+  margin: 0 auto;
+  padding-left: var(--margem);
+  padding-right: var(--margem);
+}
+
+.oculto-visual {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* Link "pular para o conteúdo": só aparece no foco do teclado. */
+.pular-conteudo {
+  position: absolute;
+  left: var(--e-4);
+  top: -100px;
+  z-index: 100;
+  padding: var(--e-3) var(--e-4);
+  background: var(--acento);
+  color: var(--sobre-acento);
+  border-radius: var(--raio);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pular-conteudo:focus-visible {
+  top: var(--e-4);
+}
+
+.pular-conteudo:hover {
+  color: var(--sobre-acento);
+}
+
+/* ---------- Movimento reduzido ----------
+   Desliga toda animação e transição. Os elementos que entram com animação
+   começam visíveis (ver componentes.css), então nada some. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

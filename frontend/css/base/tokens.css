@@ -1,0 +1,172 @@
+/*
+  Ronu — Tokens do design system "Dojo Noturno" (escuro) e "Washi" (claro)
+
+  Toda cor da interface sai daqui: nenhuma tela usa cor escrita direto.
+  O modo escuro é a identidade e fica em :root. O Washi entra por
+  [data-tema="claro"], que o js/base/tema.js aplica no <html> antes da
+  primeira pintura (escolha salva ou, na falta dela, o prefers-color-scheme
+  do aparelho). Sem JavaScript a página fica no escuro.
+
+  Os pares escuro/claro foram tirados das telas aprovadas em docs/redesign/telas
+  (cada tela comparada com a sua versão ...Washi). Três ajustes de contraste
+  aprovados em 2026-10-16: --acento-texto no Washi, --borda-campo a 3:1 e
+  --texto-2-ativo para texto secundário sobre --superficie-3 no Washi.
+*/
+
+:root {
+  color-scheme: dark;
+
+  /* ---------- Superfícies ---------- */
+  --fundo: #0F0E0D;
+  --superficie: #151311;          /* cards */
+  --superficie-2: #1A1816;        /* cards flutuantes, catálogo */
+  --superficie-3: #1F1C19;        /* item ativo: nav, opção marcada, avatar */
+  --superficie-hover: #24201C;
+
+  /* ---------- Linhas ---------- */
+  --borda: #2C2925;               /* borda padrão de card e divisória */
+  --linha: #3A3631;               /* chips, botão fantasma, etapa futura */
+  --borda-hover: #4A443D;
+  --borda-forte: #5C564D;         /* hover de sugestão, barra negativa */
+  --borda-campo: #65615A;         /* contorno de campo: 3:1 contra o fundo */
+  --divisor: #221F1C;             /* linhas internas, trilho de barra */
+  --grade: #211E1A;               /* quadriculado do fundo */
+
+  /* ---------- Texto ---------- */
+  --texto: #F0E9DD;
+  --texto-2: #A39C91;             /* secundário: 7:1 no fundo */
+  --texto-2-ativo: #A39C91;       /* secundário sobre --superficie-3 */
+  --texto-3: #6E675E;             /* só placeholder e enfeite: não passa 4,5:1 */
+  --ponto: #7A7368;               /* pesagens no gráfico pequeno */
+
+  /* ---------- Acento ---------- */
+  --acento: #E5533B;
+  --acento-texto: #E5533B;        /* acento usado como texto pequeno */
+  --sobre-acento: #0F0E0D;        /* texto em cima do acento */
+
+  /* ---------- Estados ---------- */
+  --erro-borda: #7A2E22;
+  --erro-fundo: #2A1512;
+  --erro-campo: #B5462F;
+  --sucesso-borda: #3F5A3A;
+  --sucesso-fundo: #151F14;
+
+  /* ---------- Quimono (ilustração provisória) ---------- */
+  --quimono: #F0E9DD;
+  --quimono-sombra-1: #DDD4C4;
+  --quimono-sombra-2: #E7DFD1;
+  --quimono-costura: #CFC5B3;
+  --quimono-faixa: #141210;
+  --quimono-faixa-borda: #BDB3A1;
+
+  /* Faixas do onboarding: azul, roxa e marrom são iguais nos dois modos */
+  --faixa-branca: #E7DFD1;
+  --faixa-azul: #2F5D8A;
+  --faixa-roxa: #6A3E7C;
+  --faixa-marrom: #6B4A2E;
+  --faixa-preta: #141210;
+
+  /* ---------- Tipografia ---------- */
+  --fonte-titulo: 'Shippori Mincho B1', 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif;
+  --fonte-corpo: 'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+  --fonte-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', monospace;
+
+  --t-rotulo: 0.75rem;            /* 12px, maiúsculas espaçadas */
+  --t-pequeno: 0.8125rem;         /* 13px */
+  --t-apoio: 0.875rem;            /* 14px */
+  --t-corpo: 0.9375rem;           /* 15px */
+  --t-corpo-g: 1rem;              /* 16px, campos (evita zoom no iOS) */
+  --t-lead: 1.0625rem;            /* 17px */
+  --t-h3: 1.375rem;               /* 22px, título de card */
+  --t-h2: 1.5rem;                 /* 24px, seção */
+  --t-h1: clamp(1.875rem, 1.35rem + 1.9vw, 2.75rem);   /* 30 → 44px */
+  --t-display: clamp(2.5rem, 1.6rem + 3.6vw, 4rem);    /* 40 → 64px */
+  --t-numero-g: clamp(2.5rem, 1.9rem + 2.2vw, 3.75rem); /* meta do dia */
+
+  --rastreio-rotulo: 0.2em;
+
+  /* ---------- Espaço (base 4px) ---------- */
+  --e-1: 0.25rem;
+  --e-2: 0.5rem;
+  --e-3: 0.75rem;
+  --e-4: 1rem;
+  --e-5: 1.25rem;
+  --e-6: 1.5rem;
+  --e-7: 2rem;
+  --e-8: 2.5rem;
+  --e-9: 3rem;
+  --e-10: 4rem;
+  --e-11: 6rem;
+
+  /* ---------- Forma ---------- */
+  --raio-1: 2px;
+  --raio: 3px;                    /* botões e campos */
+  --raio-2: 4px;                  /* opções, carimbo */
+  --raio-card: 6px;
+  --raio-pilula: 999px;           /* só chips e controles pequenos */
+
+  /* ---------- Layout ---------- */
+  --largura: 1320px;
+  --margem: 2.5rem;
+  --altura-cabecalho: 4.5rem;
+  --altura-abas: 4.25rem;
+
+  /* ---------- Movimento ---------- */
+  --curva-saida: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --curva-suave: cubic-bezier(0.4, 0, 0.2, 1);
+  --d-rapida: 160ms;
+  --d-media: 300ms;
+  --d-lenta: 600ms;
+  --d-desenho: 1100ms;            /* gráficos se desenhando */
+}
+
+:root[data-tema="claro"] {
+  color-scheme: light;
+
+  --fundo: #F2ECE0;
+  --superficie: #EAE3D5;
+  --superficie-2: #E4DCCC;
+  --superficie-3: #DFD6C5;
+  --superficie-hover: #DCD2C0;
+
+  --borda: #CFC4B0;
+  --linha: #BFB39D;
+  --borda-hover: #A89C86;
+  --borda-forte: #9A8E78;
+  --borda-campo: #898174;
+  --divisor: #D6CCB9;
+  --grade: #E2D9C8;
+
+  --texto: #1A1714;
+  --texto-2: #6B6254;
+  --texto-2-ativo: #645B4E;
+  --texto-3: #857A68;
+  --ponto: #7A6F5E;
+
+  --acento: #C23B22;
+  --acento-texto: #A53520;
+  --sobre-acento: #F2ECE0;
+
+  --erro-borda: #D9A79B;
+  --erro-fundo: #F7E1DB;
+  --erro-campo: #B23A24;
+  --sucesso-borda: #9DB592;
+  --sucesso-fundo: #E3EDDC;
+
+  --quimono: #1A1714;
+  --quimono-sombra-1: #2A2622;
+  --quimono-sombra-2: #33302B;
+  --quimono-costura: #4A443D;
+  --quimono-faixa: #F2ECE0;
+  --quimono-faixa-borda: #6B6254;
+
+  --faixa-branca: #F2ECE0;
+  --faixa-preta: #0A0908;
+}
+
+@media (max-width: 720px) {
+  :root {
+    --margem: 1rem;
+    --altura-cabecalho: 3.75rem;
+  }
+}

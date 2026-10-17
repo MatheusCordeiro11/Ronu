@@ -439,3 +439,5 @@ FodyWeavers.xsd
 *.msp
 
 src/Ronu.Api/Ronu.Api.http
+# Hooks do Impeccable para o Codex (ferramenta local do agente, não é código do projeto)
+.codex/
