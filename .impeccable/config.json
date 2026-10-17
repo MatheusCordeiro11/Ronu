@@ -29,6 +29,33 @@
         ],
         "createdAt": "2026-10-16T22:40:53.904Z",
         "reason": "Falso positivo: o card da tabela tem padding 0 de propósito; as células th/td têm recuo próprio de 12px a 32px"
+      },
+      {
+        "rule": "numbered-section-labels",
+        "value": "*",
+        "files": [
+          "frontend/landing/v1/index.html"
+        ],
+        "createdAt": "2026-10-17T19:22:31.090Z",
+        "reason": "Tela aprovada pelo usuário (docs/redesign/telas/MainScroll): a landing é uma sequência de 4 passos, e a numeração 01–04 diz em que passo se está"
+      },
+      {
+        "rule": "codex-grid-background",
+        "value": "*",
+        "files": [
+          "frontend/landing/v1/landing.css"
+        ],
+        "createdAt": "2026-10-17T19:22:31.156Z",
+        "reason": "Telas aprovadas pelo usuário em docs/redesign definem a grade quadriculada deslizando como enfeite da identidade"
+      },
+      {
+        "rule": "codex-grid-background",
+        "value": "*",
+        "files": [
+          "frontend/landing/v1/index.html"
+        ],
+        "createdAt": "2026-10-17T19:22:31.217Z",
+        "reason": "Telas aprovadas pelo usuário em docs/redesign definem a grade quadriculada deslizando como enfeite da identidade"
       }
     ]
   }

@@ -1,569 +1,956 @@
 /*
-  Ronu — Landing v1
-  Depende de frontend/css/styles.css (tokens + base).
+  Ronu — Landing com rolagem guiada (tela aprovada: docs/redesign/telas/MainScroll)
+  Depende de css/base/tokens.css, css/base/base.css e css/componentes.css.
+
+  Como o movimento funciona: cada .lp-secao recebe --p (0 a 1), escrito pelo
+  landing.js a partir da rolagem, com suavização. Todo o resto é calculado
+  aqui a partir de --p: os passos acendem, as barras crescem, a cena gira.
+  O JS só escreve --p e os números que contam.
+  Sem JS, ou com prefers-reduced-motion, --p fica em 1 e cada seção vira um
+  bloco comum, já no estado final (a classe .rolagem-guiada não entra).
+
+  Atalhos usados nas fórmulas:
+    seg(a, b)  = clamp(0, (p − a) / (b − a), 1)      fase de 0 a 1 entre a e b
+    liga(x)    = clamp(0, x × 1000, 1)                vira 1 assim que x > 0
 */
 
-/* ---------- Header ---------- */
-.site-header {
-  padding-top: var(--sp-4);
-  padding-bottom: var(--sp-4);
+:root {
+  --altura-topo: 4rem;
 }
 
-.site-header .container {
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ---------- Topo ---------- */
+.lp-topo {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--fundo);
+  border-bottom: 1px solid var(--borda);
+}
+
+.lp-topo-linha {
+  min-height: var(--altura-topo);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--e-5);
 }
 
-.wordmark {
-  font-family: var(--font-display);
-  font-size: var(--fs-md);
-  font-weight: 700;
+.lp-nav {
+  display: flex;
+  gap: var(--e-1);
+  font-size: var(--t-apoio);
+}
+
+.lp-nav a {
+  padding: 10px 12px;
+  color: var(--texto-2);
   text-decoration: none;
-  color: var(--text);
-  letter-spacing: -0.01em;
 }
 
-.wordmark span {
-  color: var(--accent);
+.lp-nav a:hover {
+  color: var(--texto);
 }
 
-.header-nav {
+.lp-topo-acoes {
   display: flex;
   align-items: center;
-  gap: var(--sp-4);
+  gap: var(--e-3);
 }
 
-.header-nav a {
-  font-size: var(--fs-xs);
+.lp-entrar {
+  padding: 10px 12px;
+  font-size: var(--t-apoio);
   text-decoration: none;
-  color: var(--text-muted);
-  transition: color 0.15s ease;
-}
-
-.header-nav a:hover {
-  color: var(--text);
 }
 
 /* ---------- Hero ---------- */
-/* overflow-x: clip corta só o que passa da borda lateral da seção (que
-   ocupa a largura toda da tela): no mobile, a espiral atrás do título
-   (125% da largura dele) passava 28px da tela à direita e deixava a página
-   com rolagem lateral. "clip", e não "hidden": não transforma a seção numa
-   área rolável nem mexe no eixo vertical. No desktop não corta nada — a
-   espiral termina bem antes da borda. */
-.hero {
-  padding-top: var(--sp-7);
-  padding-bottom: var(--sp-8);
-  overflow-x: clip;
-}
-
-.hero .container {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
-  gap: var(--sp-8);
-  align-items: center;
-}
-
-.hero-copy .eyebrow {
-  margin-bottom: var(--sp-4);
-}
-
-.hero-title {
-  font-size: var(--fs-4xl);
-  max-width: 15ch;
-}
-
-.hero-lede {
-  margin-top: var(--sp-4);
-  font-size: var(--fs-md);
-  max-width: 42ch;
-  color: var(--text-muted);
-}
-
-.hero-actions {
-  margin-top: var(--sp-6);
-  display: flex;
-  align-items: center;
-  gap: var(--sp-5);
-  flex-wrap: wrap;
-}
-
-.hero-secondary-link {
-  font-size: var(--fs-xs);
-  color: var(--text-muted);
-  text-decoration-line: underline;
-  text-decoration-color: var(--border);
-  text-decoration-thickness: var(--border-width);
-  text-underline-offset: 3px;
-  transition: color 0.15s ease, text-decoration-color 0.15s ease;
-}
-
-.hero-secondary-link:hover {
-  color: var(--text);
-  text-decoration-color: var(--text-muted);
-}
-
-/* Espaço do carrossel de fotos do hero. Proporção 4:5 (retrato) no
-   desktop. Fundo liso só enquanto a foto carrega: a grade 3×3 e o degradê
-   dourado eram do placeholder/ilustrações e riscavam as fotos; as marcas
-   de canto (::before, abaixo) ficam como moldura. */
-.hero-image-slot {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  border-radius: var(--radius);
-  border: var(--border-width) solid var(--border);
-  background: var(--surface);
+.lp-hero {
+  border-bottom: 1px solid var(--borda);
   overflow: hidden;
 }
 
-/* Espiral de pontos (phyllotaxis) como fundo decorativo atrás do título —
-   fica atrás do texto (z-index negativo), com opacidade baixa para não
-   atrapalhar a leitura. */
-.hero-title-wrap {
+.lp-hero-grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: var(--e-9);
+  align-items: center;
+  min-height: 640px;
+  padding-top: 88px;
+  padding-bottom: var(--e-10);
+}
+
+.lp-hero-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
   position: relative;
-  isolation: isolate;
-  width: fit-content;
-  max-width: 100%;
-}
-
-.hero-title-spiral {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 125%;
-  aspect-ratio: 1 / 1;
-  transform: translate(-50%, -50%);
-  z-index: -1;
-  opacity: 0.4;
-  pointer-events: none;
-  color: var(--accent);
-}
-
-.hero-title-spiral svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-/* Pulso dos pontos: transform-box: fill-box faz o scale() usar o próprio
-   centro do círculo (cx/cy), não a origem do viewBox — sem isso todo ponto
-   "puxaria" na direção do canto superior esquerdo ao escalar. */
-.ronu-spiral-dot {
-  transform-box: fill-box;
-  transform-origin: center;
-  opacity: 0.3;
-  animation: ronu-spiral-pulso var(--ronu-spiral-duracao, 4s) cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  animation-delay: var(--ronu-spiral-atraso, 0s);
-}
-
-@keyframes ronu-spiral-pulso {
-  0%,
-  100% {
-    transform: scale(0.5);
-    opacity: 0.15;
-  }
-
-  50% {
-    transform: scale(1.5);
-    opacity: 1;
-  }
-}
-
-/* ---------- Carrossel de modalidades (hero) ---------- */
-.hero-carousel-track {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.hero-carousel-slide {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transform: translateX(10px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-.hero-carousel-slide.is-active {
-  opacity: 1;
-  transform: translateX(0);
   z-index: 1;
 }
 
-.hero-carousel-slide img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.lp-kicker {
+  align-self: flex-start;
+  font-size: var(--t-rotulo);
+  color: var(--acento-texto);
 }
 
-/* Enquadramento das fotos que perdem o assunto no corte central (os espaços
-   vão de 16:10, landing no mobile, a 4:5): a bola do chute, a cabeça do
-   lutador de muay thai e o rosto do corredor. As demais ficam centralizadas. */
-.hero-carousel-slide img[src*="foto-futebol-chute"] { object-position: 30% 50%; }
-.hero-carousel-slide img[src*="foto-muaythai-chute"] { object-position: 50% 25%; }
-.hero-carousel-slide img[src*="foto-corrida-borrada"] { object-position: 50% 10%; }
+.lp-hero-titulo {
+  font-size: var(--t-display);
+  line-height: 1.04;
+}
 
-/* Fotos novas, todas fora do centro: a bola do basquete fica na borda
-   esquerda (5%: bola e perfil; o braço direito sai do corte em retrato);
-   voleio e piscina sobem um pouco para não cortar a bola no corte
-   paisagem do celular, mantendo pé do chute e rosto; o alongamento puxa
-   à esquerda para o rosto e a mão com magnésio no joelho caberem no 4:5;
-   a dança puxa à direita e para baixo, onde estão o rosto e o pé de apoio. */
-.hero-carousel-slide img[src*="foto-basquete-movimento"] { object-position: 5% 40%; }
-.hero-carousel-slide img[src*="foto-futebol-voleio"] { object-position: 50% 35%; }
-.hero-carousel-slide img[src*="foto-piscina-bola"] { object-position: 50% 45%; }
-.hero-carousel-slide img[src*="foto-alongamento-magnesio"] { object-position: 40% 50%; }
-.hero-carousel-slide img[src*="foto-danca-movimento"] { object-position: 60% 70%; }
+/* Título sobre a grade: o fundo vai no bloco inteiro, não em cada linha. Com
+   a entrelinha justa, o fundo de uma linha cortava a de cima. */
+.lp-bloco-fundo {
+  width: fit-content;
+  max-width: 100%;
+  padding: 4px 0;
+  background: var(--fundo);
+}
 
-/* A fileira de pontos fica acima dos braços inferiores das marcas de canto
-   (recuo --sp-4 + braço de 20px + respiro --sp-1): com 14 fotos ela mede
-   320px e, na altura das marcas, passaria por cima delas em containers
-   estreitos (landing no celular, login em ~1024px). */
-.hero-carousel-controls {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: calc(var(--sp-4) + 20px + var(--sp-1));
-  z-index: 2;
+.lp-hero-lede {
+  max-width: 520px;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--texto-2);
+}
+
+.lp-hero-acoes {
+  display: flex;
+  gap: var(--e-3);
+  flex-wrap: wrap;
+}
+
+/* O botão fantasma ganha o fundo da página para a grade não passar por ele. */
+.lp-fundo {
+  background: var(--fundo);
+}
+
+.lp-modalidades {
+  margin-top: var(--e-1);
+}
+
+.lp-hero-arte {
+  position: relative;
+  height: 480px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.hero-carousel-dots {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
+.lp-hero-quimono {
+  width: 320px;
+  height: auto;
+  animation-name: lp-quimono-balanca;
 }
 
-/* O quadrado visível continua com 8px; o ::before invisível amplia a área de
-   clique/toque para 24px. Com 16px de gap, as áreas de pontos vizinhos se
-   encostam sem se sobrepor. */
-.hero-carousel-dot {
-  position: relative;
-  width: 8px;
-  height: 8px;
-  padding: 0;
-  border-radius: var(--radius);
-  border: var(--border-width) solid var(--border);
-  background: var(--bg);
-  cursor: pointer;
-  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+/* Um pouco mais largo que o quimono das outras telas, como no canvas. */
+@keyframes lp-quimono-balanca {
+  0%, 100% { transform: perspective(900px) rotateY(-16deg) translateY(0); }
+  50% { transform: perspective(900px) rotateY(16deg) translateY(-14px); }
 }
 
-.hero-carousel-dot::before {
-  content: '';
+.lp-flutua-1 {
   position: absolute;
-  inset: -8px;
+  top: 40px;
+  left: 0;
 }
 
-/* Abaixo de 360px o container fica com menos de 328px e a fileira de 14
-   pontos (320px com 24px entre centros) não cabe: o espaçamento cai para
-   20px e a área de toque estreita para 20px, sem sobrepor a dos vizinhos. */
-@media (max-width: 359px) {
-  .hero-carousel-dots {
-    gap: 12px;
-  }
-
-  .hero-carousel-dot::before {
-    inset: -8px -6px;
-  }
-}
-
-.hero-carousel-dot:hover {
-  border-color: var(--text-muted);
-}
-
-.hero-carousel-dot.is-active {
-  background: var(--accent);
-  border-color: var(--accent);
-  transform: scale(1.2);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-carousel-slide {
-    transition: none;
-  }
-}
-
-.hero-image-slot::before {
-  content: '';
+.lp-flutua-2 {
   position: absolute;
-  inset: var(--sp-4);
-  z-index: 3;
-  pointer-events: none;
-  background-repeat: no-repeat;
-  background-image:
-    linear-gradient(var(--accent), var(--accent)), linear-gradient(var(--accent), var(--accent)),
-    linear-gradient(var(--accent), var(--accent)), linear-gradient(var(--accent), var(--accent)),
-    linear-gradient(var(--accent), var(--accent)), linear-gradient(var(--accent), var(--accent)),
-    linear-gradient(var(--accent), var(--accent)), linear-gradient(var(--accent), var(--accent));
-  background-size:
-    20px 2px, 2px 20px,
-    20px 2px, 2px 20px,
-    20px 2px, 2px 20px,
-    20px 2px, 2px 20px;
-  background-position:
-    top left, top left,
-    top right, top right,
-    bottom left, bottom left,
-    bottom right, bottom right;
-  opacity: 0.6;
+  bottom: 40px;
+  right: 0;
+  animation-delay: -3s;
 }
 
-/* ---------- Problema (seção editorial, sem grid de ícones) ---------- */
-.problem {
-  background: var(--surface);
+.lp-flutua-rotulo {
+  font-size: 11px;
+  color: var(--texto-2);
 }
 
-.problem .container {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: var(--sp-8);
+.lp-flutua-acento {
+  color: var(--acento-texto);
 }
 
-.problem-heading {
-  font-size: var(--fs-2xl);
-  max-width: 14ch;
+.lp-flutua-numero {
+  font-size: 1.5rem;
 }
 
-.problem-body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-4);
-}
-
-.problem-body p {
-  font-size: var(--fs-md);
-  color: var(--text-muted);
-  max-width: 56ch;
-}
-
-.problem-body p strong {
-  color: var(--text);
-  font-weight: 500;
-}
-
-.problem-highlight {
-  margin-top: var(--sp-2);
-  padding-left: var(--sp-4);
-  border-left: 2px solid var(--accent);
-}
-
-.problem-highlight p {
-  color: var(--text);
-  font-size: var(--fs-md);
-  font-family: var(--font-display);
-  font-weight: 500;
-  line-height: 1.4;
-}
-
-/* ---------- CTA final ---------- */
-.final-cta {
-  text-align: center;
-}
-
-.final-cta .container {
-  max-width: 640px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-5);
-}
-
-.final-cta-title {
-  font-size: var(--fs-2xl);
-}
-
-/* ---------- CTA final: linhas de fundo (EXPERIMENTO VISUAL) ----------
-   Mesmo experimento das linhas do dashboard (ver dashboard.css), copiado
-   e não compartilhado de propósito enquanto não vira regra do DESIGN.md —
-   por isso também NÃO está registrado lá.
-   Só nesta seção: é a de mais espaço vazio, tem o mesmo fundo (Tatame
-   Noturno) em que opacidade e velocidade foram calibradas no dashboard, e
-   fica longe da espiral do hero (as duas nunca aparecem juntas na tela).
-   - Traço de 1px em Poeira de Tatame, sem dourado (Regra do Ouro Raro).
-   - Mesmos parâmetros do dashboard: opacidade 0,16–0,30, deslize de
-     140–180px em ciclos de 3,5–5 s, só em transform/opacity, 200px de
-     folga de cada lado para o deslize nunca expor a ponta das linhas.
-   - Desenho de faixa (1440×400, 3 linhas por camada) esticado à altura
-     da seção (preserveAspectRatio="none" + traço que não escala): o
-     desenho de tela cheia do dashboard deixaria a faixa quase vazia.
-   - Sem máscara: as linhas passam pela seção inteira, inclusive atrás do
-     título e do botão (diferente do dashboard, onde nunca passam atrás de
-     texto). O conteúdo fica numa camada acima (z-index 1) — as linhas
-     aparecem entre as letras do título e somem atrás do fundo opaco do
-     botão.
-   - prefers-reduced-motion: tudo parado. */
-.final-cta {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-}
-
-.final-cta .container {
-  position: relative;
-  z-index: 1;
-}
-
-.final-cta-linhas {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.final-cta-linhas-camada {
+.lp-hero-carimbo {
   position: absolute;
   top: 0;
-  left: -200px;
-  width: calc(100% + 400px);
-  max-width: none; /* styles.css limita todo svg a max-width: 100% */
-  height: 100%;
-  opacity: 0.22;
-  will-change: transform, opacity;
+  right: 24px;
 }
 
-.final-cta-linhas-camada path {
-  fill: none;
-  stroke: var(--text-muted);
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-}
-
-/* --deslize: amplitude de cada camada (no máximo 200px, a folga das bordas). */
-.final-cta-linhas-a {
-  --deslize: -160px;
-  animation: final-cta-linhas-deslize 4s ease-in-out infinite;
-}
-
-.final-cta-linhas-b {
-  --deslize: -140px;
-  animation: final-cta-linhas-deslize 5s ease-in-out -2.5s infinite;
-}
-
-.final-cta-linhas-c {
-  --deslize: -180px;
-  animation: final-cta-linhas-deslize 3.5s ease-in-out -1.2s infinite;
-}
-
-@keyframes final-cta-linhas-deslize {
-  0%,
-  100% {
-    transform: translateX(0);
-    opacity: 0.16;
-  }
-
-  50% {
-    transform: translateX(var(--deslize));
-    opacity: 0.3;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .final-cta-linhas-camada {
-    animation: none;
-  }
-}
-
-/* ---------- Footer ---------- */
-.site-footer {
-  padding-top: var(--sp-5);
-  padding-bottom: var(--sp-5);
-}
-
-/* Duas linhas empilhadas: a de cima (wordmark + ©) e a de créditos. Cada
-   linha mantém o layout de antes: um item de cada lado, quebrando para
-   baixo em telas estreitas. */
-.site-footer .container {
+.lp-hero-rodape {
+  padding-bottom: 28px;
   display: flex;
-  flex-direction: column;
-  gap: var(--sp-4);
-}
-
-.footer-linha {
-  display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: var(--sp-2) var(--sp-4);
+  align-items: center;
+  gap: var(--e-5);
   flex-wrap: wrap;
 }
 
-.footer-copy {
-  font-size: var(--fs-2xs);
-  color: var(--text-muted);
+.lp-rolar {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+  font-size: 11px;
+  color: var(--texto-2);
+  text-decoration: none;
 }
 
-/* Créditos: discretos, no mesmo tamanho e tom do ©. Sem dourado e sem
-   ícones — o único chamado da página é o CTA final, acima. */
-.footer-creditos {
+.lp-rolar-seta {
+  color: var(--acento);
+  animation: lp-quica 1.8s ease-in-out infinite;
+}
+
+@keyframes lp-quica {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+.lp-indice {
+  display: flex;
+  gap: var(--e-6);
+  flex-wrap: wrap;
+  padding: 4px 0;
+  font-size: 11px;
+}
+
+.lp-indice a {
+  color: var(--texto-2);
+  text-decoration: none;
+}
+
+.lp-indice a:hover {
+  color: var(--acento-texto);
+}
+
+.lp-exemplo {
+  padding-top: var(--e-6);
+  padding-bottom: var(--e-6);
+  max-width: var(--largura);
+}
+
+/* ---------- Seções com rolagem guiada ---------- */
+.lp-secao {
+  --p: 1;
+  position: relative;
+  border-top: 1px solid var(--borda);
+  scroll-margin-top: var(--altura-topo);
+  /* Corta só o que vaza para os lados (o carimbo antes de bater fica em
+     escala 1,8 e alargava a página no celular). "clip", não "hidden": não
+     cria área rolável, então o palco continua grudando (sticky). */
+  overflow-x: clip;
+}
+
+.lp-palco {
+  padding-top: var(--e-10);
+  padding-bottom: var(--e-10);
+}
+
+/* Com a rolagem guiada ligada (landing.js): a seção fica alta e o palco
+   gruda logo abaixo do topo; a altura extra é o "curso" da cena. */
+.rolagem-guiada .lp-secao {
+  height: 260svh;
+}
+
+.rolagem-guiada .lp-palco {
+  position: sticky;
+  top: var(--altura-topo);
+  min-height: calc(100svh - var(--altura-topo));
+  display: flex;
+  align-items: center;
+  padding-top: var(--e-9);
+  padding-bottom: var(--e-9);
+}
+
+.lp-palco-grade {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 470px) minmax(0, 1fr);
+  gap: var(--e-9);
+  align-items: center;
+}
+
+.lp-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.lp-numero-secao {
+  font-size: var(--t-rotulo);
+  color: var(--acento-texto);
+}
+
+.lp-titulo-secao {
+  font-size: clamp(2rem, 1.4rem + 2.2vw, 2.875rem);
+  line-height: 1.08;
+}
+
+.lp-texto-secao {
+  font-size: var(--t-lead);
+  line-height: 1.6;
+  color: var(--texto-2);
+}
+
+/* Passos: o atual acende, os anteriores ficam cheios, os próximos esmaecem.
+   feito = o passo j já começou; atual = feito, mas o próximo ainda não. */
+.lp-passos {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lp-passos li {
+  --feito: clamp(0, (var(--p) * var(--n) * 0.999 - var(--j)) * 1000 + 1, 1);
+  --prox: clamp(0, (var(--p) * var(--n) * 0.999 - var(--j) - 1) * 1000 + 1, 1);
+  --atual: calc(var(--feito) - var(--prox));
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 18px;
+  border-left: 2px solid color-mix(in srgb, var(--acento) calc(var(--atual) * 100%), var(--borda));
+  background: color-mix(in srgb, var(--superficie-2) calc(var(--atual) * 100%), transparent);
+  opacity: calc(0.45 + 0.55 * var(--feito));
+  transition: background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+}
+
+.lp-passo-nome {
+  font-size: var(--t-corpo);
+  font-weight: 600;
+}
+
+.lp-passo-desc {
+  font-size: var(--t-apoio);
+  line-height: 1.5;
+  color: var(--texto-2);
+}
+
+.lp-trilho {
+  position: relative;
+  height: 2px;
+  background: var(--borda);
+}
+
+.lp-trilho span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: calc(var(--p) * 100%);
+  background: var(--acento);
+}
+
+.lp-marcos {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e-3);
+  margin-top: -14px;
+  font-size: 11px;
+}
+
+.lp-marcos span {
+  --feito: clamp(0, (var(--p) * var(--n) * 0.999 - var(--j)) * 1000 + 1, 1);
+  color: color-mix(in srgb, var(--acento-texto) calc(var(--feito) * 100%), var(--texto-3));
+  transition: color 0.3s ease;
+}
+
+/* ---------- A cena (lado direito) ---------- */
+.lp-cena-area {
+  display: flex;
+  justify-content: center;
+  perspective: 1600px;
+  min-width: 0;
+}
+
+/* Começa inclinada e assenta até 85% do curso (smoothstep). */
+.lp-cena {
+  --f: clamp(0, 1 - var(--p) / 0.85, 1);
+  --e: calc(var(--f) * var(--f) * (3 - 2 * var(--f)));
+  position: relative;
+  transform:
+    rotateX(calc(18deg * var(--e)))
+    rotateY(calc(-22deg * var(--e)))
+    rotateZ(calc(3deg * var(--e)))
+    translateY(calc(40px * var(--e)));
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+.lp-cartao {
+  width: 100%;
+  max-width: 560px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  outline: 1px solid var(--superficie-2);
+  outline-offset: 10px;
+}
+
+.lp-etiqueta {
+  position: absolute;
+  top: -14px;
+  right: 20px;
+  z-index: 2;
+  padding: 6px 10px;
+  border-radius: var(--raio-1);
+  background: var(--acento);
+  color: var(--sobre-acento);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.lp-cartao-titulo {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: var(--t-h3);
+}
+
+.lp-kcal-grande {
+  font-size: 2.75rem;
+}
+
+.lp-par {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lp-par-fim {
+  align-items: flex-end;
+}
+
+/* Surge de baixo entre --a e --b. */
+.lp-surge {
+  --s: clamp(0, (var(--p) - var(--a)) / (var(--b) - var(--a)), 1);
+  opacity: var(--s);
+  transform: translateY(calc((1 - var(--s)) * 14px));
+}
+
+/* ----- 01 · Treino ----- */
+.lp-mods .chip {
+  padding: 9px 16px;
+  font-size: var(--t-apoio);
+}
+
+.lp-mod {
+  border-color: var(--borda);
+  color: var(--texto-2);
+}
+
+.lp-mod-ativa {
+  --on: clamp(0, (var(--p) - 0.12) * 1000, 1);
+  background: color-mix(in srgb, var(--acento) calc(var(--on) * 100%), transparent);
+  border-color: color-mix(in srgb, var(--acento) calc(var(--on) * 100%), var(--borda));
+  color: color-mix(in srgb, var(--sobre-acento) calc(var(--on) * 100%), var(--texto-2));
+  font-weight: 600;
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+.lp-dias > span {
+  padding: 12px 0;
+  color: var(--texto);
+  font-weight: 600;
+}
+
+/* Cada dia de treino marca entre --a e --a + 0,06, com um "pulo" no meio. */
+.lp-dias > .lp-dia {
+  --s: clamp(0, (var(--p) - var(--a)) / 0.06, 1);
+  --cheio: clamp(0, var(--s) * 1000, 1);
+  --meio: clamp(0, (var(--s) - 0.5) * 1000, 1);
+  background: color-mix(in srgb, var(--acento) calc(var(--cheio) * 100%), transparent);
+  border-color: color-mix(in srgb, var(--acento) calc(var(--meio) * 100%), var(--borda));
+  color: color-mix(in srgb, var(--sobre-acento) calc(var(--meio) * 100%), var(--texto));
+  transform: scale(calc(1 + 0.48 * var(--s) * (1 - var(--s))));
+}
+
+.lp-cartao-rodape {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-top: 18px;
+  border-top: 1px solid var(--borda);
+}
+
+.lp-duracao {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+#sec-treino .lp-kcal-grande {
+  color: var(--acento-texto);
+}
+
+/* ----- 02 · A meta ----- */
+.lp-conta {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Cada linha entra entre --a e --a + 0,16. As barras ficam numa escala de
+   3.400 kcal: a soma das partes positivas (3.291) cabe com folga. */
+.lp-conta-linha {
+  --s: clamp(0, (var(--p) - var(--a)) / 0.16, 1);
+  --s3: min(1, var(--s) * 3);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  opacity: var(--s3);
+  transform: translateX(calc((1 - var(--s3)) * -16px));
+}
+
+.lp-conta-cabeca {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e-3);
+  font-size: var(--t-apoio);
+}
+
+.lp-conta-cabeca .num {
+  font-weight: 600;
+}
+
+.lp-conta-trilho {
+  position: relative;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--divisor);
+  overflow: hidden;
+}
+
+.lp-conta-barra {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 2px;
+  width: calc(var(--v) * var(--s) / 3400 * 100%);
+  left: calc((var(--ini) - var(--neg) * var(--v) * var(--s)) / 3400 * 100%);
+}
+
+.lp-barra-texto { background: var(--texto); }
+.lp-barra-acento { background: var(--acento); }
+.lp-barra-negativa { background: var(--borda-forte); }
+
+.lp-conta-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--e-4);
+  padding-top: var(--e-4);
+  border-top: 1px solid var(--borda);
+}
+
+/* ----- 03 · A semana (celular) ----- */
+/* segunda = treino (antes de 40% e depois de 70%); terça = descanso (entre). */
+.lp-celular-area {
+  --ter: calc(clamp(0, (var(--p) - 0.4) * 1000, 1) * clamp(0, (0.7 - var(--p)) * 1000, 1));
+  --seg: calc(1 - var(--ter));
+}
+
+.lp-celular {
+  width: 300px;
+  height: 600px;
+  padding: 14px;
+  border: 1px solid var(--linha);
+  border-radius: 42px;
+  background: var(--superficie);
+}
+
+.lp-celular-tela {
+  height: 100%;
+  padding: 22px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-radius: 30px;
+  background: var(--fundo);
+  overflow: hidden;
+}
+
+.lp-celular-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lp-celular-marca {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.lp-chip-estado {
+  --s: clamp(0, (var(--p) - 0.74) / 0.06, 1);
+  padding: 4px 8px;
+  border: 1px solid var(--acento);
+  border-radius: var(--raio-pilula);
+  color: var(--acento-texto);
+  font-size: 11px;
+  opacity: var(--s);
+  transform: translateY(calc((1 - var(--s)) * -6px));
+}
+
+.lp-celular-dias {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.lp-celular-dias span {
+  padding: 8px 0;
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+  color: var(--texto-2);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.lp-celular-dias .lp-dia-seg {
+  background: color-mix(in srgb, var(--acento) calc(var(--seg) * 100%), var(--superficie-2));
+  color: color-mix(in srgb, var(--sobre-acento) calc(var(--seg) * 100%), var(--texto-2));
+}
+
+.lp-celular-dias .lp-dia-ter {
+  background: color-mix(in srgb, var(--acento) calc(var(--ter) * 100%), var(--superficie-2));
+  color: color-mix(in srgb, var(--sobre-acento) calc(var(--ter) * 100%), var(--texto-2));
+}
+
+.lp-celular-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.lp-celular-kcal {
+  display: flex;
   align-items: baseline;
+  gap: 6px;
 }
 
-.footer-texto {
-  font-size: var(--fs-2xs);
-  color: var(--text-muted);
+.lp-celular-kcal .numero {
+  font-size: 1.875rem;
 }
 
-.footer-nome {
-  color: var(--text);
+/* Duas camadas no mesmo lugar: a de segunda e a de terça. */
+.lp-pilha {
+  display: grid;
 }
 
-/* Mesmo tratamento do link "Já tenho uma conta" do hero. */
-.footer-link {
+.lp-pilha > * {
+  grid-area: 1 / 1;
+}
+
+.lp-camada-seg {
+  opacity: var(--seg);
+}
+
+.lp-camada-ter {
+  opacity: var(--ter);
+}
+
+.lp-refeicoes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Cada refeição surge em sequência e some rápido perto das trocas de dia. */
+.lp-refeicoes li {
+  --s: clamp(0, (var(--p) - 0.03 - 0.06 * var(--i)) / 0.07, 1);
+  --troca: min(1, max(var(--p) - 0.4, 0.4 - var(--p)) / 0.05, max(var(--p) - 0.7, 0.7 - var(--p)) / 0.05);
+  --v: min(var(--s), var(--troca));
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-card);
+  background: var(--superficie);
+  font-size: var(--t-pequeno);
+  line-height: 1.4;
+  opacity: var(--v);
+  transform: translateY(calc((1 - var(--v)) * 14px));
+}
+
+.lp-refeicoes li .mono {
+  font-size: 11px;
+  color: var(--texto-2);
+}
+
+/* Mandioca → aipim (nome do Rio de Janeiro) a partir de 80%. */
+/* A palavra em si é trocada pelo landing.js na metade (p = 0,84); aqui
+   fica só o destaque, que acende quando a troca começa. */
+.lp-regional {
+  --aip: clamp(0, (var(--p) - 0.8) / 0.08, 1);
+  --enf: clamp(0, var(--aip) * 1000, 1);
   display: inline-block;
-  padding-block: 0.25rem;
-  color: var(--text-muted);
-  text-decoration-line: underline;
-  text-decoration-color: var(--border);
-  text-decoration-thickness: var(--border-width);
-  text-underline-offset: 3px;
-  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+  color: color-mix(in srgb, var(--acento-texto) calc(var(--enf) * 100%), var(--texto));
+  font-weight: calc(400 + 200 * var(--enf));
+  border-bottom: 1px dashed color-mix(in srgb, var(--acento) calc(var(--enf) * 100%), transparent);
+  transform: scale(calc(1 + var(--aip) * (1 - var(--aip))));
+  transform-origin: left center;
 }
 
-.footer-link:hover {
-  color: var(--text);
-  text-decoration-color: var(--text-muted);
+
+/* ----- 04 · A balança ----- */
+.lp-balanca-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--e-4);
 }
 
-.footer-link:focus-visible {
-  outline: var(--border-width) solid var(--accent);
-  outline-offset: 2px;
-  border-radius: var(--radius);
+.lp-peso {
+  font-size: 2.5rem;
 }
 
-/* ---------- Responsivo ---------- */
+.lp-grafico {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.lp-grafico-guia {
+  stroke: var(--divisor);
+  stroke-width: 1;
+  fill: none;
+}
+
+/* As pesagens aparecem uma a uma entre 2% e 30%. */
+.lp-pontos circle {
+  --s: clamp(0, (var(--p) - 0.02) / 0.28, 1);
+  fill: var(--texto-3);
+  opacity: clamp(0, (var(--s) * 14 - var(--j) - 1) * 1000 + 1, 1);
+}
+
+/* A tendência se desenha entre 30% e 60%. */
+.lp-grafico-linha {
+  fill: none;
+  stroke: var(--texto);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - clamp(0, (var(--p) - 0.3) / 0.3, 1));
+}
+
+.lp-balanca-rodape {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--e-3);
+  flex-wrap: wrap;
+}
+
+.lp-meta-ajustada {
+  font-size: var(--t-corpo);
+}
+
+.lp-meta-ajustada strong {
+  color: var(--acento-texto);
+}
+
+/* Carimbo "Meta 3% menor": bate entre 72% e 80%. */
+.lp-carimbo-ajuste {
+  --st: clamp(0, (var(--p) - 0.72) / 0.08, 1);
+  position: absolute;
+  top: 34%;
+  right: 36px;
+  padding: 10px 16px;
+  border: 3px solid var(--acento);
+  border-radius: var(--raio-2);
+  background: var(--superficie);
+  color: var(--acento);
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 1.375rem;
+  opacity: var(--st);
+  transform: rotate(-8deg) scale(calc(1.8 - 0.8 * var(--st)));
+}
+
+/* ---------- Chamada final ---------- */
+.lp-final {
+  border-top: 1px solid var(--borda);
+}
+
+.lp-final-conteudo {
+  padding-top: var(--e-11);
+  padding-bottom: var(--e-11);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 22px;
+}
+
+.lp-final-titulo {
+  max-width: 760px;
+  font-size: clamp(2.25rem, 1.5rem + 3vw, 3.5rem);
+  line-height: 1.05;
+}
+
+/* ---------- Rodapé ---------- */
+.lp-creditos {
+  padding-top: 0;
+}
+
+.lp-autor {
+  color: var(--texto);
+}
+
+/* ---------- Celular e telas médias ---------- */
 @media (max-width: 960px) {
-  .hero .container,
-  .problem .container {
+  .lp-nav {
+    display: none;
+  }
+
+  .lp-hero-grade {
     grid-template-columns: 1fr;
+    gap: var(--e-7);
+    min-height: 0;
+    padding-top: var(--e-9);
   }
 
-  .hero-title {
-    max-width: none;
+  .lp-hero-arte {
+    height: 380px;
   }
 
-  .hero-image-slot {
-    aspect-ratio: 16 / 10;
-    order: -1;
+  .lp-hero-quimono {
+    width: 240px;
   }
 
-  .problem-heading {
-    max-width: none;
+  .lp-palco-grade {
+    grid-template-columns: 1fr;
+    gap: var(--e-6);
+  }
+
+  /* Arranjo compacto: só o passo atual aparece, no mesmo lugar. */
+  .rolagem-guiada .lp-passos {
+    display: grid;
+  }
+
+  .rolagem-guiada .lp-passos li {
+    grid-area: 1 / 1;
+    opacity: var(--atual);
+  }
+
+  .rolagem-guiada .lp-palco {
+    align-items: flex-start;
+    padding-top: var(--e-6);
+    padding-bottom: var(--e-6);
+  }
+
+  .rolagem-guiada .lp-texto {
+    gap: 12px;
+  }
+
+  .rolagem-guiada .lp-marcos {
+    margin-top: -2px;
+  }
+
+  .rolagem-guiada .lp-marcos span:not(:first-child):not(:last-child) {
+    display: none;
   }
 }
 
-@media (max-width: 640px) {
-  .hero-title {
-    font-size: var(--fs-3xl);
+@media (max-width: 720px) {
+  :root {
+    --altura-topo: 3.75rem;
   }
 
-  .header-nav span {
+  .lp-topo-cta {
+    display: none;
+  }
+
+  .lp-hero-arte {
+    height: 340px;
+  }
+
+  .lp-hero-quimono {
+    width: 200px;
+  }
+
+  .lp-flutua-1 {
+    top: 16px;
+  }
+
+  .lp-flutua-2 {
+    bottom: 16px;
+  }
+
+  .lp-flutua-numero {
+    font-size: 1.25rem;
+  }
+
+  .lp-hero-carimbo {
+    right: 0;
+  }
+
+  .lp-hero-rodape {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .lp-indice {
+    gap: var(--e-4);
+  }
+
+  .lp-cartao {
+    padding: 20px;
+    gap: 16px;
+    outline-offset: 6px;
+  }
+
+  .lp-kcal-grande {
+    font-size: 2.25rem;
+  }
+
+  .lp-peso {
+    font-size: 2rem;
+  }
+
+  .lp-carimbo-ajuste {
+    right: 16px;
+    font-size: 1.125rem;
+  }
+
+  .rolagem-guiada .lp-titulo-secao {
+    font-size: 1.75rem;
+  }
+
+  /* O celular de 300 × 600 não cabe junto do texto: diminui inteiro. */
+  .lp-celular {
+    zoom: 0.6;
+  }
+
+  .lp-final-conteudo {
+    padding-top: var(--e-10);
+    padding-bottom: var(--e-10);
+  }
+}
+
+/* Telas baixas: o parágrafo sai do palco grudado para a cena caber. */
+@media (max-width: 960px) and (max-height: 820px) {
+  .rolagem-guiada .lp-texto-secao {
     display: none;
   }
 }
