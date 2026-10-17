@@ -37,11 +37,12 @@ Apps de dieta genéricos calculam calorias a partir de níveis de atividade fís
 
 ## Brand Commitments
 
-- Nome do produto: **Ronu** (wordmark em minúsculas, "ronu.").
+- Nome do produto: **Ronu**. Logo: quadrado no acento com 浪 + "RONU" no serifado; carimbo 浪人 (rōnin) como selo da marca.
 - Tom de voz: sério, disciplinado, "para quem treina de verdade" — direto, sem enrolação, embasado (não motivacional genérico).
-- Identidade visual já estabelecida em `frontend/css/styles.css` (ver comentário no arquivo): referência ao tatame de competição. Restrições explícitas do próprio time: sem gradientes roxos, sem sombras suaves genéricas, sem cantos muito arredondados.
-- Paleta: fundo escuro (`#121820`/`#1B232D`), texto claro quente (`#EDE7DA`), acento dourado (`#C9A227`).
-- Tipografia: Space Grotesk (display) + Inter (corpo).
+- Identidade visual "Dojo Noturno" (redesign de out/2026, telas aprovadas em `docs/redesign/`), descrita em `DESIGN.md` e implementada em `frontend/css/base/tokens.css`. Dois modos: escuro "Dojo Noturno" e claro "Washi", com troca pelo usuário (primeira visita segue o aparelho). Restrições do próprio time continuam: sem gradientes decorativos, sem sombras suaves genéricas, cantos de 3 a 6 px.
+- Paleta: escuro com fundo `#0F0E0D`, texto `#F0E9DD` e acento vermelho-carimbo `#E5533B`; Washi com fundo `#F2ECE0`, texto `#1A1714` e acento `#C23B22`.
+- Tipografia: Shippori Mincho B1 (títulos e números) + IBM Plex Sans (corpo) + IBM Plex Mono (etiquetas da landing).
+- Ilustração: quimono em SVG, provisório.
 - Jiu-jitsu é o exemplo/bandeira preferido em imagens e copy de portfólio/marketing, mesmo que o produto sirva todas as modalidades igualmente.
 
 ## Evidence on Hand

@@ -1,152 +1,563 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-13T00:00:00Z",
+  "generatedAt": "2026-10-17T14:02:44Z",
   "title": "Design System: Ronu",
   "extensions": {
     "colorMeta": {
-      "tatame-noturno": {
+      "fundo": {
         "role": "neutral",
-        "displayName": "Tatame Noturno",
-        "canonical": "#121820",
-        "tonalRamp": ["#0a0d11", "#121820", "#1b232d", "#2a333f", "#4a5563", "#71808f", "#9fabb8", "#c9d1da"]
+        "displayName": "Fundo · Dojo Noturno",
+        "canonical": "#0F0E0D",
+        "tonalRamp": [
+          "#211f1c",
+          "#3c3834",
+          "#5d5751",
+          "#7e756d",
+          "#9c948c",
+          "#b8b2ad",
+          "#d4d1ce",
+          "#eeedec"
+        ]
       },
-      "painel-academia": {
+      "superficie": {
         "role": "neutral",
-        "displayName": "Painel de Academia",
-        "canonical": "#1B232D",
-        "tonalRamp": ["#0a0d11", "#121820", "#1b232d", "#2a333f", "#4a5563", "#71808f", "#9fabb8", "#c9d1da"]
+        "displayName": "Superfície",
+        "canonical": "#151311",
+        "tonalRamp": [
+          "#221f1b",
+          "#3e3832",
+          "#60574e",
+          "#827569",
+          "#9f9489",
+          "#bbb2aa",
+          "#d6d1cc",
+          "#efedeb"
+        ]
       },
-      "corda-crua": {
+      "superficie-2": {
         "role": "neutral",
-        "displayName": "Corda Crua",
-        "canonical": "#EDE7DA",
-        "tonalRamp": ["#2a2718", "#4d4830", "#726b49", "#a89d78", "#c9bfa0", "#dcd4c0", "#ede7da", "#f7f4ec"]
+        "displayName": "Superfície 2",
+        "canonical": "#1A1816",
+        "tonalRamp": [
+          "#211f1c",
+          "#3d3833",
+          "#5e574f",
+          "#7f756c",
+          "#9d948b",
+          "#b9b2ac",
+          "#d5d1cd",
+          "#efedec"
+        ]
       },
-      "poeira-tatame": {
+      "superficie-3": {
         "role": "neutral",
-        "displayName": "Poeira de Tatame",
-        "canonical": "#8F98A3",
-        "tonalRamp": ["#20242a", "#363c44", "#4f5761", "#697380", "#8f98a3", "#b1b8c0", "#d3d7dc", "#eceef0"]
+        "displayName": "Superfície ativa",
+        "canonical": "#1F1C19",
+        "tonalRamp": [
+          "#221f1b",
+          "#3e3832",
+          "#60574d",
+          "#827569",
+          "#9f9488",
+          "#bbb2aa",
+          "#d6d1cc",
+          "#efedeb"
+        ]
       },
-      "ouro-faixa": {
+      "borda": {
+        "role": "neutral",
+        "displayName": "Borda",
+        "canonical": "#2C2925",
+        "tonalRamp": [
+          "#211f1c",
+          "#3d3933",
+          "#5e584f",
+          "#7f776b",
+          "#9d958b",
+          "#b9b3ac",
+          "#d5d2cd",
+          "#efedec"
+        ]
+      },
+      "linha": {
+        "role": "neutral",
+        "displayName": "Linha",
+        "canonical": "#3A3631",
+        "tonalRamp": [
+          "#211f1c",
+          "#3d3933",
+          "#5e584f",
+          "#7f766b",
+          "#9d958b",
+          "#b9b3ac",
+          "#d5d2cd",
+          "#efedec"
+        ]
+      },
+      "borda-campo": {
+        "role": "neutral",
+        "displayName": "Borda de campo",
+        "canonical": "#65615A",
+        "tonalRamp": [
+          "#201f1d",
+          "#3b3935",
+          "#5c5852",
+          "#7c776f",
+          "#9a968e",
+          "#b7b4ae",
+          "#d4d2ce",
+          "#eeedec"
+        ]
+      },
+      "texto": {
+        "role": "neutral",
+        "displayName": "Texto · papel cru",
+        "canonical": "#F0E9DD",
+        "tonalRamp": [
+          "#2a2213",
+          "#4e3e22",
+          "#786035",
+          "#a38148",
+          "#bd9f6a",
+          "#d0ba95",
+          "#e3d6bf",
+          "#f4efe6"
+        ]
+      },
+      "texto-2": {
+        "role": "neutral",
+        "displayName": "Texto secundário",
+        "canonical": "#A39C91",
+        "tonalRamp": [
+          "#211f1c",
+          "#3d3933",
+          "#5e584f",
+          "#80786b",
+          "#9d968a",
+          "#b9b4ac",
+          "#d5d2cd",
+          "#efeeec"
+        ]
+      },
+      "texto-3": {
+        "role": "neutral",
+        "displayName": "Texto 3 (placeholder)",
+        "canonical": "#6E675E",
+        "tonalRamp": [
+          "#211f1c",
+          "#3c3934",
+          "#5e5850",
+          "#7e766c",
+          "#9c958b",
+          "#b8b3ac",
+          "#d5d2cd",
+          "#efedec"
+        ]
+      },
+      "acento": {
         "role": "primary",
-        "displayName": "Ouro de Faixa",
-        "canonical": "#C9A227",
-        "tonalRamp": ["#332107", "#5c3b0d", "#8a5912", "#b8931f", "#c9a227", "#d9b755", "#e7cd8a", "#f3e4bd"]
+        "displayName": "Vermelho-carimbo",
+        "canonical": "#E5533B",
+        "tonalRamp": [
+          "#360e07",
+          "#63190d",
+          "#992714",
+          "#cf351b",
+          "#e65942",
+          "#ed8878",
+          "#f4b8ae",
+          "#fbe3df"
+        ]
       },
-      "linha-demarcacao": {
+      "sobre-acento": {
         "role": "neutral",
-        "displayName": "Linha de Demarcação",
-        "canonical": "#2A333F",
-        "tonalRamp": ["#0a0d11", "#12161c", "#1b232d", "#2a333f", "#4a5563", "#71808f", "#9fabb8", "#c9d1da"]
+        "displayName": "Sobre o acento",
+        "canonical": "#0F0E0D",
+        "tonalRamp": [
+          "#211f1c",
+          "#3c3834",
+          "#5d5751",
+          "#7e756d",
+          "#9c948c",
+          "#b8b2ad",
+          "#d4d1ce",
+          "#eeedec"
+        ]
       },
-      "ferrugem-ferro": {
+      "erro-campo": {
         "role": "error",
-        "displayName": "Ferrugem de Ferro",
-        "canonical": "#A8462F",
-        "tonalRamp": ["#2c120a", "#4f2013", "#75301c", "#a8462f", "#c05f45", "#d38670", "#e4b3a5", "#f2dad2"]
+        "displayName": "Erro de campo",
+        "canonical": "#B5462F",
+        "tonalRamp": [
+          "#31130d",
+          "#592217",
+          "#8a3524",
+          "#ba4830",
+          "#d36b55",
+          "#df9586",
+          "#ecbfb6",
+          "#f8e6e3"
+        ]
+      },
+      "washi-fundo": {
+        "role": "neutral",
+        "displayName": "Fundo · Washi",
+        "canonical": "#F2ECE0",
+        "tonalRamp": [
+          "#2b2312",
+          "#4f4021",
+          "#7a6333",
+          "#a58545",
+          "#c0a368",
+          "#d2bd93",
+          "#e4d7be",
+          "#f4f0e6"
+        ]
+      },
+      "washi-superficie": {
+        "role": "neutral",
+        "displayName": "Superfície · Washi",
+        "canonical": "#EAE3D5",
+        "tonalRamp": [
+          "#292214",
+          "#4b3e25",
+          "#74603a",
+          "#9c824e",
+          "#b8a070",
+          "#ccbb99",
+          "#e0d6c2",
+          "#f3efe7"
+        ]
+      },
+      "washi-superficie-2": {
+        "role": "neutral",
+        "displayName": "Superfície 2 · Washi",
+        "canonical": "#E4DCCC",
+        "tonalRamp": [
+          "#282215",
+          "#493e27",
+          "#71603c",
+          "#998151",
+          "#b59f73",
+          "#caba9b",
+          "#dfd6c3",
+          "#f3efe8"
+        ]
+      },
+      "washi-superficie-3": {
+        "role": "neutral",
+        "displayName": "Superfície ativa · Washi",
+        "canonical": "#DFD6C5",
+        "tonalRamp": [
+          "#272116",
+          "#483d28",
+          "#705e3e",
+          "#978053",
+          "#b39d75",
+          "#c9b99c",
+          "#ded5c4",
+          "#f2efe8"
+        ]
+      },
+      "washi-borda": {
+        "role": "neutral",
+        "displayName": "Borda · Washi",
+        "canonical": "#CFC4B0",
+        "tonalRamp": [
+          "#262117",
+          "#463c2a",
+          "#6c5d42",
+          "#927e59",
+          "#ae9b7a",
+          "#c5b8a0",
+          "#dcd4c6",
+          "#f2eee9"
+        ]
+      },
+      "washi-linha": {
+        "role": "neutral",
+        "displayName": "Linha · Washi",
+        "canonical": "#BFB39D",
+        "tonalRamp": [
+          "#252018",
+          "#443c2c",
+          "#695c45",
+          "#8e7d5d",
+          "#aa9b7d",
+          "#c3b7a2",
+          "#dbd4c7",
+          "#f1eee9"
+        ]
+      },
+      "washi-borda-campo": {
+        "role": "neutral",
+        "displayName": "Borda de campo · Washi",
+        "canonical": "#898174",
+        "tonalRamp": [
+          "#211f1c",
+          "#3d3933",
+          "#5e5850",
+          "#7f786c",
+          "#9d968b",
+          "#b9b4ac",
+          "#d5d2cd",
+          "#efeeec"
+        ]
+      },
+      "washi-texto": {
+        "role": "neutral",
+        "displayName": "Texto · tinta",
+        "canonical": "#1A1714",
+        "tonalRamp": [
+          "#231f1b",
+          "#3f3831",
+          "#62574b",
+          "#857566",
+          "#a29486",
+          "#bcb2a9",
+          "#d7d1cb",
+          "#efedeb"
+        ]
+      },
+      "washi-texto-2": {
+        "role": "neutral",
+        "displayName": "Texto secundário · Washi",
+        "canonical": "#6B6254",
+        "tonalRamp": [
+          "#221f1b",
+          "#3f3a31",
+          "#61594c",
+          "#837867",
+          "#a19787",
+          "#bcb5a9",
+          "#d7d2cc",
+          "#efeeeb"
+        ]
+      },
+      "washi-texto-3": {
+        "role": "neutral",
+        "displayName": "Texto 3 · Washi (placeholder)",
+        "canonical": "#857A68",
+        "tonalRamp": [
+          "#22201b",
+          "#3f3a31",
+          "#61594c",
+          "#847967",
+          "#a19787",
+          "#bcb5a9",
+          "#d7d2cb",
+          "#efeeeb"
+        ]
+      },
+      "washi-acento": {
+        "role": "primary",
+        "displayName": "Vermelho-carimbo · Washi",
+        "canonical": "#C23B22",
+        "tonalRamp": [
+          "#341009",
+          "#5f1d11",
+          "#942d1a",
+          "#c83d23",
+          "#df6049",
+          "#e88e7d",
+          "#f1bbb1",
+          "#fae5e1"
+        ]
+      },
+      "washi-acento-texto": {
+        "role": "primary",
+        "displayName": "Acento como texto · Washi",
+        "canonical": "#A53520",
+        "tonalRamp": [
+          "#33100a",
+          "#5e1e12",
+          "#912f1c",
+          "#c43f26",
+          "#dc624c",
+          "#e68f7f",
+          "#f0bcb2",
+          "#f9e5e1"
+        ]
+      },
+      "washi-sobre-acento": {
+        "role": "neutral",
+        "displayName": "Sobre o acento · Washi",
+        "canonical": "#F2ECE0",
+        "tonalRamp": [
+          "#2b2312",
+          "#4f4021",
+          "#7a6333",
+          "#a58545",
+          "#c0a368",
+          "#d2bd93",
+          "#e4d7be",
+          "#f4f0e6"
+        ]
       }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "Títulos de hero e headings de seção (h1–h2)." },
-      "body": { "displayName": "Body", "purpose": "Parágrafo corrido, sempre neutro para não competir com o display." },
-      "label": { "displayName": "Label", "purpose": "Rótulo de campo, eyebrow, texto de botão, item de navegação." }
+      "display": {
+        "displayName": "Display",
+        "purpose": "Título do hero da landing."
+      },
+      "title": {
+        "displayName": "Título de tela",
+        "purpose": "h1 de cada tela; também os números grandes de métrica (.numero)."
+      },
+      "body": {
+        "displayName": "Corpo",
+        "purpose": "Texto corrido e controles."
+      },
+      "label": {
+        "displayName": "Rótulo",
+        "purpose": "Rótulo curto em maiúsculas espaçadas, no topo de cards e seções."
+      },
+      "mono": {
+        "displayName": "Etiqueta mono",
+        "purpose": "Só nas etiquetas da landing com rolagem guiada."
+      }
     },
     "shadows": [],
     "motion": [
-      { "name": "ease-standard", "value": "ease 0.15s", "purpose": "Transição padrão de color/border-color/background-color em hovers e foco." }
+      {
+        "name": "curva-saida",
+        "value": "cubic-bezier(0.2, 0.7, 0.2, 1)",
+        "purpose": "Entradas, gráficos se desenhando, zoom de card."
+      },
+      {
+        "name": "curva-suave",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Troca de tema e barras de carregando."
+      },
+      {
+        "name": "d-rapida",
+        "value": "160ms",
+        "purpose": "Hover de cor e borda."
+      },
+      {
+        "name": "d-media",
+        "value": "300ms",
+        "purpose": "Zoom leve de card."
+      },
+      {
+        "name": "d-desenho",
+        "value": "1100ms",
+        "purpose": "Gráficos de dados se desenhando (ao carregar, ao entrar na tela, no hover)."
+      },
+      {
+        "name": "enfeite",
+        "value": "grade 18s · quimono 9s · carimbo 7s · flutua 6s",
+        "purpose": "Únicos movimentos contínuos; desligados com prefers-reduced-motion."
+      }
     ],
     "breakpoints": [
-      { "name": "md", "value": "960px" },
-      { "name": "sm", "value": "720px" },
-      { "name": "xs", "value": "640px" }
+      {
+        "name": "celular",
+        "value": "720px"
+      }
     ]
   },
   "components": [
     {
-      "name": "Primary Button",
+      "name": "Botão primário",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "CTA principal (ex: 'Criar minha dieta').",
-      "html": "<button class=\"ds-btn-primary\">Criar minha dieta</button>",
-      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 0.75rem; padding: 16px 32px; font-family: 'Inter', sans-serif; font-size: 0.875rem; font-weight: 600; border-radius: 4px; border: 1px solid #C9A227; background: #C9A227; color: #121820; cursor: pointer; white-space: nowrap; transition: background-color 0.15s ease, border-color 0.15s ease; } .ds-btn-primary:hover { background: #b8931f; border-color: #b8931f; } .ds-btn-primary:focus-visible { outline: 2px solid #EDE7DA; outline-offset: 2px; }"
+      "description": "Ação principal da tela (ex.: 'Gerar minha primeira dieta').",
+      "html": "<button class=\"ds-botao-primario\">Gerar minha primeira dieta</button>",
+      "css": ".ds-botao-primario { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 12px 22px; font-family: 'IBM Plex Sans', -apple-system, sans-serif; font-size: 0.9375rem; font-weight: 600; border-radius: 3px; border: 1px solid var(--acento, #E5533B); background: var(--acento, #E5533B); color: var(--sobre-acento, #0F0E0D); cursor: pointer; transition: filter 160ms ease, transform 160ms ease; } .ds-botao-primario:hover { filter: brightness(1.08); } .ds-botao-primario:active { transform: translateY(1px); } .ds-botao-primario:focus-visible { outline: 2px solid var(--acento, #E5533B); outline-offset: 2px; }"
     },
     {
-      "name": "Secondary Button",
+      "name": "Botão fantasma",
       "kind": "button",
-      "refersTo": "button-secondary",
-      "description": "Ação secundária/ghost (ex: 'Já tenho uma conta').",
-      "html": "<button class=\"ds-btn-secondary\">Já tenho uma conta</button>",
-      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 0.75rem; padding: 16px 32px; font-family: 'Inter', sans-serif; font-size: 0.875rem; font-weight: 600; border-radius: 4px; border: 1px solid #2A333F; background: transparent; color: #EDE7DA; cursor: pointer; white-space: nowrap; transition: border-color 0.15s ease; } .ds-btn-secondary:hover { border-color: #8F98A3; } .ds-btn-secondary:focus-visible { outline: 2px solid #EDE7DA; outline-offset: 2px; }"
+      "refersTo": "button-ghost",
+      "description": "Ação secundária (ex.: 'Ver como funciona').",
+      "html": "<button class=\"ds-botao-fantasma\">Ver como funciona</button>",
+      "css": ".ds-botao-fantasma { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 12px 22px; font-family: 'IBM Plex Sans', -apple-system, sans-serif; font-size: 0.9375rem; font-weight: 500; border-radius: 3px; border: 1px solid var(--linha, #3A3631); background: transparent; color: var(--texto, #F0E9DD); cursor: pointer; transition: border-color 160ms ease; } .ds-botao-fantasma:hover { border-color: var(--borda-forte, #5C564D); } .ds-botao-fantasma:focus-visible { outline: 2px solid var(--acento, #E5533B); outline-offset: 2px; }"
     },
     {
-      "name": "Text Field",
+      "name": "Campo",
       "kind": "input",
-      "refersTo": "field-input",
-      "description": "Campo de formulário padrão (auth, onboarding), com rótulo acima.",
-      "html": "<div class=\"ds-field\"><label for=\"ds-peso\">Peso (kg)</label><input id=\"ds-peso\" type=\"text\" placeholder=\"Ex: 78\"></div>",
-      "css": ".ds-field { display: flex; flex-direction: column; gap: 0.5rem; font-family: 'Inter', sans-serif; } .ds-field label { font-size: 0.875rem; font-weight: 500; color: #EDE7DA; } .ds-field input { background: #121820; border: 1px solid #2A333F; border-radius: 4px; padding: 1rem; font-size: 1rem; color: #EDE7DA; } .ds-field input::placeholder { color: #8F98A3; } .ds-field input:focus-visible { outline: none; border-color: #C9A227; }"
+      "refersTo": "campo",
+      "description": "Campo com rótulo acima; borda a 3:1, foco no acento.",
+      "html": "<div class=\"ds-campo\"><label for=\"ds-peso\">Peso de hoje (kg)</label><input id=\"ds-peso\" type=\"text\" placeholder=\"Ex.: 79,1\"></div>",
+      "css": ".ds-campo { display: flex; flex-direction: column; gap: 0.5rem; font-family: 'IBM Plex Sans', -apple-system, sans-serif; } .ds-campo label { font-size: 0.875rem; font-weight: 500; color: var(--texto, #F0E9DD); } .ds-campo input { min-height: 48px; padding: 13px 15px; background: var(--superficie, #151311); border: 1px solid var(--borda-campo, #65615A); border-radius: 3px; font-size: 1rem; color: var(--texto, #F0E9DD); } .ds-campo input::placeholder { color: var(--texto-3, #6E675E); } .ds-campo input:hover { border-color: var(--borda-forte, #5C564D); } .ds-campo input:focus-visible { outline: none; border-color: var(--acento, #E5533B); }"
     },
     {
-      "name": "Error Field",
-      "kind": "input",
-      "refersTo": "field-input-error",
-      "description": "Estado de erro do campo, com mensagem abaixo.",
-      "html": "<div class=\"ds-field ds-field-error\"><label for=\"ds-email\">Email</label><input id=\"ds-email\" type=\"text\" value=\"email-invalido\"><span class=\"ds-field-error-message\">Digite um email válido.</span></div>",
-      "css": ".ds-field-error input { border-color: #A8462F; } .ds-field-error-message { font-size: 0.875rem; color: #A8462F; }"
+      "name": "Navegação principal",
+      "kind": "nav",
+      "refersTo": "nav-principal",
+      "description": "Nav do cabeçalho; a página atual ganha a superfície ativa.",
+      "html": "<nav class=\"ds-nav\"><a href=\"#\" aria-current=\"page\">Dieta</a><a href=\"#\">Progresso</a><a href=\"#\">Treino</a></nav>",
+      "css": ".ds-nav { display: flex; gap: 4px; font-family: 'IBM Plex Sans', -apple-system, sans-serif; font-size: 0.875rem; } .ds-nav a { padding: 10px 14px; border-radius: 3px; color: var(--texto-2, #A39C91); text-decoration: none; transition: color 160ms ease; } .ds-nav a:hover { color: var(--texto, #F0E9DD); } .ds-nav a[aria-current=\"page\"] { color: var(--texto, #F0E9DD); background: var(--superficie-3, #1F1C19); } .ds-nav a:focus-visible { outline: 2px solid var(--acento, #E5533B); outline-offset: 2px; }"
     },
     {
-      "name": "Eyebrow Label",
-      "kind": "custom",
-      "refersTo": "eyebrow",
-      "description": "Rótulo curto acima de um título — único lugar onde o dourado aparece em texto corrido.",
-      "html": "<p class=\"ds-eyebrow\">Feito por quem treina, não por quem só estuda dieta</p>",
-      "css": ".ds-eyebrow { display: inline-flex; align-items: center; gap: 0.75rem; font-family: 'Inter', sans-serif; font-size: 0.875rem; font-weight: 500; color: #C9A227; } .ds-eyebrow::before { content: ''; width: 14px; height: 1px; background: #C9A227; flex-shrink: 0; }"
+      "name": "Chips de alimento",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Gosto (borda no acento) e evitar (tracejado no acento).",
+      "html": "<div class=\"ds-chips\"><span class=\"ds-chip\">frango</span><span class=\"ds-chip ds-chip-gosto\">arroz</span><span class=\"ds-chip ds-chip-evitar\">camarão</span></div>",
+      "css": ".ds-chips { display: flex; gap: 8px; flex-wrap: wrap; font-family: 'IBM Plex Sans', -apple-system, sans-serif; } .ds-chip { padding: 6px 14px; border: 1px solid var(--linha, #3A3631); border-radius: 999px; font-size: 0.9375rem; color: var(--texto, #F0E9DD); } .ds-chip-gosto { background: var(--superficie-3, #1F1C19); border-color: var(--acento, #E5533B); } .ds-chip-evitar { border-style: dashed; border-color: var(--acento, #E5533B); color: var(--acento-texto, #E5533B); }"
     },
     {
-      "name": "Highlight Blockquote",
-      "kind": "custom",
-      "refersTo": "problem-highlight",
-      "description": "Citação/destaque editorial com borda esquerda em dourado — usado para condensar a proposta de valor em uma frase.",
-      "html": "<div class=\"ds-highlight\"><p>Treino e nutrição calculados juntos, não em planilhas separadas.</p></div>",
-      "css": ".ds-highlight { padding-left: 1.5rem; border-left: 2px solid #C9A227; } .ds-highlight p { color: #EDE7DA; font-family: 'Space Grotesk', serif; font-size: 1.125rem; font-weight: 500; line-height: 1.4; }"
-    },
-    {
-      "name": "Card / Panel",
+      "name": "Card de métrica",
       "kind": "card",
-      "refersTo": "surface-panel",
-      "description": "Superfície elevada sem sombra — separação só por contraste de tom e borda de 1px.",
-      "html": "<div class=\"ds-panel\"><p class=\"ds-panel-label\">Gasto calórico semanal</p><p class=\"ds-panel-value\">2.340 kcal</p></div>",
-      "css": ".ds-panel { background: #1B232D; border: 1px solid #2A333F; border-radius: 4px; padding: 1.5rem; } .ds-panel-label { font-family: 'Inter', sans-serif; font-size: 0.875rem; color: #8F98A3; margin: 0 0 0.5rem; } .ds-panel-value { font-family: 'Space Grotesk', serif; font-size: 1.75rem; font-weight: 600; color: #EDE7DA; font-variant-numeric: tabular-nums; margin: 0; }"
+      "refersTo": "cartao",
+      "description": "Card plano com rótulo em maiúsculas e número no serifado.",
+      "html": "<div class=\"ds-cartao\"><span class=\"ds-rotulo\">Peso de tendência</span><span class=\"ds-numero\">79,4 <small>kg</small></span></div>",
+      "css": ".ds-cartao { display: flex; flex-direction: column; gap: 12px; padding: 24px; background: var(--superficie, #151311); border: 1px solid var(--borda, #2C2925); border-radius: 6px; transition: transform 300ms cubic-bezier(0.2, 0.7, 0.2, 1), border-color 300ms ease; } .ds-cartao:hover { transform: scale(1.012); border-color: var(--borda-hover, #4A443D); } .ds-rotulo { font-family: 'IBM Plex Sans', -apple-system, sans-serif; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--texto-2, #A39C91); } .ds-numero { font-family: 'Shippori Mincho B1', Georgia, serif; font-weight: 800; font-size: 2.25rem; line-height: 1; font-variant-numeric: tabular-nums; color: var(--texto, #F0E9DD); } .ds-numero small { font-family: 'IBM Plex Sans', -apple-system, sans-serif; font-weight: 400; font-size: 0.875rem; color: var(--texto-2, #A39C91); }"
+    },
+    {
+      "name": "Carimbo 浪人",
+      "kind": "custom",
+      "refersTo": "carimbo",
+      "description": "Selo da marca, bate a cada 7 s (enfeite).",
+      "html": "<div class=\"ds-carimbo\" aria-hidden=\"true\"><span>浪</span><span>人</span></div>",
+      "css": ".ds-carimbo { width: 60px; padding: 12px 0; display: flex; flex-direction: column; align-items: center; border: 2px solid var(--acento, #E5533B); border-radius: 4px; color: var(--acento, #E5533B); font-family: 'Shippori Mincho B1', Georgia, serif; font-weight: 800; font-size: 24px; line-height: 1.15; transform: rotate(-4deg); animation: ds-carimbo 7s ease-out infinite; } @keyframes ds-carimbo { 0%, 62% { transform: rotate(-4deg) scale(1); opacity: 1; } 66% { transform: rotate(-8deg) scale(1.35); opacity: 0; } 72% { transform: rotate(-4deg) scale(0.92); opacity: 1; } 76%, 100% { transform: rotate(-4deg) scale(1); } } @media (prefers-reduced-motion: reduce) { .ds-carimbo { animation: none; } }"
     }
   ],
   "narrative": {
-    "northStar": "A Súmula do Tatame",
-    "overview": "A súmula é a ficha oficial de uma luta: preenchida à mão, sem espaço para floreio, cada número nela é exato porque decide um resultado. É essa mistura que define o Ronu — a seriedade do tatame, a precisão de uma pesagem oficial e o hábito de registrar treino como um logbook de atleta, tudo em um único documento visual. Nada aqui existe para impressionar; existe para estar certo.\n\nO sistema é escuro, denso e de baixo contraste decorativo: um fundo quase preto, texto num branco quente (cor de corda crua, não um branco de tela), e um único acento dourado — a cor de faixa — usado como um selo, não como papel de parede. Bordas finas de 1px substituem sombra; a profundidade vem do contraste entre painel e fundo, nunca de um blur suave. Cantos ficam quase retos (4px): o suficiente para não cortar o dedo, não o bastante para virar decoração.",
+    "northStar": "Dojo Noturno",
+    "overview": "Um dojo depois do treino: luz baixa, tatame escuro, um quimono pendurado e o carimbo vermelho do 浪人 (rōnin, o lutador sem mestre que dá nome ao Ronu) na ficha de cada aluno. O Ronu é sério e preciso como uma pesagem oficial, mas tem o calor de papel e tinta: serifado japonês nos títulos e números, sans técnico no corpo, um vermelho de carimbo como único acento.\n\nO sistema tem dois modos, com a mesma estrutura e os mesmos componentes: Dojo Noturno (escuro, a identidade), com fundo quase preto quente, texto cor de papel cru e acento vermelho-carimbo; e Washi (claro), o papel japonês, com fundo creme, texto tinta e o mesmo vermelho um tom mais fechado.",
     "keyCharacteristics": [
-      "Escuro, denso, sem gradiente decorativo — a cor sobra para o dourado, não para o fundo.",
-      "Um acento só (dourado), usado como carimbo raro: CTA, eyebrow, borda de destaque.",
-      "Tipografia forte no display (Space Grotesk), neutra e legível no corpo (Inter).",
-      "Zero sombra. Profundidade = contraste de superfície + linha de 1px.",
-      "Números (peso, frequência, calorias) sempre em tabular-nums — a súmula não deixa o dado \"dançar\"."
+      "Uma lista única de variáveis de cor (frontend/css/base/tokens.css) com duas versões. Nenhuma tela usa cor escrita direto.",
+      "Um acento só, vermelho-carimbo: CTA, item escolhido, foco, dia de treino. Nunca preenche áreas grandes.",
+      "Profundidade por tom de superfície e borda de 1px. Sem sombra.",
+      "Números de métrica sempre no serifado e em tabular-nums.",
+      "Movimento com propósito: os gráficos se desenham; só o enfeite se move sem parar."
     ],
     "rules": [
-      { "name": "A Regra do Ouro Raro", "body": "O dourado nunca preenche uma área grande — ele pontua (texto de eyebrow, borda de CTA, foco de input), nunca decora. Se uma tela tem mais de um elemento dourado grande por vez, tem dourado demais.", "section": "colors" },
-      { "name": "A Regra do Número Estável", "body": "Todo número que representa uma métrica do usuário — peso, frequência semanal, calorias — usa font-variant-numeric: tabular-nums (classe .num). Uma súmula não deixa o dado \"dançar\" quando o dígito muda.", "section": "typography" },
-      { "name": "A Regra Sem Sombra", "body": "Nenhum componente recebe box-shadow, blur ou glow difuso. Se um elemento precisa se destacar, ele muda de tom de fundo ou ganha uma borda — nunca uma sombra.", "section": "elevation" }
+      {
+        "name": "A Regra do Carimbo",
+        "body": "O vermelho marca, não pinta: botão principal, a opção escolhida, o dia de treino, o foco. Se uma área grande ficou vermelha, é carimbo demais.",
+        "section": "colors"
+      },
+      {
+        "name": "A Regra do Contraste Medido",
+        "body": "Texto que precisa ser lido usa --texto ou --texto-2 (≥ 4,5:1 nos dois modos). --texto-3 fica para placeholder e enfeite. Acento como texto pequeno usa --acento-texto.",
+        "section": "colors"
+      },
+      {
+        "name": "A Regra do Número Estável",
+        "body": "Todo número de métrica usa tabular-nums (.num, .numero, tabelas).",
+        "section": "typography"
+      },
+      {
+        "name": "A Regra Sem Sombra",
+        "body": "Nenhum box-shadow, glow ou blur decorativo.",
+        "section": "elevation"
+      }
     ],
     "dos": [
-      "Do manter o dourado (#C9A227) restrito a pontuação: CTA primário, eyebrow, foco de input, borda de destaque em citação.",
-      "Do usar tabular-nums em qualquer número que represente peso, frequência ou calorias.",
-      "Do separar seções com uma linha de 1px em Linha de Demarcação, nunca com um card flutuante ou sombra.",
-      "Do manter o raio em 4px em todos os componentes — botão, input, card, slot de imagem."
+      "Do usar só as variáveis de tokens.css; conferir cada tela nos dois modos.",
+      "Do dar a todo controle um botão ou link de verdade, rótulo visível ou aria-label, e foco visível.",
+      "Do usar o botão oficial do Google (renderButton), redesenhado no tema certo quando o modo troca."
     ],
     "donts": [
-      "Don't usar gradiente roxo/azul-arroxeado ou qualquer gradiente decorativo fora do sutil overlay dourado já definido no slot de imagem do hero.",
-      "Don't adicionar box-shadow, glow ou blur em qualquer componente — profundidade vem só de contraste de superfície.",
-      "Don't arredondar cantos além de 4px — nada de cards ou botões \"pill\".",
-      "Don't usar branco puro (#FFFFFF) para texto — o texto principal é sempre Corda Crua (#EDE7DA).",
-      "Don't inventar prova social (depoimentos, fotos de atletas, números de usuários) — nenhum conteúdo real existe ainda; usar placeholders explícitos como o slot de imagem do hero."
+      "Don't escrever cor direto em tela nenhuma.",
+      "Don't usar --texto-3 em texto que precisa ser lido.",
+      "Don't pôr sombra, gradiente decorativo ou cantos acima de 6px em card.",
+      "Don't animar gráfico em laço infinito.",
+      "Don't inventar dados, depoimentos ou modalidades: tudo que é número ou catálogo vem da API."
     ]
   }
 }

@@ -15,7 +15,7 @@ artes marciais e esportes de combate, a partir do gasto calórico real de cada m
 - Responder sempre em português (pt-BR).
 - O usuário não escreve código: ele decide e testa.
 - Nunca editar um arquivo sem antes ler o conteúdo atual.
-- Mudança visual nova: rodar `$impeccable shape` seguindo o design system "Súmula do Tatame" (`DESIGN.md`) e ter o shape aprovado antes de escrever código.
+- Mudança visual nova: rodar `$impeccable shape` seguindo o design system "Dojo Noturno" (`DESIGN.md`, com os modos escuro e Washi) e ter o shape aprovado antes de escrever código. Toda cor sai das variáveis de `frontend/css/base/tokens.css`, e cada tela é conferida nos dois modos.
 - Mudança não visual complexa: investigar e apresentar uma proposta antes de escrever código.
 - Nunca fazer commit, push ou deploy sem pedido explícito. Todo commit vem só depois do teste manual do usuário.
 - Problemas encontrados no caminho devem ser sinalizados, mas não resolvidos sem aprovação.
