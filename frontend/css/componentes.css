@@ -381,12 +381,15 @@
 
 /* Carregando: o texto continua (o JS troca por "Entrando..." etc.) e uma
    linha corre embaixo do botão, para o estado ser visível sem girar nada. */
-.botao[aria-busy="true"] {
+/* data-loading é o que o ronuDefinirCarregando (js/auth.js) marca no botão. */
+.botao[aria-busy="true"],
+.botao[data-loading="true"] {
   cursor: progress;
   opacity: 0.85;
 }
 
-.botao[aria-busy="true"]::after {
+.botao[aria-busy="true"]::after,
+.botao[data-loading="true"]::after {
   content: '';
   position: absolute;
   left: 12%;
@@ -460,7 +463,10 @@
   border-color: var(--acento);
 }
 
-.entrada[aria-invalid="true"] {
+/* .field-error é a classe que o ronuMarcarCampoInvalido (js/auth.js) põe no
+   bloco do campo; aria-invalid, para quem marca o próprio campo. */
+.entrada[aria-invalid="true"],
+.field-error .entrada {
   border-color: var(--erro-campo);
 }
 

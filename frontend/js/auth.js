@@ -439,8 +439,8 @@ let ronuLoginGoogleEmAndamento = false;
 // do formulário —, então o progresso vai numa linha de status logo abaixo
 // (#google-status, role="status", anunciada por leitores de tela). Durante a
 // espera, o slot do Google e o formulário ficam bloqueados: o formulário fica
-// inert (não só o botão desabilitado — no cadastro, digitar reabilitaria o
-// botão via revelarEtapa) para não haver dois logins em paralelo.
+// inert (não só o botão desabilitado — Enter num campo ainda enviaria) para
+// não haver dois logins em paralelo.
 async function ronuTratarCredencialGoogle(response) {
   const form = document.querySelector('form');
   const submitBtn = document.getElementById('submit-btn');

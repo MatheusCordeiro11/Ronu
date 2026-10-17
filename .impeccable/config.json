@@ -56,6 +56,42 @@
         ],
         "createdAt": "2026-10-17T19:22:31.217Z",
         "reason": "Telas aprovadas pelo usuário em docs/redesign definem a grade quadriculada deslizando como enfeite da identidade"
+      },
+      {
+        "rule": "kicker-above-heading",
+        "value": "*",
+        "files": [
+          "frontend/login.html"
+        ],
+        "createdAt": "2026-10-17T19:35:52.104Z",
+        "reason": "Telas aprovadas pelo usuário (docs/redesign/telas/Login e Cadastro) têm o rótulo curto acima do título"
+      },
+      {
+        "rule": "codex-grid-background",
+        "value": "*",
+        "files": [
+          "frontend/login.html"
+        ],
+        "createdAt": "2026-10-17T19:35:52.175Z",
+        "reason": "Telas aprovadas pelo usuário em docs/redesign definem a grade quadriculada deslizando como enfeite da identidade"
+      },
+      {
+        "rule": "kicker-above-heading",
+        "value": "*",
+        "files": [
+          "frontend/cadastro.html"
+        ],
+        "createdAt": "2026-10-17T19:35:52.234Z",
+        "reason": "Telas aprovadas pelo usuário (docs/redesign/telas/Login e Cadastro) têm o rótulo curto acima do título"
+      },
+      {
+        "rule": "codex-grid-background",
+        "value": "*",
+        "files": [
+          "frontend/cadastro.html"
+        ],
+        "createdAt": "2026-10-17T19:35:52.299Z",
+        "reason": "Telas aprovadas pelo usuário em docs/redesign definem a grade quadriculada deslizando como enfeite da identidade"
       }
     ]
   }

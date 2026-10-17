@@ -1,0 +1,352 @@
+/*
+  Ronu — Telas de entrada (login e cadastro; depois esqueci/redefinir senha e
+  estado, que usam o mesmo arranjo). Telas aprovadas: docs/redesign/telas/
+  Login, Cadastro e as versões ...Mobile / ...Washi.
+  Depende de css/base/tokens.css, css/base/base.css e css/componentes.css.
+
+  Desktop: painel da marca à esquerda (grade, logo, sol/lua, carimbo, quimono
+  e o texto da marca) e o formulário à direita.
+  Celular: o painel vira uma faixa no topo; no login, com o quimono saindo
+  pela borda de baixo; no cadastro, só com logo, carimbo e as etapas.
+*/
+
+.entrada-pagina {
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+}
+
+/* ---------- Painel da marca ---------- */
+.entrada-painel {
+  position: relative;
+  min-height: 100svh;
+  padding: var(--e-8) var(--e-9);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--e-7);
+  border-right: 1px solid var(--borda);
+  overflow: hidden;
+}
+
+.entrada-painel-topo {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--e-4);
+}
+
+.entrada-painel-topo .logo-selo {
+  width: 32px;
+  height: 32px;
+  font-size: 17px;
+}
+
+.entrada-painel-topo .logo-nome {
+  font-size: 24px;
+}
+
+.entrada-painel-acoes {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e-4);
+}
+
+.entrada-arte {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 80px;
+  pointer-events: none;
+}
+
+.entrada-arte .quimono {
+  width: 300px;
+  height: auto;
+}
+
+/* Cadastro: quimono menor e mais alto, para caber o texto e as etapas. */
+.entrada-cadastro .entrada-arte {
+  padding-bottom: 180px;
+}
+
+.entrada-cadastro .entrada-arte .quimono {
+  width: 280px;
+}
+
+/* Faixa branca (cadastro): a faixa ganha contorno para não sumir no quimono. */
+.quimono .q-faixa-branca {
+  fill: var(--faixa-branca);
+  stroke: var(--quimono-faixa-borda);
+  stroke-width: 2;
+}
+
+.entrada-flutua {
+  position: absolute;
+  top: 190px;
+  left: var(--e-9);
+  z-index: 1;
+}
+
+.entrada-flutua .numero {
+  font-size: 1.375rem;
+}
+
+.entrada-painel-texto {
+  position: relative;
+  z-index: 1;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.entrada-painel-texto h2 {
+  font-size: 2.5rem;
+  line-height: 1.15;
+}
+
+.entrada-painel-texto p {
+  font-size: var(--t-lead);
+  line-height: 1.6;
+  color: var(--texto-2);
+}
+
+.entrada-painel-rodape {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-7);
+  max-width: 480px;
+}
+
+/* As etapas futuras do cadastro piscam em sequência (enfeite, como no canvas). */
+.entrada-etapas li:not(.feita) {
+  animation: entrada-etapa 5s ease-in-out infinite;
+}
+
+.entrada-etapas li:nth-child(2) { animation-delay: 0.6s; }
+.entrada-etapas li:nth-child(3) { animation-delay: 1.2s; }
+.entrada-etapas li:nth-child(4) { animation-delay: 1.8s; }
+.entrada-etapas li:nth-child(5) { animation-delay: 2.4s; }
+
+@keyframes entrada-etapa {
+  0%, 100% { opacity: 0.45; }
+  20%, 40% { opacity: 1; }
+}
+
+/* ---------- Formulário ---------- */
+.entrada-form-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--e-10) var(--e-7);
+}
+
+.entrada-form {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.entrada-cadastro .entrada-form {
+  max-width: 420px;
+  gap: var(--e-6);
+}
+
+.entrada-cabeca {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.entrada-cabeca h1 {
+  font-size: var(--t-h1);
+}
+
+.entrada-campos {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.entrada-cadastro .entrada-campos {
+  gap: var(--e-4);
+}
+
+.entrada-linha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+}
+
+.entrada-linha > .campo:first-child {
+  flex: 2 1 220px;
+}
+
+.entrada-linha > .campo:last-child {
+  flex: 1 1 110px;
+}
+
+.entrada-form .botao-primario {
+  margin-top: 6px;
+}
+
+.entrada-google {
+  min-height: 44px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Enquanto a credencial do Google é trocada por uma sessão (js/auth.js). */
+.entrada-google[data-loading="true"] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.entrada-google-status:empty {
+  display: none;
+}
+
+.entrada-google-status {
+  margin-top: -14px;
+  text-align: center;
+  font-size: var(--t-apoio);
+  color: var(--texto-2);
+}
+
+.entrada-alternar {
+  text-align: center;
+  font-size: var(--t-corpo);
+  color: var(--texto-2);
+}
+
+.entrada-alternar a {
+  color: var(--acento-texto);
+  font-weight: 500;
+}
+
+/* No celular, o título do formulário passa a ser a frase da marca. */
+.so-celular {
+  display: none;
+}
+
+/* ---------- Celular ---------- */
+@media (max-width: 960px) {
+  .entrada-pagina {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .entrada-painel {
+    min-height: 0;
+    padding: var(--e-5) var(--e-5) var(--e-6);
+    border-right: 0;
+    border-bottom: 1px solid var(--borda);
+    gap: var(--e-7);
+  }
+
+  .entrada-painel-topo .logo-selo {
+    width: 28px;
+    height: 28px;
+    font-size: 15px;
+  }
+
+  .entrada-painel-topo .logo-nome {
+    font-size: 20px;
+  }
+
+  .entrada-painel .carimbo {
+    width: 44px;
+    padding: 8px 0;
+    font-size: 17px;
+  }
+
+  .entrada-painel .botao-tema {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* Login: faixa de 230 px com o quimono cortado pela borda de baixo. */
+  .entrada-login .entrada-painel {
+    height: 230px;
+  }
+
+  .entrada-login .entrada-arte {
+    align-items: flex-end;
+    padding-bottom: 0;
+    bottom: -40px;
+    top: auto;
+    height: 220px;
+  }
+
+  .entrada-login .entrada-arte .quimono {
+    width: 190px;
+  }
+
+  /* Cadastro: sem quimono; ficam o logo, o carimbo e as etapas. */
+  .entrada-cadastro .entrada-arte {
+    display: none;
+  }
+
+  .entrada-flutua,
+  .entrada-painel-texto {
+    display: none;
+  }
+
+  .entrada-etapas {
+    gap: 6px;
+  }
+
+  .entrada-etapas li {
+    font-size: 11px;
+  }
+
+  .entrada-form-area {
+    align-items: flex-start;
+    padding: var(--e-7) var(--e-5) var(--e-6);
+  }
+
+  .entrada-form {
+    gap: var(--e-5);
+  }
+
+  .entrada-cabeca {
+    gap: 6px;
+  }
+
+  .entrada-cabeca h1 {
+    font-size: 1.875rem;
+    line-height: 1.15;
+  }
+
+  .entrada-campos {
+    gap: 14px;
+  }
+
+  .entrada-linha {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* Em coluna, a base de 220/110 px viraria altura. */
+  .entrada-linha > .campo:first-child,
+  .entrada-linha > .campo:last-child {
+    flex: none;
+  }
+
+  .so-desktop {
+    display: none;
+  }
+
+  .so-celular {
+    display: inline;
+  }
+}
