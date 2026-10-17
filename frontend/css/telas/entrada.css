@@ -238,6 +238,176 @@
   display: none;
 }
 
+/* ---------- Telas de senha (esqueci e redefinir) ----------
+   Cada estado é uma <section class="entrada-estado">, trocada pelo
+   ronuMostrarEstado (js/auth.js), que marca data-entrando na troca. */
+.entrada-estado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-6);
+}
+
+.entrada-estado[data-entrando="true"] {
+  animation: entra var(--d-lenta) var(--curva-saida) both;
+}
+
+.entrada-estado .entrada-cabeca p {
+  font-size: var(--t-corpo-g);
+  line-height: 1.6;
+  color: var(--texto-2);
+}
+
+.entrada-estado .entrada-cabeca strong {
+  color: var(--texto);
+}
+
+/* O título recebe o foco na troca de estado (leitor de tela); sem anel. */
+.entrada-estado .auth-title:focus {
+  outline: none;
+}
+
+/* Envelope de "Confira seu email": se desenha uma vez ao aparecer. */
+.entrada-envelope {
+  color: var(--acento);
+}
+
+.entrada-envelope rect,
+.entrada-envelope path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: desenha-linha 1.6s var(--curva-saida) 0.2s forwards;
+}
+
+.entrada-notas {
+  padding-top: 18px;
+  border-top: 1px solid var(--borda);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  font-size: var(--t-apoio);
+  color: var(--texto-2);
+}
+
+.entrada-notas strong {
+  color: var(--texto);
+  font-weight: 500;
+}
+
+.entrada-reenvio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.entrada-reenvio .botao {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Liberado depois dos 60 s, o "Reenviar" vira a ação principal da tela
+   (no acento); enquanto conta ou envia, fica no contorno. */
+.entrada-reenvio .botao-fantasma:not(:disabled) {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--sobre-acento);
+  font-weight: 600;
+}
+
+.entrada-reenvio .botao-fantasma:not(:disabled):hover {
+  color: var(--sobre-acento);
+  filter: brightness(1.08);
+}
+
+:root[data-tema="claro"] .entrada-reenvio .botao-fantasma:not(:disabled):hover {
+  filter: brightness(0.92);
+}
+
+/* Barra da espera de 60 s do "Reenviar" (esqueci-senha.js liga .contando). */
+.entrada-contagem {
+  height: 2px;
+  border-radius: 1px;
+  background: var(--borda);
+  overflow: hidden;
+}
+
+.entrada-contagem span {
+  display: block;
+  height: 100%;
+  background: var(--acento);
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+.entrada-contagem.contando span {
+  animation: entrada-contagem 60s linear forwards;
+}
+
+@keyframes entrada-contagem {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+/* "Conferindo o link...": uma barra curta que atravessa. */
+.entrada-varredura {
+  height: 2px;
+  border-radius: 1px;
+  background: var(--borda);
+  overflow: hidden;
+}
+
+.entrada-varredura span {
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: var(--acento);
+  animation: entrada-varredura 1.4s ease-in-out infinite;
+}
+
+@keyframes entrada-varredura {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+
+.entrada-acoes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.entrada-links {
+  text-align: center;
+  font-size: var(--t-corpo);
+  color: var(--texto-2);
+}
+
+.entrada-links a,
+.entrada-links .link-botao {
+  color: var(--texto);
+}
+
+.link-botao {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+  cursor: pointer;
+}
+
+.link-botao:hover {
+  color: var(--acento-texto);
+}
+
+.entrada-status:empty {
+  display: none;
+}
+
+.entrada-status {
+  font-size: var(--t-apoio);
+  color: var(--texto-2);
+}
+
 /* ---------- Celular ---------- */
 @media (max-width: 960px) {
   .entrada-pagina {
@@ -294,6 +464,16 @@
   /* Cadastro: sem quimono; ficam o logo, o carimbo e as etapas. */
   .entrada-cadastro .entrada-arte {
     display: none;
+  }
+
+  /* Senha: faixa de 120 px só com logo, sol/lua e carimbo. */
+  .entrada-senha .entrada-arte {
+    display: none;
+  }
+
+  .entrada-senha .entrada-painel {
+    min-height: 120px;
+    justify-content: center;
   }
 
   .entrada-flutua,

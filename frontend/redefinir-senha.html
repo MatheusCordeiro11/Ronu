@@ -10,83 +10,131 @@
        cabeçalho Referer, e esta página não manda Referer nenhum. -->
   <meta name="referrer" content="no-referrer">
 
+  <!-- Antes do CSS: aplica o modo escuro/claro antes da primeira pintura. -->
+  <script src="js/base/tema.js"></script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/auth.css">
-  <script src="js/auth-entrada.js"></script>
+  <link rel="stylesheet" href="css/base/tokens.css">
+  <link rel="stylesheet" href="css/base/base.css">
+  <link rel="stylesheet" href="css/componentes.css">
+  <link rel="stylesheet" href="css/telas/entrada.css">
 </head>
 <body>
+  <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
 
-  <div class="auth-page auth-page-senha">
+  <div class="entrada-pagina entrada-senha">
 
-    <aside class="auth-brand">
-      <a href="landing/v1/index.html" class="wordmark">ronu<span>.</span></a>
-      <div class="auth-brand-visual auth-brand-foto">
-        <img src="img/modalidades/foto-judo-plateia.webp" alt="Judoca de quimono e faixa preta diante da plateia de um ginásio" fetchpriority="high">
+    <aside class="entrada-painel grade">
+      <div class="entrada-painel-topo">
+        <a class="logo" href="landing/v1/index.html" aria-label="Ronu, página inicial">
+          <span class="logo-selo" aria-hidden="true">浪</span>
+          <span class="logo-nome" aria-hidden="true">RONU</span>
+        </a>
+        <div class="entrada-painel-acoes">
+          <button type="button" class="botao-tema" data-alternar-tema aria-label="Mudar para o modo claro">
+            <svg class="icone-sol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></svg>
+            <svg class="icone-lua" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+          </button>
+          <div class="carimbo" aria-hidden="true"><span>浪</span><span>人</span></div>
+        </div>
       </div>
-      <p class="auth-brand-quote">Senha nova, mesmo histórico: suas dietas e pesagens continuam onde estavam.</p>
+
+      <div class="entrada-arte" aria-hidden="true">
+        <svg class="quimono" viewBox="0 0 400 460" width="300" height="345" focusable="false">
+          <path class="q-corpo" d="M150 30 L40 62 L0 192 L70 218 L110 142 L110 440 L290 440 L290 142 L330 218 L400 192 L360 62 L250 30 Q200 52 150 30 Z"/>
+          <path class="q-sombra-1" d="M150 30 L176 30 L256 232 L238 252 Z"/>
+          <path class="q-sombra-2" d="M250 30 L224 30 L150 220 L162 252 Z"/>
+          <path class="q-costura" d="M40 62 L70 218 M360 62 L330 218 M200 280 L200 440"/>
+          <path class="q-faixa" d="M110 250 L290 250 L290 282 L110 282 Z"/>
+          <path class="q-faixa" d="M188 282 L166 376 L184 379 L201 286 Z"/>
+          <path class="q-faixa" d="M212 282 L240 368 L222 373 L203 286 Z"/>
+          <rect class="q-etiqueta" x="232" y="262" width="22" height="9"/>
+        </svg>
+      </div>
+
+      <div class="entrada-painel-texto">
+        <h2>Senha nova, mesmo histórico.</h2>
+        <p>Suas dietas e pesagens continuam exatamente onde estavam.</p>
+      </div>
     </aside>
 
-    <main class="auth-form-panel">
-      <div class="auth-form-wrap">
+    <main class="entrada-form-area" id="conteudo">
+      <div class="entrada-form">
 
         <!-- O formulário só aparece depois que a API confirma que o link vale:
              ninguém digita a senha nova num link que já não serve. -->
-        <section class="auth-estado" id="estado-verificando">
-          <h1 class="auth-title" tabindex="-1">Criar senha nova</h1>
-          <p class="auth-subtitle" id="verificando-status" role="status" aria-live="polite">Conferindo o link...</p>
+        <section class="entrada-estado" id="estado-verificando">
+          <div class="entrada-cabeca">
+            <span class="rotulo rotulo-acento">Recuperar acesso</span>
+            <h1 class="auth-title" tabindex="-1">Criar senha nova</h1>
+          </div>
+          <div class="campo">
+            <span class="texto-2" id="verificando-status" role="status" aria-live="polite">Conferindo o link...</span>
+            <div class="entrada-varredura" aria-hidden="true"><span></span></div>
+          </div>
         </section>
 
-        <section class="auth-estado" id="estado-link" hidden>
-          <h1 class="auth-title" tabindex="-1" id="link-titulo">Link inválido</h1>
-          <p class="auth-subtitle" id="link-texto"></p>
-          <a href="esqueci-senha.html" class="btn btn-primary btn-block" id="link-acao-principal">Pedir um novo link</a>
-          <p class="auth-switch"><a href="login.html" class="auth-switch-link" id="link-acao-secundaria">Voltar para o login</a></p>
+        <section class="entrada-estado" id="estado-link" hidden>
+          <div class="entrada-cabeca">
+            <span class="rotulo rotulo-acento">Recuperar acesso</span>
+            <h1 class="auth-title" tabindex="-1" id="link-titulo">Link inválido</h1>
+            <p id="link-texto"></p>
+          </div>
+          <div class="entrada-acoes">
+            <a class="botao botao-primario botao-grande botao-bloco" href="esqueci-senha.html" id="link-acao-principal">Pedir um novo link</a>
+            <a class="botao botao-fantasma botao-grande botao-bloco" href="login.html" id="link-acao-secundaria">Voltar para o login</a>
+          </div>
         </section>
 
-        <section class="auth-estado" id="estado-erro" hidden>
-          <h1 class="auth-title" tabindex="-1">Criar senha nova</h1>
-          <p class="auth-subtitle">Não foi possível conferir o link agora.</p>
-          <div class="form-message form-message-error" id="verificar-error" role="alert"></div>
-          <button type="button" class="btn btn-primary btn-block" id="tentar-de-novo-btn">
+        <section class="entrada-estado" id="estado-erro" hidden>
+          <div class="entrada-cabeca">
+            <span class="rotulo rotulo-acento">Recuperar acesso</span>
+            <h1 class="auth-title" tabindex="-1">Criar senha nova</h1>
+            <p>Não foi possível conferir o link agora.</p>
+          </div>
+          <div class="aviso aviso-erro" id="verificar-error" role="alert"></div>
+          <button type="button" class="botao botao-primario botao-grande botao-bloco" id="tentar-de-novo-btn">
             <span class="btn-label">Tentar de novo</span>
           </button>
         </section>
 
-        <section class="auth-estado" id="estado-formulario" hidden>
-          <h1 class="auth-title" tabindex="-1">Criar senha nova</h1>
-          <p class="auth-subtitle">Escolha a senha que você vai usar para entrar.</p>
+        <section class="entrada-estado" id="estado-formulario" hidden>
+          <div class="entrada-cabeca">
+            <span class="rotulo rotulo-acento">Recuperar acesso</span>
+            <h1 class="auth-title" tabindex="-1">Criar senha nova</h1>
+            <p>Escolha uma senha nova para a sua conta.</p>
+          </div>
 
-          <div class="form-message form-message-error" id="form-error" role="alert" hidden></div>
+          <div class="aviso aviso-erro" id="form-error" role="alert" hidden></div>
 
-          <form id="redefinir-form" novalidate>
+          <form id="redefinir-form" class="entrada-campos" novalidate>
             <!-- Email da conta (vem da API ao conferir o link), escondido: é
                  o que deixa o gerenciador de senhas do navegador salvar a
                  senha nova na conta certa. -->
             <input type="email" id="email-conta" name="username" autocomplete="username" readonly hidden>
 
-            <div class="field" id="field-senha-nova">
-              <label for="senha-nova">Senha nova</label>
-              <input type="password" id="senha-nova" name="senha-nova" autocomplete="new-password" minlength="8" maxlength="64" required aria-describedby="senha-nova-dica">
-              <span class="field-hint" id="senha-nova-dica">De 8 a 64 caracteres.</span>
-              <span class="field-error-message" id="senha-nova-error" hidden></span>
+            <div class="campo" id="field-senha-nova">
+              <label class="campo-rotulo" for="senha-nova">Senha nova</label>
+              <input class="entrada" type="password" id="senha-nova" name="senha-nova" autocomplete="new-password" minlength="8" maxlength="64" required aria-describedby="senha-nova-dica senha-nova-error">
+              <span class="campo-dica" id="senha-nova-dica">De 8 a 64 caracteres.</span>
+              <span class="campo-erro" id="senha-nova-error" hidden></span>
             </div>
 
-            <div class="field" id="field-confirmar-senha">
-              <label for="confirmar-senha">Confirmar senha nova</label>
-              <input type="password" id="confirmar-senha" name="confirmar-senha" autocomplete="new-password" maxlength="64" required>
-              <span class="field-error-message" id="confirmar-senha-error" hidden></span>
+            <div class="campo" id="field-confirmar-senha">
+              <label class="campo-rotulo" for="confirmar-senha">Confirmar senha nova</label>
+              <input class="entrada" type="password" id="confirmar-senha" name="confirmar-senha" autocomplete="new-password" maxlength="64" required aria-describedby="confirmar-senha-error">
+              <span class="campo-erro" id="confirmar-senha-error" hidden></span>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-block" id="submit-btn">
+            <button type="submit" class="botao botao-primario botao-grande botao-bloco" id="submit-btn">
               <span class="btn-label">Salvar senha nova</span>
             </button>
           </form>
 
-          <p class="auth-nota">Ao salvar, você sai de todos os aparelhos em que estava conectado.</p>
+          <p class="apoio">Ao salvar, você sai de todos os aparelhos em que estava conectado.</p>
         </section>
 
       </div>

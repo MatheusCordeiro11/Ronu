@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const reenvioError = document.getElementById('reenvio-error');
   const reenviarBtn = document.getElementById('reenviar-btn');
   const reenvioStatus = document.getElementById('reenvio-status');
+  const contagem = document.getElementById('reenvio-contagem');
 
   let emailPedido = '';
   let temporizadorReenvio = null;
@@ -41,10 +42,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const label = reenviarBtn.querySelector('.btn-label');
     const fim = Date.now() + RONU_ESPERA_REENVIO_S * 1000;
 
+    // A barra embaixo do botão esvazia nos mesmos 60 s (animação em CSS);
+    // tirar e pôr a classe de novo reinicia a animação a cada pedido.
+    contagem.classList.remove('contando');
+    void contagem.offsetWidth;
+    contagem.classList.add('contando');
+
     const atualizar = () => {
       const restante = Math.ceil((fim - Date.now()) / 1000);
       if (restante <= 0) {
         clearInterval(temporizadorReenvio);
+        contagem.classList.remove('contando');
         reenviarBtn.disabled = false;
         label.textContent = 'Reenviar';
         return;
@@ -114,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('outro-email-btn').addEventListener('click', () => {
     clearInterval(temporizadorReenvio);
+    contagem.classList.remove('contando');
     ronuOcultarErroFormulario(formError);
     ronuMostrarEstado(secoes, 'formulario');
     campoEmail.focus();
