@@ -55,7 +55,7 @@ O email sai em segundo plano (a resposta não espera o SMTP). Limite por conta: 
 ## Perfil (dados pessoais)
 
 ### `GET /api/perfil`
-**Devolve:** `altura` (cm), `sexo`, `dataNascimento`, `rotinaDiaria`, `orcamentoSemanal` — todos podem vir nulos enquanto o onboarding não os preencheu
+**Devolve:** `altura` (cm), `sexo`, `dataNascimento`, `rotinaDiaria`, `orcamentoSemanal` — todos podem vir nulos enquanto o onboarding não os preencheu — e os dados da conta: `nome`, `email`, `estado` (UF, `null` se ainda não informado), `temSenha` e `temGoogle` (se a conta tem senha própria e se tem login com Google vinculado; a senha e o hash nunca vêm)
 
 ### `PUT /api/perfil`
 **Recebe:** `altura` (cm), `sexo` (`Masculino` ou `Feminino`), `dataNascimento` (obrigatórios); `rotinaDiaria` e `orcamentoSemanal` (opcionais; `orcamentoSemanal` aceita `economico`, `moderado` ou `sem_restricao`)
@@ -83,7 +83,7 @@ O email sai em segundo plano (a resposta não espera o SMTP). Limite por conta: 
 **Erros:** 404 se o usuário ainda não registrou nenhum objetivo.
 
 ### `GET /api/objetivos/tendencia`
-**Devolve:** lista de pontos do gráfico de peso, cada um com `data`, `pesoBruto` e `pesoTendencia` (peso suavizado)
+**Devolve:** lista de pontos do gráfico de peso, em ordem de data, cada um com `data`, `pesoBruto`, `pesoTendencia` (peso suavizado) e, do registro de origem, `id`, `objetivo` e `aderencia` (nula quando não respondida)
 
 ### `DELETE /api/objetivos/{id}`
 **Devolve:** 204 sem corpo
@@ -135,7 +135,8 @@ As três rotas devolvem a dieta no mesmo formato, `DietaResponse`:
 
 - `dataGeracao`
 - `dieta`
-  - `dias`: os 7 dias da semana, cada um com `diaSemana`, `refeicoes` (cada refeição com `nome`, `horario` opcional, `alimentos [{ nome, quantidade, unidade }]` e `macros`), `totalDoDia`, `metaCalculada` e `metaElevadaPeloPiso`
+  - `dias`: os 7 dias da semana, cada um com `diaSemana`, `refeicoes` (cada refeição com `nome`, `horario` opcional, `alimentos [{ nome, quantidade, unidade }]` e `macros`), `totalDoDia`, `metaCalculada`, `metaElevadaPeloPiso` e `composicaoMeta`
+  - `composicaoMeta` (nulo nas dietas geradas antes do campo): as partes da meta daquele dia, gravadas na geração, em kcal inteiras que somam exatamente `meta` (o arredondamento de `metaCalculada.calorias`): `gastoRepouso`, `atividadeForaDoTreino`, `treino [{ nome, horas, kcal }]`, `objetivo`, `ajusteProgresso`, `pisoCarboidrato`, `meta`. A diferença de arredondamento cai na última parte diferente de zero
   - `ajusteAdaptativo` (pode ser nulo): `percentual`, `motivo`, `aplicado`, `ritmoRealKgSemana`, `ritmoEsperadoKgSemana`, `pontosUsados`
 - `macros`, `totalDoDia` e `metaCalculada` têm `calorias`, `proteinasG`, `carboidratosG` e `gordurasG`
 
@@ -162,6 +163,16 @@ As três rotas devolvem a dieta no mesmo formato, `DietaResponse`:
 
 ### `GET /api/dietas/historico`
 **Devolve:** lista das dietas salvas do usuário (até 3), da mais recente para a mais antiga, cada uma com `dataGeracao` e `dieta`
+
+---
+
+## Metas (simulação)
+
+### `POST /api/metas/simulacao`
+Calcula a meta da fórmula sem gravar nada e sem chamar a IA, com as mesmas classes da geração da dieta. Sem o ajuste adaptativo (que depende do histórico).
+**Recebe (tudo opcional; o que não vier usa o dado salvo):** `sexo` (`Masculino` ou `Feminino`), `altura` (cm, 100 a 250), `dataNascimento` (até hoje, no máximo 100 anos atrás), `peso` (kg, 20 a 300; ausente = peso de tendência salvo), `objetivo` (`perder peso`, `manter peso` ou `ganhar peso`; ausente = o do registro mais recente), `modalidades [{ modalidadeId, diasSemana, duracaoMediaHoras }]` (mesmas regras do `POST /api/usuarios/modalidades`, sem repetir modalidade; se vier, mesmo vazia, substitui a lista salva)
+**Devolve:** `versaoFormula`; `entradas { sexo, altura, dataNascimento, idade, peso, pesoOrigem ("informado" ou "tendencia"), objetivo }`; `gastoRepouso { total, peso, altura, idade, sexo }` (as parcelas de Mifflin-St Jeor, que somam o total pelo maior resto); `atividadeForaDoTreino { fator, kcal }`; `ritmoEsperadoKgSemana`; `modalidades [{ modalidadeId, nome, metReferencia, duracaoHoras, diasSemana, kcalSessao }]`; `dias` (sempre 7, de 1 = segunda a 7 = domingo) com `diaSemana`, `treinoKcal`, `manutencao`, `objetivoKcal`, `tetoDeficitAplicado` e `metaFormula`. Valores em kcal inteiras: cada parte é arredondada uma vez e todo total é a soma das partes mostradas
+**Erros:** 400 `{ mensagem }` para valor fora do conjunto ou da faixa e quando falta um dado que também não está salvo ("Informe seu peso." etc.); 404 se uma modalidade não existe.
 
 ---
 

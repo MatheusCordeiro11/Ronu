@@ -39,6 +39,20 @@ public class ContextoDietaBuilder : IContextoDietaBuilder
             : historico[^1].Peso;
     }
 
+    /// <summary>
+    /// Idade em anos completos no dia "hoje" (UTC, como no resto do cálculo).
+    /// Compartilhada com a simulação da meta (MetasController).
+    /// </summary>
+    public static int Idade(DateOnly dataNascimento, DateOnly hoje)
+    {
+        var idade = hoje.Year - dataNascimento.Year;
+        if (hoje < dataNascimento.AddYears(idade))
+        {
+            idade--;
+        }
+        return idade;
+    }
+
     public async Task<ContextoDietaDto> ConstruirAsync(int usuarioId)
     {
         var usuario = await _context.Usuarios
@@ -104,11 +118,7 @@ public class ContextoDietaBuilder : IContextoDietaBuilder
             })
             .ToListAsync();
 
-        var idade = DateTime.UtcNow.Year - usuario.DataNascimento!.Value.Year;
-        if (DateOnly.FromDateTime(DateTime.UtcNow) < usuario.DataNascimento.Value.AddYears(idade))
-        {
-            idade--;
-        }
+        var idade = Idade(usuario.DataNascimento!.Value, DateOnly.FromDateTime(DateTime.UtcNow));
 
         return new ContextoDietaDto
         {
