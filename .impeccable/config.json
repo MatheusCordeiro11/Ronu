@@ -164,6 +164,33 @@
         ],
         "createdAt": "2026-10-17T19:50:14.124Z",
         "reason": "Falso positivo: a regra .entrada-varredura vem do entrada.css compartilhado; login e cadastro não têm esse elemento"
+      },
+      {
+        "rule": "kicker-above-heading",
+        "value": "*",
+        "files": [
+          "frontend/estado.html"
+        ],
+        "createdAt": "2026-10-17T20:03:11.506Z",
+        "reason": "Tela aprovada pelo usuário (docs/redesign/telas/Estado) tem o rótulo 'Só falta isso' acima do título"
+      },
+      {
+        "rule": "codex-grid-background",
+        "value": "*",
+        "files": [
+          "frontend/estado.html"
+        ],
+        "createdAt": "2026-10-17T20:03:11.574Z",
+        "reason": "Telas aprovadas pelo usuário em docs/redesign definem a grade quadriculada deslizando como enfeite da identidade"
+      },
+      {
+        "rule": "marquee",
+        "value": "*",
+        "files": [
+          "frontend/estado.html"
+        ],
+        "createdAt": "2026-10-17T20:03:11.666Z",
+        "reason": "Falso positivo: a regra .entrada-varredura vem do entrada.css compartilhado; a tela de estado não tem esse elemento"
       }
     ]
   }

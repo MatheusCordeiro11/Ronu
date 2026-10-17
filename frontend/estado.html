@@ -6,150 +6,144 @@
   <title>Ronu — Informar estado</title>
   <meta name="description" content="Informe seu estado para o Ronu adaptar sua dieta à sua região.">
 
+  <!-- Antes do CSS: aplica o modo escuro/claro antes da primeira pintura. -->
+  <script src="js/base/tema.js"></script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/auth.css">
-  <script src="js/auth-entrada.js"></script>
-  <link rel="stylesheet" href="css/estado.css">
+  <link rel="stylesheet" href="css/base/tokens.css">
+  <link rel="stylesheet" href="css/base/base.css">
+  <link rel="stylesheet" href="css/componentes.css">
+  <link rel="stylesheet" href="css/telas/entrada.css">
 </head>
 <body>
+  <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
 
-  <div class="auth-page">
+  <div class="entrada-pagina entrada-senha entrada-estado-uf">
 
-    <aside class="auth-brand">
-      <a href="landing/v1/index.html" class="wordmark">ronu<span>.</span></a>
-      <div class="auth-brand-visual hero-carousel" id="authCarousel">
-        <!--
-          Ordem: as 9 fotos anteriores seguem na sequência de antes; as 5 novas entram
-          intercaladas para que nenhuma foto com motion blur forte (basquete, corrida,
-          giro, os dois futebóis e a piscina) encoste em outra, nem as duas de tom
-          quente (futebóis e piscina) ou as duas de estúdio cinza (alongamento e dança).
-          Vale também entre a última e a primeira, porque o carrossel dá a volta.
-          A 1ª foto leva fetchpriority="high": os slides ficam empilhados na área
-          visível (só a opacidade muda), então o loading="lazy" não adia as demais no
-          desktop — elas baixam junto, em prioridade baixa, e a 1ª precisa chegar antes.
-        -->
-        <ul class="hero-carousel-track">
-          <li class="hero-carousel-slide is-active">
-            <img src="img/modalidades/foto-natacao.webp" alt="Nadador submerso visto de baixo, em preto e branco" loading="eager" fetchpriority="high">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-basquete-movimento.webp" alt="Jogador de basquete segurando a bola no alto, borrado pela velocidade, contra um fundo azul e amarelo" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-judo-plateia.webp" alt="Judoca de quimono e faixa preta diante da plateia de um ginásio" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-academia-puxada.webp" alt="Atleta de regata vermelha num aparelho de puxada" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-futebol-voleio.webp" alt="Jogador de futebol chutando a bola no ar sobre almofadas vermelhas" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-muaythai-chute.webp" alt="Lutador chutando o saco de pancadas numa academia de muay thai" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-prancha.webp" alt="Atleta treinando abdômen com rolinho no chão da academia" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-piscina-bola.webp" alt="Homem dentro de uma piscina olhando a bola no ar, em tons quentes" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-boxe-ringue.webp" alt="Dois boxeadores frente a frente no ringue antes da luta" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-giro-2.webp" alt="Atleta girando o corpo num golpe, borrado pela velocidade" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-alongamento-magnesio.webp" alt="Atleta de regata preta com as mãos brancas de magnésio, alongando o braço num estúdio cinza" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-futebol-chute.webp" alt="Jogador de futebol acertando a bola no ar" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-danca-movimento.webp" alt="Bailarina equilibrada numa perna, com a outra estendida para trás, num estúdio cinza" loading="lazy">
-          </li>
-          <li class="hero-carousel-slide">
-            <img src="img/modalidades/foto-corrida-borrada.webp" alt="Atleta correndo de moletom, borrado pela velocidade" loading="lazy">
-          </li>
-        </ul>
-
-        <div class="hero-carousel-controls">
-          <div class="hero-carousel-dots" role="tablist" aria-label="Selecionar imagem">
-            <button type="button" class="hero-carousel-dot is-active" role="tab" aria-selected="true" aria-label="Natação"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Basquete"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Judô"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Musculação"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Voleio"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Muay thai"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Abdômen"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Piscina"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Boxe"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Movimento"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Alongamento"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Futebol"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Dança"></button>
-            <button type="button" class="hero-carousel-dot" role="tab" aria-selected="false" aria-label="Corrida"></button>
-          </div>
+    <aside class="entrada-painel grade">
+      <div class="entrada-painel-topo">
+        <a class="logo" href="landing/v1/index.html" aria-label="Ronu, página inicial">
+          <span class="logo-selo" aria-hidden="true">浪</span>
+          <span class="logo-nome" aria-hidden="true">RONU</span>
+        </a>
+        <div class="entrada-painel-acoes">
+          <button type="button" class="botao-tema" data-alternar-tema aria-label="Mudar para o modo claro">
+            <svg class="icone-sol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></svg>
+            <svg class="icone-lua" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+          </button>
+          <div class="carimbo" aria-hidden="true"><span>浪</span><span>人</span></div>
         </div>
       </div>
-      <p class="auth-brand-quote">Sua dieta calcula o que seu treino realmente gasta.</p>
+
+      <div class="entrada-arte" aria-hidden="true">
+        <svg class="quimono" viewBox="0 0 400 460" width="280" height="322" focusable="false">
+          <path class="q-corpo" d="M150 30 L40 62 L0 192 L70 218 L110 142 L110 440 L290 440 L290 142 L330 218 L400 192 L360 62 L250 30 Q200 52 150 30 Z"/>
+          <path class="q-sombra-1" d="M150 30 L176 30 L256 232 L238 252 Z"/>
+          <path class="q-sombra-2" d="M250 30 L224 30 L150 220 L162 252 Z"/>
+          <path class="q-costura" d="M40 62 L70 218 M360 62 L330 218 M200 280 L200 440"/>
+          <path class="q-faixa" d="M110 250 L290 250 L290 282 L110 282 Z"/>
+          <path class="q-faixa" d="M188 282 L166 376 L184 379 L201 286 Z"/>
+          <path class="q-faixa" d="M212 282 L240 368 L222 373 L203 286 Z"/>
+          <rect class="q-etiqueta" x="232" y="262" width="22" height="9"/>
+        </svg>
+      </div>
+
+      <div class="entrada-painel-texto">
+        <h2>Cada região tem seu feijão.</h2>
+        <p>E a sua mandioca pode ser aipim ou macaxeira. O Ronu escreve o cardápio do jeito que se fala aí.</p>
+      </div>
     </aside>
 
-    <main class="auth-form-panel">
+    <main class="entrada-form-area" id="conteudo">
       <!-- Oculto até estado.js confirmar que o usuário realmente precisa
            informar o estado — evita a tela piscar antes de um redirecionamento. -->
-      <div class="auth-form-wrap" id="estado-conteudo" hidden>
-        <p class="eyebrow estado-eyebrow">Só mais um passo</p>
-        <h1 class="auth-title">Em que estado você mora?</h1>
-        <p class="auth-subtitle">Usamos o seu estado para adaptar os nomes e os alimentos da sua dieta à sua região.</p>
+      <div class="entrada-form entrada-form-larga" id="estado-conteudo" hidden>
+        <div class="entrada-cabeca entra">
+          <span class="rotulo rotulo-acento">Só falta isso</span>
+          <h1>Em que estado você mora?</h1>
+          <p class="texto-2">Usamos para os nomes dos alimentos e para contar o seu dia no fuso certo.</p>
+        </div>
 
-        <div class="form-message form-message-error" id="form-error" role="alert" hidden></div>
+        <div class="aviso aviso-erro" id="form-error" role="alert" hidden></div>
 
-        <form id="estado-form" novalidate>
-          <div class="field">
-            <label for="estado">Estado</label>
-            <select id="estado" name="estado" class="field-select" autocomplete="address-level1" required>
-              <option value="" disabled selected>Selecione seu estado</option>
-              <option value="AC">Acre</option>
-              <option value="AL">Alagoas</option>
-              <option value="AP">Amapá</option>
-              <option value="AM">Amazonas</option>
-              <option value="BA">Bahia</option>
-              <option value="CE">Ceará</option>
-              <option value="DF">Distrito Federal</option>
-              <option value="ES">Espírito Santo</option>
-              <option value="GO">Goiás</option>
-              <option value="MA">Maranhão</option>
-              <option value="MT">Mato Grosso</option>
-              <option value="MS">Mato Grosso do Sul</option>
-              <option value="MG">Minas Gerais</option>
-              <option value="PA">Pará</option>
-              <option value="PB">Paraíba</option>
-              <option value="PR">Paraná</option>
-              <option value="PE">Pernambuco</option>
-              <option value="PI">Piauí</option>
-              <option value="RJ">Rio de Janeiro</option>
-              <option value="RN">Rio Grande do Norte</option>
-              <option value="RS">Rio Grande do Sul</option>
-              <option value="RO">Rondônia</option>
-              <option value="RR">Roraima</option>
-              <option value="SC">Santa Catarina</option>
-              <option value="SP">São Paulo</option>
-              <option value="SE">Sergipe</option>
-              <option value="TO">Tocantins</option>
-            </select>
+        <form id="estado-form" class="entrada-campos" novalidate>
+          <!-- Rádios de verdade (setas do teclado e "obrigatório" do próprio
+               navegador), com cara de botão. O valor é a sigla, como antes. -->
+          <fieldset class="uf-grupos entra" style="--atraso: 80ms">
+            <legend class="oculto-visual">Estado</legend>
+            <div class="uf-regiao">
+              <span class="uf-regiao-nome" aria-hidden="true">Norte</span>
+              <div class="uf-opcoes">
+                <label class="uf"><input type="radio" name="estado" value="AC" required><span>AC</span></label>
+                <label class="uf"><input type="radio" name="estado" value="AM"><span>AM</span></label>
+                <label class="uf"><input type="radio" name="estado" value="AP"><span>AP</span></label>
+                <label class="uf"><input type="radio" name="estado" value="PA"><span>PA</span></label>
+                <label class="uf"><input type="radio" name="estado" value="RO"><span>RO</span></label>
+                <label class="uf"><input type="radio" name="estado" value="RR"><span>RR</span></label>
+                <label class="uf"><input type="radio" name="estado" value="TO"><span>TO</span></label>
+              </div>
+            </div>
+            <div class="uf-regiao">
+              <span class="uf-regiao-nome" aria-hidden="true">Nordeste</span>
+              <div class="uf-opcoes">
+                <label class="uf"><input type="radio" name="estado" value="AL"><span>AL</span></label>
+                <label class="uf"><input type="radio" name="estado" value="BA"><span>BA</span></label>
+                <label class="uf"><input type="radio" name="estado" value="CE"><span>CE</span></label>
+                <label class="uf"><input type="radio" name="estado" value="MA"><span>MA</span></label>
+                <label class="uf"><input type="radio" name="estado" value="PB"><span>PB</span></label>
+                <label class="uf"><input type="radio" name="estado" value="PE"><span>PE</span></label>
+                <label class="uf"><input type="radio" name="estado" value="PI"><span>PI</span></label>
+                <label class="uf"><input type="radio" name="estado" value="RN"><span>RN</span></label>
+                <label class="uf"><input type="radio" name="estado" value="SE"><span>SE</span></label>
+              </div>
+            </div>
+            <div class="uf-regiao">
+              <span class="uf-regiao-nome" aria-hidden="true">Centro-Oeste</span>
+              <div class="uf-opcoes">
+                <label class="uf"><input type="radio" name="estado" value="DF"><span>DF</span></label>
+                <label class="uf"><input type="radio" name="estado" value="GO"><span>GO</span></label>
+                <label class="uf"><input type="radio" name="estado" value="MS"><span>MS</span></label>
+                <label class="uf"><input type="radio" name="estado" value="MT"><span>MT</span></label>
+              </div>
+            </div>
+            <div class="uf-regiao">
+              <span class="uf-regiao-nome" aria-hidden="true">Sudeste</span>
+              <div class="uf-opcoes">
+                <label class="uf"><input type="radio" name="estado" value="ES"><span>ES</span></label>
+                <label class="uf"><input type="radio" name="estado" value="MG"><span>MG</span></label>
+                <label class="uf"><input type="radio" name="estado" value="RJ"><span>RJ</span></label>
+                <label class="uf"><input type="radio" name="estado" value="SP"><span>SP</span></label>
+              </div>
+            </div>
+            <div class="uf-regiao">
+              <span class="uf-regiao-nome" aria-hidden="true">Sul</span>
+              <div class="uf-opcoes">
+                <label class="uf"><input type="radio" name="estado" value="PR"><span>PR</span></label>
+                <label class="uf"><input type="radio" name="estado" value="RS"><span>RS</span></label>
+                <label class="uf"><input type="radio" name="estado" value="SC"><span>SC</span></label>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Prévia do cardápio e do fuso (estado.js), depois da escolha. -->
+          <div class="cartao uf-previa entra" id="estado-previa" aria-live="polite" style="--atraso: 160ms" hidden>
+            <span class="rotulo">Em <span id="previa-uf"></span>, o seu cardápio fica assim</span>
+            <div class="chips">
+              <span class="chip"><span id="previa-mandioca"></span> cozida</span>
+              <span class="chip"><span id="previa-feijao"></span> cozido</span>
+            </div>
+            <span class="apoio">Seu dia vira à meia-noite no fuso <span id="previa-fuso"></span>.</span>
           </div>
 
-          <button type="submit" class="btn btn-primary btn-block" id="submit-btn">
+          <button type="submit" class="botao botao-primario botao-grande botao-bloco entra" id="submit-btn" style="--atraso: 240ms">
             <span class="btn-label">Continuar</span>
           </button>
         </form>
 
-        <p class="auth-switch">Não é você? <button type="button" class="auth-switch-link estado-sair" id="sair-btn">Sair</button></p>
+        <p class="entrada-alternar">Não é você? <button type="button" class="link-botao" id="sair-btn">Sair</button></p>
       </div>
     </main>
 
@@ -157,14 +151,5 @@
 
   <script src="js/auth.js"></script>
   <script src="js/estado.js"></script>
-  <script src="js/hero-carousel.js"></script>
-  <script>
-    window.addEventListener('load', () => {
-      initHeroCarousel(document.getElementById('authCarousel'), {
-        autoDelay: 5000,
-        resumeDelay: 8000,
-      });
-    });
-  </script>
 </body>
 </html>

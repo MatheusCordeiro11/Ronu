@@ -399,6 +399,104 @@
   color: var(--acento-texto);
 }
 
+/* ---------- Estado (UF) ---------- */
+.entrada-form-larga {
+  max-width: 520px;
+}
+
+.uf-grupos {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.uf-regiao {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.uf-regiao-nome {
+  flex: 0 0 96px;
+  padding-top: 11px;
+  font-size: var(--t-rotulo);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--texto-2);
+}
+
+.uf-opcoes {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* O rádio fica escondido (mas no Tab e nas setas); o span é o "botão". */
+.uf {
+  position: relative;
+}
+
+.uf input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.uf span {
+  display: block;
+  min-width: 52px;
+  padding: 10px 0;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  font-size: var(--t-apoio);
+  font-weight: 600;
+  text-align: center;
+  transition: background-color var(--d-rapida) ease, border-color var(--d-rapida) ease, transform var(--d-rapida) ease;
+}
+
+.uf:hover span {
+  border-color: var(--borda-forte);
+  transform: translateY(-2px);
+}
+
+.uf input:checked + span {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--sobre-acento);
+}
+
+.uf input:focus-visible + span {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
+.uf-previa {
+  padding: 20px 22px;
+  gap: 14px;
+}
+
+@media (max-width: 720px) {
+  .uf-regiao {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .uf-regiao-nome {
+    flex: none;
+    padding-top: 0;
+  }
+
+  .uf span {
+    min-width: 48px;
+  }
+}
+
 .entrada-status:empty {
   display: none;
 }

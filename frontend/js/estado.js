@@ -25,10 +25,31 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('estado-form');
   const formError = document.getElementById('form-error');
   const submitBtn = document.getElementById('submit-btn');
-  const selectEstado = document.getElementById('estado');
   const btnSair = document.getElementById('sair-btn');
+  const previa = document.getElementById('estado-previa');
 
   conteudo.hidden = false;
+
+  // Prévia do que muda com o estado. Espelha as regras do backend: a regra 9
+  // do prompt (GeradorDietaGemini.MontarPrompt) para os nomes e o
+  // FusoHorarioEstado para o fuso. Se uma delas mudar, mudar aqui também.
+  const NORTE_NORDESTE = ['AC', 'AM', 'AP', 'PA', 'RO', 'RR', 'TO', 'AL', 'BA', 'CE', 'MA', 'PB', 'PE', 'PI', 'RN', 'SE'];
+  function mostrarPrevia(uf) {
+    document.getElementById('previa-uf').textContent = uf;
+    document.getElementById('previa-mandioca').textContent =
+      uf === 'RJ' ? 'Aipim' : NORTE_NORDESTE.includes(uf) ? 'Macaxeira' : 'Mandioca';
+    document.getElementById('previa-feijao').textContent =
+      ['PR', 'RS', 'SC'].includes(uf) ? 'Feijão preto' : 'Feijão';
+    document.getElementById('previa-fuso').textContent =
+      uf === 'AC' ? 'do Acre (UTC−5)'
+        : ['AM', 'RO', 'RR', 'MT', 'MS'].includes(uf) ? 'do Amazonas (UTC−4)'
+          : 'de Brasília (UTC−3)';
+    previa.hidden = false;
+  }
+
+  form.addEventListener('change', (evento) => {
+    if (evento.target.name === 'estado') mostrarPrevia(evento.target.value);
+  });
 
   btnSair.addEventListener('click', () => {
     ronuLimparSessao();
@@ -47,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ronuDefinirCarregando(submitBtn, true, 'Salvando...');
 
     try {
-      await ronuSalvarEstado(selectEstado.value);
+      await ronuSalvarEstado(form.elements.estado.value);
       await ronuRedirecionarPosAuth();
     } catch (erro) {
       ronuMostrarErroFormulario(formError, erro.message);
