@@ -6,6 +6,7 @@ using Ronu.Api.DTOs;
 using Ronu.Api.Models.IA;
 using Ronu.Api.Services;
 using Ronu.Api.Services.IA;
+using Ronu.Api.Validacao;
 using System.Security.Claims;
 
 namespace Ronu.Api.Controllers;
@@ -39,13 +40,6 @@ public class MetasController : ControllerBase
     private int UsuarioIdLogado =>
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-    // Os valores que a fórmula entende (comparação exata, como no cálculo).
-    private static readonly HashSet<string> Sexos = new() { "Masculino", "Feminino" };
-    private static readonly HashSet<string> Objetivos = new() { "perder peso", "manter peso", "ganhar peso" };
-
-    // Mesma faixa que o onboarding e o perfil já aplicam no campo de data.
-    private const int IdadeMaxima = 100;
-
     /// <summary>
     /// Calcula a meta da fórmula com o que vier no pedido e, no que faltar, os
     /// dados salvos da pessoa. Só a data "hoje" do servidor (UTC) entra além
@@ -59,27 +53,21 @@ public class MetasController : ControllerBase
         // Primeiro o que dá para conferir sem banco: valores fora do conjunto
         // ou da faixa só valem quando vêm no pedido (os salvos já passaram
         // pelas telas).
-        if (request.Sexo is not null && !Sexos.Contains(request.Sexo))
+        // Mesmas regras do PUT /perfil e do POST /objetivos (RegrasDadosCorporais).
+        if (request.Sexo is not null && !RegrasDadosCorporais.Sexos.Contains(request.Sexo))
         {
-            return BadRequest(new { mensagem = "Sexo inválido." });
+            return BadRequest(new { mensagem = RegrasDadosCorporais.MensagemSexo });
         }
 
-        if (request.Objetivo is not null && !Objetivos.Contains(request.Objetivo))
+        if (request.Objetivo is not null && !RegrasDadosCorporais.Objetivos.Contains(request.Objetivo))
         {
-            return BadRequest(new { mensagem = "Objetivo inválido." });
+            return BadRequest(new { mensagem = RegrasDadosCorporais.MensagemObjetivo });
         }
 
-        if (request.DataNascimento is { } nascimentoInformado)
+        if (request.DataNascimento is { } nascimentoInformado
+            && RegrasDadosCorporais.ValidarNascimento(nascimentoInformado, hoje) is { } erroNascimento)
         {
-            if (nascimentoInformado > hoje)
-            {
-                return BadRequest(new { mensagem = "A data de nascimento não pode ser no futuro." });
-            }
-
-            if (nascimentoInformado < hoje.AddYears(-IdadeMaxima))
-            {
-                return BadRequest(new { mensagem = "Informe uma data de nascimento de até 100 anos atrás." });
-            }
+            return BadRequest(new { mensagem = erroNascimento });
         }
 
         if (request.Modalidades is not null)

@@ -174,6 +174,7 @@ public class SimulacaoMetaTests
     [InlineData("objetivo", "emagrecer", "Objetivo inválido.")]
     [InlineData("futuro", null, "A data de nascimento não pode ser no futuro.")]
     [InlineData("velho", null, "Informe uma data de nascimento de até 100 anos atrás.")]
+    [InlineData("menor", null, "O Ronu é para maiores de 18 anos.")]
     [InlineData("dia", null, "Os dias da semana devem estar entre 1 (Segunda) e 7 (Domingo).")]
     [InlineData("diaRepetido", null, "Não é possível repetir o mesmo dia da semana.")]
     [InlineData("modalidadeRepetida", null, "Não é possível repetir a mesma modalidade.")]
@@ -187,6 +188,7 @@ public class SimulacaoMetaTests
             case "objetivo": pedido.Objetivo = valor; break;
             case "futuro": pedido.DataNascimento = Hoje.AddDays(1); break;
             case "velho": pedido.DataNascimento = Hoje.AddYears(-100).AddDays(-1); break;
+            case "menor": pedido.DataNascimento = Hoje.AddYears(-18).AddDays(1); break;
             case "dia": pedido.Modalidades![0].DiasSemana = new[] { 0, 3 }; break;
             case "diaRepetido": pedido.Modalidades![0].DiasSemana = new[] { 3, 3 }; break;
             case "modalidadeRepetida": pedido.Modalidades!.Add(new() { ModalidadeId = 1, DiasSemana = new[] { 6 }, DuracaoMediaHoras = 1 }); break;

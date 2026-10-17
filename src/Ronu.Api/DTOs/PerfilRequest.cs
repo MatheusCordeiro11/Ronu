@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Ronu.Api.Validacao;
 
 namespace Ronu.Api.DTOs;
 
@@ -11,6 +12,8 @@ namespace Ronu.Api.DTOs;
 /// </summary>
 public class PerfilRequest
 {
+    // Em centímetros. Mesma faixa da simulação (RegrasDadosCorporais).
+    [Range(100.0, 250.0, ErrorMessage = RegrasDadosCorporais.MensagemAltura)]
     public required decimal Altura { get; set; }
 
     [Required(ErrorMessage = "Informe seu sexo.")]

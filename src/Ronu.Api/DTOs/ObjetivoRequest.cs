@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Ronu.Api.Validacao;
 
 namespace Ronu.Api.DTOs;
 
@@ -8,6 +9,8 @@ namespace Ronu.Api.DTOs;
 /// </summary>
 public class ObjetivoRequest
 {
+    // Mesma faixa da simulação e do campo de peso das telas (RegrasDadosCorporais).
+    [Range(20.0, 300.0, ErrorMessage = RegrasDadosCorporais.MensagemPeso)]
     public required decimal Peso { get; set; }
 
     [Required(ErrorMessage = "Informe seu objetivo.")]

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ronu.Api.Data;
 using Ronu.Api.DTOs;
+using Ronu.Api.Validacao;
 using System.Security.Claims;
 
 namespace Ronu.Api.Controllers;
@@ -78,6 +79,19 @@ public class PerfilController : ControllerBase
         if (!string.IsNullOrEmpty(request.OrcamentoSemanal) && !ValoresOrcamentoSemanal.Contains(request.OrcamentoSemanal))
         {
             return BadRequest(new { mensagem = "Orçamento semanal inválido." });
+        }
+
+        // Mesmas regras da simulação (RegrasDadosCorporais); altura pelo [Range]
+        // do PerfilRequest. Valor fora do conjunto cairia na fórmula errada sem aviso.
+        if (!RegrasDadosCorporais.Sexos.Contains(request.Sexo))
+        {
+            return BadRequest(new { mensagem = RegrasDadosCorporais.MensagemSexo });
+        }
+
+        var erroNascimento = RegrasDadosCorporais.ValidarNascimento(request.DataNascimento, DateOnly.FromDateTime(DateTime.UtcNow));
+        if (erroNascimento is not null)
+        {
+            return BadRequest(new { mensagem = erroNascimento });
         }
 
         var usuario = await _context.Usuarios.FirstAsync(u => u.Id == UsuarioIdLogado);

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Ronu.Api.Validacao;
 
 namespace Ronu.Api.DTOs;
 
@@ -18,12 +19,12 @@ public class SimulacaoMetaRequest
 
     // Em centímetros. Limites em double: com int, o RangeAttribute converteria
     // o valor para inteiro antes de comparar (19,9 kg viraria 20 e passaria).
-    [Range(100.0, 250.0, ErrorMessage = "Informe uma altura entre 1,00 e 2,50 m.")]
+    [Range(100.0, 250.0, ErrorMessage = RegrasDadosCorporais.MensagemAltura)]
     public decimal? Altura { get; set; }
 
     public DateOnly? DataNascimento { get; set; }
 
-    [Range(20.0, 300.0, ErrorMessage = "Informe um peso entre 20 e 300 kg.")]
+    [Range(20.0, 300.0, ErrorMessage = RegrasDadosCorporais.MensagemPeso)]
     public decimal? Peso { get; set; }
 
     // "perder peso", "manter peso" ou "ganhar peso".

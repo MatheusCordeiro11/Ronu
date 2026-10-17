@@ -5,6 +5,7 @@ using Ronu.Api.Data;
 using Ronu.Api.DTOs;
 using Ronu.Api.Models;
 using Ronu.Api.Services;
+using Ronu.Api.Validacao;
 using System.Security.Claims;
 
 namespace Ronu.Api.Controllers;
@@ -55,6 +56,13 @@ public class ObjetivosController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Criar(ObjetivoRequest request)
     {
+        // Só os três objetivos que a fórmula conhece (RegrasDadosCorporais): outro
+        // texto viraria "manter peso" no cálculo sem aviso. Peso pelo [Range].
+        if (!RegrasDadosCorporais.Objetivos.Contains(request.Objetivo))
+        {
+            return BadRequest(new { mensagem = RegrasDadosCorporais.MensagemObjetivo });
+        }
+
         // Opcional: nulo ou vazio segue normalmente; qualquer outro valor
         // precisa ser uma das opções conhecidas.
         if (!string.IsNullOrEmpty(request.Aderencia) && !ValoresAderencia.Contains(request.Aderencia))

@@ -58,10 +58,10 @@ O email sai em segundo plano (a resposta não espera o SMTP). Limite por conta: 
 **Devolve:** `altura` (cm), `sexo`, `dataNascimento`, `rotinaDiaria`, `orcamentoSemanal` — todos podem vir nulos enquanto o onboarding não os preencheu — e os dados da conta: `nome`, `email`, `estado` (UF, `null` se ainda não informado), `temSenha` e `temGoogle` (se a conta tem senha própria e se tem login com Google vinculado; a senha e o hash nunca vêm)
 
 ### `PUT /api/perfil`
-**Recebe:** `altura` (cm), `sexo` (`Masculino` ou `Feminino`), `dataNascimento` (obrigatórios); `rotinaDiaria` e `orcamentoSemanal` (opcionais; `orcamentoSemanal` aceita `economico`, `moderado` ou `sem_restricao`)
+**Recebe:** `altura` (cm, de 100 a 250), `sexo` (`Masculino` ou `Feminino`), `dataNascimento` (idade de 18 a 100 anos) (obrigatórios); `rotinaDiaria` e `orcamentoSemanal` (opcionais; `orcamentoSemanal` aceita `economico`, `moderado` ou `sem_restricao`)
 **Devolve:** o mesmo formato do `GET /api/perfil`
 *(sobrescreve os valores atuais; não é histórico)*
-**Erros:** 400 se o `orcamentoSemanal` não for um dos valores aceitos.
+**Erros:** 400 `{ mensagem }` se o `orcamentoSemanal` não for um dos valores aceitos, se o `sexo` não for um dos dois, se a altura estiver fora da faixa, ou se a data de nascimento for no futuro, der menos de 18 anos ("O Ronu é para maiores de 18 anos.") ou mais de 100. As regras ficam em `Validacao/RegrasDadosCorporais.cs`, as mesmas do `POST /objetivos` e da simulação.
 
 ### `PUT /api/perfil/estado`
 **Recebe:** `estado` (UF; a API ignora espaços e maiúsculas/minúsculas)
@@ -73,10 +73,10 @@ O email sai em segundo plano (a resposta não espera o SMTP). Limite por conta: 
 ## Objetivo / dados corporais (histórico)
 
 ### `POST /api/objetivos`
-**Recebe:** `peso`, `objetivo`, `aderencia` (opcional: `seguiu`, `comeu_mais`, `comeu_menos` ou `nao_seguiu`; nulo ou vazio = sem resposta)
+**Recebe:** `peso` (kg, de 20 a 300), `objetivo` (`perder peso`, `manter peso` ou `ganhar peso`), `aderencia` (opcional: `seguiu`, `comeu_mais`, `comeu_menos` ou `nao_seguiu`; nulo ou vazio = sem resposta)
 **Devolve:** `id`, `peso`, `objetivo`, `dataRegistro`, `aderencia`, `registradoHoje`, `temDieta` (mesmo formato do `GET /api/objetivos/atual`)
 *(`dataRegistro` é preenchida automaticamente pela API, em UTC, não vem do cliente. Se já existe um registro do usuário no mesmo dia — o dia no fuso do estado (UF) do usuário; sem estado, horário de Brasília —, ele é atualizado em vez de criar outro, inclusive a `aderencia`, que volta a nulo se não for enviada)*
-**Erros:** 400 se a `aderencia` não for um dos valores aceitos.
+**Erros:** 400 `{ mensagem }` se a `aderencia` ou o `objetivo` não forem um dos valores aceitos, ou se o peso estiver fora da faixa.
 
 ### `GET /api/objetivos/atual`
 **Devolve:** o registro mais recente de `ObjetivoUsuario` do usuário logado (`id`, `peso`, `objetivo`, `dataRegistro`, `aderencia`), mais `registradoHoje` (se esse registro é o de hoje, no fuso do estado do usuário, que o próximo POST vai sobrescrever — a mesma regra de "hoje" do POST) e `temDieta` (se o usuário já tem alguma dieta gerada)
@@ -170,7 +170,7 @@ As três rotas devolvem a dieta no mesmo formato, `DietaResponse`:
 
 ### `POST /api/metas/simulacao`
 Calcula a meta da fórmula sem gravar nada e sem chamar a IA, com as mesmas classes da geração da dieta. Sem o ajuste adaptativo (que depende do histórico).
-**Recebe (tudo opcional; o que não vier usa o dado salvo):** `sexo` (`Masculino` ou `Feminino`), `altura` (cm, 100 a 250), `dataNascimento` (até hoje, no máximo 100 anos atrás), `peso` (kg, 20 a 300; ausente = peso de tendência salvo), `objetivo` (`perder peso`, `manter peso` ou `ganhar peso`; ausente = o do registro mais recente), `modalidades [{ modalidadeId, diasSemana, duracaoMediaHoras }]` (mesmas regras do `POST /api/usuarios/modalidades`, sem repetir modalidade; se vier, mesmo vazia, substitui a lista salva)
+**Recebe (tudo opcional; o que não vier usa o dado salvo):** `sexo` (`Masculino` ou `Feminino`), `altura` (cm, 100 a 250), `dataNascimento` (idade de 18 a 100 anos), `peso` (kg, 20 a 300; ausente = peso de tendência salvo), `objetivo` (`perder peso`, `manter peso` ou `ganhar peso`; ausente = o do registro mais recente), `modalidades [{ modalidadeId, diasSemana, duracaoMediaHoras }]` (mesmas regras do `POST /api/usuarios/modalidades`, sem repetir modalidade; se vier, mesmo vazia, substitui a lista salva)
 **Devolve:** `versaoFormula`; `entradas { sexo, altura, dataNascimento, idade, peso, pesoOrigem ("informado" ou "tendencia"), objetivo }`; `gastoRepouso { total, peso, altura, idade, sexo }` (as parcelas de Mifflin-St Jeor, que somam o total pelo maior resto); `atividadeForaDoTreino { fator, kcal }`; `ritmoEsperadoKgSemana`; `modalidades [{ modalidadeId, nome, metReferencia, duracaoHoras, diasSemana, kcalSessao }]`; `dias` (sempre 7, de 1 = segunda a 7 = domingo) com `diaSemana`, `treinoKcal`, `manutencao`, `objetivoKcal`, `tetoDeficitAplicado` e `metaFormula`. Valores em kcal inteiras: cada parte é arredondada uma vez e todo total é a soma das partes mostradas
 **Erros:** 400 `{ mensagem }` para valor fora do conjunto ou da faixa e quando falta um dado que também não está salvo ("Informe seu peso." etc.); 404 se uma modalidade não existe.
 
