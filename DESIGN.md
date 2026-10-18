@@ -179,7 +179,7 @@ Cantos de 3px em botões e campos, 4px em opções e carimbo, 6px em cards. Píl
 
 ## Components
 
-Em `frontend/css/componentes.css` (vitrine em `frontend/vitrine-base.html`, provisória):
+Em `frontend/css/componentes.css`; o estilo próprio de cada tela fica em `frontend/css/telas/`:
 
 - **Logo:** quadrado no acento com 浪 + "RONU" no serifado.
 - **Botões:** primário (acento, texto `--sobre-acento`, hover por brilho), fantasma (borda `--linha`), texto (sublinhado). Carregando = `aria-busy` com linha correndo; desabilitado = `disabled`.

@@ -13,24 +13,6 @@
         "reason": "Telas aprovadas pelo usuário em docs/redesign (README, Movimento: grade quadriculada deslizando) definem a grade como enfeite da identidade"
       },
       {
-        "rule": "codex-grid-background",
-        "value": "*",
-        "files": [
-          "frontend/vitrine-base.html"
-        ],
-        "createdAt": "2026-10-16T22:31:06.782Z",
-        "reason": "Vitrine provisória da base, mostra a grade aprovada em docs/redesign"
-      },
-      {
-        "rule": "cramped-padding",
-        "value": "*",
-        "files": [
-          "frontend/vitrine-base.html"
-        ],
-        "createdAt": "2026-10-16T22:40:53.904Z",
-        "reason": "Falso positivo: o card da tabela tem padding 0 de propósito; as células th/td têm recuo próprio de 12px a 32px"
-      },
-      {
         "rule": "numbered-section-labels",
         "value": "*",
         "files": [
