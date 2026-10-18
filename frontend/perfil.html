@@ -4,89 +4,182 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ronu — Perfil</title>
-  <meta name="description" content="Seus dados pessoais, usados no cálculo da sua dieta.">
+  <meta name="description" content="Seu objetivo, seus dados, sua região e a sua conta.">
+
+  <!-- Antes do CSS: aplica o modo escuro/claro antes da primeira pintura. -->
+  <script src="js/base/tema.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/auth.css">
-  <link rel="stylesheet" href="css/dashboard.css">
-  <link rel="stylesheet" href="css/onboarding.css">
-  <link rel="stylesheet" href="css/configuracoes.css">
+  <link rel="stylesheet" href="css/base/tokens.css">
+  <link rel="stylesheet" href="css/base/base.css">
+  <link rel="stylesheet" href="css/componentes.css">
+  <link rel="stylesheet" href="css/telas/perfil.css">
+
+  <script src="js/base/movimento.js" defer></script>
 </head>
-<body>
+<body class="com-abas">
+  <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
 
-  <header class="simple-header border-b">
-    <div class="container dashboard-header-inner">
-      <a href="landing/v1/index.html" class="wordmark">ronu<span>.</span></a>
-      <div class="header-actions">
-        <a href="dashboard.html" class="btn btn-secondary">Voltar ao dashboard</a>
-        <button type="button" id="logout-btn" class="btn btn-secondary">Sair</button>
+  <!-- Montado por js/base/cabecalho.js (logo, nav, sol/lua, avatar e abas). -->
+  <header class="cabecalho" data-cabecalho="perfil"></header>
+
+  <section class="faixa-titulo grade pf-faixa">
+    <div class="conteiner pf-faixa-conteudo">
+      <div class="pf-avatar" aria-hidden="true">
+        <svg class="pf-orbita" viewBox="0 0 124 124"><circle cx="62" cy="62" r="60"/></svg>
+        <span class="pf-avatar-iniciais" id="pf-iniciais"></span>
       </div>
-    </div>
-  </header>
-
-  <nav class="config-subnav border-b" aria-label="Configurações da conta">
-    <div class="container config-subnav-inner">
-      <a href="perfil.html" class="config-subnav-link" aria-current="page">Perfil</a>
-      <a href="treino.html" class="config-subnav-link">Treino</a>
-      <a href="alimentacao.html" class="config-subnav-link">Alimentação</a>
-    </div>
-  </nav>
-
-  <main class="config-page">
-    <div class="container">
-
-      <!-- ---------- Perfil ---------- -->
-      <section class="config-section" aria-labelledby="perfil-heading">
-        <div class="config-section-head">
-          <h1 id="perfil-heading" class="config-section-title">Dados pessoais</h1>
-          <p class="config-section-subtitle">Usados pra calcular sua taxa metabólica basal.</p>
+      <div class="pf-identidade sobre-grade">
+        <span class="rotulo rotulo-acento pf-so-largo">Seu perfil</span>
+        <h1 id="pf-nome">Seu perfil</h1>
+        <div class="pf-identidade-linha">
+          <span class="texto-2" id="pf-email"></span>
+          <span class="chip chip-pequeno pf-google" id="pf-google-chip" hidden><span class="pf-google-g" aria-hidden="true">G</span>Conta Google conectada</span>
         </div>
+      </div>
+      <div class="carimbo pf-carimbo" aria-hidden="true"><span>浪</span><span>人</span></div>
+    </div>
+  </section>
 
-        <p class="text-muted" id="perfil-loading">Carregando...</p>
+  <main id="conteudo" class="conteiner pf-main">
+    <div class="pf-estado" id="perfil-loading" aria-live="polite">
+      <span class="texto-2">Carregando o seu perfil...</span>
+      <div class="carregando" aria-hidden="true"></div>
+    </div>
 
-        <div class="form-message form-message-error" id="perfil-error" hidden></div>
-        <div class="form-message form-message-success" id="perfil-success" hidden></div>
+    <section class="cartao pf-estado-cartao" id="perfil-load-error" hidden>
+      <h2>Não foi possível carregar o seu perfil</h2>
+      <p class="texto-2">Verifique sua conexão e tente novamente.</p>
+      <button type="button" class="botao botao-fantasma" id="btn-tentar-novamente">Tentar novamente</button>
+    </section>
 
-        <form id="perfil-form" hidden>
-          <div class="field" id="field-perfil-altura">
-            <label for="perfil-altura">Altura (m)</label>
-            <input type="text" id="perfil-altura" name="altura" inputmode="decimal" placeholder="Ex: 1,74" required>
-            <span class="field-error-message" id="perfil-altura-error" hidden></span>
+    <div class="pf-grade" id="perfil-content" hidden>
+      <div class="pf-coluna">
+        <!-- Objetivo: trocar pede confirmação e o peso de hoje (vira a pesagem
+             de hoje, já com o objetivo novo). -->
+        <section class="cartao pf-objetivo" aria-labelledby="pf-objetivo-titulo">
+          <div class="pf-cabeca">
+            <h2 id="pf-objetivo-titulo">Objetivo</h2>
+            <span class="apoio" id="pf-objetivo-desde"></span>
           </div>
+          <div class="pf-objetivos" role="radiogroup" aria-labelledby="pf-objetivo-titulo" id="pf-objetivos">
+            <button type="button" role="radio" class="opcao pf-opcao" data-valor="perder peso" aria-checked="false"><span class="pf-opcao-titulo">Perder peso</span><span class="opcao-dica">Meta abaixo do gasto</span></button>
+            <button type="button" role="radio" class="opcao pf-opcao" data-valor="manter peso" aria-checked="false"><span class="pf-opcao-titulo">Manter peso</span><span class="opcao-dica">Meta igual ao gasto</span></button>
+            <button type="button" role="radio" class="opcao pf-opcao" data-valor="ganhar peso" aria-checked="false"><span class="pf-opcao-titulo">Ganhar peso</span><span class="opcao-dica">Meta acima do gasto</span></button>
+          </div>
+          <form class="pf-confirmar entra" id="pf-confirmar" novalidate hidden>
+            <p>Trocar o objetivo muda a conta da sua meta e faz o ajuste pelo progresso recomeçar a contar do zero. Para começar a contar certo, informe o seu peso de hoje.</p>
+            <div class="campo pf-campo-peso" id="pf-campo-peso">
+              <label class="campo-rotulo" for="pf-peso-hoje">Peso de hoje (kg)</label>
+              <input class="entrada entrada-no-card num" id="pf-peso-hoje" type="number" inputmode="decimal" step="0.1" min="20" max="300" aria-describedby="pf-peso-erro">
+              <span class="campo-erro" id="pf-peso-erro" hidden></span>
+            </div>
+            <div class="aviso aviso-erro" id="pf-objetivo-erro" role="alert" hidden></div>
+            <div class="pf-confirmar-acoes">
+              <button type="submit" class="botao botao-primario" id="pf-confirmar-trocar"><span class="btn-label"></span></button>
+              <button type="button" class="botao botao-fantasma" id="pf-confirmar-manter"></button>
+            </div>
+          </form>
+          <p class="pf-salvo" id="pf-objetivo-status" role="status"></p>
+        </section>
 
-          <div class="field">
-            <label>Sexo</label>
-            <div class="option-group" role="radiogroup" aria-label="Sexo">
-              <label class="option-pill">
-                <input type="radio" name="perfil-sexo" value="Masculino">
-                <span>Masculino</span>
-              </label>
-              <label class="option-pill">
-                <input type="radio" name="perfil-sexo" value="Feminino">
-                <span>Feminino</span>
-              </label>
+        <section class="cartao pf-dados" aria-labelledby="pf-dados-titulo">
+          <div class="pf-cabeca">
+            <h2 id="pf-dados-titulo">Seus dados</h2>
+            <span class="apoio pf-so-largo">Usados no cálculo do gasto em repouso</span>
+          </div>
+          <div class="pf-dados-campos">
+            <div class="campo pf-campo-sexo">
+              <span class="campo-rotulo" id="pf-sexo-rotulo">Sexo biológico</span>
+              <div class="segmentado segmentado-acento" role="radiogroup" aria-labelledby="pf-sexo-rotulo" id="pf-sexo">
+                <button type="button" role="radio" aria-checked="false" data-valor="Masculino">Masculino</button>
+                <button type="button" role="radio" aria-checked="false" data-valor="Feminino">Feminino</button>
+              </div>
+            </div>
+            <div class="campo" id="pf-campo-altura">
+              <label class="campo-rotulo" for="pf-altura">Altura (cm)</label>
+              <input class="entrada entrada-no-card num" id="pf-altura" type="number" inputmode="numeric" min="100" max="250" step="1" aria-describedby="pf-altura-erro">
+              <span class="campo-erro" id="pf-altura-erro" hidden></span>
+            </div>
+            <div class="campo" id="pf-campo-nascimento">
+              <label class="campo-rotulo" for="pf-nascimento"><span class="pf-so-largo">Data de nascimento</span><span class="pf-so-celular">Nascimento</span></label>
+              <input class="entrada entrada-no-card" id="pf-nascimento" type="date" aria-describedby="pf-nascimento-erro">
+              <span class="campo-erro" id="pf-nascimento-erro" hidden></span>
             </div>
           </div>
-
-          <div class="field">
-            <label for="perfil-data-nascimento">Data de nascimento</label>
-            <input type="date" id="perfil-data-nascimento" name="data-nascimento" required>
+          <p class="pf-salvo" id="pf-dados-status" role="status"></p>
+          <div class="pf-peso-linha">
+            <span class="texto-2" id="pf-peso"></span>
+            <a class="cartao-link pf-so-largo" href="progresso.html#registrar">Registrar peso</a>
           </div>
+        </section>
 
-          <button type="submit" class="btn btn-primary" id="btn-salvar-perfil">
-            <span class="btn-label">Salvar alterações</span>
-          </button>
-        </form>
-      </section>
+        <section class="cartao pf-conta" aria-labelledby="pf-conta-titulo">
+          <h2 id="pf-conta-titulo" class="pf-conta-titulo">Conta</h2>
+          <ul class="pf-conta-lista" id="pf-conta-lista"></ul>
+        </section>
+      </div>
 
+      <aside class="pf-lateral" aria-label="Gasto em repouso, região e aparência">
+        <section class="cartao ergue pf-repouso" aria-labelledby="pf-repouso-titulo" aria-live="polite" data-anima-hover>
+          <h2 class="rotulo" id="pf-repouso-titulo">Seu gasto em repouso</h2>
+          <span class="numero pf-repouso-total"><span id="pf-repouso-total">—</span> <span class="numero-unidade">kcal</span></span>
+          <p class="apoio pf-so-largo">O que o seu corpo gasta parado num dia. É a base da meta: em cima dele entram o dia a dia e os treinos.</p>
+          <div class="pf-partes" id="pf-partes" data-anima-grupo></div>
+          <span class="apoio pf-so-largo">Fórmula de Mifflin-St Jeor</span>
+        </section>
+
+        <section class="cartao ergue pf-regiao" aria-labelledby="pf-regiao-titulo">
+          <div class="cartao-cabeca">
+            <h2 class="rotulo" id="pf-regiao-titulo">Região</h2>
+            <button type="button" class="botao-texto cartao-link pf-regiao-alterar" id="pf-regiao-alterar" aria-expanded="false" aria-controls="pf-regiao-form">Alterar</button>
+          </div>
+          <span class="pf-regiao-nome" id="pf-regiao-nome"></span>
+          <span class="apoio" id="pf-regiao-detalhe"></span>
+          <form class="pf-regiao-form" id="pf-regiao-form" novalidate hidden>
+            <label class="campo-rotulo" for="pf-regiao-select">Seu estado</label>
+            <select class="entrada entrada-no-card" id="pf-regiao-select"></select>
+            <div class="aviso aviso-erro" id="pf-regiao-erro" role="alert" hidden></div>
+            <div class="pf-regiao-acoes">
+              <button type="submit" class="botao botao-primario botao-pequeno" id="pf-regiao-salvar"><span class="btn-label">Salvar</span></button>
+              <button type="button" class="botao-texto" id="pf-regiao-cancelar">Cancelar</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Modo de cor: a mesma escolha do sol/lua do topo, com a opção de
+             seguir o aparelho (js/base/tema.js cuida do clique e das setas). -->
+        <section class="cartao ergue pf-aparencia" aria-labelledby="pf-aparencia-titulo">
+          <h2 class="rotulo" id="pf-aparencia-titulo">Aparência</h2>
+          <div class="segmentado pf-temas" role="radiogroup" aria-labelledby="pf-aparencia-titulo">
+            <button type="button" role="radio" data-escolha-tema="escuro" aria-checked="false">Escuro</button>
+            <button type="button" role="radio" data-escolha-tema="claro" aria-checked="false">Claro</button>
+            <button type="button" role="radio" data-escolha-tema="aparelho" aria-checked="false">Igual ao aparelho</button>
+          </div>
+          <p class="apoio">Fica guardado neste navegador.</p>
+        </section>
+
+        <section class="cartao pf-quando" id="pf-quando" aria-live="polite">
+          <h2 class="rotulo" id="pf-quando-titulo">Quando muda na dieta</h2>
+          <p id="pf-quando-texto">Tudo aqui é salvo na hora e vale a partir da próxima dieta gerada.</p>
+          <a class="botao botao-primario pf-gerar entra" id="pf-gerar" href="dashboard.html" hidden>Gerar dieta com os dados novos</a>
+        </section>
+      </aside>
     </div>
   </main>
 
+  <footer class="rodape">
+    <div class="conteiner rodape-linha">
+      <span>Gasto em repouso: Mifflin-St Jeor, com o seu peso de tendência.</span>
+      <span>O Ronu é para maiores de 18 anos.</span>
+    </div>
+  </footer>
+
   <script src="js/auth.js"></script>
+  <script src="js/base/cabecalho.js"></script>
   <script src="js/perfil.js"></script>
 </body>
 </html>

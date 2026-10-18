@@ -1,0 +1,633 @@
+/*
+  Ronu — Perfil (tela aprovada: docs/redesign/telas/Perfil, ...Mobile, ...Washi)
+  Depende de tokens, base e componentes.
+
+  Desktop: faixa com avatar, nome, email e o carimbo; à esquerda objetivo,
+  dados e conta; à direita gasto em repouso, região, aparência e "quando
+  muda na dieta".
+  Celular: faixa centrada; uma coluna na ordem objetivo, dados, gasto,
+  região, aparência, conta.
+*/
+
+.pf-so-celular {
+  display: none;
+}
+
+/* ---------- Faixa ---------- */
+.pf-faixa-conteudo {
+  position: relative;
+  padding-top: var(--e-9);
+  padding-bottom: var(--e-9);
+  display: flex;
+  align-items: center;
+  gap: var(--e-7);
+  flex-wrap: wrap;
+}
+
+.pf-avatar {
+  position: relative;
+  flex: none;
+  width: 124px;
+  height: 124px;
+}
+
+/* Órbita tracejada girando devagar: enfeite (para com movimento reduzido). */
+.pf-orbita {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  animation: pf-orbita 16s linear infinite;
+}
+
+.pf-orbita circle {
+  fill: none;
+  stroke: var(--acento);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 7;
+}
+
+@keyframes pf-orbita {
+  to { transform: rotate(360deg); }
+}
+
+.pf-avatar-iniciais {
+  position: absolute;
+  inset: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--superficie-3);
+  border: 1px solid var(--linha);
+  color: var(--acento-texto);
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 2.375rem;
+}
+
+.pf-identidade {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  padding: 4px 0;
+}
+
+.pf-identidade h1 {
+  font-size: var(--t-h1);
+  overflow-wrap: anywhere;
+}
+
+.pf-identidade-linha {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: var(--t-corpo);
+}
+
+.pf-google {
+  gap: var(--e-2);
+  background: var(--fundo);
+}
+
+.pf-google-g {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--texto);
+  color: var(--fundo);
+  font-weight: 600;
+  font-size: 10px;
+}
+
+.pf-carimbo {
+  position: absolute;
+  top: var(--e-8);
+  right: var(--margem);
+}
+
+/* ---------- Estrutura ---------- */
+.pf-main {
+  padding-top: var(--e-7);
+  padding-bottom: var(--e-10);
+}
+
+.pf-grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(300px, 1fr);
+  gap: var(--e-6);
+  align-items: start;
+}
+
+.pf-coluna,
+.pf-lateral {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-5);
+}
+
+.pf-lateral {
+  gap: var(--e-4);
+}
+
+.pf-grade h2.rotulo {
+  font-family: var(--fonte-corpo);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.pf-cabeca {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--e-4);
+  flex-wrap: wrap;
+}
+
+.pf-estado {
+  max-width: 420px;
+  padding: var(--e-9) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.pf-estado-cartao {
+  max-width: 640px;
+  padding: var(--e-8);
+  align-items: flex-start;
+}
+
+.pf-salvo {
+  font-size: var(--t-pequeno);
+  color: var(--texto-2);
+}
+
+.pf-salvo:empty {
+  display: none;
+}
+
+.pf-salvo[data-tipo="ok"] {
+  color: var(--texto);
+}
+
+.pf-salvo[data-tipo="ok"]::before {
+  content: '✓ ';
+  color: var(--acento-texto);
+}
+
+.pf-salvo[data-tipo="erro"] {
+  color: var(--acento-texto);
+}
+
+/* ---------- Objetivo ---------- */
+.pf-objetivo,
+.pf-dados {
+  padding: 24px 26px;
+}
+
+.pf-objetivos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pf-opcao {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 18px;
+}
+
+.pf-opcao:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.pf-opcao-titulo {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 1.1875rem;
+  line-height: 1.2;
+}
+
+.pf-confirmar {
+  padding: 4px 0 4px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-left: 2px solid var(--acento);
+}
+
+.pf-confirmar p {
+  font-size: var(--t-corpo);
+  line-height: 1.55;
+  max-width: 60ch;
+}
+
+.pf-campo-peso .entrada {
+  width: 160px;
+}
+
+.pf-confirmar-acoes {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ---------- Seus dados ---------- */
+.pf-dados {
+  gap: 18px;
+}
+
+.pf-dados-campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--e-4);
+}
+
+.pf-campo-sexo .segmentado > button {
+  min-height: 48px;
+}
+
+.pf-peso-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-4);
+  flex-wrap: wrap;
+  padding-top: var(--e-4);
+  border-top: 1px solid var(--borda);
+  font-size: var(--t-apoio);
+}
+
+.pf-peso-linha strong {
+  color: var(--texto);
+}
+
+/* ---------- Conta ---------- */
+.pf-conta {
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+}
+
+.pf-conta-titulo {
+  padding: 20px 26px;
+  border-bottom: 1px solid var(--borda);
+}
+
+.pf-conta-item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--e-4);
+  padding: 18px 26px;
+  background: transparent;
+  border: 0;
+  color: var(--texto);
+  text-align: left;
+  transition: background-color var(--d-rapida) ease;
+}
+
+.pf-conta-lista li + li .pf-conta-item {
+  border-top: 1px solid var(--divisor);
+}
+
+button.pf-conta-item:hover {
+  background: var(--superficie-hover);
+}
+
+button.pf-conta-item:focus-visible {
+  outline-offset: -3px;
+}
+
+.pf-conta-textos {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pf-conta-item-titulo {
+  font-size: var(--t-corpo);
+  font-weight: 500;
+}
+
+.pf-conta-seta {
+  color: var(--texto-2);
+  font-size: 1.125rem;
+}
+
+/* ---------- Gasto em repouso ---------- */
+.pf-repouso {
+  padding: var(--e-6);
+  gap: var(--e-4);
+}
+
+.pf-repouso-total {
+  font-size: 3rem;
+}
+
+.pf-repouso p {
+  line-height: 1.55;
+}
+
+.pf-partes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pf-parte {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.pf-parte-texto {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e-3);
+  font-size: var(--t-pequeno);
+}
+
+.pf-parte-texto > span:first-child {
+  color: var(--texto-2);
+}
+
+/* ---------- Região e aparência ---------- */
+.pf-regiao,
+.pf-aparencia,
+.pf-quando {
+  padding: 22px;
+  gap: var(--e-3);
+}
+
+.pf-regiao .cartao-cabeca {
+  align-items: center;
+}
+
+.pf-regiao-alterar {
+  min-height: 0;
+  padding: 0;
+  font-size: var(--t-pequeno);
+  color: var(--acento-texto);
+}
+
+.pf-regiao-nome {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 1.375rem;
+  line-height: 1.2;
+}
+
+.pf-regiao-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  padding-top: var(--e-3);
+  border-top: 1px solid var(--borda);
+}
+
+.pf-regiao-acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+}
+
+.pf-temas > button {
+  min-height: 44px;
+  padding: 10px 8px;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+/* ---------- Quando muda ---------- */
+.pf-quando {
+  transition: border-color var(--d-media) ease;
+}
+
+.pf-quando[data-mudou] {
+  border-color: var(--acento);
+}
+
+.pf-quando p {
+  font-size: var(--t-corpo);
+  line-height: 1.55;
+}
+
+.pf-gerar {
+  align-self: flex-start;
+}
+
+/* ---------- Telas médias ---------- */
+@media (max-width: 1080px) {
+  .pf-grade {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pf-lateral {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    align-items: start;
+  }
+}
+
+/* ---------- Celular ---------- */
+@media (max-width: 720px) {
+  .pf-so-largo {
+    display: none !important;
+  }
+
+  .pf-so-celular {
+    display: inline;
+  }
+
+  .pf-faixa-conteudo {
+    padding-top: var(--e-7);
+    padding-bottom: var(--e-7);
+    flex-direction: column;
+    gap: 14px;
+    text-align: center;
+  }
+
+  .pf-avatar {
+    width: 104px;
+    height: 104px;
+  }
+
+  .pf-avatar-iniciais {
+    inset: 9px;
+    font-size: 1.875rem;
+  }
+
+  .pf-identidade {
+    align-items: center;
+    padding: 4px 10px;
+    gap: 6px;
+  }
+
+  .pf-identidade h1 {
+    font-size: 1.75rem;
+  }
+
+  .pf-identidade-linha {
+    flex-direction: column;
+    gap: var(--e-2);
+    font-size: var(--t-apoio);
+  }
+
+  .pf-carimbo {
+    display: none;
+  }
+
+  .pf-main {
+    padding-top: var(--e-5);
+    padding-bottom: var(--e-8);
+  }
+
+  /* A lateral se desfaz para os cards entrarem na ordem do canvas. */
+  .pf-grade {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--e-4);
+  }
+
+  .pf-coluna,
+  .pf-lateral {
+    display: contents;
+  }
+
+  .pf-objetivo { order: 1; }
+  .pf-dados { order: 2; }
+  .pf-repouso { order: 3; }
+  .pf-regiao { order: 4; }
+  .pf-aparencia { order: 5; }
+  .pf-conta { order: 6; }
+  .pf-quando { order: 7; }
+
+  .pf-objetivo,
+  .pf-dados,
+  .pf-repouso,
+  .pf-regiao,
+  .pf-aparencia {
+    padding: 18px;
+    gap: 12px;
+  }
+
+  .pf-cabeca h2,
+  .pf-conta-titulo {
+    font-size: 1.25rem;
+  }
+
+  .pf-objetivos {
+    grid-template-columns: 1fr;
+    gap: var(--e-2);
+  }
+
+  .pf-opcao {
+    padding: 14px 16px;
+    gap: 2px;
+  }
+
+  .pf-opcao-titulo {
+    font-family: var(--fonte-corpo);
+    font-weight: 600;
+    font-size: var(--t-corpo);
+  }
+
+  .pf-opcao .opcao-dica {
+    font-size: var(--t-rotulo);
+  }
+
+  .pf-confirmar-acoes .botao {
+    flex: 1 1 100%;
+  }
+
+  .pf-campo-peso .entrada {
+    width: 100%;
+  }
+
+  /* Sexo numa linha; altura e nascimento lado a lado embaixo. */
+  .pf-dados-campos {
+    grid-template-columns: 1fr 1.4fr;
+    gap: 10px;
+  }
+
+  .pf-campo-sexo {
+    grid-column: 1 / -1;
+  }
+
+  .pf-peso-linha {
+    padding-top: 0;
+    border-top: 0;
+    font-size: var(--t-pequeno);
+  }
+
+  .pf-repouso .rotulo,
+  .pf-regiao .rotulo,
+  .pf-aparencia .rotulo {
+    font-size: 11px;
+  }
+
+  .pf-repouso-total {
+    font-size: 2.375rem;
+  }
+
+  .pf-parte-texto {
+    font-size: var(--t-rotulo);
+  }
+
+  .pf-regiao-nome {
+    font-family: var(--fonte-corpo);
+    font-weight: 600;
+    font-size: var(--t-corpo);
+  }
+
+  .pf-conta-titulo {
+    padding: 16px 18px;
+  }
+
+  .pf-conta-item {
+    padding: 16px 18px;
+  }
+
+  .pf-quando {
+    padding: 0;
+    background: none;
+    border: 0;
+    align-items: center;
+    text-align: center;
+  }
+
+  .pf-quando .rotulo {
+    display: none;
+  }
+
+  .pf-quando[data-mudou] .rotulo {
+    display: block;
+  }
+
+  .pf-quando p {
+    font-size: var(--t-pequeno);
+    color: var(--texto-2);
+  }
+
+  .pf-gerar {
+    align-self: stretch;
+    min-height: 52px;
+  }
+
+  .pf-estado-cartao {
+    padding: var(--e-6);
+  }
+}
