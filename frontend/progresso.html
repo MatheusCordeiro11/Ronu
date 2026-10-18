@@ -4,166 +4,206 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ronu — Progresso de peso</title>
-  <meta name="description" content="Acompanhe a tendência suavizada do seu peso ao longo do tempo.">
+  <meta name="description" content="Acompanhe a tendência do seu peso e o ajuste da sua meta pelo progresso.">
+
+  <!-- Antes do CSS: aplica o modo escuro/claro antes da primeira pintura. -->
+  <script src="js/base/tema.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/auth.css">
-  <link rel="stylesheet" href="css/dashboard.css">
-  <link rel="stylesheet" href="css/onboarding.css">
-  <link rel="stylesheet" href="css/progresso.css">
+  <link rel="stylesheet" href="css/base/tokens.css">
+  <link rel="stylesheet" href="css/base/base.css">
+  <link rel="stylesheet" href="css/componentes.css">
+  <link rel="stylesheet" href="css/telas/progresso.css">
+
+  <script src="js/base/movimento.js" defer></script>
 </head>
-<body>
+<body class="com-abas">
+  <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
 
-  <header class="simple-header border-b">
-    <div class="container dashboard-header-inner">
-      <a href="landing/v1/index.html" class="wordmark">ronu<span>.</span></a>
-      <div class="header-actions">
-        <a href="dashboard.html" class="btn btn-secondary">Voltar ao dashboard</a>
-        <button type="button" id="logout-btn" class="btn btn-secondary">Sair</button>
+  <!-- Montado por js/base/cabecalho.js (logo, nav, sol/lua, avatar e abas). -->
+  <header class="cabecalho" data-cabecalho="progresso"></header>
+
+  <section class="faixa-titulo grade">
+    <div class="conteiner faixa-titulo-conteudo">
+      <div class="faixa-titulo-texto">
+        <span class="rotulo rotulo-acento sobre-grade">Seu peso</span>
+        <h1 class="sobre-grade">Progresso de peso</h1>
+        <p class="sobre-grade pg-intro">A balança varia com água, comida e hora do dia. A linha de tendência mostra a direção real por trás dessas oscilações.</p>
       </div>
+      <button type="button" class="botao botao-primario" id="peso-registrar-toggle" aria-expanded="false" aria-controls="pg-registrar" hidden>Registrar peso</button>
     </div>
-  </header>
+  </section>
 
-  <main class="progresso-page">
-    <div class="container">
+  <main id="conteudo" class="conteiner pg-main">
+    <div class="aviso aviso-sucesso" id="peso-registrar-sucesso" role="status" hidden></div>
 
-      <div class="progresso-page-head">
-        <h1 class="progresso-page-title">Progresso de peso</h1>
-        <p class="text-muted">A tendência suavizada do seu peso, sem o ruído de cada pesagem isolada. Ele varia por água, comida e hora do dia — a tendência mostra a direção real por trás dessas oscilações.</p>
-        <button type="button" class="btn btn-secondary" id="peso-registrar-toggle" aria-expanded="false" aria-controls="peso-registrar-form">Registrar peso</button>
-      </div>
+    <div class="pg-estado" id="progresso-loading" aria-live="polite">
+      <span class="texto-2">Carregando o seu progresso...</span>
+      <div class="carregando" aria-hidden="true"></div>
+    </div>
 
-      <p class="text-muted" id="progresso-loading">Carregando...</p>
+    <section class="cartao pg-estado-cartao" id="progresso-error" hidden>
+      <h2>Não foi possível carregar seu progresso</h2>
+      <p class="texto-2">Verifique sua conexão e tente novamente.</p>
+      <button type="button" class="botao botao-fantasma" id="btn-tentar-novamente">Tentar novamente</button>
+    </section>
 
-      <div class="form-message form-message-error" id="progresso-error" hidden></div>
+    <section class="cartao pg-estado-cartao" id="progresso-empty" hidden>
+      <h2>Nenhum peso registrado ainda</h2>
+      <p class="texto-2">O seu primeiro peso é registrado no cadastro. Complete o cadastro para começar a acompanhar a sua evolução aqui.</p>
+      <a href="onboarding.html" class="botao botao-primario">Completar cadastro</a>
+    </section>
 
-      <section class="progresso-empty" id="progresso-empty" hidden>
-        <p class="eyebrow">Progresso</p>
-        <h2 class="progresso-empty-title">Nenhum peso registrado ainda</h2>
-        <p class="progresso-empty-subtitle">Seu peso é registrado no cadastro inicial. Complete seu cadastro pra começar a acompanhar sua evolução aqui.</p>
-        <a href="onboarding.html" class="btn btn-primary">Completar cadastro</a>
-      </section>
+    <div class="pg-grade" id="progresso-content" hidden>
 
-      <div class="progresso-content" id="progresso-content" hidden>
-
-        <section class="meta-stamp" id="peso-stamp" aria-label="Resumo do peso">
-          <div class="meta-stamp-head">
-            <p class="meta-stamp-label">Peso de tendência</p>
-            <p class="meta-stamp-date" id="peso-stamp-data"></p>
-          </div>
-          <dl class="meta-stamp-grid">
-            <div class="meta-stamp-item">
-              <dt>Tendência atual</dt>
-              <dd class="num" id="peso-stamp-tendencia"></dd>
-            </div>
-            <div class="meta-stamp-item">
-              <dt>Última pesagem</dt>
-              <dd class="num" id="peso-stamp-bruto"></dd>
-            </div>
-            <div class="meta-stamp-item">
-              <dt>Variação total</dt>
-              <dd class="num" id="peso-stamp-variacao"></dd>
-            </div>
-          </dl>
-
-          <div class="form-message form-message-success" id="peso-registrar-sucesso" hidden></div>
-
-          <form class="peso-registrar-form" id="peso-registrar-form" hidden>
-            <div class="peso-registrar-fields">
-              <div class="field">
-                <label for="peso-registrar-valor">Peso (kg)</label>
-                <input type="number" id="peso-registrar-valor" name="peso" inputmode="decimal" step="0.1" min="20" max="300" required>
-              </div>
-
-              <div class="field">
-                <label>Objetivo</label>
-                <div class="option-group" role="radiogroup" aria-label="Objetivo">
-                  <label class="option-pill">
-                    <input type="radio" name="peso-registrar-objetivo" value="ganhar peso">
-                    <span>Ganhar peso</span>
-                  </label>
-                  <label class="option-pill">
-                    <input type="radio" name="peso-registrar-objetivo" value="perder peso">
-                    <span>Perder peso</span>
-                  </label>
-                  <label class="option-pill">
-                    <input type="radio" name="peso-registrar-objetivo" value="manter peso">
-                    <span>Manter peso</span>
-                  </label>
-                </div>
-              </div>
+      <!-- Registrar peso. No desktop abre pelo botão do topo; no celular fica
+           sempre aberto, depois do ajuste (canvas ProgressoMobile). -->
+      <section class="cartao pg-registrar" id="pg-registrar" aria-labelledby="pg-registrar-titulo">
+        <h2 class="pg-registrar-titulo" id="pg-registrar-titulo">Registrar peso</h2>
+        <form id="peso-registrar-form" novalidate>
+          <div class="pg-registrar-linha">
+            <div class="campo pg-campo-peso" id="campo-peso">
+              <label class="campo-rotulo" for="peso-registrar-valor">Peso de hoje (kg)</label>
+              <input class="entrada entrada-no-card num" type="number" id="peso-registrar-valor" name="peso" inputmode="decimal" step="0.1" min="20" max="300" required aria-describedby="peso-erro">
+              <span class="campo-erro" id="peso-erro" hidden></span>
             </div>
 
-            <!-- Aderência à dieta desde a pesagem anterior (opcional). O
-                 progresso.js decide quando mostrar: só com dieta gerada, com
-                 pesagem anterior e com o mesmo objetivo já salvo. -->
-            <fieldset class="aderencia" id="aderencia-fieldset" aria-describedby="aderencia-apoio" hidden>
-              <legend class="aderencia-pergunta">Desde a pesagem de <span id="aderencia-data"></span>, como foi com a dieta?</legend>
-              <div class="aderencia-apoio-linha">
-                <p class="aderencia-apoio" id="aderencia-apoio">Opcional. Ajuda o Ronu a ajustar suas calorias com mais precisão.</p>
-                <button type="button" class="aderencia-limpar" id="aderencia-limpar">Limpar resposta</button>
-              </div>
-              <div class="aderencia-opcoes">
-                <label class="option-pill aderencia-pill">
-                  <input type="radio" name="peso-registrar-aderencia" value="seguiu">
-                  <span>Segui a dieta</span>
-                </label>
-                <label class="option-pill aderencia-pill">
-                  <input type="radio" name="peso-registrar-aderencia" value="comeu_mais">
-                  <span>Comi um pouco mais</span>
-                </label>
-                <label class="option-pill aderencia-pill">
-                  <input type="radio" name="peso-registrar-aderencia" value="comeu_menos">
-                  <span>Comi um pouco menos</span>
-                </label>
-                <label class="option-pill aderencia-pill">
-                  <input type="radio" name="peso-registrar-aderencia" value="nao_seguiu">
-                  <span>Não deu pra seguir <span class="aderencia-dica">viagem, doença, semana sem controle</span></span>
-                </label>
+            <fieldset class="campo pg-objetivo">
+              <legend class="campo-rotulo">Objetivo</legend>
+              <div class="pg-pilulas">
+                <label class="pg-pilula"><input type="radio" name="peso-registrar-objetivo" value="perder peso"><span>Perder<span class="pg-curto">&nbsp;peso</span></span></label>
+                <label class="pg-pilula"><input type="radio" name="peso-registrar-objetivo" value="manter peso"><span>Manter<span class="pg-curto">&nbsp;peso</span></span></label>
+                <label class="pg-pilula"><input type="radio" name="peso-registrar-objetivo" value="ganhar peso"><span>Ganhar<span class="pg-curto">&nbsp;peso</span></span></label>
               </div>
             </fieldset>
+          </div>
 
-            <p class="aderencia-objetivo-alterado" id="aderencia-objetivo-alterado" hidden>Objetivo alterado: a pergunta sobre a dieta volta na próxima pesagem.</p>
-
-            <div class="form-message form-message-error" id="peso-registrar-error" hidden></div>
-
-            <div class="peso-registrar-actions">
-              <button type="submit" class="btn btn-primary" id="btn-registrar-peso">
-                <span class="btn-label">Salvar</span>
-              </button>
-              <button type="button" class="btn btn-secondary" id="btn-cancelar-registrar-peso">Cancelar</button>
+          <!-- Aderência à dieta desde a pesagem anterior (opcional). O
+               progresso.js decide quando mostrar: só com dieta gerada, com
+               pesagem anterior e com o mesmo objetivo já salvo. -->
+          <fieldset class="pg-aderencia" id="aderencia-fieldset" aria-describedby="aderencia-apoio" hidden>
+            <div class="pg-aderencia-cabeca">
+              <legend class="pg-aderencia-pergunta">Desde a pesagem de <span id="aderencia-data"></span>, como foi com a dieta?</legend>
+              <span class="apoio" id="aderencia-apoio">Opcional. Ajuda o Ronu a ajustar suas calorias.</span>
+              <button type="button" class="botao-texto pg-limpar" id="aderencia-limpar" hidden>Limpar resposta</button>
             </div>
-          </form>
-        </section>
+            <div class="pg-aderencia-opcoes">
+              <label class="pg-opcao"><input type="radio" name="peso-registrar-aderencia" value="seguiu"><span class="pg-opcao-titulo">Segui a dieta</span><span class="pg-opcao-dica">Comi o que a dieta pedia</span></label>
+              <label class="pg-opcao"><input type="radio" name="peso-registrar-aderencia" value="comeu_mais"><span class="pg-opcao-titulo">Comi um pouco mais</span><span class="pg-opcao-dica">Passei um pouco</span></label>
+              <label class="pg-opcao"><input type="radio" name="peso-registrar-aderencia" value="comeu_menos"><span class="pg-opcao-titulo">Comi um pouco menos</span><span class="pg-opcao-dica">Ficou faltando</span></label>
+              <label class="pg-opcao"><input type="radio" name="peso-registrar-aderencia" value="nao_seguiu"><span class="pg-opcao-titulo">Não deu pra seguir</span><span class="pg-opcao-dica">Viagem, doença, semana sem controle</span></label>
+            </div>
+          </fieldset>
 
-        <section class="peso-grafico-panel" aria-label="Gráfico de evolução do peso">
-          <div class="peso-grafico-head">
-            <h2 class="peso-grafico-title">Evolução</h2>
-            <div class="peso-legenda">
-              <span class="peso-legenda-item"><span class="peso-legenda-marca peso-legenda-marca-bruto"></span>Peso bruto</span>
-              <span class="peso-legenda-item"><span class="peso-legenda-marca peso-legenda-marca-tendencia"></span>Tendência</span>
+          <p class="nota pg-objetivo-alterado" id="aderencia-objetivo-alterado" hidden>Objetivo alterado: a pergunta sobre a dieta volta na próxima pesagem, e o ajuste pelo progresso recomeça a contar.</p>
+
+          <div class="aviso aviso-erro" id="peso-registrar-error" role="alert" hidden></div>
+
+          <div class="pg-registrar-acoes">
+            <button type="submit" class="botao botao-primario" id="btn-registrar-peso"><span class="btn-label">Salvar pesagem</span></button>
+            <button type="button" class="botao botao-fantasma pg-cancelar" id="btn-cancelar-registrar-peso">Cancelar</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Gráfico: a linha é o peso de tendência, os pontos são cada pesagem. -->
+      <section class="cartao pg-grafico" aria-label="Gráfico de peso" data-anima-hover>
+        <div class="pg-grafico-cabeca">
+          <div class="pg-numeros">
+            <div class="pg-numero-principal">
+              <span class="rotulo">Peso de tendência</span>
+              <span class="numero pg-tendencia"><span id="pg-tendencia"></span> <span class="numero-unidade">kg</span></span>
+            </div>
+            <div class="pg-numero">
+              <span class="apoio" id="pg-periodo-rotulo">No período</span>
+              <span class="pg-numero-valor num" id="pg-variacao"></span>
+            </div>
+            <div class="pg-numero pg-numero-ultima">
+              <span class="apoio">Última pesagem</span>
+              <span class="pg-numero-valor num" id="pg-ultima"></span>
             </div>
           </div>
-          <svg class="peso-grafico" id="peso-grafico" role="img" aria-labelledby="peso-grafico-titulo">
-            <title id="peso-grafico-titulo">Gráfico de peso bruto e peso de tendência ao longo do tempo</title>
+          <div class="segmentado pg-periodos" role="tablist" aria-label="Período" id="pg-periodos">
+            <button type="button" role="tab" aria-selected="true" data-semanas="4" aria-controls="pg-grafico-desenho">4 semanas</button>
+            <button type="button" role="tab" aria-selected="false" data-semanas="12" aria-controls="pg-grafico-desenho" tabindex="-1">12 semanas</button>
+          </div>
+        </div>
+
+        <div class="pg-grafico-desenho" id="pg-grafico-desenho" data-anima-grupo>
+          <svg class="pg-svg" id="peso-grafico" role="img" aria-labelledby="peso-grafico-titulo">
+            <title id="peso-grafico-titulo"></title>
           </svg>
+          <div class="pg-eixo-y" id="pg-eixo-y" aria-hidden="true"></div>
+        </div>
+        <div class="pg-eixo-x num" id="pg-eixo-x" aria-hidden="true"></div>
+        <div class="pg-legenda">
+          <span><span class="pg-marca-linha" aria-hidden="true"></span>Tendência</span>
+          <span><span class="pg-marca-ponto" aria-hidden="true"></span>Cada pesagem</span>
+        </div>
+      </section>
+
+      <aside class="pg-lateral" aria-label="Ajuste e ritmo">
+        <section class="cartao ergue pg-ajuste" id="pg-ajuste" data-anima-hover hidden>
+          <div class="pg-ajuste-cabeca">
+            <h2 class="rotulo">Ajuste pelo progresso</h2>
+            <span class="pg-ajuste-estado" id="pg-ajuste-estado"></span>
+          </div>
+          <p class="pg-ajuste-regra" id="pg-ajuste-regra"></p>
+          <p class="pg-ajuste-falta" id="pg-ajuste-falta" hidden></p>
+          <p class="apoio pg-ajuste-ritmo" id="pg-ajuste-ritmo" hidden></p>
+          <div class="pg-barras" data-anima-grupo>
+            <div class="pg-barra">
+              <div class="pg-barra-texto"><span>Pesagens</span><span class="num" id="pg-ajuste-pesagens"></span></div>
+              <div class="trilho"><span class="preenche" data-anima="barra-h" id="pg-ajuste-pesagens-barra"></span></div>
+            </div>
+            <div class="pg-barra">
+              <div class="pg-barra-texto"><span>Dias cobertos</span><span class="num" id="pg-ajuste-dias"></span></div>
+              <div class="trilho"><span class="preenche" data-anima="barra-h" id="pg-ajuste-dias-barra" style="--atraso: 200ms"></span></div>
+            </div>
+          </div>
         </section>
 
-        <section class="peso-historico-section">
-          <h2 class="peso-historico-title">Histórico</h2>
-          <ul class="peso-historico-list" id="peso-historico-list"></ul>
+        <!-- Ritmo da dieta atual: o real e o esperado de quando ela foi gerada. -->
+        <section class="cartao ergue pg-ritmo" id="pg-ritmo" hidden>
+          <h2 class="rotulo">Ritmo</h2>
+          <div class="pg-ritmo-numeros">
+            <div class="pg-ritmo-item"><span class="apoio"><span class="pg-so-largo">Real</span><span class="pg-curto-celular">Ritmo real</span></span><span class="pg-ritmo-valor num" id="pg-ritmo-real"></span></div>
+            <div class="pg-ritmo-item"><span class="apoio">Esperado</span><span class="pg-ritmo-valor num" id="pg-ritmo-esperado"></span></div>
+          </div>
+          <p class="apoio pg-ritmo-texto" id="pg-ritmo-texto"></p>
+          <a class="cartao-link pg-ritmo-link" href="dashboard.html">Ver na dieta</a>
         </section>
+      </aside>
 
-      </div>
-
+      <section class="cartao pg-tabela" aria-labelledby="pg-tabela-titulo">
+        <div class="pg-tabela-cabeca">
+          <h2 id="pg-tabela-titulo">Pesagens recentes</h2>
+          <span class="apoio pg-tabela-dica">Uma por dia; registrar de novo no mesmo dia corrige</span>
+        </div>
+        <div class="pg-tabela-rolagem">
+          <table class="tabela" id="pg-tabela">
+            <thead><tr><th scope="col">Data</th><th scope="col">Peso</th><th scope="col">Tendência</th><th scope="col">Com a dieta</th></tr></thead>
+            <tbody id="pg-tabela-corpo"></tbody>
+          </table>
+        </div>
+        <ul class="pg-lista" id="pg-lista"></ul>
+        <button type="button" class="botao-texto pg-ver-todas" id="pg-ver-todas" hidden></button>
+      </section>
     </div>
   </main>
 
+  <footer class="rodape">
+    <div class="conteiner rodape-linha">
+      <span>Peso de tendência: média móvel exponencial das pesagens, pelo tempo entre elas.</span>
+      <span>Uma pesagem por dia, de preferência no mesmo horário.</span>
+    </div>
+  </footer>
+
   <script src="js/auth.js"></script>
+  <script src="js/base/cabecalho.js"></script>
   <script src="js/progresso.js"></script>
 </body>
 </html>

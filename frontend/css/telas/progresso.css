@@ -1,0 +1,876 @@
+/*
+  Ronu — Progresso (tela aprovada: docs/redesign/telas/Progresso, ...Mobile, ...Washi)
+  Depende de tokens, base e componentes.
+
+  Desktop: registrar peso abre no topo; gráfico à esquerda, ajuste e ritmo à
+  direita; pesagens recentes embaixo, em tabela.
+  Celular: gráfico, ritmo (dois números), ajuste, registrar peso sempre
+  aberto e as pesagens em lista.
+*/
+
+/* ---------- Estrutura ---------- */
+.pg-main {
+  padding-top: var(--e-7);
+  padding-bottom: var(--e-10);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-6);
+}
+
+.pg-grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+  grid-template-areas:
+    "registrar registrar"
+    "grafico lateral"
+    "tabela tabela";
+  gap: var(--e-6);
+  align-items: start;
+}
+
+/* Formulário fechado: sem a linha dele, senão o espaço entre linhas sobra no topo. */
+.pg-grade:not(:has(.pg-registrar-aberto)) {
+  grid-template-areas:
+    "grafico lateral"
+    "tabela tabela";
+}
+
+.pg-registrar { grid-area: registrar; }
+.pg-grafico { grid-area: grafico; }
+.pg-lateral { grid-area: lateral; }
+.pg-tabela { grid-area: tabela; }
+
+.pg-lateral {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+
+.pg-estado {
+  max-width: 420px;
+  padding: var(--e-9) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.pg-estado-cartao {
+  max-width: 640px;
+  padding: var(--e-8);
+  align-items: flex-start;
+}
+
+.pg-estado-cartao p {
+  max-width: 52ch;
+  line-height: 1.6;
+}
+
+/* Rótulos dos cards são <h2> pela estrutura, no visual do rótulo. */
+.pg-grade h2.rotulo {
+  font-family: var(--fonte-corpo);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* ---------- Registrar peso ---------- */
+/* No desktop só aparece aberto pelo botão do topo. */
+.pg-registrar:not(.pg-registrar-aberto) {
+  display: none;
+}
+
+.pg-registrar {
+  border-color: var(--acento);
+  padding: 26px 28px;
+  animation: entra var(--d-media) var(--curva-saida) both;
+}
+
+/* O título nomeia a seção para leitor de tela; no desktop o botão do topo
+   já diz o que é, então ele some da vista. */
+.pg-registrar-titulo {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+#peso-registrar-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.pg-registrar-linha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-7);
+  align-items: flex-start;
+}
+
+.pg-campo-peso .entrada {
+  width: 160px;
+}
+
+fieldset.campo,
+.pg-aderencia {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+fieldset.campo legend {
+  padding: 0;
+  margin-bottom: var(--e-2);
+}
+
+/* Opções com rádio nativo por baixo: teclado e leitor de tela de graça. */
+.pg-pilulas {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pg-pilula,
+.pg-opcao {
+  position: relative;
+  cursor: pointer;
+}
+
+.pg-pilula input,
+.pg-opcao input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.pg-pilula > span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 46px;
+  padding: 11px 18px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  font-size: var(--t-apoio);
+  transition: background-color var(--d-rapida) ease, border-color var(--d-rapida) ease, color var(--d-rapida) ease;
+}
+
+.pg-pilula:hover > span {
+  border-color: var(--borda-hover);
+}
+
+.pg-pilula input:checked + span {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--sobre-acento);
+  font-weight: 600;
+}
+
+.pg-pilula input:focus-visible + span,
+.pg-opcao:has(input:focus-visible) {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
+.pg-aderencia {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  padding-top: var(--e-5);
+  border-top: 1px solid var(--borda);
+}
+
+.pg-aderencia[hidden] {
+  display: none;
+}
+
+.pg-aderencia-cabeca {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--e-2) var(--e-4);
+  flex-wrap: wrap;
+}
+
+.pg-aderencia-pergunta {
+  float: left; /* legend dentro de flex: o float tira o modo especial dela */
+  padding: 0;
+  font-size: var(--t-corpo);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.pg-aderencia-cabeca .apoio {
+  margin-left: auto;
+}
+
+.pg-limpar {
+  min-height: 0;
+  padding: 0;
+  font-size: var(--t-pequeno);
+  color: var(--texto);
+}
+
+.pg-aderencia-opcoes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--e-2);
+}
+
+.pg-opcao {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-2);
+  transition: background-color var(--d-rapida) ease, border-color var(--d-rapida) ease;
+}
+
+.pg-opcao:hover {
+  border-color: var(--borda-hover);
+}
+
+.pg-opcao:has(input:checked) {
+  background: var(--superficie-3);
+  border-color: var(--acento);
+}
+
+.pg-opcao-titulo {
+  font-size: var(--t-apoio);
+  font-weight: 600;
+}
+
+.pg-opcao-dica {
+  font-size: var(--t-rotulo);
+  color: var(--texto-2);
+  line-height: 1.4;
+}
+
+.pg-opcao:has(input:checked) .pg-opcao-dica {
+  color: var(--texto-2-ativo);
+}
+
+.pg-objetivo-alterado {
+  padding-top: var(--e-4);
+  border-top: 1px solid var(--borda);
+}
+
+.pg-registrar-acoes {
+  display: flex;
+  gap: var(--e-3);
+  flex-wrap: wrap;
+}
+
+/* ---------- Gráfico ---------- */
+.pg-grafico {
+  padding: 28px 30px;
+  gap: 22px;
+}
+
+.pg-grafico-cabeca {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--e-6);
+  flex-wrap: wrap;
+}
+
+.pg-numeros {
+  display: flex;
+  gap: var(--e-8);
+  flex-wrap: wrap;
+}
+
+.pg-numero-principal,
+.pg-numero {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pg-numero {
+  justify-content: flex-end;
+}
+
+.pg-tendencia {
+  font-size: 3.25rem;
+}
+
+.pg-numero-valor {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.pg-periodos {
+  flex: none;
+}
+
+.pg-periodos > button {
+  min-height: 42px;
+  flex: none;
+}
+
+.pg-grafico-desenho {
+  position: relative;
+}
+
+.pg-svg {
+  display: block;
+  width: 100%;
+  height: 280px;
+  overflow: visible;
+}
+
+.pg-grade-linha {
+  stroke: var(--divisor);
+  stroke-width: 1;
+}
+
+.pg-area {
+  fill: var(--acento);
+  fill-opacity: 0.07;
+}
+
+.pg-pontos circle {
+  fill: var(--ponto);
+}
+
+.pg-linha {
+  fill: none;
+  stroke: var(--texto);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.pg-atual {
+  fill: var(--acento);
+  stroke: var(--superficie);
+  stroke-width: 2;
+}
+
+/* Valores do eixo Y à direita, alinhados às linhas de grade pelo JS. */
+.pg-eixo-y span {
+  position: absolute;
+  right: 0;
+  transform: translateY(-50%);
+  font-size: var(--t-rotulo);
+  color: var(--texto-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.pg-eixo-x {
+  display: flex;
+  justify-content: space-between;
+  margin-top: -8px;
+  font-size: var(--t-rotulo);
+  color: var(--texto-2);
+}
+
+.pg-legenda {
+  display: flex;
+  gap: 22px;
+  flex-wrap: wrap;
+  font-size: var(--t-pequeno);
+  color: var(--texto-2);
+}
+
+.pg-legenda > span {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+}
+
+.pg-marca-linha {
+  width: 18px;
+  height: 2px;
+  background: var(--texto);
+}
+
+.pg-marca-ponto {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ponto);
+}
+
+/* ---------- Ajuste e ritmo ---------- */
+.pg-lateral .cartao {
+  padding: 22px;
+  gap: 14px;
+}
+
+.pg-ajuste-cabeca {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pg-ajuste-estado {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 1.625rem;
+  line-height: 1.1;
+}
+
+.pg-ajuste-regra {
+  font-size: var(--t-apoio);
+  color: var(--texto-2);
+  line-height: 1.55;
+}
+
+.pg-ajuste-falta {
+  padding-left: var(--e-3);
+  border-left: 2px solid var(--acento);
+  font-size: var(--t-apoio);
+  line-height: 1.55;
+}
+
+/* No desktop o texto do ritmo fica no card do ritmo. */
+.pg-ajuste-ritmo {
+  display: none;
+}
+
+.pg-barras {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.pg-barra {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pg-barra-texto {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e-3);
+  font-size: var(--t-pequeno);
+}
+
+.pg-barra-texto > span:first-child {
+  color: var(--texto-2);
+}
+
+.pg-ritmo-numeros {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--e-3);
+}
+
+.pg-ritmo-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pg-ritmo-valor {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: var(--t-h3);
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.pg-curto-celular {
+  display: none;
+}
+
+/* ---------- Pesagens recentes ---------- */
+.pg-tabela {
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+}
+
+.pg-tabela-cabeca {
+  padding: 20px var(--e-7);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--e-4);
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--borda);
+}
+
+.pg-tabela-rolagem {
+  overflow-x: auto;
+}
+
+.pg-resposta {
+  font-size: var(--t-pequeno);
+}
+
+/* "Não deu pra seguir" ficou de fora da conta: borda mais forte, tracejada. */
+.pg-resposta-fora {
+  border-color: var(--borda-forte);
+  border-style: dashed;
+}
+
+.pg-sem-resposta {
+  font-size: var(--t-pequeno);
+  color: var(--texto-2);
+}
+
+.pg-lista {
+  display: none;
+}
+
+.pg-ver-todas {
+  align-self: flex-start;
+  margin: var(--e-2) var(--e-7) var(--e-4);
+  font-size: var(--t-pequeno);
+}
+
+/* ---------- Telas médias: a lateral desce ---------- */
+@media (max-width: 1080px) {
+  .pg-grade {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "registrar"
+      "grafico"
+      "lateral"
+      "tabela";
+  }
+
+  .pg-grade:not(:has(.pg-registrar-aberto)) {
+    grid-template-areas:
+      "grafico"
+      "lateral"
+      "tabela";
+  }
+
+  /* auto-fit: com dois cards, os dois dividem a largura toda. */
+  .pg-lateral {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    align-items: start;
+  }
+
+  .pg-aderencia-opcoes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ---------- Celular ---------- */
+@media (max-width: 720px) {
+  .faixa-titulo h1 {
+    font-size: 2rem;
+    line-height: 1.15;
+  }
+
+  .pg-intro,
+  #peso-registrar-toggle {
+    display: none;
+  }
+
+  .pg-main {
+    padding-top: var(--e-5);
+    padding-bottom: var(--e-8);
+    gap: var(--e-4);
+  }
+
+  /* A lateral se desfaz: ritmo e ajuste viram itens da grade, na ordem do
+     canvas (gráfico, ritmo, ajuste, registrar, pesagens). */
+  /* O formulário fica sempre aberto aqui: a linha dele existe nos dois casos. */
+  .pg-grade,
+  .pg-grade:not(:has(.pg-registrar-aberto)) {
+    gap: var(--e-4);
+    grid-template-areas:
+      "grafico"
+      "ritmo"
+      "ajuste"
+      "registrar"
+      "tabela";
+  }
+
+  .pg-lateral {
+    display: contents;
+  }
+
+  .pg-ritmo { grid-area: ritmo; }
+  .pg-ajuste { grid-area: ajuste; }
+
+  /* Sempre aberto, sem "Cancelar". */
+  .pg-registrar,
+  .pg-registrar:not(.pg-registrar-aberto) {
+    display: flex;
+    padding: 18px;
+    gap: 14px;
+    animation: none;
+  }
+
+  .pg-registrar-titulo {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+    font-size: 1.25rem;
+  }
+
+  .pg-cancelar {
+    display: none;
+  }
+
+  #peso-registrar-form {
+    gap: 14px;
+  }
+
+  .pg-registrar-linha {
+    flex-direction: column;
+    gap: 14px;
+    align-items: stretch;
+  }
+
+  .pg-campo-peso .entrada {
+    width: 100%;
+  }
+
+  .pg-pilulas {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .pg-pilula > span {
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 4px;
+    font-size: var(--t-pequeno);
+  }
+
+  .pg-curto {
+    display: none;
+  }
+
+  .pg-aderencia {
+    padding-top: 14px;
+    gap: var(--e-2);
+  }
+
+  .pg-aderencia-cabeca {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .pg-aderencia-cabeca .apoio {
+    margin-left: 0;
+    font-size: var(--t-rotulo);
+  }
+
+  .pg-aderencia-pergunta {
+    float: none;
+    font-size: var(--t-apoio);
+  }
+
+  .pg-aderencia-opcoes {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .pg-opcao {
+    padding: 12px;
+  }
+
+  .pg-opcao-titulo {
+    font-size: var(--t-pequeno);
+  }
+
+  .pg-opcao-dica {
+    display: none;
+  }
+
+  .pg-registrar-acoes .botao-primario {
+    width: 100%;
+    min-height: 52px;
+    font-size: var(--t-corpo-g);
+  }
+
+  .pg-grafico {
+    padding: 20px 18px;
+    gap: var(--e-4);
+  }
+
+  .pg-grafico-cabeca {
+    gap: var(--e-4);
+  }
+
+  .pg-numeros {
+    width: 100%;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: var(--e-4);
+  }
+
+  .pg-numero {
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .pg-numero-principal .rotulo {
+    font-size: 11px;
+  }
+
+  .pg-tendencia {
+    font-size: 2.625rem;
+  }
+
+  .pg-numero-valor {
+    font-size: 1.0625rem;
+  }
+
+  .pg-numero-ultima {
+    display: none;
+  }
+
+  .pg-periodos {
+    width: 100%;
+  }
+
+  .pg-periodos > button {
+    flex: 1;
+  }
+
+  .pg-svg {
+    height: 200px;
+  }
+
+  .pg-eixo-x {
+    font-size: 11px;
+  }
+
+  .pg-legenda {
+    gap: 18px;
+    font-size: var(--t-rotulo);
+  }
+
+  /* Ritmo: dois números lado a lado, cada um no seu card. */
+  .pg-ritmo {
+    padding: 0;
+    background: none;
+    border: 0;
+    gap: 0;
+  }
+
+  .pg-ritmo > .rotulo,
+  .pg-ritmo-texto,
+  .pg-ritmo-link {
+    display: none;
+  }
+
+  .pg-ritmo-numeros {
+    gap: 10px;
+  }
+
+  .pg-ritmo-item {
+    padding: 14px;
+    background: var(--superficie);
+    border: 1px solid var(--borda);
+    border-radius: var(--raio-card);
+  }
+
+  .pg-ritmo-valor {
+    font-size: 1.1875rem;
+  }
+
+  .pg-curto-celular {
+    display: inline;
+  }
+
+  .pg-so-largo {
+    display: none;
+  }
+
+  .pg-ajuste {
+    padding: 18px;
+    gap: 12px;
+  }
+
+  .pg-ajuste-cabeca {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .pg-ajuste-cabeca .rotulo {
+    font-size: 11px;
+  }
+
+  .pg-ajuste-estado {
+    font-size: 1.125rem;
+  }
+
+  .pg-ajuste-regra {
+    display: none;
+  }
+
+  .pg-ajuste-ritmo:not([hidden]) {
+    display: block;
+  }
+
+  .pg-ajuste-falta {
+    font-size: var(--t-pequeno);
+  }
+
+  .pg-tabela-cabeca {
+    padding: 16px 18px;
+  }
+
+  .pg-tabela-cabeca h2 {
+    font-size: 1.25rem;
+  }
+
+  .pg-tabela-dica,
+  .pg-tabela-rolagem {
+    display: none;
+  }
+
+  .pg-lista {
+    display: block;
+  }
+
+  .pg-lista li {
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--e-3);
+  }
+
+  .pg-lista li + li {
+    border-top: 1px solid var(--divisor);
+  }
+
+  .pg-lista-textos {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .pg-lista-peso {
+    font-size: var(--t-corpo);
+    font-weight: 600;
+  }
+
+  .pg-lista .apoio {
+    font-size: var(--t-rotulo);
+  }
+
+  .pg-ver-todas {
+    margin: 0 18px var(--e-4);
+  }
+
+  .pg-estado-cartao {
+    padding: var(--e-6);
+  }
+}
