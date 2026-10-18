@@ -3,143 +3,177 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ronu — Área do atleta</title>
+  <title>Ronu — Sua dieta</title>
   <meta name="description" content="Sua dieta semanal calculada a partir do gasto real do seu treino.">
+
+  <!-- Antes do CSS: aplica o modo escuro/claro antes da primeira pintura. -->
+  <script src="js/base/tema.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/auth.css">
-  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/base/tokens.css">
+  <link rel="stylesheet" href="css/base/base.css">
+  <link rel="stylesheet" href="css/componentes.css">
+  <link rel="stylesheet" href="css/telas/painel.css">
+
+  <script src="js/base/movimento.js" defer></script>
 </head>
-<body>
+<body class="com-abas">
+  <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
 
-  <header class="simple-header border-b">
-    <div class="container dashboard-header-inner">
-      <a href="landing/v1/index.html" class="wordmark">ronu<span>.</span></a>
-      <div class="header-actions">
-        <a href="perfil.html" class="avatar" id="avatar-link"></a>
-        <button type="button" id="logout-btn" class="btn btn-secondary">Sair</button>
+  <!-- Montado por js/base/cabecalho.js (logo, nav, sol/lua, avatar e abas). -->
+  <header class="cabecalho" data-cabecalho="dieta"></header>
+
+  <section class="faixa-titulo grade">
+    <div class="conteiner faixa-titulo-conteudo">
+      <div class="faixa-titulo-texto">
+        <span class="rotulo rotulo-acento sobre-grade">Sua semana</span>
+        <h1 class="sobre-grade" id="db-saudacao">Sua dieta</h1>
       </div>
-    </div>
-  </header>
-
-  <main class="dashboard">
-    <!-- Linhas de fundo (experimento visual, ver comentário em dashboard.css).
-         Só textura: sem conteúdo, fora da árvore de acessibilidade. -->
-    <div class="dashboard-linhas" aria-hidden="true">
-      <svg class="dashboard-linhas-camada dashboard-linhas-a" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" focusable="false">
-        <path d="M-120 70 C 240 30, 600 120, 960 70 S 1380 20, 1560 85"/>
-        <path d="M-120 290 C 260 250, 620 345, 980 290 S 1390 240, 1560 305"/>
-        <path d="M-120 505 C 220 470, 580 560, 940 505 S 1370 455, 1560 520"/>
-        <path d="M-120 725 C 250 690, 610 780, 970 725 S 1380 680, 1560 740"/>
-      </svg>
-      <svg class="dashboard-linhas-camada dashboard-linhas-b" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" focusable="false">
-        <path d="M-120 140 C 200 185, 560 95, 900 140 S 1360 190, 1560 130"/>
-        <path d="M-120 360 C 230 400, 590 315, 930 360 S 1370 405, 1560 350"/>
-        <path d="M-120 580 C 210 620, 570 535, 910 580 S 1350 625, 1560 570"/>
-        <path d="M-120 800 C 240 840, 600 760, 950 800 S 1380 845, 1560 790"/>
-      </svg>
-      <svg class="dashboard-linhas-camada dashboard-linhas-c" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" focusable="false">
-        <path d="M-120 215 C 280 190, 640 250, 1000 215 S 1400 180, 1560 225"/>
-        <path d="M-120 430 C 270 405, 630 470, 990 430 S 1395 400, 1560 440"/>
-        <path d="M-120 650 C 290 625, 650 690, 1010 650 S 1405 620, 1560 660"/>
-        <path d="M-120 870 C 260 845, 620 905, 980 870 S 1390 840, 1560 880"/>
-      </svg>
-    </div>
-
-    <div class="container">
-
-      <h1 class="visually-hidden">Área do atleta — dieta da semana</h1>
-
-      <div class="form-message form-message-error" id="dashboard-gerar-error" role="alert" hidden></div>
-
-      <div class="dashboard-loading" id="dashboard-loading" aria-live="polite">
-        <p class="text-muted">Carregando sua súmula...</p>
-      </div>
-
-      <section class="dashboard-empty" id="dashboard-load-error" hidden>
-        <p class="eyebrow">Área do atleta</p>
-        <h2 class="dashboard-empty-title">Não foi possível carregar seus dados</h2>
-        <p class="dashboard-empty-subtitle">Verifique sua conexão e tente novamente.</p>
-        <button type="button" class="btn btn-secondary" id="btn-tentar-novamente">
-          <span class="btn-label">Tentar novamente</span>
-        </button>
-      </section>
-
-      <section class="dashboard-empty" id="dashboard-empty" hidden>
-        <p class="eyebrow">Área do atleta</p>
-        <h2 class="dashboard-empty-title">Sua primeira dieta ainda não foi gerada</h2>
-        <p class="dashboard-empty-subtitle">A IA monta um cardápio de 7 dias a partir do seu objetivo, peso e do gasto calórico real das suas modalidades de treino.</p>
-        <button type="button" class="btn btn-primary btn-gerar-dieta" id="btn-gerar-vazio">
-          <span class="btn-label">Gerar minha primeira dieta</span>
-        </button>
-        <a href="progresso.html" class="dashboard-link-progresso">Ver progresso</a>
-      </section>
-
-      <div class="dashboard-content" id="dashboard-content" hidden>
-
-        <div class="dashboard-toolbar">
-          <div class="version-switch" id="version-switch" role="tablist" aria-label="Versão da dieta" hidden></div>
-          <!-- Botão antes do link no DOM (ordem de leitura e de Tab: ação
-               principal primeiro); no desktop o CSS inverte para o link ficar
-               à esquerda e o botão na ponta direita. -->
-          <div class="dashboard-toolbar-acoes">
-            <button type="button" class="btn btn-secondary btn-gerar-dieta" id="btn-gerar">
-              <span class="btn-label">Gerar nova dieta</span>
-            </button>
-            <a href="progresso.html" class="dashboard-link-progresso">Ver progresso</a>
-          </div>
+      <div class="db-acoes" id="db-acoes" hidden>
+        <div class="segmentado db-versoes" id="version-switch" role="tablist" aria-label="Versão da dieta" hidden></div>
+        <div class="db-gerar">
+          <button type="button" class="botao botao-primario" id="btn-gerar"><span class="btn-label">Gerar nova dieta</span></button>
+          <span class="apoio sobre-grade" data-dica-gerar></span>
         </div>
+      </div>
+    </div>
+  </section>
 
-        <section class="meta-stamp" aria-label="Meta diária calculada">
-          <div class="meta-stamp-head">
-            <p class="meta-stamp-label">Meta diária calculada</p>
-            <p class="meta-stamp-date" id="meta-data"></p>
+  <main id="conteudo" class="conteiner db-main">
+    <div class="aviso aviso-erro" id="dashboard-gerar-error" role="alert" hidden></div>
+
+    <div class="db-estado" id="dashboard-loading" aria-live="polite">
+      <span class="texto-2">Carregando a sua semana...</span>
+      <div class="carregando" aria-hidden="true"></div>
+    </div>
+
+    <section class="cartao db-estado-cartao" id="dashboard-load-error" hidden>
+      <h2>Não foi possível carregar seus dados</h2>
+      <p class="texto-2">Verifique sua conexão e tente novamente.</p>
+      <button type="button" class="botao botao-fantasma" id="btn-tentar-novamente"><span class="btn-label">Tentar novamente</span></button>
+    </section>
+
+    <section class="cartao db-estado-cartao" id="dashboard-empty" hidden>
+      <h2>Sua primeira dieta ainda não foi gerada</h2>
+      <p class="texto-2">A IA monta um cardápio de 7 dias a partir do seu objetivo, do seu peso e do gasto real das suas modalidades de treino.</p>
+      <button type="button" class="botao botao-primario botao-grande" id="btn-gerar-vazio"><span class="btn-label">Gerar minha primeira dieta</span></button>
+    </section>
+
+    <div class="db-grade" id="dashboard-content" hidden>
+      <div class="db-coluna">
+
+        <!-- Meta do dia escolhido: anel com quanto o cardápio cobre da meta,
+             as kcal e os macros. Os desenhos refazem ao entrar na tela e no hover. -->
+        <section class="cartao db-meta" aria-label="Meta do dia" data-anima-hover>
+          <div class="db-meta-topo" data-anima-grupo>
+            <div class="db-anel">
+              <svg viewBox="0 0 84 84" width="132" height="132" aria-hidden="true">
+                <circle class="anel-fundo" cx="42" cy="42" r="36" stroke-width="5"/>
+                <circle class="anel-valor" id="db-anel" data-anima="anel" cx="42" cy="42" r="36" stroke-width="5" pathLength="1" transform="rotate(-90 42 42)"/>
+              </svg>
+              <div class="db-anel-texto"><span class="apoio" id="db-anel-tipo"></span><span class="numero" id="db-anel-dia"></span></div>
+            </div>
+            <div class="db-meta-numero">
+              <span class="rotulo" id="db-meta-rotulo">Meta do dia</span>
+              <span class="numero db-meta-kcal"><span id="db-meta-kcal"></span> <span class="numero-unidade">kcal</span></span>
+              <span class="apoio" id="db-meta-cobertura"></span>
+            </div>
+            <dl class="db-macros">
+              <div><div class="db-macro-linha"><dt>Proteína</dt><dd class="num" id="db-p"></dd></div><div class="trilho"><span class="preenche preenche-texto" data-anima="barra-h" id="db-p-barra"></span></div></div>
+              <div><div class="db-macro-linha"><dt>Carboidrato</dt><dd class="num" id="db-c"></dd></div><div class="trilho"><span class="preenche" data-anima="barra-h" id="db-c-barra" style="--atraso: 150ms"></span></div></div>
+              <div><div class="db-macro-linha"><dt>Gordura</dt><dd class="num" id="db-g"></dd></div><div class="trilho"><span class="preenche preenche-apoio" data-anima="barra-h" id="db-g-barra" style="--atraso: 300ms"></span></div></div>
+            </dl>
           </div>
-          <dl class="meta-stamp-grid">
-            <div class="meta-stamp-item">
-              <dt>Calorias</dt>
-              <dd class="num" id="meta-calorias"></dd>
-            </div>
-            <div class="meta-stamp-item">
-              <dt>Proteína</dt>
-              <dd class="num" id="meta-proteina"></dd>
-            </div>
-            <div class="meta-stamp-item">
-              <dt>Carboidrato</dt>
-              <dd class="num" id="meta-carbo"></dd>
-            </div>
-            <div class="meta-stamp-item">
-              <dt>Gordura</dt>
-              <dd class="num" id="meta-gordura"></dd>
-            </div>
-          </dl>
           <!-- Meta adaptativa: como o progresso mexeu (ou não) nesta dieta.
-               Preenchido por dashboard.js; escondido em dietas sem o campo.
-               O elemento é reaproveitado entre versões, então o "Saiba mais"
-               aberto continua aberto ao trocar de versão. -->
-          <details class="meta-ajuste" id="meta-ajuste" hidden>
-            <summary class="meta-ajuste-resumo">
-              <span class="meta-ajuste-mensagem" id="meta-ajuste-mensagem"></span>
-              <span class="meta-ajuste-toggle">Saiba mais</span>
+               Escondido em dietas sem o campo. O elemento é reaproveitado entre
+               versões, então o "Saiba mais" aberto continua aberto. -->
+          <details class="db-ajuste" id="meta-ajuste" hidden>
+            <summary>
+              <span class="db-ajuste-traco" aria-hidden="true"></span>
+              <span class="db-ajuste-mensagem" id="meta-ajuste-mensagem"></span>
+              <span class="db-ajuste-mais">Saiba mais <svg class="db-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 4l4 4 4-4"/></svg></span>
             </summary>
-            <div class="meta-ajuste-detalhe" id="meta-ajuste-detalhe"></div>
+            <div class="db-ajuste-detalhe" id="meta-ajuste-detalhe"></div>
           </details>
         </section>
 
-        <nav class="day-row" id="day-row" role="tablist" aria-label="Dias da semana"></nav>
+        <div class="db-dias" id="day-row" role="tablist" aria-label="Dia da semana" data-anima-grupo></div>
+        <div class="db-legenda">
+          <span class="db-legenda-itens">
+            <span><span class="db-marca db-marca-treino" aria-hidden="true"></span>Dia de treino</span>
+            <span><span class="db-marca" aria-hidden="true"></span>Descanso</span>
+          </span>
+          <span class="num" id="db-total"></span>
+        </div>
 
-        <section class="day-panel" id="day-panel" aria-live="polite"></section>
-
+        <section class="db-refeicoes" id="day-panel" aria-label="Refeições do dia" aria-live="polite"></section>
       </div>
 
+      <aside class="db-lateral" aria-label="Seu perfil de treino e progresso">
+        <section class="cartao ergue" id="db-card-objetivo" hidden>
+          <div class="cartao-cabeca"><h2 class="rotulo">Seu objetivo</h2><a class="cartao-link" href="perfil.html">Alterar</a></div>
+          <span class="db-lateral-titulo" id="db-objetivo"></span>
+          <span class="apoio" id="db-objetivo-texto"></span>
+        </section>
+
+        <section class="cartao ergue" id="db-card-progresso" data-anima-hover hidden>
+          <div class="cartao-cabeca"><h2 class="rotulo">Progresso</h2><span class="apoio" id="db-ultima-pesagem"></span></div>
+          <div class="db-peso-linha">
+            <span class="numero db-peso"><span id="db-peso"></span> <span class="numero-unidade">kg</span></span>
+            <span class="apoio num" id="db-peso-variacao"></span>
+          </div>
+          <div data-anima-grupo>
+            <svg class="db-mini-grafico" viewBox="0 0 300 70" role="img" id="db-mini-grafico" aria-label="">
+              <g data-anima="pontos" style="--atraso: 300ms" id="db-mini-pontos"></g>
+              <path data-anima="linha" pathLength="1" id="db-mini-linha"/>
+            </svg>
+          </div>
+          <a class="botao botao-fantasma botao-bloco" href="progresso.html">Registrar peso de hoje</a>
+          <span class="apoio">Junto com o peso, conte como foi com a dieta.</span>
+        </section>
+
+        <section class="cartao ergue" id="db-card-treino" hidden>
+          <div class="cartao-cabeca"><h2 class="rotulo">Seu treino</h2><a class="cartao-link" href="treino.html">Editar</a></div>
+          <div class="db-treinos" id="db-treinos"></div>
+        </section>
+
+        <section class="cartao ergue" id="db-card-alimentacao" hidden>
+          <div class="cartao-cabeca"><h2 class="rotulo">Sua alimentação</h2><a class="cartao-link" href="alimentacao.html">Editar</a></div>
+          <div class="chips" id="db-comidas"></div>
+          <dl class="db-dl">
+            <dt>Orçamento</dt><dd id="db-orcamento"></dd>
+            <dt>Rotina</dt><dd id="db-rotina"></dd>
+          </dl>
+        </section>
+
+        <!-- As partes da meta do dia, gravadas na geração (composicaoMeta). -->
+        <section class="cartao ergue" id="db-card-conta" data-anima-hover hidden>
+          <h2 class="rotulo" id="db-conta-titulo">Como sua meta foi calculada</h2>
+          <div class="db-conta" id="db-conta" data-anima-grupo></div>
+        </section>
+      </aside>
+    </div>
+
+    <!-- No celular, "Gerar" fica no fim da página (canvas DashboardMobile);
+         o do topo some nessa largura. -->
+    <div class="db-gerar-fim" id="db-gerar-fim" hidden>
+      <button type="button" class="botao botao-primario botao-grande botao-bloco" id="btn-gerar-fim"><span class="btn-label">Gerar nova dieta</span></button>
+      <span class="apoio" data-dica-gerar></span>
     </div>
   </main>
 
+  <footer class="rodape">
+    <div class="conteiner rodape-linha">
+      <span>Quantidades com o peso do alimento pronto para comer.</span>
+      <span>Dados nutricionais: TACO (NEPA/UNICAMP) e USDA FoodData Central.</span>
+    </div>
+  </footer>
+
   <script src="js/auth.js"></script>
+  <script src="js/base/cabecalho.js"></script>
   <script src="js/dashboard.js"></script>
 </body>
 </html>

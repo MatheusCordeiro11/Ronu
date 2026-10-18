@@ -1,0 +1,908 @@
+/*
+  Ronu — Dashboard (tela aprovada: docs/redesign/telas/Dashboard, ...Mobile, ...Washi)
+  Depende de tokens, base e componentes.
+
+  Desktop: faixa de título com versão e "Gerar"; à esquerda a meta do dia,
+  os 7 dias e as refeições; à direita os cards de objetivo, progresso,
+  treino, alimentação e a conta da meta.
+  Celular: tudo numa coluna, dias e versões rolando na horizontal, e a
+  lateral depois das refeições.
+*/
+
+/* ---------- Faixa de título ---------- */
+.faixa-titulo h1 {
+  font-size: var(--t-h1);
+}
+
+.db-acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--e-4);
+  flex-wrap: wrap;
+}
+
+.db-versoes {
+  width: auto;
+}
+
+.db-versoes > button {
+  flex: none;
+  min-height: 44px;
+}
+
+.db-gerar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--e-1);
+}
+
+.db-gerar .apoio {
+  font-size: var(--t-rotulo);
+}
+
+/* ---------- Estrutura ---------- */
+.db-main {
+  padding-top: var(--e-7);
+  padding-bottom: var(--e-10);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-6);
+}
+
+.db-grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+  gap: var(--e-6);
+  align-items: start;
+}
+
+.db-coluna {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-6);
+}
+
+.db-lateral {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+
+.db-estado {
+  max-width: 420px;
+  padding: var(--e-9) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.db-estado-cartao {
+  max-width: 640px;
+  padding: var(--e-8);
+  align-items: flex-start;
+}
+
+.db-estado-cartao p {
+  max-width: 52ch;
+  line-height: 1.6;
+}
+
+/* ---------- Meta do dia ---------- */
+.db-meta {
+  padding: 0;
+  gap: 0;
+  animation: entra var(--d-lenta) var(--curva-saida) both;
+}
+
+.db-meta-topo {
+  padding: 28px 32px;
+  display: flex;
+  gap: var(--e-7);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.db-anel {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  flex: none;
+}
+
+.db-anel svg {
+  display: block;
+}
+
+.db-anel-texto {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.db-anel-texto .apoio {
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.db-anel-texto .numero {
+  font-size: 15px;
+}
+
+.db-meta-numero {
+  flex: 1 1 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.db-meta-kcal {
+  font-size: var(--t-numero-g);
+}
+
+.db-macros {
+  flex: 1 1 260px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.db-macros > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.db-macro-linha {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e-3);
+  font-size: var(--t-apoio);
+}
+
+.db-macro-linha dt {
+  color: var(--texto-2);
+}
+
+/* ---------- Ajuste pelo progresso (details) ---------- */
+.db-ajuste {
+  border-top: 1px solid var(--borda);
+}
+
+.db-ajuste summary {
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  font-size: var(--t-corpo);
+  list-style: none;
+  cursor: pointer;
+}
+
+.db-ajuste summary::-webkit-details-marker {
+  display: none;
+}
+
+.db-ajuste summary:focus-visible {
+  outline-offset: -3px;
+}
+
+.db-ajuste-traco {
+  flex: none;
+  width: 14px;
+  height: 1px;
+  background: var(--acento);
+}
+
+/* Meta mantida ou ajuste ainda inativo: o traço fica neutro. */
+.db-ajuste[data-estado="neutro"] .db-ajuste-traco {
+  background: var(--texto-2);
+}
+
+.db-ajuste-mensagem {
+  flex: 1;
+}
+
+.db-ajuste-mais {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--texto-2);
+  font-size: var(--t-apoio);
+}
+
+.db-ajuste summary:hover .db-ajuste-mais {
+  color: var(--texto);
+}
+
+.db-chevron {
+  transition: transform var(--d-media) ease;
+}
+
+.db-ajuste[open] .db-chevron {
+  transform: rotate(180deg);
+}
+
+.db-ajuste-detalhe {
+  padding: 0 32px 24px 58px;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  color: var(--texto-2);
+  line-height: 1.65;
+}
+
+.db-ajuste-detalhe a {
+  color: var(--acento-texto);
+}
+
+/* ---------- Dias ---------- */
+.db-dias {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--e-2);
+}
+
+.db-dia {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 12px 14px;
+  background: transparent;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-2);
+  color: var(--texto);
+  text-align: left;
+  transition: background-color var(--d-rapida) ease, border-color var(--d-rapida) ease;
+}
+
+.db-dia:hover {
+  border-color: var(--borda-hover);
+}
+
+.db-dia[aria-selected="true"] {
+  background: var(--superficie-3);
+  border-color: var(--acento);
+}
+
+.db-dia:focus-visible {
+  outline-offset: 2px;
+}
+
+.db-dia-nome {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--t-pequeno);
+}
+
+.db-dia-kcal {
+  font-size: var(--t-corpo);
+  font-weight: 600;
+}
+
+.db-dia-trilho {
+  width: 100%;
+  height: 30px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.db-dia-barra {
+  display: block;
+  width: 100%;
+  border-radius: 2px;
+  background: var(--linha);
+}
+
+.db-dia[data-tipo="treino"] .db-dia-barra {
+  background: var(--acento);
+}
+
+/* Marca de treino (cheia) e descanso (vazada): não depende só da cor. */
+.db-marca {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid var(--texto-2);
+}
+
+.db-marca-treino {
+  background: var(--acento);
+  border-color: var(--acento);
+}
+
+.db-dia .db-marca {
+  width: 7px;
+  height: 7px;
+}
+
+.db-legenda {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--e-4);
+  flex-wrap: wrap;
+  font-size: var(--t-pequeno);
+  color: var(--texto-2);
+}
+
+.db-legenda-itens {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.db-legenda-itens > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.db-legenda strong {
+  color: var(--texto);
+}
+
+/* ---------- Refeições ---------- */
+.db-refeicoes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.db-refeicao {
+  padding: 20px 24px;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--e-6);
+  flex-wrap: wrap;
+}
+
+.db-refeicao-titulo {
+  flex: 0 0 104px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.db-refeicao-hora {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: var(--t-h3);
+  line-height: 1.1;
+}
+
+.db-refeicao-nome {
+  font-family: var(--fonte-corpo);
+  font-weight: 400;
+  font-size: var(--t-pequeno);
+  line-height: 1.4;
+  color: var(--texto-2);
+}
+
+/* Sem horário (dietas antigas), o nome assume o lugar de título. */
+.db-refeicao-titulo > .db-refeicao-nome:first-child {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 1.125rem;
+  color: var(--texto);
+}
+
+.db-alimentos {
+  flex: 1 1 280px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.db-alimentos li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e-4);
+  padding-bottom: var(--e-2);
+  border-bottom: 1px solid var(--divisor);
+  font-size: var(--t-corpo);
+}
+
+.db-alimentos li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.db-alimento-qtd {
+  flex: none;
+  color: var(--texto-2);
+  white-space: nowrap;
+}
+
+.db-refeicao-totais {
+  flex: 0 0 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.db-refeicao-kcal {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 1.625rem;
+  line-height: 1;
+}
+
+/* ---------- Lateral ---------- */
+.db-lateral .cartao {
+  padding: 22px;
+  gap: 14px;
+}
+
+.db-lateral .cartao-cabeca {
+  align-items: center;
+}
+
+/* Os rótulos dos cards são <h2> pela estrutura, mas no visual do rótulo. */
+.db-lateral h2.rotulo {
+  font-family: var(--fonte-corpo);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.db-lateral-titulo {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 1.75rem;
+  line-height: 1.1;
+}
+
+.db-peso-linha {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--e-3);
+  flex-wrap: wrap;
+}
+
+.db-peso {
+  font-size: 2.25rem;
+}
+
+.db-mini-grafico {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.db-mini-grafico path {
+  fill: none;
+  stroke: var(--texto);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.db-mini-grafico g circle {
+  fill: var(--ponto);
+}
+
+.db-mini-atual {
+  fill: var(--acento);
+}
+
+.db-treinos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-5);
+}
+
+.db-treino {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.db-treino + .db-treino {
+  padding-top: var(--e-5);
+  border-top: 1px solid var(--divisor);
+}
+
+.db-treino-cabeca {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--e-3);
+}
+
+.db-treino-nome {
+  font-weight: 600;
+}
+
+.db-treino-dias {
+  gap: 4px;
+}
+
+.db-treino-dias > span {
+  min-height: 0;
+  padding: 6px 0;
+  font-size: var(--t-rotulo);
+}
+
+.db-chip-mais {
+  color: var(--texto-2);
+}
+
+.db-dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--e-2) var(--e-4);
+  font-size: var(--t-pequeno);
+}
+
+.db-dl dt {
+  color: var(--texto-2);
+}
+
+.db-dl dd {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Conta da meta: rótulo e valor em cima, barra da parte embaixo. */
+.db-conta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.db-conta-linha {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.db-conta-texto {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e-3);
+  font-size: var(--t-apoio);
+}
+
+.db-conta-texto > span:first-child {
+  color: var(--texto-2);
+}
+
+.db-conta .preenche {
+  background: var(--texto);
+}
+
+.db-conta-negativa .preenche,
+.db-conta-total .preenche {
+  background: var(--acento);
+}
+
+.db-conta-total {
+  padding-top: 10px;
+  border-top: 1px solid var(--borda);
+}
+
+.db-conta-total .db-conta-texto {
+  font-size: var(--t-corpo);
+  font-weight: 600;
+}
+
+.db-conta-total .db-conta-texto > span:first-child {
+  color: var(--texto);
+}
+
+/* ---------- Só no celular: "Gerar" no fim e refeições recolhidas ---------- */
+.db-gerar-fim,
+.db-mais-refeicoes {
+  display: none;
+}
+
+/* ---------- Telas médias: a lateral desce e vira duas colunas ---------- */
+@media (max-width: 1080px) {
+  .db-grade {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .db-lateral {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    align-items: start;
+  }
+}
+
+/* ---------- Celular ---------- */
+@media (max-width: 720px) {
+  .faixa-titulo-conteudo {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--e-5);
+  }
+
+  .faixa-titulo h1 {
+    font-size: 1.875rem;
+    line-height: 1.15;
+  }
+
+  .db-acoes {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--e-3);
+  }
+
+  /* Versões viram botões soltos que rolam na horizontal. */
+  .db-versoes {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    gap: var(--e-2);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .db-versoes > button,
+  .db-versoes > button + button {
+    border: 1px solid var(--borda);
+    border-radius: var(--raio);
+    min-height: 40px;
+    padding: 9px 14px;
+    font-size: var(--t-pequeno);
+  }
+
+  .db-versoes > button[aria-selected="true"] {
+    border-color: var(--linha);
+  }
+
+  /* O "Gerar" do topo dá lugar ao do fim da página. */
+  .db-acoes .db-gerar {
+    display: none;
+  }
+
+  /* Com uma dieta só não há versões: o bloco fica vazio e não ocupa espaço. */
+  .db-acoes:has(> .db-versoes[hidden]) {
+    display: none;
+  }
+
+  .db-gerar-fim:not([hidden]) {
+    order: 2;
+    display: flex;
+    flex-direction: column;
+    gap: var(--e-2);
+    text-align: center;
+  }
+
+  /* O erro de gerar fica logo acima do botão do fim, onde a pessoa clicou. */
+  #dashboard-gerar-error {
+    order: 1;
+  }
+
+  .db-refeicoes:not(.db-refeicoes-abertas) .db-refeicao-extra {
+    display: none;
+  }
+
+  .db-mais-refeicoes {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    padding: var(--e-2) var(--e-4);
+    background: transparent;
+    border: 1px dashed var(--borda);
+    border-radius: var(--raio-card);
+    color: var(--texto-2);
+    font-size: var(--t-pequeno);
+    text-align: center;
+  }
+
+  .db-mais-refeicoes:hover {
+    color: var(--texto);
+    border-color: var(--borda-hover);
+  }
+
+  .db-main {
+    padding-top: var(--e-5);
+    padding-bottom: var(--e-8);
+    gap: var(--e-4);
+  }
+
+  .db-coluna {
+    gap: var(--e-4);
+  }
+
+  /* Anel e número lado a lado; os macros descem para uma linha própria. */
+  .db-meta-topo {
+    padding: 20px;
+    gap: var(--e-4);
+    align-items: center;
+  }
+
+  .db-anel,
+  .db-anel svg {
+    width: 84px;
+    height: 84px;
+  }
+
+  .db-anel-texto .apoio {
+    font-size: 10px;
+  }
+
+  .db-anel-texto .numero {
+    font-size: 13px;
+  }
+
+  .db-meta-numero {
+    flex: 1 1 0;
+    min-width: 0;
+    gap: 4px;
+  }
+
+  .db-meta-numero .rotulo {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+  }
+
+  .db-meta-kcal {
+    font-size: 2.5rem;
+  }
+
+  .db-macros {
+    flex: 1 1 100%;
+    flex-direction: row;
+    gap: var(--e-3);
+  }
+
+  .db-macros > div {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .db-macro-linha {
+    flex-direction: column;
+    gap: 2px;
+    font-size: var(--t-pequeno);
+  }
+
+  .db-ajuste summary {
+    padding: 14px 20px;
+    font-size: var(--t-apoio);
+    flex-wrap: wrap;
+  }
+
+  .db-ajuste-mais {
+    font-size: var(--t-pequeno);
+  }
+
+  .db-ajuste-detalhe {
+    padding: 0 20px 20px;
+    font-size: var(--t-apoio);
+  }
+
+  /* Dias rolam na horizontal, com a borda da tela como limite. */
+  .db-dias {
+    display: flex;
+    overflow-x: auto;
+    margin: 0 calc(var(--margem) * -1);
+    padding: 2px var(--margem) 4px;
+    scroll-padding: 0 var(--margem);
+    scrollbar-width: none;
+  }
+
+  .db-dias::-webkit-scrollbar,
+  .db-versoes::-webkit-scrollbar {
+    display: none;
+  }
+
+  .db-dia {
+    flex: 0 0 76px;
+    padding: 10px;
+    gap: 4px;
+  }
+
+  .db-dia-trilho {
+    height: 22px;
+  }
+
+  .db-legenda {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--e-2);
+  }
+
+  .db-refeicao {
+    padding: 16px;
+    flex-direction: column;
+    gap: var(--e-3);
+  }
+
+  .db-refeicao-titulo {
+    flex: none;
+    width: 100%;
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--e-2);
+    padding-right: 90px;
+  }
+
+  .db-refeicao-hora {
+    font-size: 1.25rem;
+  }
+
+  .db-alimentos {
+    flex: none;
+    width: 100%;
+    gap: 6px;
+  }
+
+  .db-alimentos li {
+    font-size: var(--t-apoio);
+    padding-bottom: 6px;
+  }
+
+  /* Kcal da refeição sobe para a linha do horário, à direita. */
+  .db-refeicao {
+    position: relative;
+  }
+
+  .db-refeicao-totais {
+    flex: none;
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .db-refeicao-kcal {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-family: var(--fonte-corpo);
+    font-weight: 600;
+    font-size: var(--t-corpo);
+    line-height: 1.6;
+  }
+
+  .db-refeicao-kcal .numero-unidade {
+    color: var(--texto);
+    font-size: inherit;
+  }
+
+  .db-refeicao-totais .apoio {
+    font-size: var(--t-rotulo);
+  }
+
+  .db-lateral {
+    display: flex;
+  }
+
+  .db-lateral .cartao {
+    padding: 18px;
+    gap: 10px;
+  }
+
+  .db-lateral-titulo {
+    font-size: 1.5rem;
+  }
+
+  .db-peso {
+    font-size: 1.875rem;
+  }
+
+  .db-estado-cartao {
+    padding: var(--e-6);
+  }
+
+  .db-estado-cartao .botao {
+    width: 100%;
+  }
+}

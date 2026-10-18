@@ -137,6 +137,9 @@
   window.RonuTema = {
     escolha: function () { return escolhaAtual; },
     modo: function () { return resolver(escolhaAtual); },
-    definir: trocar
+    definir: trocar,
+    // Para botões criados depois do carregamento (ex.: o cabeçalho montado
+    // por js/base/cabecalho.js): acerta o rótulo e o ícone deles.
+    atualizar: function () { atualizarBotoes(resolver(escolhaAtual)); }
   };
 })();
