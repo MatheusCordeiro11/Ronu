@@ -4,142 +4,146 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ronu — Alimentação</title>
-  <meta name="description" content="Os alimentos que você prefere ou quer evitar na sua dieta.">
+  <meta name="description" content="Do que você gosta, o que prefere evitar, sua rotina e seu orçamento.">
+
+  <!-- Antes do CSS: aplica o modo escuro/claro antes da primeira pintura. -->
+  <script src="js/base/tema.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/auth.css">
-  <link rel="stylesheet" href="css/dashboard.css">
-  <link rel="stylesheet" href="css/onboarding.css">
-  <link rel="stylesheet" href="css/configuracoes.css">
+  <link rel="stylesheet" href="css/base/tokens.css">
+  <link rel="stylesheet" href="css/base/base.css">
+  <link rel="stylesheet" href="css/componentes.css">
+  <link rel="stylesheet" href="css/telas/alimentacao.css">
+
+  <script src="js/base/movimento.js" defer></script>
 </head>
-<body>
+<body class="com-abas">
+  <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
 
-  <header class="simple-header border-b">
-    <div class="container dashboard-header-inner">
-      <a href="landing/v1/index.html" class="wordmark">ronu<span>.</span></a>
-      <div class="header-actions">
-        <a href="dashboard.html" class="btn btn-secondary">Voltar ao dashboard</a>
-        <button type="button" id="logout-btn" class="btn btn-secondary">Sair</button>
+  <!-- Montado por js/base/cabecalho.js (logo, nav, sol/lua, avatar e abas). -->
+  <header class="cabecalho" data-cabecalho="alimentacao"></header>
+
+  <section class="faixa-titulo grade al-faixa">
+    <div class="conteiner faixa-titulo-conteudo al-faixa-conteudo">
+      <div class="faixa-titulo-texto">
+        <span class="rotulo rotulo-acento sobre-grade">Sua alimentação</span>
+        <h1 class="sobre-grade">O que entra no seu prato</h1>
+        <p class="sobre-grade al-intro">Diga do que você gosta, o que prefere evitar, como é o seu dia e quanto quer gastar. O Ronu monta o cardápio em cima disso.</p>
       </div>
     </div>
-  </header>
-
-  <nav class="config-subnav border-b" aria-label="Configurações da conta">
-    <div class="container config-subnav-inner">
-      <a href="perfil.html" class="config-subnav-link">Perfil</a>
-      <a href="treino.html" class="config-subnav-link">Treino</a>
-      <a href="alimentacao.html" class="config-subnav-link" aria-current="page">Alimentação</a>
+    <!-- Enfeite: pratos passando devagar. Duas cópias da lista para o laço
+         não ter emenda; para com movimento reduzido (base.css). -->
+    <div class="al-pratos" aria-hidden="true">
+      <div class="al-pratos-trilha" id="al-pratos"></div>
     </div>
-  </nav>
+  </section>
 
-  <main class="config-page">
-    <div class="container">
-
-      <!-- ---------- Preferências alimentares ---------- -->
-      <section class="config-section" aria-labelledby="preferencias-heading">
-        <div class="config-section-head">
-          <h1 id="preferencias-heading" class="config-section-title">Preferências alimentares</h1>
-          <p class="config-section-subtitle">O que você prefere comer ou evitar — usado pra montar sua dieta.</p>
+  <main id="conteudo" class="conteiner al-main">
+    <div class="al-coluna">
+      <!-- Gosto de comer -->
+      <section class="cartao al-lista" aria-labelledby="al-gosto-titulo" data-tipo="preferido">
+        <div class="al-cabeca">
+          <h2 id="al-gosto-titulo">Gosto de comer</h2>
+          <span class="apoio al-so-largo">O Ronu dá preferência a estes</span>
         </div>
-
-        <div class="form-message form-message-error" id="preferencias-error" hidden></div>
-
-        <div class="preferencia-form">
-          <div class="field">
-            <label for="config-alimento">Alimento</label>
-            <input type="text" id="config-alimento" placeholder="Ex: brócolis">
-          </div>
-
-          <div class="option-group" role="radiogroup" aria-label="Tipo de preferência">
-            <label class="option-pill">
-              <input type="radio" name="config-tipo-preferencia" value="preferido" checked>
-              <span>Prefiro</span>
-            </label>
-            <label class="option-pill">
-              <input type="radio" name="config-tipo-preferencia" value="evitar">
-              <span>Evitar</span>
-            </label>
-          </div>
-
-          <button type="button" class="btn btn-secondary" id="btn-adicionar-preferencia">
-            <span class="btn-label">Adicionar</span>
-          </button>
-        </div>
-
-        <p class="text-muted" id="preferencias-loading">Carregando suas preferências...</p>
-        <p class="text-muted" id="preferencias-empty" hidden>Nenhuma preferência cadastrada ainda.</p>
-        <ul class="preferencia-list" id="preferencia-list" hidden></ul>
-      </section>
-
-      <!-- ---------- Rotina diária ---------- -->
-      <section class="config-section border-t" aria-labelledby="rotina-heading">
-        <div class="config-section-head">
-          <h2 id="rotina-heading" class="config-section-title">Rotina diária</h2>
-          <p class="config-section-subtitle">Usamos sua rotina para estimar os horários das refeições da sua dieta.</p>
-        </div>
-
-        <p class="text-muted" id="rotina-loading">Carregando sua rotina...</p>
-
-        <div class="form-message form-message-error" id="rotina-error" hidden></div>
-        <div class="form-message form-message-success" id="rotina-success" hidden></div>
-
-        <form id="rotina-form" novalidate hidden>
-          <div class="field">
-            <label for="rotina-texto">Sua rotina</label>
-            <textarea id="rotina-texto" name="rotina" rows="4" maxlength="500" placeholder="Ex: acordo às 6h, trabalho das 8h às 17h, treino às 19h" aria-describedby="rotina-contador"></textarea>
-            <span class="rotina-contador num" id="rotina-contador">0/500</span>
-          </div>
-
-          <button type="submit" class="btn btn-primary" id="btn-salvar-rotina">
-            <span class="btn-label">Salvar rotina</span>
-          </button>
+        <form class="al-adicionar" novalidate>
+          <label class="oculto-visual" for="al-gosto-campo">Adicionar alimento que você gosta</label>
+          <input class="entrada entrada-no-card" id="al-gosto-campo" type="text" maxlength="100" autocomplete="off" placeholder="Ex.: ovo, cuscuz, tapioca">
+          <button type="submit" class="botao botao-primario al-adicionar-botao" aria-label="Adicionar aos que você gosta"><span class="btn-label"><span class="al-so-largo">Adicionar</span><span class="al-so-celular" aria-hidden="true">+</span></span></button>
         </form>
-      </section>
-
-      <!-- ---------- Orçamento semanal ---------- -->
-      <section class="config-section border-t" aria-labelledby="orcamento-heading">
-        <div class="config-section-head">
-          <h2 id="orcamento-heading" class="config-section-title">Orçamento semanal</h2>
-          <p class="config-section-subtitle">Usamos para priorizar alimentos que cabem no seu orçamento.</p>
+        <p class="al-aviso" role="status"></p>
+        <ul class="chips al-chips" aria-label="Alimentos que você gosta"></ul>
+        <div class="al-sugestoes">
+          <span class="apoio al-so-largo" id="al-sugestoes-rotulo">Sugestões rápidas</span>
+          <div class="al-sugestoes-lista" id="al-sugestoes" role="group" aria-label="Sugestões rápidas"></div>
         </div>
-
-        <p class="text-muted" id="orcamento-loading">Carregando seu orçamento...</p>
-
-        <div class="form-message form-message-error" id="orcamento-error" hidden></div>
-        <div class="form-message form-message-success" id="orcamento-success" hidden></div>
-
-        <form id="orcamento-form" novalidate hidden>
-          <div class="field">
-            <div class="option-group" role="radiogroup" aria-labelledby="orcamento-heading">
-              <label class="option-pill">
-                <input type="radio" name="orcamento-semanal" value="economico">
-                <span>Econômico</span>
-              </label>
-              <label class="option-pill">
-                <input type="radio" name="orcamento-semanal" value="moderado">
-                <span>Moderado</span>
-              </label>
-              <label class="option-pill">
-                <input type="radio" name="orcamento-semanal" value="sem_restricao">
-                <span>Sem restrição</span>
-              </label>
-            </div>
-          </div>
-
-          <button type="submit" class="btn btn-secondary" id="btn-salvar-orcamento">
-            <span class="btn-label">Salvar orçamento</span>
-          </button>
-        </form>
       </section>
 
+      <!-- Prefiro evitar -->
+      <section class="cartao al-lista" aria-labelledby="al-evitar-titulo" data-tipo="evitar">
+        <div class="al-cabeca">
+          <h2 id="al-evitar-titulo">Prefiro evitar</h2>
+          <span class="apoio al-so-largo">Ficam de fora do cardápio</span>
+        </div>
+        <form class="al-adicionar" novalidate>
+          <label class="oculto-visual" for="al-evitar-campo">Adicionar alimento para evitar</label>
+          <input class="entrada entrada-no-card" id="al-evitar-campo" type="text" maxlength="100" autocomplete="off" placeholder="Ex.: camarão, leite, fígado">
+          <button type="submit" class="botao botao-fantasma al-adicionar-botao" aria-label="Adicionar aos que você prefere evitar"><span class="btn-label"><span class="al-so-largo">Adicionar</span><span class="al-so-celular" aria-hidden="true">+</span></span></button>
+        </form>
+        <p class="al-aviso" role="status"></p>
+        <ul class="chips al-chips" aria-label="Alimentos que você prefere evitar"></ul>
+        <p class="apoio al-alergia">Tem alergia? Coloque aqui também, mas confira sempre os rótulos<span class="al-so-largo">: o cardápio é gerado por IA e não substitui orientação médica</span>.</p>
+      </section>
+
+      <!-- Rotina -->
+      <section class="cartao al-rotina" aria-labelledby="al-rotina-titulo">
+        <div class="al-cabeca">
+          <h2 id="al-rotina-titulo"><label for="al-rotina-texto">Sua rotina</label></h2>
+          <span class="apoio al-so-largo">Usada para os horários das refeições</span>
+        </div>
+        <textarea class="entrada entrada-no-card" id="al-rotina-texto" rows="3" maxlength="500" placeholder="Ex.: acordo às 6h30, trabalho das 8h às 17h e treino às 19h" aria-describedby="al-rotina-ajuda al-rotina-status"></textarea>
+        <div class="al-rotina-pe">
+          <span id="al-rotina-ajuda"><span class="al-so-largo">Escreva do seu jeito: quando acorda, trabalha, treina e dorme.</span><span class="al-so-celular">Usada para os horários das refeições</span></span>
+          <span class="num" id="al-rotina-contador">0/500</span>
+        </div>
+        <p class="al-salvo" id="al-rotina-status" role="status"></p>
+      </section>
+
+      <div class="aviso aviso-erro" id="al-perfil-erro" role="alert" hidden></div>
     </div>
+
+    <aside class="al-lateral" aria-label="Orçamento, região e quando muda">
+      <!-- Orçamento: as três faixas que a regra 12 do prompt conhece. -->
+      <section class="cartao ergue al-orcamento" aria-labelledby="al-orcamento-titulo" data-anima-hover>
+        <h2 class="rotulo" id="al-orcamento-titulo">Orçamento por semana</h2>
+        <div class="al-orcamento-topo" data-anima-grupo>
+          <svg class="al-anel" viewBox="0 0 100 100" aria-hidden="true">
+            <circle class="anel-fundo" cx="50" cy="50" r="40" stroke-width="8"/>
+            <circle class="anel-valor" id="al-anel" data-anima="anel" cx="50" cy="50" r="40" stroke-width="8" pathLength="1" transform="rotate(-90 50 50)"/>
+          </svg>
+          <div class="al-orcamento-textos">
+            <span class="numero al-orcamento-nome" id="al-orcamento-nome"></span>
+            <span class="apoio" id="al-orcamento-dica"></span>
+          </div>
+        </div>
+        <div class="segmentado al-faixas" role="radiogroup" aria-labelledby="al-orcamento-titulo" id="al-faixas">
+          <button type="button" role="radio" aria-checked="false" data-valor="economico">Econômico</button>
+          <button type="button" role="radio" aria-checked="false" data-valor="moderado">Moderado</button>
+          <button type="button" role="radio" aria-checked="false" data-valor="sem_restricao">Sem restrição</button>
+        </div>
+        <p class="al-salvo" id="al-orcamento-status" role="status"></p>
+        <p class="apoio al-so-largo">Com orçamento apertado, o Ronu troca cortes caros por opções mais em conta com proteína parecida.</p>
+      </section>
+
+      <section class="cartao ergue al-nomes" aria-labelledby="al-nomes-titulo">
+        <div class="cartao-cabeca">
+          <h2 class="rotulo" id="al-nomes-titulo">Nomes dos alimentos</h2>
+          <a class="cartao-link" href="perfil.html">Alterar estado</a>
+        </div>
+        <p class="al-nomes-texto" id="al-nomes-texto"></p>
+        <ul class="chips al-nomes-chips al-so-largo-flex" id="al-nomes-chips"></ul>
+      </section>
+
+      <section class="cartao al-quando" id="al-quando" aria-live="polite">
+        <h2 class="rotulo al-so-largo" id="al-quando-titulo">Quando muda na dieta</h2>
+        <p id="al-quando-texto">Tudo aqui é salvo na hora e vale a partir da próxima dieta gerada.</p>
+        <a class="botao botao-primario al-gerar entra" id="al-gerar" href="dashboard.html" hidden>Gerar dieta com essas mudanças</a>
+      </section>
+    </aside>
   </main>
 
+  <footer class="rodape">
+    <div class="conteiner rodape-linha">
+      <span>O que você prefere evitar fica fora do cardápio, inclusive como ingrediente de outro prato.</span>
+      <span>Dados nutricionais: TACO (NEPA/UNICAMP) e USDA FoodData Central.</span>
+    </div>
+  </footer>
+
   <script src="js/auth.js"></script>
+  <script src="js/base/cabecalho.js"></script>
   <script src="js/alimentacao.js"></script>
 </body>
 </html>

@@ -1,7 +1,12 @@
-// Ronu — Alimentação (preferências alimentares + rotina diária)
-// Listar/adicionar/remover alimentos preferidos ou a evitar, e editar a
-// rotina diária usada para estimar os horários das refeições. Uma das três
-// páginas de configurações da conta, ao lado de perfil.html e treino.html.
+// Ronu — Alimentação (gosto, evitar, rotina, orçamento e nomes regionais)
+//
+// Como no canvas aprovado, tudo é salvo na hora, sem botão Salvar:
+// - Gosto / evitar: cada chip é uma PreferenciaAlimentar (POST faz upsert pelo
+//   nome, sem diferenciar maiúsculas; DELETE remove). Mandar para a outra
+//   lista um alimento que já está numa só troca o tipo.
+// - Rotina e orçamento vivem no perfil (PUT /perfil grava todos os campos
+//   juntos). A rotina salva pouco depois de parar de digitar e ao sair do
+//   campo; o orçamento, no clique.
 
 document.addEventListener('DOMContentLoaded', async () => {
   const usuario = ronuUsuarioLogado();
@@ -10,238 +15,211 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  const btnLogout = document.getElementById('logout-btn');
-  btnLogout.addEventListener('click', () => {
-    ronuLimparSessao();
-    window.location.href = 'login.html';
+  const $ = (id) => document.getElementById(id);
+
+  // Mesma lista de sugestões do passo Alimentação do onboarding.
+  const SUGESTOES = ['frango', 'arroz', 'feijão', 'ovo', 'banana', 'aveia', 'cuscuz', 'tapioca', 'batata-doce',
+    'carne moída', 'peixe', 'iogurte', 'leite', 'queijo', 'pão francês', 'camarão', 'mandioca', 'abacate'];
+  const MAX_SUGESTOES = 8;
+
+  // Enfeite da faixa do topo (não é dado: só pratos comuns no Brasil).
+  const PRATOS = ['arroz e feijão', 'cuscuz com ovo', 'tapioca', 'frango grelhado', 'batata-doce', 'pão de queijo',
+    'açaí', 'baião de dois', 'mandioca cozida', 'banana com aveia', 'peixe assado', 'omelete'];
+
+  const NOMES_LISTA = { preferido: 'Gosto de comer', evitar: 'Prefiro evitar' };
+
+  // As três faixas da regra 12 do prompt (GeradorDietaGemini). O anel mostra
+  // a faixa: um terço, dois terços ou cheio.
+  const ORCAMENTOS = {
+    economico: { nome: 'Econômico', dica: 'Prioriza ovo, frango, peixes populares e feijão, sem cortes caros.', fracao: 1 / 3 },
+    moderado: { nome: 'Moderado', dica: 'Bom senso de custo-benefício na escolha.', fracao: 2 / 3 },
+    sem_restricao: { nome: 'Sem restrição', dica: 'O custo não entra na escolha dos alimentos.', fracao: 1 }
+  };
+
+  const ESTADOS = {
+    AC: 'Acre', AL: 'Alagoas', AP: 'Amapá', AM: 'Amazonas', BA: 'Bahia', CE: 'Ceará', DF: 'Distrito Federal',
+    ES: 'Espírito Santo', GO: 'Goiás', MA: 'Maranhão', MT: 'Mato Grosso', MS: 'Mato Grosso do Sul', MG: 'Minas Gerais',
+    PA: 'Pará', PB: 'Paraíba', PR: 'Paraná', PE: 'Pernambuco', PI: 'Piauí', RJ: 'Rio de Janeiro', RN: 'Rio Grande do Norte',
+    RS: 'Rio Grande do Sul', RO: 'Rondônia', RR: 'Roraima', SC: 'Santa Catarina', SP: 'São Paulo', SE: 'Sergipe', TO: 'Tocantins'
+  };
+  // Espelha a regra 9 do prompt (GeradorDietaGemini.MontarPrompt), como a
+  // prévia do estado.js. Se uma mudar, mudar a outra também.
+  const NORTE_NORDESTE = ['AC', 'AM', 'AP', 'PA', 'RO', 'RR', 'TO', 'AL', 'BA', 'CE', 'MA', 'PB', 'PE', 'PI', 'RN', 'SE'];
+
+  const ROTINA_LIMITE = 500;
+  const ESPERA_ROTINA_MS = 1000;
+
+  let preferencias = [];
+  let perfil = null;
+  let mudou = false;
+
+  function criar(tag, classe, texto) {
+    const el = document.createElement(tag);
+    if (classe) el.className = classe;
+    if (texto != null) el.textContent = texto;
+    return el;
+  }
+
+  function normalizar(texto) {
+    return texto.trim().toLowerCase();
+  }
+
+  function marcarMudanca() {
+    mudou = true;
+    $('al-quando').dataset.mudou = '';
+    $('al-quando-titulo').textContent = 'Salvo';
+    $('al-quando-texto').textContent = 'Suas mudanças foram salvas. Elas entram na próxima dieta que você gerar.';
+    $('al-gerar').hidden = false;
+  }
+
+  // ---------- Faixa dos pratos ----------
+
+  $('al-pratos').replaceChildren(...[...PRATOS, ...PRATOS].map((prato) => criar('span', null, `${prato}  ·`)));
+
+  // ---------- Gosto / evitar ----------
+
+  const secoes = {};
+  document.querySelectorAll('.al-lista').forEach((secao) => {
+    const tipo = secao.dataset.tipo;
+    secoes[tipo] = {
+      secao,
+      form: secao.querySelector('form'),
+      campo: secao.querySelector('input'),
+      botao: secao.querySelector('.al-adicionar-botao'),
+      aviso: secao.querySelector('.al-aviso'),
+      chips: secao.querySelector('.al-chips')
+    };
   });
 
-  // ---------- Preferências alimentares ----------
-
-  const elPreferenciasLoading = document.getElementById('preferencias-loading');
-  const elPreferenciasEmpty = document.getElementById('preferencias-empty');
-  const elPreferenciasError = document.getElementById('preferencias-error');
-  const elPreferenciaList = document.getElementById('preferencia-list');
-  const elAlimentoInput = document.getElementById('config-alimento');
-  const btnAdicionarPreferencia = document.getElementById('btn-adicionar-preferencia');
-
-  // Ação de remover fica em dois estados dentro do próprio item (sem modal):
-  // "Remover" e, depois de um clique, "Remover? Sim / Cancelar".
-  function renderizarAcaoRemover(elAcoes, id) {
-    elAcoes.innerHTML = '';
-    elAcoes.classList.remove('is-confirming');
-
-    const botao = document.createElement('button');
-    botao.type = 'button';
-    botao.className = 'preferencia-remove-btn';
-    botao.dataset.acao = 'remover';
-    botao.textContent = 'Remover';
-
-    elAcoes.appendChild(botao);
+  function avisar(tipo, texto, erro) {
+    const aviso = secoes[tipo].aviso;
+    aviso.textContent = texto;
+    aviso.dataset.tipo = erro ? 'erro' : '';
   }
 
-  function renderizarConfirmacaoRemover(elAcoes) {
-    elAcoes.innerHTML = '';
-    elAcoes.classList.add('is-confirming');
-
-    const texto = document.createElement('span');
-    texto.className = 'preferencia-confirm-text';
-    texto.textContent = 'Remover?';
-
-    const btnConfirmar = document.createElement('button');
-    btnConfirmar.type = 'button';
-    btnConfirmar.className = 'preferencia-confirm-btn';
-    btnConfirmar.dataset.acao = 'confirmar';
-    btnConfirmar.textContent = 'Sim';
-
-    const btnCancelar = document.createElement('button');
-    btnCancelar.type = 'button';
-    btnCancelar.className = 'preferencia-cancel-btn';
-    btnCancelar.dataset.acao = 'cancelar';
-    btnCancelar.textContent = 'Cancelar';
-
-    elAcoes.append(texto, btnConfirmar, btnCancelar);
-  }
-
-  function criarItemPreferencia(preferencia) {
-    const item = document.createElement('li');
-    item.className = 'preferencia-item';
-    item.dataset.tipo = preferencia.tipo;
+  function criarChip(preferencia) {
+    const item = criar('li', 'chip chip-com-remover al-chip');
     item.dataset.id = preferencia.id;
-
-    const info = document.createElement('div');
-    info.className = 'preferencia-info';
-
-    const nomeSpan = document.createElement('span');
-    nomeSpan.className = 'preferencia-alimento';
-    nomeSpan.textContent = preferencia.alimento;
-
-    const tipoSpan = document.createElement('span');
-    tipoSpan.className = 'preferencia-tipo';
-    tipoSpan.textContent = preferencia.tipo === 'evitar' ? 'Evitar' : 'Prefiro';
-
-    info.append(nomeSpan, tipoSpan);
-
-    const acoes = document.createElement('div');
-    acoes.className = 'preferencia-actions';
-    renderizarAcaoRemover(acoes, preferencia.id);
-
-    item.append(info, acoes);
+    const remover = criar('button', 'chip-remover');
+    remover.type = 'button';
+    remover.setAttribute('aria-label', `Remover ${preferencia.alimento}`);
+    remover.innerHTML = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6"/></svg>';
+    remover.addEventListener('click', () => removerPreferencia(preferencia, item));
+    item.append(preferencia.alimento, remover);
     return item;
   }
 
-  function mostrarListaOuVazio() {
-    const temItens = elPreferenciaList.children.length > 0;
-    elPreferenciaList.hidden = !temItens;
-    elPreferenciasEmpty.hidden = temItens;
+  function renderizarListas() {
+    Object.entries(secoes).forEach(([tipo, s]) => {
+      s.chips.replaceChildren(...preferencias.filter((p) => p.tipo === tipo).map(criarChip));
+    });
+    renderizarSugestoes();
   }
 
-  async function carregarPreferencias() {
-    try {
-      const resposta = await ronuFetchAutenticado('/preferencias-alimentares');
-      if (!resposta.ok) throw new Error();
-
-      const preferencias = await resposta.json();
-      elPreferenciaList.innerHTML = '';
-      preferencias.forEach((preferencia) => elPreferenciaList.appendChild(criarItemPreferencia(preferencia)));
-
-      elPreferenciasLoading.hidden = true;
-      mostrarListaOuVazio();
-    } catch (erro) {
-      if (erro.message !== 'Sessão expirada.') {
-        elPreferenciasLoading.textContent = 'Não foi possível carregar suas preferências. Recarregue a página.';
-      }
-    }
+  function renderizarSugestoes() {
+    const usados = new Set(preferencias.map((p) => normalizar(p.alimento)));
+    const lista = SUGESTOES.filter((nome) => !usados.has(nome)).slice(0, MAX_SUGESTOES);
+    $('al-sugestoes').replaceChildren(...lista.map((nome) => {
+      const botao = criar('button', 'chip chip-sugestao al-sugestao', `+ ${nome}`);
+      botao.type = 'button';
+      botao.setAttribute('aria-label', `Adicionar ${nome} aos que você gosta`);
+      botao.addEventListener('click', () => adicionar('preferido', nome, botao));
+      return botao;
+    }));
   }
 
-  async function adicionarPreferencia() {
-    const alimento = elAlimentoInput.value.trim();
-    const tipo = document.querySelector('input[name="config-tipo-preferencia"]:checked').value;
-
-    if (!alimento) {
-      elAlimentoInput.reportValidity();
+  async function adicionar(tipo, nomeBruto, origem) {
+    const s = secoes[tipo];
+    const nome = normalizar(nomeBruto);
+    if (!nome) {
+      s.campo.focus();
       return;
     }
 
-    ronuOcultarErroFormulario(elPreferenciasError);
-    ronuDefinirCarregando(btnAdicionarPreferencia, true, 'Adicionando...');
+    const existente = preferencias.find((p) => normalizar(p.alimento) === nome);
+    if (existente && existente.tipo === tipo) {
+      avisar(tipo, `“${nome}” já está nesta lista.`);
+      s.campo.value = '';
+      return;
+    }
+
+    avisar(tipo, '');
+    // Sem ronuDefinirCarregando: ele troca o texto do .btn-label, e este tem
+    // dois rótulos (desktop "Adicionar", celular "+") que se perderiam.
+    if (s.botao.getAttribute('aria-busy') === 'true') return;
+    s.botao.disabled = true;
+    s.botao.setAttribute('aria-busy', 'true');
+    if (origem) origem.disabled = true;
 
     try {
       const resposta = await ronuFetchAutenticado('/preferencias-alimentares', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ alimento, tipo })
+        body: JSON.stringify({ alimento: nome, tipo })
       });
-
       if (!resposta.ok) {
         const corpo = await resposta.json().catch(() => null);
         throw new Error(corpo?.mensagem || 'Não foi possível adicionar. Tente novamente.');
       }
-
-      const preferenciaSalva = await resposta.json();
-
-      // Upsert no back-end: se o alimento já existia, atualiza o item existente
-      // em vez de duplicar na lista.
-      const itemExistente = elPreferenciaList.querySelector(`[data-id="${preferenciaSalva.id}"]`);
-      if (itemExistente) itemExistente.remove();
-
-      elPreferenciaList.appendChild(criarItemPreferencia(preferenciaSalva));
-      mostrarListaOuVazio();
-
-      elAlimentoInput.value = '';
-      elAlimentoInput.focus();
+      const salva = await resposta.json();
+      // Upsert: o mesmo id volta quando o alimento já estava na outra lista.
+      preferencias = [...preferencias.filter((p) => p.id !== salva.id), salva];
+      renderizarListas();
+      if (existente) {
+        avisar(tipo, `“${nome}” saiu de “${NOMES_LISTA[existente.tipo]}” e veio para cá.`);
+      }
+      s.campo.value = '';
+      marcarMudanca();
     } catch (erro) {
-      ronuMostrarErroFormulario(elPreferenciasError, erro.message);
+      if (erro.message !== 'Sessão expirada.') avisar(tipo, erro.message, true);
     } finally {
-      ronuDefinirCarregando(btnAdicionarPreferencia, false);
+      s.botao.disabled = false;
+      s.botao.removeAttribute('aria-busy');
+      // A sugestão clicada some da lista; o foco vai para o campo da seção.
+      if (origem && origem.isConnected) origem.disabled = false;
+      if (origem && !origem.isConnected) s.campo.focus();
     }
   }
 
-  btnAdicionarPreferencia.addEventListener('click', adicionarPreferencia);
-
-  elAlimentoInput.addEventListener('keydown', (evento) => {
-    if (evento.key === 'Enter') {
+  Object.entries(secoes).forEach(([tipo, s]) => {
+    s.form.addEventListener('submit', (evento) => {
       evento.preventDefault();
-      adicionarPreferencia();
-    }
+      adicionar(tipo, s.campo.value);
+    });
+    s.campo.addEventListener('input', () => avisar(tipo, ''));
   });
 
-  async function removerPreferencia(item) {
-    const id = item.dataset.id;
-    item.classList.add('is-removing');
-    ronuOcultarErroFormulario(elPreferenciasError);
-
+  async function removerPreferencia(preferencia, item) {
+    const tipo = preferencia.tipo;
+    item.dataset.saindo = '';
+    avisar(tipo, '');
     try {
-      const resposta = await ronuFetchAutenticado(`/preferencias-alimentares/${id}`, { method: 'DELETE' });
-
+      const resposta = await ronuFetchAutenticado(`/preferencias-alimentares/${preferencia.id}`, { method: 'DELETE' });
       if (!resposta.ok && resposta.status !== 404) {
         const corpo = await resposta.json().catch(() => null);
         throw new Error(corpo?.mensagem || 'Não foi possível remover. Tente novamente.');
       }
-
-      item.remove();
-      mostrarListaOuVazio();
+      preferencias = preferencias.filter((p) => p.id !== preferencia.id);
+      renderizarListas();
+      // O chip some com o botão focado: o foco vai para o campo da lista.
+      secoes[tipo].campo.focus();
+      marcarMudanca();
     } catch (erro) {
-      item.classList.remove('is-removing');
-      renderizarAcaoRemover(item.querySelector('.preferencia-actions'), id);
-      ronuMostrarErroFormulario(elPreferenciasError, erro.message);
+      delete item.dataset.saindo;
+      if (erro.message !== 'Sessão expirada.') avisar(tipo, erro.message, true);
     }
   }
 
-  // Delegação de evento na lista: os itens são recriados a cada carga/adição,
-  // então um listener por item vazaria handlers órfãos toda vez que a lista
-  // é redesenhada.
-  elPreferenciaList.addEventListener('click', (evento) => {
-    const botao = evento.target.closest('button[data-acao]');
-    if (!botao) return;
-
-    const item = botao.closest('.preferencia-item');
-    const acoes = item.querySelector('.preferencia-actions');
-
-    if (botao.dataset.acao === 'remover') {
-      renderizarConfirmacaoRemover(acoes);
-    } else if (botao.dataset.acao === 'cancelar') {
-      renderizarAcaoRemover(acoes, item.dataset.id);
-    } else if (botao.dataset.acao === 'confirmar') {
-      removerPreferencia(item);
-    }
-  });
-
-  // ---------- Perfil salvo (compartilhado por Rotina e Orçamento) ----------
-  // Rotina e orçamento não têm endpoint próprio: vivem no perfil, e o PUT
-  // /perfil grava todos os campos juntos (altura, sexo e data de nascimento
-  // são required no PerfilRequest). Cada seção salva reenviando o perfil com
-  // só o próprio campo trocado — assim salvar uma seção não apaga (nem leva
-  // junto, sem salvar) o campo da outra.
-  // perfilSalvo (do GET ao abrir a página) só preenche a tela e decide se
-  // ela abre travada. Para salvar, o perfil é buscado de novo na hora (ver
-  // salvarNoPerfil).
-
-  let perfilSalvo = null;
+  // ---------- Perfil: rotina e orçamento ----------
+  // PUT /perfil grava todos os campos juntos (altura, sexo e data de
+  // nascimento são obrigatórios). Para não apagar o que outra aba salvou, o
+  // perfil é lido de novo logo antes de cada PUT, e só o campo da seção muda
+  // (solução definitiva, endpoints por seção, em docs/lacunas-conhecidas.md).
 
   function perfilIncompleto() {
-    return perfilSalvo.altura == null || perfilSalvo.sexo == null || perfilSalvo.dataNascimento == null;
+    return perfil.altura == null || perfil.sexo == null || perfil.dataNascimento == null;
   }
 
-  // Sem os dados do perfil o PUT sempre falharia — em vez de deixar o
-  // usuário descobrir isso só ao salvar, a seção já abre travada.
-  function mostrarPerfilIncompleto(elErro, complemento) {
-    elErro.textContent = 'Complete seus dados pessoais em ';
-    const link = document.createElement('a');
-    link.href = 'perfil.html';
-    link.textContent = 'Perfil';
-    elErro.append(link, ` antes de salvar ${complemento}.`);
-    elErro.hidden = false;
-  }
-
-  // Perfil gravado AGORA, logo antes de salvar — não o carregado quando a
-  // página abriu. Com duas abas abertas (esta e perfil.html, por exemplo), a
-  // que salvasse por último mandaria de volta os dados antigos e apagaria o
-  // que a outra salvou. Buscando na hora, a janela cai de minutos/horas para
-  // o intervalo entre este GET e o PUT (menos de 1 s); a solução definitiva
-  // (endpoints separados por seção) está em docs/lacunas-conhecidas.md.
-  // Se o GET falhar, o salvamento é cancelado: cair de volta no perfilSalvo
-  // traria o problema de volta justamente quando a rede está instável.
   async function buscarPerfilAtual() {
     let resposta;
     try {
@@ -264,188 +242,187 @@ document.addEventListener('DOMContentLoaded', async () => {
       orcamentoSemanal: atual.orcamentoSemanal ?? null,
       ...alteracoes
     };
-
     const resposta = await ronuFetchAutenticado('/perfil', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(corpo)
     });
-
     if (!resposta.ok) {
       const dados = await resposta.json().catch(() => null);
       throw new Error(dados?.mensagem || 'Não foi possível salvar. Tente novamente.');
     }
-
-    // O PUT devolve o perfil como ficou gravado — fonte mais confiável que o
-    // corpo enviado.
-    perfilSalvo = await resposta.json();
+    // O PUT devolve o perfil como ficou gravado.
+    perfil = await resposta.json();
   }
 
-  // ---------- Rotina diária ----------
-
-  const ROTINA_LIMITE = 500;
-
-  const elRotinaLoading = document.getElementById('rotina-loading');
-  const elRotinaError = document.getElementById('rotina-error');
-  const elRotinaSuccess = document.getElementById('rotina-success');
-  const elRotinaForm = document.getElementById('rotina-form');
-  const elRotinaTexto = document.getElementById('rotina-texto');
-  const elRotinaContador = document.getElementById('rotina-contador');
-  const btnSalvarRotina = document.getElementById('btn-salvar-rotina');
-
-  function atualizarContadorRotina() {
-    const tamanho = elRotinaTexto.value.length;
-    elRotinaContador.textContent = `${tamanho}/${ROTINA_LIMITE}`;
-    elRotinaContador.classList.toggle('is-excedido', tamanho > ROTINA_LIMITE);
+  function status(el, texto, tipo) {
+    el.textContent = texto;
+    el.dataset.tipo = tipo || '';
   }
 
-  function bloquearRotina() {
-    elRotinaTexto.disabled = true;
-    btnSalvarRotina.disabled = true;
+  // Sem os dados do perfil o PUT sempre falharia: rotina e orçamento já
+  // abrem travados, com o caminho para completar.
+  function mostrarPerfilIncompleto() {
+    const erro = $('al-perfil-erro');
+    erro.textContent = 'Complete seus dados pessoais em ';
+    const link = criar('a', null, 'Perfil');
+    link.href = 'perfil.html';
+    erro.append(link, ' para salvar sua rotina e seu orçamento.');
+    erro.hidden = false;
+    $('al-rotina-texto').disabled = true;
+    botoesOrcamento.forEach((b) => { b.disabled = true; });
   }
 
-  function preencherRotina() {
-    elRotinaTexto.value = perfilSalvo.rotinaDiaria ?? '';
-    atualizarContadorRotina();
+  // ----- Rotina -----
 
-    elRotinaLoading.hidden = true;
-    elRotinaForm.hidden = false;
+  const elRotina = $('al-rotina-texto');
+  const elRotinaStatus = $('al-rotina-status');
+  let rotinaPendente = null;
+  let rotinaSalvando = false;
+  let rotinaDeNovo = false;
 
-    if (perfilIncompleto()) {
-      mostrarPerfilIncompleto(elRotinaError, 'sua rotina');
-      bloquearRotina();
-    }
+  function atualizarContador() {
+    $('al-rotina-contador').textContent = `${elRotina.value.length}/${ROTINA_LIMITE}`;
   }
 
-  function mostrarFalhaRotina() {
-    elRotinaLoading.hidden = true;
-    ronuMostrarErroFormulario(elRotinaError, 'Não foi possível carregar sua rotina. Recarregue a página.');
-    elRotinaForm.hidden = false;
-    bloquearRotina();
+  // Vazio (ou só espaços) vira null: "sem rotina" tem um valor só no banco.
+  function rotinaDoCampo() {
+    return elRotina.value.trim() || null;
   }
 
-  async function salvarRotina(evento) {
-    evento.preventDefault();
+  async function salvarRotina() {
+    clearTimeout(rotinaPendente);
+    if (!perfil || perfilIncompleto()) return;
+    if (rotinaDoCampo() === (perfil.rotinaDiaria ?? null)) return;
+    if (rotinaSalvando) { rotinaDeNovo = true; return; }
 
-    ronuOcultarErroFormulario(elRotinaError);
-    elRotinaSuccess.hidden = true;
-
-    // maxlength="500" já impede passar do limite no navegador; esta checagem
-    // é só a rede de segurança caso o atributo seja contornado.
-    if (elRotinaTexto.value.length > ROTINA_LIMITE) {
-      ronuMostrarErroFormulario(elRotinaError, `Sua rotina pode ter no máximo ${ROTINA_LIMITE} caracteres.`);
-      return;
-    }
-
-    ronuDefinirCarregando(btnSalvarRotina, true, 'Salvando...');
-
-    // Campo vazio (ou só com espaços) vira null, não "" — "sem rotina"
-    // fica com um único valor no banco.
-    const rotinaDiaria = elRotinaTexto.value.trim() || null;
-
+    rotinaSalvando = true;
+    status(elRotinaStatus, 'Salvando...');
     try {
-      await salvarNoPerfil({ rotinaDiaria });
-
-      elRotinaSuccess.textContent = 'Rotina salva.';
-      elRotinaSuccess.hidden = false;
+      await salvarNoPerfil({ rotinaDiaria: rotinaDoCampo() });
+      status(elRotinaStatus, 'Salvo', 'ok');
+      marcarMudanca();
     } catch (erro) {
-      if (erro.message !== 'Sessão expirada.') {
-        ronuMostrarErroFormulario(elRotinaError, erro.message);
-      }
+      if (erro.message !== 'Sessão expirada.') status(elRotinaStatus, erro.message, 'erro');
     } finally {
-      ronuDefinirCarregando(btnSalvarRotina, false);
+      rotinaSalvando = false;
+      if (rotinaDeNovo) {
+        rotinaDeNovo = false;
+        salvarRotina();
+      }
     }
   }
 
-  elRotinaTexto.addEventListener('input', atualizarContadorRotina);
-  elRotinaForm.addEventListener('submit', salvarRotina);
+  elRotina.addEventListener('input', () => {
+    atualizarContador();
+    status(elRotinaStatus, '');
+    clearTimeout(rotinaPendente);
+    rotinaPendente = setTimeout(salvarRotina, ESPERA_ROTINA_MS);
+  });
+  elRotina.addEventListener('blur', salvarRotina);
 
-  // ---------- Orçamento semanal ----------
-  // Valores fixos ("economico", "moderado", "sem_restricao"), usados como
-  // estão pela regra 12 do prompt. Opcional: sem escolha salva, nenhuma pill
-  // vem marcada (e não há "limpar" — "moderado" e "não informado" têm o
-  // mesmo efeito na dieta).
+  // ----- Orçamento -----
 
-  const elOrcamentoLoading = document.getElementById('orcamento-loading');
-  const elOrcamentoError = document.getElementById('orcamento-error');
-  const elOrcamentoSuccess = document.getElementById('orcamento-success');
-  const elOrcamentoForm = document.getElementById('orcamento-form');
-  const btnSalvarOrcamento = document.getElementById('btn-salvar-orcamento');
-  const radiosOrcamento = Array.from(document.querySelectorAll('input[name="orcamento-semanal"]'));
+  const botoesOrcamento = Array.from($('al-faixas').querySelectorAll('[role="radio"]'));
+  const elOrcamentoStatus = $('al-orcamento-status');
 
-  function bloquearOrcamento() {
-    radiosOrcamento.forEach((radio) => { radio.disabled = true; });
-    btnSalvarOrcamento.disabled = true;
+  function renderizarOrcamento(valor) {
+    const faixa = ORCAMENTOS[valor];
+    $('al-orcamento-nome').textContent = faixa ? faixa.nome : 'Não informado';
+    $('al-orcamento-dica').textContent = faixa ? faixa.dica : 'Sem escolha, o Ronu usa bom senso de custo-benefício.';
+    $('al-anel').style.setProperty('--anel-fim', String(1 - (faixa ? faixa.fracao : 0)));
+    botoesOrcamento.forEach((b) => {
+      const marcado = b.dataset.valor === valor;
+      b.setAttribute('aria-checked', String(marcado));
+      // Sem nada marcado, o primeiro recebe o Tab (padrão de radiogroup).
+      b.tabIndex = marcado || (!faixa && b === botoesOrcamento[0]) ? 0 : -1;
+    });
+    // Redesenha o anel com a faixa nova.
+    const grupo = document.querySelector('.al-orcamento-topo');
+    if (window.RonuMovimento && grupo.classList.contains('em-cena')) window.RonuMovimento.redesenhar(grupo);
   }
 
-  function preencherOrcamento() {
-    const radioSalvo = radiosOrcamento.find((radio) => radio.value === perfilSalvo.orcamentoSemanal);
-    if (radioSalvo) radioSalvo.checked = true;
-
-    elOrcamentoLoading.hidden = true;
-    elOrcamentoForm.hidden = false;
-
-    if (perfilIncompleto()) {
-      mostrarPerfilIncompleto(elOrcamentoError, 'seu orçamento');
-      bloquearOrcamento();
-    }
-  }
-
-  function mostrarFalhaOrcamento() {
-    elOrcamentoLoading.hidden = true;
-    ronuMostrarErroFormulario(elOrcamentoError, 'Não foi possível carregar seu orçamento. Recarregue a página.');
-    elOrcamentoForm.hidden = false;
-    bloquearOrcamento();
-  }
-
-  async function salvarOrcamento(evento) {
-    evento.preventDefault();
-
-    ronuOcultarErroFormulario(elOrcamentoError);
-    elOrcamentoSuccess.hidden = true;
-
-    const selecionado = radiosOrcamento.find((radio) => radio.checked);
-    if (!selecionado) {
-      ronuMostrarErroFormulario(elOrcamentoError, 'Selecione uma opção.');
-      return;
-    }
-
-    ronuDefinirCarregando(btnSalvarOrcamento, true, 'Salvando...');
-
+  async function escolherOrcamento(botao) {
+    const valor = botao.dataset.valor;
+    if (!perfil || perfilIncompleto() || valor === perfil.orcamentoSemanal) return;
+    const anterior = perfil.orcamentoSemanal;
+    renderizarOrcamento(valor);
+    status(elOrcamentoStatus, 'Salvando...');
     try {
-      await salvarNoPerfil({ orcamentoSemanal: selecionado.value });
-
-      elOrcamentoSuccess.textContent = 'Orçamento salvo.';
-      elOrcamentoSuccess.hidden = false;
+      await salvarNoPerfil({ orcamentoSemanal: valor });
+      status(elOrcamentoStatus, 'Salvo', 'ok');
+      marcarMudanca();
     } catch (erro) {
-      if (erro.message !== 'Sessão expirada.') {
-        ronuMostrarErroFormulario(elOrcamentoError, erro.message);
-      }
-    } finally {
-      ronuDefinirCarregando(btnSalvarOrcamento, false);
+      renderizarOrcamento(anterior);
+      if (erro.message !== 'Sessão expirada.') status(elOrcamentoStatus, erro.message, 'erro');
     }
   }
 
-  elOrcamentoForm.addEventListener('submit', salvarOrcamento);
+  botoesOrcamento.forEach((botao) => botao.addEventListener('click', () => escolherOrcamento(botao)));
+  $('al-faixas').addEventListener('keydown', (evento) => {
+    const passo = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[evento.key];
+    if (!passo) return;
+    evento.preventDefault();
+    const atual = Math.max(0, botoesOrcamento.indexOf(document.activeElement));
+    const proximo = botoesOrcamento[(atual + passo + botoesOrcamento.length) % botoesOrcamento.length];
+    proximo.focus();
+    escolherOrcamento(proximo);
+  });
 
-  // ---------- Carga do perfil ----------
+  // ----- Nomes regionais -----
 
-  async function carregarPerfilSalvo() {
+  function renderizarNomes() {
+    const uf = perfil && perfil.estado;
+    const mandioca = uf === 'RJ' ? 'aipim' : NORTE_NORDESTE.includes(uf) ? 'macaxeira' : 'mandioca';
+    const feijao = ['PR', 'RS', 'SC'].includes(uf) ? 'feijão preto' : 'feijão';
+    const texto = $('al-nomes-texto');
+    texto.replaceChildren();
+    if (uf && ESTADOS[uf]) {
+      texto.append('Você está em ', criar('strong', null, ESTADOS[uf]), ', então o cardápio fala:');
+    } else {
+      texto.textContent = 'Sem estado informado, o cardápio usa os nomes mais comuns:';
+    }
+    $('al-nomes-chips').replaceChildren(...[mandioca, feijao].map((nome) => criar('li', 'chip chip-pequeno', nome)));
+    // No celular a frase já traz os nomes (canvas AlimentacaoMobile).
+    texto.append(criar('span', 'al-so-celular', ` ${mandioca}, ${feijao}.`));
+  }
+
+  // ---------- Carga ----------
+
+  async function carregarPreferencias() {
+    try {
+      const resposta = await ronuFetchAutenticado('/preferencias-alimentares');
+      if (!resposta.ok) throw new Error();
+      preferencias = await resposta.json();
+      renderizarListas();
+    } catch (erro) {
+      if (erro.message === 'Sessão expirada.') return;
+      Object.keys(secoes).forEach((tipo) => avisar(tipo, 'Não foi possível carregar suas preferências. Recarregue a página.', true));
+    }
+  }
+
+  async function carregarPerfil() {
     try {
       const resposta = await ronuFetchAutenticado('/perfil');
       if (!resposta.ok) throw new Error();
-
-      perfilSalvo = await resposta.json();
-      preencherRotina();
-      preencherOrcamento();
+      perfil = await resposta.json();
+      elRotina.value = perfil.rotinaDiaria ?? '';
+      atualizarContador();
+      renderizarOrcamento(perfil.orcamentoSemanal);
+      renderizarNomes();
+      if (perfilIncompleto()) mostrarPerfilIncompleto();
     } catch (erro) {
-      if (erro.message !== 'Sessão expirada.') {
-        mostrarFalhaRotina();
-        mostrarFalhaOrcamento();
-      }
+      if (erro.message === 'Sessão expirada.') return;
+      const elErro = $('al-perfil-erro');
+      ronuMostrarErroFormulario(elErro, 'Não foi possível carregar sua rotina e seu orçamento. Recarregue a página.');
+      elRotina.disabled = true;
+      botoesOrcamento.forEach((b) => { b.disabled = true; });
+      renderizarOrcamento(null);
+      renderizarNomes();
     }
   }
 
+  renderizarSugestoes();
   // Seções independentes: uma falha numa não impede a outra de carregar.
-  await Promise.all([carregarPreferencias(), carregarPerfilSalvo()]);
+  await Promise.all([carregarPreferencias(), carregarPerfil()]);
 });
