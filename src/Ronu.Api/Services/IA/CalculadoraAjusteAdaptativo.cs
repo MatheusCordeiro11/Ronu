@@ -91,28 +91,9 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
         var tendencia = _calculadoraPesoTendencia.Calcular(
             ordenado.Select(r => new RegistroPesoDto { Data = r.Data, Peso = r.Peso }).ToList());
 
-        // Início do período do objetivo atual: volta do registro mais recente
-        // até a última troca de objetivo.
-        var inicioObjetivoAtual = ordenado.Count;
-        for (var i = ordenado.Count - 1; i >= 0 && ordenado[i].Objetivo == objetivoAtual; i--)
-        {
-            inicioObjetivoAtual = i;
-        }
+        var indicesUsados = IndicesDaJanela(ordenado, dietas[0].DataGeracao, objetivoAtual, agoraUtc);
 
-        // Últimos 28 dias, mas nunca antes do dia (UTC) da primeira dieta: a
-        // dieta gerada num dia já vale para aquele dia.
-        var inicioJanela = agoraUtc.AddDays(-JanelaDias);
-        var diaPrimeiraDieta = dietas[0].DataGeracao.Date;
-        if (inicioJanela < diaPrimeiraDieta)
-        {
-            inicioJanela = diaPrimeiraDieta;
-        }
-        var indicesUsados = Enumerable.Range(inicioObjetivoAtual, ordenado.Count - inicioObjetivoAtual)
-            .Where(i => ordenado[i].Data >= inicioJanela && ordenado[i].Aderencia != NaoSeguiu)
-            .ToList();
-
-        if (indicesUsados.Count < MinimoPontos
-            || (ordenado[indicesUsados[^1]].Data - ordenado[indicesUsados[0]].Data).TotalDays < MinimoDiasIntervalo)
+        if (!JanelaSuficiente(ordenado, indicesUsados))
         {
             return SemAjuste(MotivoAjusteAdaptativo.HistoricoInsuficiente, indicesUsados.Count);
         }
@@ -199,6 +180,65 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
             ManutencaoMediaDiaria = Math.Round(manutencaoMedia, 1),
             MetaPrescritaMediaDiaria = Math.Round(metaPrescritaMedia, 1),
             DiasComDieta = dias
+        };
+    }
+
+    /// <summary>
+    /// Os pontos que a meta adaptativa usaria agora (índices de
+    /// <paramref name="ordenado"/>, que já vem em ordem de data). Regra única,
+    /// usada pelo Calcular e pelo resumo do Progresso (ResumirJanela), para a
+    /// tela nunca contar diferente da dieta.
+    /// </summary>
+    public static List<int> IndicesDaJanela(
+        IReadOnlyList<RegistroPesoAderenciaDto> ordenado, DateTime primeiraDieta, string objetivoAtual, DateTime agoraUtc)
+    {
+        // Início do período do objetivo atual: volta do registro mais recente
+        // até a última troca de objetivo.
+        var inicioObjetivoAtual = ordenado.Count;
+        for (var i = ordenado.Count - 1; i >= 0 && ordenado[i].Objetivo == objetivoAtual; i--)
+        {
+            inicioObjetivoAtual = i;
+        }
+
+        // Últimos 28 dias, mas nunca antes do dia (UTC) da primeira dieta: a
+        // dieta gerada num dia já vale para aquele dia.
+        var inicioJanela = agoraUtc.AddDays(-JanelaDias);
+        var diaPrimeiraDieta = primeiraDieta.Date;
+        if (inicioJanela < diaPrimeiraDieta)
+        {
+            inicioJanela = diaPrimeiraDieta;
+        }
+        return Enumerable.Range(inicioObjetivoAtual, ordenado.Count - inicioObjetivoAtual)
+            .Where(i => ordenado[i].Data >= inicioJanela && ordenado[i].Aderencia != NaoSeguiu)
+            .ToList();
+    }
+
+    /// <summary>Se os pontos bastam para confiar na inclinação (mínimos de pontos e de dias).</summary>
+    public static bool JanelaSuficiente(IReadOnlyList<RegistroPesoAderenciaDto> ordenado, IReadOnlyList<int> indices) =>
+        indices.Count >= MinimoPontos && DiasCobertos(ordenado, indices) >= MinimoDiasIntervalo;
+
+    private static double DiasCobertos(IReadOnlyList<RegistroPesoAderenciaDto> ordenado, IReadOnlyList<int> indices) =>
+        indices.Count < 2 ? 0 : (ordenado[indices[^1]].Data - ordenado[indices[0]].Data).TotalDays;
+
+    /// <summary>
+    /// Quanto da janela já está preenchido hoje, para o card "Ajuste pelo
+    /// progresso" do Progresso: o que a próxima dieta usaria. Sem dieta gerada
+    /// não há janela (nada conta ainda).
+    /// </summary>
+    public static ProgressoAjusteDto ResumirJanela(
+        IReadOnlyList<RegistroPesoAderenciaDto> historico, DateTime? primeiraDieta, string objetivoAtual, DateTime agoraUtc)
+    {
+        var ordenado = historico.OrderBy(r => r.Data).ToList();
+        var indices = primeiraDieta is null
+            ? new List<int>()
+            : IndicesDaJanela(ordenado, primeiraDieta.Value, objetivoAtual, agoraUtc);
+
+        return new ProgressoAjusteDto
+        {
+            Pesagens = indices.Count,
+            // Para baixo: 13,9 dias ainda não são 14.
+            DiasCobertos = (int)Math.Floor(DiasCobertos(ordenado, indices)),
+            Suficiente = JanelaSuficiente(ordenado, indices)
         };
     }
 

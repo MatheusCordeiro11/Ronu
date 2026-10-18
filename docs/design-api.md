@@ -74,12 +74,12 @@ O email sai em segundo plano (a resposta não espera o SMTP). Limite por conta: 
 
 ### `POST /api/objetivos`
 **Recebe:** `peso` (kg, de 20 a 300), `objetivo` (`perder peso`, `manter peso` ou `ganhar peso`), `aderencia` (opcional: `seguiu`, `comeu_mais`, `comeu_menos` ou `nao_seguiu`; nulo ou vazio = sem resposta)
-**Devolve:** `id`, `peso`, `objetivo`, `dataRegistro`, `aderencia`, `registradoHoje`, `temDieta` (mesmo formato do `GET /api/objetivos/atual`)
+**Devolve:** `id`, `peso`, `objetivo`, `dataRegistro`, `aderencia`, `registradoHoje`, `temDieta`, `progressoAjuste` (mesmo formato do `GET /api/objetivos/atual`)
 *(`dataRegistro` é preenchida automaticamente pela API, em UTC, não vem do cliente. Se já existe um registro do usuário no mesmo dia — o dia no fuso do estado (UF) do usuário; sem estado, horário de Brasília —, ele é atualizado em vez de criar outro, inclusive a `aderencia`, que volta a nulo se não for enviada)*
 **Erros:** 400 `{ mensagem }` se a `aderencia` ou o `objetivo` não forem um dos valores aceitos, ou se o peso estiver fora da faixa.
 
 ### `GET /api/objetivos/atual`
-**Devolve:** o registro mais recente de `ObjetivoUsuario` do usuário logado (`id`, `peso`, `objetivo`, `dataRegistro`, `aderencia`), mais `registradoHoje` (se esse registro é o de hoje, no fuso do estado do usuário, que o próximo POST vai sobrescrever — a mesma regra de "hoje" do POST) e `temDieta` (se o usuário já tem alguma dieta gerada)
+**Devolve:** o registro mais recente de `ObjetivoUsuario` do usuário logado (`id`, `peso`, `objetivo`, `dataRegistro`, `aderencia`), mais `registradoHoje` (se esse registro é o de hoje, no fuso do estado do usuário, que o próximo POST vai sobrescrever — a mesma regra de "hoje" do POST) e `temDieta` (se o usuário já tem alguma dieta gerada). `progressoAjuste` diz quanto da janela da meta adaptativa já está preenchido agora, pela mesma regra da geração da dieta: `pesagens` (as que contariam: últimos 28 dias, desde a primeira dieta, no objetivo atual, sem "não deu pra seguir"), `diasCobertos` (entre a primeira e a última delas, arredondado para baixo), `suficiente` (se a próxima dieta já teria dados para ajustar) e os limites `minimoPesagens` (5), `minimoDias` (14) e `janelaDias` (28). Sem dieta gerada, tudo zero.
 **Erros:** 404 se o usuário ainda não registrou nenhum objetivo.
 
 ### `GET /api/objetivos/tendencia`

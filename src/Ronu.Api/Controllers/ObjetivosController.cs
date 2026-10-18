@@ -4,7 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Ronu.Api.Data;
 using Ronu.Api.DTOs;
 using Ronu.Api.Models;
+using Ronu.Api.Models.IA;
 using Ronu.Api.Services;
+using Ronu.Api.Services.IA;
 using Ronu.Api.Validacao;
 using System.Security.Claims;
 
@@ -156,6 +158,21 @@ public class ObjetivosController : ControllerBase
         var objetivoDeHoje = await BuscarObjetivoDeHojeAsync();
         var temDieta = await _context.DietasIA.AnyAsync(d => d.UsuarioId == UsuarioIdLogado);
 
+        // A janela conta a partir da primeira dieta de todas (MetasDieta guarda
+        // todas; DietasIA só as 3 mais recentes), com o mesmo histórico que a
+        // geração da dieta usa (ContextoDietaBuilder).
+        var primeiraDieta = await _context.MetasDieta
+            .Where(m => m.UsuarioId == UsuarioIdLogado)
+            .OrderBy(m => m.DataGeracao)
+            .Select(m => (DateTime?)m.DataGeracao)
+            .FirstOrDefaultAsync();
+        var historico = await _context.ObjetivosUsuario
+            .Where(o => o.UsuarioId == UsuarioIdLogado)
+            .Select(o => new RegistroPesoAderenciaDto { Data = o.DataRegistro, Peso = o.Peso, Aderencia = o.Aderencia, Objetivo = o.Objetivo })
+            .ToListAsync();
+        // O objetivo da janela é o do registro mais recente, como na geração.
+        var objetivoMaisRecente = historico.OrderBy(r => r.Data).Last().Objetivo;
+
         return new ObjetivoAtualResponse
         {
             Id = objetivo.Id,
@@ -164,7 +181,8 @@ public class ObjetivosController : ControllerBase
             DataRegistro = objetivo.DataRegistro,
             Aderencia = objetivo.Aderencia,
             RegistradoHoje = objetivoDeHoje?.Id == objetivo.Id,
-            TemDieta = temDieta
+            TemDieta = temDieta,
+            ProgressoAjuste = CalculadoraAjusteAdaptativo.ResumirJanela(historico, primeiraDieta, objetivoMaisRecente, DateTime.UtcNow)
         };
     }
 

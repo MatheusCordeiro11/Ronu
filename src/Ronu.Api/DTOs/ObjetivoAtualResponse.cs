@@ -15,4 +15,8 @@ public class ObjetivoAtualResponse : ObjetivoResponse
     // Se o usuário já tem alguma dieta gerada. Sem dieta, a pergunta de
     // aderência fica escondida.
     public bool TemDieta { get; set; }
+
+    // Card "Ajuste pelo progresso" do Progresso (redesign de out/2026). Só
+    // acrescenta o campo: o frontend antigo ignora.
+    public ProgressoAjusteDto? ProgressoAjuste { get; set; }
 }
