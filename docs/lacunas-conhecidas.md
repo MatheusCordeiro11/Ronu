@@ -4,7 +4,7 @@ Decisões conscientes de escopo do MVP, registradas aqui para não serem esqueci
 
 ## Resolvidas ou descartadas
 
-- ~~Sem edição de perfil, modalidades ou preferências já salvos~~ — **Resolvido.** Perfil tem `GET`/`PUT /api/perfil`, com tela em `configuracoes.html`. Preferências e Modalidades têm CRUD completo (`GET`/`POST` upsert/`DELETE`). O guarda-rail contra remover a última modalidade (evita loop de onboarding) existe só no frontend — ver o item "A API deixa remover a última modalidade", em Geração de dieta (IA).
+- ~~Sem edição de perfil, modalidades ou preferências já salvos~~ — **Resolvido.** Perfil tem `GET`/`PUT /api/perfil`, com tela em `perfil.html` (a antiga `configuracoes.html` só redireciona para ela). Preferências e Modalidades têm CRUD completo (`GET`/`POST` upsert/`DELETE`), com telas em `alimentacao.html` e `treino.html`. O guarda-rail contra remover a última modalidade (evita loop de onboarding) existe só no frontend — ver o item "A API deixa remover a última modalidade", em Geração de dieta (IA).
 - ~~Imagem real ainda não substitui o placeholder da landing hero~~ — **Resolvido.** Carrossel de ilustrações blackwork (6 modalidades), replicado em landing, login, cadastro e onboarding, cada tela com sua própria ordem de exibição.
 - ~~Senha não tem tamanho mínimo validado no backend~~ — **Resolvido.** `[MinLength(8)]` em `CadastroRequest`, validado automaticamente pelo ASP.NET Core.
 - ~~Objetivo ainda não é editável de fato~~ — **Resolvido.** `DELETE /api/objetivos/{id}`, com guarda-rail contra remover o último objetivo restante do usuário.
