@@ -1,0 +1,737 @@
+/*
+  Ronu — Treino (tela aprovada: docs/redesign/telas/Treino, ...Mobile, ...Washi)
+  Depende de tokens, base e componentes.
+
+  Desktop: resumo da semana na faixa; à esquerda os cards das modalidades
+  (um aberto por vez), à direita o gasto por dia e quando muda na dieta;
+  embaixo o catálogo em cartas que rolam na horizontal.
+  Celular: tudo numa coluna, dias com uma letra, catálogo rolando.
+*/
+
+.tr-so-celular {
+  display: none;
+}
+
+/* ---------- Faixa ---------- */
+.tr-resumo {
+  margin: 0;
+  padding: 18px 22px;
+  display: flex;
+  gap: var(--e-7);
+  background: var(--fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-card);
+}
+
+.tr-resumo > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tr-resumo dd {
+  margin: 0;
+}
+
+.tr-resumo-numero {
+  font-size: 1.875rem;
+}
+
+/* ---------- Estrutura ---------- */
+.tr-main {
+  padding-top: var(--e-7);
+  padding-bottom: var(--e-10);
+}
+
+.tr-conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-8);
+}
+
+.tr-grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: var(--e-6);
+  align-items: start;
+}
+
+.tr-titulo-secao {
+  font-size: var(--t-h2);
+}
+
+.tr-minhas {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tr-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tr-lista:empty {
+  display: none;
+}
+
+.tr-lateral {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+
+.tr-estado {
+  max-width: 420px;
+  padding: var(--e-9) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.tr-estado-cartao {
+  max-width: 640px;
+  padding: var(--e-8);
+  align-items: flex-start;
+}
+
+.tr-grade h2.rotulo {
+  font-family: var(--fonte-corpo);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* ---------- Card da modalidade ---------- */
+.tr-card {
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+  transition: border-color var(--d-media) ease;
+}
+
+.tr-card-aberto {
+  border-color: var(--acento);
+}
+
+.tr-card-cabeca {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--e-4);
+  flex-wrap: wrap;
+  width: 100%;
+  padding: 20px 22px;
+  background: transparent;
+  border: 0;
+  color: var(--texto);
+  text-align: left;
+}
+
+.tr-card-cabeca:focus-visible {
+  outline-offset: -3px;
+}
+
+.tr-card-textos {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tr-card-nome {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: var(--t-h3);
+  line-height: 1.15;
+}
+
+.tr-card-resumo {
+  font-size: var(--t-apoio);
+  color: var(--texto-2);
+}
+
+.tr-card-kcal {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.tr-card-kcal-valor {
+  font-size: var(--t-h2);
+}
+
+.tr-card-kcal .apoio {
+  font-size: var(--t-rotulo);
+}
+
+.tr-card-corpo {
+  padding: 20px 22px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-top: 1px solid var(--borda);
+  animation: entra var(--d-media) var(--curva-saida) both;
+}
+
+.tr-bloco {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tr-dias > button {
+  min-height: 44px;
+  font-size: var(--t-apoio);
+}
+
+.tr-linha {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--e-5);
+  flex-wrap: wrap;
+}
+
+.tr-duracao {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--borda-campo);
+  border-radius: var(--raio);
+}
+
+.tr-duracao button {
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--texto);
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.tr-duracao button:disabled {
+  color: var(--texto-3);
+  cursor: not-allowed;
+}
+
+.tr-duracao button:focus-visible {
+  outline-offset: -3px;
+}
+
+.tr-duracao output {
+  min-width: 96px;
+  line-height: 46px;
+  border-left: 1px solid var(--borda);
+  border-right: 1px solid var(--borda);
+  text-align: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.tr-acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  flex-wrap: wrap;
+}
+
+.tr-remover {
+  padding: 0;
+  font-size: var(--t-apoio);
+}
+
+.tr-sem-quebra {
+  white-space: nowrap;
+}
+
+.tr-conta {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-2);
+}
+
+.tr-conta-rotulo {
+  letter-spacing: 0.16em;
+}
+
+.tr-conta-formula {
+  font-size: var(--t-corpo);
+}
+
+.tr-conta-formula strong {
+  color: var(--acento-texto);
+}
+
+.tr-status {
+  font-size: var(--t-pequeno);
+  color: var(--texto-2);
+}
+
+.tr-status:empty {
+  display: none;
+}
+
+.tr-status[data-tipo="ok"] {
+  color: var(--texto);
+}
+
+.tr-status[data-tipo="ok"]::before {
+  content: '✓ ';
+  color: var(--acento-texto);
+}
+
+.tr-status[data-tipo="erro"] {
+  color: var(--acento-texto);
+}
+
+/* ---------- Gasto por dia ---------- */
+.tr-semana {
+  gap: 18px;
+}
+
+.tr-barras {
+  height: 200px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.tr-coluna {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  justify-items: center;
+  gap: var(--e-2);
+}
+
+.tr-coluna-valor {
+  font-size: var(--t-rotulo);
+  color: var(--texto-2);
+}
+
+.tr-coluna-area {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.tr-coluna-trilho {
+  width: 100%;
+  max-width: 44px;
+  border-radius: var(--raio);
+  overflow: hidden;
+  display: flex;
+}
+
+.tr-coluna-descanso {
+  height: 6px !important;
+  border: 1px dashed var(--linha);
+}
+
+/* A parte da modalidade aberta no acento, embaixo; as outras por cima. */
+.tr-coluna-barra {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, var(--acento) var(--aberta, 0%), var(--borda-forte) var(--aberta, 0%));
+}
+
+.tr-coluna-dia {
+  font-size: var(--t-pequeno);
+  color: var(--texto-2);
+}
+
+.tr-legenda {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  padding-top: 14px;
+  border-top: 1px solid var(--borda);
+  font-size: var(--t-pequeno);
+  color: var(--texto-2);
+}
+
+.tr-legenda > span {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+}
+
+.tr-marca {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.tr-marca-aberta { background: var(--acento); }
+.tr-marca-outras { background: var(--borda-forte); }
+.tr-marca-descanso { border: 1px dashed var(--linha); }
+
+.tr-quando {
+  gap: var(--e-3);
+}
+
+.tr-quando p {
+  font-size: var(--t-corpo);
+  line-height: 1.55;
+}
+
+.tr-gerar {
+  align-self: flex-start;
+}
+
+.tr-gerar-celular {
+  display: none;
+}
+
+/* ---------- Catálogo ---------- */
+.tr-catalogo {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.tr-catalogo-cabeca {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--e-4);
+  flex-wrap: wrap;
+}
+
+/* Folga em volta para o zoom do hover não ser cortado pela rolagem. */
+.tr-cartas {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  margin: -12px -6px 0;
+  padding: 12px 6px 16px;
+  scrollbar-width: thin;
+}
+
+.tr-carta {
+  position: relative;
+  flex: 0 0 200px;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  background: var(--superficie-2);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-card);
+  color: var(--texto);
+  text-align: left;
+  transition: transform 350ms var(--curva-saida), border-color 250ms ease;
+}
+
+.tr-carta-arte {
+  position: relative;
+  display: block;
+  height: 120px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--borda);
+  background: var(--superficie);
+}
+
+/* A grade aqui fica parada: só a da faixa de título desliza. */
+.tr-carta-zoom {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: none;
+  transition: transform 600ms var(--curva-saida);
+}
+
+.tr-carta-kanji {
+  padding: 0 8px;
+  background: var(--superficie);
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 54px;
+  line-height: 1.2;
+}
+
+.tr-carta-textos {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tr-carta-nome {
+  font-weight: 600;
+  font-size: var(--t-corpo-g);
+}
+
+.tr-carta-acao {
+  font-size: var(--t-pequeno);
+  font-weight: 500;
+  color: var(--acento-texto);
+}
+
+.tr-carta-tem {
+  opacity: 0.6;
+}
+
+.tr-carta-tem .tr-carta-kanji {
+  color: var(--borda-forte);
+}
+
+.tr-carta-tem .tr-carta-acao {
+  color: var(--texto-2);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tr-carta:hover {
+    z-index: 2;
+    transform: scale(1.045);
+    border-color: var(--borda-forte);
+  }
+
+  .tr-carta:hover .tr-carta-zoom {
+    transform: scale(1.12);
+  }
+}
+
+.tr-carta:focus-visible {
+  outline-offset: 2px;
+}
+
+/* ---------- Telas médias ---------- */
+@media (max-width: 1080px) {
+  .tr-grade {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tr-lateral {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    align-items: start;
+  }
+}
+
+/* ---------- Celular ---------- */
+@media (max-width: 720px) {
+  .tr-so-largo,
+  .tr-so-largo-bloco {
+    display: none !important;
+  }
+
+  .tr-so-celular {
+    display: inline;
+  }
+
+  p.tr-so-celular {
+    display: block;
+  }
+
+  .faixa-titulo h1 {
+    font-size: 1.875rem;
+    line-height: 1.15;
+  }
+
+  .faixa-titulo-conteudo {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .tr-intro {
+    display: none;
+  }
+
+  .tr-resumo {
+    padding: 14px 16px;
+    gap: 28px;
+  }
+
+  .tr-resumo-numero {
+    font-size: 1.5rem;
+  }
+
+  .tr-main {
+    padding-top: var(--e-5);
+    padding-bottom: var(--e-8);
+  }
+
+  .tr-conteudo {
+    gap: var(--e-4);
+  }
+
+  .tr-grade {
+    gap: var(--e-4);
+  }
+
+  .tr-lateral {
+    display: flex;
+  }
+
+  /* "Suas modalidades" não aparece no celular: os cards abrem a tela. */
+  .tr-minhas > .tr-titulo-secao {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .tr-card-cabeca {
+    padding: 18px;
+    flex-wrap: nowrap;
+  }
+
+  .tr-card-nome {
+    font-size: 1.25rem;
+  }
+
+  .tr-card-resumo {
+    font-size: var(--t-pequeno);
+  }
+
+  .tr-card-kcal-valor {
+    font-size: 1.3125rem;
+  }
+
+  .tr-card-kcal .apoio {
+    font-size: 11px;
+  }
+
+  .tr-card-corpo {
+    padding: 16px 18px 18px;
+    gap: 16px;
+  }
+
+  .tr-bloco {
+    gap: var(--e-2);
+  }
+
+  .tr-dias {
+    gap: 4px;
+  }
+
+  .tr-dias > button {
+    min-height: 40px;
+    font-size: var(--t-rotulo);
+  }
+
+  .tr-linha {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--e-4);
+  }
+
+  .tr-bloco-duracao {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .tr-duracao button {
+    width: 42px;
+    height: 42px;
+    font-size: 1.125rem;
+  }
+
+  .tr-duracao output {
+    min-width: 88px;
+    line-height: 42px;
+  }
+
+  .tr-conta {
+    padding: 12px 14px;
+  }
+
+  .tr-conta-rotulo {
+    font-size: 11px;
+  }
+
+  .tr-conta-formula {
+    font-size: var(--t-apoio);
+  }
+
+  .tr-conta .apoio {
+    display: none;
+  }
+
+  .tr-semana {
+    padding: 18px;
+    gap: 14px;
+  }
+
+  .tr-barras {
+    height: 130px;
+    gap: var(--e-2);
+  }
+
+  .tr-coluna {
+    grid-template-rows: 1fr auto;
+    gap: 6px;
+  }
+
+  .tr-coluna-trilho {
+    max-width: 32px;
+  }
+
+  .tr-coluna-dia {
+    font-size: 11px;
+  }
+
+  .tr-catalogo {
+    gap: var(--e-3);
+  }
+
+  .tr-titulo-secao {
+    font-size: 1.25rem;
+  }
+
+  .tr-cartas {
+    gap: 10px;
+    margin: -12px calc(var(--margem) * -1) 0 -6px;
+    padding-right: var(--margem);
+  }
+
+  .tr-carta {
+    flex-basis: 150px;
+  }
+
+  .tr-carta-arte {
+    height: 84px;
+  }
+
+  .tr-carta-kanji {
+    font-size: 40px;
+    padding: 0 6px;
+  }
+
+  .tr-carta-textos {
+    padding: 10px 12px;
+    gap: 4px;
+  }
+
+  .tr-carta-nome {
+    font-size: var(--t-apoio);
+  }
+
+  .tr-carta-acao {
+    font-size: var(--t-rotulo);
+  }
+
+  .tr-gerar-celular:not([hidden]) {
+    display: flex;
+    min-height: 52px;
+  }
+
+  .tr-estado-cartao {
+    padding: var(--e-6);
+  }
+}

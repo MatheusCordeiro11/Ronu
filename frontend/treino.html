@@ -4,108 +4,114 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ronu — Treino</title>
-  <meta name="description" content="As modalidades que você pratica, com dias e duração de cada treino.">
+  <meta name="description" content="As modalidades que você treina, com dias, duração e o gasto de cada sessão.">
+
+  <!-- Antes do CSS: aplica o modo escuro/claro antes da primeira pintura. -->
+  <script src="js/base/tema.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/auth.css">
-  <link rel="stylesheet" href="css/dashboard.css">
-  <link rel="stylesheet" href="css/onboarding.css">
-  <link rel="stylesheet" href="css/configuracoes.css">
+  <link rel="stylesheet" href="css/base/tokens.css">
+  <link rel="stylesheet" href="css/base/base.css">
+  <link rel="stylesheet" href="css/componentes.css">
+  <link rel="stylesheet" href="css/telas/treino.css">
+
+  <script src="js/base/movimento.js" defer></script>
 </head>
-<body>
+<body class="com-abas">
+  <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
 
-  <header class="simple-header border-b">
-    <div class="container dashboard-header-inner">
-      <a href="landing/v1/index.html" class="wordmark">ronu<span>.</span></a>
-      <div class="header-actions">
-        <a href="dashboard.html" class="btn btn-secondary">Voltar ao dashboard</a>
-        <button type="button" id="logout-btn" class="btn btn-secondary">Sair</button>
+  <!-- Montado por js/base/cabecalho.js (logo, nav, sol/lua, avatar e abas). -->
+  <header class="cabecalho" data-cabecalho="treino"></header>
+
+  <section class="faixa-titulo grade">
+    <div class="conteiner faixa-titulo-conteudo">
+      <div class="faixa-titulo-texto">
+        <span class="rotulo rotulo-acento sobre-grade">Seu treino</span>
+        <h1 class="sobre-grade">O que você treina, e quando</h1>
+        <p class="sobre-grade tr-intro">O Ronu calcula o gasto de cada sessão pela modalidade, pela duração e pelo seu peso. Dia de treino ganha mais calorias e mais carboidrato; dia de descanso, menos.</p>
       </div>
-    </div>
-  </header>
-
-  <nav class="config-subnav border-b" aria-label="Configurações da conta">
-    <div class="container config-subnav-inner">
-      <a href="perfil.html" class="config-subnav-link">Perfil</a>
-      <a href="treino.html" class="config-subnav-link" aria-current="page">Treino</a>
-      <a href="alimentacao.html" class="config-subnav-link">Alimentação</a>
-    </div>
-  </nav>
-
-  <main class="config-page">
-    <div class="container">
-
-      <!-- ---------- Modalidades ---------- -->
-      <section class="config-section" aria-labelledby="modalidades-heading">
-        <div class="config-section-head">
-          <h1 id="modalidades-heading" class="config-section-title">Modalidades praticadas</h1>
-          <p class="config-section-subtitle">Usadas pra calcular o gasto calórico do seu treino.</p>
+      <dl class="tr-resumo" id="tr-resumo" hidden>
+        <div>
+          <dt class="apoio"><span class="tr-so-largo">Gasto com treino na semana</span><span class="tr-so-celular">Na semana</span></dt>
+          <dd class="numero tr-resumo-numero"><span id="tr-total-semana"></span> <span class="numero-unidade">kcal</span></dd>
         </div>
+        <div>
+          <dt class="apoio">Sessões</dt>
+          <dd class="numero tr-resumo-numero" id="tr-sessoes"></dd>
+        </div>
+      </dl>
+    </div>
+  </section>
 
-        <p class="text-muted" id="modalidades-loading">Carregando...</p>
+  <main id="conteudo" class="conteiner tr-main">
+    <div class="tr-estado" id="treino-loading" aria-live="polite">
+      <span class="texto-2">Carregando o seu treino...</span>
+      <div class="carregando" aria-hidden="true"></div>
+    </div>
 
-        <div class="form-message form-message-error" id="modalidades-error" hidden></div>
+    <section class="cartao tr-estado-cartao" id="treino-load-error" hidden>
+      <h2>Não foi possível carregar o seu treino</h2>
+      <p class="texto-2">Verifique sua conexão e tente novamente.</p>
+      <button type="button" class="botao botao-fantasma" id="btn-tentar-novamente">Tentar novamente</button>
+    </section>
 
-        <ul class="modalidade-config-list" id="modalidade-config-list" hidden></ul>
+    <div class="tr-conteudo" id="treino-content" hidden>
+      <div class="tr-grade">
+        <section class="tr-minhas" aria-labelledby="tr-minhas-titulo">
+          <h2 id="tr-minhas-titulo" class="tr-titulo-secao">Suas modalidades</h2>
+          <div class="aviso aviso-erro" id="treino-error" role="alert" hidden></div>
+          <p class="vazio" id="tr-vazio" hidden>Nenhum treino cadastrado. Sem treino, a meta usa só o seu gasto do dia a dia. Escolha uma modalidade logo abaixo.</p>
+          <div class="tr-lista" id="tr-lista"></div>
+        </section>
 
-        <div class="modalidade-add-form" id="modalidade-add-form" hidden>
-          <div class="field">
-            <label>Adicionar modalidade</label>
-            <div class="option-group" role="radiogroup" aria-label="Modalidade a adicionar" id="modalidade-add-options"></div>
-          </div>
-
-          <div class="modalidade-collapse" id="modalidade-add-collapse">
-            <div class="modalidade-collapse-inner">
-              <div class="field">
-                <label>Dias da semana</label>
-                <div class="modalidade-dias" role="group" aria-label="Dias da semana a adicionar" id="modalidade-add-dias">
-                  <button type="button" class="dia-toggle" data-dia="1" aria-pressed="false" aria-label="segunda-feira" disabled>SEG</button>
-                  <button type="button" class="dia-toggle" data-dia="2" aria-pressed="false" aria-label="terça-feira" disabled>TER</button>
-                  <button type="button" class="dia-toggle" data-dia="3" aria-pressed="false" aria-label="quarta-feira" disabled>QUA</button>
-                  <button type="button" class="dia-toggle" data-dia="4" aria-pressed="false" aria-label="quinta-feira" disabled>QUI</button>
-                  <button type="button" class="dia-toggle" data-dia="5" aria-pressed="false" aria-label="sexta-feira" disabled>SEX</button>
-                  <button type="button" class="dia-toggle" data-dia="6" aria-pressed="false" aria-label="sábado" disabled>SÁB</button>
-                  <button type="button" class="dia-toggle" data-dia="7" aria-pressed="false" aria-label="domingo" disabled>DOM</button>
-                </div>
-              </div>
-
-              <div class="modalidade-duracao-field" role="group" aria-label="Duração média por sessão">
-                <span class="modalidade-duracao-titulo">Duração média por sessão</span>
-                <div class="modalidade-duracao-grupo">
-                  <label class="modalidade-duracao-unidade">
-                    <span>Horas</span>
-                    <input type="number" id="modalidade-add-duracao-horas" class="modalidade-duracao-horas num" min="0" max="5" step="1" value="0" disabled>
-                  </label>
-                  <label class="modalidade-duracao-unidade">
-                    <span>Min</span>
-                    <select id="modalidade-add-duracao-minutos" class="modalidade-duracao-minutos num" disabled>
-                      <option value="0">0</option>
-                      <option value="15">15</option>
-                      <option value="30">30</option>
-                      <option value="45">45</option>
-                    </select>
-                  </label>
-                </div>
-              </div>
+        <aside class="tr-lateral" aria-label="Gasto da semana">
+          <section class="cartao tr-semana" aria-labelledby="tr-semana-titulo" data-anima-hover>
+            <div class="cartao-cabeca">
+              <h2 class="rotulo" id="tr-semana-titulo">Gasto com treino por dia</h2>
+              <span class="apoio tr-so-largo">kcal</span>
             </div>
-          </div>
+            <div class="tr-barras" id="tr-barras" data-anima-grupo></div>
+            <div class="tr-legenda tr-so-largo">
+              <span><span class="tr-marca tr-marca-aberta" aria-hidden="true"></span>Modalidade aberta</span>
+              <span><span class="tr-marca tr-marca-outras" aria-hidden="true"></span>Outras</span>
+              <span><span class="tr-marca tr-marca-descanso" aria-hidden="true"></span>Descanso</span>
+            </div>
+            <p class="apoio tr-so-celular">Mudanças entram na próxima dieta que você gerar.</p>
+          </section>
 
-          <button type="button" class="btn btn-secondary" id="btn-adicionar-modalidade">
-            <span class="btn-label">Adicionar</span>
-          </button>
+          <section class="cartao tr-quando tr-so-largo-bloco" aria-labelledby="tr-quando-titulo">
+            <h2 class="rotulo" id="tr-quando-titulo">Quando muda na dieta</h2>
+            <p>Mudanças aqui entram na próxima dieta que você gerar. A dieta atual continua como está.</p>
+            <a class="botao botao-primario tr-gerar entra" id="tr-gerar" href="dashboard.html" hidden>Gerar dieta com o treino novo</a>
+          </section>
+        </aside>
+      </div>
+
+      <section class="tr-catalogo" aria-labelledby="tr-catalogo-titulo">
+        <div class="tr-catalogo-cabeca">
+          <h2 id="tr-catalogo-titulo" class="tr-titulo-secao">Adicionar modalidade</h2>
+          <span class="apoio tr-so-largo">Intensidades do Compêndio de Atividades Físicas</span>
         </div>
-
-        <p class="text-muted" id="modalidades-catalogo-completo" hidden>Todas as modalidades do catálogo já estão adicionadas.</p>
+        <div class="tr-cartas" id="tr-cartas"></div>
       </section>
 
+      <!-- No celular o aviso de gerar vai no fim, depois do catálogo. -->
+      <a class="botao botao-primario botao-bloco tr-gerar-celular" id="tr-gerar-celular" href="dashboard.html" hidden>Gerar dieta com o treino novo</a>
     </div>
   </main>
 
+  <footer class="rodape">
+    <div class="conteiner rodape-linha">
+      <span>Gasto da sessão: (MET − 1) × peso de tendência × horas.</span>
+      <span>Intensidades (MET) do Compêndio de Atividades Físicas.</span>
+    </div>
+  </footer>
+
   <script src="js/auth.js"></script>
+  <script src="js/base/cabecalho.js"></script>
   <script src="js/treino.js"></script>
 </body>
 </html>

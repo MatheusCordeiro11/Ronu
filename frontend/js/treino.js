@@ -1,7 +1,15 @@
 // Ronu — Treino (modalidades praticadas)
-// Listar/adicionar/remover modalidades e editar dias + duração de cada uma.
-// Uma das três páginas de configurações da conta, ao lado de perfil.html e
-// alimentacao.html.
+// Lista, adiciona, edita (dias + duração) e remove as modalidades do usuário.
+//
+// Como no canvas aprovado, não há botão "Salvar": cada mudança é gravada
+// sozinha (POST /usuarios/modalidades faz upsert pela modalidade) pouco depois
+// do último toque, e o card mostra "Salvando..." / "Salvo" — nunca em
+// silêncio. Uma modalidade nova só vai para a API quando ganha o primeiro dia,
+// porque a API exige pelo menos um.
+//
+// Os números (kcal por sessão, gasto por dia, total da semana) vêm do
+// POST /metas/simulacao com a lista em edição, a mesma conta da dieta, com o
+// peso de tendência salvo.
 
 document.addEventListener('DOMContentLoaded', async () => {
   const usuario = ronuUsuarioLogado();
@@ -10,516 +18,559 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  const btnLogout = document.getElementById('logout-btn');
-  btnLogout.addEventListener('click', () => {
-    ronuLimparSessao();
-    window.location.href = 'login.html';
-  });
+  const $ = (id) => document.getElementById(id);
 
-  // ---------- Modalidades ----------
-  // Cada modalidade praticada é um vínculo (UsuarioModalidade) com dias da
-  // semana + duração média editáveis e ação de remover; "adicionar" só
-  // oferece as modalidades do catálogo que o usuário ainda não pratica. Os
-  // toggles de dia (.dia-toggle/.modalidade-dias) e os campos de duração
-  // (horas + minutos, .modalidade-duracao-horas/-minutos) vêm de
-  // onboarding.css, já carregado nesta página —
-  // mesmo widget usado no Passo 3 do onboarding, sem duplicar CSS. Reaproveita
-  // a mecânica de "Remover -> Sim/Cancelar" de Preferências, mas com classes
-  // próprias — seção independente, sem acoplar às internals da outra.
+  const elLoading = $('treino-loading');
+  const elLoadError = $('treino-load-error');
+  const elContent = $('treino-content');
+  const elErro = $('treino-error');
+  const elLista = $('tr-lista');
+  const elVazio = $('tr-vazio');
+  const elCartas = $('tr-cartas');
+  const elBarras = $('tr-barras');
 
-  const elModalidadesLoading = document.getElementById('modalidades-loading');
-  const elModalidadesError = document.getElementById('modalidades-error');
-  const elModalidadeList = document.getElementById('modalidade-config-list');
-  const elModalidadeAddForm = document.getElementById('modalidade-add-form');
-  const elModalidadeAddOptions = document.getElementById('modalidade-add-options');
-  const elModalidadeAddCollapse = document.getElementById('modalidade-add-collapse');
-  const elModalidadeAddDias = document.getElementById('modalidade-add-dias');
-  const elModalidadeAddDuracaoHoras = document.getElementById('modalidade-add-duracao-horas');
-  const elModalidadeAddDuracaoMinutos = document.getElementById('modalidade-add-duracao-minutos');
-  const elModalidadesCatalogoCompleto = document.getElementById('modalidades-catalogo-completo');
-  const btnAdicionarModalidade = document.getElementById('btn-adicionar-modalidade');
-
-  // 1=Segunda ... 7=Domingo (ISO 8601, mesmo padrão do backend e do
-  // onboarding — abreviação de 3 letras pra não colidir em pt-BR).
-  const DIAS_SEMANA = [
-    { valor: 1, rotulo: 'SEG', nomeCompleto: 'segunda-feira' },
-    { valor: 2, rotulo: 'TER', nomeCompleto: 'terça-feira' },
-    { valor: 3, rotulo: 'QUA', nomeCompleto: 'quarta-feira' },
-    { valor: 4, rotulo: 'QUI', nomeCompleto: 'quinta-feira' },
-    { valor: 5, rotulo: 'SEX', nomeCompleto: 'sexta-feira' },
-    { valor: 6, rotulo: 'SÁB', nomeCompleto: 'sábado' },
-    { valor: 7, rotulo: 'DOM', nomeCompleto: 'domingo' }
+  // 1 = segunda ... 7 = domingo (ISO 8601, mesmo padrão do backend).
+  const DIAS = [
+    { valor: 1, curto: 'Seg', letra: 'S', nome: 'segunda-feira' },
+    { valor: 2, curto: 'Ter', letra: 'T', nome: 'terça-feira' },
+    { valor: 3, curto: 'Qua', letra: 'Q', nome: 'quarta-feira' },
+    { valor: 4, curto: 'Qui', letra: 'Q', nome: 'quinta-feira' },
+    { valor: 5, curto: 'Sex', letra: 'S', nome: 'sexta-feira' },
+    { valor: 6, curto: 'Sáb', letra: 'S', nome: 'sábado' },
+    { valor: 7, curto: 'Dom', letra: 'D', nome: 'domingo' }
   ];
 
-  const MINUTOS_PERMITIDOS = [0, 15, 30, 45];
+  // Mesma faixa do UsuarioModalidadeRequest (0,25 a 5 h), em passos de 15 min.
+  const DURACAO_MIN = 15;
+  const DURACAO_MAX = 300;
+  const PASSO_MIN = 15;
+  const ESPERA_SALVAR_MS = 700;
+  const ESPERA_SIMULAR_MS = 300;
 
-  // A API só aceita um decimal (DuracaoMediaHoras) — a UI coleta horas e
-  // minutos separados (minutos travado em múltiplos de 15, sem digitação
-  // livre) e converte só na hora de montar o payload.
-  function horasMinutosParaDecimal(horas, minutos) {
-    return horas + minutos / 60;
+  // Kanji de enfeite de cada carta do catálogo (aria-hidden). Modalidade nova
+  // no catálogo, sem kanji aqui, usa 技 ("técnica").
+  const KANJI = {
+    'jiu-jitsu': '柔', 'muay thai': '拳', boxe: '打', 'musculação': '力',
+    futebol: '蹴', basquete: '籠', 'natação': '泳'
+  };
+
+  let catalogo = [];
+  let itens = [];          // modalidades na tela, salvas ou ainda não
+  let aberta = null;       // modalidadeId do card aberto
+  let simulacao = null;    // última resposta do POST /metas/simulacao
+  let mudou = false;       // houve mudança salva nesta visita
+
+  // ---------- Formatação ----------
+
+  function formatarNumero(valor) {
+    return Math.round(valor).toLocaleString('pt-BR');
   }
 
-  // Inverso — usado ao carregar um vínculo já salvo, pra preencher os dois
-  // campos de edição. Arredonda pro múltiplo de 15 min mais próximo, já que
-  // o select só aceita esses valores (o decimal salvo pode ter vindo de
-  // antes dessa mudança, com minutos "soltos", ex: 1.4h).
-  function decimalParaHorasMinutos(decimal) {
-    const totalMinutos = Math.round((decimal * 60) / 15) * 15;
-    return { horas: Math.floor(totalMinutos / 60), minutos: totalMinutos % 60 };
+  function formatarDecimal(valor, casas = 2) {
+    return Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: casas });
   }
 
-  let catalogoModalidades = [];
-
-  function modalidadesJaAdicionadas() {
-    return new Set(
-      Array.from(elModalidadeList.querySelectorAll('.modalidade-item')).map(
-        (item) => Number(item.dataset.modalidadeId)
-      )
-    );
+  function formatarDuracao(minutos) {
+    const h = Math.floor(minutos / 60);
+    const m = minutos % 60;
+    return [h ? `${h} h` : '', m ? `${m} min` : ''].filter(Boolean).join(' ');
   }
 
-  function renderizarAcaoRemoverModalidade(elAcoes) {
-    elAcoes.innerHTML = '';
-
-    const botao = document.createElement('button');
-    botao.type = 'button';
-    botao.className = 'modalidade-remove-btn';
-    botao.dataset.acao = 'remover';
-    botao.textContent = 'Remover';
-
-    elAcoes.appendChild(botao);
+  function criar(tag, classe, texto) {
+    const el = document.createElement(tag);
+    if (classe) el.className = classe;
+    if (texto != null) el.textContent = texto;
+    return el;
   }
 
-  function renderizarConfirmacaoRemoverModalidade(elAcoes) {
-    elAcoes.innerHTML = '';
-
-    const texto = document.createElement('span');
-    texto.className = 'modalidade-confirm-text';
-    texto.textContent = 'Remover?';
-
-    const btnConfirmar = document.createElement('button');
-    btnConfirmar.type = 'button';
-    btnConfirmar.className = 'modalidade-confirm-btn';
-    btnConfirmar.dataset.acao = 'confirmar';
-    btnConfirmar.textContent = 'Sim';
-
-    const btnCancelar = document.createElement('button');
-    btnCancelar.type = 'button';
-    btnCancelar.className = 'modalidade-cancel-btn';
-    btnCancelar.dataset.acao = 'cancelar';
-    btnCancelar.textContent = 'Cancelar';
-
-    elAcoes.append(texto, btnConfirmar, btnCancelar);
+  function diasOrdenados(item) {
+    return [...item.dias].sort((a, b) => a - b);
   }
 
-  function criarItemModalidade(vinculo) {
-    const item = document.createElement('li');
-    item.className = 'modalidade-item';
-    item.dataset.vinculoId = vinculo.id;
-    item.dataset.modalidadeId = vinculo.modalidade.id;
-    // Baseline pra saber se os dias mudaram desde o último salvo — dataset
-    // (não uma const capturada no closure) porque salvarModalidade() roda
-    // fora deste escopo, disparada pela delegação de evento da lista.
-    item.dataset.diasSalvos = JSON.stringify(vinculo.diasSemana.slice().sort((a, b) => a - b));
-    item.dataset.duracaoSalva = String(vinculo.duracaoMediaHoras);
+  // Duração salva em decimal (pode ter vindo de antes, com minutos "soltos",
+  // ex.: 1,4 h): arredonda para o múltiplo de 15 min mais próximo.
+  function horasParaMinutos(horas) {
+    const minutos = Math.round((horas * 60) / PASSO_MIN) * PASSO_MIN;
+    return Math.min(DURACAO_MAX, Math.max(DURACAO_MIN, minutos));
+  }
 
-    const info = document.createElement('div');
-    info.className = 'modalidade-item-info';
+  // ---------- Estados de topo ----------
 
-    const nomeSpan = document.createElement('span');
-    nomeSpan.className = 'modalidade-item-nome';
-    nomeSpan.textContent = vinculo.modalidade.nome;
+  function mostrarSomente(elementoVisivel) {
+    [elLoading, elLoadError, elContent].forEach((el) => {
+      el.hidden = el !== elementoVisivel;
+    });
+    $('tr-resumo').hidden = elementoVisivel !== elContent;
+  }
 
-    const detalhes = document.createElement('div');
-    detalhes.className = 'modalidade-item-detalhes';
+  // ---------- Simulação (números da tela) ----------
 
-    const diasGroup = document.createElement('div');
-    diasGroup.className = 'modalidade-dias';
-    diasGroup.setAttribute('role', 'group');
-    diasGroup.setAttribute('aria-label', `Dias da semana de treino de ${vinculo.modalidade.nome}`);
+  let pedidoSimulacao = 0;
+  let simulacaoPendente = null;
 
-    const diasAtivos = new Set(vinculo.diasSemana);
-    const btnSalvar = document.createElement('button');
+  // Só entram as modalidades com dia: é o que a próxima dieta usaria.
+  function agendarSimulacao() {
+    clearTimeout(simulacaoPendente);
+    simulacaoPendente = setTimeout(simular, ESPERA_SIMULAR_MS);
+  }
 
-    // Confirmação "Salvo" desta linha (ver mostrarModalidadeSalva). Fica
-    // sempre no DOM, vazia, para o role="status" anunciar quando receber
-    // conteúdo — e é por linha, então salvar uma modalidade nunca apaga nem
-    // prende a confirmação de outra.
-    const salvoStatus = document.createElement('span');
-    salvoStatus.className = 'modalidade-salvo';
-    salvoStatus.setAttribute('role', 'status');
-
-    function diasSelecionadosOrdenados() {
-      return Array.from(diasGroup.querySelectorAll('.dia-toggle'))
-        .filter((botao) => botao.getAttribute('aria-pressed') === 'true')
-        .map((botao) => Number(botao.dataset.dia))
-        .sort((a, b) => a - b);
-    }
-
-    // Só habilita "Salvar" quando dias OU duração diferem do último salvo —
-    // evita autosave silencioso, consistente com o resto da página.
-    function atualizarEstadoSalvar() {
-      const diasMudaram = JSON.stringify(diasSelecionadosOrdenados()) !== item.dataset.diasSalvos;
-      const duracaoAtual = horasMinutosParaDecimal(Number(horasInput.value || 0), Number(minutosSelect.value));
-      const duracaoMudou = String(duracaoAtual) !== item.dataset.duracaoSalva;
-      btnSalvar.disabled = (!diasMudaram && !duracaoMudou) || horasInput.value === '';
-      // Mexeu de novo na linha: o "Salvo" deixa de ser verdade.
-      salvoStatus.textContent = '';
-    }
-
-    DIAS_SEMANA.forEach(({ valor, rotulo, nomeCompleto }) => {
-      const botao = document.createElement('button');
-      botao.type = 'button';
-      botao.className = 'dia-toggle';
-      botao.dataset.dia = valor;
-      botao.setAttribute('aria-pressed', String(diasAtivos.has(valor)));
-      botao.setAttribute('aria-label', nomeCompleto);
-      botao.textContent = rotulo;
-
-      botao.addEventListener('click', () => {
-        const pressionado = botao.getAttribute('aria-pressed') === 'true';
-        botao.setAttribute('aria-pressed', String(!pressionado));
-        atualizarEstadoSalvar();
+  async function simular() {
+    const numero = ++pedidoSimulacao;
+    const modalidades = itens
+      .filter((item) => item.dias.size > 0)
+      .map((item) => ({ modalidadeId: item.modalidade.id, diasSemana: diasOrdenados(item), duracaoMediaHoras: item.duracao / 60 }));
+    try {
+      const resposta = await ronuFetchAutenticado('/metas/simulacao', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ modalidades })
       });
-
-      diasGroup.appendChild(botao);
-    });
-
-    const { horas: horasIniciais, minutos: minutosIniciais } = decimalParaHorasMinutos(vinculo.duracaoMediaHoras);
-
-    const duracaoField = document.createElement('div');
-    duracaoField.className = 'modalidade-duracao-field';
-    duracaoField.setAttribute('role', 'group');
-    duracaoField.setAttribute('aria-label', `Duração média por sessão de ${vinculo.modalidade.nome}`);
-
-    const duracaoTitulo = document.createElement('span');
-    duracaoTitulo.className = 'modalidade-duracao-titulo';
-    duracaoTitulo.textContent = 'Duração média por sessão';
-
-    const duracaoGrupo = document.createElement('div');
-    duracaoGrupo.className = 'modalidade-duracao-grupo';
-
-    const labelHoras = document.createElement('label');
-    labelHoras.className = 'modalidade-duracao-unidade';
-    const spanHoras = document.createElement('span');
-    spanHoras.textContent = 'Horas';
-    const horasInput = document.createElement('input');
-    horasInput.type = 'number';
-    horasInput.className = 'modalidade-duracao-horas num';
-    horasInput.min = '0';
-    horasInput.max = '5';
-    horasInput.step = '1';
-    horasInput.value = String(horasIniciais);
-    labelHoras.append(spanHoras, horasInput);
-
-    const labelMinutos = document.createElement('label');
-    labelMinutos.className = 'modalidade-duracao-unidade';
-    const spanMinutos = document.createElement('span');
-    spanMinutos.textContent = 'Min';
-    const minutosSelect = document.createElement('select');
-    minutosSelect.className = 'modalidade-duracao-minutos num';
-    MINUTOS_PERMITIDOS.forEach((valor) => {
-      const opcao = document.createElement('option');
-      opcao.value = String(valor);
-      opcao.textContent = String(valor);
-      minutosSelect.appendChild(opcao);
-    });
-    minutosSelect.value = String(minutosIniciais);
-    labelMinutos.append(spanMinutos, minutosSelect);
-
-    horasInput.addEventListener('input', atualizarEstadoSalvar);
-    minutosSelect.addEventListener('change', atualizarEstadoSalvar);
-
-    duracaoGrupo.append(labelHoras, labelMinutos);
-    duracaoField.append(duracaoTitulo, duracaoGrupo);
-
-    btnSalvar.type = 'button';
-    btnSalvar.className = 'modalidade-save-btn';
-    btnSalvar.dataset.acao = 'salvar-modalidade';
-    btnSalvar.textContent = 'Salvar';
-    btnSalvar.disabled = true;
-
-    detalhes.append(diasGroup, duracaoField, btnSalvar, salvoStatus);
-    info.append(nomeSpan, detalhes);
-
-    const acoes = document.createElement('div');
-    acoes.className = 'modalidade-item-actions';
-    renderizarAcaoRemoverModalidade(acoes);
-
-    item.append(info, acoes);
-    return item;
+      if (!resposta.ok) throw new Error();
+      const dados = await resposta.json();
+      // Uma resposta antiga que chega depois de uma nova não vale mais.
+      if (numero !== pedidoSimulacao) return;
+      simulacao = dados;
+    } catch (erro) {
+      if (erro.message === 'Sessão expirada.') return;
+      if (numero !== pedidoSimulacao) return;
+      simulacao = null;
+    }
+    atualizarNumeros();
   }
 
-  function mostrarListaModalidades() {
-    elModalidadeList.hidden = elModalidadeList.children.length === 0;
+  function kcalSessao(item) {
+    if (!simulacao || item.dias.size === 0) return null;
+    const sim = simulacao.modalidades.find((m) => m.modalidadeId === item.modalidade.id);
+    return sim ? sim.kcalSessao : null;
   }
 
-  // Recalculada a cada adição/remoção: as pills de "adicionar" só mostram
-  // modalidades do catálogo que ainda não estão na lista de praticadas.
-  function renderizarOpcoesAdicionar() {
-    const jaAdicionadas = modalidadesJaAdicionadas();
-    const disponiveis = catalogoModalidades.filter((modalidade) => !jaAdicionadas.has(modalidade.id));
+  // ---------- Card de cada modalidade ----------
 
-    elModalidadeAddOptions.innerHTML = '';
-    disponiveis.forEach((modalidade) => {
-      const pill = document.createElement('label');
-      pill.className = 'option-pill';
+  function criarCard(item) {
+    const id = item.modalidade.id;
+    const card = criar('article', 'cartao tr-card');
+    card.dataset.modalidadeId = id;
 
-      const radio = document.createElement('input');
-      radio.type = 'radio';
-      radio.name = 'modalidade-add-escolha';
-      radio.value = String(modalidade.id);
-
-      const span = document.createElement('span');
-      span.textContent = modalidade.nome;
-
-      pill.append(radio, span);
-      elModalidadeAddOptions.appendChild(pill);
+    const cabeca = criar('button', 'tr-card-cabeca');
+    cabeca.type = 'button';
+    cabeca.id = `tr-cabeca-${id}`;
+    cabeca.setAttribute('aria-controls', `tr-corpo-${id}`);
+    const textos = criar('span', 'tr-card-textos');
+    const nome = criar('span', 'tr-card-nome', item.modalidade.nome);
+    const resumo = criar('span', 'tr-card-resumo');
+    textos.append(nome, resumo);
+    const numeros = criar('span', 'tr-card-kcal');
+    const kcal = criar('span', 'numero tr-card-kcal-valor');
+    numeros.append(kcal, criar('span', 'apoio', 'kcal por sessão'));
+    cabeca.append(textos, numeros);
+    cabeca.addEventListener('click', () => {
+      aberta = aberta === id ? null : id;
+      atualizarAberturas();
+      atualizarNumeros();
     });
 
-    Array.from(elModalidadeAddDias.querySelectorAll('.dia-toggle')).forEach((botao) => {
-      botao.setAttribute('aria-pressed', 'false');
-      botao.disabled = true;
-    });
-    elModalidadeAddDuracaoHoras.value = '0';
-    elModalidadeAddDuracaoHoras.disabled = true;
-    elModalidadeAddDuracaoMinutos.value = '0';
-    elModalidadeAddDuracaoMinutos.disabled = true;
-    elModalidadeAddCollapse.classList.remove('is-aberto');
+    const corpo = criar('div', 'tr-card-corpo');
+    corpo.id = `tr-corpo-${id}`;
+    corpo.setAttribute('role', 'region');
+    corpo.setAttribute('aria-labelledby', cabeca.id);
 
-    const temDisponiveis = disponiveis.length > 0;
-    elModalidadeAddForm.hidden = !temDisponiveis;
-    elModalidadesCatalogoCompleto.hidden = temDisponiveis;
+    // Dias
+    const blocoDias = criar('div', 'tr-bloco');
+    const rotuloDias = criar('span', 'campo-rotulo', 'Dias da semana');
+    rotuloDias.id = `tr-dias-rotulo-${id}`;
+    const grupoDias = criar('div', 'dias tr-dias');
+    grupoDias.setAttribute('role', 'group');
+    grupoDias.setAttribute('aria-labelledby', rotuloDias.id);
+    DIAS.forEach((dia) => {
+      const botao = criar('button');
+      botao.type = 'button';
+      botao.dataset.dia = dia.valor;
+      botao.setAttribute('aria-label', dia.nome);
+      botao.append(criar('span', 'tr-so-largo', dia.curto), criar('span', 'tr-so-celular', dia.letra));
+      botao.addEventListener('click', () => {
+        if (item.dias.has(dia.valor)) item.dias.delete(dia.valor);
+        else item.dias.add(dia.valor);
+        aoMudar(item);
+      });
+      grupoDias.appendChild(botao);
+    });
+    blocoDias.append(rotuloDias, grupoDias);
+
+    // Duração e remover
+    const linha = criar('div', 'tr-linha');
+    const blocoDuracao = criar('div', 'tr-bloco tr-bloco-duracao');
+    const rotuloDuracao = criar('span', 'campo-rotulo');
+    rotuloDuracao.append(criar('span', 'tr-so-largo', 'Duração de cada sessão'), criar('span', 'tr-so-celular', 'Duração'));
+    const controle = criar('div', 'tr-duracao');
+    controle.setAttribute('role', 'group');
+    controle.setAttribute('aria-label', `Duração de cada sessão de ${item.modalidade.nome}`);
+    const menos = criar('button', null, '−');
+    menos.type = 'button';
+    menos.setAttribute('aria-label', 'Diminuir 15 minutos');
+    const valor = criar('output');
+    valor.setAttribute('aria-live', 'polite');
+    const mais = criar('button', null, '+');
+    mais.type = 'button';
+    mais.setAttribute('aria-label', 'Aumentar 15 minutos');
+    menos.addEventListener('click', () => { item.duracao = Math.max(DURACAO_MIN, item.duracao - PASSO_MIN); aoMudar(item); });
+    mais.addEventListener('click', () => { item.duracao = Math.min(DURACAO_MAX, item.duracao + PASSO_MIN); aoMudar(item); });
+    controle.append(menos, valor, mais);
+    blocoDuracao.append(rotuloDuracao, controle);
+
+    const acoes = criar('div', 'tr-acoes');
+    linha.append(blocoDuracao, acoes);
+
+    // Conta da sessão
+    const conta = criar('div', 'tr-conta');
+    const rotuloConta = criar('span', 'rotulo tr-conta-rotulo');
+    rotuloConta.append(criar('span', 'tr-so-largo', 'Como o gasto da sessão é calculado'), criar('span', 'tr-so-celular', 'Gasto da sessão'));
+    conta.append(
+      rotuloConta,
+      criar('span', 'tr-conta-formula num'),
+      criar('span', 'apoio', 'O “− 1” tira o que você já gastaria parado, que entra na conta do dia a dia.')
+    );
+
+    const status = criar('p', 'tr-status');
+    status.setAttribute('role', 'status');
+
+    corpo.append(blocoDias, linha, conta, status);
+    card.append(cabeca, corpo);
+
+    item.el = { card, cabeca, resumo, kcal, corpo, grupoDias, valor, menos, mais, acoes, formula: conta.querySelector('.tr-conta-formula'), status };
+    renderizarAcoes(item);
+    return card;
   }
 
-  elModalidadeAddOptions.addEventListener('change', (evento) => {
-    if (evento.target.name !== 'modalidade-add-escolha') return;
-    elModalidadeAddCollapse.classList.add('is-aberto');
-    const botoesDia = Array.from(elModalidadeAddDias.querySelectorAll('.dia-toggle'));
-    botoesDia.forEach((botao) => { botao.disabled = false; });
-    elModalidadeAddDuracaoHoras.disabled = false;
-    elModalidadeAddDuracaoMinutos.disabled = false;
-    botoesDia[0].focus();
-  });
+  // "Remover modalidade" -> "Remover? Sim / Cancelar". A última modalidade
+  // salva não sai: sem ela o cadastro fica incompleto (ronuChecarCadastroCompleto
+  // exige uma) e o próximo login cairia no onboarding.
+  function renderizarAcoes(item, confirmando = false) {
+    const acoes = item.el.acoes;
+    acoes.replaceChildren();
+    if (!confirmando) {
+      const remover = criar('button', 'botao-texto tr-remover', 'Remover modalidade');
+      remover.type = 'button';
+      remover.addEventListener('click', () => {
+        ronuOcultarErroFormulario(elErro);
+        if (!item.vinculoId) {
+          removerDaTela(item);
+          return;
+        }
+        if (itens.filter((i) => i.vinculoId).length <= 1) {
+          ronuMostrarErroFormulario(elErro, 'Você precisa manter pelo menos uma modalidade.');
+          return;
+        }
+        renderizarAcoes(item, true);
+        acoes.querySelector('.tr-confirmar').focus();
+      });
+      acoes.appendChild(remover);
+      return;
+    }
+    const pergunta = criar('span', 'apoio', `Remover ${item.modalidade.nome}?`);
+    // .btn-label: o ronuDefinirCarregando troca o texto dele ("Removendo...").
+    const sim = criar('button', 'botao botao-fantasma botao-pequeno tr-confirmar');
+    sim.type = 'button';
+    sim.appendChild(criar('span', 'btn-label', 'Sim, remover'));
+    const nao = criar('button', 'botao-texto', 'Cancelar');
+    nao.type = 'button';
+    sim.addEventListener('click', () => removerModalidade(item, sim));
+    nao.addEventListener('click', () => {
+      renderizarAcoes(item);
+      acoes.querySelector('.tr-remover').focus();
+    });
+    acoes.append(pergunta, sim, nao);
+  }
 
-  elModalidadeAddDias.addEventListener('click', (evento) => {
-    const botao = evento.target.closest('.dia-toggle');
-    if (!botao) return;
-    const pressionado = botao.getAttribute('aria-pressed') === 'true';
-    botao.setAttribute('aria-pressed', String(!pressionado));
-  });
+  function atualizarCard(item) {
+    const { resumo, kcal, grupoDias, valor, menos, mais, formula } = item.el;
+    const dias = diasOrdenados(item);
+    const nomesDias = dias.map((d) => DIAS[d - 1].curto).join(', ');
+    resumo.textContent = `${dias.length ? nomesDias : 'Nenhum dia escolhido'} · ${formatarDuracao(item.duracao)}`;
 
-  async function carregarModalidades() {
+    grupoDias.querySelectorAll('button').forEach((botao) => {
+      botao.setAttribute('aria-pressed', String(item.dias.has(Number(botao.dataset.dia))));
+    });
+    valor.textContent = formatarDuracao(item.duracao);
+    menos.disabled = item.duracao <= DURACAO_MIN;
+    mais.disabled = item.duracao >= DURACAO_MAX;
+
+    const k = kcalSessao(item);
+    kcal.textContent = k == null ? '—' : formatarNumero(k);
+    if (k != null && simulacao) {
+      const met = formatarDecimal(item.modalidade.metReferencia);
+      // No celular sem a palavra "intensidade", como no canvas, para caber.
+      formula.replaceChildren(
+        '(',
+        criar('span', 'tr-so-largo', 'intensidade '),
+        `${met} − 1) × ${formatarDecimal(simulacao.entradas.peso, 1)} kg × ${formatarDecimal(item.duracao / 60)} h = `,
+        criar('strong', 'tr-sem-quebra', `${formatarNumero(k)} kcal`)
+      );
+    } else {
+      formula.textContent = item.dias.size === 0
+        ? 'Escolha pelo menos um dia para ver o gasto da sessão.'
+        : 'Calculando...';
+    }
+  }
+
+  function atualizarAberturas() {
+    itens.forEach((item) => {
+      const abertaAgora = item.modalidade.id === aberta;
+      item.el.card.classList.toggle('tr-card-aberto', abertaAgora);
+      item.el.cabeca.setAttribute('aria-expanded', String(abertaAgora));
+      item.el.corpo.hidden = !abertaAgora;
+    });
+  }
+
+  function renderizarLista() {
+    elLista.replaceChildren(...itens.map((item) => item.el.card));
+    elVazio.hidden = itens.length > 0;
+    itens.forEach(atualizarCard);
+    atualizarAberturas();
+    renderizarCatalogo();
+  }
+
+  // ---------- Gravação ----------
+
+  function mostrarStatus(item, texto, tipo) {
+    item.el.status.textContent = texto;
+    item.el.status.dataset.tipo = tipo || '';
+  }
+
+  function aoMudar(item) {
+    atualizarCard(item);
+    agendarSimulacao();
+    clearTimeout(item.salvarPendente);
+    if (item.dias.size === 0) {
+      mostrarStatus(item, item.vinculoId
+        ? 'Escolha pelo menos um dia para salvar.'
+        : 'Escolha os dias para adicionar aos seus treinos.', 'aviso');
+      return;
+    }
+    mostrarStatus(item, '');
+    item.salvarPendente = setTimeout(() => salvar(item), ESPERA_SALVAR_MS);
+  }
+
+  function igualAoSalvo(item) {
+    return item.salvo
+      && item.salvo.duracao === item.duracao
+      && JSON.stringify(item.salvo.dias) === JSON.stringify(diasOrdenados(item));
+  }
+
+  // Uma gravação por vez por card: o que mudar durante uma vai na seguinte.
+  async function salvar(item) {
+    if (item.salvando) { item.salvarDeNovo = true; return; }
+    if (item.dias.size === 0 || igualAoSalvo(item)) return;
+
+    item.salvando = true;
+    const dias = diasOrdenados(item);
+    const duracao = item.duracao;
+    mostrarStatus(item, 'Salvando...');
+    ronuOcultarErroFormulario(elErro);
+
+    try {
+      const resposta = await ronuFetchAutenticado('/usuarios/modalidades', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ modalidadeId: item.modalidade.id, diasSemana: dias, duracaoMediaHoras: duracao / 60 })
+      });
+      if (!resposta.ok) {
+        const corpo = await resposta.json().catch(() => null);
+        throw new Error(corpo?.mensagem || 'Não foi possível salvar. Tente novamente.');
+      }
+      const salvo = await resposta.json();
+      item.vinculoId = salvo.id;
+      item.salvo = { dias, duracao };
+      mudou = true;
+      atualizarAvisoGerar();
+      mostrarStatus(item, igualAoSalvo(item) ? 'Salvo' : '', 'ok');
+    } catch (erro) {
+      if (erro.message !== 'Sessão expirada.') {
+        mostrarStatus(item, erro.message, 'erro');
+      }
+    } finally {
+      item.salvando = false;
+      if (item.salvarDeNovo) {
+        item.salvarDeNovo = false;
+        salvar(item);
+      }
+    }
+  }
+
+  function removerDaTela(item) {
+    clearTimeout(item.salvarPendente);
+    itens = itens.filter((i) => i !== item);
+    if (aberta === item.modalidade.id) aberta = itens[0] ? itens[0].modalidade.id : null;
+    renderizarLista();
+    agendarSimulacao();
+    // O foco vai para o título da seção, em vez de se perder com o card.
+    $('tr-minhas-titulo').tabIndex = -1;
+    $('tr-minhas-titulo').focus();
+  }
+
+  async function removerModalidade(item, botao) {
+    if (item.salvando) return;
+    ronuDefinirCarregando(botao, true, 'Removendo...');
+    try {
+      const resposta = await ronuFetchAutenticado(`/usuarios/modalidades/${item.vinculoId}`, { method: 'DELETE' });
+      if (!resposta.ok && resposta.status !== 404) {
+        const corpo = await resposta.json().catch(() => null);
+        throw new Error(corpo?.mensagem || 'Não foi possível remover. Tente novamente.');
+      }
+      mudou = true;
+      atualizarAvisoGerar();
+      removerDaTela(item);
+    } catch (erro) {
+      if (erro.message === 'Sessão expirada.') return;
+      ronuDefinirCarregando(botao, false);
+      renderizarAcoes(item);
+      ronuMostrarErroFormulario(elErro, erro.message);
+    }
+  }
+
+  function atualizarAvisoGerar() {
+    $('tr-gerar').hidden = !mudou;
+    $('tr-gerar-celular').hidden = !mudou;
+  }
+
+  // ---------- Catálogo ----------
+
+  function kanjiDe(nome) {
+    return KANJI[nome.toLowerCase()] || '技';
+  }
+
+  function renderizarCatalogo() {
+    const temNaLista = new Set(itens.map((i) => i.modalidade.id));
+    const peso = simulacao ? simulacao.entradas.peso : null;
+
+    elCartas.replaceChildren(...catalogo.map((modalidade) => {
+      const tem = temNaLista.has(modalidade.id);
+      const carta = criar('button', `tr-carta${tem ? ' tr-carta-tem' : ''}`);
+      carta.type = 'button';
+      carta.setAttribute('aria-label', tem
+        ? `${modalidade.nome}, já está nos seus treinos. Abrir`
+        : `Adicionar ${modalidade.nome}`);
+
+      const arte = criar('span', 'tr-carta-arte');
+      arte.setAttribute('aria-hidden', 'true');
+      const zoom = criar('span', 'tr-carta-zoom grade');
+      zoom.appendChild(criar('span', 'tr-carta-kanji', kanjiDe(modalidade.nome)));
+      arte.appendChild(zoom);
+
+      const textos = criar('span', 'tr-carta-textos');
+      // ~kcal por hora com o seu peso: (MET − 1) × peso, só como referência.
+      const porHora = peso ? ` · ~${formatarNumero((modalidade.metReferencia - 1) * peso)} kcal/h` : '';
+      textos.append(
+        criar('span', 'tr-carta-nome', modalidade.nome),
+        criar('span', 'apoio num tr-so-largo', `Intensidade ${formatarDecimal(modalidade.metReferencia, 1)}${porHora}`),
+        criar('span', 'tr-carta-acao', tem ? 'Já está nos seus treinos' : '+ Adicionar')
+      );
+      carta.append(arte, textos);
+      carta.addEventListener('click', () => (tem ? abrirExistente(modalidade.id) : adicionar(modalidade)));
+      return carta;
+    }));
+  }
+
+  function abrirExistente(modalidadeId) {
+    aberta = modalidadeId;
+    atualizarAberturas();
+    atualizarNumeros();
+    const item = itens.find((i) => i.modalidade.id === modalidadeId);
+    item.el.card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    item.el.cabeca.focus({ preventScroll: true });
+  }
+
+  // Entra na tela aberta e sem dia; só vai para a API com o primeiro dia.
+  function adicionar(modalidade) {
+    const item = { modalidade, vinculoId: null, dias: new Set(), duracao: 60, salvo: null };
+    criarCard(item);
+    itens.push(item);
+    aberta = modalidade.id;
+    renderizarLista();
+    mostrarStatus(item, 'Escolha os dias para adicionar aos seus treinos.', 'aviso');
+    item.el.card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    item.el.grupoDias.querySelector('button').focus({ preventScroll: true });
+  }
+
+  // ---------- Gasto por dia ----------
+
+  function renderizarBarras() {
+    const itemAberto = itens.find((i) => i.modalidade.id === aberta);
+    const kcalAberta = itemAberto ? kcalSessao(itemAberto) || 0 : 0;
+    const porDia = DIAS.map((dia) => {
+      const total = simulacao ? (simulacao.dias.find((d) => d.diaSemana === dia.valor) || {}).treinoKcal || 0 : 0;
+      const daAberta = itemAberto && itemAberto.dias.has(dia.valor) ? Math.min(kcalAberta, total) : 0;
+      return { dia, total, daAberta };
+    });
+    const maior = Math.max(1200, ...porDia.map((d) => d.total));
+
+    elBarras.replaceChildren(...porDia.map(({ dia, total, daAberta }, i) => {
+      const coluna = criar('div', 'tr-coluna');
+      const valor = criar('span', 'tr-coluna-valor num tr-so-largo', total ? formatarNumero(total) : '—');
+      const trilho = criar('div', `tr-coluna-trilho${total ? '' : ' tr-coluna-descanso'}`);
+      trilho.style.height = `${Math.max(4, (total / maior) * 100)}%`;
+      if (total) {
+        const barra = criar('div', 'tr-coluna-barra');
+        barra.dataset.anima = 'barra-v';
+        barra.style.setProperty('--aberta', `${((daAberta / total) * 100).toFixed(1)}%`);
+        barra.style.setProperty('--atraso', `${i * 70}ms`);
+        trilho.appendChild(barra);
+      }
+      // A altura em % da barra é da área, sem o valor e o dia em volta.
+      const area = criar('div', 'tr-coluna-area');
+      area.appendChild(trilho);
+      const nome = criar('span', 'tr-coluna-dia', dia.curto);
+      nome.setAttribute('aria-hidden', 'true');
+      valor.setAttribute('aria-hidden', 'true');
+      coluna.setAttribute('role', 'img');
+      coluna.setAttribute('aria-label', total
+        ? `${dia.nome}: ${formatarNumero(total)} kcal de treino`
+        : `${dia.nome}: descanso`);
+      coluna.append(valor, area, nome);
+      return coluna;
+    }));
+  }
+
+  function atualizarNumeros() {
+    itens.forEach(atualizarCard);
+    renderizarBarras();
+    renderizarCatalogo();
+    const total = simulacao ? simulacao.dias.reduce((soma, d) => soma + d.treinoKcal, 0) : null;
+    $('tr-total-semana').textContent = total == null ? '—' : formatarNumero(total);
+    $('tr-sessoes').textContent = String(itens.reduce((soma, i) => soma + i.dias.size, 0));
+  }
+
+  // ---------- Carga inicial ----------
+
+  async function iniciar() {
+    mostrarSomente(elLoading);
     try {
       const [respostaCatalogo, respostaPraticadas] = await Promise.all([
         fetch(`${RONU_CONFIG.API_BASE}/modalidades`),
         ronuFetchAutenticado('/usuarios/modalidades')
       ]);
-
-      if (!respostaCatalogo.ok || !respostaPraticadas.ok) throw new Error();
-
-      catalogoModalidades = await respostaCatalogo.json();
+      if (!respostaCatalogo.ok || !respostaPraticadas.ok) throw new Error('Falha ao carregar.');
+      catalogo = await respostaCatalogo.json();
       const praticadas = await respostaPraticadas.json();
 
-      elModalidadeList.innerHTML = '';
-      praticadas.forEach((vinculo) => elModalidadeList.appendChild(criarItemModalidade(vinculo)));
-
-      elModalidadesLoading.hidden = true;
-      mostrarListaModalidades();
-      renderizarOpcoesAdicionar();
-    } catch (erro) {
-      if (erro.message !== 'Sessão expirada.') {
-        elModalidadesLoading.textContent = 'Não foi possível carregar suas modalidades. Recarregue a página.';
-      }
-    }
-  }
-
-  async function adicionarModalidade() {
-    const escolhida = elModalidadeAddOptions.querySelector('input[name="modalidade-add-escolha"]:checked');
-
-    if (!escolhida) {
-      ronuMostrarErroFormulario(elModalidadesError, 'Selecione uma modalidade.');
-      return;
-    }
-
-    const diasSemana = Array.from(elModalidadeAddDias.querySelectorAll('.dia-toggle'))
-      .filter((botao) => botao.getAttribute('aria-pressed') === 'true')
-      .map((botao) => Number(botao.dataset.dia));
-
-    if (diasSemana.length === 0) {
-      ronuMostrarErroFormulario(elModalidadesError, 'Selecione pelo menos um dia da semana.');
-      return;
-    }
-
-    if (!elModalidadeAddDuracaoHoras.reportValidity()) return;
-
-    // Horas e minutos são válidos isoladamente (0-5h, 0/15/30/45min), mas a
-    // SOMA pode ficar fora da faixa que a API aceita (ex: 0h+0min=0, abaixo
-    // do mínimo; 5h+45min=5.75, acima do máximo) — por isso valida o total.
-    const duracaoMediaHoras = horasMinutosParaDecimal(
-      Number(elModalidadeAddDuracaoHoras.value || 0),
-      Number(elModalidadeAddDuracaoMinutos.value)
-    );
-
-    if (duracaoMediaHoras < 0.25 || duracaoMediaHoras > 5) {
-      ronuMostrarErroFormulario(elModalidadesError, 'Informe uma duração entre 15 minutos e 5 horas.');
-      return;
-    }
-
-    ronuOcultarErroFormulario(elModalidadesError);
-    ronuDefinirCarregando(btnAdicionarModalidade, true, 'Adicionando...');
-
-    try {
-      const resposta = await ronuFetchAutenticado('/usuarios/modalidades', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          modalidadeId: Number(escolhida.value),
-          diasSemana,
-          duracaoMediaHoras
-        })
+      itens = praticadas.map((vinculo) => {
+        const modalidade = catalogo.find((m) => m.id === vinculo.modalidade.id) || vinculo.modalidade;
+        const dias = [...vinculo.diasSemana].sort((a, b) => a - b);
+        const duracao = horasParaMinutos(vinculo.duracaoMediaHoras);
+        const item = { modalidade, vinculoId: vinculo.id, dias: new Set(dias), duracao, salvo: { dias, duracao } };
+        criarCard(item);
+        return item;
       });
+      aberta = itens[0] ? itens[0].modalidade.id : null;
 
-      if (!resposta.ok) {
-        const corpo = await resposta.json().catch(() => null);
-        throw new Error(corpo?.mensagem || 'Não foi possível adicionar. Tente novamente.');
-      }
-
-      const vinculoSalvo = await resposta.json();
-      const modalidade = catalogoModalidades.find((m) => m.id === vinculoSalvo.modalidadeId);
-      elModalidadeList.appendChild(criarItemModalidade({ ...vinculoSalvo, modalidade }));
-      mostrarListaModalidades();
-      renderizarOpcoesAdicionar();
+      mostrarSomente(elContent);
+      renderizarLista();
+      await simular();
     } catch (erro) {
-      ronuMostrarErroFormulario(elModalidadesError, erro.message);
-    } finally {
-      ronuDefinirCarregando(btnAdicionarModalidade, false);
+      if (erro.message !== 'Sessão expirada.') mostrarSomente(elLoadError);
     }
   }
 
-  btnAdicionarModalidade.addEventListener('click', adicionarModalidade);
+  $('btn-tentar-novamente').addEventListener('click', iniciar);
 
-  // Um .modalidade-salvo-texto novo a cada salvamento: o elemento recém-
-  // criado é o que dispara a entrada animada (configuracoes.css). O nome da
-  // modalidade vai só para o leitor de tela — visualmente, a linha já diz qual é.
-  function mostrarModalidadeSalva(item, salvoStatus) {
-    const nome = item.querySelector('.modalidade-item-nome').textContent;
-    const texto = document.createElement('span');
-    texto.className = 'modalidade-salvo-texto';
-    const contexto = document.createElement('span');
-    contexto.className = 'visually-hidden';
-    contexto.textContent = `${nome}: `;
-    texto.append(contexto, 'Salvo');
-    salvoStatus.replaceChildren(texto);
-  }
-
-  async function salvarModalidade(item, botao) {
-    const horasInput = item.querySelector('.modalidade-duracao-horas');
-    const minutosSelect = item.querySelector('.modalidade-duracao-minutos');
-    if (!horasInput.reportValidity()) return;
-
-    const duracaoMediaHoras = horasMinutosParaDecimal(Number(horasInput.value || 0), Number(minutosSelect.value));
-
-    // Horas e minutos são válidos isoladamente (0-5h, 0/15/30/45min), mas a
-    // SOMA pode ficar fora da faixa que a API aceita — por isso valida o total.
-    if (duracaoMediaHoras < 0.25 || duracaoMediaHoras > 5) {
-      ronuMostrarErroFormulario(elModalidadesError, 'Informe uma duração entre 15 minutos e 5 horas.');
-      return;
-    }
-
-    const diasSemana = Array.from(item.querySelectorAll('.dia-toggle'))
-      .filter((b) => b.getAttribute('aria-pressed') === 'true')
-      .map((b) => Number(b.dataset.dia))
-      .sort((a, b) => a - b);
-
-    if (diasSemana.length === 0) {
-      const nome = item.querySelector('.modalidade-item-nome').textContent;
-      ronuMostrarErroFormulario(elModalidadesError, `Selecione pelo menos um dia da semana para ${nome}.`);
-      return;
-    }
-
-    const modalidadeId = Number(item.dataset.modalidadeId);
-    const salvoStatus = item.querySelector('.modalidade-salvo');
-
-    botao.disabled = true;
-    const textoOriginal = botao.textContent;
-    botao.textContent = 'Salvando...';
-    salvoStatus.textContent = '';
-    ronuOcultarErroFormulario(elModalidadesError);
-
-    try {
-      const resposta = await ronuFetchAutenticado('/usuarios/modalidades', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ modalidadeId, diasSemana, duracaoMediaHoras })
-      });
-
-      if (!resposta.ok) {
-        const corpo = await resposta.json().catch(() => null);
-        throw new Error(corpo?.mensagem || 'Não foi possível salvar. Tente novamente.');
-      }
-
-      item.dataset.duracaoSalva = String(duracaoMediaHoras);
-      item.dataset.diasSalvos = JSON.stringify(diasSemana);
-      botao.textContent = textoOriginal;
-      mostrarModalidadeSalva(item, salvoStatus);
-    } catch (erro) {
-      botao.disabled = false;
-      botao.textContent = textoOriginal;
-      ronuMostrarErroFormulario(elModalidadesError, erro.message);
-    }
-  }
-
-  // Bloqueia a remoção da última modalidade restante: sem isso, o usuário
-  // ficaria com o cadastro "incompleto" (ronuChecarCadastroCompleto exige ao
-  // menos uma) e cairia de volta no loop do onboarding no próximo login.
-  async function removerModalidade(item) {
-    const vinculoId = item.dataset.vinculoId;
-    item.classList.add('is-removing');
-    ronuOcultarErroFormulario(elModalidadesError);
-
-    try {
-      const resposta = await ronuFetchAutenticado(`/usuarios/modalidades/${vinculoId}`, { method: 'DELETE' });
-
-      if (!resposta.ok && resposta.status !== 404) {
-        const corpo = await resposta.json().catch(() => null);
-        throw new Error(corpo?.mensagem || 'Não foi possível remover. Tente novamente.');
-      }
-
-      item.remove();
-      mostrarListaModalidades();
-      renderizarOpcoesAdicionar();
-    } catch (erro) {
-      item.classList.remove('is-removing');
-      renderizarAcaoRemoverModalidade(item.querySelector('.modalidade-item-actions'));
-      ronuMostrarErroFormulario(elModalidadesError, erro.message);
-    }
-  }
-
-  elModalidadeList.addEventListener('click', (evento) => {
-    const botao = evento.target.closest('button[data-acao]');
-    if (!botao) return;
-
-    const item = botao.closest('.modalidade-item');
-
-    if (botao.dataset.acao === 'salvar-modalidade') {
-      salvarModalidade(item, botao);
-      return;
-    }
-
-    if (botao.dataset.acao === 'remover') {
-      if (elModalidadeList.children.length <= 1) {
-        ronuMostrarErroFormulario(elModalidadesError, 'Você precisa manter pelo menos uma modalidade.');
-        return;
-      }
-      renderizarConfirmacaoRemoverModalidade(item.querySelector('.modalidade-item-actions'));
-    } else if (botao.dataset.acao === 'cancelar') {
-      renderizarAcaoRemoverModalidade(item.querySelector('.modalidade-item-actions'));
-    } else if (botao.dataset.acao === 'confirmar') {
-      removerModalidade(item);
-    }
-  });
-
-  await carregarModalidades();
+  await iniciar();
 });
