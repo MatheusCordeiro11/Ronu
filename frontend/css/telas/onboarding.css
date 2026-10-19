@@ -391,7 +391,8 @@
     background: none;
   }
 
-  .ob-painel .carimbo {
+  .ob-painel .carimbo,
+  .ob-painel .selo-legenda {
     display: none;
   }
 

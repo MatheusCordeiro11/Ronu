@@ -54,18 +54,23 @@
   gap: var(--e-4);
 }
 
+/* O padding de cima desce o quimono para a gola não encostar na legenda do
+   Ronin, embaixo do carimbo (em painéis estreitos, ~1024 px, ela encostava). */
 .entrada-arte {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-top: 120px;
   padding-bottom: 80px;
   pointer-events: none;
 }
 
+/* Em janela baixa (notebook de 720 px) o quimono encolhe com a altura, para
+   caber entre a legenda do Ronin e o texto do pé do painel. */
 .entrada-arte .quimono {
-  width: 300px;
+  width: min(300px, 36svh);
   height: auto;
 }
 
@@ -537,6 +542,11 @@
     font-size: 17px;
   }
 
+  /* Na faixa do topo não cabe a legenda do Ronin: fica só o carimbo. */
+  .entrada-painel .selo-legenda {
+    display: none;
+  }
+
   .entrada-painel .botao-tema {
     width: 36px;
     height: 36px;
@@ -549,6 +559,7 @@
 
   .entrada-login .entrada-arte {
     align-items: flex-end;
+    padding-top: 0;
     padding-bottom: 0;
     bottom: -40px;
     top: auto;

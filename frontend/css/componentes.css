@@ -841,6 +841,49 @@ button.chip:hover {
   font-size: 22px;
 }
 
+/* Carimbo com legenda: "Ronin" e o que é, ao lado (.selo) ou embaixo
+   (.selo-embaixo). Teste pedido pelo usuário em 2026-10-18. A legenda é
+   texto de verdade (o carimbo continua aria-hidden). O espaço entre os dois
+   cobre o carimbo crescendo quando "bate". */
+.selo {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e-4);
+}
+
+.selo-embaixo {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--e-3);
+}
+
+.selo-embaixo .selo-legenda {
+  order: 1;
+}
+
+.selo-legenda {
+  max-width: 210px;
+  padding-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: right;
+}
+
+.selo-nome {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 1rem;
+  line-height: 1.2;
+  color: var(--texto);
+}
+
+.selo-texto {
+  font-size: var(--t-rotulo);
+  line-height: 1.45;
+  color: var(--texto-2);
+}
+
 /* ---------- Quimono (SVG provisório) ---------- */
 .quimono {
   transform-origin: 50% 40%;
