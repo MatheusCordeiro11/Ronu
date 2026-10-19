@@ -438,37 +438,160 @@ document.addEventListener('DOMContentLoaded', async () => {
     return KANJI[nome.toLowerCase()] || '技';
   }
 
+  // A fileira roda sozinha (ver Rolagem automática, abaixo) e é redesenhada
+  // a cada simulação: só refaz as cartas quando algo nelas muda, para não
+  // tirar o foco de quem está numa carta nem dar um tranco na rolagem.
+  let assinaturaCatalogo = null;
+
   function renderizarCatalogo() {
     const temNaLista = new Set(itens.map((i) => i.modalidade.id));
     const peso = simulacao ? simulacao.entradas.peso : null;
+    const assinatura = JSON.stringify([catalogo.map((m) => m.id), [...temNaLista].sort(), peso]);
+    if (assinatura === assinaturaCatalogo) return;
+    assinaturaCatalogo = assinatura;
 
-    elCartas.replaceChildren(...catalogo.map((modalidade) => {
-      const tem = temNaLista.has(modalidade.id);
-      const carta = criar('button', `tr-carta${tem ? ' tr-carta-tem' : ''}`);
-      carta.type = 'button';
-      carta.setAttribute('aria-label', tem
-        ? `${modalidade.nome}, já está nos seus treinos. Abrir`
-        : `Adicionar ${modalidade.nome}`);
-
-      const arte = criar('span', 'tr-carta-arte');
-      arte.setAttribute('aria-hidden', 'true');
-      const zoom = criar('span', 'tr-carta-zoom grade');
-      zoom.appendChild(criar('span', 'tr-carta-kanji', kanjiDe(modalidade.nome)));
-      arte.appendChild(zoom);
-
-      const textos = criar('span', 'tr-carta-textos');
-      // ~kcal por hora com o seu peso: (MET − 1) × peso, só como referência.
-      const porHora = peso ? ` · ~${formatarNumero((modalidade.metReferencia - 1) * peso)} kcal/h` : '';
-      textos.append(
-        criar('span', 'tr-carta-nome', modalidade.nome),
-        criar('span', 'apoio num tr-so-largo', `Intensidade ${formatarDecimal(modalidade.metReferencia, 1)}${porHora}`),
-        criar('span', 'tr-carta-acao', tem ? 'Já está nos seus treinos' : '+ Adicionar')
-      );
-      carta.append(arte, textos);
-      carta.addEventListener('click', () => (tem ? abrirExistente(modalidade.id) : adicionar(modalidade)));
-      return carta;
-    }));
+    const originais = catalogo.map((modalidade) => criarCarta(modalidade, temNaLista.has(modalidade.id), peso, false));
+    // Cópias para o laço não ter emenda: clicáveis com o mouse e o dedo, mas
+    // fora do Tab e do leitor de tela (as originais já dizem tudo).
+    const copias = rolagem.ligada
+      ? catalogo.map((modalidade) => criarCarta(modalidade, temNaLista.has(modalidade.id), peso, true))
+      : [];
+    const posicao = elCartas.scrollLeft;
+    elCartas.replaceChildren(...originais, ...copias);
+    elCartas.scrollLeft = posicao;
+    rolagem.medir();
   }
+
+  function criarCarta(modalidade, tem, peso, copia) {
+    const carta = criar('button', `tr-carta${tem ? ' tr-carta-tem' : ''}${copia ? ' tr-carta-copia' : ''}`);
+    carta.type = 'button';
+    if (copia) {
+      carta.tabIndex = -1;
+      carta.setAttribute('aria-hidden', 'true');
+    }
+    carta.setAttribute('aria-label', tem
+      ? `${modalidade.nome}, já está nos seus treinos. Abrir`
+      : `Adicionar ${modalidade.nome}`);
+
+    const arte = criar('span', 'tr-carta-arte');
+    arte.setAttribute('aria-hidden', 'true');
+    const zoom = criar('span', 'tr-carta-zoom grade');
+    zoom.appendChild(criar('span', 'tr-carta-kanji', kanjiDe(modalidade.nome)));
+    arte.appendChild(zoom);
+
+    const textos = criar('span', 'tr-carta-textos');
+    // ~kcal por hora com o seu peso: (MET − 1) × peso, só como referência.
+    const porHora = peso ? ` · ~${formatarNumero((modalidade.metReferencia - 1) * peso)} kcal/h` : '';
+    textos.append(
+      criar('span', 'tr-carta-nome', modalidade.nome),
+      criar('span', 'apoio num tr-so-largo', `Intensidade ${formatarDecimal(modalidade.metReferencia, 1)}${porHora}`),
+      criar('span', 'tr-carta-acao', tem ? 'Já está nos seus treinos' : '+ Adicionar')
+    );
+    carta.append(arte, textos);
+    carta.addEventListener('click', () => (tem ? abrirExistente(modalidade.id) : adicionar(modalidade)));
+    return carta;
+  }
+
+  // ---------- Rolagem automática do catálogo ----------
+  // A fileira anda sozinha, devagar e em laço, mexendo no scrollLeft (e não
+  // num transform): assim o dedo, a roda do mouse e o teclado continuam
+  // rolando como sempre. Como as cartas são botões, ela para quando o mouse
+  // está em cima, quando uma carta tem o foco e enquanto o dedo mexe nela, e
+  // o botão "Pausar" para de vez (WCAG 2.2.2). Também para fora da tela e com
+  // a aba escondida. Com movimento reduzido, nada disso liga: fica a fileira
+  // parada de antes.
+  const rolagem = (() => {
+    const VELOCIDADE_PX_S = 28;
+    const VOLTA_DEPOIS_DO_TOQUE_MS = 4000;
+    const reduzido = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const btn = $('tr-pausar');
+    const estado = { ligada: !reduzido, mouse: false, foco: false, toque: false, usuario: false, fora: false };
+    let larguraVolta = 0;   // distância de uma carta original até a cópia dela
+    let posicao = 0;
+    let anterior = null;
+    let quadro = null;
+    let voltaDoToque = null;
+
+    function parada() {
+      return estado.mouse || estado.foco || estado.toque || estado.usuario || estado.fora || document.hidden;
+    }
+
+    function passo(agora) {
+      quadro = null;
+      if (!estado.ligada || larguraVolta <= 0 || parada()) { anterior = null; return; }
+      // A pessoa rolou na mão (ou o redesenho mudou a posição): segue dali.
+      if (Math.abs(elCartas.scrollLeft - posicao) > 2) posicao = elCartas.scrollLeft;
+      if (anterior != null) posicao += (VELOCIDADE_PX_S * Math.min(agora - anterior, 100)) / 1000;
+      if (posicao >= larguraVolta) posicao -= larguraVolta;
+      anterior = agora;
+      elCartas.scrollLeft = posicao;
+      quadro = requestAnimationFrame(passo);
+    }
+
+    function seguir() {
+      if (quadro == null && estado.ligada && !parada()) quadro = requestAnimationFrame(passo);
+    }
+
+    function atualizarBotao() {
+      btn.hidden = !(estado.ligada && larguraVolta > 0);
+      btn.dataset.pausado = String(estado.usuario);
+      btn.querySelector('.tr-pausar-texto').textContent = estado.usuario ? 'Continuar' : 'Pausar';
+      btn.setAttribute('aria-label', estado.usuario ? 'Continuar a rolagem das modalidades' : 'Pausar a rolagem das modalidades');
+    }
+
+    // Só roda se as cartas originais não couberem: aí a cópia existe e a
+    // volta é a distância entre a primeira original e a primeira cópia.
+    function medir() {
+      const copias = elCartas.querySelectorAll('.tr-carta-copia');
+      // Escondidas, as cópias não têm posição: aparecem para medir.
+      copias.forEach((c) => { c.hidden = false; });
+      const primeiraCopia = copias[0];
+      const primeira = elCartas.firstElementChild;
+      const volta = primeiraCopia ? primeiraCopia.offsetLeft - primeira.offsetLeft : 0;
+      larguraVolta = volta > elCartas.clientWidth ? volta : 0;
+      elCartas.classList.toggle('tr-cartas-rodando', larguraVolta > 0);
+      // Sem rodar, as cópias só atrapalhariam a rolagem na mão.
+      elCartas.querySelectorAll('.tr-carta-copia').forEach((c) => { c.hidden = larguraVolta <= 0; });
+      atualizarBotao();
+      seguir();
+    }
+
+    if (estado.ligada) {
+      elCartas.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') { estado.mouse = true; } });
+      elCartas.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') { estado.mouse = false; seguir(); } });
+      elCartas.addEventListener('focusin', () => { estado.foco = true; });
+      elCartas.addEventListener('focusout', (e) => {
+        if (!elCartas.contains(e.relatedTarget)) { estado.foco = false; seguir(); }
+      });
+      // Toque: para enquanto o dedo mexe e volta um pouco depois.
+      const tocou = () => {
+        estado.toque = true;
+        clearTimeout(voltaDoToque);
+        voltaDoToque = setTimeout(() => { estado.toque = false; seguir(); }, VOLTA_DEPOIS_DO_TOQUE_MS);
+      };
+      elCartas.addEventListener('touchstart', tocou, { passive: true });
+      elCartas.addEventListener('touchmove', tocou, { passive: true });
+      btn.addEventListener('click', () => {
+        estado.usuario = !estado.usuario;
+        atualizarBotao();
+        seguir();
+      });
+      document.addEventListener('visibilitychange', seguir);
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver((entradas) => {
+          estado.fora = !entradas[0].isIntersecting;
+          seguir();
+        }).observe(elCartas);
+      }
+      let redimensionar = null;
+      window.addEventListener('resize', () => {
+        clearTimeout(redimensionar);
+        redimensionar = setTimeout(medir, 150);
+      });
+    }
+
+    return { get ligada() { return estado.ligada; }, medir };
+  })();
 
   function abrirExistente(modalidadeId) {
     aberta = modalidadeId;

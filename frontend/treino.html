@@ -93,7 +93,17 @@
       <section class="tr-catalogo" aria-labelledby="tr-catalogo-titulo">
         <div class="tr-catalogo-cabeca">
           <h2 id="tr-catalogo-titulo" class="tr-titulo-secao">Adicionar modalidade</h2>
-          <span class="apoio tr-so-largo">Intensidades do Compêndio de Atividades Físicas</span>
+          <div class="tr-catalogo-direita">
+            <span class="apoio tr-so-largo">Intensidades do Compêndio de Atividades Físicas</span>
+            <!-- Pausa da fileira que roda sozinha (js/treino.js). Só aparece
+                 quando ela de fato roda: sem movimento reduzido e com mais
+                 cartas do que cabem. -->
+            <button type="button" class="botao-texto tr-pausar" id="tr-pausar" aria-controls="tr-cartas" hidden>
+              <svg class="tr-icone-pausar" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 2v8M8.5 2v8"/></svg>
+              <svg class="tr-icone-continuar" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 2l6 4-6 4z"/></svg>
+              <span class="tr-pausar-texto">Pausar</span>
+            </button>
+          </div>
         </div>
         <div class="tr-cartas" id="tr-cartas"></div>
       </section>
