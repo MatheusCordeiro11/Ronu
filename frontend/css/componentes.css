@@ -483,6 +483,63 @@ textarea.entrada {
   line-height: 1.5;
 }
 
+/* Campo de senha com o botão de olho (js/base/senha.js monta a caixa). */
+.senha-caixa {
+  position: relative;
+}
+
+.senha-caixa .entrada {
+  padding-right: 52px;
+}
+
+/* O Edge desenha um olho próprio: fica só o nosso. */
+.senha-caixa .entrada::-ms-reveal {
+  display: none;
+}
+
+.botao-ver-senha {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  width: 44px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--raio);
+  background: transparent;
+  color: var(--texto-2);
+  transform: translateY(-50%);
+  cursor: pointer;
+  transition: color var(--d-rapida) ease;
+}
+
+.botao-ver-senha:hover {
+  color: var(--texto);
+}
+
+.botao-ver-senha:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: -2px;
+}
+
+.botao-ver-senha svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* O ícone mostra a ação: olho para mostrar, olho riscado para esconder. */
+.botao-ver-senha .icone-ocultar,
+.botao-ver-senha[aria-pressed="true"] .icone-mostrar {
+  display: none;
+}
+
+.botao-ver-senha[aria-pressed="true"] .icone-ocultar {
+  display: block;
+}
+
 select.entrada {
   appearance: none;
   padding-right: 40px;
