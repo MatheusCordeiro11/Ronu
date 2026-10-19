@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   btnManter.addEventListener('click', () => fecharConfirmacao(true));
   elPesoHoje.addEventListener('input', () => ronuLimparCampoInvalido($('pf-campo-peso'), $('pf-peso-erro')));
 
-  elConfirmar.addEventListener('submit', async (evento) => {
+  elConfirmar.addEventListener('submit', ronuComGravacao(async (evento) => {
     evento.preventDefault();
     const peso = parseFloat(elPesoHoje.value);
     if (!(peso >= 20 && peso <= 300)) {
@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       ronuDefinirCarregando(btnTrocar, false);
       if (erro.message !== 'Sessão expirada.') ronuMostrarErroFormulario($('pf-objetivo-erro'), erro.message);
     }
-  });
+  }));
 
   // ---------- Seus dados ----------
 
@@ -265,8 +265,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // PUT /perfil grava todos os campos juntos: rotina e orçamento (editados
   // na Alimentação) vêm de um GET feito na hora, para não apagar o que outra
   // aba salvou (solução definitiva em docs/lacunas-conhecidas.md).
-  async function salvarDados() {
+  const salvarDados = ronuComGravacao(async () => {
     clearTimeout(salvarPendente);
+    salvarPendente = null;
     const dados = dadosDosCampos(true);
     if (!dados || igualAoSalvo(dados)) return;
     if (salvando) { salvarDeNovo = true; return; }
@@ -303,7 +304,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         salvarDados();
       }
     }
-  }
+  });
 
   function aoMudarDados() {
     status(elDadosStatus, '');
@@ -462,7 +463,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnRegiaoAlterar.focus();
   });
 
-  elRegiaoForm.addEventListener('submit', async (evento) => {
+  elRegiaoForm.addEventListener('submit', ronuComGravacao(async (evento) => {
     evento.preventDefault();
     const uf = elRegiaoSelect.value;
     if (!uf) {
@@ -488,6 +489,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     } finally {
       ronuDefinirCarregando(btn, false);
     }
+  }));
+
+  // ---------- Gerar dieta ----------
+
+  $('pf-gerar').addEventListener('click', () => {
+    ronuGerarDietaEIrAoPainel($('pf-gerar'), $('pf-gerar-erro'), {
+      // Altura ou nascimento ainda no atraso de salvar.
+      descarregar: () => {
+        if (salvarPendente) salvarDados();
+      },
+      travar: [document.querySelector('.pf-coluna'), document.querySelector('.pf-regiao')]
+    });
   });
 
   // ---------- Conta ----------

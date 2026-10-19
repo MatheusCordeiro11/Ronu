@@ -429,6 +429,80 @@ function ronuAvisoDeEspera(elementoTexto) {
   return () => temporizadores.forEach(clearTimeout);
 }
 
+// Gravações em andamento na tela (Perfil, Treino e Alimentação salvam
+// sozinhas). O "Gerar dieta" dessas telas espera todas terminarem, para a
+// dieta já sair com a última mudança.
+const ronuGravacoes = new Set();
+
+// Embrulha uma função async de gravação para ela entrar no acompanhamento.
+function ronuComGravacao(funcao) {
+  return (...args) => {
+    const promessa = funcao(...args);
+    ronuGravacoes.add(promessa);
+    const tirar = () => ronuGravacoes.delete(promessa);
+    promessa.then(tirar, tirar);
+    return promessa;
+  };
+}
+
+// Em laço: uma gravação pode encadear outra ao terminar (o "salvar de novo"
+// de quem mexeu durante a anterior).
+async function ronuAguardarGravacoes() {
+  while (ronuGravacoes.size > 0) await Promise.allSettled([...ronuGravacoes]);
+}
+
+let ronuGerandoDieta = false;
+
+// "Gerar dieta com as mudanças" do Perfil, do Treino e da Alimentação: salva
+// o que estiver pendente, gera a dieta e só então vai para o painel, que já
+// abre nela. Enquanto gera, as áreas de edição ficam inert: uma mudança
+// feita no meio não entraria na dieta que está sendo montada. Em erro, fica
+// na tela com a mensagem e tudo destravado para tentar de novo.
+// - descarregar: dispara na hora as gravações que esperavam o atraso.
+// - travar: elementos que ficam inert durante a geração.
+async function ronuGerarDietaEIrAoPainel(botao, elErro, { descarregar, travar = [] } = {}) {
+  // Enter/Espaço no botão em carregamento, ou o outro "Gerar" da tela.
+  if (ronuGerandoDieta) return;
+  ronuGerandoDieta = true;
+
+  const destravar = () => {
+    ronuGerandoDieta = false;
+    ronuDefinirCarregando(botao, false);
+    botao.removeAttribute('aria-busy');
+    travar.forEach((el) => { el.inert = false; });
+  };
+
+  ronuOcultarErroFormulario(elErro);
+  ronuDefinirCarregando(botao, true, 'Montando sua dieta da semana...');
+  botao.setAttribute('aria-busy', 'true');
+  travar.forEach((el) => { el.inert = true; });
+
+  try {
+    if (descarregar) descarregar();
+    await ronuAguardarGravacoes();
+
+    const resposta = await ronuFetchAutenticado('/dietas/gerar', { method: 'POST' });
+    if (!resposta.ok) {
+      const corpo = await resposta.json().catch(() => null);
+      throw new Error(corpo?.mensagem || 'Não foi possível gerar sua dieta. Tente novamente.');
+    }
+
+    // Voltar do painel pelo navegador pode restaurar esta página do cache
+    // como estava (carregando e travada): destrava ao reaparecer.
+    window.addEventListener('pageshow', (evento) => {
+      if (evento.persisted) destravar();
+    }, { once: true });
+    window.location.href = 'dashboard.html';
+  } catch (erro) {
+    if (erro.message === 'Sessão expirada.') return;
+    destravar();
+    ronuMostrarErroFormulario(elErro, erro.message === 'Failed to fetch'
+      ? 'Não foi possível gerar sua dieta. Verifique sua conexão e tente novamente.'
+      : erro.message);
+    elErro.scrollIntoView({ block: 'nearest' });
+  }
+}
+
 // true do momento em que uma credencial do Google chega até a página trocar
 // (ou o login falhar). Uma segunda credencial nesse intervalo é ignorada.
 let ronuLoginGoogleEmAndamento = false;

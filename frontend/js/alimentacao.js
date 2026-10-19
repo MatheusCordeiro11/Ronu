@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }));
   }
 
-  async function adicionar(tipo, nomeBruto, origem) {
+  const adicionar = ronuComGravacao(async (tipo, nomeBruto, origem) => {
     const s = secoes[tipo];
     const nome = normalizar(nomeBruto);
     if (!nome) {
@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (origem && origem.isConnected) origem.disabled = false;
       if (origem && !origem.isConnected) s.campo.focus();
     }
-  }
+  });
 
   Object.entries(secoes).forEach(([tipo, s]) => {
     s.form.addEventListener('submit', (evento) => {
@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     s.campo.addEventListener('input', () => avisar(tipo, ''));
   });
 
-  async function removerPreferencia(preferencia, item) {
+  const removerPreferencia = ronuComGravacao(async (preferencia, item) => {
     const tipo = preferencia.tipo;
     item.dataset.saindo = '';
     avisar(tipo, '');
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       delete item.dataset.saindo;
       if (erro.message !== 'Sessão expirada.') avisar(tipo, erro.message, true);
     }
-  }
+  });
 
   // ---------- Perfil: rotina e orçamento ----------
   // PUT /perfil grava todos os campos juntos (altura, sexo e data de
@@ -290,7 +290,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return elRotina.value.trim() || null;
   }
 
-  async function salvarRotina() {
+  const salvarRotina = ronuComGravacao(async () => {
     clearTimeout(rotinaPendente);
     if (!perfil || perfilIncompleto()) return;
     if (rotinaDoCampo() === (perfil.rotinaDiaria ?? null)) return;
@@ -311,7 +311,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         salvarRotina();
       }
     }
-  }
+  });
 
   elRotina.addEventListener('input', () => {
     atualizarContador();
@@ -342,7 +342,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (window.RonuMovimento && grupo.classList.contains('em-cena')) window.RonuMovimento.redesenhar(grupo);
   }
 
-  async function escolherOrcamento(botao) {
+  const escolherOrcamento = ronuComGravacao(async (botao) => {
     const valor = botao.dataset.valor;
     if (!perfil || perfilIncompleto() || valor === perfil.orcamentoSemanal) return;
     const anterior = perfil.orcamentoSemanal;
@@ -356,7 +356,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       renderizarOrcamento(anterior);
       if (erro.message !== 'Sessão expirada.') status(elOrcamentoStatus, erro.message, 'erro');
     }
-  }
+  });
 
   botoesOrcamento.forEach((botao) => botao.addEventListener('click', () => escolherOrcamento(botao)));
   $('al-faixas').addEventListener('keydown', (evento) => {
@@ -386,6 +386,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     // No celular a frase já traz os nomes (canvas AlimentacaoMobile).
     texto.append(criar('span', 'al-so-celular', ` ${mandioca}, ${feijao}.`));
   }
+
+  // ---------- Gerar dieta ----------
+
+  $('al-gerar').addEventListener('click', () => {
+    ronuGerarDietaEIrAoPainel($('al-gerar'), $('al-gerar-erro'), {
+      // Rotina ainda no atraso de salvar (sem mudança, salvarRotina não grava).
+      descarregar: salvarRotina,
+      travar: [document.querySelector('.al-coluna'), document.querySelector('.al-orcamento')]
+    });
+  });
 
   // ---------- Carga ----------
 

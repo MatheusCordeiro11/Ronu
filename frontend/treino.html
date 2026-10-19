@@ -85,7 +85,8 @@
           <section class="cartao tr-quando tr-so-largo-bloco" aria-labelledby="tr-quando-titulo">
             <h2 class="rotulo" id="tr-quando-titulo">Quando muda na dieta</h2>
             <p>Mudanças aqui entram na próxima dieta que você gerar. A dieta atual continua como está.</p>
-            <a class="botao botao-primario tr-gerar entra" id="tr-gerar" href="dashboard.html" hidden>Gerar dieta com o treino novo</a>
+            <button type="button" class="botao botao-primario tr-gerar entra" id="tr-gerar" hidden><span class="btn-label">Gerar dieta com o treino novo</span></button>
+            <div class="aviso aviso-erro" id="tr-gerar-erro" role="alert" hidden></div>
           </section>
         </aside>
       </div>
@@ -109,7 +110,10 @@
       </section>
 
       <!-- No celular o aviso de gerar vai no fim, depois do catálogo. -->
-      <a class="botao botao-primario botao-bloco tr-gerar-celular" id="tr-gerar-celular" href="dashboard.html" hidden>Gerar dieta com o treino novo</a>
+      <div class="tr-gerar-celular" id="tr-gerar-celular" hidden>
+        <button type="button" class="botao botao-primario botao-bloco" id="tr-gerar-celular-botao"><span class="btn-label">Gerar dieta com o treino novo</span></button>
+        <div class="aviso aviso-erro" id="tr-gerar-celular-erro" role="alert" hidden></div>
+      </div>
     </div>
   </main>
 

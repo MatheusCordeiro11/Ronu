@@ -777,6 +777,11 @@
 
   .tr-gerar-celular:not([hidden]) {
     display: flex;
+    flex-direction: column;
+    gap: var(--e-3);
+  }
+
+  .tr-gerar-celular .botao {
     min-height: 52px;
   }
 

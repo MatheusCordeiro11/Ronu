@@ -357,7 +357,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Uma gravação por vez por card: o que mudar durante uma vai na seguinte.
-  async function salvar(item) {
+  const salvar = ronuComGravacao(async (item) => {
     if (item.salvando) { item.salvarDeNovo = true; return; }
     if (item.dias.size === 0 || igualAoSalvo(item)) return;
 
@@ -394,7 +394,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         salvar(item);
       }
     }
-  }
+  });
 
   function removerDaTela(item) {
     clearTimeout(item.salvarPendente);
@@ -407,7 +407,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     $('tr-minhas-titulo').focus();
   }
 
-  async function removerModalidade(item, botao) {
+  const removerModalidade = ronuComGravacao(async (item, botao) => {
     if (item.salvando) return;
     ronuDefinirCarregando(botao, true, 'Removendo...');
     try {
@@ -425,12 +425,26 @@ document.addEventListener('DOMContentLoaded', async () => {
       renderizarAcoes(item);
       ronuMostrarErroFormulario(elErro, erro.message);
     }
-  }
+  });
 
   function atualizarAvisoGerar() {
     $('tr-gerar').hidden = !mudou;
     $('tr-gerar-celular').hidden = !mudou;
   }
+
+  // Largo e celular têm cada um o seu botão (só um aparece por vez).
+  [['tr-gerar', 'tr-gerar-erro'], ['tr-gerar-celular-botao', 'tr-gerar-celular-erro']].forEach(([idBotao, idErro]) => {
+    $(idBotao).addEventListener('click', () => {
+      ronuGerarDietaEIrAoPainel($(idBotao), $(idErro), {
+        // Dias ou duração ainda no atraso de salvar (sem mudança, salvar não grava).
+        descarregar: () => itens.forEach((item) => {
+          clearTimeout(item.salvarPendente);
+          salvar(item);
+        }),
+        travar: [document.querySelector('.tr-minhas'), document.querySelector('.tr-catalogo')]
+      });
+    });
+  });
 
   // ---------- Catálogo ----------
 
