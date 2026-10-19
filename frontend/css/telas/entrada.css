@@ -210,6 +210,14 @@
   justify-content: center;
 }
 
+/* O iframe do Google não declara color-scheme (é claro). Com a página em
+   "dark" (Dojo Noturno), o navegador pinta um fundo branco opaco atrás de um
+   iframe de esquema diferente, que aparecia como moldura em volta do botão.
+   Declarar o mesmo esquema do conteúdo dele deixa o fundo transparente. */
+.entrada-google iframe {
+  color-scheme: light;
+}
+
 /* Enquanto a credencial do Google é trocada por uma sessão (js/auth.js). */
 .entrada-google[data-loading="true"] {
   opacity: 0.5;
