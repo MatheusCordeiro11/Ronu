@@ -263,6 +263,14 @@
   -webkit-box-decoration-break: clone;
 }
 
+/* Nas faixas de título das telas logadas a grade passa inteira por trás do
+   texto (pedido do usuário, 2026-10-18): os retângulos de fundo cortavam as
+   linhas e, com a grade deslizando, os quadrados pareciam desalinhados. As
+   linhas são apagadas o bastante (--grade) para não atrapalhar a leitura. */
+.faixa-titulo .sobre-grade {
+  background: none;
+}
+
 @media (max-width: 720px) {
   .faixa-titulo-conteudo {
     padding-top: var(--e-7);
