@@ -26,6 +26,7 @@
   <link rel="stylesheet" href="landing.css">
 
   <script src="landing.js" defer></script>
+  <script src="modalidades.js" defer></script>
 </head>
 <body>
   <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
@@ -71,27 +72,112 @@
           <p class="apoio lp-modalidades"><span class="sobre-grade">Grátis · Jiu-jitsu, muay thai, boxe, musculação, futebol, basquete e natação</span></p>
         </div>
 
-        <div class="lp-hero-arte" aria-hidden="true">
-          <svg class="quimono lp-hero-quimono" viewBox="0 0 400 460" width="320" height="368" focusable="false">
-            <path class="q-corpo" d="M150 30 L40 62 L0 192 L70 218 L110 142 L110 440 L290 440 L290 142 L330 218 L400 192 L360 62 L250 30 Q200 52 150 30 Z"/>
-            <path class="q-sombra-1" d="M150 30 L176 30 L256 232 L238 252 Z"/>
-            <path class="q-sombra-2" d="M250 30 L224 30 L150 220 L162 252 Z"/>
-            <path class="q-costura" d="M40 62 L70 218 M360 62 L330 218 M200 280 L200 440"/>
-            <path class="q-faixa" d="M110 250 L290 250 L290 282 L110 282 Z"/>
-            <path class="q-faixa" d="M188 282 L166 376 L184 379 L201 286 Z"/>
-            <path class="q-faixa" d="M212 282 L240 368 L222 373 L203 286 Z"/>
-            <rect class="q-etiqueta" x="232" y="262" width="22" height="9"/>
-          </svg>
+        <!-- A ilustração troca sozinha entre as sete modalidades do catálogo
+             (GET /api/modalidades), para mostrar que o Ronu não é só jiu-jitsu
+             (landing/v1/modalidades.js). Cores só pelos tokens do quimono. -->
+        <div class="lp-hero-arte" id="lp-modalidades">
+          <div class="quimono lp-hero-quimono lp-ilustracoes">
+            <svg class="lp-ilustracao lp-ilustracao-atual" viewBox="0 0 400 460" role="img" aria-label="Quimono de jiu-jitsu" focusable="false">
+              <path class="q-corpo" d="M150 30 L40 62 L0 192 L70 218 L110 142 L110 440 L290 440 L290 142 L330 218 L400 192 L360 62 L250 30 Q200 52 150 30 Z"/>
+              <path class="q-sombra-1" d="M150 30 L176 30 L256 232 L238 252 Z"/>
+              <path class="q-sombra-2" d="M250 30 L224 30 L150 220 L162 252 Z"/>
+              <path class="q-costura" d="M40 62 L70 218 M360 62 L330 218 M200 280 L200 440"/>
+              <path class="q-faixa" d="M110 250 L290 250 L290 282 L110 282 Z"/>
+              <path class="q-faixa" d="M188 282 L166 376 L184 379 L201 286 Z"/>
+              <path class="q-faixa" d="M212 282 L240 368 L222 373 L203 286 Z"/>
+              <rect class="q-etiqueta" x="232" y="262" width="22" height="9"/>
+            </svg>
+            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Calção de muay thai" focusable="false">
+              <path class="il-papel" d="M92 128 L308 128 L345 392 L218 392 L200 262 L182 392 L55 392 Z"/>
+              <path class="il-sombra" d="M92 128 L120 128 L104 392 L55 392 Z"/>
+              <path class="il-sombra" d="M308 128 L280 128 L296 392 L345 392 Z"/>
+              <path class="il-traco-costura" d="M200 262 L200 150" stroke-width="2"/>
+              <rect class="il-tinta" x="84" y="70" width="232" height="64" rx="8"/>
+              <rect class="il-acento" x="140" y="92" width="120" height="20" rx="3"/>
+              <path class="il-acento" d="M55 368 L182 368 L182 392 L55 392 Z M218 368 L345 368 L345 392 L218 392 Z"/>
+              <path class="il-traco-costura" d="M84 102 L54 128 M316 102 L346 128" stroke-width="6" stroke-linecap="round"/>
+            </svg>
+            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Luvas de boxe" focusable="false">
+              <g transform="translate(110 40)">
+                <path class="il-sombra" d="M70 120 C70 60 190 50 205 110 C222 170 212 250 186 280 L186 330 L84 330 L84 285 C52 252 48 180 70 120 Z"/>
+                <rect class="il-tinta" x="82" y="292" width="106" height="74" rx="8"/>
+                <rect class="il-acento" x="82" y="312" width="106" height="10"/>
+              </g>
+              <g transform="translate(20 70)">
+                <path class="il-papel" d="M70 120 C70 60 190 50 205 110 C222 170 212 250 186 280 L186 330 L84 330 L84 285 C52 252 48 180 70 120 Z"/>
+                <path class="il-sombra-2" d="M74 196 C32 186 30 252 80 258 Z"/>
+                <path class="il-traco-costura" d="M100 120 C120 100 160 98 182 118" stroke-width="3" fill="none"/>
+                <rect class="il-tinta" x="82" y="292" width="106" height="74" rx="8"/>
+                <rect class="il-acento" x="82" y="312" width="106" height="10"/>
+              </g>
+            </svg>
+            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Halter de musculação" focusable="false">
+              <g transform="rotate(-18 200 230)">
+                <rect class="il-costura" x="70" y="218" width="260" height="24" rx="4"/>
+                <rect class="il-papel" x="40" y="140" width="44" height="180" rx="8"/>
+                <rect class="il-sombra" x="84" y="162" width="30" height="136" rx="6"/>
+                <rect class="il-papel" x="316" y="140" width="44" height="180" rx="8"/>
+                <rect class="il-sombra" x="286" y="162" width="30" height="136" rx="6"/>
+                <rect class="il-acento" x="114" y="208" width="14" height="44" rx="3"/>
+                <rect class="il-acento" x="272" y="208" width="14" height="44" rx="3"/>
+                <path class="il-traco-tinta" d="M160 222 L160 238 M176 222 L176 238 M192 222 L192 238 M208 222 L208 238 M224 222 L224 238 M240 222 L240 238" stroke-width="3"/>
+              </g>
+            </svg>
+            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Bola de futebol" focusable="false">
+              <!-- Id único na página: o recorte dos gomos da bola. -->
+              <defs><clipPath id="lp-recorte-bola-futebol"><circle cx="200" cy="230" r="150"/></clipPath></defs>
+              <circle class="il-papel" cx="200" cy="230" r="150"/>
+              <g class="il-tinta" clip-path="url(#lp-recorte-bola-futebol)">
+                <polygon points="200,182 245.6,215.2 228.2,268.8 171.8,268.8 154.4,215.2"/>
+                <circle cx="288" cy="108" r="52"/><circle cx="343" cy="276" r="52"/><circle cx="200" cy="384" r="52"/><circle cx="57" cy="276" r="52"/><circle cx="112" cy="108" r="52"/>
+              </g>
+              <path class="il-traco-costura" d="M200 182 L200 132 M245.6 215.2 L292 198 M228.2 268.8 L258 310 M171.8 268.8 L142 310 M154.4 215.2 L108 198" stroke-width="5" stroke-linecap="round"/>
+              <circle class="il-traco-costura" cx="200" cy="230" r="150" fill="none" stroke-width="4"/>
+              <path class="il-traco-acento" d="M120 410 L280 410" stroke-width="8" stroke-linecap="round"/>
+            </svg>
+            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Bola de basquete" focusable="false">
+              <circle class="il-acento" cx="200" cy="230" r="150"/>
+              <path class="il-traco-tinta" d="M200 80 L200 380 M50 230 L350 230 M96 122 C152 172 152 288 96 338 M304 122 C248 172 248 288 304 338" stroke-width="7" fill="none" stroke-linecap="round"/>
+              <path class="il-traco-papel" d="M120 120 C150 98 180 90 205 90" stroke-width="6" fill="none" stroke-linecap="round" opacity=".55"/>
+              <path class="il-traco-costura" d="M120 410 L280 410" stroke-width="8" stroke-linecap="round"/>
+            </svg>
+            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Óculos de natação" focusable="false">
+              <path class="il-traco-costura" d="M78 222 C20 222 12 292 60 300 M322 222 C380 222 388 292 340 300" stroke-width="12" fill="none" stroke-linecap="round"/>
+              <ellipse class="il-tinta il-traco-papel" cx="138" cy="230" rx="64" ry="48" stroke-width="14"/>
+              <ellipse class="il-tinta il-traco-papel" cx="262" cy="230" rx="64" ry="48" stroke-width="14"/>
+              <rect class="il-papel" x="190" y="222" width="20" height="14" rx="4"/>
+              <path class="il-traco-acento" d="M108 212 C118 200 136 196 150 200 M232 212 C242 200 260 196 274 200" stroke-width="6" fill="none" stroke-linecap="round"/>
+              <path class="il-traco-acento" d="M30 372 q35 -24 70 0 t70 0 t70 0 t70 0 t70 0" stroke-width="8" fill="none" stroke-linecap="round"/>
+              <path class="il-traco-costura" d="M30 404 q35 -24 70 0 t70 0 t70 0 t70 0 t70 0" stroke-width="6" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+
+          <div class="lp-modalidades-controles">
+            <span class="mono lp-modalidade-nome" id="lp-modalidade-nome" aria-live="polite">Jiu-jitsu</span>
+            <div class="lp-pontos" role="group" aria-label="Modalidades">
+              <button type="button" class="lp-ponto" aria-label="Mostrar Jiu-jitsu" aria-pressed="true"><span></span></button>
+              <button type="button" class="lp-ponto" aria-label="Mostrar Muay thai" aria-pressed="false"><span></span></button>
+              <button type="button" class="lp-ponto" aria-label="Mostrar Boxe" aria-pressed="false"><span></span></button>
+              <button type="button" class="lp-ponto" aria-label="Mostrar Musculação" aria-pressed="false"><span></span></button>
+              <button type="button" class="lp-ponto" aria-label="Mostrar Futebol" aria-pressed="false"><span></span></button>
+              <button type="button" class="lp-ponto" aria-label="Mostrar Basquete" aria-pressed="false"><span></span></button>
+              <button type="button" class="lp-ponto" aria-label="Mostrar Natação" aria-pressed="false"><span></span></button>
+            </div>
+          </div>
+
           <!-- Números do exemplo, pela fórmula real (ver landing.js). -->
-          <div class="flutua lp-flutua-1">
-            <span class="mono lp-flutua-rotulo lp-flutua-acento">Hoje · jiu-jitsu</span>
+          <div class="flutua lp-flutua-1" aria-hidden="true">
+            <span class="mono lp-flutua-rotulo lp-flutua-acento">Hoje · dia de treino</span>
             <span class="numero lp-flutua-numero">2.851 kcal</span>
           </div>
-          <div class="flutua lp-flutua-2">
+          <div class="flutua lp-flutua-2" aria-hidden="true">
             <span class="mono lp-flutua-rotulo">Amanhã · descanso</span>
             <span class="numero lp-flutua-numero texto-2">2.035 kcal</span>
           </div>
-          <div class="carimbo carimbo-pequeno lp-hero-carimbo"><span>浪</span><span>人</span></div>
+          <div class="selo lp-hero-carimbo">
+            <p class="selo-legenda"><span class="selo-nome">Ronin</span><span class="selo-texto">No Japão feudal, o samurai sem mestre, que seguia o próprio caminho. Daí vem o nome Ronu.</span></p>
+            <div class="carimbo carimbo-pequeno" aria-hidden="true"><span>浪</span><span>人</span></div>
+          </div>
         </div>
       </div>
 

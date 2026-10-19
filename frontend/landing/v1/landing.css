@@ -139,18 +139,118 @@ html {
   margin-top: var(--e-1);
 }
 
+/* O padding de cima desce a ilustração para a legenda do Ronin (no alto, ao
+   lado do carimbo) não encostar nela. Ilustração e, embaixo, nome e pontos
+   ficam empilhados no centro (assim os controles nunca cobrem o desenho). */
 .lp-hero-arte {
   position: relative;
-  height: 480px;
+  height: 540px;
+  padding-top: 96px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 14px;
 }
 
+/* Palco das sete ilustrações (landing/v1/modalidades.js): o balanço do
+   quimono fica no palco, então vale para todas. */
 .lp-hero-quimono {
+  position: relative;
   width: 320px;
   height: auto;
+  aspect-ratio: 400 / 460;
   animation-name: lp-quimono-balanca;
+}
+
+.lp-ilustracao {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transform: scale(0.82) rotate(-8deg);
+  transition: opacity 0.7s ease, transform 0.8s var(--curva-saida);
+}
+
+.lp-ilustracao-atual {
+  opacity: 1;
+  transform: none;
+}
+
+/* Cores das ilustrações novas: as mesmas do quimono, nos dois modos. */
+.il-papel { fill: var(--quimono); }
+.il-sombra { fill: var(--quimono-sombra-1); }
+.il-sombra-2 { fill: var(--quimono-sombra-2); }
+.il-costura { fill: var(--quimono-costura); }
+.il-tinta { fill: var(--quimono-faixa); }
+.il-acento { fill: var(--acento); }
+.il-traco-papel { stroke: var(--quimono); }
+.il-traco-costura { stroke: var(--quimono-costura); }
+.il-traco-tinta { stroke: var(--quimono-faixa); }
+.il-traco-acento { stroke: var(--acento); }
+
+/* Nome da modalidade e os pontos, logo abaixo da ilustração. */
+.lp-modalidades-controles {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--e-2);
+}
+
+.lp-modalidade-nome {
+  padding: 6px 14px;
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-pilula);
+  background: var(--fundo);
+  font-size: var(--t-rotulo);
+  color: var(--texto);
+}
+
+.lp-pontos {
+  display: flex;
+  padding: 0 4px;
+  border-radius: var(--raio-pilula);
+  background: var(--fundo);
+}
+
+/* O ponto à vista é pequeno, mas o botão tem 24 × 24 px de área de toque. */
+.lp-ponto {
+  min-width: 24px;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2px;
+  border: 0;
+  border-radius: var(--raio-pilula);
+  background: transparent;
+  cursor: pointer;
+}
+
+.lp-ponto span {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--linha);
+  transition: width 0.4s ease, background-color 0.4s ease;
+}
+
+.lp-ponto:hover span {
+  background: var(--borda-forte);
+}
+
+.lp-ponto[aria-pressed="true"] span {
+  width: 18px;
+  background: var(--acento);
+}
+
+.lp-ponto:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 1px;
 }
 
 /* Um pouco mais largo que o quimono das outras telas, como no canvas. */
@@ -808,6 +908,18 @@ html {
   line-height: 1.05;
 }
 
+/* No topo e na chamada final só passa a grade atrás do texto (a arte do topo
+   tem coluna própria e, no celular, vai para baixo): ela segue inteira por
+   trás das letras, como nas faixas de título das telas logadas (pedido do
+   usuário, 2026-10-18). Os retângulos de fundo cortavam as linhas. O botão
+   fantasma (.lp-fundo) mantém o fundo: é botão, com borda. */
+.lp-hero .lp-bloco-fundo,
+.lp-hero .sobre-grade,
+.lp-final .lp-bloco-fundo,
+.lp-final .sobre-grade {
+  background: none;
+}
+
 /* ---------- Rodapé ---------- */
 .lp-creditos {
   padding-top: 0;
@@ -815,6 +927,14 @@ html {
 
 .lp-autor {
   color: var(--texto);
+}
+
+/* Duas colunas com a arte estreita: o card "Hoje" desce para não encostar na
+   legenda do Ronin, no alto à direita. */
+@media (min-width: 961px) and (max-width: 1180px) {
+  .lp-flutua-1 {
+    top: 120px;
+  }
 }
 
 /* ---------- Celular e telas médias ---------- */
@@ -831,7 +951,7 @@ html {
   }
 
   .lp-hero-arte {
-    height: 380px;
+    height: 480px;
   }
 
   .lp-hero-quimono {
@@ -881,24 +1001,42 @@ html {
     display: none;
   }
 
+  /* Aqui não cabe a legenda do Ronin ao lado do carimbo: fica só o carimbo.
+     A ilustração começa abaixo do card "Hoje" e os cards ficam compactos,
+     para não esconderem o desenho (a luva de boxe sumia atrás deles). */
   .lp-hero-arte {
-    height: 340px;
+    height: 380px;
+    padding-top: 72px;
+  }
+
+  .lp-hero .selo-legenda {
+    display: none;
   }
 
   .lp-hero-quimono {
-    width: 200px;
+    width: 180px;
   }
 
   .lp-flutua-1 {
-    top: 16px;
+    top: 0;
   }
 
+  /* Acima do nome e dos pontos; encosta só no canto de baixo do desenho. */
   .lp-flutua-2 {
-    bottom: 16px;
+    bottom: 96px;
+  }
+
+  .lp-hero-arte .flutua {
+    padding: 8px 12px;
+    gap: 2px;
+  }
+
+  .lp-flutua-rotulo {
+    font-size: 10px;
   }
 
   .lp-flutua-numero {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
   }
 
   .lp-hero-carimbo {
