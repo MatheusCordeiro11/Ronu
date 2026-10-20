@@ -441,3 +441,5 @@ FodyWeavers.xsd
 src/Ronu.Api/Ronu.Api.http
 # Hooks do Impeccable para o Codex (ferramenta local do agente, não é código do projeto)
 .codex/
+# Saída do /brag (vídeo de divulgação, ~230 MB): material gerado, não é código do projeto
+brag-output/
