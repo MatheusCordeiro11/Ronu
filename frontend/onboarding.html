@@ -89,7 +89,7 @@
             <div class="ob-cabeca">
               <span class="rotulo rotulo-acento">Passo 1 de 4</span>
               <h1 id="ob-t0" tabindex="-1">Primeiro, você.</h1>
-              <p>Com isso o Ronu calcula quanto o seu corpo gasta parado.</p>
+              <p>Com isso o Ronu calcula quanto o seu corpo gasta parado e no seu dia a dia.</p>
             </div>
             <div class="campo">
               <span class="campo-rotulo" id="l-sexo">Sexo biológico</span>
@@ -110,6 +110,15 @@
               <div class="campo" id="field-nascimento">
                 <label class="campo-rotulo" for="data-nascimento">Nascimento</label>
                 <input class="entrada" type="date" id="data-nascimento" required>
+              </div>
+            </div>
+            <div class="campo ob-nivel" id="field-nivel">
+              <span class="campo-rotulo" id="l-nivel">Como é o seu dia, fora do treino?</span>
+              <div class="nivel-opcoes" role="radiogroup" aria-labelledby="l-nivel" id="ob-nivel">
+                <button type="button" role="radio" aria-checked="false" class="opcao nivel-opcao" data-valor="sentado"><span class="opcao-titulo">Sentado quase o dia todo</span><span class="opcao-dica">Escritório, estudo, home office, motorista</span></button>
+                <button type="button" role="radio" aria-checked="false" class="opcao nivel-opcao" data-valor="em_pe"><span class="opcao-titulo">Em pé boa parte do dia</span><span class="opcao-dica">Professor, vendedor, cabeleireiro, cozinha</span></button>
+                <button type="button" role="radio" aria-checked="false" class="opcao nivel-opcao" data-valor="andando"><span class="opcao-titulo">Andando e se mexendo muito</span><span class="opcao-dica">Garçom, enfermagem, entregador a pé, faxina</span></button>
+                <button type="button" role="radio" aria-checked="false" class="opcao nivel-opcao" data-valor="bracal"><span class="opcao-titulo">Trabalho braçal pesado</span><span class="opcao-dica">Obra, carga e descarga, lavoura, mudanças</span></button>
               </div>
             </div>
             <p class="apoio">O peso de hoje vira a sua primeira pesagem no Progresso.</p>

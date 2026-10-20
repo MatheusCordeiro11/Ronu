@@ -170,6 +170,36 @@
   color: var(--texto-2);
 }
 
+/* ---------- Aviso do nível de atividade ----------
+   Uma linha fina, não um cartão: não compete com o anel e o número da meta. */
+.db-nivel {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  padding: 12px 16px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  font-size: var(--t-apoio);
+  color: var(--texto-2);
+}
+
+.db-nivel-traco {
+  flex: none;
+  width: 14px;
+  height: 1px;
+  background: var(--acento);
+}
+
+.db-nivel-texto {
+  flex: 1;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.db-nivel .cartao-link {
+  flex: none;
+}
+
 /* ---------- Ajuste pelo progresso (details) ---------- */
 .db-ajuste {
   border-top: 1px solid var(--borda);

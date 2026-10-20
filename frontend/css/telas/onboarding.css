@@ -178,6 +178,10 @@
   gap: 14px;
 }
 
+.ob-nivel {
+  margin-top: var(--e-2);
+}
+
 .ob-objetivos {
   display: flex;
   flex-direction: column;

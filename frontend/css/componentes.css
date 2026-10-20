@@ -687,6 +687,38 @@ select.entrada {
   color: var(--texto-2-ativo);
 }
 
+/* ---------- Nível de atividade fora do treino (onboarding e Perfil) ----------
+   As quatro opções do dia a dia: título e exemplos empilhados, em duas
+   colunas no desktop e uma no celular. Reaproveita .opcao (radiogroup). */
+.nivel-opcoes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.nivel-opcao {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 4px;
+  padding: 14px 16px;
+}
+
+.nivel-opcao .opcao-titulo {
+  font-size: 1.05rem;
+}
+
+.field-error .nivel-opcao {
+  border-color: var(--erro-campo);
+}
+
+@media (max-width: 640px) {
+  .nivel-opcoes {
+    grid-template-columns: 1fr;
+    gap: var(--e-2);
+  }
+}
+
 /* ---------- Chips (alimentos, modalidades) ---------- */
 .chip {
   display: inline-flex;

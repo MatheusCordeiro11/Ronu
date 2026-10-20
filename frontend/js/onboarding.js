@@ -2,8 +2,9 @@
 //
 // Tela aprovada: docs/redesign/telas/Onboarding. Cinco passos; cada um só
 // avança depois de salvar com sucesso na API:
-//   0 Perfil       PUT  /perfil (sexo, altura, nascimento). O peso fica na tela
-//                  e vai no passo seguinte, junto com o objetivo.
+//   0 Perfil       PUT  /perfil (sexo, altura, nascimento e o nível de atividade
+//                  do dia a dia, obrigatório aqui). O peso fica na tela e vai
+//                  no passo seguinte, junto com o objetivo.
 //   1 Objetivo     POST /objetivos (peso + objetivo): a primeira pesagem do
 //                  Progresso. No mesmo dia, um novo POST atualiza o registro.
 //   2 Treino       POST /usuarios/modalidades por modalidade escolhida e DELETE
@@ -78,6 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     passo: 0,
     perfilSalvo: null,
     sexo: null,
+    nivelAtividade: null,         // "sentado" | "em_pe" | "andando" | "bracal"
     objetivo: null,
     catalogo: [],
     semTreino: false,             // marcou "Não treino no momento" (nenhuma modalidade)
@@ -109,6 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const p = perfilR.value;
     estado.perfilSalvo = p;
     if (p.sexo) estado.sexo = p.sexo;
+    if (p.nivelAtividade) estado.nivelAtividade = p.nivelAtividade;
     if (p.altura != null) $('altura').value = String(Math.round(p.altura));
     if (p.dataNascimento) $('data-nascimento').value = p.dataNascimento;
   }
@@ -147,6 +150,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       dataNascimento: $('data-nascimento').value,
       peso: Number($('peso').value),
       objetivo,
+      // Sem resposta o campo some do JSON e a API usa o fator médio.
+      nivelAtividade: estado.nivelAtividade ?? undefined,
       // Sempre explícito: antes do passo Treino, sem treino nenhum.
       modalidades: estado.passo >= 2 ? modalidadesParaApi() : []
     };
@@ -347,6 +352,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   marcarRadios('ob-sexo', estado.sexo);
 
+  // Sem opção pré-marcada: só vem marcada se a pessoa já respondeu antes
+  // (quem saiu no meio do cadastro e voltou).
+  ligarRadios('ob-nivel', (valor) => {
+    estado.nivelAtividade = valor;
+    marcarRadios('ob-nivel', valor);
+    $('field-nivel').classList.remove('field-error');
+    agendarSimulacao();
+  });
+  marcarRadios('ob-nivel', estado.nivelAtividade);
+
   // Faixa de idade da API (RegrasDadosCorporais): 18 a 100 anos.
   const hoje = new Date();
   const dataIso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -368,6 +383,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!nascimento) return erro('Informe sua data de nascimento.', 'data-nascimento');
     if (nascimento > $('data-nascimento').max) return erro('O Ronu é para maiores de 18 anos.', 'data-nascimento');
     if (nascimento < $('data-nascimento').min) return erro('Informe uma data de nascimento de até 100 anos atrás.', 'data-nascimento');
+    if (!estado.nivelAtividade) {
+      erro('Escolha como é o seu dia, fora do treino.', 'ob-nivel');
+      $('ob-nivel').querySelector('[role="radio"]').focus();
+      return;
+    }
 
     // O PUT grava tudo junto: rotina e orçamento já salvos vão de volta como
     // estavam, para não serem apagados (lacuna "Duas abas abertas…").
@@ -375,6 +395,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       altura,
       sexo: estado.sexo,
       dataNascimento: nascimento,
+      nivelAtividade: estado.nivelAtividade,
       rotinaDiaria: estado.perfilSalvo?.rotinaDiaria ?? null,
       orcamentoSemanal: estado.perfilSalvo?.orcamentoSemanal ?? null
     });

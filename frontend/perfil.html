@@ -120,6 +120,23 @@
           </div>
         </section>
 
+        <!-- Nível de atividade do dia a dia (fora do treino): entra no fator da
+             conta da meta. Salva ao escolher. -->
+        <section class="cartao pf-nivel" id="seu-dia" aria-labelledby="pf-nivel-titulo">
+          <div class="pf-cabeca">
+            <h2 id="pf-nivel-titulo">Como é o seu dia, fora do treino?</h2>
+          </div>
+          <p class="apoio" id="pf-nivel-apoio"></p>
+          <div class="nivel-opcoes" role="radiogroup" aria-labelledby="pf-nivel-titulo" id="pf-nivel">
+            <button type="button" role="radio" aria-checked="false" class="opcao nivel-opcao" data-valor="sentado"><span class="opcao-titulo">Sentado quase o dia todo</span><span class="opcao-dica">Escritório, estudo, home office, motorista</span></button>
+            <button type="button" role="radio" aria-checked="false" class="opcao nivel-opcao" data-valor="em_pe"><span class="opcao-titulo">Em pé boa parte do dia</span><span class="opcao-dica">Professor, vendedor, cabeleireiro, cozinha</span></button>
+            <button type="button" role="radio" aria-checked="false" class="opcao nivel-opcao" data-valor="andando"><span class="opcao-titulo">Andando e se mexendo muito</span><span class="opcao-dica">Garçom, enfermagem, entregador a pé, faxina</span></button>
+            <button type="button" role="radio" aria-checked="false" class="opcao nivel-opcao" data-valor="bracal"><span class="opcao-titulo">Trabalho braçal pesado</span><span class="opcao-dica">Obra, carga e descarga, lavoura, mudanças</span></button>
+          </div>
+          <p class="apoio pf-nivel-aviso" id="pf-nivel-aviso" hidden>A nova meta vale a partir da próxima dieta. O ajuste pelo progresso recomeça a contar do zero.</p>
+          <p class="pf-salvo" id="pf-nivel-status" role="status"></p>
+        </section>
+
         <section class="cartao pf-conta" aria-labelledby="pf-conta-titulo">
           <h2 id="pf-conta-titulo" class="pf-conta-titulo">Conta</h2>
           <ul class="pf-conta-lista" id="pf-conta-lista"></ul>

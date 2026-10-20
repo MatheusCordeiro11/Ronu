@@ -8,6 +8,8 @@
 // - Sexo salva no clique; altura e nascimento, pouco depois de parar de
 //   digitar (ou ao sair do campo), só quando o valor é válido.
 // - Região: PUT /perfil/estado (ronuSalvarEstado, o mesmo do estado.html).
+// - Nível de atividade do dia a dia: salva no clique (PUT /perfil com o
+//   nivelAtividade; os outros campos vão de volta como estão salvos).
 // O gasto em repouso vem do POST /metas/simulacao com o que está nos campos
 // (~300 ms depois da última mudança), então mexer num campo já mostra a conta.
 
@@ -120,6 +122,64 @@ document.addEventListener('DOMContentLoaded', async () => {
       aoEscolher(proximo.dataset.valor, proximo);
     });
   }
+
+  // ---------- Nível de atividade (dia a dia, fora do treino) ----------
+
+  const elNivel = $('pf-nivel');
+  const elNivelStatus = $('pf-nivel-status');
+  let salvandoNivel = false;
+
+  function renderizarNivel() {
+    marcarRadio(elNivel, perfil.nivelAtividade ?? null);
+    $('pf-nivel-apoio').textContent = perfil.nivelAtividade ? '' : 'Sem resposta, a conta usa um valor médio.';
+  }
+
+  // O PUT /perfil exige os dados do corpo: vêm de um GET feito na hora, para
+  // não gravar um campo ainda pela metade (e não apagar o que outra aba salvou).
+  const salvarNivel = ronuComGravacao(async (valor) => {
+    if (salvandoNivel || valor === perfil.nivelAtividade) return;
+    salvandoNivel = true;
+    const anterior = perfil.nivelAtividade ?? null;
+    marcarRadio(elNivel, valor);
+    status(elNivelStatus, 'Salvando...');
+    try {
+      const respostaAtual = await ronuFetchAutenticado('/perfil');
+      if (!respostaAtual.ok) throw new Error('Não foi possível salvar. Tente novamente.');
+      const atual = await respostaAtual.json();
+      const resposta = await ronuFetchAutenticado('/perfil', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          altura: atual.altura,
+          sexo: atual.sexo,
+          dataNascimento: atual.dataNascimento,
+          rotinaDiaria: atual.rotinaDiaria ?? null,
+          orcamentoSemanal: atual.orcamentoSemanal ?? null,
+          nivelAtividade: valor
+        })
+      });
+      if (!resposta.ok) {
+        const corpo = await resposta.json().catch(() => null);
+        throw new Error(corpo?.mensagem || 'Não foi possível salvar. Tente novamente.');
+      }
+      perfil = await resposta.json();
+      status(elNivelStatus, 'Salvo', 'ok');
+      $('pf-nivel-aviso').hidden = false;
+      $('pf-nivel-apoio').textContent = '';
+      marcarMudanca();
+    } catch (erro) {
+      if (erro.message === 'Sessão expirada.') return;
+      marcarRadio(elNivel, anterior);
+      status(elNivelStatus, erro.message === 'Failed to fetch' ? 'Não foi possível salvar. Tente novamente.' : erro.message, 'erro');
+    } finally {
+      salvandoNivel = false;
+    }
+  });
+
+  ligarRadio(elNivel, (valor) => {
+    status(elNivelStatus, '');
+    salvarNivel(valor);
+  });
 
   // ---------- Objetivo ----------
 
@@ -573,10 +633,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       renderizarObjetivo();
       $('pf-objetivos').querySelectorAll('[role="radio"]').forEach((b) => { b.disabled = !objetivoAtual; });
       renderizarDados();
+      renderizarNivel();
       renderizarRegiao();
       renderizarConta();
       renderizarPeso();
       mostrarSomente(elContent);
+      // Vindo do aviso do dashboard (perfil.html#seu-dia): o conteúdo só
+      // existe agora, então o navegador não rolou até aqui sozinho.
+      if (location.hash === '#seu-dia') {
+        $('seu-dia').scrollIntoView({ block: 'center' });
+        elNivel.querySelector('[role="radio"][tabindex="0"]')?.focus({ preventScroll: true });
+      }
       // O sol/lua e as opções de tema foram desenhados agora: acerta as marcas.
       if (window.RonuTema) window.RonuTema.atualizar();
       await simular();

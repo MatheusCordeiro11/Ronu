@@ -492,6 +492,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   // exatamente a meta. Cada barra começa onde a anterior parou; as negativas
   // (objetivo, ajuste) andam para trás. Dietas antigas não têm o campo, e o
   // card some.
+  // Nomes do nível de atividade (Usuario.NivelAtividade) no card da conta.
+  const NOMES_NIVEL = { sentado: 'sentado', em_pe: 'em pé', andando: 'andando', bracal: 'braçal' };
+
+  // "Dia a dia, sentado (×1,3)". Dietas antigas e dietas de quem não
+  // respondeu não têm nível: ficam com o ×1,4 de sempre. Sem treino no dia,
+  // "fora do treino" não diz nada: o dia a dia é tudo.
+  function rotuloDiaADia(c) {
+    const fator = c.fatorAtividade == null ? '×1,4' : `×${formatarDecimal(c.fatorAtividade, 2)}`;
+    const nivel = NOMES_NIVEL[c.nivelAtividade];
+    if (nivel) return `Dia a dia, ${nivel} (${fator})`;
+    return c.treino.length === 0 ? `Dia a dia (${fator})` : `Dia a dia fora do treino (${fator})`;
+  }
+
   function renderizarConta(dietaResponse) {
     const card = $('db-card-conta');
     const dia = dietaResponse.dieta.dias[diaSelecionado];
@@ -503,8 +516,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const passos = [
       ['Gasto em repouso', c.gastoRepouso],
-      // Sem treino no dia, "fora do treino" não diz nada: o dia a dia é tudo.
-      [c.treino.length === 0 ? 'Dia a dia (×1,4)' : 'Dia a dia fora do treino (×1,4)', c.atividadeForaDoTreino],
+      [rotuloDiaADia(c), c.atividadeForaDoTreino],
       ...c.treino.map((t) => [`${t.nome}, ${formatarDecimal(t.horas, 2)} h`, t.kcal])
     ];
     if (c.objetivo !== 0) {
@@ -800,6 +812,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     tentar(() => renderizarProgresso(tendencia));
     tentar(() => renderizarTreino(modalidades, simulacao));
     tentar(() => renderizarAlimentacao(perfil, preferencias));
+    // Só para quem já tem dieta (esta função roda com o painel aberto) e
+    // ainda não contou como é o dia fora do treino.
+    tentar(() => { $('db-aviso-nivel').hidden = !perfil || perfil.nivelAtividade != null; });
   }
 
   // ---------- Gerar ----------

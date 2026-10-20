@@ -188,8 +188,15 @@
 
 /* ---------- Objetivo ---------- */
 .pf-objetivo,
-.pf-dados {
+.pf-dados,
+.pf-nivel {
   padding: 24px 26px;
+}
+
+.pf-nivel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .pf-objetivos {
@@ -509,6 +516,7 @@ button.pf-conta-item:focus-visible {
 
   .pf-objetivo { order: 1; }
   .pf-dados { order: 2; }
+  .pf-nivel { order: 2; }
   .pf-repouso { order: 3; }
   .pf-regiao { order: 4; }
   .pf-aparencia { order: 5; }
@@ -517,6 +525,7 @@ button.pf-conta-item:focus-visible {
 
   .pf-objetivo,
   .pf-dados,
+  .pf-nivel,
   .pf-repouso,
   .pf-regiao,
   .pf-aparencia {
