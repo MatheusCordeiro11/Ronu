@@ -462,6 +462,120 @@ document.addEventListener('DOMContentLoaded', async () => {
   // nelas muda, para não tirar o foco de quem está numa carta.
   let assinaturaCatalogo = null;
 
+  // ---------- Rolagem automática de cada fileira ----------
+  // Cada categoria é uma fileira que anda sozinha, devagar e em laço, mexendo
+  // no scrollLeft (e não num transform): assim o dedo, a roda do mouse e o
+  // teclado continuam rolando como sempre. Como as cartas são botões, ela para
+  // quando o mouse está em cima, quando uma carta tem o foco e enquanto o dedo
+  // mexe nela, e o botão "Pausar" para de vez (WCAG 2.2.2). Também para fora
+  // da tela e com a aba escondida. Com movimento reduzido nada disso liga: fica
+  // a fileira parada. Fileira que cabe inteira na tela também fica parada.
+  const rolagens = new Map();        // categoria → controle da fileira na tela
+  const memoriaRolagem = new Map();  // categoria → { posicao, usuario } do último desenho
+
+  function criarRolagem(fileira, btn, pausadaPeloUsuario) {
+    const VELOCIDADE_PX_S = 28;
+    const VOLTA_DEPOIS_DO_TOQUE_MS = 4000;
+    const estado = { ligada: !REDUZIDO, mouse: false, foco: false, toque: false, usuario: pausadaPeloUsuario, fora: false };
+    let larguraVolta = 0;   // distância de uma carta original até a cópia dela
+    let posicao = fileira.scrollLeft;
+    let anterior = null;
+    let quadro = null;
+    let voltaDoToque = null;
+    let redimensionar = null;
+    let observador = null;
+
+    const parada = () => estado.mouse || estado.foco || estado.toque || estado.usuario || estado.fora || document.hidden;
+
+    function passo(agora) {
+      quadro = null;
+      if (!estado.ligada || larguraVolta <= 0 || parada()) { anterior = null; return; }
+      // A pessoa rolou na mão (ou o redesenho mudou a posição): segue dali.
+      if (Math.abs(fileira.scrollLeft - posicao) > 2) posicao = fileira.scrollLeft;
+      if (anterior != null) posicao += (VELOCIDADE_PX_S * Math.min(agora - anterior, 100)) / 1000;
+      if (posicao >= larguraVolta) posicao -= larguraVolta;
+      anterior = agora;
+      fileira.scrollLeft = posicao;
+      quadro = requestAnimationFrame(passo);
+    }
+
+    function seguir() {
+      if (quadro == null && estado.ligada && !parada()) quadro = requestAnimationFrame(passo);
+    }
+
+    function atualizarBotao() {
+      btn.hidden = !(estado.ligada && larguraVolta > 0);
+      btn.dataset.pausado = String(estado.usuario);
+      btn.querySelector('.tr-pausar-texto').textContent = estado.usuario ? 'Continuar' : 'Pausar';
+      const nome = fileira.closest('.tr-grupo').dataset.categoria;
+      btn.setAttribute('aria-label', `${estado.usuario ? 'Continuar' : 'Pausar'} a rolagem de ${nome}`);
+    }
+
+    // Só roda se as cartas originais não couberem: aí a cópia existe e a
+    // volta é a distância entre a primeira original e a primeira cópia.
+    function medir() {
+      const copias = fileira.querySelectorAll('.tr-carta-copia');
+      // Escondidas, as cópias não têm posição: aparecem para medir.
+      copias.forEach((c) => { c.hidden = false; });
+      const primeiraCopia = copias[0];
+      const primeira = fileira.firstElementChild;
+      const volta = primeiraCopia ? primeiraCopia.offsetLeft - primeira.offsetLeft : 0;
+      larguraVolta = volta > fileira.clientWidth ? volta : 0;
+      fileira.classList.toggle('tr-cartas-rodando', larguraVolta > 0);
+      // Sem rodar, as cópias só atrapalhariam a rolagem na mão.
+      copias.forEach((c) => { c.hidden = larguraVolta <= 0; });
+      atualizarBotao();
+      seguir();
+    }
+
+    function aoRedimensionar() {
+      clearTimeout(redimensionar);
+      redimensionar = setTimeout(medir, 150);
+    }
+
+    if (estado.ligada) {
+      fileira.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') estado.mouse = true; });
+      fileira.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') { estado.mouse = false; seguir(); } });
+      fileira.addEventListener('focusin', () => { estado.foco = true; });
+      fileira.addEventListener('focusout', (e) => {
+        if (!fileira.contains(e.relatedTarget)) { estado.foco = false; seguir(); }
+      });
+      // Toque: para enquanto o dedo mexe e volta um pouco depois.
+      const tocou = () => {
+        estado.toque = true;
+        clearTimeout(voltaDoToque);
+        voltaDoToque = setTimeout(() => { estado.toque = false; seguir(); }, VOLTA_DEPOIS_DO_TOQUE_MS);
+      };
+      fileira.addEventListener('touchstart', tocou, { passive: true });
+      fileira.addEventListener('touchmove', tocou, { passive: true });
+      btn.addEventListener('click', () => {
+        estado.usuario = !estado.usuario;
+        atualizarBotao();
+        seguir();
+      });
+      document.addEventListener('visibilitychange', seguir);
+      window.addEventListener('resize', aoRedimensionar);
+      if ('IntersectionObserver' in window) {
+        observador = new IntersectionObserver((entradas) => {
+          estado.fora = !entradas[0].isIntersecting;
+          seguir();
+        });
+        observador.observe(fileira);
+      }
+    }
+
+    function destruir() {
+      cancelAnimationFrame(quadro);
+      clearTimeout(voltaDoToque);
+      clearTimeout(redimensionar);
+      document.removeEventListener('visibilitychange', seguir);
+      window.removeEventListener('resize', aoRedimensionar);
+      if (observador) observador.disconnect();
+    }
+
+    return { medir, destruir, posicao: () => fileira.scrollLeft, pausadaPeloUsuario: () => estado.usuario };
+  }
+
   // Seções que já entraram na tela: ao redesenhar, elas não repetem a entrada.
   const secoesVistas = new Set();
   const observadorSecoes = !REDUZIDO && 'IntersectionObserver' in window
@@ -497,13 +611,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         secao.setAttribute('aria-labelledby', `tr-grupo-${indice}`);
         const titulo = criar('h3', 'rotulo tr-grupo-titulo', categoria);
         titulo.id = `tr-grupo-${indice}`;
-        const grade = criar('div', 'tr-cartas');
+        const pausar = criar('button', 'botao-texto tr-pausar');
+        pausar.type = 'button';
+        pausar.hidden = true;
+        pausar.setAttribute('aria-label', `Pausar a rolagem de ${categoria}`);
+        pausar.innerHTML = '<svg class="tr-icone-pausar" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 2v8M8.5 2v8"/></svg>'
+          + '<svg class="tr-icone-continuar" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 2l6 4-6 4z"/></svg>'
+          + '<span class="tr-pausar-texto">Pausar</span>';
+        const cabeca = criar('div', 'tr-grupo-cabeca');
+        cabeca.append(titulo, pausar);
+        const fileira = criar('div', 'tr-cartas');
         modalidades.forEach((modalidade, i) => {
-          const carta = criarCarta(modalidade, temNaLista.has(modalidade.id), peso);
+          const carta = criarCarta(modalidade, temNaLista.has(modalidade.id), peso, false);
           carta.style.setProperty('--i', String(i));
-          grade.appendChild(carta);
+          fileira.appendChild(carta);
         });
-        secao.append(titulo, grade);
+        // Cópias para o laço não ter emenda: clicáveis com o mouse e o dedo,
+        // mas fora do Tab e do leitor de tela (as originais já dizem tudo).
+        if (!REDUZIDO) {
+          modalidades.forEach((modalidade) => {
+            fileira.appendChild(criarCarta(modalidade, temNaLista.has(modalidade.id), peso, true));
+          });
+        }
+        secao.append(cabeca, fileira);
         // Com movimento reduzido (ou sem IntersectionObserver) as cartas já
         // aparecem no lugar, sem entrada em sequência.
         if (observadorSecoes) {
@@ -513,15 +643,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         return secao;
       });
 
+    // Guarda a posição e a pausa de cada fileira para o redesenho não dar tranco.
+    rolagens.forEach((rolagem, categoria) => {
+      memoriaRolagem.set(categoria, { posicao: rolagem.posicao(), usuario: rolagem.pausadaPeloUsuario() });
+      rolagem.destruir();
+    });
+    rolagens.clear();
     elCartas.replaceChildren(...secoes);
+    elCartas.querySelectorAll('.tr-grupo').forEach((secao) => {
+      const categoria = secao.dataset.categoria;
+      const fileira = secao.querySelector('.tr-cartas');
+      const antes = memoriaRolagem.get(categoria);
+      if (antes) fileira.scrollLeft = antes.posicao;
+      const rolagem = criarRolagem(fileira, secao.querySelector('.tr-pausar'), antes ? antes.usuario : false);
+      rolagens.set(categoria, rolagem);
+      rolagem.medir();
+    });
     if (observadorSecoes) {
       elCartas.querySelectorAll('.tr-grupo-anima:not(.tr-grupo-visto)').forEach((secao) => observadorSecoes.observe(secao));
     }
   }
 
-  function criarCarta(modalidade, tem, peso) {
-    const carta = criar('button', `tr-carta${tem ? ' tr-carta-tem' : ''}`);
+  function criarCarta(modalidade, tem, peso, copia) {
+    const carta = criar('button', `tr-carta${tem ? ' tr-carta-tem' : ''}${copia ? ' tr-carta-copia' : ''}`);
     carta.type = 'button';
+    if (copia) {
+      carta.tabIndex = -1;
+      carta.setAttribute('aria-hidden', 'true');
+    }
     carta.setAttribute('aria-label', tem
       ? `${modalidade.nome}, já está nos seus treinos. Abrir`
       : `Adicionar ${modalidade.nome}`);

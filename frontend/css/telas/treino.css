@@ -432,11 +432,65 @@
   color: var(--texto-2);
 }
 
+.tr-grupo-cabeca {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--e-4);
+}
+
+/* Pausar / Continuar a fileira que roda sozinha (js/treino.js). */
+.tr-pausar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 var(--e-1);
+  font-size: var(--t-pequeno);
+  color: var(--texto);
+  text-decoration: none;
+}
+
+.tr-pausar svg {
+  width: 12px;
+  height: 12px;
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tr-pausar .tr-icone-continuar,
+.tr-pausar[data-pausado="true"] .tr-icone-pausar {
+  display: none;
+}
+
+.tr-pausar[data-pausado="true"] .tr-icone-continuar {
+  display: block;
+}
+
+/* Uma fileira por categoria. Folga em volta para o zoom do hover não ser
+   cortado pela rolagem. A barra segue as cores da tela (sem ela, o Windows
+   desenha uma barra clara). */
 .tr-cartas {
   position: relative;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  display: flex;
   gap: 14px;
+  overflow-x: auto;
+  margin: -12px -6px 0;
+  padding: 12px 6px 16px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--borda-forte) transparent;
+}
+
+/* Rodando sozinha, a barra só atrapalharia: some (a rolagem na mão continua). */
+.tr-cartas-rodando {
+  scrollbar-width: none;
+}
+
+.tr-cartas-rodando::-webkit-scrollbar {
+  display: none;
 }
 
 /* Entrada em sequência quando a seção aparece na tela: o JS só liga
@@ -460,6 +514,7 @@
 
 .tr-carta {
   position: relative;
+  flex: 0 0 200px;
   display: flex;
   flex-direction: column;
   padding: 0;
@@ -739,8 +794,13 @@
   }
 
   .tr-cartas {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
+    margin: -12px calc(var(--margem) * -1) 0 -6px;
+    padding-right: var(--margem);
+  }
+
+  .tr-carta {
+    flex-basis: 150px;
   }
 
   .tr-carta-arte {
