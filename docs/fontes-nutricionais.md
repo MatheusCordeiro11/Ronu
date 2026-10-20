@@ -31,7 +31,7 @@ Licença: domínio público (CC0 1.0); o USDA pede a citação do FoodData Centr
 Usado só para o que a TACO não tem: tilápia, atum em conserva em água, pasta de amendoim, macarrão cozido
 e leite fluido. O código de cada item é o `fdcId`.
 
-## IBGE: peso por unidade
+## IBGE: medidas caseiras e peso por unidade
 
 IBGE. **Pesquisa de Orçamentos Familiares 2008-2009: Tabela de Medidas Referidas para os Alimentos
 Consumidos no Brasil.** Rio de Janeiro: IBGE, 2011. Disponível em:
@@ -39,8 +39,14 @@ https://biblioteca.ibge.gov.br/visualizacao/livros/liv50000.pdf
 
 Licença: dados de publicações do IBGE podem ser usados por terceiros com a citação do IBGE como fonte.
 
-Usado para o peso da "unidade média" dos itens contáveis (ovo, pão francês, fatia de pão de forma,
-pão de queijo e frutas inteiras).
+Usado para as **medidas caseiras** (unidade, fatia, colher de sopa, colher de servir, concha, copo...)
+dos itens, entre elas o peso da "unidade média" dos contáveis (ovo, pão francês, fatia de pão de forma,
+pão de queijo e frutas inteiras). A POF preenche toda medida de todo alimento, emprestando valores de outro
+utensílio ou de outro alimento, então só entra a medida que o IBGE mediu de fato (direta) ou que vale para o
+mesmo alimento com outro nome (categoria). Cada medida guarda o código do alimento na POF, a página do PDF e
+a descrição na fonte, e o teste a confere contra `docs/pof/medidas-pof-itens-mapeados.csv`. Método, regras e
+a tabela de revisão estão em `docs/pof/`. As gramaturas da POF são a compilação do IBGE de outras tabelas
+(Pinheiro et al. 2004, Guia Alimentar 2006, Philippi 2008, entre outras, citadas no Quadro 3 do PDF).
 
 ## O que não vem de tabela
 

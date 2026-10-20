@@ -1,0 +1,150 @@
+"""Mapeamento item da base -> alimento e preparação da POF 2008-2009.
+
+Cada entrada: id do item -> (código do alimento na POF, [códigos de preparação], tipo, nota)
+tipo: 'ESPECIFICO' = o alimento da POF é o mesmo da base;
+      'GENERICO'   = a POF só tem uma categoria mais ampla que contém o item (ex.: peixe de água doce);
+      None         = sem correspondência: o item fica só com gramas, sem medida caseira.
+Preparação: 1 cru, 2 cozido, 3 grelhado, 4 assado, 5 frito, 7 refogado, 99 não se aplica.
+"""
+E, G = 'ESPECIFICO', 'GENERICO'
+
+MAPA = {
+    # Cereais e massas
+    'arroz-branco-cozido': ('6300101', [99], E, 'POF "Arroz": as fontes descrevem arroz cozido.'),
+    'arroz-integral-cozido': ('6300201', [99], E, ''),
+    'aveia-em-flocos': ('6500401', [99], E, ''),
+    'macarrao-cozido': ('6503401', [2], E, ''),
+    'cuscuz-de-milho-cozido': ('6902901', [99], E, ''),
+    'milho-verde-em-conserva': ('7700401', [99], E, ''),
+    'tapioca': ('6501516', [99], E, 'POF "Tapioca de goma" (a tapioca pronta).'),
+    'farinha-de-mandioca-torrada': ('6501401', [99], E, ''),
+    # Pães
+    'pao-frances': ('8000105', [99], E, 'POF "Pão de sal" (o pão francês).'),
+    'pao-de-forma-integral': ('8001401', [99], E, 'POF "Pão integral".'),
+    'pao-de-queijo-assado': ('8000801', [99], E, ''),
+    # Leguminosas
+    'feijao-cozido': ('6303102', [99], G, 'POF só tem "Feijão (preto, mulatinho, roxo, rosinha, etc.)": não separa o carioca.'),
+    'feijao-preto-cozido': ('6303102', [99], E, ''),
+    'feijao-fradinho-cozido': ('6301603', [99], G, 'POF "Feijão de corda" (fradinho = feijão-de-corda, nome regional).'),
+    'lentilha-cozida': ('6302901', [99], E, ''),
+    # Tubérculos e raízes
+    'batata-inglesa-cozida': ('6400101', [2], E, ''),
+    'batata-doce-cozida': ('6400401', [2], E, ''),
+    'mandioca-cozida': ('6400601', [2], E, ''),
+    'mandioquinha-cozida': ('6400303', [2], E, 'POF "Mandioquinha salsa (Batata-baroa)".'),
+    'cara-cozido': ('6400701', [2], E, ''),
+    # Hortaliças
+    'alface-crua': ('6700101', [99], E, ''),
+    'rucula-crua': ('6702001', [99], E, ''),
+    'agriao-cru': ('6701301', [1], E, ''),
+    'couve-crua': ('6700501', [1], E, ''),
+    'tomate-cru': ('6705101', [99], E, ''),
+    'pepino-cru': ('6704001', [99], E, ''),
+    'cenoura-crua': ('6401201', [1], E, ''),
+    'cenoura-cozida': ('6401201', [2], E, ''),
+    'beterraba-crua': ('6401101', [1], E, ''),
+    'beterraba-cozida': ('6401101', [2], E, ''),
+    'brocolis-cozido': ('6701704', [2], E, ''),
+    'couve-flor-cozida': ('6700601', [2], E, ''),
+    'abobrinha-cozida': ('6703701', [2], E, ''),
+    'abobrinha-refogada': ('6703701', [7], E, ''),
+    'chuchu-cozido': ('6704101', [2], E, ''),
+    'couve-refogada': ('6700501', [7], E, ''),
+    'espinafre-refogado': ('6700701', [7], E, ''),
+    'repolho-cru': ('6700901', [1], E, ''),
+    'repolho-roxo-cru': ('6700901', [1], G, 'POF "Repolho" não separa a cor.'),
+    'acelga-crua': ('6701501', [1], E, ''),
+    'cebola-crua': ('6705701', [1], E, ''),
+    'abobora-cozida': ('6703901', [2], E, ''),
+    'berinjela-cozida': ('6705401', [2], E, ''),
+    # Frutas
+    'banana-prata': ('6801101', [99], E, 'POF "Banana (ouro, prata, d´água, da terra, etc.)".'),
+    'banana-nanica': ('6801101', [99], G, 'POF junta todas as bananas; nanica = d´água.'),
+    'maca-fuji': ('6803001', [99], G, 'POF "Maçã" não separa a variedade.'),
+    'pera-williams': ('6803601', [99], G, 'POF "Pera" não separa a variedade.'),
+    'laranja-pera': ('6801801', [99], E, 'POF "Laranja (pera, seleta, lima, da terra, etc.)".'),
+    'tangerina': ('6802201', [99], E, ''),
+    'kiwi': ('6807801', [99], E, ''),
+    'mamao-papaia': ('6803101', [99], G, 'POF "Mamão" não separa papaia e formosa.'),
+    'mamao-formosa': ('6803101', [99], G, 'POF "Mamão" não separa papaia e formosa.'),
+    'abacaxi': ('6802601', [99], E, ''),
+    'melancia': ('6803401', [99], E, ''),
+    'melao': ('6803501', [99], E, ''),
+    'morango': ('6805201', [99], E, ''),
+    'uva-italia': ('6803901', [99], G, 'POF "Uva" não separa a variedade.'),
+    'manga-palmer': ('6803201', [99], G, 'POF "Manga" não separa a variedade.'),
+    'abacate': ('6802701', [99], E, ''),
+    'goiaba-vermelha': ('6804201', [99], G, 'POF "Goiaba" não separa a cor.'),
+    'acai-sem-acucar': ('6601706', [99], E, ''),
+    # Carnes bovinas
+    'patinho-bovino-grelhado': ('7100501', [3], E, ''),
+    'patinho-bovino-moido-refogado': ('7104301', [7], G, 'POF "Carne moída" (não separa o corte), refogada.'),
+    'carne-moida-de-acem-cozida': ('7104301', [2], G, 'POF "Carne moída" (não separa o corte), cozida.'),
+    'acem-bovino-cozido': ('7100801', [2], E, ''),
+    'alcatra-bovina-grelhada': ('7100301', [3], E, ''),
+    'contrafile-bovino-grelhado': ('7100201', [3], E, ''),
+    'coxao-mole-bovino-cozido': None,
+    'lagarto-bovino-cozido': ('7106401', [2], E, ''),
+    'musculo-bovino-cozido': ('7101001', [2], E, ''),
+    'maminha-bovina-grelhada': ('7100303', [3], E, ''),
+    'file-mignon-grelhado': ('7100101', [3], E, ''),
+    # Aves
+    'peito-de-frango-sem-pele-grelhado': ('7800401', [3], E, ''),
+    'peito-de-frango-sem-pele-cozido': ('7800401', [2], E, ''),
+    'coxa-de-frango-sem-pele-cozida': ('7800302', [2], G, 'POF "Frango em pedaços" (medidas coxa e sobrecoxa).'),
+    'sobrecoxa-de-frango-sem-pele-assada': ('7800302', [4], G, 'POF "Frango em pedaços" (medidas coxa e sobrecoxa).'),
+    'frango-sem-pele-assado': ('7800103', [4], E, 'POF "Frango inteiro".'),
+    # Carnes suínas
+    'lombo-suino-assado': ('7103701', [4], E, ''),
+    'bisteca-suina-grelhada': ('7103305', [3], E, ''),
+    'pernil-suino-assado': ('7103401', [4], E, ''),
+    # Peixes (a POF só tem categorias amplas de peixe)
+    'file-de-tilapia-grelhado': ('7400101', [3], G, 'POF "Peixe de água doce": a tilápia está nesta categoria; sem item próprio.'),
+    'salmao-grelhado': ('7200101', [3], G, 'POF "Peixe de mar": sem item próprio para salmão fresco.'),
+    'sardinha-assada': ('7200101', [4], G, 'POF "Peixe de mar": sem item próprio para sardinha fresca.'),
+    'atum-em-conserva-em-agua': ('7703402', [99], E, ''),
+    'merluza-assada': ('7200101', [4], G, 'POF "Peixe de mar": sem item próprio para merluza.'),
+    'corvina-assada': ('7200101', [4], G, 'POF "Peixe de mar": sem item próprio para corvina.'),
+    # Ovos
+    'ovo-de-galinha-cozido': ('7803301', [2], E, ''),
+    'ovo-de-galinha-frito': ('7803301', [5], E, ''),
+    'clara-de-ovo-cozida': None,
+    # Laticínios
+    'leite-integral': ('7900101', [99], E, ''),
+    'leite-desnatado': ('7903601', [99], E, ''),
+    'iogurte-natural': ('7901204', [99], E, ''),
+    'iogurte-natural-desnatado': ('7901203', [99], E, ''),
+    'queijo-minas-frescal': ('7902001', [99], G, 'POF "Queijo de minas": não separa o frescal.'),
+    'queijo-mucarela': ('7901801', [99], E, ''),
+    'queijo-prato': ('7901701', [99], E, ''),
+    'queijo-parmesao': None,
+    'ricota': ('7902201', [99], E, ''),
+    'requeijao-cremoso': ('7902901', [99], E, ''),
+    # Oleaginosas e sementes
+    'pasta-de-amendoim-integral': ('6901203', [99], G, 'POF "Pasta de amendoim" (não separa a integral).'),
+    'amendoim-torrado': None,
+    'castanha-de-caju': ('6600801', [99], E, ''),
+    'castanha-do-para': ('6600701', [99], E, ''),
+    'amendoa-torrada': ('6600501', [99], E, ''),
+    'noz': ('6601501', [99], E, ''),
+    'linhaca': ('6302001', [99], E, ''),
+    # Óleos, açúcares, bebidas
+    'azeite-de-oliva-extra-virgem': ('8400101', [99], E, ''),
+    'oleo-de-soja': ('8400301', [99], E, ''),
+    'manteiga': ('7901501', [99], E, ''),
+    'acucar-refinado': ('6906602', [99], E, 'POF "Açúcar".'),
+    'acucar-mascavo': ('6900304', [99], E, ''),
+    'mel': ('6901602', [99], E, ''),
+    'cafe-coado': ('8501302', [99], E, ''),
+    'cha-mate': None,
+    'cha-preto': ('8206301', [99], G, 'POF "Chá (preto, camomila, erva cidreira, capim limão, etc.)".'),
+    'cha-de-erva-doce': ('8206301', [99], G, 'POF "Chá (preto, camomila, erva cidreira, capim limão, etc.)".'),
+    'suco-de-laranja-natural': ('8500407', [99], E, ''),
+    'agua-de-coco': ('8202101', [99], E, ''),
+    'refrigerante-de-cola': ('8200101', [99], E, ''),
+    'refrigerante-de-guarana': ('8200301', [99], E, ''),
+    'cerveja-pilsen': ('8300101', [99], E, ''),
+}
+
+# Medidas que não servem para o prato (embalagens, unidades de peso/volume, colheres pequenas).
+EXCLUIDAS = {68, 94, 76, 79, 80, 97, 98, 6, 86, 13, 84} | set(range(36, 67)) | {69, 70, 71, 72, 73, 74, 75}

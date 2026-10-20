@@ -1,0 +1,368 @@
+item,tipo_correspondencia,classe,medida,gramas,codigo_alimento_pof,alimento_pof,preparacao_pof,descricao_na_fonte,codigo_fonte,pagina_pdf
+arroz-branco-cozido,ESPECIFICO,DIRETA,Colher de arroz/servir,45,6300101,"Arroz (polido, parboilizado)",Não se aplica,Arroz cozido - colher de arroz cheia,1,35
+arroz-branco-cozido,ESPECIFICO,DIRETA,Colher de sopa,25,6300101,"Arroz (polido, parboilizado)",Não se aplica,Arroz cozido - colher de sopa cheia,1,35
+arroz-branco-cozido,ESPECIFICO,DIRETA,Concha,100,6300101,"Arroz (polido, parboilizado)",Não se aplica,Arroz cozido - concha média cheia,1,35
+arroz-branco-cozido,ESPECIFICO,DIRETA,Escumadeira,85,6300101,"Arroz (polido, parboilizado)",Não se aplica,Arroz cozido - escumadeira média cheia,1,35
+arroz-branco-cozido,ESPECIFICO,DIRETA,Prato fundo,200,6300101,"Arroz (polido, parboilizado)",Não se aplica,Arroz cozido - prato fundo cheio,1,35
+arroz-integral-cozido,ESPECIFICO,DIRETA,Colher de arroz/servir,63,6300201,Arroz integral,Não se aplica,Arroz integral cozido - colher de arroz cheia,1,36
+arroz-integral-cozido,ESPECIFICO,DIRETA,Colher de sopa,20,6300201,Arroz integral,Não se aplica,Arroz integral cozido - colher de sopa cheia,1,36
+arroz-integral-cozido,ESPECIFICO,DIRETA,Concha,117,6300201,Arroz integral,Não se aplica,Arroz integral cozido - concha média cheia,1,36
+arroz-integral-cozido,ESPECIFICO,DIRETA,Escumadeira,59,6300201,Arroz integral,Não se aplica,Arroz integral cozido - escumadeira média cheia,1,36
+arroz-integral-cozido,ESPECIFICO,DIRETA,Prato fundo,200,6300201,Arroz integral,Não se aplica,Arroz cozido - prato fundo cheio,1,36
+aveia-em-flocos,ESPECIFICO,DIRETA,Colher de chá,2,6500401,Aveia em flocos,Não se aplica,Aveia flocos - colher de chá cheia,1,74
+aveia-em-flocos,ESPECIFICO,DIRETA,Colher de sobremesa,7,6500401,Aveia em flocos,Não se aplica,Aveia flocos - colher de sobremesa cheia,1,74
+aveia-em-flocos,ESPECIFICO,DIRETA,Colher de sopa,15,6500401,Aveia em flocos,Não se aplica,Aveia flocos - colher de sopa cheia,1,74
+macarrao-cozido,ESPECIFICO,DIRETA,Colher de arroz/servir,50,6503401,Macarrão,Cozido(a),Macarrão cozido - colher de arroz cheia,1,87
+macarrao-cozido,ESPECIFICO,DIRETA,Colher de sopa,25,6503401,Macarrão,Cozido(a),Macarrão cozido - colher de sopa cheia,1,87
+macarrao-cozido,ESPECIFICO,DIRETA,Escumadeira,110,6503401,Macarrão,Cozido(a),Macarrão cozido - escumadeira média cheia,1,87
+macarrao-cozido,ESPECIFICO,DIRETA,Garfada,30,6503401,Macarrão,Cozido(a),Macarrão cozido - garfada,1,87
+macarrao-cozido,ESPECIFICO,DIRETA,Pegador,110,6503401,Macarrão,Cozido(a),Macarrão cozido - pegador,1,87
+macarrao-cozido,ESPECIFICO,DIRETA,Prato fundo,400,6503401,Macarrão,Cozido(a),Macarrão cozido - prato fundo cheio,1,88
+macarrao-cozido,ESPECIFICO,DIRETA,Prato raso,320,6503401,Macarrão,Cozido(a),Macarrão cozido - prato raso cheio,1,88
+cuscuz-de-milho-cozido,ESPECIFICO,DIRETA,Pedaço,135,6902901,Cuscuz,Não se aplica,Cuscuz de milho - pedaço médio,1,193
+milho-verde-em-conserva,ESPECIFICO,DIRETA,Colher de sobremesa,17,7700401,Milho verde em conserva,Não se aplica,Milho verde enlatado - colher de sobremesa cheia,1,312
+milho-verde-em-conserva,ESPECIFICO,DIRETA,Colher de sopa,24,7700401,Milho verde em conserva,Não se aplica,Milho verde enlatado - colher de sopa,1,312
+farinha-de-mandioca-torrada,ESPECIFICO,DIRETA,Caneca,171,6501401,Farinha de mandioca,Não se aplica,Farinha de mandioca - caneca,14,80
+farinha-de-mandioca-torrada,ESPECIFICO,DIRETA,Colher de arroz/servir,33,6501401,Farinha de mandioca,Não se aplica,Farinha de mandioca - colher de arroz,14,80
+farinha-de-mandioca-torrada,ESPECIFICO,DIRETA,Colher de chá,5,6501401,Farinha de mandioca,Não se aplica,Farinha de mandioca - colher de chá cheia,1,80
+farinha-de-mandioca-torrada,ESPECIFICO,DIRETA,Colher de sobremesa,10,6501401,Farinha de mandioca,Não se aplica,Farinha de mandioca - colher de sobremesa cheia,1,80
+farinha-de-mandioca-torrada,ESPECIFICO,DIRETA,Colher de sopa,16,6501401,Farinha de mandioca,Não se aplica,Farinha de mandioca - colher de sopa cheia,1,80
+farinha-de-mandioca-torrada,ESPECIFICO,DIRETA,Concha,110,6501401,Farinha de mandioca,Não se aplica,Farinha de mandioca - concha,14,80
+farinha-de-mandioca-torrada,ESPECIFICO,DIRETA,Copo médio,172,6501401,Farinha de mandioca,Não se aplica,Farinha de mandioca - copo médio,14,80
+farinha-de-mandioca-torrada,ESPECIFICO,DIRETA,Punhado,23,6501401,Farinha de mandioca,Não se aplica,Farinha de mandioca - punhado,14,81
+farinha-de-mandioca-torrada,ESPECIFICO,DIRETA,Prato fundo,271,6501401,Farinha de mandioca,Não se aplica,Farinha de mandioca - prato fundo,14,81
+farinha-de-mandioca-torrada,ESPECIFICO,DIRETA,Tigela,148,6501401,Farinha de mandioca,Não se aplica,Farinha de mandioca - tigela,14,81
+farinha-de-mandioca-torrada,ESPECIFICO,DIRETA,Xícara de chá,148,6501401,Farinha de mandioca,Não se aplica,Farinha de mandioca - xícara de chá,14,81
+pao-frances,ESPECIFICO,DIRETA,Unidade,50,8000105,Pão de sal,Não se aplica,Pão francês - unidade,1,393
+pao-de-queijo-assado,ESPECIFICO,DIRETA,Unidade,20,8000801,Pão de queijo,Não se aplica,Pão de queijo - unidade média,1,394
+pao-de-queijo-assado,ESPECIFICO,DIRETA,Unidade pequena,10,8000801,Pão de queijo,Não se aplica,Pão de queijo - unidade pequena,1,394
+feijao-cozido,GENERICO,DIRETA,Colher de arroz/servir,35,6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",Não se aplica,Feijão branco cozido - colher de arroz cheia,1,43
+feijao-cozido,GENERICO,DIRETA,Colher de sopa,17,6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",Não se aplica,Feijão branco cozido - colher de sopa cheia,1,43
+feijao-cozido,GENERICO,DIRETA,Concha,140,6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",Não se aplica,Feijão branco cozido - concha média cheia,1,43
+feijao-preto-cozido,ESPECIFICO,DIRETA,Colher de arroz/servir,35,6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",Não se aplica,Feijão branco cozido - colher de arroz cheia,1,43
+feijao-preto-cozido,ESPECIFICO,DIRETA,Colher de sopa,17,6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",Não se aplica,Feijão branco cozido - colher de sopa cheia,1,43
+feijao-preto-cozido,ESPECIFICO,DIRETA,Concha,140,6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",Não se aplica,Feijão branco cozido - concha média cheia,1,43
+feijao-fradinho-cozido,GENERICO,DIRETA,Colher de arroz/servir,35,6301603,Feijão de corda,Não se aplica,Feijão branco cozido - colher de arroz cheia,1,40
+feijao-fradinho-cozido,GENERICO,DIRETA,Colher de sopa,17,6301603,Feijão de corda,Não se aplica,Feijão branco cozido - colher de sopa cheia,1,40
+feijao-fradinho-cozido,GENERICO,DIRETA,Concha,140,6301603,Feijão de corda,Não se aplica,Feijão branco cozido - concha média cheia,1,40
+lentilha-cozida,ESPECIFICO,DIRETA,Colher de arroz/servir,32,6302901,Lentilha,Não se aplica,Lentilha cozida - colher de arroz,1,42
+lentilha-cozida,ESPECIFICO,DIRETA,Colher de sopa,18,6302901,Lentilha,Não se aplica,Lentilha cozida - colher de sopa,1,42
+lentilha-cozida,ESPECIFICO,DIRETA,Concha,160,6302901,Lentilha,Não se aplica,Lentilha cozida - concha média cheia,1,42
+batata-inglesa-cozida,ESPECIFICO,DIRETA,Colher de arroz/servir,60,6400101,Batata-inglesa,Cozido(a),Batata-inglesa cozida - colher de arroz cheia,1,45
+batata-inglesa-cozida,ESPECIFICO,DIRETA,Colher de sopa,30,6400101,Batata-inglesa,Cozido(a),Batata-inglesa cozida - colher de sopa cheia,1,46
+batata-inglesa-cozida,ESPECIFICO,DIRETA,Escumadeira,80,6400101,Batata-inglesa,Cozido(a),Batata-inglesa cozida - escumadeira média cheia,1,46
+batata-inglesa-cozida,ESPECIFICO,DIRETA,Unidade,140,6400101,Batata-inglesa,Cozido(a),Batata-inglesa cozida - unidade média,1,46
+batata-inglesa-cozida,ESPECIFICO,DIRETA,Unidade pequena,70,6400101,Batata-inglesa,Cozido(a),Batata-inglesa cozida - unidade pequena,1,46
+batata-doce-cozida,ESPECIFICO,DIRETA,Colher de sopa,42,6400401,Batata-doce,Cozido(a),Batata-doce cozida - colher de sopa cheia,1,51
+batata-doce-cozida,ESPECIFICO,DIRETA,Fatia,70,6400401,Batata-doce,Cozido(a),Batata-doce cozida - fatia média,1,51
+batata-doce-cozida,ESPECIFICO,DIRETA,Unidade,355,6400401,Batata-doce,Cozido(a),Batata-doce cozida - unidade média,1,51
+mandioca-cozida,ESPECIFICO,DIRETA,Colher de arroz/servir,60,6400601,Mandioca,Cozido(a),Aipim cozido - colher de arroz cheia picada,1,54
+mandioca-cozida,ESPECIFICO,DIRETA,Colher de sopa,30,6400601,Mandioca,Cozido(a),Aipim cozido - colher de sopa cheia picada,1,54
+mandioca-cozida,ESPECIFICO,DIRETA,Pedaço,100,6400601,Mandioca,Cozido(a),Aipim cozido - pedaço médio,1,55
+mandioquinha-cozida,ESPECIFICO,DIRETA,Colher de sopa,35,6400303,Mandioquinha salsa (Batata-baroa),Cozido(a),Batata-baroa cozida - colher de sopa cheia,1,50
+mandioquinha-cozida,ESPECIFICO,DIRETA,Unidade,80,6400303,Mandioquinha salsa (Batata-baroa),Cozido(a),Batata-baroa cozida - unidade média,1,50
+alface-crua,ESPECIFICO,DIRETA,Colher de sopa,8,6700101,Alface,Não se aplica,Alface - colher de sopa cheia picada,1,104
+alface-crua,ESPECIFICO,DIRETA,Folha,10,6700101,Alface,Não se aplica,Alface - folha média,1,104
+alface-crua,ESPECIFICO,DIRETA,Pires,20,6700101,Alface,Não se aplica,Alface - pires de folha,4,104
+alface-crua,ESPECIFICO,DIRETA,Prato de sobremesa,30,6700101,Alface,Não se aplica,Alface - prato de sobremesa cheio picada,1,104
+alface-crua,ESPECIFICO,DIRETA,Prato fundo,60,6700101,Alface,Não se aplica,Alface - prato fundo,4,104
+alface-crua,ESPECIFICO,DIRETA,Prato raso,50,6700101,Alface,Não se aplica,Alface - prato raso,4,104
+alface-crua,ESPECIFICO,DIRETA,Unidade,200,6700101,Alface,Não se aplica,Alface - unidade média,1,105
+alface-crua,ESPECIFICO,DIRETA,Unidade pequena,130,6700101,Alface,Não se aplica,Alface - unidade pequena,1,105
+rucula-crua,ESPECIFICO,DIRETA,Ramo,6,6702001,Rúcula,Não se aplica,Rúcula - ramo,2,124
+agriao-cru,ESPECIFICO,DIRETA,Colher de sopa,7,6701301,Agrião,Cru(a),Agrião - colher de sopa cheia picada,1,116
+agriao-cru,ESPECIFICO,DIRETA,Garfada,30,6701301,Agrião,Cru(a),Agrião - garfada,1,116
+agriao-cru,ESPECIFICO,DIRETA,Pires,10,6701301,Agrião,Cru(a),Agrião - pires cheio picado,1,116
+agriao-cru,ESPECIFICO,DIRETA,Prato raso,80,6701301,Agrião,Cru(a),Agrião - prato raso cheio picado,1,116
+agriao-cru,ESPECIFICO,DIRETA,Ramo,5,6701301,Agrião,Cru(a),Agrião - ramo médio,1,116
+agriao-cru,ESPECIFICO,SEMELHANTE,Colher de arroz/servir,50,6701301,Agrião,Cru(a),Agrião refogado - colher de arroz cheia,1,116
+couve-crua,ESPECIFICO,DIRETA,Folha,20,6700501,Couve,Cru(a),Couve crua - folha média,1,106
+couve-crua,ESPECIFICO,SEMELHANTE,Colher de sopa,20,6700501,Couve,Cru(a),Couve refogada - colher de sopa cheia picada,1,106
+tomate-cru,ESPECIFICO,DIRETA,Colher de sopa,30,6705101,Tomate,Não se aplica,Tomate - colher de sopa cheia em tiras,1,143
+tomate-cru,ESPECIFICO,DIRETA,Fatia,15,6705101,Tomate,Não se aplica,Tomate - fatia média,1,143
+tomate-cru,ESPECIFICO,DIRETA,Unidade,100,6705101,Tomate,Não se aplica,Tomate - unidade média,1,143
+tomate-cru,ESPECIFICO,DIRETA,Unidade pequena,50,6705101,Tomate,Não se aplica,Tomate - unidade pequena,1,143
+pepino-cru,ESPECIFICO,DIRETA,Colher de sopa,18,6704001,Pepino,Não se aplica,Pepino - colher de sopa cheia picada,1,132
+pepino-cru,ESPECIFICO,DIRETA,Unidade,100,6704001,Pepino,Não se aplica,Pepino - unidade média,1,133
+cenoura-crua,ESPECIFICO,DIRETA,Colher de sopa,12,6401201,Cenoura,Cru(a),Cenoura crua - colher de sopa cheia ralada,1,68
+cenoura-crua,ESPECIFICO,DIRETA,Unidade,120,6401201,Cenoura,Cru(a),Cenoura crua - unidade média,1,69
+cenoura-crua,ESPECIFICO,DIRETA,Unidade pequena,55,6401201,Cenoura,Cru(a),Cenoura crua - unidade pequena,1,69
+cenoura-crua,ESPECIFICO,SEMELHANTE,Escumadeira,48,6401201,Cenoura,Cru(a),Cenoura cozida - escumadeira média rasa picada,1,68
+cenoura-crua,ESPECIFICO,SEMELHANTE,Fatia,5,6401201,Cenoura,Cru(a),Cenoura cozida - fatia,14,68
+cenoura-cozida,ESPECIFICO,DIRETA,Escumadeira,48,6401201,Cenoura,Cozido(a),Cenoura cozida - escumadeira média rasa picada,1,69
+cenoura-cozida,ESPECIFICO,DIRETA,Fatia,5,6401201,Cenoura,Cozido(a),Cenoura cozida - fatia,14,69
+cenoura-cozida,ESPECIFICO,DIRETA,Unidade,100,6401201,Cenoura,Cozido(a),Cenoura cozida - unidade média,1,69
+cenoura-cozida,ESPECIFICO,DIRETA,Unidade pequena,46,6401201,Cenoura,Cozido(a),Cenoura cozida - unidade pequena,1,69
+beterraba-crua,ESPECIFICO,DIRETA,Colher de sopa,16,6401101,Beterraba,Cru(a),Beterraba crua - colher de sopa cheia ralada,1,66
+beterraba-crua,ESPECIFICO,DIRETA,Prato de sobremesa,168,6401101,Beterraba,Cru(a),Beterraba - prato de sobremesa,7,66
+beterraba-crua,ESPECIFICO,DIRETA,Unidade,140,6401101,Beterraba,Cru(a),Beterraba crua - unidade média,1,66
+beterraba-crua,ESPECIFICO,SEMELHANTE,Colher de arroz/servir,38,6401101,Beterraba,Cru(a),Beterraba cozida - colher de arroz cheia,1,66
+beterraba-crua,ESPECIFICO,SEMELHANTE,Fatia,12,6401101,Beterraba,Cru(a),Beterraba cozida - fatia média,1,66
+beterraba-cozida,ESPECIFICO,DIRETA,Colher de arroz/servir,38,6401101,Beterraba,Cozido(a),Beterraba cozida - colher de arroz cheia,1,66
+beterraba-cozida,ESPECIFICO,DIRETA,Colher de sopa,20,6401101,Beterraba,Cozido(a),Beterraba cozida - colher de sopa cheia,1,67
+beterraba-cozida,ESPECIFICO,DIRETA,Escumadeira,45,6401101,Beterraba,Cozido(a),Beterraba cozida - escumadeira média rasa picada,1,67
+beterraba-cozida,ESPECIFICO,DIRETA,Fatia,12,6401101,Beterraba,Cozido(a),Beterraba cozida - fatia média,1,67
+beterraba-cozida,ESPECIFICO,DIRETA,Prato de sobremesa,168,6401101,Beterraba,Cozido(a),Beterraba - prato de sobremesa,7,67
+beterraba-cozida,ESPECIFICO,DIRETA,Unidade,125,6401101,Beterraba,Cozido(a),Beterraba cozida - unidade média,1,67
+beterraba-cozida,ESPECIFICO,DIRETA,Unidade pequena,75,6401101,Beterraba,Cozido(a),Beterraba cozida - unidade pequena,1,67
+brocolis-cozido,ESPECIFICO,DIRETA,Colher de sopa,10,6701704,Brócolis,Cozido(a),Brócolis cozido - colher de sopa cheia picada,1,121
+brocolis-cozido,ESPECIFICO,DIRETA,Pires,75,6701704,Brócolis,Cozido(a),Brócolis cozido - pires,7,121
+couve-flor-cozida,ESPECIFICO,DIRETA,Colher de sopa,25,6700601,Couve-flor,Cozido(a),Couve-flor cozida - colher de sopa cheia,1,110
+couve-flor-cozida,ESPECIFICO,DIRETA,Prato de sobremesa,100,6700601,Couve-flor,Cozido(a),Couve-flor cozida - prato de sobremesa,1,110
+couve-flor-cozida,ESPECIFICO,DIRETA,Ramo,60,6700601,Couve-flor,Cozido(a),Couve-flor cozida - ramo médio,1,110
+couve-flor-cozida,ESPECIFICO,DIRETA,Unidade pequena,30,6700601,Couve-flor,Cozido(a),Couve-flor cozida - ramo pequeno,1,110
+abobrinha-cozida,ESPECIFICO,DIRETA,Colher de arroz/servir,70,6703701,Abobrinha,Cozido(a),Abobrinha cozida - colher de arroz cheia,1,127
+abobrinha-cozida,ESPECIFICO,DIRETA,Colher de sopa,30,6703701,Abobrinha,Cozido(a),Abobrinha cozida - colher de sopa cheia,1,127
+abobrinha-cozida,ESPECIFICO,DIRETA,Escumadeira,90,6703701,Abobrinha,Cozido(a),Abobrinha cozida - escumadeira média cheia,1,127
+abobrinha-cozida,ESPECIFICO,DIRETA,Fatia,61,6703701,Abobrinha,Cozido(a),Abobrinha - fatia,14,127
+abobrinha-cozida,ESPECIFICO,DIRETA,Pedaço,17,6703701,Abobrinha,Cozido(a),Abobrinha - pedaço,14,127
+abobrinha-cozida,ESPECIFICO,DIRETA,Rodela,18,6703701,Abobrinha,Cozido(a),Abobrinha - rodela,14,127
+abobrinha-cozida,ESPECIFICO,DIRETA,Unidade,335,6703701,Abobrinha,Cozido(a),Abobrinha - unidade,14,127
+abobrinha-refogada,ESPECIFICO,DIRETA,Pedaço,17,6703701,Abobrinha,Refogado(a),Abobrinha - pedaço,14,129
+abobrinha-refogada,ESPECIFICO,DIRETA,Rodela,18,6703701,Abobrinha,Refogado(a),Abobrinha - rodela,14,129
+abobrinha-refogada,ESPECIFICO,DIRETA,Unidade,335,6703701,Abobrinha,Refogado(a),Abobrinha - unidade,14,129
+abobrinha-refogada,ESPECIFICO,SEMELHANTE,Colher de arroz/servir,70,6703701,Abobrinha,Refogado(a),Abobrinha cozida - colher de arroz cheia,1,128
+abobrinha-refogada,ESPECIFICO,SEMELHANTE,Colher de sopa,30,6703701,Abobrinha,Refogado(a),Abobrinha cozida - colher de sopa cheia,1,128
+abobrinha-refogada,ESPECIFICO,SEMELHANTE,Escumadeira,90,6703701,Abobrinha,Refogado(a),Abobrinha cozida - escumadeira média cheia,1,128
+chuchu-cozido,ESPECIFICO,DIRETA,Colher de arroz/servir,45,6704101,Chuchu,Cozido(a),Chuchu cozido - colher de arroz cheia,1,133
+chuchu-cozido,ESPECIFICO,DIRETA,Colher de sopa,20,6704101,Chuchu,Cozido(a),Chuchu cozido - colher de sopa cheia,1,133
+chuchu-cozido,ESPECIFICO,DIRETA,Escumadeira,110,6704101,Chuchu,Cozido(a),Chuchu cozido - escumadeira média cheia,1,133
+chuchu-cozido,ESPECIFICO,DIRETA,Pedaço,30,6704101,Chuchu,Cozido(a),Chuchu cozido - pedaço,1,133
+chuchu-cozido,ESPECIFICO,DIRETA,Unidade,230,6704101,Chuchu,Cozido(a),Chuchu cozido - unidade média,1,134
+chuchu-cozido,ESPECIFICO,DIRETA,Unidade pequena,145,6704101,Chuchu,Cozido(a),Chuchu cozido - unidade pequena,1,134
+couve-refogada,ESPECIFICO,DIRETA,Colher de sopa,20,6700501,Couve,Refogado(a),Couve refogada - colher de sopa cheia picada,1,107
+couve-refogada,ESPECIFICO,DIRETA,Folha,25,6700501,Couve,Refogado(a),Couve refogada - folha média,1,108
+espinafre-refogado,ESPECIFICO,SEMELHANTE,Colher de sopa,25,6700701,Espinafre,Refogado(a),Espinafre cozido - colher de sopa cheia,1,112
+repolho-cru,ESPECIFICO,DIRETA,Colher de arroz/servir,25,6700901,Repolho,Cru(a),Repolho cru - colher de arroz cheia,1,113
+repolho-cru,ESPECIFICO,DIRETA,Colher de sopa,10,6700901,Repolho,Cru(a),Repolho cru - colher de sopa cheia,1,113
+repolho-cru,ESPECIFICO,DIRETA,Escumadeira,25,6700901,Repolho,Cru(a),Repolho cru - escumadeira média cheia,1,113
+repolho-cru,ESPECIFICO,DIRETA,Folha,26,6700901,Repolho,Cru(a),Repolho cru - folha média,1,113
+repolho-cru,ESPECIFICO,DIRETA,Pires,100,6700901,Repolho,Cru(a),Repolho - pires cheio,7,113
+repolho-roxo-cru,GENERICO,DIRETA,Colher de arroz/servir,25,6700901,Repolho,Cru(a),Repolho cru - colher de arroz cheia,1,113
+repolho-roxo-cru,GENERICO,DIRETA,Colher de sopa,10,6700901,Repolho,Cru(a),Repolho cru - colher de sopa cheia,1,113
+repolho-roxo-cru,GENERICO,DIRETA,Escumadeira,25,6700901,Repolho,Cru(a),Repolho cru - escumadeira média cheia,1,113
+repolho-roxo-cru,GENERICO,DIRETA,Folha,26,6700901,Repolho,Cru(a),Repolho cru - folha média,1,113
+repolho-roxo-cru,GENERICO,DIRETA,Pires,100,6700901,Repolho,Cru(a),Repolho - pires cheio,7,113
+acelga-crua,ESPECIFICO,DIRETA,Colher de arroz/servir,10,6701501,Acelga,Cru(a),Acelga - colher de arroz cheia,1,118
+acelga-crua,ESPECIFICO,DIRETA,Colher de sopa,6,6701501,Acelga,Cru(a),Acelga - colher de sopa cheia picada,1,118
+acelga-crua,ESPECIFICO,DIRETA,Folha,10,6701501,Acelga,Cru(a),Acelga - folha média,1,118
+cebola-crua,ESPECIFICO,DIRETA,Colher de sopa,10,6705701,Cebola,Cru(a),Cebola - colher de sopa cheia,1,148
+cebola-crua,ESPECIFICO,DIRETA,Fatia,6,6705701,Cebola,Cru(a),Cebola - fatia média,1,148
+cebola-crua,ESPECIFICO,DIRETA,Unidade,70,6705701,Cebola,Cru(a),Cebola - unidade média,1,148
+cebola-crua,ESPECIFICO,DIRETA,Unidade pequena,30,6705701,Cebola,Cru(a),Cebola - unidade pequena,1,148
+abobora-cozida,ESPECIFICO,DIRETA,Colher de sopa,36,6703901,Abóbora,Cozido(a),Abóbora cozida - colher de sopa cheia,1,130
+abobora-cozida,ESPECIFICO,DIRETA,Escumadeira,100,6703901,Abóbora,Cozido(a),Abóbora cozida - escumadeira média cheia,1,130
+abobora-cozida,ESPECIFICO,DIRETA,Pedaço,50,6703901,Abóbora,Cozido(a),Abóbora cozida - pedaço médio,1,130
+berinjela-cozida,ESPECIFICO,SEMELHANTE,Colher de arroz/servir,75,6705401,Berinjela,Cozido(a),Berinjela ensopada - colher de arroz cheia,1,145
+berinjela-cozida,ESPECIFICO,SEMELHANTE,Colher de sopa,25,6705401,Berinjela,Cozido(a),Berinjela ensopada - colher de sopa cheia,1,145
+berinjela-cozida,ESPECIFICO,SEMELHANTE,Escumadeira,125,6705401,Berinjela,Cozido(a),Berinjela ensopada - escumadeira média cheia,1,145
+berinjela-cozida,ESPECIFICO,SEMELHANTE,Fatia,20,6705401,Berinjela,Cozido(a),Berinjela frita - fatia média,1,145
+banana-prata,ESPECIFICO,DIRETA,Pedaço,16,6801101,"Banana (ouro, prata, d´água, da terra, etc.)",Não se aplica,Banana - pedaço,14,155
+banana-prata,ESPECIFICO,DIRETA,Prato raso,235,6801101,"Banana (ouro, prata, d´água, da terra, etc.)",Não se aplica,Banana - prato raso,14,155
+banana-prata,ESPECIFICO,DIRETA,Unidade,75,6801101,"Banana (ouro, prata, d´água, da terra, etc.)",Não se aplica,Banana-prata - unidade,3,155
+banana-nanica,GENERICO,DIRETA,Pedaço,16,6801101,"Banana (ouro, prata, d´água, da terra, etc.)",Não se aplica,Banana - pedaço,14,155
+banana-nanica,GENERICO,DIRETA,Prato raso,235,6801101,"Banana (ouro, prata, d´água, da terra, etc.)",Não se aplica,Banana - prato raso,14,155
+maca-fuji,GENERICO,DIRETA,Unidade,150,6803001,Maçã,Não se aplica,Maçã - unidade média,1,160
+maca-fuji,GENERICO,DIRETA,Unidade pequena,90,6803001,Maçã,Não se aplica,Maçã - unidade pequena,1,160
+pera-williams,GENERICO,DIRETA,Unidade,130,6803601,Pera,Não se aplica,pera - unidade média,1,163
+laranja-pera,ESPECIFICO,DIRETA,Unidade,180,6801801,"Laranja (pera, seleta, lima, da terra, etc.)",Não se aplica,Laranja - unidade média,1,156
+laranja-pera,ESPECIFICO,DIRETA,Unidade pequena,90,6801801,"Laranja (pera, seleta, lima, da terra, etc.)",Não se aplica,Laranja - unidade pequena,1,156
+tangerina,ESPECIFICO,DIRETA,Unidade,135,6802201,Tangerina,Não se aplica,Tangerina - unidade média,1,157
+tangerina,ESPECIFICO,DIRETA,Unidade pequena,100,6802201,Tangerina,Não se aplica,Tangerina - unidade pequena,1,157
+kiwi,ESPECIFICO,DIRETA,Rodela,11,6807801,Kiwi,Não se aplica,Kiwi - rodela,7,174
+kiwi,ESPECIFICO,DIRETA,Unidade,94,6807801,Kiwi,Não se aplica,Kiwi - unidade média,1,174
+mamao-papaia,GENERICO,DIRETA,Colher de arroz/servir,70,6803101,Mamão,Não se aplica,Mamão papaya - colher de arroz cheia,1,160
+mamao-papaia,GENERICO,DIRETA,Colher de sopa,40,6803101,Mamão,Não se aplica,Mamão papaya - colher de sopa cheia,1,160
+mamao-papaia,GENERICO,DIRETA,Fatia,170,6803101,Mamão,Não se aplica,Mamão - fatia média,1,160
+mamao-papaia,GENERICO,DIRETA,Unidade,310,6803101,Mamão,Não se aplica,Mamão papaya - unidade média,1,161
+mamao-papaia,GENERICO,DIRETA,Unidade pequena,270,6803101,Mamão,Não se aplica,Mamão papaya - unidade pequena,1,161
+mamao-formosa,GENERICO,DIRETA,Fatia,170,6803101,Mamão,Não se aplica,Mamão - fatia média,1,160
+abacaxi,ESPECIFICO,DIRETA,Fatia,75,6802601,Abacaxi,Não se aplica,Abacaxi - fatia média,1,158
+abacaxi,ESPECIFICO,DIRETA,Unidade,750,6802601,Abacaxi,Não se aplica,Abacaxi - unidade média,1,159
+abacaxi,ESPECIFICO,DIRETA,Unidade pequena,480,6802601,Abacaxi,Não se aplica,Abacaxi - unidade pequena,1,159
+melancia,ESPECIFICO,DIRETA,Fatia,200,6803401,Melancia,Não se aplica,Melancia - fatia média,1,162
+melancia,ESPECIFICO,DIRETA,Pedaço,150,6803401,Melancia,Não se aplica,Melancia - pedaço médio,7,162
+melao,ESPECIFICO,DIRETA,Fatia,90,6803501,Melão,Não se aplica,Melão - fatia média,1,162
+melao,ESPECIFICO,DIRETA,Unidade,660,6803501,Melão,Não se aplica,Melão - unidade média,1,163
+morango,ESPECIFICO,DIRETA,Unidade,12,6805201,Morango,Não se aplica,Morango - unidade média,1,169
+morango,ESPECIFICO,DIRETA,Unidade pequena,7,6805201,Morango,Não se aplica,Morango - unidade pequena,1,169
+uva-italia,GENERICO,DIRETA,Unidade,8,6803901,Uva,Não se aplica,Uva - unidade média,1,164
+uva-italia,GENERICO,DIRETA,Unidade pequena,4,6803901,Uva,Não se aplica,Uva - unidade pequena,1,164
+abacate,ESPECIFICO,DIRETA,Colher de sopa,45,6802701,Abacate,Não se aplica,Abacate - colher de sopa cheia picado,1,159
+abacate,ESPECIFICO,DIRETA,Unidade,430,6802701,Abacate,Não se aplica,Abacate - unidade média,1,159
+abacate,ESPECIFICO,DIRETA,Unidade pequena,370,6802701,Abacate,Não se aplica,Abacate - unidade pequena,1,159
+goiaba-vermelha,GENERICO,DIRETA,Unidade,170,6804201,Goiaba,Não se aplica,Goiaba - unidade média,1,165
+goiaba-vermelha,GENERICO,DIRETA,Unidade pequena,50,6804201,Goiaba,Não se aplica,Goiaba - unidade pequena,9,166
+acai-sem-acucar,ESPECIFICO,DIRETA,Concha,101,6601706,Açaí,Não se aplica,Açaí - concha,14,101
+acai-sem-acucar,ESPECIFICO,DIRETA,Copo grande,326,6601706,Açaí,Não se aplica,Açaí - copo grande,14,101
+acai-sem-acucar,ESPECIFICO,DIRETA,Copo médio,273,6601706,Açaí,Não se aplica,Açaí - copo médio,14,101
+acai-sem-acucar,ESPECIFICO,DIRETA,Tigela,202,6601706,Açaí,Não se aplica,Açaí - tigela,14,102
+patinho-bovino-grelhado,ESPECIFICO,DIRETA,Bife,100,7100501,Patinho,Grelhado(a)/Brasa/Churrasco,Bife bovino - unidade média,1,229
+patinho-bovino-grelhado,ESPECIFICO,SEMELHANTE,Pedaço,35,7100501,Patinho,Grelhado(a)/Brasa/Churrasco,Carne bovina ensopada - pedaço médio,1,229
+patinho-bovino-moido-refogado,GENERICO,DIRETA,Colher de arroz/servir,60,7104301,Carne moída,Refogado(a),Carne bovina moída - colher de arroz cheia,1,260
+patinho-bovino-moido-refogado,GENERICO,DIRETA,Colher de sopa,25,7104301,Carne moída,Refogado(a),Carne bovina moída - colher de sopa cheia,1,261
+carne-moida-de-acem-cozida,GENERICO,DIRETA,Colher de arroz/servir,60,7104301,Carne moída,Cozido(a),Carne bovina moída - colher de arroz cheia,1,259
+carne-moida-de-acem-cozida,GENERICO,DIRETA,Colher de sopa,25,7104301,Carne moída,Cozido(a),Carne bovina moída - colher de sopa cheia,1,259
+acem-bovino-cozido,ESPECIFICO,DIRETA,Bife,100,7100801,Acém,Cozido(a),Bife bovino - unidade média,1,233
+acem-bovino-cozido,ESPECIFICO,SEMELHANTE,Colher de arroz/servir,70,7100801,Acém,Cozido(a),Carne bovina ensopada com legumes - colher de arroz cheia,1,233
+acem-bovino-cozido,ESPECIFICO,SEMELHANTE,Pedaço,35,7100801,Acém,Cozido(a),Carne bovina ensopada - pedaço médio,1,233
+alcatra-bovina-grelhada,ESPECIFICO,DIRETA,Bife,100,7100301,Alcatra,Grelhado(a)/Brasa/Churrasco,Bife bovino - unidade média,1,225
+alcatra-bovina-grelhada,ESPECIFICO,SEMELHANTE,Pedaço,35,7100301,Alcatra,Grelhado(a)/Brasa/Churrasco,Carne bovina ensopada - pedaço médio,1,225
+contrafile-bovino-grelhado,ESPECIFICO,DIRETA,Bife,100,7100201,Contrafilé,Grelhado(a)/Brasa/Churrasco,Bife bovino - unidade média,1,222
+contrafile-bovino-grelhado,ESPECIFICO,SEMELHANTE,Pedaço,35,7100201,Contrafilé,Grelhado(a)/Brasa/Churrasco,Carne bovina ensopada - pedaço médio,1,222
+lagarto-bovino-cozido,ESPECIFICO,SEMELHANTE,Pedaço,35,7106401,Lagarto bovino,Cozido(a),Carne bovina ensopada - pedaço médio,1,269
+musculo-bovino-cozido,ESPECIFICO,DIRETA,Bife,100,7101001,Músculo bovino,Cozido(a),Bife bovino - unidade média,1,235
+musculo-bovino-cozido,ESPECIFICO,SEMELHANTE,Colher de sopa,30,7101001,Músculo bovino,Cozido(a),Carne bovina ensopada - colher de sopa cheia,1,235
+musculo-bovino-cozido,ESPECIFICO,SEMELHANTE,Pedaço,35,7101001,Músculo bovino,Cozido(a),Carne bovina ensopada - pedaço médio,1,235
+maminha-bovina-grelhada,ESPECIFICO,DIRETA,Bife,100,7100303,Maminha,Grelhado(a)/Brasa/Churrasco,Bife bovino - unidade média,1,226
+maminha-bovina-grelhada,ESPECIFICO,SEMELHANTE,Pedaço,35,7100303,Maminha,Grelhado(a)/Brasa/Churrasco,Carne bovina ensopada - pedaço médio,1,227
+file-mignon-grelhado,ESPECIFICO,DIRETA,Bife,100,7100101,Filé mignon,Grelhado(a)/Brasa/Churrasco,Bife bovino - unidade média,1,220
+file-mignon-grelhado,ESPECIFICO,DIRETA,Unidade,100,7100101,Filé mignon,Grelhado(a)/Brasa/Churrasco,Bife bovino - unidade média,1,220
+file-mignon-grelhado,ESPECIFICO,SEMELHANTE,Pedaço,35,7100101,Filé mignon,Grelhado(a)/Brasa/Churrasco,Carne bovina ensopada - pedaço médio,1,220
+peito-de-frango-sem-pele-grelhado,ESPECIFICO,SEMELHANTE,Filé,100,7800401,Peito de galinha ou frango,Grelhado(a)/Brasa/Churrasco,Frango frito - filé médio,1,339
+peito-de-frango-sem-pele-grelhado,ESPECIFICO,SEMELHANTE,Peito,180,7800401,Peito de galinha ou frango,Grelhado(a)/Brasa/Churrasco,Frango assado - peito médio,1,340
+peito-de-frango-sem-pele-cozido,ESPECIFICO,SEMELHANTE,Colher de sopa,20,7800401,Peito de galinha ou frango,Cozido(a),Frango assado - colher de sopa cheia desfiado,1,339
+peito-de-frango-sem-pele-cozido,ESPECIFICO,SEMELHANTE,Filé,100,7800401,Peito de galinha ou frango,Cozido(a),Frango frito - filé médio,1,339
+peito-de-frango-sem-pele-cozido,ESPECIFICO,SEMELHANTE,Peito,180,7800401,Peito de galinha ou frango,Cozido(a),Frango assado - peito médio,1,339
+sobrecoxa-de-frango-sem-pele-assada,GENERICO,DIRETA,Sobrecoxa,65,7800302,Frango em pedaços,Assado(a),Frango assado - sobrecoxa média,1,329
+frango-sem-pele-assado,ESPECIFICO,DIRETA,Asa,40,7800103,Frango inteiro,Assado(a),Frango assado - asa média,1,323
+frango-sem-pele-assado,ESPECIFICO,DIRETA,Peito,180,7800103,Frango inteiro,Assado(a),Frango assado - peito médio,1,323
+frango-sem-pele-assado,ESPECIFICO,DIRETA,Sobrecoxa,65,7800103,Frango inteiro,Assado(a),Frango assado - sobrecoxa média,1,323
+lombo-suino-assado,ESPECIFICO,DIRETA,Fatia,190,7103701,Lombo suíno,Assado(a),Porco lombo assado - 1 fatia,2,255
+file-de-tilapia-grelhado,GENERICO,SEMELHANTE,Filé,120,7400101,"Peixe de água doce (inteiro, em posta, em filé, etc.)",Grelhado(a)/Brasa/Churrasco,Peixe cozido - filé médio,1,303
+file-de-tilapia-grelhado,GENERICO,SEMELHANTE,Posta,200,7400101,"Peixe de água doce (inteiro, em posta, em filé, etc.)",Grelhado(a)/Brasa/Churrasco,Peixe cozido - posta média,1,303
+file-de-tilapia-grelhado,GENERICO,SEMELHANTE,Unidade pequena,150,7400101,"Peixe de água doce (inteiro, em posta, em filé, etc.)",Grelhado(a)/Brasa/Churrasco,Peixe cozido - posta pequena,1,303
+salmao-grelhado,GENERICO,SEMELHANTE,Filé,120,7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",Grelhado(a)/Brasa/Churrasco,Peixe cozido - filé médio,1,291
+salmao-grelhado,GENERICO,SEMELHANTE,Posta,200,7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",Grelhado(a)/Brasa/Churrasco,Peixe cozido - posta média,1,291
+sardinha-assada,GENERICO,SEMELHANTE,Colher de sopa,20,7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",Assado(a),Peixe cozido - colher de sopa cheia picada,1,291
+sardinha-assada,GENERICO,SEMELHANTE,Filé,120,7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",Assado(a),Peixe cozido - filé médio,1,292
+sardinha-assada,GENERICO,SEMELHANTE,Posta,200,7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",Assado(a),Peixe cozido - posta média,1,292
+sardinha-assada,GENERICO,SEMELHANTE,Unidade pequena,150,7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",Assado(a),Peixe cozido - posta pequena,1,292
+atum-em-conserva-em-agua,ESPECIFICO,DIRETA,Colher de sobremesa,10,7703402,Atum em conserva,Não se aplica,Atum sólido em água e sal Coqueiro - colher de sobremesa,1,320
+atum-em-conserva-em-agua,ESPECIFICO,DIRETA,Colher de sopa,16,7703402,Atum em conserva,Não se aplica,Atum sólido em água e sal Coqueiro - colher de sopa cheia,1,320
+merluza-assada,GENERICO,SEMELHANTE,Colher de sopa,20,7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",Assado(a),Peixe cozido - colher de sopa cheia picada,1,291
+merluza-assada,GENERICO,SEMELHANTE,Filé,120,7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",Assado(a),Peixe cozido - filé médio,1,292
+merluza-assada,GENERICO,SEMELHANTE,Posta,200,7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",Assado(a),Peixe cozido - posta média,1,292
+merluza-assada,GENERICO,SEMELHANTE,Unidade pequena,150,7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",Assado(a),Peixe cozido - posta pequena,1,292
+corvina-assada,GENERICO,SEMELHANTE,Colher de sopa,20,7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",Assado(a),Peixe cozido - colher de sopa cheia picada,1,291
+corvina-assada,GENERICO,SEMELHANTE,Filé,120,7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",Assado(a),Peixe cozido - filé médio,1,292
+corvina-assada,GENERICO,SEMELHANTE,Posta,200,7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",Assado(a),Peixe cozido - posta média,1,292
+corvina-assada,GENERICO,SEMELHANTE,Unidade pequena,150,7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",Assado(a),Peixe cozido - posta pequena,1,292
+ovo-de-galinha-cozido,ESPECIFICO,DIRETA,Unidade,45,7803301,Ovo de galinha,Cozido(a),Ovo de galinha cozido - unidade média,1,362
+ovo-de-galinha-cozido,ESPECIFICO,SEMELHANTE,Colher de arroz/servir,45,7803301,Ovo de galinha,Cozido(a),Ovo de galinha mexido - colher de arroz cheia,1,361
+ovo-de-galinha-cozido,ESPECIFICO,SEMELHANTE,Colher de sopa,15,7803301,Ovo de galinha,Cozido(a),Ovo de galinha mexido - colher de sopa cheia,1,362
+ovo-de-galinha-frito,ESPECIFICO,DIRETA,Unidade,50,7803301,Ovo de galinha,Frito(a),Ovo de galinha frito - unidade média,1,362
+ovo-de-galinha-frito,ESPECIFICO,SEMELHANTE,Colher de arroz/servir,45,7803301,Ovo de galinha,Frito(a),Ovo de galinha mexido - colher de arroz cheia,1,362
+ovo-de-galinha-frito,ESPECIFICO,SEMELHANTE,Colher de sopa,15,7803301,Ovo de galinha,Frito(a),Ovo de galinha mexido - colher de sopa cheia,1,362
+ovo-de-galinha-frito,ESPECIFICO,SEMELHANTE,Escumadeira,45,7803301,Ovo de galinha,Frito(a),Ovo de galinha mexido - escumadeira média rasa,1,362
+ovo-de-galinha-frito,ESPECIFICO,SEMELHANTE,Fatia,10,7803301,Ovo de galinha,Frito(a),Ovo de galinha cozido - fatia média,1,362
+leite-integral,ESPECIFICO,DIRETA,Caneca,300,7900101,Leite de vaca integral,Não se aplica,Caneca de 300ml,15,367
+leite-integral,ESPECIFICO,DIRETA,Copo americano,150,7900101,Leite de vaca integral,Não se aplica,Copo americano,15,367
+leite-integral,ESPECIFICO,DIRETA,Copo de cafezinho,50,7900101,Leite de vaca integral,Não se aplica,Copo de cafezinho,1,367
+leite-integral,ESPECIFICO,DIRETA,Copo de requeijão,240,7900101,Leite de vaca integral,Não se aplica,Copo de requeijão,1,367
+leite-integral,ESPECIFICO,DIRETA,Copo grande,300,7900101,Leite de vaca integral,Não se aplica,Copo grande,7,367
+leite-integral,ESPECIFICO,DIRETA,Copo médio,240,7900101,Leite de vaca integral,Não se aplica,Copo médio,1,367
+leite-integral,ESPECIFICO,DIRETA,Copo tulipa,290,7900101,Leite de vaca integral,Não se aplica,Copo tulipa,1,367
+leite-integral,ESPECIFICO,DIRETA,Xícara de café,50,7900101,Leite de vaca integral,Não se aplica,Xícara de café,15,367
+leite-integral,ESPECIFICO,DIRETA,Xícara de chá,200,7900101,Leite de vaca integral,Não se aplica,Xícara de chá,1,368
+leite-desnatado,ESPECIFICO,DIRETA,Caneca,300,7903601,Leite de vaca desnatado,Não se aplica,Caneca de 300ml,15,384
+leite-desnatado,ESPECIFICO,DIRETA,Copo americano,150,7903601,Leite de vaca desnatado,Não se aplica,Copo americano,15,385
+leite-desnatado,ESPECIFICO,DIRETA,Copo de requeijão,240,7903601,Leite de vaca desnatado,Não se aplica,Copo de requeijão,1,385
+leite-desnatado,ESPECIFICO,DIRETA,Copo grande,300,7903601,Leite de vaca desnatado,Não se aplica,Copo grande,7,385
+leite-desnatado,ESPECIFICO,DIRETA,Copo médio,240,7903601,Leite de vaca desnatado,Não se aplica,Copo médio,1,385
+leite-desnatado,ESPECIFICO,DIRETA,Copo tulipa,290,7903601,Leite de vaca desnatado,Não se aplica,Copo tulipa,1,385
+leite-desnatado,ESPECIFICO,DIRETA,Xícara de café,50,7903601,Leite de vaca desnatado,Não se aplica,Xícara de café,15,385
+leite-desnatado,ESPECIFICO,DIRETA,Xícara de chá,200,7903601,Leite de vaca desnatado,Não se aplica,Xícara de chá,1,385
+iogurte-natural,ESPECIFICO,DIRETA,Copo americano,150,7901204,Iogurte natural,Não se aplica,Copo americano,15,373
+iogurte-natural,ESPECIFICO,DIRETA,Copo de requeijão,240,7901204,Iogurte natural,Não se aplica,Copo de requeijão,1,373
+iogurte-natural,ESPECIFICO,DIRETA,Copo grande,300,7901204,Iogurte natural,Não se aplica,Copo grande,7,373
+iogurte-natural,ESPECIFICO,DIRETA,Copo médio,240,7901204,Iogurte natural,Não se aplica,Copo médio,1,373
+iogurte-natural-desnatado,ESPECIFICO,DIRETA,Copo americano,150,7901203,Iogurte desnatado,Não se aplica,Copo americano,15,373
+iogurte-natural-desnatado,ESPECIFICO,DIRETA,Copo médio,240,7901203,Iogurte desnatado,Não se aplica,Copo médio,1,373
+queijo-minas-frescal,GENERICO,DIRETA,Fatia,45,7902001,Queijo de minas,Não se aplica,Queijo minas padrão - fatia média,1,378
+queijo-mucarela,ESPECIFICO,DIRETA,Fatia,20,7901801,Queijo muçarela,Não se aplica,Queijo muçarela - fatia média,1,377
+queijo-prato,ESPECIFICO,DIRETA,Fatia,15,7901701,Queijo prato,Não se aplica,Queijo prato - fatia média,1,377
+ricota,ESPECIFICO,DIRETA,Fatia,35,7902201,Queijo ricota,Não se aplica,Ricota Marília - fatia média,1,379
+requeijao-cremoso,ESPECIFICO,DIRETA,Colher de sopa,30,7902901,Requeijão,Não se aplica,Requeijão - colher de sopa cheia,1,381
+castanha-de-caju,ESPECIFICO,DIRETA,Punhado,40,6600801,Castanha de caju,Não se aplica,Castanha de caju torrada - punhado,1,100
+castanha-de-caju,ESPECIFICO,DIRETA,Unidade,2.5,6600801,Castanha de caju,Não se aplica,Castanha de caju torrada - unidade média,1,100
+castanha-do-para,ESPECIFICO,DIRETA,Unidade,4,6600701,Castanha-do-pará,Não se aplica,Castanha-do-pará - unidade,1,100
+amendoa-torrada,ESPECIFICO,DIRETA,Unidade,1,6600501,Amêndoa,Não se aplica,Amêndoa - unidade,1,100
+noz,ESPECIFICO,DIRETA,Unidade,5,6601501,Noz,Não se aplica,Noz - unidade,1,101
+linhaca,ESPECIFICO,DIRETA,Colher de sobremesa,3,6302001,Semente de linhaça,Não se aplica,Semente de linhaça - colher de sobremesa,14,41
+linhaca,ESPECIFICO,DIRETA,Colher de sopa,13,6302001,Semente de linhaça,Não se aplica,Semente de linhaça - colher de sopa,14,41
+oleo-de-soja,ESPECIFICO,DIRETA,Colher de chá,2,8400301,Óleo de soja,Não se aplica,Óleo vegetal - colher de chá,1,474
+oleo-de-soja,ESPECIFICO,DIRETA,Colher de sopa,8,8400301,Óleo de soja,Não se aplica,Óleo vegetal - colher de sopa,1,474
+manteiga,ESPECIFICO,DIRETA,Colher de chá,8,7901501,Manteiga com ou sem sal,Não se aplica,Manteiga - colher de chá cheia,1,375
+manteiga,ESPECIFICO,DIRETA,Colher de sobremesa,23,7901501,Manteiga com ou sem sal,Não se aplica,Manteiga - colher de sobremesa cheia,1,375
+manteiga,ESPECIFICO,DIRETA,Colher de sopa,32,7901501,Manteiga com ou sem sal,Não se aplica,Manteiga - colher de sopa cheia,1,375
+acucar-refinado,ESPECIFICO,DIRETA,Colher de chá,5,6906602,Açúcar,Não se aplica,Açúcar refinado - colher de chá cheia,1,205
+acucar-refinado,ESPECIFICO,DIRETA,Colher de sobremesa,16,6906602,Açúcar,Não se aplica,Açúcar refinado - colher de sobremesa cheia,1,205
+acucar-refinado,ESPECIFICO,DIRETA,Colher de sopa,24,6906602,Açúcar,Não se aplica,Açúcar refinado - colher de sopa cheia,1,205
+acucar-mascavo,ESPECIFICO,DIRETA,Colher de sopa,19,6900304,Açúcar mascavo,Não se aplica,Açúcar mascavo - colher de sopa cheia,1,176
+mel,ESPECIFICO,DIRETA,Colher de chá,3,6901602,Mel,Não se aplica,Mel de abelha - colher de chá,1,188
+mel,ESPECIFICO,DIRETA,Colher de sobremesa,9,6901602,Mel,Não se aplica,Mel de abelha - colher de sobremesa,1,189
+mel,ESPECIFICO,DIRETA,Colher de sopa,15,6901602,Mel,Não se aplica,Mel de abelha - colher de sopa,1,189
+cafe-coado,ESPECIFICO,DIRETA,Caneca,300,8501302,Café,Não se aplica,Caneca de 300ml,15,505
+cafe-coado,ESPECIFICO,DIRETA,Copo americano,150,8501302,Café,Não se aplica,Copo americano,15,505
+cafe-coado,ESPECIFICO,DIRETA,Copo de cafezinho,50,8501302,Café,Não se aplica,Copo de cafezinho,1,505
+cafe-coado,ESPECIFICO,DIRETA,Copo de requeijão,240,8501302,Café,Não se aplica,Copo de requeijão,1,505
+cafe-coado,ESPECIFICO,DIRETA,Copo grande,300,8501302,Café,Não se aplica,Copo grande,7,505
+cafe-coado,ESPECIFICO,DIRETA,Copo médio,240,8501302,Café,Não se aplica,Copo médio,1,505
+cafe-coado,ESPECIFICO,DIRETA,Copo tulipa,290,8501302,Café,Não se aplica,Copo tulipa,1,505
+cafe-coado,ESPECIFICO,DIRETA,Xícara de café,50,8501302,Café,Não se aplica,Xícara de café,15,505
+cafe-coado,ESPECIFICO,DIRETA,Xícara de chá,200,8501302,Café,Não se aplica,Xícara de chá,1,505
+cha-preto,GENERICO,DIRETA,Caneca,300,8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",Não se aplica,Caneca de 300ml,15,458
+cha-preto,GENERICO,DIRETA,Copo americano,150,8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",Não se aplica,Copo americano,15,458
+cha-preto,GENERICO,DIRETA,Copo de cafezinho,50,8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",Não se aplica,Copo de cafezinho,1,458
+cha-preto,GENERICO,DIRETA,Copo de requeijão,240,8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",Não se aplica,Copo de requeijão,1,458
+cha-preto,GENERICO,DIRETA,Copo grande,300,8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",Não se aplica,Copo grande,7,458
+cha-preto,GENERICO,DIRETA,Copo médio,240,8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",Não se aplica,Copo médio,1,458
+cha-preto,GENERICO,DIRETA,Copo tulipa,290,8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",Não se aplica,Copo tulipa,1,458
+cha-preto,GENERICO,DIRETA,Xícara de café,50,8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",Não se aplica,Xícara de café,15,458
+cha-preto,GENERICO,DIRETA,Xícara de chá,200,8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",Não se aplica,Xícara de chá,1,458
+cha-de-erva-doce,GENERICO,DIRETA,Caneca,300,8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",Não se aplica,Caneca de 300ml,15,458
+cha-de-erva-doce,GENERICO,DIRETA,Copo americano,150,8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",Não se aplica,Copo americano,15,458
+cha-de-erva-doce,GENERICO,DIRETA,Copo de cafezinho,50,8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",Não se aplica,Copo de cafezinho,1,458
+cha-de-erva-doce,GENERICO,DIRETA,Copo de requeijão,240,8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",Não se aplica,Copo de requeijão,1,458
+cha-de-erva-doce,GENERICO,DIRETA,Copo grande,300,8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",Não se aplica,Copo grande,7,458
+cha-de-erva-doce,GENERICO,DIRETA,Copo médio,240,8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",Não se aplica,Copo médio,1,458
+cha-de-erva-doce,GENERICO,DIRETA,Copo tulipa,290,8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",Não se aplica,Copo tulipa,1,458
+cha-de-erva-doce,GENERICO,DIRETA,Xícara de café,50,8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",Não se aplica,Xícara de café,15,458
+cha-de-erva-doce,GENERICO,DIRETA,Xícara de chá,200,8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",Não se aplica,Xícara de chá,1,458
+suco-de-laranja-natural,ESPECIFICO,DIRETA,Caneca,300,8500407,Suco de laranja,Não se aplica,Caneca de 300ml,15,488
+suco-de-laranja-natural,ESPECIFICO,DIRETA,Copo americano,150,8500407,Suco de laranja,Não se aplica,Copo americano,15,488
+suco-de-laranja-natural,ESPECIFICO,DIRETA,Copo de requeijão,240,8500407,Suco de laranja,Não se aplica,Copo de requeijão,1,488
+suco-de-laranja-natural,ESPECIFICO,DIRETA,Copo grande,300,8500407,Suco de laranja,Não se aplica,Copo grande,7,488
+suco-de-laranja-natural,ESPECIFICO,DIRETA,Copo médio,240,8500407,Suco de laranja,Não se aplica,Copo médio,1,488
+suco-de-laranja-natural,ESPECIFICO,DIRETA,Copo tulipa,290,8500407,Suco de laranja,Não se aplica,Copo tulipa,1,488
+suco-de-laranja-natural,ESPECIFICO,DIRETA,Xícara de café,50,8500407,Suco de laranja,Não se aplica,Xícara de café,15,489
+suco-de-laranja-natural,ESPECIFICO,DIRETA,Xícara de chá,200,8500407,Suco de laranja,Não se aplica,Xícara de chá,1,489
+agua-de-coco,ESPECIFICO,DIRETA,Copo americano,150,8202101,Água de coco,Não se aplica,Copo americano,15,448
+agua-de-coco,ESPECIFICO,DIRETA,Copo de requeijão,240,8202101,Água de coco,Não se aplica,Copo de requeijão,1,448
+agua-de-coco,ESPECIFICO,DIRETA,Copo grande,300,8202101,Água de coco,Não se aplica,Copo grande,7,448
+agua-de-coco,ESPECIFICO,DIRETA,Copo médio,240,8202101,Água de coco,Não se aplica,Copo médio,1,448
+agua-de-coco,ESPECIFICO,DIRETA,Copo tulipa,290,8202101,Água de coco,Não se aplica,Copo tulipa,1,448
+agua-de-coco,ESPECIFICO,DIRETA,Unidade,340,8202101,Água de coco,Não se aplica,Água de coco - unidade,1,449
+agua-de-coco,ESPECIFICO,DIRETA,Xícara de chá,200,8202101,Água de coco,Não se aplica,Xícara de chá,1,449
+refrigerante-de-cola,ESPECIFICO,DIRETA,Caneca,300,8200101,Refrigerante de cola tradicional,Não se aplica,Caneca de 300ml,15,434
+refrigerante-de-cola,ESPECIFICO,DIRETA,Copo americano,150,8200101,Refrigerante de cola tradicional,Não se aplica,Copo americano,15,434
+refrigerante-de-cola,ESPECIFICO,DIRETA,Copo de cafezinho,50,8200101,Refrigerante de cola tradicional,Não se aplica,Copo de cafezinho,1,434
+refrigerante-de-cola,ESPECIFICO,DIRETA,Copo de requeijão,240,8200101,Refrigerante de cola tradicional,Não se aplica,Copo de requeijão,1,434
+refrigerante-de-cola,ESPECIFICO,DIRETA,Copo grande,300,8200101,Refrigerante de cola tradicional,Não se aplica,Copo grande,7,434
+refrigerante-de-cola,ESPECIFICO,DIRETA,Copo médio,240,8200101,Refrigerante de cola tradicional,Não se aplica,Copo médio,1,434
+refrigerante-de-cola,ESPECIFICO,DIRETA,Copo tulipa,290,8200101,Refrigerante de cola tradicional,Não se aplica,Copo tulipa,1,434
+refrigerante-de-cola,ESPECIFICO,DIRETA,Xícara de chá,200,8200101,Refrigerante de cola tradicional,Não se aplica,Xícara de chá,1,436
+refrigerante-de-guarana,ESPECIFICO,DIRETA,Caneca,300,8200301,Refrigerante de guaraná tradicional,Não se aplica,Caneca de 300ml,15,439
+refrigerante-de-guarana,ESPECIFICO,DIRETA,Copo americano,150,8200301,Refrigerante de guaraná tradicional,Não se aplica,Copo americano,15,439
+refrigerante-de-guarana,ESPECIFICO,DIRETA,Copo de requeijão,240,8200301,Refrigerante de guaraná tradicional,Não se aplica,Copo de requeijão,1,439
+refrigerante-de-guarana,ESPECIFICO,DIRETA,Copo grande,300,8200301,Refrigerante de guaraná tradicional,Não se aplica,Copo grande,7,439
+refrigerante-de-guarana,ESPECIFICO,DIRETA,Copo médio,240,8200301,Refrigerante de guaraná tradicional,Não se aplica,Copo médio,1,439
+refrigerante-de-guarana,ESPECIFICO,DIRETA,Copo tulipa,290,8200301,Refrigerante de guaraná tradicional,Não se aplica,Copo tulipa,1,439
+refrigerante-de-guarana,ESPECIFICO,DIRETA,Xícara de café,50,8200301,Refrigerante de guaraná tradicional,Não se aplica,Xícara de café,15,440
+cerveja-pilsen,ESPECIFICO,DIRETA,Caneca,300,8300101,Cerveja (com ou sem álcool),Não se aplica,Caneca de 300ml,15,464
+cerveja-pilsen,ESPECIFICO,DIRETA,Copo americano,150,8300101,Cerveja (com ou sem álcool),Não se aplica,Copo americano,15,464
+cerveja-pilsen,ESPECIFICO,DIRETA,Copo de requeijão,240,8300101,Cerveja (com ou sem álcool),Não se aplica,Copo de requeijão,1,464
+cerveja-pilsen,ESPECIFICO,DIRETA,Copo grande,300,8300101,Cerveja (com ou sem álcool),Não se aplica,Copo grande,7,464
+cerveja-pilsen,ESPECIFICO,DIRETA,Copo médio,240,8300101,Cerveja (com ou sem álcool),Não se aplica,Copo médio,1,464
+cerveja-pilsen,ESPECIFICO,DIRETA,Copo tulipa,290,8300101,Cerveja (com ou sem álcool),Não se aplica,Copo tulipa,1,464

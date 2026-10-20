@@ -13,8 +13,12 @@ namespace Ronu.Api.Data;
 /// - USDA: FoodData Central, SR Legacy (domínio público, CC0), só para o que a
 ///   TACO não tem. Código = fdcId.
 /// - DERIVADO: valor de outro item da TACO, com a justificativa na Observacao.
-/// - Peso por unidade: IBGE, POF 2008-2009, Tabela de Medidas Referidas para os
-///   Alimentos Consumidos no Brasil ("unidade média").
+/// - Medidas caseiras (unidade, fatia, colher, concha...): IBGE, POF 2008-2009, Tabela de
+///   Medidas Referidas para os Alimentos Consumidos no Brasil. Só entra medida que a POF mediu de
+///   fato (direta) ou que vale para o mesmo alimento com outro nome (categoria), nunca uma medida
+///   emprestada de outro utensílio ou de outro alimento. Cada medida guarda o código do alimento na
+///   POF, a página do PDF e a descrição na fonte, e o teste a confere contra docs/pof/. Itens sem
+///   medida só têm gramas. Método e regras: docs/pof/README.md.
 ///
 /// Kcal, proteína, carboidrato e gordura são por 100 g. Para os itens medidos
 /// em "ml" (bebidas), o valor por 100 g é usado como 100 ml. O carboidrato da
@@ -30,8 +34,24 @@ namespace Ronu.Api.Data;
 ///
 /// Para mudar um valor: confira na fonte, altere aqui e incremente VersaoBase.
 /// </summary>
-public static class BaseNutricional
+public static partial class BaseNutricional
 {
+    /// <summary>A lista completa: valores da fase 1, grupo de troca, nutriente principal e medidas caseiras.</summary>
+    public static IReadOnlyList<AlimentoBase> Itens { get; }
+
+    // Construtor estático, e não inicializador: Itens precisa dos campos das três partes desta classe
+    // (Dados, Classificacao, MedidasPorItem), e a ordem dos inicializadores entre arquivos não é definida.
+    static BaseNutricional()
+    {
+        Itens = Dados.Select(Completar).ToList();
+    }
+
+    private static AlimentoBase Completar(AlimentoBase item)
+    {
+        var (grupo, nutriente) = Classificacao[item.Id];
+        return item with { Grupo = grupo, Nutriente = nutriente, Medidas = MedidasPorItem.GetValueOrDefault(item.Id) ?? [] };
+    }
+
     /// <summary>
     /// Versão dos valores. Cada dieta guardará a versão usada no cálculo, para
     /// que uma mudança aqui não reescreva o passado.
@@ -45,7 +65,12 @@ public static class BaseNutricional
     /// </summary>
     public const int TetoDeNomes = 150;
 
-    public static IReadOnlyList<AlimentoBase> Itens { get; } =
+    /// <summary>
+    /// Os itens como na fase 1 (valores por 100 g, porção máxima, alérgenos). Grupo de troca, nutriente
+    /// principal e medidas caseiras entram em Completar, a partir de BaseNutricionalClassificacao.cs e
+    /// BaseNutricionalMedidas.cs.
+    /// </summary>
+    private static readonly AlimentoBase[] Dados =
     [
         new("arroz-branco-cozido", "Arroz branco cozido", CategoriaAlimento.CereaisEMassas, "g", FonteNutricional.Taco, "3", "Arroz, tipo 1, cozido", 128m, 2.5m, 28.1m, 0.2m, true, 400m, Alergenos.Nenhum,
             Observacao: "Arroz tipo 1. A TACO cozinha sem sal e sem óleo: o óleo do preparo caseiro não está incluído."),
@@ -62,13 +87,10 @@ public static class BaseNutricional
         new("tapioca", "Tapioca", CategoriaAlimento.CereaisEMassas, "g", FonteNutricional.Derivado, "124", "Fécula, de mandioca", 297m, 0.4m, 72.7m, 0.3m, true, 150m, Alergenos.Nenhum,
             Observacao: "DERIVADO: tapioca pronta, sem recheio, da fécula de mandioca da TACO (124) hidratada. A hidratação vem da tapioca medida pela própria TACO (551, \"Tapioca, com manteiga\", 24,9% de umidade): tirada a manteiga (10,9 g de gordura em 100 g = 13,2% de manteiga), a tapioca tem 73,7% de matéria seca, contra 82,2% da fécula. Logo, 100 g de tapioca = 89,7 g de fécula + 10,3 g de água (11,5 g de água para cada 100 g de fécula). Tirar a manteiga direto do 551 dá 290 kcal e 73,3 g de carboidrato, perto deste valor."),
         new("farinha-de-mandioca-torrada", "Farinha de mandioca torrada", CategoriaAlimento.CereaisEMassas, "g", FonteNutricional.Taco, "122", "Farinha, de mandioca, torrada", 365m, 1.2m, 89.2m, 0.3m, false, 50m, Alergenos.Nenhum),
-        new("pao-frances", "Pão francês", CategoriaAlimento.Paes, "g", FonteNutricional.Taco, "53", "Pão, trigo, francês", 300m, 8m, 58.6m, 3.1m, false, 150m, Alergenos.Gluten,
-            PesoUnidade: new(50m, "IBGE, POF 2008-2009, Tabela de Medidas Referidas: Pão francês - unidade")),
+        new("pao-frances", "Pão francês", CategoriaAlimento.Paes, "g", FonteNutricional.Taco, "53", "Pão, trigo, francês", 300m, 8m, 58.6m, 3.1m, false, 150m, Alergenos.Gluten),
         new("pao-de-forma-integral", "Pão de forma integral", CategoriaAlimento.Paes, "g", FonteNutricional.Taco, "52", "Pão, trigo, forma, integral", 253m, 9.4m, 49.9m, 3.7m, false, 100m, Alergenos.Gluten | Alergenos.Lactose,
-            PesoUnidade: new(25m, "IBGE, POF 2008-2009, Tabela de Medidas Referidas: Pão de forma de aveia - unidade (fatia)"),
             Observacao: "Lactose marcada por precaução: pães de forma industrializados costumam ter leite ou soro de leite."),
         new("pao-de-queijo-assado", "Pão de queijo assado", CategoriaAlimento.Paes, "g", FonteNutricional.Taco, "140", "Pão, de queijo, assado", 363m, 5.1m, 34.2m, 24.6m, false, 120m, Alergenos.Lactose | Alergenos.Ovo | Alergenos.Gluten,
-            PesoUnidade: new(20m, "IBGE, POF 2008-2009, Tabela de Medidas Referidas: Pão de queijo - unidade média"),
             Observacao: "Glúten marcado por precaução: versões industrializadas podem conter ou ter contaminação cruzada."),
         new("feijao-cozido", "Feijão cozido", CategoriaAlimento.Leguminosas, "g", FonteNutricional.Taco, "561", "Feijão, carioca, cozido", 76m, 4.8m, 13.6m, 0.5m, true, 300m, Alergenos.Nenhum,
             Observacao: "Feijão carioca. A TACO cozinha só com água (sem tempero nem óleo)."),
@@ -115,22 +137,16 @@ public static class BaseNutricional
         new("abobora-cozida", "Abóbora cozida", CategoriaAlimento.Hortalicas, "g", FonteNutricional.Taco, "64", "Abóbora, cabotian, cozida", 48m, 1.4m, 10.8m, 0.7m, true, 250m, Alergenos.Nenhum,
             Observacao: "Abóbora cabotiá."),
         new("berinjela-cozida", "Berinjela cozida", CategoriaAlimento.Hortalicas, "g", FonteNutricional.Taco, "95", "Berinjela, cozida", 19m, 0.7m, 4.5m, 0.1m, false, 200m, Alergenos.Nenhum),
-        new("banana-prata", "Banana prata", CategoriaAlimento.Frutas, "g", FonteNutricional.Taco, "182", "Banana, prata, crua", 98m, 1.3m, 26m, 0.1m, false, 225m, Alergenos.Nenhum,
-            PesoUnidade: new(75m, "IBGE, POF 2008-2009, Tabela de Medidas Referidas: Banana-prata - unidade")),
+        new("banana-prata", "Banana prata", CategoriaAlimento.Frutas, "g", FonteNutricional.Taco, "182", "Banana, prata, crua", 98m, 1.3m, 26m, 0.1m, false, 225m, Alergenos.Nenhum),
         new("banana-nanica", "Banana nanica", CategoriaAlimento.Frutas, "g", FonteNutricional.Taco, "179", "Banana, nanica, crua", 92m, 1.4m, 23.8m, 0.1m, true, 250m, Alergenos.Nenhum,
             Observacao: "Sem peso por unidade: o IBGE só traz a unidade da banana-prata."),
         new("maca-fuji", "Maçã fuji", CategoriaAlimento.Frutas, "g", FonteNutricional.Taco, "222", "Maçã, Fuji, com casca, crua", 56m, 0.3m, 15.2m, 0m, false, 300m, Alergenos.Nenhum,
-            PesoUnidade: new(150m, "IBGE, POF 2008-2009, Tabela de Medidas Referidas: Maçã - unidade média"),
             Observacao: "Com casca."),
-        new("pera-williams", "Pera williams", CategoriaAlimento.Frutas, "g", FonteNutricional.Taco, "243", "Pêra, Williams, crua", 53m, 0.6m, 14m, 0.1m, false, 260m, Alergenos.Nenhum,
-            PesoUnidade: new(130m, "IBGE, POF 2008-2009, Tabela de Medidas Referidas: pera - unidade média")),
-        new("laranja-pera", "Laranja pera", CategoriaAlimento.Frutas, "g", FonteNutricional.Taco, "214", "Laranja, pêra, crua", 37m, 1m, 8.9m, 0.1m, false, 360m, Alergenos.Nenhum,
-            PesoUnidade: new(180m, "IBGE, POF 2008-2009, Tabela de Medidas Referidas: Laranja - unidade média")),
+        new("pera-williams", "Pera williams", CategoriaAlimento.Frutas, "g", FonteNutricional.Taco, "243", "Pêra, Williams, crua", 53m, 0.6m, 14m, 0.1m, false, 260m, Alergenos.Nenhum),
+        new("laranja-pera", "Laranja pera", CategoriaAlimento.Frutas, "g", FonteNutricional.Taco, "214", "Laranja, pêra, crua", 37m, 1m, 8.9m, 0.1m, false, 360m, Alergenos.Nenhum),
         new("tangerina", "Tangerina", CategoriaAlimento.Frutas, "g", FonteNutricional.Taco, "251", "Tangerina, Poncã, crua", 38m, 0.8m, 9.6m, 0.1m, false, 270m, Alergenos.Nenhum,
-            PesoUnidade: new(135m, "IBGE, POF 2008-2009, Tabela de Medidas Referidas: Tangerina - unidade média"),
             Observacao: "Tangerina poncã."),
-        new("kiwi", "Kiwi", CategoriaAlimento.Frutas, "g", FonteNutricional.Taco, "207", "Kiwi, cru", 51m, 1.3m, 11.5m, 0.6m, false, 188m, Alergenos.Nenhum,
-            PesoUnidade: new(94m, "IBGE, POF 2008-2009, Tabela de Medidas Referidas: Kiwi - unidade média")),
+        new("kiwi", "Kiwi", CategoriaAlimento.Frutas, "g", FonteNutricional.Taco, "207", "Kiwi, cru", 51m, 1.3m, 11.5m, 0.6m, false, 188m, Alergenos.Nenhum),
         new("mamao-papaia", "Mamão papaia", CategoriaAlimento.Frutas, "g", FonteNutricional.Taco, "226", "Mamão, Papaia, cru", 40m, 0.5m, 10.4m, 0.1m, true, 300m, Alergenos.Nenhum),
         new("mamao-formosa", "Mamão formosa", CategoriaAlimento.Frutas, "g", FonteNutricional.Taco, "225", "Mamão, Formosa, cru", 45m, 0.8m, 11.6m, 0.1m, true, 300m, Alergenos.Nenhum),
         new("abacaxi", "Abacaxi", CategoriaAlimento.Frutas, "g", FonteNutricional.Taco, "164", "Abacaxi, cru", 48m, 0.9m, 12.3m, 0.1m, true, 300m, Alergenos.Nenhum),
@@ -184,10 +200,8 @@ public static class BaseNutricional
         new("merluza-assada", "Merluza assada", CategoriaAlimento.Peixes, "g", FonteNutricional.Taco, "301", "Merluza, filé, assado", 122m, 26.6m, 0m, 0.9m, true, 300m, Alergenos.Peixe,
             Observacao: "Filé."),
         new("corvina-assada", "Corvina assada", CategoriaAlimento.Peixes, "g", FonteNutricional.Taco, "293", "Corvina grande, assada", 147m, 26.8m, 0m, 3.6m, true, 300m, Alergenos.Peixe),
-        new("ovo-de-galinha-cozido", "Ovo de galinha cozido", CategoriaAlimento.Ovos, "g", FonteNutricional.Taco, "488", "Ovo, de galinha, inteiro, cozido/10minutos", 146m, 13.3m, 0.6m, 9.5m, false, 270m, Alergenos.Ovo,
-            PesoUnidade: new(45m, "IBGE, POF 2008-2009, Tabela de Medidas Referidas: Ovo de galinha cozido - unidade média")),
+        new("ovo-de-galinha-cozido", "Ovo de galinha cozido", CategoriaAlimento.Ovos, "g", FonteNutricional.Taco, "488", "Ovo, de galinha, inteiro, cozido/10minutos", 146m, 13.3m, 0.6m, 9.5m, false, 270m, Alergenos.Ovo),
         new("ovo-de-galinha-frito", "Ovo de galinha frito", CategoriaAlimento.Ovos, "g", FonteNutricional.Taco, "490", "Ovo, de galinha, inteiro, frito", 240m, 15.6m, 1.2m, 18.6m, false, 200m, Alergenos.Ovo,
-            PesoUnidade: new(50m, "IBGE, POF 2008-2009, Tabela de Medidas Referidas: Ovo de galinha frito - unidade média"),
             Observacao: "O óleo da fritura já está no valor da TACO."),
         new("clara-de-ovo-cozida", "Clara de ovo cozida", CategoriaAlimento.Ovos, "g", FonteNutricional.Taco, "486", "Ovo, de galinha, clara, cozida/10minutos", 59m, 13.4m, 0m, 0.1m, true, 300m, Alergenos.Ovo),
         new("leite-integral", "Leite integral", CategoriaAlimento.Laticinios, "ml", FonteNutricional.Usda, "171265", "Milk, whole, 3.25% milkfat, with added vitamin D", 61m, 3.15m, 4.8m, 3.25m, false, 500m, Alergenos.Lactose,
@@ -294,8 +308,94 @@ public enum Alergenos
 /// <summary>Nome do item usado nas UFs listadas (ex.: "Aipim cozido" no RJ).</summary>
 public record ApelidoRegional(string Nome, IReadOnlyList<string> Ufs);
 
-/// <summary>Peso de uma unidade (ovo, pão, fruta inteira) e de onde ele veio.</summary>
-public record PesoPorUnidade(decimal Gramas, string Origem);
+/// <summary>De onde vem uma medida caseira.</summary>
+public enum OrigemMedida
+{
+    /// <summary>A POF mediu este alimento, no mesmo preparo, com este utensílio.</summary>
+    Direta,
+
+    /// <summary>
+    /// A POF só tem o alimento por categoria, ou descreve a fonte com outro nome do mesmo alimento
+    /// ("Maçã" para a fuji, "Aipim" para a mandioca, "bife bovino" para o patinho): vale a medida da
+    /// categoria. Categorias que misturam alimentos diferentes (peixe de mar) não entram.
+    /// </summary>
+    Categoria,
+
+    /// <summary>
+    /// A POF mediu outro preparo, ou uma categoria mais ampla, que serve de aproximação: o filé de 120 g do
+    /// "peixe cozido" para a tilápia, a merluza e a corvina, que se comem em filé. Decisão de 2026-10-20;
+    /// só entra assim o que foi aprovado item a item.
+    /// </summary>
+    Semelhante
+}
+
+/// <summary>
+/// Uma medida caseira de um item: quanto pesa uma unidade da medida ("1 concha de arroz = 100 g"),
+/// com a fonte. Para os itens em ml, a POF dá o peso do copo e a base trata 1 g como 1 ml, como já
+/// faz com os valores por 100 g.
+/// </summary>
+/// <param name="Nome">No singular ("concha").</param>
+/// <param name="NomePlural">"conchas".</param>
+/// <param name="CodigoPof">Código do alimento na POF (7 dígitos).</param>
+/// <param name="PaginaPof">Página do PDF da POF onde está a linha.</param>
+/// <param name="DescricaoNaFonte">Como a POF descreve a medida na fonte de referência dela.</param>
+/// <param name="EhUnidade">Se é o peso de UMA unidade inteira do item (ovo, pão, fruta), o antigo PesoUnidade.</param>
+public record MedidaCaseira(
+    string Nome,
+    string NomePlural,
+    decimal Gramas,
+    OrigemMedida Origem,
+    string CodigoPof,
+    int PaginaPof,
+    string DescricaoNaFonte,
+    bool EhUnidade = false);
+
+/// <summary>
+/// O nutriente que o item entrega no prato, o que a troca preserva ao mudar de alimento (proteína no
+/// frango, carboidrato no arroz). É o PAPEL do item no prato, não o macro que mais pesa nas kcal:
+/// o ovo e o pão de queijo têm mais de 50% das kcal em gordura, mas entram como proteína e como pão.
+/// Livre = sem nutriente a preservar (hortaliças, café, chá, cerveja). Classificação do projeto,
+/// como a porção máxima, não valor de tabela.
+/// </summary>
+public enum NutrientePrincipal
+{
+    Proteina,
+    Carboidrato,
+    Gordura,
+    Livre
+}
+
+/// <summary>
+/// Com quais itens um item pode ser trocado (a troca só oferece itens do mesmo grupo). Classificação do
+/// projeto. Pontos de julgamento:
+/// - Leguminosas é grupo próprio, com a PROTEÍNA como nutriente principal: é o papel do feijão no prato
+///   (carboidrato é o macro que mais pesa nas kcal, ~70%, mas ninguém troca feijão por arroz). Decisão de
+///   2026-10-20.
+/// - Carboidratos junta cereais, massas, pães e tubérculos: o cuscuz e o macarrão servem tanto no prato
+///   quanto no café. Quem ordena os parecidos (e filtra pelo tipo de refeição) é a feature da troca.
+/// - Abacate está em OleaginosasESementes: é fruta na TACO, mas no prato é fonte de gordura.
+/// - Requeijão está em OleosEGorduras, junto com a manteiga: é usado como pasta no pão (decisão de 2026-10-20),
+///   não como queijo de fatia.
+/// - Bebidas se separam em sem calorias (café, chás), com açúcar (suco, água de coco, refrigerante) e
+///   alcoólicas (que só aparecem se a pessoa as incluiu, ValidadorBebidaAlcoolica).
+/// </summary>
+public enum GrupoDeTroca
+{
+    CarnesEPeixes,
+    Ovos,
+    LeiteEIogurte,
+    Queijos,
+    Leguminosas,
+    Carboidratos,
+    Frutas,
+    Hortalicas,
+    OleaginosasESementes,
+    OleosEGorduras,
+    Adocantes,
+    CafesEChas,
+    SucosERefrigerantes,
+    BebidasAlcoolicas
+}
 
 /// <summary>Um alimento da base, com os valores por 100 g (ou 100 ml).</summary>
 /// <param name="Id">Identificador estável (não muda se o nome mudar).</param>
@@ -320,9 +420,20 @@ public record AlimentoBase(
     bool Ajustavel,
     decimal PorcaoMaxima,
     Alergenos Alergenos,
-    PesoPorUnidade? PesoUnidade = null,
     IReadOnlyList<ApelidoRegional>? Apelidos = null,
     string? Observacao = null)
 {
     public IReadOnlyList<ApelidoRegional> Apelidos { get; init; } = Apelidos ?? [];
+
+    /// <summary>O que o item entrega no prato (preenchido em BaseNutricional.Completar).</summary>
+    public NutrientePrincipal Nutriente { get; init; }
+
+    /// <summary>Com quem o item pode ser trocado (preenchido em BaseNutricional.Completar).</summary>
+    public GrupoDeTroca Grupo { get; init; }
+
+    /// <summary>Medidas caseiras, com fonte. Vazio = só gramas.</summary>
+    public IReadOnlyList<MedidaCaseira> Medidas { get; init; } = [];
+
+    /// <summary>O peso de uma unidade inteira (ovo, pão, fruta), para os itens contáveis.</summary>
+    public MedidaCaseira? MedidaUnidade => Medidas.FirstOrDefault(m => m.EhUnidade);
 }

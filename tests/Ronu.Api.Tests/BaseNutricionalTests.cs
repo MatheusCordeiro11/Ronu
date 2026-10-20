@@ -102,15 +102,15 @@ public class BaseNutricionalTests
     }
 
     [Fact]
-    public void Peso_Por_Unidade_Tem_Origem_E_O_Item_So_Muda_De_Unidade_Em_Unidade()
+    public void Peso_Por_Unidade_Tem_Fonte_E_O_Item_So_Muda_De_Unidade_Em_Unidade()
     {
-        Assert.All(Itens.Where(i => i.PesoUnidade is not null), item =>
+        Assert.All(Itens.Where(i => i.MedidaUnidade is not null), item =>
         {
-            Assert.True(item.PesoUnidade!.Gramas > 0, item.Nome);
-            Assert.False(string.IsNullOrWhiteSpace(item.PesoUnidade.Origem), item.Nome);
+            Assert.True(item.MedidaUnidade!.Gramas > 0, item.Nome);
+            Assert.False(string.IsNullOrWhiteSpace(item.MedidaUnidade.DescricaoNaFonte), item.Nome);
             Assert.Equal("g", item.Medida);
             Assert.False(item.Ajustavel, $"{item.Nome}: contável não muda de peso sem mudar a contagem");
-            Assert.True(item.PorcaoMaxima >= item.PesoUnidade.Gramas, item.Nome);
+            Assert.True(item.PorcaoMaxima >= item.MedidaUnidade.Gramas, item.Nome);
         });
     }
 

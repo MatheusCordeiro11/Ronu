@@ -1,0 +1,1289 @@
+codigo_alimento,alimento,codigo_preparacao,preparacao,codigo_medida,medida,codigo_medida_padrao,medida_padrao,gramas,codigo_fonte,descricao_na_fonte,pagina_pdf
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,9,Caneca,12,Colher de arroz/servir,100,1,Arroz - prato fundo raso,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,10,Caneco,12,Colher de arroz/servir,100,1,Arroz - prato fundo raso,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,12,Colher de arroz/servir,12,Colher de arroz/servir,45,1,Arroz cozido - colher de arroz cheia,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,13,Colher de café,12,Colher de arroz/servir,3.1,1,Arroz cozido - 1/8 colher de sopa cheia,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,14,Colher de chá,12,Colher de arroz/servir,6.3,1,Arroz cozido - 1/4 colher de sopa cheia,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,15,Colher de sobremesa,12,Colher de arroz/servir,12.5,1,Arroz cozido - 1/2 colher de sopa cheia,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,16,Colher de sopa,12,Colher de arroz/servir,25,1,Arroz cozido - colher de sopa cheia,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,17,Concha,12,Colher de arroz/servir,100,1,Arroz cozido - concha média cheia,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,18,Copo americano,12,Colher de arroz/servir,100,1,Arroz - prato fundo raso,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,21,Copo grande,12,Colher de arroz/servir,200,1,Arroz cozido - prato fundo cheio,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,22,Copo médio,12,Colher de arroz/servir,200,1,Arroz cozido - prato fundo cheio,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,28,Escumadeira,12,Colher de arroz/servir,85,1,Arroz cozido - escumadeira média cheia,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,35,Garfada,12,Colher de arroz/servir,25,1,Arroz cozido - colher de sopa cheia,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,68,Grama,12,Colher de arroz/servir,1,15,Grama,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,82,Pegador,12,Colher de arroz/servir,25,1,Arroz cozido - colher de sopa cheia,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,87,Porção,12,Colher de arroz/servir,125,2,Arroz branco cozido - porção Guia Alimentar,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,90,Pote,12,Colher de arroz/servir,100,1,Arroz - prato fundo raso,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,91,Prato de sobremesa,12,Colher de arroz/servir,50,1,Arroz - 1/2 prato fundo raso,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,92,Prato fundo,12,Colher de arroz/servir,200,1,Arroz cozido - prato fundo cheio,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,93,Prato raso,12,Colher de arroz/servir,100,1,Arroz - prato fundo raso,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,94,Quilo,12,Colher de arroz/servir,1000,15,Quilo,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,102,Tigela,12,Colher de arroz/servir,100,1,Arroz - prato fundo raso,35
+6300101,"Arroz (polido, parboilizado)",99,Não se aplica,106,Xícara de chá,12,Colher de arroz/servir,100,1,Arroz - prato fundo raso,35
+6300201,Arroz integral,99,Não se aplica,9,Caneca,12,Colher de arroz/servir,100,1,Arroz - prato fundo raso,36
+6300201,Arroz integral,99,Não se aplica,12,Colher de arroz/servir,12,Colher de arroz/servir,63,1,Arroz integral cozido - colher de arroz cheia,36
+6300201,Arroz integral,99,Não se aplica,14,Colher de chá,12,Colher de arroz/servir,5,1,Arroz integral cozido - 1/4 colher de sopa cheia,36
+6300201,Arroz integral,99,Não se aplica,15,Colher de sobremesa,12,Colher de arroz/servir,10,1,Arroz integral cozido - 1/2 colher de sopa cheia,36
+6300201,Arroz integral,99,Não se aplica,16,Colher de sopa,12,Colher de arroz/servir,20,1,Arroz integral cozido - colher de sopa cheia,36
+6300201,Arroz integral,99,Não se aplica,17,Concha,12,Colher de arroz/servir,117,1,Arroz integral cozido - concha média cheia,36
+6300201,Arroz integral,99,Não se aplica,28,Escumadeira,12,Colher de arroz/servir,59,1,Arroz integral cozido - escumadeira média cheia,36
+6300201,Arroz integral,99,Não se aplica,68,Grama,12,Colher de arroz/servir,1,15,Grama,36
+6300201,Arroz integral,99,Não se aplica,82,Pegador,12,Colher de arroz/servir,20,1,Arroz integral cozido - colher de sopa cheia,36
+6300201,Arroz integral,99,Não se aplica,87,Porção,12,Colher de arroz/servir,198,2,Arroz integral cozido - porção Guia Alimentar,36
+6300201,Arroz integral,99,Não se aplica,91,Prato de sobremesa,12,Colher de arroz/servir,50,1,Arroz - 1/2 prato fundo raso,36
+6300201,Arroz integral,99,Não se aplica,92,Prato fundo,12,Colher de arroz/servir,200,1,Arroz cozido - prato fundo cheio,36
+6300201,Arroz integral,99,Não se aplica,93,Prato raso,12,Colher de arroz/servir,100,1,Arroz - prato fundo raso,36
+6300201,Arroz integral,99,Não se aplica,94,Quilo,12,Colher de arroz/servir,1000,15,Quilo,36
+6301603,Feijão de corda,99,Não se aplica,12,Colher de arroz/servir,17,Concha,35,1,Feijão branco cozido - colher de arroz cheia,40
+6301603,Feijão de corda,99,Não se aplica,14,Colher de chá,17,Concha,4.3,1,Feijão branco cozido - 1/4 colher de sopa cheia,40
+6301603,Feijão de corda,99,Não se aplica,16,Colher de sopa,17,Concha,17,1,Feijão branco cozido - colher de sopa cheia,40
+6301603,Feijão de corda,99,Não se aplica,17,Concha,17,Concha,140,1,Feijão branco cozido - concha média cheia,40
+6301603,Feijão de corda,99,Não se aplica,28,Escumadeira,17,Concha,35,1,Feijão branco cozido - colher de arroz cheia,40
+6301603,Feijão de corda,99,Não se aplica,68,Grama,17,Concha,1,15,Grama,40
+6301603,Feijão de corda,99,Não se aplica,87,Porção,17,Concha,50,2,Feijão cozido (somente grãos) - porção Guia Alimentar,40
+6301603,Feijão de corda,99,Não se aplica,92,Prato fundo,17,Concha,280,1,Feijão branco cozido - 2 conchas média cheias,40
+6301603,Feijão de corda,99,Não se aplica,93,Prato raso,17,Concha,140,1,Feijão branco cozido - concha média cheia,41
+6301603,Feijão de corda,99,Não se aplica,94,Quilo,17,Concha,1000,15,Quilo,41
+6302001,Semente de linhaça,99,Não se aplica,13,Colher de café,16,Colher de sopa,0.4,14,Semente de linhaça - 1/4 colher de sobremesa,41
+6302001,Semente de linhaça,99,Não se aplica,14,Colher de chá,16,Colher de sopa,1.5,14,Semente de linhaça - 1/2 colher de sobremesa,41
+6302001,Semente de linhaça,99,Não se aplica,15,Colher de sobremesa,16,Colher de sopa,3,14,Semente de linhaça - colher de sobremesa,41
+6302001,Semente de linhaça,99,Não se aplica,16,Colher de sopa,16,Colher de sopa,13,14,Semente de linhaça - colher de sopa,41
+6302001,Semente de linhaça,99,Não se aplica,68,Grama,16,Colher de sopa,1,15,Grama,41
+6302001,Semente de linhaça,99,Não se aplica,87,Porção,16,Colher de sopa,26,14,Semente de linhaça - 2 colheres de sopa,41
+6302001,Semente de linhaça,99,Não se aplica,93,Prato raso,16,Colher de sopa,26,14,Semente de linhaça - 2 colheres de sopa,41
+6302001,Semente de linhaça,99,Não se aplica,94,Quilo,16,Colher de sopa,1000,15,Quilo,41
+6302901,Lentilha,99,Não se aplica,12,Colher de arroz/servir,17,Concha,32,1,Lentilha cozida - colher de arroz,42
+6302901,Lentilha,99,Não se aplica,16,Colher de sopa,17,Concha,18,1,Lentilha cozida - colher de sopa,42
+6302901,Lentilha,99,Não se aplica,17,Concha,17,Concha,160,1,Lentilha cozida - concha média cheia Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,42
+6302901,Lentilha,99,Não se aplica,28,Escumadeira,17,Concha,32,1,Lentilha cozida - colher de arroz,42
+6302901,Lentilha,99,Não se aplica,68,Grama,17,Concha,1,15,Grama,42
+6302901,Lentilha,99,Não se aplica,87,Porção,17,Concha,48,2,Lentilha cozida - porção Guia Alimentar,42
+6302901,Lentilha,99,Não se aplica,92,Prato fundo,17,Concha,320,1,Lentilha cozida - 2 conchas média cheias,42
+6302901,Lentilha,99,Não se aplica,93,Prato raso,17,Concha,160,1,Lentilha cozida - concha média cheia,42
+6302901,Lentilha,99,Não se aplica,94,Quilo,17,Concha,1000,15,Quilo,42
+6302901,Lentilha,99,Não se aplica,102,Tigela,17,Concha,160,1,Lentilha cozida - concha média cheia,42
+6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",99,Não se aplica,12,Colher de arroz/servir,17,Concha,35,1,Feijão branco cozido - colher de arroz cheia,43
+6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",99,Não se aplica,14,Colher de chá,17,Concha,4.3,1,Feijão branco cozido - 1/4 colher de sopa cheia,43
+6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",99,Não se aplica,15,Colher de sobremesa,17,Concha,8.5,1,Feijão branco cozido - 1/2 colher de sopa cheia,43
+6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",99,Não se aplica,16,Colher de sopa,17,Concha,17,1,Feijão branco cozido - colher de sopa cheia,43
+6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",99,Não se aplica,17,Concha,17,Concha,140,1,Feijão branco cozido - concha média cheia,43
+6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",99,Não se aplica,18,Copo americano,17,Concha,140,1,Feijão branco cozido - concha média cheia,43
+6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",99,Não se aplica,22,Copo médio,17,Concha,280,1,Feijão branco cozido - 2 conchas média cheias,43
+6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",99,Não se aplica,26,Cumbuca,17,Concha,140,1,Feijão branco cozido - concha média cheia,43
+6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",99,Não se aplica,28,Escumadeira,17,Concha,35,1,Feijão branco cozido - colher de arroz cheia,43
+6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",99,Não se aplica,68,Grama,17,Concha,1,15,Grama,43
+6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",99,Não se aplica,82,Pegador,17,Concha,17,1,Feijão branco cozido - colher de sopa cheia,43
+6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",99,Não se aplica,87,Porção,17,Concha,50,2,Feijão cozido (somente grãos) - porção Guia Alimentar,43
+6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",99,Não se aplica,91,Prato de sobremesa,17,Concha,140,1,Feijão branco cozido - concha média cheia,43
+6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",99,Não se aplica,92,Prato fundo,17,Concha,280,1,Feijão branco cozido - 2 conchas média cheias,43
+6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",99,Não se aplica,93,Prato raso,17,Concha,140,1,Feijão branco cozido - concha média cheia,43
+6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",99,Não se aplica,94,Quilo,17,Concha,1000,15,Quilo,43
+6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",99,Não se aplica,102,Tigela,17,Concha,140,1,Feijão branco cozido - concha média cheia,43
+6303102,"Feijão (preto, mulatinho, roxo, rosinha, etc.)",99,Não se aplica,106,Xícara de chá,17,Concha,140,1,Feijão branco cozido - concha média cheia,43
+6400101,Batata-inglesa,2,Cozido(a),12,Colher de arroz/servir,103,Unidade,60,1,Batata-inglesa cozida - colher de arroz cheia,45
+6400101,Batata-inglesa,2,Cozido(a),14,Colher de chá,103,Unidade,7.5,1,Batata-inglesa cozida - 1/4 colher de sopa cheia,45
+6400101,Batata-inglesa,2,Cozido(a),15,Colher de sobremesa,103,Unidade,15,1,Batata-inglesa cozida - 1/2 colher de sopa cheia,46
+6400101,Batata-inglesa,2,Cozido(a),16,Colher de sopa,103,Unidade,30,1,Batata-inglesa cozida - colher de sopa cheia ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,46
+6400101,Batata-inglesa,2,Cozido(a),17,Concha,103,Unidade,80,1,Batata-inglesa cozida - escumadeira média cheia,46
+6400101,Batata-inglesa,2,Cozido(a),28,Escumadeira,103,Unidade,80,1,Batata-inglesa cozida - escumadeira média cheia,46
+6400101,Batata-inglesa,2,Cozido(a),32,Fatia,103,Unidade,16,7,Batata-inglesa cozida - pedaço pequeno,46
+6400101,Batata-inglesa,2,Cozido(a),35,Garfada,103,Unidade,30,1,Batata-inglesa cozida - colher de sopa cheia,46
+6400101,Batata-inglesa,2,Cozido(a),68,Grama,103,Unidade,1,15,Grama,46
+6400101,Batata-inglesa,2,Cozido(a),78,Metade,103,Unidade,70,1,Batata-inglesa cozida - 1/2 unidade média,46
+6400101,Batata-inglesa,2,Cozido(a),81,Pedaço,103,Unidade,16,7,Batata-inglesa cozida - pedaço pequeno,46
+6400101,Batata-inglesa,2,Cozido(a),82,Pegador,103,Unidade,30,1,Batata-inglesa cozida - colher de sopa cheia,46
+6400101,Batata-inglesa,2,Cozido(a),87,Porção,103,Unidade,90,2,Batata-inglesa corada picada - porção Guia Alimentar Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,46
+6400101,Batata-inglesa,2,Cozido(a),93,Prato raso,103,Unidade,100,7,Batata-inglesa cozida - prato de sobremesa,46
+6400101,Batata-inglesa,2,Cozido(a),94,Quilo,103,Unidade,1000,15,Quilo,46
+6400101,Batata-inglesa,2,Cozido(a),96,Rodela,103,Unidade,16,7,Batata-inglesa cozida - pedaço pequeno,46
+6400101,Batata-inglesa,2,Cozido(a),103,Unidade,103,Unidade,140,1,Batata-inglesa cozida - unidade média,46
+6400101,Batata-inglesa,2,Cozido(a),104,Unidade pequena,103,Unidade,70,1,Batata-inglesa cozida - unidade pequena,46
+6400303,Mandioquinha salsa (Batata-baroa),2,Cozido(a),16,Colher de sopa,16,Colher de sopa,35,1,Batata-baroa cozida - colher de sopa cheia ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,50
+6400303,Mandioquinha salsa (Batata-baroa),2,Cozido(a),68,Grama,16,Colher de sopa,1,15,Grama,50
+6400303,Mandioquinha salsa (Batata-baroa),2,Cozido(a),94,Quilo,16,Colher de sopa,1000,15,Quilo,50
+6400303,Mandioquinha salsa (Batata-baroa),2,Cozido(a),103,Unidade,16,Colher de sopa,80,1,Batata-baroa cozida - unidade média,50
+6400401,Batata-doce,2,Cozido(a),12,Colher de arroz/servir,81,Pedaço,100,2,Batata-doce cozida - colher de servir,51
+6400401,Batata-doce,2,Cozido(a),16,Colher de sopa,81,Pedaço,42,1,Batata-doce cozida - colher de sopa cheia,51
+6400401,Batata-doce,2,Cozido(a),17,Concha,81,Pedaço,100,2,Batata-doce cozida - colher de servir,51
+6400401,Batata-doce,2,Cozido(a),32,Fatia,81,Pedaço,70,1,Batata-doce cozida - fatia média,51
+6400401,Batata-doce,2,Cozido(a),68,Grama,81,Pedaço,1,15,Grama,51
+6400401,Batata-doce,2,Cozido(a),78,Metade,81,Pedaço,177.5,1,Batata-doce cozida - 1/2 unidade média,51
+6400401,Batata-doce,2,Cozido(a),81,Pedaço,81,Pedaço,70,1,Batata-doce cozida - fatia média,51
+6400401,Batata-doce,2,Cozido(a),82,Pegador,81,Pedaço,42,1,Batata-doce cozida - colher de sopa cheia,51
+6400401,Batata-doce,2,Cozido(a),87,Porção,81,Pedaço,150,2,Batata-doce cozida - porção Guia Alimentar,51
+6400401,Batata-doce,2,Cozido(a),91,Prato de sobremesa,81,Pedaço,100,2,Batata-doce cozida - colher de servir,51
+6400401,Batata-doce,2,Cozido(a),92,Prato fundo,81,Pedaço,300,2,Batata-doce cozida - 3 colheres de servir,51
+6400401,Batata-doce,2,Cozido(a),93,Prato raso,81,Pedaço,100,2,Batata-doce cozida - colher de servir,51
+6400401,Batata-doce,2,Cozido(a),94,Quilo,81,Pedaço,1000,15,Quilo,51
+6400401,Batata-doce,2,Cozido(a),96,Rodela,81,Pedaço,70,1,Batata-doce cozida - fatia média,51
+6400401,Batata-doce,2,Cozido(a),103,Unidade,81,Pedaço,355,1,Batata-doce cozida - unidade média,51
+6400401,Batata-doce,2,Cozido(a),104,Unidade pequena,81,Pedaço,266.3,1,Batata-doce cozida - 75% unidade média,51
+6400601,Mandioca,2,Cozido(a),12,Colher de arroz/servir,81,Pedaço,60,1,Aipim cozido - colher de arroz cheia picada,54
+6400601,Mandioca,2,Cozido(a),16,Colher de sopa,81,Pedaço,30,1,Aipim cozido - colher de sopa cheia picada,54
+6400601,Mandioca,2,Cozido(a),17,Concha,81,Pedaço,120,1,Aipim cozido - 2 colheres de arroz cheias picado,54
+6400601,Mandioca,2,Cozido(a),28,Escumadeira,81,Pedaço,60,1,Aipim cozido - colher de arroz cheia picada,54
+6400601,Mandioca,2,Cozido(a),32,Fatia,81,Pedaço,100,1,Aipim cozido - pedaço médio,54
+6400601,Mandioca,2,Cozido(a),68,Grama,81,Pedaço,1,15,Grama,54
+6400601,Mandioca,2,Cozido(a),81,Pedaço,81,Pedaço,100,1,Aipim cozido - pedaço médio,55
+6400601,Mandioca,2,Cozido(a),82,Pegador,81,Pedaço,30,1,Aipim cozido - colher de sopa cheia picada,55
+6400601,Mandioca,2,Cozido(a),87,Porção,81,Pedaço,128,2,Mandioca cozida - porção Guia Alimentar,55
+6400601,Mandioca,2,Cozido(a),94,Quilo,81,Pedaço,1000,15,Quilo,55
+6400701,Cará,2,Cozido(a),12,Colher de arroz/servir,81,Pedaço,60,1,Aipim cozido - colher de arroz cheia picada,59
+6400701,Cará,2,Cozido(a),16,Colher de sopa,81,Pedaço,30,1,Aipim cozido - colher de sopa cheia picada,59
+6400701,Cará,2,Cozido(a),17,Concha,81,Pedaço,120,1,Aipim cozido - 2 colheres de arroz cheias picado,59
+6400701,Cará,2,Cozido(a),28,Escumadeira,81,Pedaço,60,1,Aipim cozido - colher de arroz cheia picada,59
+6400701,Cará,2,Cozido(a),68,Grama,81,Pedaço,1,15,Grama,59
+6400701,Cará,2,Cozido(a),81,Pedaço,81,Pedaço,100,1,Aipim cozido - pedaço médio,59
+6400701,Cará,2,Cozido(a),87,Porção,81,Pedaço,126,2,Cará cozido/amassado - porção Guia Alimentar,59
+6400701,Cará,2,Cozido(a),94,Quilo,81,Pedaço,1000,15,Quilo,59
+6400701,Cará,2,Cozido(a),96,Rodela,81,Pedaço,30,1,Inhame cozido - pedaço pequeno,60
+6401101,Beterraba,1,Cru(a),12,Colher de arroz/servir,16,Colher de sopa,38,1,Beterraba cozida - colher de arroz cheia,66
+6401101,Beterraba,1,Cru(a),15,Colher de sobremesa,16,Colher de sopa,8,1,Beterraba crua - 1/2 colher de sopa cheia ralada Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,66
+6401101,Beterraba,1,Cru(a),16,Colher de sopa,16,Colher de sopa,16,1,Beterraba crua - colher de sopa cheia ralada,66
+6401101,Beterraba,1,Cru(a),17,Concha,16,Colher de sopa,76,1,Beterraba cozida - 2 colheres de arroz cheias,66
+6401101,Beterraba,1,Cru(a),32,Fatia,16,Colher de sopa,12,1,Beterraba cozida - fatia média,66
+6401101,Beterraba,1,Cru(a),68,Grama,16,Colher de sopa,1,15,Grama,66
+6401101,Beterraba,1,Cru(a),81,Pedaço,16,Colher de sopa,12,1,Beterraba cozida - fatia média,66
+6401101,Beterraba,1,Cru(a),82,Pegador,16,Colher de sopa,16,1,Beterraba crua - colher de sopa cheia ralada,66
+6401101,Beterraba,1,Cru(a),87,Porção,16,Colher de sopa,42,2,Beterraba crua ralada - porção Guia Alimentar,66
+6401101,Beterraba,1,Cru(a),91,Prato de sobremesa,16,Colher de sopa,168,7,Beterraba - prato de sobremesa,66
+6401101,Beterraba,1,Cru(a),94,Quilo,16,Colher de sopa,1000,15,Quilo,66
+6401101,Beterraba,1,Cru(a),96,Rodela,16,Colher de sopa,12,1,Beterraba cozida - fatia média,66
+6401101,Beterraba,1,Cru(a),103,Unidade,16,Colher de sopa,140,1,Beterraba crua - unidade média,66
+6401101,Beterraba,2,Cozido(a),12,Colher de arroz/servir,96,Rodela,38,1,Beterraba cozida - colher de arroz cheia,66
+6401101,Beterraba,2,Cozido(a),15,Colher de sobremesa,96,Rodela,10,7,Beterraba cozida - 1/2 colher de sopa cheia,66
+6401101,Beterraba,2,Cozido(a),16,Colher de sopa,96,Rodela,20,1,Beterraba cozida - colher de sopa cheia,67
+6401101,Beterraba,2,Cozido(a),17,Concha,96,Rodela,76,1,Beterraba cozida - 2 colheres de arroz cheias,67
+6401101,Beterraba,2,Cozido(a),28,Escumadeira,96,Rodela,45,1,Beterraba cozida - escumadeira média rasa picada,67
+6401101,Beterraba,2,Cozido(a),32,Fatia,96,Rodela,12,1,Beterraba cozida - fatia média,67
+6401101,Beterraba,2,Cozido(a),35,Garfada,96,Rodela,20,1,Beterraba cozida - colher de sopa cheia,67
+6401101,Beterraba,2,Cozido(a),68,Grama,96,Rodela,1,15,Grama,67
+6401101,Beterraba,2,Cozido(a),78,Metade,96,Rodela,62.5,1,Beterraba cozida - 1/2 unidade média,67
+6401101,Beterraba,2,Cozido(a),81,Pedaço,96,Rodela,12,1,Beterraba cozida - fatia média,67
+6401101,Beterraba,2,Cozido(a),82,Pegador,96,Rodela,20,1,Beterraba cozida - colher de sopa cheia,67
+6401101,Beterraba,2,Cozido(a),85,Pires,96,Rodela,84,7,Beterraba - 1/2 prato de sobremesa,67
+6401101,Beterraba,2,Cozido(a),87,Porção,96,Rodela,43,2,Beterraba cozida - porção Guia Alimentar,67
+6401101,Beterraba,2,Cozido(a),91,Prato de sobremesa,96,Rodela,168,7,Beterraba - prato de sobremesa,67
+6401101,Beterraba,2,Cozido(a),93,Prato raso,96,Rodela,168,7,Beterraba - prato de sobremesa,67
+6401101,Beterraba,2,Cozido(a),94,Quilo,96,Rodela,1000,15,Quilo,67
+6401101,Beterraba,2,Cozido(a),96,Rodela,96,Rodela,12,1,Beterraba cozida - fatia média,67
+6401101,Beterraba,2,Cozido(a),103,Unidade,96,Rodela,125,1,Beterraba cozida - unidade média,67
+6401101,Beterraba,2,Cozido(a),104,Unidade pequena,96,Rodela,75,1,Beterraba cozida - unidade pequena,67
+6401101,Beterraba,2,Cozido(a),106,Xícara de chá,96,Rodela,84,7,Beterraba - 1/2 prato de sobremesa,67
+6401201,Cenoura,1,Cru(a),3,Banda,16,Colher de sopa,60,1,Cenoura crua - 1/2 unidade média,68
+6401201,Cenoura,1,Cru(a),12,Colher de arroz/servir,16,Colher de sopa,40,1,Cenoura cozida - colher arroz cheia picada,68
+6401201,Cenoura,1,Cru(a),15,Colher de sobremesa,16,Colher de sopa,6,1,Cenoura crua - 1/2 colher de sopa cheia ralada,68
+6401201,Cenoura,1,Cru(a),16,Colher de sopa,16,Colher de sopa,12,1,Cenoura crua - colher de sopa cheia ralada,68
+6401201,Cenoura,1,Cru(a),17,Concha,16,Colher de sopa,48,1,Cenoura cozida - escumadeira média rasa picada,68
+6401201,Cenoura,1,Cru(a),18,Copo americano,16,Colher de sopa,48,1,Cenoura cozida - escumadeira média rasa picada,68
+6401201,Cenoura,1,Cru(a),21,Copo grande,16,Colher de sopa,96,1,Cenoura cozida - 2 escumadeiras média rasas picada,68
+6401201,Cenoura,1,Cru(a),22,Copo médio,16,Colher de sopa,96,1,Cenoura cozida - 2 escumadeiras média rasas picada,68
+6401201,Cenoura,1,Cru(a),28,Escumadeira,16,Colher de sopa,48,1,Cenoura cozida - escumadeira média rasa picada,68
+6401201,Cenoura,1,Cru(a),32,Fatia,16,Colher de sopa,5,14,Cenoura cozida - fatia,68
+6401201,Cenoura,1,Cru(a),68,Grama,16,Colher de sopa,1,15,Grama,68
+6401201,Cenoura,1,Cru(a),81,Pedaço,16,Colher de sopa,5,14,Cenoura cozida - fatia,68
+6401201,Cenoura,1,Cru(a),82,Pegador,16,Colher de sopa,12,1,Cenoura crua - colher de sopa cheia ralada,68
+6401201,Cenoura,1,Cru(a),87,Porção,16,Colher de sopa,38,2,Cenoura crua (picada) - porção Guia Alimentar,69
+6401201,Cenoura,1,Cru(a),93,Prato raso,16,Colher de sopa,48,1,Cenoura cozida - escumadeira média rasa picada,69
+6401201,Cenoura,1,Cru(a),94,Quilo,16,Colher de sopa,1000,15,Quilo,69
+6401201,Cenoura,1,Cru(a),96,Rodela,16,Colher de sopa,5,14,Cenoura cozida - fatia,69
+6401201,Cenoura,1,Cru(a),103,Unidade,16,Colher de sopa,120,1,Cenoura crua - unidade média,69
+6401201,Cenoura,1,Cru(a),104,Unidade pequena,16,Colher de sopa,55,1,Cenoura crua - unidade pequena,69
+6401201,Cenoura,2,Cozido(a),12,Colher de arroz/servir,16,Colher de sopa,40,1,Cenoura cozida - colher arroz cheia picada,69
+6401201,Cenoura,2,Cozido(a),16,Colher de sopa,16,Colher de sopa,25,1,Cenoura cozida - colher sopa cheia picada,69
+6401201,Cenoura,2,Cozido(a),17,Concha,16,Colher de sopa,48,1,Cenoura cozida - escumadeira média rasa picada,69
+6401201,Cenoura,2,Cozido(a),28,Escumadeira,16,Colher de sopa,48,1,Cenoura cozida - escumadeira média rasa picada,69
+6401201,Cenoura,2,Cozido(a),32,Fatia,16,Colher de sopa,5,14,Cenoura cozida - fatia,69
+6401201,Cenoura,2,Cozido(a),68,Grama,16,Colher de sopa,1,15,Grama,69
+6401201,Cenoura,2,Cozido(a),78,Metade,16,Colher de sopa,50,1,Cenoura cozida - 1/2 unidade média,69
+6401201,Cenoura,2,Cozido(a),81,Pedaço,16,Colher de sopa,5,14,Cenoura cozida - fatia,69
+6401201,Cenoura,2,Cozido(a),82,Pegador,16,Colher de sopa,25,1,Cenoura cozida - colher sopa cheia picada,69
+6401201,Cenoura,2,Cozido(a),85,Pires,16,Colher de sopa,48,1,Cenoura cozida - escumadeira média rasa picada,69
+6401201,Cenoura,2,Cozido(a),87,Porção,16,Colher de sopa,35,2,Cenoura cozida (fatias) - porção Guia Alimentar,69
+6401201,Cenoura,2,Cozido(a),94,Quilo,16,Colher de sopa,1000,15,Quilo,69
+6401201,Cenoura,2,Cozido(a),96,Rodela,16,Colher de sopa,5,14,Cenoura cozida - fatia,69
+6401201,Cenoura,2,Cozido(a),102,Tigela,16,Colher de sopa,48,1,Cenoura cozida - escumadeira média rasa picada,69
+6401201,Cenoura,2,Cozido(a),103,Unidade,16,Colher de sopa,100,1,Cenoura cozida - unidade média,69
+6401201,Cenoura,2,Cozido(a),104,Unidade pequena,16,Colher de sopa,46,1,Cenoura cozida - unidade pequena,69
+6401201,Cenoura,2,Cozido(a),106,Xícara de chá,16,Colher de sopa,48,1,Cenoura cozida - escumadeira média rasa picada,69
+6500401,Aveia em flocos,99,Não se aplica,12,Colher de arroz/servir,16,Colher de sopa,30,1,Aveia flocos - 2 colheres de sopa cheias,74
+6500401,Aveia em flocos,99,Não se aplica,13,Colher de café,16,Colher de sopa,1,1,Aveia flocos - 1/2 colher de chá cheia,74
+6500401,Aveia em flocos,99,Não se aplica,14,Colher de chá,16,Colher de sopa,2,1,Aveia flocos - colher de chá cheia,74
+6500401,Aveia em flocos,99,Não se aplica,15,Colher de sobremesa,16,Colher de sopa,7,1,Aveia flocos - colher de sobremesa cheia,74
+6500401,Aveia em flocos,99,Não se aplica,16,Colher de sopa,16,Colher de sopa,15,1,Aveia flocos - colher de sopa cheia,74
+6500401,Aveia em flocos,99,Não se aplica,68,Grama,16,Colher de sopa,1,15,Grama,74
+6500401,Aveia em flocos,99,Não se aplica,87,Porção,16,Colher de sopa,37.5,2,Farinha de aveia - porção Guia Alimentar,74
+6500401,Aveia em flocos,99,Não se aplica,94,Quilo,16,Colher de sopa,1000,15,Quilo,74
+6501401,Farinha de mandioca,99,Não se aplica,9,Caneca,16,Colher de sopa,171,14,Farinha de mandioca - caneca,80
+6501401,Farinha de mandioca,99,Não se aplica,10,Caneco,16,Colher de sopa,171,14,Farinha de mandioca - caneca Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,80
+6501401,Farinha de mandioca,99,Não se aplica,12,Colher de arroz/servir,16,Colher de sopa,33,14,Farinha de mandioca - colher de arroz,80
+6501401,Farinha de mandioca,99,Não se aplica,13,Colher de café,16,Colher de sopa,3,14,Farinha de mandioca - colher de café,80
+6501401,Farinha de mandioca,99,Não se aplica,14,Colher de chá,16,Colher de sopa,5,1,Farinha de mandioca - colher de chá cheia,80
+6501401,Farinha de mandioca,99,Não se aplica,15,Colher de sobremesa,16,Colher de sopa,10,1,Farinha de mandioca - colher de sobremesa cheia,80
+6501401,Farinha de mandioca,99,Não se aplica,16,Colher de sopa,16,Colher de sopa,16,1,Farinha de mandioca - colher de sopa cheia,80
+6501401,Farinha de mandioca,99,Não se aplica,17,Concha,16,Colher de sopa,110,14,Farinha de mandioca - concha,80
+6501401,Farinha de mandioca,99,Não se aplica,18,Copo americano,16,Colher de sopa,127,14,Farinha de mandioca - copo pequeno,80
+6501401,Farinha de mandioca,99,Não se aplica,19,Copo de cafezinho,16,Colher de sopa,42.3,14,Farinha de mandioca - 1/3 copo pequeno,80
+6501401,Farinha de mandioca,99,Não se aplica,20,Copo de requeijão,16,Colher de sopa,172,14,Farinha de mandioca - copo médio,80
+6501401,Farinha de mandioca,99,Não se aplica,21,Copo grande,16,Colher de sopa,172,14,Farinha de mandioca - copo médio,80
+6501401,Farinha de mandioca,99,Não se aplica,22,Copo médio,16,Colher de sopa,172,14,Farinha de mandioca - copo médio,80
+6501401,Farinha de mandioca,99,Não se aplica,23,Copo tulipa,16,Colher de sopa,172,14,Farinha de mandioca - copo médio,80
+6501401,Farinha de mandioca,99,Não se aplica,68,Grama,16,Colher de sopa,1,15,Grama,80
+6501401,Farinha de mandioca,99,Não se aplica,87,Porção,16,Colher de sopa,40,2,Farinha de mandioca - porção Guia Alimentar,81
+6501401,Farinha de mandioca,99,Não se aplica,88,Punhado,16,Colher de sopa,23,14,Farinha de mandioca - punhado,81
+6501401,Farinha de mandioca,99,Não se aplica,90,Pote,16,Colher de sopa,148,14,Farinha de mandioca - tigela,81
+6501401,Farinha de mandioca,99,Não se aplica,91,Prato de sobremesa,16,Colher de sopa,150,14,Farinha de mandioca - prato raso,81
+6501401,Farinha de mandioca,99,Não se aplica,92,Prato fundo,16,Colher de sopa,271,14,Farinha de mandioca - prato fundo,81
+6501401,Farinha de mandioca,99,Não se aplica,93,Prato raso,16,Colher de sopa,101,14,Farinha de mandioca - prato de sobremesa,81
+6501401,Farinha de mandioca,99,Não se aplica,94,Quilo,16,Colher de sopa,1000,15,Quilo,81
+6501401,Farinha de mandioca,99,Não se aplica,102,Tigela,16,Colher de sopa,148,14,Farinha de mandioca - tigela,81
+6501401,Farinha de mandioca,99,Não se aplica,105,Xícara de café,16,Colher de sopa,42.3,14,Farinha de mandioca - 1/3 copo pequeno,81
+6501401,Farinha de mandioca,99,Não se aplica,106,Xícara de chá,16,Colher de sopa,148,14,Farinha de mandioca - xícara de chá,81
+6501516,Tapioca de goma,99,Não se aplica,3,Banda,103,Unidade,25,8,Tapioca com coco - 1/2 unidade ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,84
+6501516,Tapioca de goma,99,Não se aplica,32,Fatia,103,Unidade,12.5,8,Tapioca com coco - 1/4 unidade,84
+6501516,Tapioca de goma,99,Não se aplica,68,Grama,103,Unidade,1,15,Grama,84
+6501516,Tapioca de goma,99,Não se aplica,78,Metade,103,Unidade,25,8,Tapioca com coco - 1/2 unidade,84
+6501516,Tapioca de goma,99,Não se aplica,81,Pedaço,103,Unidade,12.5,8,Tapioca com coco - 1/4 unidade,84
+6501516,Tapioca de goma,99,Não se aplica,94,Quilo,103,Unidade,1000,15,Quilo,84
+6501516,Tapioca de goma,99,Não se aplica,103,Unidade,103,Unidade,50,8,Tapioca com coco - unidade,84
+6503401,Macarrão,2,Cozido(a),12,Colher de arroz/servir,12,Colher de arroz/servir,50,1,Macarrão cozido - colher de arroz cheia,87
+6503401,Macarrão,2,Cozido(a),14,Colher de chá,12,Colher de arroz/servir,6.3,1,Macarrão cozido - 1/4 colher de sopa cheia,87
+6503401,Macarrão,2,Cozido(a),15,Colher de sobremesa,12,Colher de arroz/servir,12.5,1,Macarrão cozido - 1/2 colher de sopa cheia,87
+6503401,Macarrão,2,Cozido(a),16,Colher de sopa,12,Colher de arroz/servir,25,1,Macarrão cozido - colher de sopa cheia,87
+6503401,Macarrão,2,Cozido(a),17,Concha,12,Colher de arroz/servir,110,1,Macarrão cozido - escumadeira média cheia,87
+6503401,Macarrão,2,Cozido(a),28,Escumadeira,12,Colher de arroz/servir,110,1,Macarrão cozido - escumadeira média cheia,87
+6503401,Macarrão,2,Cozido(a),35,Garfada,12,Colher de arroz/servir,30,1,Macarrão cozido - garfada,87
+6503401,Macarrão,2,Cozido(a),68,Grama,12,Colher de arroz/servir,1,15,Grama,87
+6503401,Macarrão,2,Cozido(a),82,Pegador,12,Colher de arroz/servir,110,1,Macarrão cozido - pegador,87
+6503401,Macarrão,2,Cozido(a),87,Porção,12,Colher de arroz/servir,105,2,Macarrão cozido - porção Guia Alimentar,87
+6503401,Macarrão,2,Cozido(a),91,Prato de sobremesa,12,Colher de arroz/servir,200,1,Macarrão cozido - prato raso raso,87
+6503401,Macarrão,2,Cozido(a),92,Prato fundo,12,Colher de arroz/servir,400,1,Macarrão cozido - prato fundo cheio,88
+6503401,Macarrão,2,Cozido(a),93,Prato raso,12,Colher de arroz/servir,320,1,Macarrão cozido - prato raso cheio,88
+6503401,Macarrão,2,Cozido(a),94,Quilo,12,Colher de arroz/servir,1000,15,Quilo,88
+6503401,Macarrão,2,Cozido(a),102,Tigela,12,Colher de arroz/servir,320,1,Macarrão cozido - prato raso cheio,88
+6600501,Amêndoa,99,Não se aplica,68,Grama,103,Unidade,1,15,Grama,99
+6600501,Amêndoa,99,Não se aplica,94,Quilo,103,Unidade,1000,15,Quilo,100
+6600501,Amêndoa,99,Não se aplica,103,Unidade,103,Unidade,1,1,Amêndoa - unidade ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,100
+6600701,Castanha-do-pará,99,Não se aplica,68,Grama,103,Unidade,1,15,Grama,100
+6600701,Castanha-do-pará,99,Não se aplica,87,Porção,103,Unidade,8,3,Castanha do Brasil - porção Guia Alimentar,100
+6600701,Castanha-do-pará,99,Não se aplica,88,Punhado,103,Unidade,40,1,Castanha de caju torrada - punhado,100
+6600701,Castanha-do-pará,99,Não se aplica,94,Quilo,103,Unidade,1000,15,Quilo,100
+6600701,Castanha-do-pará,99,Não se aplica,103,Unidade,103,Unidade,4,1,Castanha-do-pará - unidade,100
+6600801,Castanha de caju,99,Não se aplica,17,Concha,103,Unidade,40,1,Castanha de caju torrada - punhado Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,100
+6600801,Castanha de caju,99,Não se aplica,18,Copo americano,103,Unidade,40,1,Castanha de caju torrada - punhado,100
+6600801,Castanha de caju,99,Não se aplica,68,Grama,103,Unidade,1,15,Grama,100
+6600801,Castanha de caju,99,Não se aplica,80,Pacote,103,Unidade,40,1,Castanha de caju torrada - punhado,100
+6600801,Castanha de caju,99,Não se aplica,87,Porção,103,Unidade,10,3,Castanha de caju - porção Guia Alimentar,100
+6600801,Castanha de caju,99,Não se aplica,88,Punhado,103,Unidade,40,1,Castanha de caju torrada - punhado,100
+6600801,Castanha de caju,99,Não se aplica,94,Quilo,103,Unidade,1000,15,Quilo,100
+6600801,Castanha de caju,99,Não se aplica,98,Saco,103,Unidade,40,1,Castanha de caju torrada - punhado,100
+6600801,Castanha de caju,99,Não se aplica,103,Unidade,103,Unidade,2.5,1,Castanha de caju torrada - unidade média,100
+6601501,Noz,99,Não se aplica,68,Grama,103,Unidade,1,15,Grama,101
+6601501,Noz,99,Não se aplica,87,Porção,103,Unidade,25,9,Noz - porção,101
+6601501,Noz,99,Não se aplica,88,Punhado,103,Unidade,40,1,Castanha de caju torrada - punhado,101
+6601501,Noz,99,Não se aplica,94,Quilo,103,Unidade,1000,15,Quilo,101
+6601501,Noz,99,Não se aplica,103,Unidade,103,Unidade,5,1,Noz - unidade,101
+6601706,Açaí,99,Não se aplica,9,Caneca,102,Tigela,326,14,Açaí - copo grande,101
+6601706,Açaí,99,Não se aplica,10,Caneco,102,Tigela,326,14,Açaí - copo grande,101
+6601706,Açaí,99,Não se aplica,17,Concha,102,Tigela,101,14,Açaí - concha,101
+6601706,Açaí,99,Não se aplica,18,Copo americano,102,Tigela,187,14,Açaí - copo médio,101
+6601706,Açaí,99,Não se aplica,21,Copo grande,102,Tigela,326,14,Açaí - copo grande,101
+6601706,Açaí,99,Não se aplica,22,Copo médio,102,Tigela,273,14,Açaí - copo médio,101
+6601706,Açaí,99,Não se aplica,23,Copo tulipa,102,Tigela,202,14,Açaí - tigela,101
+6601706,Açaí,99,Não se aplica,26,Cumbuca,102,Tigela,202,14,Açaí - tigela,101
+6601706,Açaí,99,Não se aplica,68,Grama,102,Tigela,1,15,Grama,101
+6601706,Açaí,99,Não se aplica,76,Litro,102,Tigela,1000,15,Litro,101
+6601706,Açaí,99,Não se aplica,79,Mililitro,102,Tigela,1,15,Mililitro,101
+6601706,Açaí,99,Não se aplica,85,Pires,102,Tigela,101,14,Açaí - concha,101
+6601706,Açaí,99,Não se aplica,87,Porção,102,Tigela,202,14,Açaí - tigela,101
+6601706,Açaí,99,Não se aplica,90,Pote,102,Tigela,202,14,Açaí - tigela,101
+6601706,Açaí,99,Não se aplica,91,Prato de sobremesa,102,Tigela,101,14,Açaí - concha,101
+6601706,Açaí,99,Não se aplica,92,Prato fundo,102,Tigela,326,14,Açaí - copo grande,102
+6601706,Açaí,99,Não se aplica,93,Prato raso,102,Tigela,273,14,Açaí - copo médio ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,102
+6601706,Açaí,99,Não se aplica,94,Quilo,102,Tigela,1000,15,Quilo,102
+6601706,Açaí,99,Não se aplica,101,Taça,102,Tigela,202,14,Açaí - tigela,102
+6601706,Açaí,99,Não se aplica,102,Tigela,102,Tigela,202,14,Açaí - tigela,102
+6601706,Açaí,99,Não se aplica,106,Xícara de chá,102,Tigela,187,14,Açaí - copo americano,102
+6700101,Alface,99,Não se aplica,12,Colher de arroz/servir,34,Folha,16,1,Alface - 2 colheres de sopa cheias picada,104
+6700101,Alface,99,Não se aplica,14,Colher de chá,34,Folha,2,1,Alface - 1/4 colher de sopa cheia picada,104
+6700101,Alface,99,Não se aplica,15,Colher de sobremesa,34,Folha,4,1,Alface - 1/2 colher de sopa cheia picada,104
+6700101,Alface,99,Não se aplica,16,Colher de sopa,34,Folha,8,1,Alface - colher de sopa cheia picada,104
+6700101,Alface,99,Não se aplica,17,Concha,34,Folha,32,1,Alface - 4 colheres de sopa cheias picada Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,104
+6700101,Alface,99,Não se aplica,28,Escumadeira,34,Folha,16,1,Alface - 2 colheres de sopa cheias picada,104
+6700101,Alface,99,Não se aplica,34,Folha,34,Folha,10,1,Alface - folha média,104
+6700101,Alface,99,Não se aplica,35,Garfada,34,Folha,8,1,Alface - colher de sopa cheia picada,104
+6700101,Alface,99,Não se aplica,68,Grama,34,Folha,1,15,Grama,104
+6700101,Alface,99,Não se aplica,77,Maço,34,Folha,200,1,Alface - unidade média,104
+6700101,Alface,99,Não se aplica,78,Metade,34,Folha,100,1,Alface - 1/2 unidade média,104
+6700101,Alface,99,Não se aplica,82,Pegador,34,Folha,8,1,Alface - colher de sopa cheia picada,104
+6700101,Alface,99,Não se aplica,85,Pires,34,Folha,20,4,Alface - pires de folha,104
+6700101,Alface,99,Não se aplica,87,Porção,34,Folha,27,4,Alface - porção média,104
+6700101,Alface,99,Não se aplica,91,Prato de sobremesa,34,Folha,30,1,Alface - prato de sobremesa cheio picada,104
+6700101,Alface,99,Não se aplica,92,Prato fundo,34,Folha,60,4,Alface - prato fundo,104
+6700101,Alface,99,Não se aplica,93,Prato raso,34,Folha,50,4,Alface - prato raso,104
+6700101,Alface,99,Não se aplica,94,Quilo,34,Folha,1000,15,Quilo,104
+6700101,Alface,99,Não se aplica,102,Tigela,34,Folha,20,1,Alface - pires cheio picada,105
+6700101,Alface,99,Não se aplica,103,Unidade,34,Folha,200,1,Alface - unidade média,105
+6700101,Alface,99,Não se aplica,104,Unidade pequena,34,Folha,130,1,Alface - unidade pequena,105
+6700501,Couve,1,Cru(a),12,Colher de arroz/servir,16,Colher de sopa,42,2,Couve-manteiga cozida - colher de servir,106
+6700501,Couve,1,Cru(a),14,Colher de chá,16,Colher de sopa,5,1,Couve refogada - 1/4 colher de sopa cheia picada,106
+6700501,Couve,1,Cru(a),16,Colher de sopa,16,Colher de sopa,20,1,Couve refogada - colher de sopa cheia picada,106
+6700501,Couve,1,Cru(a),17,Concha,16,Colher de sopa,84,2,Couve-manteiga cozida - 2 colheres de servir,106
+6700501,Couve,1,Cru(a),28,Escumadeira,16,Colher de sopa,42,2,Couve-manteiga cozida - colher de servir,106
+6700501,Couve,1,Cru(a),34,Folha,16,Colher de sopa,20,1,Couve crua - folha média,106
+6700501,Couve,1,Cru(a),35,Garfada,16,Colher de sopa,20,1,Couve refogada - colher de sopa cheia picada,106
+6700501,Couve,1,Cru(a),68,Grama,16,Colher de sopa,1,15,Grama,106
+6700501,Couve,1,Cru(a),82,Pegador,16,Colher de sopa,20,1,Couve refogada - colher de sopa cheia picada,106
+6700501,Couve,1,Cru(a),87,Porção,16,Colher de sopa,42,2,Couve-manteiga cozida - porção Guia Alimentar,106
+6700501,Couve,1,Cru(a),91,Prato de sobremesa,16,Colher de sopa,120,7,Couve refogada - prato cheio,106
+6700501,Couve,1,Cru(a),93,Prato raso,16,Colher de sopa,120,7,Couve refogada - prato cheio,107
+6700501,Couve,1,Cru(a),94,Quilo,16,Colher de sopa,1000,15,Quilo,107
+6700501,Couve,1,Cru(a),102,Tigela,16,Colher de sopa,84,2,Couve-manteiga cozida - 2 colheres de servir,107
+6700501,Couve,7,Refogado(a),12,Colher de arroz/servir,16,Colher de sopa,42,2,Couve-manteiga cozida - colher de servir,107
+6700501,Couve,7,Refogado(a),14,Colher de chá,16,Colher de sopa,5,1,Couve refogada - 1/4 colher de sopa cheia picada,107
+6700501,Couve,7,Refogado(a),15,Colher de sobremesa,16,Colher de sopa,10,1,Couve refogada - 1/2 colher de sopa cheia picada,107
+6700501,Couve,7,Refogado(a),16,Colher de sopa,16,Colher de sopa,20,1,Couve refogada - colher de sopa cheia picada,107
+6700501,Couve,7,Refogado(a),17,Concha,16,Colher de sopa,84,2,Couve-manteiga cozida - 2 colheres de servir,108
+6700501,Couve,7,Refogado(a),28,Escumadeira,16,Colher de sopa,42,2,Couve-manteiga cozida - colher de servir ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,108
+6700501,Couve,7,Refogado(a),34,Folha,16,Colher de sopa,25,1,Couve refogada - folha média,108
+6700501,Couve,7,Refogado(a),35,Garfada,16,Colher de sopa,20,1,Couve refogada - colher de sopa cheia picada,108
+6700501,Couve,7,Refogado(a),68,Grama,16,Colher de sopa,1,15,Grama,108
+6700501,Couve,7,Refogado(a),82,Pegador,16,Colher de sopa,20,1,Couve refogada - colher de sopa cheia picada,108
+6700501,Couve,7,Refogado(a),87,Porção,16,Colher de sopa,42,2,Couve-manteiga cozida - porção Guia Alimentar,108
+6700501,Couve,7,Refogado(a),92,Prato fundo,16,Colher de sopa,120,7,Couve refogada - prato cheio,108
+6700501,Couve,7,Refogado(a),94,Quilo,16,Colher de sopa,1000,15,Quilo,108
+6700501,Couve,7,Refogado(a),106,Xícara de chá,16,Colher de sopa,84,2,Couve-manteiga cozida - 2 colheres de servir,108
+6700601,Couve-flor,2,Cozido(a),12,Colher de arroz/servir,95,Ramo,50,1,Couve-flor cozida - 2 colheres de sopa cheias,110
+6700601,Couve-flor,2,Cozido(a),15,Colher de sobremesa,95,Ramo,12.5,1,Couve-flor cozida - 1/2 colher de sopa cheia ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,110
+6700601,Couve-flor,2,Cozido(a),16,Colher de sopa,95,Ramo,25,1,Couve-flor cozida - colher de sopa cheia,110
+6700601,Couve-flor,2,Cozido(a),17,Concha,95,Ramo,100,1,Couve-flor cozida - 4 colheres de sopa cheias,110
+6700601,Couve-flor,2,Cozido(a),28,Escumadeira,95,Ramo,50,1,Couve-flor cozida - 2 colheres de sopa cheias,110
+6700601,Couve-flor,2,Cozido(a),68,Grama,95,Ramo,1,15,Grama,110
+6700601,Couve-flor,2,Cozido(a),81,Pedaço,95,Ramo,60,1,Couve-flor cozida - ramo médio,110
+6700601,Couve-flor,2,Cozido(a),82,Pegador,95,Ramo,25,1,Couve-flor cozida - colher de sopa cheia,110
+6700601,Couve-flor,2,Cozido(a),85,Pires,95,Ramo,50,1,Couve-flor cozida - 2 colheres de sopa cheias,110
+6700601,Couve-flor,2,Cozido(a),87,Porção,95,Ramo,69,2,Couve-flor cozida - porção Guia Alimentar,110
+6700601,Couve-flor,2,Cozido(a),91,Prato de sobremesa,95,Ramo,100,1,Couve-flor cozida - prato de sobremesa Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,110
+6700601,Couve-flor,2,Cozido(a),94,Quilo,95,Ramo,1000,15,Quilo,110
+6700601,Couve-flor,2,Cozido(a),95,Ramo,95,Ramo,60,1,Couve-flor cozida - ramo médio,110
+6700601,Couve-flor,2,Cozido(a),103,Unidade,95,Ramo,60,1,Couve-flor cozida - ramo médio,110
+6700601,Couve-flor,2,Cozido(a),104,Unidade pequena,95,Ramo,30,1,Couve-flor cozida - ramo pequeno,110
+6700701,Espinafre,7,Refogado(a),15,Colher de sobremesa,16,Colher de sopa,12.5,1,Espinafre cozido - 1/2 colher de sopa cheia,111
+6700701,Espinafre,7,Refogado(a),16,Colher de sopa,16,Colher de sopa,25,1,Espinafre cozido - colher de sopa cheia,112
+6700701,Espinafre,7,Refogado(a),28,Escumadeira,16,Colher de sopa,50,1,Couve-flor cozida - 2 colheres de sopa cheias ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,112
+6700701,Espinafre,7,Refogado(a),68,Grama,16,Colher de sopa,1,15,Grama,112
+6700701,Espinafre,7,Refogado(a),87,Porção,16,Colher de sopa,67,2,Espinafre cozido - porção Guia Alimentar,112
+6700701,Espinafre,7,Refogado(a),94,Quilo,16,Colher de sopa,1000,15,Quilo,112
+6700901,Repolho,1,Cru(a),12,Colher de arroz/servir,16,Colher de sopa,25,1,Repolho cru - colher de arroz cheia,113
+6700901,Repolho,1,Cru(a),14,Colher de chá,16,Colher de sopa,2.5,1,Repolho cru - 1/4 colher de sopa cheia,113
+6700901,Repolho,1,Cru(a),15,Colher de sobremesa,16,Colher de sopa,5,1,Repolho cru - 1/2 colher de sopa cheia,113
+6700901,Repolho,1,Cru(a),16,Colher de sopa,16,Colher de sopa,10,1,Repolho cru - colher de sopa cheia,113
+6700901,Repolho,1,Cru(a),17,Concha,16,Colher de sopa,50,1,Repolho cru - 2 colheres de arroz cheias,113
+6700901,Repolho,1,Cru(a),26,Cumbuca,16,Colher de sopa,100,7,Repolho - pires cheio,113
+6700901,Repolho,1,Cru(a),28,Escumadeira,16,Colher de sopa,25,1,Repolho cru - escumadeira média cheia,113
+6700901,Repolho,1,Cru(a),34,Folha,16,Colher de sopa,26,1,Repolho cru - folha média,113
+6700901,Repolho,1,Cru(a),35,Garfada,16,Colher de sopa,10,1,Repolho cru - colher de sopa cheia,113
+6700901,Repolho,1,Cru(a),68,Grama,16,Colher de sopa,1,15,Grama,113
+6700901,Repolho,1,Cru(a),82,Pegador,16,Colher de sopa,10,1,Repolho cru - colher de sopa cheia,113
+6700901,Repolho,1,Cru(a),85,Pires,16,Colher de sopa,100,7,Repolho - pires cheio,113
+6700901,Repolho,1,Cru(a),87,Porção,16,Colher de sopa,60,4,Repolho cru - porção,113
+6700901,Repolho,1,Cru(a),92,Prato fundo,16,Colher de sopa,200,7,Repolho - 2 pires cheios,113
+6700901,Repolho,1,Cru(a),93,Prato raso,16,Colher de sopa,150,7,Repolho cozido - prato de sobremesa cheio,113
+6700901,Repolho,1,Cru(a),94,Quilo,16,Colher de sopa,1000,15,Quilo,113
+6700901,Repolho,1,Cru(a),101,Taça,16,Colher de sopa,100,7,Repolho - pires cheio,113
+6700901,Repolho,1,Cru(a),102,Tigela,16,Colher de sopa,100,7,Repolho - pires cheio,113
+6701301,Agrião,1,Cru(a),12,Colher de arroz/servir,12,Colher de arroz/servir,50,1,Agrião refogado - colher de arroz cheia,116
+6701301,Agrião,1,Cru(a),16,Colher de sopa,12,Colher de arroz/servir,7,1,Agrião - colher de sopa cheia picada,116
+6701301,Agrião,1,Cru(a),34,Folha,12,Colher de arroz/servir,5,1,Agrião - ramo médio,116
+6701301,Agrião,1,Cru(a),35,Garfada,12,Colher de arroz/servir,30,1,Agrião - garfada,116
+6701301,Agrião,1,Cru(a),68,Grama,12,Colher de arroz/servir,1,15,Grama,116
+6701301,Agrião,1,Cru(a),77,Maço,12,Colher de arroz/servir,5,1,Agrião - ramo médio,116
+6701301,Agrião,1,Cru(a),82,Pegador,12,Colher de arroz/servir,7,1,Agrião - colher de sopa cheia picada,116
+6701301,Agrião,1,Cru(a),85,Pires,12,Colher de arroz/servir,10,1,Agrião - pires cheio picado,116
+6701301,Agrião,1,Cru(a),87,Porção,12,Colher de arroz/servir,37.5,4,Agrião - porção média,116
+6701301,Agrião,1,Cru(a),92,Prato fundo,12,Colher de arroz/servir,80,1,Agrião - prato raso cheio picado,116
+6701301,Agrião,1,Cru(a),93,Prato raso,12,Colher de arroz/servir,80,1,Agrião - prato raso cheio picado,116
+6701301,Agrião,1,Cru(a),94,Quilo,12,Colher de arroz/servir,1000,15,Quilo,116
+6701301,Agrião,1,Cru(a),95,Ramo,12,Colher de arroz/servir,5,1,Agrião - ramo médio,116
+6701501,Acelga,1,Cru(a),12,Colher de arroz/servir,16,Colher de sopa,10,1,Acelga - colher de arroz cheia,118
+6701501,Acelga,1,Cru(a),16,Colher de sopa,16,Colher de sopa,6,1,Acelga - colher de sopa cheia picada,118
+6701501,Acelga,1,Cru(a),34,Folha,16,Colher de sopa,10,1,Acelga - folha média,118
+6701501,Acelga,1,Cru(a),35,Garfada,16,Colher de sopa,6,1,Acelga - colher de sopa cheia picada Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,118
+6701501,Acelga,1,Cru(a),68,Grama,16,Colher de sopa,1,15,Grama,118
+6701501,Acelga,1,Cru(a),82,Pegador,16,Colher de sopa,6,1,Acelga - colher de sopa cheia picada,118
+6701501,Acelga,1,Cru(a),85,Pires,16,Colher de sopa,60,1,Acelga - prato raso picada,118
+6701501,Acelga,1,Cru(a),87,Porção,16,Colher de sopa,60,4,Repolho cru - porção,118
+6701501,Acelga,1,Cru(a),92,Prato fundo,16,Colher de sopa,60,1,Acelga - prato raso raso picada,118
+6701501,Acelga,1,Cru(a),94,Quilo,16,Colher de sopa,1000,15,Quilo,118
+6701704,Brócolis,2,Cozido(a),12,Colher de arroz/servir,16,Colher de sopa,20,1,Brócolis cozido - 2 colheres de sopa cheias picado,121
+6701704,Brócolis,2,Cozido(a),15,Colher de sobremesa,16,Colher de sopa,5,1,Brócolis cozido - 1/2 colher de sopa cheia picada,121
+6701704,Brócolis,2,Cozido(a),16,Colher de sopa,16,Colher de sopa,10,1,Brócolis cozido - colher de sopa cheia picada,121
+6701704,Brócolis,2,Cozido(a),17,Concha,16,Colher de sopa,40,1,Brócolis cozido - 4 colheres de sopa cheias picada,121
+6701704,Brócolis,2,Cozido(a),28,Escumadeira,16,Colher de sopa,20,1,Brócolis cozido - 2 colheres de sopa cheias picado,121
+6701704,Brócolis,2,Cozido(a),35,Garfada,16,Colher de sopa,10,1,Brócolis cozido - colher de sopa cheia picada,121
+6701704,Brócolis,2,Cozido(a),68,Grama,16,Colher de sopa,1,15,Grama,121
+6701704,Brócolis,2,Cozido(a),82,Pegador,16,Colher de sopa,10,1,Brócolis cozido - colher de sopa cheia picada,121
+6701704,Brócolis,2,Cozido(a),85,Pires,16,Colher de sopa,75,7,Brócolis cozido - pires,121
+6701704,Brócolis,2,Cozido(a),87,Porção,16,Colher de sopa,60,2,Brócolis cozido - porção Guia Alimentar,121
+6701704,Brócolis,2,Cozido(a),94,Quilo,16,Colher de sopa,1000,15,Quilo,121
+6701704,Brócolis,2,Cozido(a),95,Ramo,16,Colher de sopa,60,1,Couve-flor cozida - ramo médio,121
+6701704,Brócolis,2,Cozido(a),103,Unidade,16,Colher de sopa,60,1,Couve-flor cozida - ramo médio,121
+6702001,Rúcula,99,Não se aplica,12,Colher de arroz/servir,34,Folha,16,1,Alface - 2 colheres de sopa cheias,124
+6702001,Rúcula,99,Não se aplica,16,Colher de sopa,34,Folha,8,1,Alface - colher de sopa cheia,124
+6702001,Rúcula,99,Não se aplica,28,Escumadeira,34,Folha,16,1,Alface - 2 colheres de sopa cheias,124
+6702001,Rúcula,99,Não se aplica,34,Folha,34,Folha,6,2,Rúcula - ramo,124
+6702001,Rúcula,99,Não se aplica,35,Garfada,34,Folha,8,1,Alface - colher de sopa cheia Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,124
+6702001,Rúcula,99,Não se aplica,68,Grama,34,Folha,1,15,Grama,124
+6702001,Rúcula,99,Não se aplica,82,Pegador,34,Folha,8,1,Alface - colher de sopa cheia,124
+6702001,Rúcula,99,Não se aplica,85,Pires,34,Folha,20,1,Alface - pires cheio picada,124
+6702001,Rúcula,99,Não se aplica,87,Porção,34,Folha,27,4,Alface - porção média,124
+6702001,Rúcula,99,Não se aplica,91,Prato de sobremesa,34,Folha,30,1,Alface - prato de sobremesa cheio picada,124
+6702001,Rúcula,99,Não se aplica,92,Prato fundo,34,Folha,60,4,Alface - prato fundo,124
+6702001,Rúcula,99,Não se aplica,93,Prato raso,34,Folha,80,1,Alface - prato raso cheio picada,124
+6702001,Rúcula,99,Não se aplica,94,Quilo,34,Folha,1000,15,Quilo,124
+6702001,Rúcula,99,Não se aplica,95,Ramo,34,Folha,6,2,Rúcula - ramo,124
+6702001,Rúcula,99,Não se aplica,102,Tigela,34,Folha,30,1,Alface - prato de sobremesa cheio picada,124
+6703701,Abobrinha,2,Cozido(a),12,Colher de arroz/servir,16,Colher de sopa,70,1,Abobrinha cozida - colher de arroz cheia,127
+6703701,Abobrinha,2,Cozido(a),15,Colher de sobremesa,16,Colher de sopa,15,1,Abobrinha cozida - 1/2 colher de sopa cheia,127
+6703701,Abobrinha,2,Cozido(a),16,Colher de sopa,16,Colher de sopa,30,1,Abobrinha cozida - colher de sopa cheia,127
+6703701,Abobrinha,2,Cozido(a),17,Concha,16,Colher de sopa,90,1,Abobrinha cozida - escumadeira média cheia,127
+6703701,Abobrinha,2,Cozido(a),28,Escumadeira,16,Colher de sopa,90,1,Abobrinha cozida - escumadeira média cheia,127
+6703701,Abobrinha,2,Cozido(a),32,Fatia,16,Colher de sopa,61,14,Abobrinha - fatia,127
+6703701,Abobrinha,2,Cozido(a),68,Grama,16,Colher de sopa,1,15,Grama,127
+6703701,Abobrinha,2,Cozido(a),81,Pedaço,16,Colher de sopa,17,14,Abobrinha - pedaço,127
+6703701,Abobrinha,2,Cozido(a),82,Pegador,16,Colher de sopa,30,1,Abobrinha cozida - colher de sopa cheia,127
+6703701,Abobrinha,2,Cozido(a),87,Porção,16,Colher de sopa,57,2,Chuchu cozido - porção Guia Alimentar,127
+6703701,Abobrinha,2,Cozido(a),94,Quilo,16,Colher de sopa,1000,15,Quilo,127
+6703701,Abobrinha,2,Cozido(a),96,Rodela,16,Colher de sopa,18,14,Abobrinha - rodela,127
+6703701,Abobrinha,2,Cozido(a),103,Unidade,16,Colher de sopa,335,14,Abobrinha - unidade,127
+6703701,Abobrinha,7,Refogado(a),12,Colher de arroz/servir,16,Colher de sopa,70,1,Abobrinha cozida - colher de arroz cheia,128
+6703701,Abobrinha,7,Refogado(a),14,Colher de chá,16,Colher de sopa,7.5,1,Abobrinha cozida - 1/4 colher de sopa cheia,128
+6703701,Abobrinha,7,Refogado(a),15,Colher de sobremesa,16,Colher de sopa,15,1,Abobrinha cozida - 1/2 colher de sopa cheia,128
+6703701,Abobrinha,7,Refogado(a),16,Colher de sopa,16,Colher de sopa,30,1,Abobrinha cozida - colher de sopa cheia,128
+6703701,Abobrinha,7,Refogado(a),17,Concha,16,Colher de sopa,90,1,Abobrinha cozida - escumadeira média cheia,128
+6703701,Abobrinha,7,Refogado(a),28,Escumadeira,16,Colher de sopa,90,1,Abobrinha cozida - escumadeira média cheia,128
+6703701,Abobrinha,7,Refogado(a),68,Grama,16,Colher de sopa,1,15,Grama,129
+6703701,Abobrinha,7,Refogado(a),81,Pedaço,16,Colher de sopa,17,14,Abobrinha - pedaço,129
+6703701,Abobrinha,7,Refogado(a),82,Pegador,16,Colher de sopa,30,1,Abobrinha cozida - colher de sopa cheia,129
+6703701,Abobrinha,7,Refogado(a),87,Porção,16,Colher de sopa,57,2,Chuchu cozido - porção Guia Alimentar,129
+6703701,Abobrinha,7,Refogado(a),94,Quilo,16,Colher de sopa,1000,15,Quilo,129
+6703701,Abobrinha,7,Refogado(a),96,Rodela,16,Colher de sopa,18,14,Abobrinha - rodela,129
+6703701,Abobrinha,7,Refogado(a),103,Unidade,16,Colher de sopa,335,14,Abobrinha - unidade,129
+6703901,Abóbora,2,Cozido(a),12,Colher de arroz/servir,16,Colher de sopa,72,1,Abóbora cozida - 2 colheres de sopa cheias,130
+6703901,Abóbora,2,Cozido(a),14,Colher de chá,16,Colher de sopa,9,1,Abóbora cozida - 1/4 colher de sopa cheia,130
+6703901,Abóbora,2,Cozido(a),15,Colher de sobremesa,16,Colher de sopa,18,1,Abóbora cozida - 1/2 colher de sopa cheia,130
+6703901,Abóbora,2,Cozido(a),16,Colher de sopa,16,Colher de sopa,36,1,Abóbora cozida - colher de sopa cheia,130
+6703901,Abóbora,2,Cozido(a),17,Concha,16,Colher de sopa,100,1,Abóbora cozida - escumadeira média cheia picada,130
+6703901,Abóbora,2,Cozido(a),28,Escumadeira,16,Colher de sopa,100,1,Abóbora cozida - escumadeira média cheia,130
+6703901,Abóbora,2,Cozido(a),32,Fatia,16,Colher de sopa,50,1,Abóbora cozida - pedaço médio Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,130
+6703901,Abóbora,2,Cozido(a),68,Grama,16,Colher de sopa,1,15,Grama,130
+6703901,Abóbora,2,Cozido(a),81,Pedaço,16,Colher de sopa,50,1,Abóbora cozida - pedaço médio,130
+6703901,Abóbora,2,Cozido(a),82,Pegador,16,Colher de sopa,36,1,Abóbora cozida - colher de sopa cheia,130
+6703901,Abóbora,2,Cozido(a),87,Porção,16,Colher de sopa,70,2,Abóbora cozida - porção Guia Alimentar,130
+6703901,Abóbora,2,Cozido(a),92,Prato fundo,16,Colher de sopa,280,7,Abóbora cozida - pires,130
+6703901,Abóbora,2,Cozido(a),93,Prato raso,16,Colher de sopa,140,7,Abóbora cozida - pires,130
+6703901,Abóbora,2,Cozido(a),94,Quilo,16,Colher de sopa,1000,15,Quilo,130
+6703901,Abóbora,2,Cozido(a),96,Rodela,16,Colher de sopa,30,1,Abóbora cozida - pedaço pequeno,130
+6703901,Abóbora,2,Cozido(a),102,Tigela,16,Colher de sopa,100,1,Abóbora cozida - escumadeira média cheia picada,130
+6704001,Pepino,99,Não se aplica,12,Colher de arroz/servir,96,Rodela,36,1,Pepino - 2 colheres de sopa cheias picado,132
+6704001,Pepino,99,Não se aplica,14,Colher de chá,96,Rodela,4.5,1,Pepino - 1/4 colher de sopa cheia picada Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,132
+6704001,Pepino,99,Não se aplica,15,Colher de sobremesa,96,Rodela,9,1,Pepino - 1/2 colher de sopa cheia picada,132
+6704001,Pepino,99,Não se aplica,16,Colher de sopa,96,Rodela,18,1,Pepino - colher de sopa cheia picada,132
+6704001,Pepino,99,Não se aplica,28,Escumadeira,96,Rodela,36,1,Pepino - 2 colheres de sopa cheias picada,132
+6704001,Pepino,99,Não se aplica,32,Fatia,96,Rodela,3,1,Pepino - fatia pequena,132
+6704001,Pepino,99,Não se aplica,68,Grama,96,Rodela,1,15,Grama,132
+6704001,Pepino,99,Não se aplica,78,Metade,96,Rodela,50,1,Pepino - 1/2 unidade média,132
+6704001,Pepino,99,Não se aplica,81,Pedaço,96,Rodela,3,1,Pepino - fatia pequena,132
+6704001,Pepino,99,Não se aplica,82,Pegador,96,Rodela,18,1,Pepino - colher de sopa cheia picada,132
+6704001,Pepino,99,Não se aplica,87,Porção,96,Rodela,36,1,Pepino - 2 colheres de sopa cheias picada,132
+6704001,Pepino,99,Não se aplica,93,Prato raso,96,Rodela,36,1,Pepino - 2 colheres de sopa cheias picada,132
+6704001,Pepino,99,Não se aplica,94,Quilo,96,Rodela,1000,15,Quilo,132
+6704001,Pepino,99,Não se aplica,96,Rodela,96,Rodela,3,1,Pepino - fatia pequena,132
+6704001,Pepino,99,Não se aplica,101,Taça,96,Rodela,36,1,Pepino - 2 colheres de sopa cheias picada,132
+6704001,Pepino,99,Não se aplica,103,Unidade,96,Rodela,100,1,Pepino - unidade média,133
+6704001,Pepino,99,Não se aplica,104,Unidade pequena,96,Rodela,75,1,Pepino - 75% unidade média,133
+6704101,Chuchu,2,Cozido(a),12,Colher de arroz/servir,16,Colher de sopa,45,1,Chuchu cozido - colher de arroz cheia,133
+6704101,Chuchu,2,Cozido(a),15,Colher de sobremesa,16,Colher de sopa,10,1,Chuchu cozido - 1/2 colher de sopa cheia,133
+6704101,Chuchu,2,Cozido(a),16,Colher de sopa,16,Colher de sopa,20,1,Chuchu cozido - colher de sopa cheia,133
+6704101,Chuchu,2,Cozido(a),17,Concha,16,Colher de sopa,110,1,Chuchu cozido - escumadeira média cheia,133
+6704101,Chuchu,2,Cozido(a),28,Escumadeira,16,Colher de sopa,110,1,Chuchu cozido - escumadeira média cheia,133
+6704101,Chuchu,2,Cozido(a),32,Fatia,16,Colher de sopa,30,1,Chuchu cozido - pedaço médio,133
+6704101,Chuchu,2,Cozido(a),68,Grama,16,Colher de sopa,1,15,Grama,133
+6704101,Chuchu,2,Cozido(a),78,Metade,16,Colher de sopa,115,1,Chuchu cozido - 1/2 unidade média,133
+6704101,Chuchu,2,Cozido(a),81,Pedaço,16,Colher de sopa,30,1,Chuchu cozido - pedaço,133
+6704101,Chuchu,2,Cozido(a),82,Pegador,16,Colher de sopa,20,1,Chuchu cozido - colher de sopa cheia,133
+6704101,Chuchu,2,Cozido(a),87,Porção,16,Colher de sopa,57,2,Chuchu cozido - porção Guia Alimentar,133
+6704101,Chuchu,2,Cozido(a),93,Prato raso,16,Colher de sopa,45,1,Chuchu cozido - colher de arroz cheia,133
+6704101,Chuchu,2,Cozido(a),94,Quilo,16,Colher de sopa,1000,15,Quilo,134
+6704101,Chuchu,2,Cozido(a),96,Rodela,16,Colher de sopa,15,1,Chuchu cozido - pedaço pequeno ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,134
+6704101,Chuchu,2,Cozido(a),102,Tigela,16,Colher de sopa,110,1,Chuchu cozido - escumadeira média cheia,134
+6704101,Chuchu,2,Cozido(a),103,Unidade,16,Colher de sopa,230,1,Chuchu cozido - unidade média,134
+6704101,Chuchu,2,Cozido(a),104,Unidade pequena,16,Colher de sopa,145,1,Chuchu cozido - unidade pequena,134
+6705101,Tomate,99,Não se aplica,3,Banda,96,Rodela,50,1,Tomate - 1/2 unidade média,143
+6705101,Tomate,99,Não se aplica,12,Colher de arroz/servir,96,Rodela,60,1,Tomate - 2 colheres de sopa cheias em tiras,143
+6705101,Tomate,99,Não se aplica,14,Colher de chá,96,Rodela,7.5,1,Tomate - 1/4 colher de sopa cheia em tiras,143
+6705101,Tomate,99,Não se aplica,15,Colher de sobremesa,96,Rodela,15,1,Tomate - 1/2 colher de sopa cheia em tiras,143
+6705101,Tomate,99,Não se aplica,16,Colher de sopa,96,Rodela,30,1,Tomate - colher de sopa cheia em tiras,143
+6705101,Tomate,99,Não se aplica,17,Concha,96,Rodela,120,1,Tomate - 4 colheres de sopa cheias em tiras,143
+6705101,Tomate,99,Não se aplica,28,Escumadeira,96,Rodela,60,1,Tomate - 2 colheres de sopa cheias em tiras,143
+6705101,Tomate,99,Não se aplica,32,Fatia,96,Rodela,15,1,Tomate - fatia média,143
+6705101,Tomate,99,Não se aplica,35,Garfada,96,Rodela,30,1,Tomate - colher de sopa cheia em tiras,143
+6705101,Tomate,99,Não se aplica,68,Grama,96,Rodela,1,15,Grama,143
+6705101,Tomate,99,Não se aplica,78,Metade,96,Rodela,50,1,Tomate - 1/2 unidade média,143
+6705101,Tomate,99,Não se aplica,81,Pedaço,96,Rodela,15,1,Tomate - fatia média,143
+6705101,Tomate,99,Não se aplica,82,Pegador,96,Rodela,30,1,Tomate - colher de sopa cheia em tiras,143
+6705101,Tomate,99,Não se aplica,85,Pires,96,Rodela,60,7,Tomate - pires pequeno,143
+6705101,Tomate,99,Não se aplica,87,Porção,96,Rodela,80,2,Tomate comum - porção Guia Alimentar,143
+6705101,Tomate,99,Não se aplica,91,Prato de sobremesa,96,Rodela,60,7,Tomate - pires pequeno,143
+6705101,Tomate,99,Não se aplica,93,Prato raso,96,Rodela,60,7,Tomate - pires pequeno,143
+6705101,Tomate,99,Não se aplica,94,Quilo,96,Rodela,1000,15,Quilo,143
+6705101,Tomate,99,Não se aplica,96,Rodela,96,Rodela,15,1,Tomate - fatia média,143
+6705101,Tomate,99,Não se aplica,103,Unidade,96,Rodela,100,1,Tomate - unidade média,143
+6705101,Tomate,99,Não se aplica,104,Unidade pequena,96,Rodela,50,1,Tomate - unidade pequena,143
+6705401,Berinjela,2,Cozido(a),12,Colher de arroz/servir,16,Colher de sopa,75,1,Berinjela ensopada - colher de arroz cheia,145
+6705401,Berinjela,2,Cozido(a),15,Colher de sobremesa,16,Colher de sopa,12.5,1,Berinjela ensopada - 1/2 colher de sopa cheia,145
+6705401,Berinjela,2,Cozido(a),16,Colher de sopa,16,Colher de sopa,25,1,Berinjela ensopada - colher de sopa cheia,145
+6705401,Berinjela,2,Cozido(a),28,Escumadeira,16,Colher de sopa,125,1,Berinjela ensopada - escumadeira média cheia,145
+6705401,Berinjela,2,Cozido(a),32,Fatia,16,Colher de sopa,20,1,Berinjela frita - fatia média,145
+6705401,Berinjela,2,Cozido(a),68,Grama,16,Colher de sopa,1,15,Grama,145
+6705401,Berinjela,2,Cozido(a),81,Pedaço,16,Colher de sopa,20,1,Berinjela frita - fatia média,145
+6705401,Berinjela,2,Cozido(a),87,Porção,16,Colher de sopa,60,2,Berinjela cozida - porção Guia Alimentar,145
+6705401,Berinjela,2,Cozido(a),93,Prato raso,16,Colher de sopa,110,7,Berinjela cozida - pires de chá cheio,145
+6705401,Berinjela,2,Cozido(a),94,Quilo,16,Colher de sopa,1000,15,Quilo,145
+6705401,Berinjela,2,Cozido(a),104,Unidade pequena,16,Colher de sopa,112.5,9,Berinjela - 75% da unidade média,145
+6705701,Cebola,1,Cru(a),3,Banda,96,Rodela,35,1,Cebola - 1/2 unidade média,147
+6705701,Cebola,1,Cru(a),12,Colher de arroz/servir,96,Rodela,20,1,Cebola - 2 colheres de sopa cheias,147
+6705701,Cebola,1,Cru(a),14,Colher de chá,96,Rodela,2.5,1,Cebola - 1/4 colher de sopa cheia,147
+6705701,Cebola,1,Cru(a),15,Colher de sobremesa,96,Rodela,5,1,Cebola - 1/2 colher de sopa cheia,147
+6705701,Cebola,1,Cru(a),16,Colher de sopa,96,Rodela,10,1,Cebola - colher de sopa cheia,148
+6705701,Cebola,1,Cru(a),32,Fatia,96,Rodela,6,1,Cebola - fatia média ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,148
+6705701,Cebola,1,Cru(a),35,Garfada,96,Rodela,10,1,Cebola - colher de sopa cheia,148
+6705701,Cebola,1,Cru(a),68,Grama,96,Rodela,1,15,Grama,148
+6705701,Cebola,1,Cru(a),78,Metade,96,Rodela,35,1,Cebola - 1/2 unidade média,148
+6705701,Cebola,1,Cru(a),81,Pedaço,96,Rodela,17.5,1,Cebola - 1/4 unidade média,148
+6705701,Cebola,1,Cru(a),82,Pegador,96,Rodela,10,1,Cebola - colher de sopa cheia,148
+6705701,Cebola,1,Cru(a),85,Pires,96,Rodela,30,1,Cebola - unidade pequena,148
+6705701,Cebola,1,Cru(a),87,Porção,96,Rodela,20,1,Cebola - 2 colheres de sopa cheias,148
+6705701,Cebola,1,Cru(a),94,Quilo,96,Rodela,1000,15,Quilo,148
+6705701,Cebola,1,Cru(a),96,Rodela,96,Rodela,6,1,Cebola - fatia média Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,148
+6705701,Cebola,1,Cru(a),103,Unidade,96,Rodela,70,1,Cebola - unidade média,148
+6705701,Cebola,1,Cru(a),104,Unidade pequena,96,Rodela,30,1,Cebola - unidade pequena,148
+6801101,"Banana (ouro, prata, d´água, da terra, etc.)",99,Não se aplica,68,Grama,103,Unidade,1,15,Grama,155
+6801101,"Banana (ouro, prata, d´água, da terra, etc.)",99,Não se aplica,81,Pedaço,103,Unidade,16,14,Banana - pedaço,155
+6801101,"Banana (ouro, prata, d´água, da terra, etc.)",99,Não se aplica,87,Porção,103,Unidade,86,2,Banana - porção Guia Alimentar,155
+6801101,"Banana (ouro, prata, d´água, da terra, etc.)",99,Não se aplica,93,Prato raso,103,Unidade,235,14,Banana - prato raso,155
+6801101,"Banana (ouro, prata, d´água, da terra, etc.)",99,Não se aplica,94,Quilo,103,Unidade,1000,15,Quilo,155
+6801101,"Banana (ouro, prata, d´água, da terra, etc.)",99,Não se aplica,101,Taça,103,Unidade,128,14,Banana - concha,155
+6801101,"Banana (ouro, prata, d´água, da terra, etc.)",99,Não se aplica,103,Unidade,103,Unidade,75,3,Banana-prata - unidade,155
+6801101,"Banana (ouro, prata, d´água, da terra, etc.)",99,Não se aplica,104,Unidade pequena,103,Unidade,56.3,3,Banana-prata - 75% da unidade média,155
+6801801,"Laranja (pera, seleta, lima, da terra, etc.)",99,Não se aplica,2,Bago,103,Unidade,18,2,Laranja-Bahia/seleta - gomo,156
+6801801,"Laranja (pera, seleta, lima, da terra, etc.)",99,Não se aplica,3,Banda,103,Unidade,90,1,Laranja - 1/2 unidade média ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,156
+6801801,"Laranja (pera, seleta, lima, da terra, etc.)",99,Não se aplica,18,Copo americano,103,Unidade,150,15,Copo americano,156
+6801801,"Laranja (pera, seleta, lima, da terra, etc.)",99,Não se aplica,20,Copo de requeijão,103,Unidade,240,1,Copo de requeijão,156
+6801801,"Laranja (pera, seleta, lima, da terra, etc.)",99,Não se aplica,21,Copo grande,103,Unidade,300,7,Copo grande,156
+6801801,"Laranja (pera, seleta, lima, da terra, etc.)",99,Não se aplica,22,Copo médio,103,Unidade,240,1,Copo médio,156
+6801801,"Laranja (pera, seleta, lima, da terra, etc.)",99,Não se aplica,32,Fatia,103,Unidade,18,2,Laranja-Bahia/seleta - gomo,156
+6801801,"Laranja (pera, seleta, lima, da terra, etc.)",99,Não se aplica,67,Gomo,103,Unidade,18,2,Laranja-Bahia/seleta - gomo,156
+6801801,"Laranja (pera, seleta, lima, da terra, etc.)",99,Não se aplica,68,Grama,103,Unidade,1,15,Grama,156
+6801801,"Laranja (pera, seleta, lima, da terra, etc.)",99,Não se aplica,78,Metade,103,Unidade,90,1,Laranja - 1/2 unidade média,156
+6801801,"Laranja (pera, seleta, lima, da terra, etc.)",99,Não se aplica,81,Pedaço,103,Unidade,18,2,Laranja-Bahia/seleta - gomo Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,156
+6801801,"Laranja (pera, seleta, lima, da terra, etc.)",99,Não se aplica,87,Porção,103,Unidade,144,2,Laranja-Bahia/seleta - porção Guia Alimentar,156
+6801801,"Laranja (pera, seleta, lima, da terra, etc.)",99,Não se aplica,94,Quilo,103,Unidade,1000,15,Quilo,156
+6801801,"Laranja (pera, seleta, lima, da terra, etc.)",99,Não se aplica,96,Rodela,103,Unidade,18,2,Laranja-Bahia/seleta - gomo,156
+6801801,"Laranja (pera, seleta, lima, da terra, etc.)",99,Não se aplica,103,Unidade,103,Unidade,180,1,Laranja - unidade média,156
+6801801,"Laranja (pera, seleta, lima, da terra, etc.)",99,Não se aplica,104,Unidade pequena,103,Unidade,90,1,Laranja - unidade pequena,156
+6802201,Tangerina,99,Não se aplica,2,Bago,103,Unidade,16.9,1,Tangerina - 1/8 da unidade média,157
+6802201,Tangerina,99,Não se aplica,18,Copo americano,103,Unidade,62.5,15,Diluição para o preparo de 1 copo americano,157
+6802201,Tangerina,99,Não se aplica,21,Copo grande,103,Unidade,125,15,Diluição para o preparo de 1 copo grande,157
+6802201,Tangerina,99,Não se aplica,22,Copo médio,103,Unidade,100,15,Diluição para o preparo de 1 copo médio,157
+6802201,Tangerina,99,Não se aplica,67,Gomo,103,Unidade,16.9,1,Tangerina - 1/8 da unidade média,157
+6802201,Tangerina,99,Não se aplica,68,Grama,103,Unidade,1,15,Grama,157
+6802201,Tangerina,99,Não se aplica,78,Metade,103,Unidade,67.5,1,Tangerina - 1/2 unidade média,157
+6802201,Tangerina,99,Não se aplica,94,Quilo,103,Unidade,1000,15,Quilo,157
+6802201,Tangerina,99,Não se aplica,103,Unidade,103,Unidade,135,1,Tangerina - unidade média,157
+6802201,Tangerina,99,Não se aplica,104,Unidade pequena,103,Unidade,100,1,Tangerina - unidade pequena,157
+6802601,Abacaxi,99,Não se aplica,3,Banda,96,Rodela,375,1,Abacaxi -1/2 unidade média,158
+6802601,Abacaxi,99,Não se aplica,22,Copo médio,96,Rodela,100,15,Diluição para o preparo de 1 copo médio,158
+6802601,Abacaxi,99,Não se aplica,32,Fatia,96,Rodela,75,1,Abacaxi - fatia média,158
+6802601,Abacaxi,99,Não se aplica,68,Grama,96,Rodela,1,15,Grama,158
+6802601,Abacaxi,99,Não se aplica,81,Pedaço,96,Rodela,11,7,Abacaxi -1 cubo,158
+6802601,Abacaxi,99,Não se aplica,87,Porção,96,Rodela,130,2,Abacaxi - porção Guia Alimentar,159
+6802601,Abacaxi,99,Não se aplica,94,Quilo,96,Rodela,1000,15,Quilo,159
+6802601,Abacaxi,99,Não se aplica,96,Rodela,96,Rodela,75,1,Abacaxi - fatia média,159
+6802601,Abacaxi,99,Não se aplica,103,Unidade,96,Rodela,750,1,Abacaxi - unidade média,159
+6802601,Abacaxi,99,Não se aplica,104,Unidade pequena,96,Rodela,480,1,Abacaxi - unidade pequena,159
+6802701,Abacate,99,Não se aplica,3,Banda,103,Unidade,215,1,Abacate -1/2 unidade média,159
+6802701,Abacate,99,Não se aplica,16,Colher de sopa,103,Unidade,45,1,Abacate - colher de sopa cheia picado,159
+6802701,Abacate,99,Não se aplica,21,Copo grande,103,Unidade,200,1,Abacate - copo duplo cheio picado,159
+6802701,Abacate,99,Não se aplica,22,Copo médio,103,Unidade,200,1,Abacate - copo duplo cheio picado,159
+6802701,Abacate,99,Não se aplica,32,Fatia,103,Unidade,90,1,Abacate - 2 colheres de sopa cheias picado,159
+6802701,Abacate,99,Não se aplica,68,Grama,103,Unidade,1,15,Grama,159
+6802701,Abacate,99,Não se aplica,78,Metade,103,Unidade,215,1,Abacate -1/2 unidade média,159
+6802701,Abacate,99,Não se aplica,81,Pedaço,103,Unidade,22.5,1,Abacate - 1/2 colher de sopa cheia picado,159
+6802701,Abacate,99,Não se aplica,87,Porção,103,Unidade,45,2,Abacate - porção Guia Alimentar,159
+6802701,Abacate,99,Não se aplica,90,Pote,103,Unidade,175,1,Abacate - 1/2 prato raso,159
+6802701,Abacate,99,Não se aplica,91,Prato de sobremesa,103,Unidade,175,1,Abacate - 1/2 prato raso,159
+6802701,Abacate,99,Não se aplica,94,Quilo,103,Unidade,1000,15,Quilo,159
+6802701,Abacate,99,Não se aplica,101,Taça,103,Unidade,175,1,Abacate - 1/2 prato raso,159
+6802701,Abacate,99,Não se aplica,103,Unidade,103,Unidade,430,1,Abacate - unidade média,159
+6802701,Abacate,99,Não se aplica,104,Unidade pequena,103,Unidade,370,1,Abacate - unidade pequena,159
+6803001,Maçã,99,Não se aplica,3,Banda,103,Unidade,75,1,Maçã - 1/2 unidade média Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,160
+6803001,Maçã,99,Não se aplica,32,Fatia,103,Unidade,37.5,1,Maçã - 1/4 unidade média,160
+6803001,Maçã,99,Não se aplica,68,Grama,103,Unidade,1,15,Grama,160
+6803001,Maçã,99,Não se aplica,78,Metade,103,Unidade,75,1,Maçã - 1/2 unidade média,160
+6803001,Maçã,99,Não se aplica,81,Pedaço,103,Unidade,37.5,1,Maçã - 1/4 unidade média,160
+6803001,Maçã,99,Não se aplica,87,Porção,103,Unidade,130,2,Maçã - porção Guia Alimentar,160
+6803001,Maçã,99,Não se aplica,94,Quilo,103,Unidade,1000,15,Quilo,160
+6803001,Maçã,99,Não se aplica,103,Unidade,103,Unidade,150,1,Maçã - unidade média,160
+6803001,Maçã,99,Não se aplica,104,Unidade pequena,103,Unidade,90,1,Maçã - unidade pequena,160
+6803101,Mamão,99,Não se aplica,3,Banda,32,Fatia,155,1,Mamão papaya - 1/2 unidade média,160
+6803101,Mamão,99,Não se aplica,12,Colher de arroz/servir,32,Fatia,70,1,Mamão papaya - colher de arroz cheia,160
+6803101,Mamão,99,Não se aplica,16,Colher de sopa,32,Fatia,40,1,Mamão papaya - colher de sopa cheia,160
+6803101,Mamão,99,Não se aplica,17,Concha,32,Fatia,140,1,Mamão papaya - 2 colheres de arroz cheias,160
+6803101,Mamão,99,Não se aplica,32,Fatia,32,Fatia,170,1,Mamão - fatia média,160
+6803101,Mamão,99,Não se aplica,68,Grama,32,Fatia,1,15,Grama,161
+6803101,Mamão,99,Não se aplica,78,Metade,32,Fatia,155,1,Mamão papaya - 1/2 unidade média,161
+6803101,Mamão,99,Não se aplica,81,Pedaço,32,Fatia,120,7,Mamão papaya - pedaço pequeno,161
+6803101,Mamão,99,Não se aplica,87,Porção,32,Fatia,160,2,Mamão formosa - porção Guia Alimentar,161
+6803101,Mamão,99,Não se aplica,91,Prato de sobremesa,32,Fatia,165,1,Mamão papaya - copo pequeno picado,161
+6803101,Mamão,99,Não se aplica,94,Quilo,32,Fatia,1000,15,Quilo,161
+6803101,Mamão,99,Não se aplica,96,Rodela,32,Fatia,170,1,Mamão - fatia média,161
+6803101,Mamão,99,Não se aplica,101,Taça,32,Fatia,165,1,Mamão papaya - copo pequeno picado,161
+6803101,Mamão,99,Não se aplica,103,Unidade,32,Fatia,310,1,Mamão papaya - unidade média,161
+6803101,Mamão,99,Não se aplica,104,Unidade pequena,32,Fatia,270,1,Mamão papaya - unidade pequena,161
+6803201,Manga,99,Não se aplica,3,Banda,103,Unidade,70,1,Manga - 1/2 unidade média,161
+6803201,Manga,99,Não se aplica,12,Colher de arroz/servir,103,Unidade,44,2,Manga hadden - 2 fatias,161
+6803201,Manga,99,Não se aplica,16,Colher de sopa,103,Unidade,22,2,Manga hadden - fatia,161
+6803201,Manga,99,Não se aplica,32,Fatia,103,Unidade,22,2,Manga hadden - fatia,161
+6803201,Manga,99,Não se aplica,68,Grama,103,Unidade,1,15,Grama,161
+6803201,Manga,99,Não se aplica,78,Metade,103,Unidade,70,1,Manga - 1/2 unidade média,161
+6803201,Manga,99,Não se aplica,81,Pedaço,103,Unidade,22,2,Manga hadden - fatia,161
+6803201,Manga,99,Não se aplica,87,Porção,103,Unidade,110,2,Manga - porção Guia Alimentar,162
+6803201,Manga,99,Não se aplica,94,Quilo,103,Unidade,1000,15,Quilo ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,162
+6803201,Manga,99,Não se aplica,103,Unidade,103,Unidade,140,1,Manga - espada média,162
+6803201,Manga,99,Não se aplica,104,Unidade pequena,103,Unidade,60,1,Manga - espada pequena,162
+6803401,Melancia,99,Não se aplica,18,Copo americano,32,Fatia,62.5,15,Diluição para o preparo de 1 copo americano,162
+6803401,Melancia,99,Não se aplica,21,Copo grande,32,Fatia,125,15,Diluição para o preparo de 1 copo grande,162
+6803401,Melancia,99,Não se aplica,22,Copo médio,32,Fatia,100,15,Diluição para o preparo de 1 copo médio,162
+6803401,Melancia,99,Não se aplica,32,Fatia,32,Fatia,200,1,Melancia - fatia média,162
+6803401,Melancia,99,Não se aplica,68,Grama,32,Fatia,1,15,Grama,162
+6803401,Melancia,99,Não se aplica,81,Pedaço,32,Fatia,150,7,Melancia - pedaço médio,162
+6803401,Melancia,99,Não se aplica,87,Porção,32,Fatia,296,2,Melancia - porção Guia Alimentar,162
+6803401,Melancia,99,Não se aplica,94,Quilo,32,Fatia,1000,15,Quilo,162
+6803501,Melão,99,Não se aplica,3,Banda,32,Fatia,330,1,Melão - 1/2 unidade média,162
+6803501,Melão,99,Não se aplica,32,Fatia,32,Fatia,90,1,Melão - fatia média,162
+6803501,Melão,99,Não se aplica,68,Grama,32,Fatia,1,15,Grama,162
+6803501,Melão,99,Não se aplica,81,Pedaço,32,Fatia,22.5,1,Melão - 1/4 fatia média,163
+6803501,Melão,99,Não se aplica,87,Porção,32,Fatia,230,2,Melão - porção Guia Alimentar,163
+6803501,Melão,99,Não se aplica,94,Quilo,32,Fatia,1000,15,Quilo,163
+6803501,Melão,99,Não se aplica,103,Unidade,32,Fatia,660,1,Melão - unidade média,163
+6803601,Pera,99,Não se aplica,3,Banda,103,Unidade,65,1,pera - 1/2 unidade média,163
+6803601,Pera,99,Não se aplica,32,Fatia,103,Unidade,32.5,1,pera - 1/4 unidade média,163
+6803601,Pera,99,Não se aplica,68,Grama,103,Unidade,1,15,Grama,163
+6803601,Pera,99,Não se aplica,78,Metade,103,Unidade,65,1,pera - 1/2 unidade,163
+6803601,Pera,99,Não se aplica,81,Pedaço,103,Unidade,32.5,1,pera - 1/4 unidade média,163
+6803601,Pera,99,Não se aplica,94,Quilo,103,Unidade,1000,15,Quilo,163
+6803601,Pera,99,Não se aplica,103,Unidade,103,Unidade,130,1,pera - unidade média,163
+6803601,Pera,99,Não se aplica,104,Unidade pequena,103,Unidade,97.5,1,pera - 75% unidade média,163
+6803901,Uva,99,Não se aplica,2,Bago,8,Cacho,8,1,Uva - unidade média,164
+6803901,Uva,99,Não se aplica,8,Cacho,8,Cacho,170,1,Uva - cacho pequeno,164
+6803901,Uva,99,Não se aplica,18,Copo americano,8,Cacho,70,7,Uva - 1/2 tigela Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,164
+6803901,Uva,99,Não se aplica,20,Copo de requeijão,8,Cacho,140,7,Uva - tigela,164
+6803901,Uva,99,Não se aplica,21,Copo grande,8,Cacho,140,7,Uva - tigela,164
+6803901,Uva,99,Não se aplica,22,Copo médio,8,Cacho,140,7,Uva - tigela,164
+6803901,Uva,99,Não se aplica,23,Copo tulipa,8,Cacho,140,7,Uva - tigela,164
+6803901,Uva,99,Não se aplica,67,Gomo,8,Cacho,8,1,Uva - unidade média,164
+6803901,Uva,99,Não se aplica,68,Grama,8,Cacho,1,15,Grama,164
+6803901,Uva,99,Não se aplica,87,Porção,8,Cacho,99.2,2,Uva comum - porção Guia Alimentar,164
+6803901,Uva,99,Não se aplica,88,Punhado,8,Cacho,170,1,Uva - cacho pequeno,164
+6803901,Uva,99,Não se aplica,94,Quilo,8,Cacho,1000,15,Quilo,164
+6803901,Uva,99,Não se aplica,103,Unidade,8,Cacho,8,1,Uva - unidade média,164
+6803901,Uva,99,Não se aplica,104,Unidade pequena,8,Cacho,4,1,Uva - unidade pequena,164
+6804201,Goiaba,99,Não se aplica,3,Banda,103,Unidade,85,1,Goiaba - 1/2 unidade média,165
+6804201,Goiaba,99,Não se aplica,21,Copo grande,103,Unidade,125,15,Diluição para o preparo de 1 copo grande,165
+6804201,Goiaba,99,Não se aplica,68,Grama,103,Unidade,1,15,Grama,165
+6804201,Goiaba,99,Não se aplica,81,Pedaço,103,Unidade,42.5,1,Goiaba - 1/4 unidade média,165
+6804201,Goiaba,99,Não se aplica,94,Quilo,103,Unidade,1000,15,Quilo,165
+6804201,Goiaba,99,Não se aplica,103,Unidade,103,Unidade,170,1,Goiaba - unidade média,165
+6804201,Goiaba,99,Não se aplica,104,Unidade pequena,103,Unidade,50,9,Goiaba - unidade pequena,166
+6805201,Morango,99,Não se aplica,18,Copo americano,103,Unidade,62.5,15,Diluição para o preparo de 1 copo americano,169
+6805201,Morango,99,Não se aplica,68,Grama,103,Unidade,1,15,Grama,169
+6805201,Morango,99,Não se aplica,87,Porção,103,Unidade,120,2,Morango - porção Guia Alimentar,169
+6805201,Morango,99,Não se aplica,91,Prato de sobremesa,103,Unidade,120,1,Morango - 10 unidades médias,169
+6805201,Morango,99,Não se aplica,94,Quilo,103,Unidade,1000,15,Quilo,169
+6805201,Morango,99,Não se aplica,101,Taça,103,Unidade,120,1,Morango - 10 unidades médias,169
+6805201,Morango,99,Não se aplica,103,Unidade,103,Unidade,12,1,Morango - unidade média,169
+6805201,Morango,99,Não se aplica,104,Unidade pequena,103,Unidade,7,1,Morango - unidade pequena,169
+6805201,Morango,99,Não se aplica,106,Xícara de chá,103,Unidade,120,1,Morango - 10 unidades médias,169
+6807801,Kiwi,99,Não se aplica,18,Copo americano,103,Unidade,62.5,15,Diluição para o preparo de 1 copo americano,174
+6807801,Kiwi,99,Não se aplica,21,Copo grande,103,Unidade,125,15,Diluição para o preparo de 1 copo grande,174
+6807801,Kiwi,99,Não se aplica,68,Grama,103,Unidade,1,15,Grama,174
+6807801,Kiwi,99,Não se aplica,81,Pedaço,103,Unidade,23.5,1,Kiwi - 1/4 unidade média,174
+6807801,Kiwi,99,Não se aplica,94,Quilo,103,Unidade,1000,15,Quilo,174
+6807801,Kiwi,99,Não se aplica,96,Rodela,103,Unidade,11,7,Kiwi - rodela,174
+6807801,Kiwi,99,Não se aplica,103,Unidade,103,Unidade,94,1,Kiwi - unidade média,174
+6807801,Kiwi,99,Não se aplica,104,Unidade pequena,103,Unidade,57,1,Kiwi - 75% unidade média,175
+6900304,Açúcar mascavo,99,Não se aplica,16,Colher de sopa,16,Colher de sopa,19,1,Açúcar mascavo - colher de sopa cheia,176
+6900304,Açúcar mascavo,99,Não se aplica,68,Grama,16,Colher de sopa,1,15,Grama,176
+6900304,Açúcar mascavo,99,Não se aplica,94,Quilo,16,Colher de sopa,1000,15,Quilo,176
+6901203,Pasta de amendoim,99,Não se aplica,68,Grama,86,Ponta de faca,1,15,Grama,184
+6901203,Pasta de amendoim,99,Não se aplica,86,Ponta de faca,86,Ponta de faca,12.5,7,Doce de leite - passada de faca,184
+6901203,Pasta de amendoim,99,Não se aplica,94,Quilo,86,Ponta de faca,1000,15,Quilo,185
+6901602,Mel,99,Não se aplica,12,Colher de arroz/servir,86,Ponta de faca,30,1,Mel de abelha - 2 colheres de sopa,188
+6901602,Mel,99,Não se aplica,13,Colher de café,86,Ponta de faca,2,1,Mel de abelha - colher de café,188
+6901602,Mel,99,Não se aplica,14,Colher de chá,86,Ponta de faca,3,1,Mel de abelha - colher de chá,188
+6901602,Mel,99,Não se aplica,15,Colher de sobremesa,86,Ponta de faca,9,1,Mel de abelha - colher de sobremesa,189
+6901602,Mel,99,Não se aplica,16,Colher de sopa,86,Ponta de faca,15,1,Mel de abelha - colher de sopa,189
+6901602,Mel,99,Não se aplica,22,Copo médio,86,Ponta de faca,240,1,Copo médio,189
+6901602,Mel,99,Não se aplica,68,Grama,86,Ponta de faca,1,15,Grama,189
+6901602,Mel,99,Não se aplica,86,Ponta de faca,86,Ponta de faca,12.5,7,Doce de leite - passada de faca,189
+6901602,Mel,99,Não se aplica,87,Porção,86,Ponta de faca,37.5,2,Mel - porção Guia Alimentar,189
+6901602,Mel,99,Não se aplica,93,Prato raso,86,Ponta de faca,150,15,Copo americano,189
+6901602,Mel,99,Não se aplica,94,Quilo,86,Ponta de faca,1000,15,Quilo,189
+6901602,Mel,99,Não se aplica,105,Xícara de café,86,Ponta de faca,50,15,Xícara de café,189
+6901602,Mel,99,Não se aplica,106,Xícara de chá,86,Ponta de faca,200,1,Xícara de chá,189
+6902901,Cuscuz,99,Não se aplica,3,Banda,32,Fatia,67.5,1,Cuscuz de milho - 1/2 pedaço médio,192
+6902901,Cuscuz,99,Não se aplica,12,Colher de arroz/servir,32,Fatia,24,2,Farinha de milho - 2 colheres de sopa,192
+6902901,Cuscuz,99,Não se aplica,13,Colher de café,32,Fatia,1.5,2,Farinha de milho - 1/8 colher de sopa,192
+6902901,Cuscuz,99,Não se aplica,14,Colher de chá,32,Fatia,3,2,Farinha de milho - 1/4 colher de sopa,192
+6902901,Cuscuz,99,Não se aplica,15,Colher de sobremesa,32,Fatia,6,2,Farinha de milho - 1/2 colher de sopa,192
+6902901,Cuscuz,99,Não se aplica,16,Colher de sopa,32,Fatia,12,2,Farinha de milho - colher de sopa,192
+6902901,Cuscuz,99,Não se aplica,17,Concha,32,Fatia,48,2,Farinha de milho - 4 colheres de sopa,192
+6902901,Cuscuz,99,Não se aplica,28,Escumadeira,32,Fatia,24,2,Farinha de milho - 2 colheres de sopa,192
+6902901,Cuscuz,99,Não se aplica,32,Fatia,32,Fatia,135,1,Cuscuz de milho - pedaço médio,192
+6902901,Cuscuz,99,Não se aplica,68,Grama,32,Fatia,1,15,Grama,193
+6902901,Cuscuz,99,Não se aplica,78,Metade,32,Fatia,67.5,1,Cuscuz de milho - 1/2 pedaço médio,193
+6902901,Cuscuz,99,Não se aplica,81,Pedaço,32,Fatia,135,1,Cuscuz de milho - pedaço médio,193
+6902901,Cuscuz,99,Não se aplica,87,Porção,32,Fatia,42,2,Farinha de milho - porção Guia Alimentar,193
+6902901,Cuscuz,99,Não se aplica,91,Prato de sobremesa,32,Fatia,180,1,Cuscuz de milho com leite - fatia média,193
+6902901,Cuscuz,99,Não se aplica,92,Prato fundo,32,Fatia,180,1,Cuscuz de milho com leite - fatia média,193
+6902901,Cuscuz,99,Não se aplica,93,Prato raso,32,Fatia,180,1,Cuscuz de milho com leite - pedaço médio,193
+6902901,Cuscuz,99,Não se aplica,94,Quilo,32,Fatia,1000,15,Quilo,193
+6906602,Açúcar,99,Não se aplica,13,Colher de café,14,Colher de chá,2,1,Açúcar refinado - colher de café cheia,205
+6906602,Açúcar,99,Não se aplica,14,Colher de chá,14,Colher de chá,5,1,Açúcar refinado - colher de chá cheia,205
+6906602,Açúcar,99,Não se aplica,15,Colher de sobremesa,14,Colher de chá,16,1,Açúcar refinado - colher de sobremesa cheia,205
+6906602,Açúcar,99,Não se aplica,16,Colher de sopa,14,Colher de chá,24,1,Açúcar refinado - colher de sopa cheia,205
+6906602,Açúcar,99,Não se aplica,18,Copo americano,14,Colher de chá,160,1,Açúcar refinado - copo pequeno nivelado,205
+6906602,Açúcar,99,Não se aplica,22,Copo médio,14,Colher de chá,219,1,Açúcar refinado - copo duplo nivelado,205
+6906602,Açúcar,99,Não se aplica,68,Grama,14,Colher de chá,1,15,Grama,205
+6906602,Açúcar,99,Não se aplica,87,Porção,14,Colher de chá,28,2,Açúcar cristal - porção Guia Alimentar,205
+6906602,Açúcar,99,Não se aplica,94,Quilo,14,Colher de chá,1000,15,Quilo,205
+7100101,Filé mignon,3,Grelhado(a)/Brasa/Churrasco,5,Bife,5,Bife,100,1,Bife bovino - unidade média,220
+7100101,Filé mignon,3,Grelhado(a)/Brasa/Churrasco,32,Fatia,5,Bife,35,1,Carne bovina ensopada - pedaço médio,220
+7100101,Filé mignon,3,Grelhado(a)/Brasa/Churrasco,33,Filé,5,Bife,100,1,Bife bovino - unidade média,220
+7100101,Filé mignon,3,Grelhado(a)/Brasa/Churrasco,68,Grama,5,Bife,1,15,Grama,220
+7100101,Filé mignon,3,Grelhado(a)/Brasa/Churrasco,81,Pedaço,5,Bife,35,1,Carne bovina ensopada - pedaço médio,220
+7100101,Filé mignon,3,Grelhado(a)/Brasa/Churrasco,94,Quilo,5,Bife,1000,15,Quilo,220
+7100101,Filé mignon,3,Grelhado(a)/Brasa/Churrasco,103,Unidade,5,Bife,100,1,Bife bovino - unidade média,220
+7100201,Contrafilé,3,Grelhado(a)/Brasa/Churrasco,5,Bife,5,Bife,100,1,Bife bovino - unidade média,222
+7100201,Contrafilé,3,Grelhado(a)/Brasa/Churrasco,68,Grama,5,Bife,1,15,Grama,222
+7100201,Contrafilé,3,Grelhado(a)/Brasa/Churrasco,81,Pedaço,5,Bife,35,1,Carne bovina ensopada - pedaço médio,222
+7100201,Contrafilé,3,Grelhado(a)/Brasa/Churrasco,94,Quilo,5,Bife,1000,15,Quilo,222
+7100301,Alcatra,3,Grelhado(a)/Brasa/Churrasco,5,Bife,5,Bife,100,1,Bife bovino - unidade média,225
+7100301,Alcatra,3,Grelhado(a)/Brasa/Churrasco,30,Espeto,5,Bife,46,2,Espetinho de carne - unidade,225
+7100301,Alcatra,3,Grelhado(a)/Brasa/Churrasco,32,Fatia,5,Bife,35,1,Carne bovina ensopada - pedaço médio,225
+7100301,Alcatra,3,Grelhado(a)/Brasa/Churrasco,68,Grama,5,Bife,1,15,Grama,225
+7100301,Alcatra,3,Grelhado(a)/Brasa/Churrasco,81,Pedaço,5,Bife,35,1,Carne bovina ensopada - pedaço médio,225
+7100301,Alcatra,3,Grelhado(a)/Brasa/Churrasco,87,Porção,5,Bife,75,2,Carne assada - porção Guia Alimentar,225
+7100301,Alcatra,3,Grelhado(a)/Brasa/Churrasco,94,Quilo,5,Bife,1000,15,Quilo,225
+7100303,Maminha,3,Grelhado(a)/Brasa/Churrasco,5,Bife,5,Bife,100,1,Bife bovino - unidade média,226
+7100303,Maminha,3,Grelhado(a)/Brasa/Churrasco,32,Fatia,5,Bife,35,1,Carne bovina ensopada - pedaço médio,227
+7100303,Maminha,3,Grelhado(a)/Brasa/Churrasco,33,Filé,5,Bife,100,1,Bife bovino - unidade média,227
+7100303,Maminha,3,Grelhado(a)/Brasa/Churrasco,68,Grama,5,Bife,1,15,Grama,227
+7100303,Maminha,3,Grelhado(a)/Brasa/Churrasco,81,Pedaço,5,Bife,35,1,Carne bovina ensopada - pedaço médio,227
+7100303,Maminha,3,Grelhado(a)/Brasa/Churrasco,87,Porção,5,Bife,75,2,Carne assada - porção Guia Alimentar,227
+7100303,Maminha,3,Grelhado(a)/Brasa/Churrasco,94,Quilo,5,Bife,1000,15,Quilo,227
+7100501,Patinho,3,Grelhado(a)/Brasa/Churrasco,5,Bife,5,Bife,100,1,Bife bovino - unidade média,229
+7100501,Patinho,3,Grelhado(a)/Brasa/Churrasco,32,Fatia,5,Bife,35,1,Carne bovina ensopada - pedaço médio,229
+7100501,Patinho,3,Grelhado(a)/Brasa/Churrasco,68,Grama,5,Bife,1,15,Grama,229
+7100501,Patinho,3,Grelhado(a)/Brasa/Churrasco,81,Pedaço,5,Bife,35,1,Carne bovina ensopada - pedaço médio,229
+7100501,Patinho,3,Grelhado(a)/Brasa/Churrasco,94,Quilo,5,Bife,1000,15,Quilo,229
+7100801,Acém,2,Cozido(a),5,Bife,81,Pedaço,100,1,Bife bovino - unidade média,233
+7100801,Acém,2,Cozido(a),12,Colher de arroz/servir,81,Pedaço,70,1,Carne bovina ensopada com legumes - colher de arroz cheia,233
+7100801,Acém,2,Cozido(a),68,Grama,81,Pedaço,1,15,Grama,233
+7100801,Acém,2,Cozido(a),81,Pedaço,81,Pedaço,35,1,Carne bovina ensopada - pedaço médio,233
+7100801,Acém,2,Cozido(a),87,Porção,81,Pedaço,75,2,Carne assada - porção Guia Alimentar,233
+7100801,Acém,2,Cozido(a),94,Quilo,81,Pedaço,1000,15,Quilo,233
+7101001,Músculo bovino,2,Cozido(a),5,Bife,81,Pedaço,100,1,Bife bovino - unidade média,235
+7101001,Músculo bovino,2,Cozido(a),16,Colher de sopa,81,Pedaço,30,1,Carne bovina ensopada - colher de sopa cheia,235
+7101001,Músculo bovino,2,Cozido(a),17,Concha,81,Pedaço,140,1,Carne bovina ensopada com legumes - 2 colheres de arroz,235
+7101001,Músculo bovino,2,Cozido(a),28,Escumadeira,81,Pedaço,70,1,Carne bovina ensopada com legumes - colher de arroz cheia,235
+7101001,Músculo bovino,2,Cozido(a),68,Grama,81,Pedaço,1,15,Grama,235
+7101001,Músculo bovino,2,Cozido(a),81,Pedaço,81,Pedaço,35,1,Carne bovina ensopada - pedaço médio,235
+7101001,Músculo bovino,2,Cozido(a),87,Porção,81,Pedaço,75,2,Carne assada - porção Guia Alimentar,236
+7101001,Músculo bovino,2,Cozido(a),94,Quilo,81,Pedaço,1000,15,Quilo ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,236
+7103305,Bisteca suína,3,Grelhado(a)/Brasa/Churrasco,5,Bife,81,Pedaço,70,8,Bisteca de porco assada - pedaço pequeno,251
+7103305,Bisteca suína,3,Grelhado(a)/Brasa/Churrasco,68,Grama,81,Pedaço,1,15,Grama,251
+7103305,Bisteca suína,3,Grelhado(a)/Brasa/Churrasco,81,Pedaço,81,Pedaço,70,8,Bisteca de porco assada - pedaço pequeno,251
+7103305,Bisteca suína,3,Grelhado(a)/Brasa/Churrasco,94,Quilo,81,Pedaço,1000,15,Quilo,251
+7103401,Pernil suíno,4,Assado(a),5,Bife,81,Pedaço,42,7,Pernil assado - fatia,252
+7103401,Pernil suíno,4,Assado(a),32,Fatia,81,Pedaço,90,1,Carne bovina assada - fatia média,252
+7103401,Pernil suíno,4,Assado(a),68,Grama,81,Pedaço,1,15,Grama,253
+7103401,Pernil suíno,4,Assado(a),81,Pedaço,81,Pedaço,42,7,Pernil assado - fatia,253
+7103401,Pernil suíno,4,Assado(a),94,Quilo,81,Pedaço,1000,15,Quilo,253
+7103701,Lombo suíno,4,Assado(a),32,Fatia,81,Pedaço,190,2,Porco lombo assado - 1 fatia,255
+7103701,Lombo suíno,4,Assado(a),68,Grama,81,Pedaço,1,15,Grama,255
+7103701,Lombo suíno,4,Assado(a),81,Pedaço,81,Pedaço,95,2,Porco lombo assado - 1/2 fatia,255
+7103701,Lombo suíno,4,Assado(a),94,Quilo,81,Pedaço,1000,15,Quilo,255
+7104301,Carne moída,2,Cozido(a),7,Bola,12,Colher de arroz/servir,50,1,Almôndega bovina - unidade média,259
+7104301,Carne moída,2,Cozido(a),12,Colher de arroz/servir,12,Colher de arroz/servir,60,1,Carne bovina moída - colher de arroz cheia,259
+7104301,Carne moída,2,Cozido(a),15,Colher de sobremesa,12,Colher de arroz/servir,12.5,1,Carne bovina moída - 1/2 colher de sopa cheia,259
+7104301,Carne moída,2,Cozido(a),16,Colher de sopa,12,Colher de arroz/servir,25,1,Carne bovina moída - colher de sopa cheia,259
+7104301,Carne moída,2,Cozido(a),17,Concha,12,Colher de arroz/servir,120,1,Carne bovina moída - 2 colheres de arroz cheias,259
+7104301,Carne moída,2,Cozido(a),28,Escumadeira,12,Colher de arroz/servir,60,1,Carne bovina moída - colher de arroz cheia,259
+7104301,Carne moída,2,Cozido(a),68,Grama,12,Colher de arroz/servir,1,15,Grama,259
+7104301,Carne moída,2,Cozido(a),87,Porção,12,Colher de arroz/servir,63,2,Carne moída refogada - porção Guia Alimentar,260
+7104301,Carne moída,2,Cozido(a),93,Prato raso,12,Colher de arroz/servir,60,1,Carne bovina moída - colher de arroz cheia,260
+7104301,Carne moída,2,Cozido(a),94,Quilo,12,Colher de arroz/servir,1000,15,Quilo,260
+7104301,Carne moída,7,Refogado(a),12,Colher de arroz/servir,12,Colher de arroz/servir,60,1,Carne bovina moída - colher de arroz cheia,260
+7104301,Carne moída,7,Refogado(a),16,Colher de sopa,12,Colher de arroz/servir,25,1,Carne bovina moída - colher de sopa cheia,261
+7104301,Carne moída,7,Refogado(a),17,Concha,12,Colher de arroz/servir,120,1,Carne bovina moída - 2 colheres de arroz cheias,261
+7104301,Carne moída,7,Refogado(a),28,Escumadeira,12,Colher de arroz/servir,60,1,Carne bovina moída - colher de arroz cheia,261
+7104301,Carne moída,7,Refogado(a),68,Grama,12,Colher de arroz/servir,1,15,Grama,261
+7104301,Carne moída,7,Refogado(a),82,Pegador,12,Colher de arroz/servir,30,1,Carne bovina ensopada - colher de sopa cheia,261
+7104301,Carne moída,7,Refogado(a),87,Porção,12,Colher de arroz/servir,63,2,Carne moída refogada - porção Guia Alimentar,261
+7104301,Carne moída,7,Refogado(a),94,Quilo,12,Colher de arroz/servir,1000,15,Quilo,261
+7106401,Lagarto bovino,2,Cozido(a),68,Grama,81,Pedaço,1,15,Grama,269
+7106401,Lagarto bovino,2,Cozido(a),81,Pedaço,81,Pedaço,35,1,Carne bovina ensopada - pedaço médio,269
+7106401,Lagarto bovino,2,Cozido(a),94,Quilo,81,Pedaço,1000,15,Quilo,270
+7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",3,Grelhado(a)/Brasa/Churrasco,5,Bife,89,Posta,120,1,Peixe cozido - filé médio,291
+7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",3,Grelhado(a)/Brasa/Churrasco,33,Filé,89,Posta,120,1,Peixe cozido - filé médio,291
+7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",3,Grelhado(a)/Brasa/Churrasco,68,Grama,89,Posta,1,15,Grama,291
+7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",3,Grelhado(a)/Brasa/Churrasco,87,Porção,89,Posta,75,2,Peixe frito - porção Guia Alimentar,291
+7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",3,Grelhado(a)/Brasa/Churrasco,89,Posta,89,Posta,200,1,Peixe cozido - posta média,291
+7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",3,Grelhado(a)/Brasa/Churrasco,94,Quilo,89,Posta,1000,15,Quilo,291
+7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",3,Grelhado(a)/Brasa/Churrasco,103,Unidade,89,Posta,200,1,Peixe cozido - posta média,291
+7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",4,Assado(a),3,Banda,103,Unidade,100,1,Peixe cozido - 1/2 posta média,291
+7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",4,Assado(a),7,Bola,103,Unidade,15,1,Bolinho de bacalhau - unidade média,291
+7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",4,Assado(a),16,Colher de sopa,103,Unidade,20,1,Peixe cozido - colher de sopa cheia picada,291
+7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",4,Assado(a),33,Filé,103,Unidade,120,1,Peixe cozido - filé médio,292
+7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",4,Assado(a),68,Grama,103,Unidade,1,15,Grama ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,292
+7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",4,Assado(a),78,Metade,103,Unidade,100,1,Peixe cozido - 1/2 posta média,292
+7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",4,Assado(a),87,Porção,103,Unidade,75,2,Peixe frito - porção Guia Alimentar,292
+7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",4,Assado(a),89,Posta,103,Unidade,200,1,Peixe cozido - posta média,292
+7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",4,Assado(a),94,Quilo,103,Unidade,1000,15,Quilo,292
+7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",4,Assado(a),103,Unidade,103,Unidade,200,1,Peixe cozido - posta média,292
+7200101,"Peixe de mar (inteiro, em posta, em filé, etc.)",4,Assado(a),104,Unidade pequena,103,Unidade,150,1,Peixe cozido - posta pequena,292
+7400101,"Peixe de água doce (inteiro, em posta, em filé, etc.)",3,Grelhado(a)/Brasa/Churrasco,5,Bife,103,Unidade,120,1,Peixe cozido - filé médio,303
+7400101,"Peixe de água doce (inteiro, em posta, em filé, etc.)",3,Grelhado(a)/Brasa/Churrasco,33,Filé,103,Unidade,120,1,Peixe cozido - filé médio,303
+7400101,"Peixe de água doce (inteiro, em posta, em filé, etc.)",3,Grelhado(a)/Brasa/Churrasco,68,Grama,103,Unidade,1,15,Grama,303
+7400101,"Peixe de água doce (inteiro, em posta, em filé, etc.)",3,Grelhado(a)/Brasa/Churrasco,87,Porção,103,Unidade,75,2,Peixe frito - porção Guia Alimentar,303
+7400101,"Peixe de água doce (inteiro, em posta, em filé, etc.)",3,Grelhado(a)/Brasa/Churrasco,89,Posta,103,Unidade,200,1,Peixe cozido - posta média,303
+7400101,"Peixe de água doce (inteiro, em posta, em filé, etc.)",3,Grelhado(a)/Brasa/Churrasco,94,Quilo,103,Unidade,1000,15,Quilo,303
+7400101,"Peixe de água doce (inteiro, em posta, em filé, etc.)",3,Grelhado(a)/Brasa/Churrasco,103,Unidade,103,Unidade,200,1,Peixe cozido - posta média,303
+7400101,"Peixe de água doce (inteiro, em posta, em filé, etc.)",3,Grelhado(a)/Brasa/Churrasco,104,Unidade pequena,103,Unidade,150,1,Peixe cozido - posta pequena,303
+7700401,Milho verde em conserva,99,Não se aplica,12,Colher de arroz/servir,16,Colher de sopa,38,1,Ervilha enlatada - colher de arroz cheia,312
+7700401,Milho verde em conserva,99,Não se aplica,13,Colher de café,16,Colher de sopa,4.3,1,Milho verde enlatado - 1/4 colher de sobremesa cheia,312
+7700401,Milho verde em conserva,99,Não se aplica,14,Colher de chá,16,Colher de sopa,8.5,1,Milho verde enlatado - 1/2 colher de sobremesa cheia,312
+7700401,Milho verde em conserva,99,Não se aplica,15,Colher de sobremesa,16,Colher de sopa,17,1,Milho verde enlatado - colher de sobremesa cheia,312
+7700401,Milho verde em conserva,99,Não se aplica,16,Colher de sopa,16,Colher de sopa,24,1,Milho verde enlatado - colher de sopa,312
+7700401,Milho verde em conserva,99,Não se aplica,17,Concha,16,Colher de sopa,76,1,Ervilha enlatada - 2 colheres de arroz cheias,312
+7700401,Milho verde em conserva,99,Não se aplica,68,Grama,16,Colher de sopa,1,15,Grama Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,312
+7700401,Milho verde em conserva,99,Não se aplica,75,Lata (não especificada),16,Colher de sopa,200,1,Milho verde enlatado - lata,312
+7700401,Milho verde em conserva,99,Não se aplica,87,Porção,16,Colher de sopa,172,2,Milho verde em conserva (enlatado) - porção Guia Alimentar,312
+7700401,Milho verde em conserva,99,Não se aplica,88,Punhado,16,Colher de sopa,38,1,Ervilha enlatada - colher de arroz cheia,312
+7700401,Milho verde em conserva,99,Não se aplica,94,Quilo,16,Colher de sopa,1000,15,Quilo,312
+7700401,Milho verde em conserva,99,Não se aplica,103,Unidade,16,Colher de sopa,100,1,Milho verde - espiga grande,312
+7700401,Milho verde em conserva,99,Não se aplica,104,Unidade pequena,16,Colher de sopa,50,1,Milho verde - 50% espiga grande,312
+7703402,Atum em conserva,99,Não se aplica,15,Colher de sobremesa,16,Colher de sopa,10,1,Atum sólido em água e sal Coqueiro - colher de sobremesa,320
+7703402,Atum em conserva,99,Não se aplica,16,Colher de sopa,16,Colher de sopa,16,1,Atum sólido em água e sal Coqueiro - colher de sopa cheia,320
+7703402,Atum em conserva,99,Não se aplica,68,Grama,16,Colher de sopa,1,15,Grama,320
+7703402,Atum em conserva,99,Não se aplica,75,Lata (não especificada),16,Colher de sopa,135,1,Atum sólido em água e sal Coqueiro - lata,320
+7703402,Atum em conserva,99,Não se aplica,87,Porção,16,Colher de sopa,112,2,Atum - porção Guia Alimentar,320
+7703402,Atum em conserva,99,Não se aplica,94,Quilo,16,Colher de sopa,1000,15,Quilo,320
+7800103,Frango inteiro,4,Assado(a),1,Asa,81,Pedaço,40,1,Frango assado - asa média,323
+7800103,Frango inteiro,4,Assado(a),25,Coxa,81,Pedaço,55,1,Frango assado - coxa grande,323
+7800103,Frango inteiro,4,Assado(a),68,Grama,81,Pedaço,1,15,Grama,323
+7800103,Frango inteiro,4,Assado(a),81,Pedaço,81,Pedaço,55,1,Frango assado - coxa grande,323
+7800103,Frango inteiro,4,Assado(a),83,Peito,81,Pedaço,180,1,Frango assado - peito médio,323
+7800103,Frango inteiro,4,Assado(a),87,Porção,81,Pedaço,100,2,Frango assado - porção Guia Alimentar,323
+7800103,Frango inteiro,4,Assado(a),94,Quilo,81,Pedaço,1000,15,Quilo,323
+7800103,Frango inteiro,4,Assado(a),99,Sobrecoxa,81,Pedaço,65,1,Frango assado - sobrecoxa média,323
+7800302,Frango em pedaços,2,Cozido(a),1,Asa,81,Pedaço,40,1,Frango assado - asa média,327
+7800302,Frango em pedaços,2,Cozido(a),5,Bife,81,Pedaço,100,1,Frango frito - filé médio,327
+7800302,Frango em pedaços,2,Cozido(a),12,Colher de arroz/servir,81,Pedaço,40,1,Frango assado - 2 colheres de sopa cheias desfiado,327
+7800302,Frango em pedaços,2,Cozido(a),16,Colher de sopa,81,Pedaço,20,1,Frango assado - colher de sopa cheia desfiado,327
+7800302,Frango em pedaços,2,Cozido(a),17,Concha,81,Pedaço,80,1,Frango assado - 4 colheres de sopa cheias desfiado,327
+7800302,Frango em pedaços,2,Cozido(a),24,Costela,81,Pedaço,60,1,Frango assado - costela média,327
+7800302,Frango em pedaços,2,Cozido(a),25,Coxa,81,Pedaço,55,1,Frango assado - coxa grande,327
+7800302,Frango em pedaços,2,Cozido(a),28,Escumadeira,81,Pedaço,40,1,Frango assado - 2 colheres de sopa cheias desfiado,327
+7800302,Frango em pedaços,2,Cozido(a),68,Grama,81,Pedaço,1,15,Grama,327
+7800302,Frango em pedaços,2,Cozido(a),81,Pedaço,81,Pedaço,55,1,Frango assado - coxa grande,327
+7800302,Frango em pedaços,2,Cozido(a),83,Peito,81,Pedaço,180,1,Frango assado - peito médio,327
+7800302,Frango em pedaços,2,Cozido(a),84,Pescoço,81,Pedaço,10,1,Frango assado - pescoço médio,327
+7800302,Frango em pedaços,2,Cozido(a),87,Porção,81,Pedaço,100,2,Frango assado - porção Guia Alimentar,327
+7800302,Frango em pedaços,2,Cozido(a),94,Quilo,81,Pedaço,1000,15,Quilo,328
+7800302,Frango em pedaços,2,Cozido(a),99,Sobrecoxa,81,Pedaço,65,1,Frango assado - sobrecoxa média ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,328
+7800302,Frango em pedaços,4,Assado(a),1,Asa,81,Pedaço,40,1,Frango assado - asa média,328
+7800302,Frango em pedaços,4,Assado(a),5,Bife,81,Pedaço,100,1,Frango frito - filé médio,328
+7800302,Frango em pedaços,4,Assado(a),16,Colher de sopa,81,Pedaço,20,1,Frango assado - colher de sopa cheia desfiado,328
+7800302,Frango em pedaços,4,Assado(a),17,Concha,81,Pedaço,80,1,Frango assado - 4 colheres de sopa cheias desfiado,328
+7800302,Frango em pedaços,4,Assado(a),24,Costela,81,Pedaço,60,1,Frango assado - costela média,328
+7800302,Frango em pedaços,4,Assado(a),25,Coxa,81,Pedaço,55,1,Frango assado - coxa grande,328
+7800302,Frango em pedaços,4,Assado(a),29,Espetinho,81,Pedaço,46,2,Espetinho de carne - unidade,328
+7800302,Frango em pedaços,4,Assado(a),30,Espeto,81,Pedaço,46,2,Espetinho de carne - unidade,328
+7800302,Frango em pedaços,4,Assado(a),33,Filé,81,Pedaço,100,1,Frango frito - filé médio,328
+7800302,Frango em pedaços,4,Assado(a),68,Grama,81,Pedaço,1,15,Grama,329
+7800302,Frango em pedaços,4,Assado(a),81,Pedaço,81,Pedaço,55,1,Frango assado - coxa grande,329
+7800302,Frango em pedaços,4,Assado(a),83,Peito,81,Pedaço,180,1,Frango assado - peito médio,329
+7800302,Frango em pedaços,4,Assado(a),87,Porção,81,Pedaço,100,2,Frango assado - porção Guia Alimentar,329
+7800302,Frango em pedaços,4,Assado(a),94,Quilo,81,Pedaço,1000,15,Quilo,329
+7800302,Frango em pedaços,4,Assado(a),99,Sobrecoxa,81,Pedaço,65,1,Frango assado - sobrecoxa média,329
+7800401,Peito de galinha ou frango,2,Cozido(a),5,Bife,81,Pedaço,100,1,Frango frito - filé médio,339
+7800401,Peito de galinha ou frango,2,Cozido(a),12,Colher de arroz/servir,81,Pedaço,40,1,Frango assado - 2 colheres de sopa cheias desfiado,339
+7800401,Peito de galinha ou frango,2,Cozido(a),16,Colher de sopa,81,Pedaço,20,1,Frango assado - colher de sopa cheia desfiado,339
+7800401,Peito de galinha ou frango,2,Cozido(a),32,Fatia,81,Pedaço,180,1,Frango assado - peito médio,339
+7800401,Peito de galinha ou frango,2,Cozido(a),33,Filé,81,Pedaço,100,1,Frango frito - filé médio,339
+7800401,Peito de galinha ou frango,2,Cozido(a),68,Grama,81,Pedaço,1,15,Grama,339
+7800401,Peito de galinha ou frango,2,Cozido(a),81,Pedaço,81,Pedaço,180,1,Frango assado - peito médio,339
+7800401,Peito de galinha ou frango,2,Cozido(a),83,Peito,81,Pedaço,180,1,Frango assado - peito médio,339
+7800401,Peito de galinha ou frango,2,Cozido(a),87,Porção,81,Pedaço,100,2,Frango filé grelhado - porção Guia Alimentar,339
+7800401,Peito de galinha ou frango,2,Cozido(a),94,Quilo,81,Pedaço,1000,15,Quilo,339
+7800401,Peito de galinha ou frango,2,Cozido(a),103,Unidade,81,Pedaço,180,1,Frango assado - peito médio,339
+7800401,Peito de galinha ou frango,3,Grelhado(a)/Brasa/Churrasco,5,Bife,81,Pedaço,100,1,Frango frito - filé médio,339
+7800401,Peito de galinha ou frango,3,Grelhado(a)/Brasa/Churrasco,29,Espetinho,81,Pedaço,46,2,Espetinho de carne - unidade,339
+7800401,Peito de galinha ou frango,3,Grelhado(a)/Brasa/Churrasco,30,Espeto,81,Pedaço,46,2,Espetinho de carne - unidade,339
+7800401,Peito de galinha ou frango,3,Grelhado(a)/Brasa/Churrasco,32,Fatia,81,Pedaço,180,1,Frango assado - peito médio,339
+7800401,Peito de galinha ou frango,3,Grelhado(a)/Brasa/Churrasco,33,Filé,81,Pedaço,100,1,Frango frito - filé médio,339
+7800401,Peito de galinha ou frango,3,Grelhado(a)/Brasa/Churrasco,68,Grama,81,Pedaço,1,15,Grama,339
+7800401,Peito de galinha ou frango,3,Grelhado(a)/Brasa/Churrasco,81,Pedaço,81,Pedaço,180,1,Frango assado - peito médio,340
+7800401,Peito de galinha ou frango,3,Grelhado(a)/Brasa/Churrasco,83,Peito,81,Pedaço,180,1,Frango assado - peito médio,340
+7800401,Peito de galinha ou frango,3,Grelhado(a)/Brasa/Churrasco,87,Porção,81,Pedaço,100,2,Frango filé grelhado - porção Guia Alimentar,340
+7800401,Peito de galinha ou frango,3,Grelhado(a)/Brasa/Churrasco,94,Quilo,81,Pedaço,1000,15,Quilo,340
+7800401,Peito de galinha ou frango,3,Grelhado(a)/Brasa/Churrasco,103,Unidade,81,Pedaço,180,1,Frango assado - peito médio,340
+7803301,Ovo de galinha,2,Cozido(a),3,Banda,103,Unidade,22.5,1,Ovo de galinha cozido - 1/2 unidade média,361
+7803301,Ovo de galinha,2,Cozido(a),12,Colher de arroz/servir,103,Unidade,45,1,Ovo de galinha mexido - colher de arroz cheia,361
+7803301,Ovo de galinha,2,Cozido(a),14,Colher de chá,103,Unidade,3.8,1,Ovo de galinha mexido - 1/4 colher de sopa cheia,361
+7803301,Ovo de galinha,2,Cozido(a),16,Colher de sopa,103,Unidade,15,1,Ovo de galinha mexido - colher de sopa cheia,362
+7803301,Ovo de galinha,2,Cozido(a),68,Grama,103,Unidade,1,15,Grama ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,362
+7803301,Ovo de galinha,2,Cozido(a),81,Pedaço,103,Unidade,22.5,1,Ovo de galinha cozido - 1/2 unidade média,362
+7803301,Ovo de galinha,2,Cozido(a),87,Porção,103,Unidade,90,2,Ovo cozido - porção Guia Alimentar,362
+7803301,Ovo de galinha,2,Cozido(a),94,Quilo,103,Unidade,1000,15,Quilo,362
+7803301,Ovo de galinha,2,Cozido(a),96,Rodela,103,Unidade,10,1,Ovo de galinha cozido - fatia média,362
+7803301,Ovo de galinha,2,Cozido(a),103,Unidade,103,Unidade,45,1,Ovo de galinha cozido - unidade média,362
+7803301,Ovo de galinha,5,Frito(a),12,Colher de arroz/servir,103,Unidade,45,1,Ovo de galinha mexido - colher de arroz cheia Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,362
+7803301,Ovo de galinha,5,Frito(a),16,Colher de sopa,103,Unidade,15,1,Ovo de galinha mexido - colher de sopa cheia,362
+7803301,Ovo de galinha,5,Frito(a),28,Escumadeira,103,Unidade,45,1,Ovo de galinha mexido - escumadeira média rasa,362
+7803301,Ovo de galinha,5,Frito(a),32,Fatia,103,Unidade,10,1,Ovo de galinha cozido - fatia média,362
+7803301,Ovo de galinha,5,Frito(a),68,Grama,103,Unidade,1,15,Grama,362
+7803301,Ovo de galinha,5,Frito(a),78,Metade,103,Unidade,25,1,Ovo de galinha frito - 1/2 unidade média,362
+7803301,Ovo de galinha,5,Frito(a),81,Pedaço,103,Unidade,25,1,Ovo de galinha frito - 1/2 unidade média,362
+7803301,Ovo de galinha,5,Frito(a),87,Porção,103,Unidade,50,2,Ovo frito - porção Guia Alimentar,362
+7803301,Ovo de galinha,5,Frito(a),94,Quilo,103,Unidade,1000,15,Quilo,362
+7803301,Ovo de galinha,5,Frito(a),103,Unidade,103,Unidade,50,1,Ovo de galinha frito - unidade média,362
+7900101,Leite de vaca integral,99,Não se aplica,9,Caneca,22,Copo médio,300,15,Caneca de 300ml,367
+7900101,Leite de vaca integral,99,Não se aplica,10,Caneco,22,Copo médio,300,15,Caneca de 300ml,367
+7900101,Leite de vaca integral,99,Não se aplica,18,Copo americano,22,Copo médio,150,15,Copo americano,367
+7900101,Leite de vaca integral,99,Não se aplica,19,Copo de cafezinho,22,Copo médio,50,1,Copo de cafezinho,367
+7900101,Leite de vaca integral,99,Não se aplica,20,Copo de requeijão,22,Copo médio,240,1,Copo de requeijão,367
+7900101,Leite de vaca integral,99,Não se aplica,21,Copo grande,22,Copo médio,300,7,Copo grande,367
+7900101,Leite de vaca integral,99,Não se aplica,22,Copo médio,22,Copo médio,240,1,Copo médio,367
+7900101,Leite de vaca integral,99,Não se aplica,23,Copo tulipa,22,Copo médio,290,1,Copo tulipa,367
+7900101,Leite de vaca integral,99,Não se aplica,50,Garrafa (500 ml),22,Copo médio,500,15,Garrafa de 500ml,367
+7900101,Leite de vaca integral,99,Não se aplica,68,Grama,22,Copo médio,1,15,Grama,367
+7900101,Leite de vaca integral,99,Não se aplica,76,Litro,22,Copo médio,1000,15,Litro,367
+7900101,Leite de vaca integral,99,Não se aplica,79,Mililitro,22,Copo médio,1,15,Mililitro,367
+7900101,Leite de vaca integral,99,Não se aplica,87,Porção,22,Copo médio,182,2,"Leite integral longa vida 3,5% gordura - padrão - porção",367
+7900101,Leite de vaca integral,99,Não se aplica,92,Prato fundo,22,Copo médio,300,7,Copo grande,367
+7900101,Leite de vaca integral,99,Não se aplica,93,Prato raso,22,Copo médio,240,1,Copo médio,367
+7900101,Leite de vaca integral,99,Não se aplica,94,Quilo,22,Copo médio,1000,15,Quilo,367
+7900101,Leite de vaca integral,99,Não se aplica,105,Xícara de café,22,Copo médio,50,15,Xícara de café,367
+7900101,Leite de vaca integral,99,Não se aplica,106,Xícara de chá,22,Copo médio,200,1,Xícara de chá,368
+7901203,Iogurte desnatado,99,Não se aplica,18,Copo americano,90,Pote,150,15,Copo americano,373
+7901203,Iogurte desnatado,99,Não se aplica,22,Copo médio,90,Pote,240,1,Copo médio,373
+7901203,Iogurte desnatado,99,Não se aplica,68,Grama,90,Pote,1,15,Grama,373
+7901203,Iogurte desnatado,99,Não se aplica,86,Ponta de faca,90,Pote,12.5,7,Doce de leite - passada de faca,373
+7901203,Iogurte desnatado,99,Não se aplica,90,Pote,90,Pote,200,1,Iogurte desnatado - unidade,373
+7901203,Iogurte desnatado,99,Não se aplica,94,Quilo,90,Pote,1000,15,Quilo,373
+7901204,Iogurte natural,99,Não se aplica,16,Colher de sopa,90,Pote,15,1,Creme de leite - colher de sopa rasa,373
+7901204,Iogurte natural,99,Não se aplica,18,Copo americano,90,Pote,150,15,Copo americano,373
+7901204,Iogurte natural,99,Não se aplica,20,Copo de requeijão,90,Pote,240,1,Copo de requeijão,373
+7901204,Iogurte natural,99,Não se aplica,21,Copo grande,90,Pote,300,7,Copo grande,373
+7901204,Iogurte natural,99,Não se aplica,22,Copo médio,90,Pote,240,1,Copo médio,373
+7901204,Iogurte natural,99,Não se aplica,36,Garrafa (200 ml),90,Pote,200,15,Garrafa de 200ml,374
+7901204,Iogurte natural,99,Não se aplica,68,Grama,90,Pote,1,15,Grama ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,374
+7901204,Iogurte natural,99,Não se aplica,79,Mililitro,90,Pote,1,15,Mililitro,374
+7901204,Iogurte natural,99,Não se aplica,90,Pote,90,Pote,200,1,Iogurte desnatado - unidade,374
+7901204,Iogurte natural,99,Não se aplica,94,Quilo,90,Pote,1000,15,Quilo,374
+7901501,Manteiga com ou sem sal,99,Não se aplica,12,Colher de arroz/servir,86,Ponta de faca,64,1,Manteiga - 2 colheres de sopa cheias,375
+7901501,Manteiga com ou sem sal,99,Não se aplica,13,Colher de café,86,Ponta de faca,4,1,Manteiga - 1/2 colher de chá cheia,375
+7901501,Manteiga com ou sem sal,99,Não se aplica,14,Colher de chá,86,Ponta de faca,8,1,Manteiga - colher de chá cheia,375
+7901501,Manteiga com ou sem sal,99,Não se aplica,15,Colher de sobremesa,86,Ponta de faca,23,1,Manteiga - colher de sobremesa cheia,375
+7901501,Manteiga com ou sem sal,99,Não se aplica,16,Colher de sopa,86,Ponta de faca,32,1,Manteiga - colher de sopa cheia,375
+7901501,Manteiga com ou sem sal,99,Não se aplica,18,Copo americano,86,Ponta de faca,155,4,Manteiga - xícara de chá,376
+7901501,Manteiga com ou sem sal,99,Não se aplica,22,Copo médio,86,Ponta de faca,155,4,Manteiga - xícara de chá ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,376
+7901501,Manteiga com ou sem sal,99,Não se aplica,32,Fatia,86,Ponta de faca,32,1,Manteiga - colher de sopa cheia,376
+7901501,Manteiga com ou sem sal,99,Não se aplica,35,Garfada,86,Ponta de faca,32,1,Manteiga - colher de sopa cheia,376
+7901501,Manteiga com ou sem sal,99,Não se aplica,68,Grama,86,Ponta de faca,1,15,Grama,376
+7901501,Manteiga com ou sem sal,99,Não se aplica,86,Ponta de faca,86,Ponta de faca,5,7,Manteiga - ponta de faca,376
+7901501,Manteiga com ou sem sal,99,Não se aplica,87,Porção,86,Ponta de faca,9.8,2,Manteiga - porção Guia Alimentar,376
+7901501,Manteiga com ou sem sal,99,Não se aplica,94,Quilo,86,Ponta de faca,1000,15,Quilo,376
+7901701,Queijo prato,99,Não se aplica,32,Fatia,32,Fatia,15,1,Queijo prato - fatia média,377
+7901701,Queijo prato,99,Não se aplica,68,Grama,32,Fatia,1,15,Grama,377
+7901701,Queijo prato,99,Não se aplica,87,Porção,32,Fatia,30,2,Queijo prato - porção Guia Alimentar,377
+7901701,Queijo prato,99,Não se aplica,94,Quilo,32,Fatia,1000,15,Quilo,377
+7901801,Queijo muçarela,99,Não se aplica,32,Fatia,32,Fatia,20,1,Queijo muçarela - fatia média,377
+7901801,Queijo muçarela,99,Não se aplica,68,Grama,32,Fatia,1,15,Grama,377
+7901801,Queijo muçarela,99,Não se aplica,87,Porção,32,Fatia,45,2,Queijo tipo muçarela - porção Guia Alimentar,377
+7901801,Queijo muçarela,99,Não se aplica,94,Quilo,32,Fatia,1000,15,Quilo,377
+7902001,Queijo de minas,99,Não se aplica,32,Fatia,32,Fatia,45,1,Queijo minas padrão - fatia média,378
+7902001,Queijo de minas,99,Não se aplica,68,Grama,32,Fatia,1,15,Grama,378
+7902001,Queijo de minas,99,Não se aplica,87,Porção,32,Fatia,50,2,Queijo tipo minas - porção Guia Alimentar Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,378
+7902001,Queijo de minas,99,Não se aplica,94,Quilo,32,Fatia,1000,15,Quilo,378
+7902201,Queijo ricota,99,Não se aplica,16,Colher de sopa,32,Fatia,44,1,Queijo cottage - colher de sopa cheia,379
+7902201,Queijo ricota,99,Não se aplica,32,Fatia,32,Fatia,35,1,Ricota Marília - fatia média,379
+7902201,Queijo ricota,99,Não se aplica,68,Grama,32,Fatia,1,15,Grama,379
+7902201,Queijo ricota,99,Não se aplica,86,Ponta de faca,32,Fatia,6,7,Requeijão - ponta de faca,379
+7902201,Queijo ricota,99,Não se aplica,87,Porção,32,Fatia,100,2,Ricota - porção Guia Alimentar,379
+7902201,Queijo ricota,99,Não se aplica,94,Quilo,32,Fatia,1000,15,Quilo,379
+7902901,Requeijão,99,Não se aplica,12,Colher de arroz/servir,86,Ponta de faca,60,1,Requeijão - 2 colheres de sopa cheias,380
+7902901,Requeijão,99,Não se aplica,13,Colher de café,86,Ponta de faca,3.8,1,Requeijão - 1/8 colher de sopa cheia,381
+7902901,Requeijão,99,Não se aplica,14,Colher de chá,86,Ponta de faca,7.5,1,Requeijão - 1/4 colher de sopa cheia,381
+7902901,Requeijão,99,Não se aplica,15,Colher de sobremesa,86,Ponta de faca,15,1,Requeijão - 1/2 colher de sopa cheia,381
+7902901,Requeijão,99,Não se aplica,16,Colher de sopa,86,Ponta de faca,30,1,Requeijão - colher de sopa cheia,381
+7902901,Requeijão,99,Não se aplica,22,Copo médio,86,Ponta de faca,240,1,Copo de requeijão,381
+7902901,Requeijão,99,Não se aplica,35,Garfada,86,Ponta de faca,30,1,Requeijão - colher de sopa cheia,381
+7902901,Requeijão,99,Não se aplica,68,Grama,86,Ponta de faca,1,15,Grama,381
+7902901,Requeijão,99,Não se aplica,86,Ponta de faca,86,Ponta de faca,6,7,Requeijão - ponta de faca,381
+7902901,Requeijão,99,Não se aplica,87,Porção,86,Ponta de faca,45,2,Requeijão cremoso - porção Guia Alimentar,381
+7902901,Requeijão,99,Não se aplica,94,Quilo,86,Ponta de faca,1000,15,Quilo,381
+7903601,Leite de vaca desnatado,99,Não se aplica,9,Caneca,22,Copo médio,300,15,Caneca de 300ml,384
+7903601,Leite de vaca desnatado,99,Não se aplica,10,Caneco,22,Copo médio,300,15,Caneca de 300ml,384
+7903601,Leite de vaca desnatado,99,Não se aplica,18,Copo americano,22,Copo médio,150,15,Copo americano,385
+7903601,Leite de vaca desnatado,99,Não se aplica,20,Copo de requeijão,22,Copo médio,240,1,Copo de requeijão,385
+7903601,Leite de vaca desnatado,99,Não se aplica,21,Copo grande,22,Copo médio,300,7,Copo grande,385
+7903601,Leite de vaca desnatado,99,Não se aplica,22,Copo médio,22,Copo médio,240,1,Copo médio,385
+7903601,Leite de vaca desnatado,99,Não se aplica,23,Copo tulipa,22,Copo médio,290,1,Copo tulipa,385
+7903601,Leite de vaca desnatado,99,Não se aplica,68,Grama,22,Copo médio,1,15,Grama,385
+7903601,Leite de vaca desnatado,99,Não se aplica,76,Litro,22,Copo médio,1000,15,Litro,385
+7903601,Leite de vaca desnatado,99,Não se aplica,79,Mililitro,22,Copo médio,1,15,Mililitro,385
+7903601,Leite de vaca desnatado,99,Não se aplica,87,Porção,22,Copo médio,270,2,Leite semidesnatado longa vida 2% gordura - padrão - porção,385
+7903601,Leite de vaca desnatado,99,Não se aplica,94,Quilo,22,Copo médio,1000,15,Quilo,385
+7903601,Leite de vaca desnatado,99,Não se aplica,105,Xícara de café,22,Copo médio,50,15,Xícara de café,385
+7903601,Leite de vaca desnatado,99,Não se aplica,106,Xícara de chá,22,Copo médio,200,1,Xícara de chá,385
+8000105,Pão de sal,99,Não se aplica,3,Banda,103,Unidade,25,1,Pão francês - 1/2 unidade,392
+8000105,Pão de sal,99,Não se aplica,32,Fatia,103,Unidade,25,1,Pão francês - 1/2 unidade,392
+8000105,Pão de sal,99,Não se aplica,68,Grama,103,Unidade,1,15,Grama,393
+8000105,Pão de sal,99,Não se aplica,78,Metade,103,Unidade,25,1,Pão francês - 1/2 unidade,393
+8000105,Pão de sal,99,Não se aplica,81,Pedaço,103,Unidade,25,1,Pão francês - 1/2 unidade,393
+8000105,Pão de sal,99,Não se aplica,87,Porção,103,Unidade,50,2,Pão francês - porção Guia Alimentar,393
+8000105,Pão de sal,99,Não se aplica,94,Quilo,103,Unidade,1000,15,Quilo,393
+8000105,Pão de sal,99,Não se aplica,96,Rodela,103,Unidade,16.7,1,Pão francês - 1/3 unidade,393
+8000105,Pão de sal,99,Não se aplica,103,Unidade,103,Unidade,50,1,Pão francês - unidade,393
+8000801,Pão de queijo,99,Não se aplica,68,Grama,103,Unidade,1,15,Grama,394
+8000801,Pão de queijo,99,Não se aplica,87,Porção,103,Unidade,58,2,Pão de queijo - porção Guia Alimentar,394
+8000801,Pão de queijo,99,Não se aplica,94,Quilo,103,Unidade,1000,15,Quilo,394
+8000801,Pão de queijo,99,Não se aplica,103,Unidade,103,Unidade,20,1,Pão de queijo - unidade média,394
+8000801,Pão de queijo,99,Não se aplica,104,Unidade pequena,103,Unidade,10,1,Pão de queijo - unidade pequena,394
+8001401,Pão integral,99,Não se aplica,3,Banda,32,Fatia,25,1,Pão de forma de aveia - unidade,395
+8001401,Pão integral,99,Não se aplica,32,Fatia,32,Fatia,25,1,Pão de forma de aveia - unidade,395
+8001401,Pão integral,99,Não se aplica,68,Grama,32,Fatia,1,15,Grama,395
+8001401,Pão integral,99,Não se aplica,94,Quilo,32,Fatia,1000,15,Quilo,395
+8200101,Refrigerante de cola tradicional,99,Não se aplica,9,Caneca,22,Copo médio,300,15,Caneca de 300ml,434
+8200101,Refrigerante de cola tradicional,99,Não se aplica,18,Copo americano,22,Copo médio,150,15,Copo americano Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,434
+8200101,Refrigerante de cola tradicional,99,Não se aplica,19,Copo de cafezinho,22,Copo médio,50,1,Copo de cafezinho,434
+8200101,Refrigerante de cola tradicional,99,Não se aplica,20,Copo de requeijão,22,Copo médio,240,1,Copo de requeijão,434
+8200101,Refrigerante de cola tradicional,99,Não se aplica,21,Copo grande,22,Copo médio,300,7,Copo grande,434
+8200101,Refrigerante de cola tradicional,99,Não se aplica,22,Copo médio,22,Copo médio,240,1,Copo médio,434
+8200101,Refrigerante de cola tradicional,99,Não se aplica,23,Copo tulipa,22,Copo médio,290,1,Copo tulipa,434
+8200101,Refrigerante de cola tradicional,99,Não se aplica,27,Dose,22,Copo médio,50,1,Dose de aguardente,434
+8200101,Refrigerante de cola tradicional,99,Não se aplica,36,Garrafa (200 ml),22,Copo médio,200,15,Garrafa de 200ml,434
+8200101,Refrigerante de cola tradicional,99,Não se aplica,37,Garrafa (237 ml),22,Copo médio,237,15,Garrafa de 237ml,434
+8200101,Refrigerante de cola tradicional,99,Não se aplica,38,Garrafa (248 ml),22,Copo médio,248,15,Garrafa de 248ml,434
+8200101,Refrigerante de cola tradicional,99,Não se aplica,39,Garrafa (250 ml),22,Copo médio,250,15,Garrafa de 250ml,434
+8200101,Refrigerante de cola tradicional,99,Não se aplica,40,Garrafa (275 ml),22,Copo médio,275,15,Garrafa de 275ml,434
+8200101,Refrigerante de cola tradicional,99,Não se aplica,41,Garrafa (284 ml),22,Copo médio,284,15,Garrafa de 284ml,434
+8200101,Refrigerante de cola tradicional,99,Não se aplica,42,Garrafa (290 ml),22,Copo médio,290,15,Garrafa de 290ml,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,43,Garrafa (300 ml),22,Copo médio,300,15,Garrafa de 300ml,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,45,Garrafa (330 ml),22,Copo médio,330,15,Garrafa de 330ml,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,46,Garrafa (350 ml),22,Copo médio,350,15,Garrafa de 350ml,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,50,Garrafa (500 ml),22,Copo médio,500,15,Garrafa de 500ml,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,54,Garrafa (600 ml),22,Copo médio,600,15,Garrafa de 600ml,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,55,Garrafa (650 ml),22,Copo médio,650,15,Garrafa de 650ml,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,56,Garrafa (900 ml),22,Copo médio,900,15,Garrafa de 900ml,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,58,Garrafa (980 ml),22,Copo médio,980,15,Garrafa de 980ml,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,59,Garrafa (1 l),22,Copo médio,1000,15,Garrafa de 1l,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,66,Garrafa (não especificada),,,600,5,Garrafa de 600ml,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,68,Grama,22,Copo médio,1,15,Grama,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,69,Lata (250 ml),22,Copo médio,250,15,Lata de 250ml,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,70,Lata (335 ml),22,Copo médio,335,15,Lata de 335ml,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,71,Lata (340 ml),22,Copo médio,340,15,Lata de 340ml,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,72,Lata (350 ml),22,Copo médio,350,15,Lata de 350ml,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,73,Lata (354 ml),22,Copo médio,354,15,Lata de 354ml,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,22,Copo médio,,,350,5,Lata de 350ml,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,76,Litro,22,Copo médio,1000,15,Litro,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,79,Mililitro,22,Copo médio,1,15,Mililitro,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,94,Quilo,22,Copo médio,1000,15,Quilo,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,101,Taça,22,Copo médio,150,1,Vinho - taça,435
+8200101,Refrigerante de cola tradicional,99,Não se aplica,103,Unidade,22,Copo médio,240,1,Copo médio,436
+8200101,Refrigerante de cola tradicional,99,Não se aplica,104,Unidade pequena,22,Copo médio,150,15,Copo americano ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,436
+8200101,Refrigerante de cola tradicional,99,Não se aplica,106,Xícara de chá,22,Copo médio,200,1,Xícara de chá,436
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,9,Caneca,22,Copo médio,300,15,Caneca de 300ml,439
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,10,Caneco,22,Copo médio,300,15,Caneca de 300ml,439
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,18,Copo americano,22,Copo médio,150,15,Copo americano,439
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,20,Copo de requeijão,22,Copo médio,240,1,Copo de requeijão,439
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,21,Copo grande,22,Copo médio,300,7,Copo grande,439
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,22,Copo médio,22,Copo médio,240,1,Copo médio,439
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,23,Copo tulipa,22,Copo médio,290,1,Copo tulipa,439
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,36,Garrafa (200 ml),22,Copo médio,200,15,Garrafa de 200ml,439
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,37,Garrafa (237 ml),22,Copo médio,237,15,Garrafa de 237ml,439
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,39,Garrafa (250 ml),22,Copo médio,250,15,Garrafa de 250ml,439
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,40,Garrafa (275 ml),22,Copo médio,275,15,Garrafa de 275ml,439
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,41,Garrafa (284 ml),22,Copo médio,284,15,Garrafa de 284ml,439
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,42,Garrafa (290 ml),22,Copo médio,290,15,Garrafa de 290ml,439
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,43,Garrafa (300 ml),22,Copo médio,300,15,Garrafa de 300ml,439
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,46,Garrafa (350 ml),22,Copo médio,350,15,Garrafa de 350ml,439
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,50,Garrafa (500 ml),22,Copo médio,500,15,Garrafa de 500ml,440
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,54,Garrafa (600 ml),22,Copo médio,600,15,Garrafa de 600ml ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,440
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,55,Garrafa (650 ml),22,Copo médio,650,15,Garrafa de 650ml,440
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,56,Garrafa (900 ml),22,Copo médio,900,15,Garrafa de 900ml,440
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,59,Garrafa (1 l),22,Copo médio,1000,15,Garrafa de 1l,440
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,63,Garrafa (2 l),22,Copo médio,2000,15,Garrafa de 2l,440
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,66,Garrafa (não especificada),,,600,5,Garrafa de 600ml,440
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,68,Grama,22,Copo médio,1,15,Grama,440
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,69,Lata (250 ml),22,Copo médio,250,15,Lata de 250ml,440
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,70,Lata (335 ml),22,Copo médio,335,15,Lata de 335ml Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,440
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,72,Lata (350 ml),22,Copo médio,350,15,Lata de 350ml,440
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,22,Copo médio,,,350,5,Lata de 350ml,440
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,76,Litro,22,Copo médio,1000,15,Litro,440
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,79,Mililitro,22,Copo médio,1,15,Mililitro,440
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,94,Quilo,22,Copo médio,1000,15,Quilo,440
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,103,Unidade,22,Copo médio,240,1,Copo médio,440
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,104,Unidade pequena,22,Copo médio,150,15,Copo americano,440
+8200301,Refrigerante de guaraná tradicional,99,Não se aplica,105,Xícara de café,22,Copo médio,50,15,Xícara de café,440
+8202101,Água de coco,99,Não se aplica,18,Copo americano,22,Copo médio,150,15,Copo americano,448
+8202101,Água de coco,99,Não se aplica,20,Copo de requeijão,22,Copo médio,240,1,Copo de requeijão,448
+8202101,Água de coco,99,Não se aplica,21,Copo grande,22,Copo médio,300,7,Copo grande,448
+8202101,Água de coco,99,Não se aplica,22,Copo médio,22,Copo médio,240,1,Copo médio,448
+8202101,Água de coco,99,Não se aplica,23,Copo tulipa,22,Copo médio,290,1,Copo tulipa,448
+8202101,Água de coco,99,Não se aplica,36,Garrafa (200 ml),22,Copo médio,200,15,Garrafa de 200ml,448
+8202101,Água de coco,99,Não se aplica,39,Garrafa (250 ml),22,Copo médio,250,15,Garrafa de 250ml,448
+8202101,Água de coco,99,Não se aplica,42,Garrafa (290 ml),22,Copo médio,290,15,Garrafa de 290ml,448
+8202101,Água de coco,99,Não se aplica,50,Garrafa (500 ml),22,Copo médio,500,15,Garrafa de 500ml,448
+8202101,Água de coco,99,Não se aplica,68,Grama,22,Copo médio,1,15,Grama,449
+8202101,Água de coco,99,Não se aplica,72,Lata (350 ml),22,Copo médio,350,15,Lata de 350ml,449
+8202101,Água de coco,99,Não se aplica,76,Litro,22,Copo médio,1000,15,Litro,449
+8202101,Água de coco,99,Não se aplica,79,Mililitro,22,Copo médio,1,15,Mililitro,449
+8202101,Água de coco,99,Não se aplica,94,Quilo,22,Copo médio,1000,15,Quilo,449
+8202101,Água de coco,99,Não se aplica,103,Unidade,22,Copo médio,340,1,Água de coco - unidade,449
+8202101,Água de coco,99,Não se aplica,106,Xícara de chá,22,Copo médio,200,1,Xícara de chá,449
+8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",99,Não se aplica,9,Caneca,106,Xícara de chá,300,15,Caneca de 300ml,458
+8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",99,Não se aplica,10,Caneco,106,Xícara de chá,300,15,Caneca de 300ml,458
+8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",99,Não se aplica,18,Copo americano,106,Xícara de chá,150,15,Copo americano,458
+8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",99,Não se aplica,19,Copo de cafezinho,106,Xícara de chá,50,1,Copo de cafezinho,458
+8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",99,Não se aplica,20,Copo de requeijão,106,Xícara de chá,240,1,Copo de requeijão,458
+8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",99,Não se aplica,21,Copo grande,106,Xícara de chá,300,7,Copo grande,458
+8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",99,Não se aplica,22,Copo médio,106,Xícara de chá,240,1,Copo médio,458
+8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",99,Não se aplica,23,Copo tulipa,106,Xícara de chá,290,1,Copo tulipa Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,458
+8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",99,Não se aplica,36,Garrafa (200 ml),106,Xícara de chá,200,15,Garrafa de 200ml,458
+8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",99,Não se aplica,50,Garrafa (500 ml),106,Xícara de chá,500,15,Garrafa de 500ml,458
+8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",99,Não se aplica,68,Grama,106,Xícara de chá,1,15,Grama,458
+8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",99,Não se aplica,70,Lata (335 ml),106,Xícara de chá,335,15,Lata de 335ml,458
+8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",99,Não se aplica,72,Lata (350 ml),106,Xícara de chá,350,15,Lata de 350ml,458
+8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",99,Não se aplica,76,Litro,106,Xícara de chá,1000,15,Litro,458
+8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",99,Não se aplica,79,Mililitro,106,Xícara de chá,1,15,Mililitro,458
+8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",99,Não se aplica,94,Quilo,106,Xícara de chá,1000,15,Quilo,458
+8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",99,Não se aplica,101,Taça,106,Xícara de chá,150,1,Vinho - taça,458
+8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",99,Não se aplica,103,Unidade,106,Xícara de chá,240,1,Copo médio,458
+8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",99,Não se aplica,105,Xícara de café,106,Xícara de chá,50,15,Xícara de café,458
+8206301,"Chá (preto, camomila, erva cidreira, capim limão, etc.)",99,Não se aplica,106,Xícara de chá,106,Xícara de chá,200,1,Xícara de chá,458
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,9,Caneca,72,Lata (350 ml),300,15,Caneca de 300ml,464
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,18,Copo americano,72,Lata (350 ml),150,15,Copo americano,464
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,20,Copo de requeijão,72,Lata (350 ml),240,1,Copo de requeijão,464
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,21,Copo grande,72,Lata (350 ml),300,7,Copo grande,464
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,22,Copo médio,72,Lata (350 ml),240,1,Copo médio,464
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,23,Copo tulipa,72,Lata (350 ml),290,1,Copo tulipa,464
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,27,Dose,72,Lata (350 ml),50,1,Dose de aguardente,464
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,36,Garrafa (200 ml),72,Lata (350 ml),200,15,Garrafa de 200ml,465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,39,Garrafa (250 ml),72,Lata (350 ml),250,15,Garrafa de 250ml,465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,40,Garrafa (275 ml),72,Lata (350 ml),275,15,Garrafa de 275ml,465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,42,Garrafa (290 ml),72,Lata (350 ml),290,15,Garrafa de 290ml,465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,43,Garrafa (300 ml),72,Lata (350 ml),300,15,Garrafa de 300ml,465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,44,Garrafa (320 ml),72,Lata (350 ml),320,15,Garrafa de 320ml,465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,45,Garrafa (330 ml),72,Lata (350 ml),330,15,Garrafa de 330ml,465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,46,Garrafa (350 ml),72,Lata (350 ml),350,15,Garrafa de 350ml,465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,47,Garrafa (355 ml),72,Lata (350 ml),355,15,Garrafa de 355ml,465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,48,Garrafa (400 ml),72,Lata (350 ml),400,15,Garrafa de 400ml,465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,49,Garrafa (450 ml),72,Lata (350 ml),450,15,Garrafa de 450ml,465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,50,Garrafa (500 ml),72,Lata (350 ml),500,15,Garrafa de 500ml,465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,51,Garrafa (510 ml),72,Lata (350 ml),510,15,Garrafa de 510ml,465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,53,Garrafa (591 ml),72,Lata (350 ml),591,15,Garrafa de 591ml,465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,54,Garrafa (600 ml),72,Lata (350 ml),600,15,Garrafa de 600ml,465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,55,Garrafa (650 ml),72,Lata (350 ml),650,15,Garrafa de 650ml,465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,56,Garrafa (900 ml),72,Lata (350 ml),900,15,Garrafa de 900ml,465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,59,Garrafa (1 l),72,Lata (350 ml),1000,15,Garrafa de 1l,465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,64,"Garrafa (2,25 l)",72,Lata (350 ml),2250,15,"Garrafa de 2,25l",465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,66,Garrafa (não especificada),,,600,5,Garrafa de 600ml,465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,68,Grama,72,Lata (350 ml),1,15,Grama,465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,69,Lata (250 ml),72,Lata (350 ml),250,15,Lata de 250ml,465
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,70,Lata (335 ml),72,Lata (350 ml),335,15,Lata de 335ml,466
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,71,Lata (340 ml),72,Lata (350 ml),340,15,Lata de 340ml ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,466
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,72,Lata (350 ml),72,Lata (350 ml),350,15,Lata de 350ml,466
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,73,Lata (354 ml),72,Lata (350 ml),354,15,Lata de 354ml,466
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,74,Lata (473 ml),72,Lata (350 ml),473,15,Lata de 473ml,466
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,72,Lata (350 ml),,,350,5,Lata de 350ml,466
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,76,Litro,72,Lata (350 ml),1000,15,Litro,466
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,79,Mililitro,72,Lata (350 ml),1,15,Mililitro,466
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,94,Quilo,72,Lata (350 ml),1000,15,Quilo,466
+8300101,Cerveja (com ou sem álcool),99,Não se aplica,101,Taça,72,Lata (350 ml),150,1,Vinho - taça Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,466
+8400101,Azeite de oliva,99,Não se aplica,12,Colher de arroz/servir,14,Colher de chá,16,1,Óleo vegetal - 2 colheres de sopa,473
+8400101,Azeite de oliva,99,Não se aplica,13,Colher de café,14,Colher de chá,1,1,Óleo vegetal - colher de café,473
+8400101,Azeite de oliva,99,Não se aplica,14,Colher de chá,14,Colher de chá,2,1,Óleo vegetal - colher de chá,473
+8400101,Azeite de oliva,99,Não se aplica,15,Colher de sobremesa,14,Colher de chá,5,1,Óleo vegetal - colher de sobremesa,473
+8400101,Azeite de oliva,99,Não se aplica,16,Colher de sopa,14,Colher de chá,8,1,Óleo vegetal - colher de sopa,473
+8400101,Azeite de oliva,99,Não se aplica,68,Grama,14,Colher de chá,1,15,Grama,473
+8400101,Azeite de oliva,99,Não se aplica,79,Mililitro,14,Colher de chá,1,15,Mililitro,473
+8400101,Azeite de oliva,99,Não se aplica,87,Porção,14,Colher de chá,7.6,2,Azeite de oliva - porção Guia Alimentar,473
+8400101,Azeite de oliva,99,Não se aplica,94,Quilo,14,Colher de chá,1000,15,Quilo,474
+8400301,Óleo de soja,99,Não se aplica,13,Colher de café,16,Colher de sopa,1,1,Óleo vegetal - colher de café ________________________________________________________________ Pesquisa de Orçamentos Familiares 2008-2009,474
+8400301,Óleo de soja,99,Não se aplica,14,Colher de chá,16,Colher de sopa,2,1,Óleo vegetal - colher de chá,474
+8400301,Óleo de soja,99,Não se aplica,16,Colher de sopa,16,Colher de sopa,8,1,Óleo vegetal - colher de sopa,474
+8400301,Óleo de soja,99,Não se aplica,17,Concha,16,Colher de sopa,32,1,Óleo vegetal - 4 colheres de sopa,474
+8400301,Óleo de soja,99,Não se aplica,68,Grama,16,Colher de sopa,1,15,Grama,474
+8400301,Óleo de soja,99,Não se aplica,94,Quilo,16,Colher de sopa,1000,15,Quilo,474
+8500407,Suco de laranja,99,Não se aplica,9,Caneca,22,Copo médio,300,15,Caneca de 300ml,488
+8500407,Suco de laranja,99,Não se aplica,10,Caneco,22,Copo médio,300,15,Caneca de 300ml,488
+8500407,Suco de laranja,99,Não se aplica,18,Copo americano,22,Copo médio,150,15,Copo americano,488
+8500407,Suco de laranja,99,Não se aplica,20,Copo de requeijão,22,Copo médio,240,1,Copo de requeijão,488
+8500407,Suco de laranja,99,Não se aplica,21,Copo grande,22,Copo médio,300,7,Copo grande,488
+8500407,Suco de laranja,99,Não se aplica,22,Copo médio,22,Copo médio,240,1,Copo médio,488
+8500407,Suco de laranja,99,Não se aplica,23,Copo tulipa,22,Copo médio,290,1,Copo tulipa,488
+8500407,Suco de laranja,99,Não se aplica,36,Garrafa (200 ml),22,Copo médio,200,15,Garrafa de 200ml Tabela de Medidas Referidas para os Alimentos Consumidos no Brasil,488
+8500407,Suco de laranja,99,Não se aplica,37,Garrafa (237 ml),22,Copo médio,237,15,Garrafa de 237ml,488
+8500407,Suco de laranja,99,Não se aplica,39,Garrafa (250 ml),22,Copo médio,250,15,Garrafa de 250ml,488
+8500407,Suco de laranja,99,Não se aplica,40,Garrafa (275 ml),22,Copo médio,275,15,Garrafa de 275ml,488
+8500407,Suco de laranja,99,Não se aplica,42,Garrafa (290 ml),22,Copo médio,290,15,Garrafa de 290ml,488
+8500407,Suco de laranja,99,Não se aplica,46,Garrafa (350 ml),22,Copo médio,350,15,Garrafa de 350ml,488
+8500407,Suco de laranja,99,Não se aplica,49,Garrafa (450 ml),22,Copo médio,450,15,Garrafa de 450ml,488
+8500407,Suco de laranja,99,Não se aplica,50,Garrafa (500 ml),22,Copo médio,500,15,Garrafa de 500ml,488
+8500407,Suco de laranja,99,Não se aplica,54,Garrafa (600 ml),22,Copo médio,600,15,Garrafa de 600ml,488
+8500407,Suco de laranja,99,Não se aplica,59,Garrafa (1 l),22,Copo médio,1000,15,Garrafa de 1l,488
+8500407,Suco de laranja,99,Não se aplica,68,Grama,22,Copo médio,1,15,Grama,488
+8500407,Suco de laranja,99,Não se aplica,72,Lata (350 ml),22,Copo médio,350,15,Lata de 350ml,488
+8500407,Suco de laranja,99,Não se aplica,76,Litro,22,Copo médio,1000,15,Litro,488
+8500407,Suco de laranja,99,Não se aplica,79,Mililitro,22,Copo médio,1,15,Mililitro,489
+8500407,Suco de laranja,99,Não se aplica,94,Quilo,22,Copo médio,1000,15,Quilo,489
+8500407,Suco de laranja,99,Não se aplica,101,Taça,22,Copo médio,150,1,Vinho - taça,489
+8500407,Suco de laranja,99,Não se aplica,105,Xícara de café,22,Copo médio,50,15,Xícara de café,489
+8500407,Suco de laranja,99,Não se aplica,106,Xícara de chá,22,Copo médio,200,1,Xícara de chá,489
+8501302,Café,99,Não se aplica,9,Caneca,105,Xícara de café,300,15,Caneca de 300ml,505
+8501302,Café,99,Não se aplica,10,Caneco,105,Xícara de café,300,15,Caneca de 300ml,505
+8501302,Café,99,Não se aplica,18,Copo americano,105,Xícara de café,150,15,Copo americano,505
+8501302,Café,99,Não se aplica,19,Copo de cafezinho,105,Xícara de café,50,1,Copo de cafezinho,505
+8501302,Café,99,Não se aplica,20,Copo de requeijão,105,Xícara de café,240,1,Copo de requeijão,505
+8501302,Café,99,Não se aplica,21,Copo grande,105,Xícara de café,300,7,Copo grande,505
+8501302,Café,99,Não se aplica,22,Copo médio,105,Xícara de café,240,1,Copo médio,505
+8501302,Café,99,Não se aplica,23,Copo tulipa,105,Xícara de café,290,1,Copo tulipa,505
+8501302,Café,99,Não se aplica,27,Dose,105,Xícara de café,50,1,Dose de aguardente,505
+8501302,Café,99,Não se aplica,46,Garrafa (350 ml),105,Xícara de café,350,15,Garrafa de 350ml,505
+8501302,Café,99,Não se aplica,48,Garrafa (400 ml),105,Xícara de café,400,15,Garrafa de 400ml,505
+8501302,Café,99,Não se aplica,59,Garrafa (1 l),105,Xícara de café,1000,15,Garrafa de 1l,505
+8501302,Café,99,Não se aplica,66,Garrafa (não especificada),,,1000,15,Garrafa de 1l,505
+8501302,Café,99,Não se aplica,68,Grama,105,Xícara de café,1,15,Grama,505
+8501302,Café,99,Não se aplica,79,Mililitro,105,Xícara de café,1,15,Mililitro,505
+8501302,Café,99,Não se aplica,94,Quilo,105,Xícara de café,1000,15,Quilo,505
+8501302,Café,99,Não se aplica,101,Taça,105,Xícara de café,150,1,Vinho - taça,505
+8501302,Café,99,Não se aplica,105,Xícara de café,105,Xícara de café,50,15,Xícara de café,505
+8501302,Café,99,Não se aplica,106,Xícara de chá,105,Xícara de café,200,1,Xícara de chá,505
