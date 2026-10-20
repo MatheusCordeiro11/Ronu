@@ -200,6 +200,33 @@
         ],
         "createdAt": "2026-10-17T23:50:35.638Z",
         "reason": "Falso positivo: a regra .entrada-varredura vem do entrada.css compartilhado; o onboarding não tem esse elemento"
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "brag-output/composition-vertical/index.html"
+        ],
+        "createdAt": "2026-10-19T18:45:56.105Z",
+        "reason": "Claude: o fundo #F2ECE0 é o modo Washi oficial do projeto (frontend/css/base/tokens.css, PRODUCT.md), não um bege escolhido por reflexo"
+      },
+      {
+        "rule": "buried-raster",
+        "value": "*",
+        "files": [
+          "brag-output/composition/index.html"
+        ],
+        "createdAt": "2026-10-19T18:45:56.339Z",
+        "reason": "Claude: composição de vídeo renderizada quadro a quadro; as imagens começam com opacity 0 e o render(t) as revela no tempo, então a análise estática vê só o estado inicial"
+      },
+      {
+        "rule": "kicker-above-heading",
+        "value": "*",
+        "files": [
+          "frontend/treino.html"
+        ],
+        "createdAt": "2026-10-20T00:58:36.521Z",
+        "reason": "user confirmed: rótulo 'SEU TREINO' (.rotulo) é parte do design system Dojo Noturno aprovado em docs/redesign/telas"
       }
     ]
   }
