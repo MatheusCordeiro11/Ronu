@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Ordem dos grupos do catálogo, igual à da API (CategoriasModalidade.Ordem).
   // Categoria que a API devolver e não estiver aqui entra no fim, com o próprio nome.
   const CATEGORIAS = ['Lutas', 'Esportes', 'Condicionamento', 'Corpo e movimento'];
+  const CARTAS_MIN_LACO = 5;
   const REDUZIDO = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let catalogo = [];
@@ -628,7 +629,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         // Cópias para o laço não ter emenda: clicáveis com o mouse e o dedo,
         // mas fora do Tab e do leitor de tela (as originais já dizem tudo).
-        if (!REDUZIDO) {
+        // Fileira curta (menos de CARTAS_MIN_LACO) não faz laço: a cópia
+        // apareceria colada na original, parecendo cartas repetidas.
+        if (!REDUZIDO && modalidades.length >= CARTAS_MIN_LACO) {
           modalidades.forEach((modalidade) => {
             fileira.appendChild(criarCarta(modalidade, temNaLista.has(modalidade.id), peso, true));
           });
