@@ -559,7 +559,7 @@ button.pf-conta-item:focus-visible {
 
   /* Sexo numa linha; altura e nascimento lado a lado embaixo. */
   .pf-dados-campos {
-    grid-template-columns: 1fr 1.4fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
     gap: 10px;
   }
 
