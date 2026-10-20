@@ -413,62 +413,53 @@
   gap: var(--e-4);
 }
 
-/* Pausar / Continuar a fileira que roda sozinha (js/treino.js). */
-.tr-pausar {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 36px;
-  padding: 0 var(--e-1);
-  font-size: var(--t-pequeno);
-  color: var(--texto);
-  text-decoration: none;
+/* Quatro seções por categoria (js/treino.js), cada uma com título e uma
+   grade estática de cartas. */
+.tr-grupos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-7);
 }
 
-.tr-pausar svg {
-  width: 12px;
-  height: 12px;
-  fill: currentColor;
-  stroke: currentColor;
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.tr-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
 }
 
-.tr-pausar .tr-icone-continuar,
-.tr-pausar[data-pausado="true"] .tr-icone-pausar {
-  display: none;
+.tr-grupo-titulo {
+  margin: 0;
+  color: var(--texto-2);
 }
 
-.tr-pausar[data-pausado="true"] .tr-icone-continuar {
-  display: block;
-}
-
-/* Folga em volta para o zoom do hover não ser cortado pela rolagem. A
-   barra segue as cores da tela (sem ela, o Windows desenha uma barra clara). */
 .tr-cartas {
   position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 14px;
-  overflow-x: auto;
-  margin: -12px -6px 0;
-  padding: 12px 6px 16px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--borda-forte) transparent;
 }
 
-/* Rodando sozinha, a barra só atrapalharia: some (a rolagem na mão continua). */
-.tr-cartas-rodando {
-  scrollbar-width: none;
+/* Entrada em sequência quando a seção aparece na tela: o JS só liga
+   .tr-grupo-anima com movimento permitido. A animação termina no estado
+   normal da carta, então o zoom do hover continua valendo depois. */
+.tr-grupo-anima:not(.tr-grupo-visto) .tr-carta {
+  opacity: 0;
 }
 
-.tr-cartas-rodando::-webkit-scrollbar {
-  display: none;
+.tr-grupo-anima.tr-grupo-visto .tr-carta {
+  animation: tr-carta-entra 420ms var(--curva-saida) backwards;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+@keyframes tr-carta-entra {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
 }
 
 .tr-carta {
   position: relative;
-  flex: 0 0 200px;
   display: flex;
   flex-direction: column;
   padding: 0;
@@ -743,14 +734,13 @@
     font-size: 1.25rem;
   }
 
-  .tr-cartas {
-    gap: 10px;
-    margin: -12px calc(var(--margem) * -1) 0 -6px;
-    padding-right: var(--margem);
+  .tr-grupos {
+    gap: var(--e-6);
   }
 
-  .tr-carta {
-    flex-basis: 150px;
+  .tr-cartas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
   }
 
   .tr-carta-arte {

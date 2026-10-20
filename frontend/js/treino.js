@@ -51,8 +51,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   // no catálogo, sem kanji aqui, usa 技 ("técnica").
   const KANJI = {
     'jiu-jitsu': '柔', 'muay thai': '拳', boxe: '打', 'musculação': '力',
-    futebol: '蹴', basquete: '籠', 'natação': '泳'
+    futebol: '蹴', basquete: '籠', 'natação': '泳',
+    'judô': '道', 'karatê': '空', mma: '闘', wrestling: '組', taekwondo: '跆',
+    kickboxing: '撃', capoeira: '舞', 'vôlei': '球', futsal: '室', handebol: '投',
+    'tênis': '網', 'beach tennis': '砂', corrida: '走', ciclismo: '輪',
+    caminhada: '歩', 'treino funcional': '動', 'dança': '踊', yoga: '静', pilates: '芯'
   };
+
+  // Ordem dos grupos do catálogo, igual à da API (CategoriasModalidade.Ordem).
+  // Categoria que a API devolver e não estiver aqui entra no fim, com o próprio nome.
+  const CATEGORIAS = ['Lutas', 'Esportes', 'Condicionamento', 'Corpo e movimento'];
+  const REDUZIDO = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let catalogo = [];
   let itens = [];          // modalidades na tela, salvas ou ainda não
@@ -241,9 +250,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     return card;
   }
 
-  // "Remover modalidade" -> "Remover? Sim / Cancelar". A última modalidade
-  // salva não sai: sem ela o cadastro fica incompleto (ronuChecarCadastroCompleto
-  // exige uma) e o próximo login cairia no onboarding.
+  // "Remover modalidade" -> "Remover? Sim / Cancelar". Dá para remover até a
+  // última: quem não treina no momento fica com a lista vazia (a meta usa só o
+  // gasto do dia a dia). O cadastro continua completo se já houver uma dieta
+  // gerada (ver ronuChecarCadastroCompleto em auth.js).
   function renderizarAcoes(item, confirmando = false) {
     const acoes = item.el.acoes;
     acoes.replaceChildren();
@@ -254,10 +264,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         ronuOcultarErroFormulario(elErro);
         if (!item.vinculoId) {
           removerDaTela(item);
-          return;
-        }
-        if (itens.filter((i) => i.vinculoId).length <= 1) {
-          ronuMostrarErroFormulario(elErro, 'Você precisa manter pelo menos uma modalidade.');
           return;
         }
         renderizarAcoes(item, true);
@@ -452,10 +458,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     return KANJI[nome.toLowerCase()] || '技';
   }
 
-  // A fileira roda sozinha (ver Rolagem automática, abaixo) e é redesenhada
-  // a cada simulação: só refaz as cartas quando algo nelas muda, para não
-  // tirar o foco de quem está numa carta nem dar um tranco na rolagem.
+  // O catálogo é redesenhado a cada simulação: só refaz as seções quando algo
+  // nelas muda, para não tirar o foco de quem está numa carta.
   let assinaturaCatalogo = null;
+
+  // Seções que já entraram na tela: ao redesenhar, elas não repetem a entrada.
+  const secoesVistas = new Set();
+  const observadorSecoes = !REDUZIDO && 'IntersectionObserver' in window
+    ? new IntersectionObserver((entradas) => {
+      entradas.forEach((entrada) => {
+        if (!entrada.isIntersecting) return;
+        entrada.target.classList.add('tr-grupo-visto');
+        secoesVistas.add(entrada.target.dataset.categoria);
+        observadorSecoes.unobserve(entrada.target);
+      });
+    }, { threshold: 0.15 })
+    : null;
 
   function renderizarCatalogo() {
     const temNaLista = new Set(itens.map((i) => i.modalidade.id));
@@ -464,25 +482,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (assinatura === assinaturaCatalogo) return;
     assinaturaCatalogo = assinatura;
 
-    const originais = catalogo.map((modalidade) => criarCarta(modalidade, temNaLista.has(modalidade.id), peso, false));
-    // Cópias para o laço não ter emenda: clicáveis com o mouse e o dedo, mas
-    // fora do Tab e do leitor de tela (as originais já dizem tudo).
-    const copias = rolagem.ligada
-      ? catalogo.map((modalidade) => criarCarta(modalidade, temNaLista.has(modalidade.id), peso, true))
-      : [];
-    const posicao = elCartas.scrollLeft;
-    elCartas.replaceChildren(...originais, ...copias);
-    elCartas.scrollLeft = posicao;
-    rolagem.medir();
+    // Agrupa pela categoria da API; a ordem das cartas dentro do grupo é a dela.
+    const grupos = new Map(CATEGORIAS.map((nome) => [nome, []]));
+    catalogo.forEach((modalidade) => {
+      if (!grupos.has(modalidade.categoria)) grupos.set(modalidade.categoria, []);
+      grupos.get(modalidade.categoria).push(modalidade);
+    });
+
+    const secoes = [...grupos.entries()]
+      .filter(([, modalidades]) => modalidades.length > 0)
+      .map(([categoria, modalidades], indice) => {
+        const secao = criar('section', 'tr-grupo');
+        secao.dataset.categoria = categoria;
+        secao.setAttribute('aria-labelledby', `tr-grupo-${indice}`);
+        const titulo = criar('h3', 'rotulo tr-grupo-titulo', categoria);
+        titulo.id = `tr-grupo-${indice}`;
+        const grade = criar('div', 'tr-cartas');
+        modalidades.forEach((modalidade, i) => {
+          const carta = criarCarta(modalidade, temNaLista.has(modalidade.id), peso);
+          carta.style.setProperty('--i', String(i));
+          grade.appendChild(carta);
+        });
+        secao.append(titulo, grade);
+        // Com movimento reduzido (ou sem IntersectionObserver) as cartas já
+        // aparecem no lugar, sem entrada em sequência.
+        if (observadorSecoes) {
+          secao.classList.add('tr-grupo-anima');
+          if (secoesVistas.has(categoria)) secao.classList.add('tr-grupo-visto');
+        }
+        return secao;
+      });
+
+    elCartas.replaceChildren(...secoes);
+    if (observadorSecoes) {
+      elCartas.querySelectorAll('.tr-grupo-anima:not(.tr-grupo-visto)').forEach((secao) => observadorSecoes.observe(secao));
+    }
   }
 
-  function criarCarta(modalidade, tem, peso, copia) {
-    const carta = criar('button', `tr-carta${tem ? ' tr-carta-tem' : ''}${copia ? ' tr-carta-copia' : ''}`);
+  function criarCarta(modalidade, tem, peso) {
+    const carta = criar('button', `tr-carta${tem ? ' tr-carta-tem' : ''}`);
     carta.type = 'button';
-    if (copia) {
-      carta.tabIndex = -1;
-      carta.setAttribute('aria-hidden', 'true');
-    }
     carta.setAttribute('aria-label', tem
       ? `${modalidade.nome}, já está nos seus treinos. Abrir`
       : `Adicionar ${modalidade.nome}`);
@@ -505,107 +544,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     carta.addEventListener('click', () => (tem ? abrirExistente(modalidade.id) : adicionar(modalidade)));
     return carta;
   }
-
-  // ---------- Rolagem automática do catálogo ----------
-  // A fileira anda sozinha, devagar e em laço, mexendo no scrollLeft (e não
-  // num transform): assim o dedo, a roda do mouse e o teclado continuam
-  // rolando como sempre. Como as cartas são botões, ela para quando o mouse
-  // está em cima, quando uma carta tem o foco e enquanto o dedo mexe nela, e
-  // o botão "Pausar" para de vez (WCAG 2.2.2). Também para fora da tela e com
-  // a aba escondida. Com movimento reduzido, nada disso liga: fica a fileira
-  // parada de antes.
-  const rolagem = (() => {
-    const VELOCIDADE_PX_S = 28;
-    const VOLTA_DEPOIS_DO_TOQUE_MS = 4000;
-    const reduzido = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const btn = $('tr-pausar');
-    const estado = { ligada: !reduzido, mouse: false, foco: false, toque: false, usuario: false, fora: false };
-    let larguraVolta = 0;   // distância de uma carta original até a cópia dela
-    let posicao = 0;
-    let anterior = null;
-    let quadro = null;
-    let voltaDoToque = null;
-
-    function parada() {
-      return estado.mouse || estado.foco || estado.toque || estado.usuario || estado.fora || document.hidden;
-    }
-
-    function passo(agora) {
-      quadro = null;
-      if (!estado.ligada || larguraVolta <= 0 || parada()) { anterior = null; return; }
-      // A pessoa rolou na mão (ou o redesenho mudou a posição): segue dali.
-      if (Math.abs(elCartas.scrollLeft - posicao) > 2) posicao = elCartas.scrollLeft;
-      if (anterior != null) posicao += (VELOCIDADE_PX_S * Math.min(agora - anterior, 100)) / 1000;
-      if (posicao >= larguraVolta) posicao -= larguraVolta;
-      anterior = agora;
-      elCartas.scrollLeft = posicao;
-      quadro = requestAnimationFrame(passo);
-    }
-
-    function seguir() {
-      if (quadro == null && estado.ligada && !parada()) quadro = requestAnimationFrame(passo);
-    }
-
-    function atualizarBotao() {
-      btn.hidden = !(estado.ligada && larguraVolta > 0);
-      btn.dataset.pausado = String(estado.usuario);
-      btn.querySelector('.tr-pausar-texto').textContent = estado.usuario ? 'Continuar' : 'Pausar';
-      btn.setAttribute('aria-label', estado.usuario ? 'Continuar a rolagem das modalidades' : 'Pausar a rolagem das modalidades');
-    }
-
-    // Só roda se as cartas originais não couberem: aí a cópia existe e a
-    // volta é a distância entre a primeira original e a primeira cópia.
-    function medir() {
-      const copias = elCartas.querySelectorAll('.tr-carta-copia');
-      // Escondidas, as cópias não têm posição: aparecem para medir.
-      copias.forEach((c) => { c.hidden = false; });
-      const primeiraCopia = copias[0];
-      const primeira = elCartas.firstElementChild;
-      const volta = primeiraCopia ? primeiraCopia.offsetLeft - primeira.offsetLeft : 0;
-      larguraVolta = volta > elCartas.clientWidth ? volta : 0;
-      elCartas.classList.toggle('tr-cartas-rodando', larguraVolta > 0);
-      // Sem rodar, as cópias só atrapalhariam a rolagem na mão.
-      elCartas.querySelectorAll('.tr-carta-copia').forEach((c) => { c.hidden = larguraVolta <= 0; });
-      atualizarBotao();
-      seguir();
-    }
-
-    if (estado.ligada) {
-      elCartas.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') { estado.mouse = true; } });
-      elCartas.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') { estado.mouse = false; seguir(); } });
-      elCartas.addEventListener('focusin', () => { estado.foco = true; });
-      elCartas.addEventListener('focusout', (e) => {
-        if (!elCartas.contains(e.relatedTarget)) { estado.foco = false; seguir(); }
-      });
-      // Toque: para enquanto o dedo mexe e volta um pouco depois.
-      const tocou = () => {
-        estado.toque = true;
-        clearTimeout(voltaDoToque);
-        voltaDoToque = setTimeout(() => { estado.toque = false; seguir(); }, VOLTA_DEPOIS_DO_TOQUE_MS);
-      };
-      elCartas.addEventListener('touchstart', tocou, { passive: true });
-      elCartas.addEventListener('touchmove', tocou, { passive: true });
-      btn.addEventListener('click', () => {
-        estado.usuario = !estado.usuario;
-        atualizarBotao();
-        seguir();
-      });
-      document.addEventListener('visibilitychange', seguir);
-      if ('IntersectionObserver' in window) {
-        new IntersectionObserver((entradas) => {
-          estado.fora = !entradas[0].isIntersecting;
-          seguir();
-        }).observe(elCartas);
-      }
-      let redimensionar = null;
-      window.addEventListener('resize', () => {
-        clearTimeout(redimensionar);
-        redimensionar = setTimeout(medir, 150);
-      });
-    }
-
-    return { get ligada() { return estado.ligada; }, medir };
-  })();
 
   function abrirExistente(modalidadeId) {
     aberta = modalidadeId;

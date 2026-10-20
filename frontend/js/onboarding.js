@@ -71,6 +71,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const DURACAO_MIN = 15;
   const DURACAO_MAX = 300;
   const DURACAO_PADRAO = 90;
+  // Ordem dos grupos do catálogo, igual à da API (CategoriasModalidade.Ordem).
+  const CATEGORIAS = ['Lutas', 'Esportes', 'Condicionamento', 'Corpo e movimento'];
 
   const estado = {
     passo: 0,
@@ -78,6 +80,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     sexo: null,
     objetivo: null,
     catalogo: [],
+    semTreino: false,             // marcou "Não treino no momento" (nenhuma modalidade)
     escolhidas: new Map(),        // modalidadeId → { dias: Set, minutos }
     modalidadesSalvas: new Map(), // modalidadeId → id do vínculo (para o DELETE)
     comidas: new Map(),           // alimento (minúsculo) → 'gosto' | 'evitar'
@@ -425,28 +428,96 @@ document.addEventListener('DOMContentLoaded', async () => {
       area.appendChild(p);
       return;
     }
+    // Agrupa pela categoria que a API devolve (só para a tela); categoria
+    // fora da lista conhecida entra no fim, com o próprio nome.
+    const grupos = new Map(CATEGORIAS.map((nome) => [nome, []]));
     estado.catalogo.forEach((mod) => {
-      const botao = document.createElement('button');
-      botao.type = 'button';
-      botao.className = 'chip';
-      botao.textContent = mod.nome;
-      botao.setAttribute('aria-pressed', String(estado.escolhidas.has(mod.id)));
-      botao.addEventListener('click', () => {
-        if (estado.escolhidas.has(mod.id)) {
-          estado.escolhidas.delete(mod.id);
-          cartoes.get(mod.id)?.el.remove();
-          cartoes.delete(mod.id);
-        } else {
-          estado.escolhidas.set(mod.id, { dias: new Set(), minutos: DURACAO_PADRAO });
-          criarCartao(mod);
-        }
+      if (!grupos.has(mod.categoria)) grupos.set(mod.categoria, []);
+      grupos.get(mod.categoria).push(mod);
+    });
+
+    let indice = 0;
+    grupos.forEach((modalidades, categoria) => {
+      if (modalidades.length === 0) return;
+      const secao = document.createElement('section');
+      secao.className = 'ob-grupo';
+      secao.setAttribute('aria-labelledby', `ob-grupo-${indice}`);
+      const titulo = document.createElement('h2');
+      titulo.className = 'rotulo ob-grupo-titulo';
+      titulo.id = `ob-grupo-${indice}`;
+      titulo.textContent = categoria;
+      const chips = document.createElement('div');
+      chips.className = 'chips';
+
+      modalidades.forEach((mod) => {
+        const botao = document.createElement('button');
+        botao.type = 'button';
+        botao.className = 'chip';
+        botao.textContent = mod.nome;
         botao.setAttribute('aria-pressed', String(estado.escolhidas.has(mod.id)));
-        agendarSimulacao();
+        botao.addEventListener('click', () => {
+          if (estado.escolhidas.has(mod.id)) {
+            estado.escolhidas.delete(mod.id);
+            cartoes.get(mod.id)?.el.remove();
+            cartoes.delete(mod.id);
+          } else {
+            estado.escolhidas.set(mod.id, { dias: new Set(), minutos: DURACAO_PADRAO });
+            criarCartao(mod);
+          }
+          botao.setAttribute('aria-pressed', String(estado.escolhidas.has(mod.id)));
+          agendarSimulacao();
+        });
+        chips.appendChild(botao);
       });
-      area.appendChild(botao);
+
+      secao.append(titulo, chips);
+      area.appendChild(secao);
+      indice += 1;
     });
     estado.catalogo.filter((mod) => estado.escolhidas.has(mod.id)).forEach(criarCartao);
   }
+
+  // "Não treino no momento": esconde o catálogo e os cartões e deixa a lista
+  // vazia. Se já havia modalidades escolhidas, pede confirmação na própria
+  // página (aviso abaixo do chip), sem confirm() do navegador.
+  const elSemTreino = $('ob-sem-treino');
+  const elSemTreinoConfirma = $('ob-sem-treino-confirma');
+
+  function definirSemTreino(valor) {
+    estado.semTreino = valor;
+    elSemTreino.setAttribute('aria-pressed', String(valor));
+    elSemTreinoConfirma.hidden = true;
+    $('ob-catalogo').hidden = valor;
+    $('ob-escolhidas').hidden = valor;
+    agendarSimulacao();
+  }
+
+  elSemTreino.addEventListener('click', () => {
+    if (estado.semTreino) {
+      definirSemTreino(false);
+      return;
+    }
+    if (estado.escolhidas.size > 0) {
+      elSemTreinoConfirma.hidden = false;
+      $('ob-sem-treino-remover').focus();
+      return;
+    }
+    definirSemTreino(true);
+  });
+
+  $('ob-sem-treino-remover').addEventListener('click', () => {
+    estado.escolhidas.clear();
+    cartoes.forEach((c) => c.el.remove());
+    cartoes.clear();
+    desenharCatalogo();
+    definirSemTreino(true);
+    elSemTreino.focus();
+  });
+
+  $('ob-sem-treino-cancelar').addEventListener('click', () => {
+    elSemTreinoConfirma.hidden = true;
+    elSemTreino.focus();
+  });
 
   function criarCartao(mod) {
     const escolha = estado.escolhidas.get(mod.id);
@@ -545,7 +616,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function avancarTreino() {
-    if (estado.escolhidas.size === 0) return erro('Escolha pelo menos uma modalidade.');
+    if (estado.escolhidas.size === 0 && !estado.semTreino) {
+      return erro('Escolha uma modalidade ou marque “Não treino no momento”.');
+    }
     const nomes = new Map(estado.catalogo.map((m) => [m.id, m.nome]));
     for (const [id, escolha] of estado.escolhidas) {
       if (escolha.dias.size === 0) return erro(`Marque pelo menos um dia para ${nomes.get(id)}.`);
@@ -555,8 +628,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const salvo = await enviar('/usuarios/modalidades', 'POST', corpo);
       if (salvo?.id) estado.modalidadesSalvas.set(corpo.modalidadeId, salvo.id);
     }));
-    // As que estavam salvas e foram desmarcadas saem da API. Sempre sobra pelo
-    // menos uma (a validação acima exige), então nunca se apaga a última.
+    // As que estavam salvas e foram desmarcadas saem da API. Com "Não treino no
+    // momento" (nenhuma escolhida) saem todas, e o cadastro passa a valer pela
+    // dieta gerada no último passo (ver ronuChecarCadastroCompleto em auth.js).
     const desmarcadas = [...estado.modalidadesSalvas.entries()].filter(([idMod]) => !estado.escolhidas.has(idMod));
     await Promise.all(desmarcadas.map(async ([idMod, idVinculo]) => {
       await enviar(`/usuarios/modalidades/${idVinculo}`, 'DELETE');

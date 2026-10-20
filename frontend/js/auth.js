@@ -257,12 +257,27 @@ async function ronuConsultarCadastro() {
   const temObjetivo = respostaObjetivo.status === 200;
   const temModalidade = Array.isArray(modalidades) && modalidades.length > 0;
 
-  return perfilCompleto && temObjetivo && temModalidade;
+  if (!perfilCompleto || !temObjetivo) return false;
+  if (temModalidade) return true;
+
+  // "Não treino no momento": sem modalidade, o cadastro só vale como completo
+  // se o usuário já gerou pelo menos uma dieta (GET /dietas/atual: 200 ou 404).
+  let respostaDieta;
+  try {
+    respostaDieta = await ronuFetchAutenticado('/dietas/atual');
+  } catch (erro) {
+    if (erro.message === 'Sessão expirada.') throw erro;
+    throw ronuErroChecagem(true);
+  }
+  if (respostaDieta.status >= 500) throw ronuErroChecagem(true);
+  if (respostaDieta.status !== 200 && respostaDieta.status !== 404) throw ronuErroChecagem(false);
+  return respostaDieta.status === 200;
 }
 
 // Um cadastro é considerado completo quando o usuário já tem perfil (altura,
 // sexo, data de nascimento), objetivo/peso registrado e pelo menos uma
-// modalidade vinculada (preferências é opcional). Fonte única desse critério:
+// modalidade vinculada ou pelo menos uma dieta gerada (quem não treina no
+// momento não tem modalidade; preferências é opcional). Fonte única desse critério:
 // usada depois de login/cadastro, ao abrir o onboarding e ao abrir o dashboard
 // sem a marca de cadastro completo, pra decidir entre onboarding e dashboard.
 // Quando dá completo, grava a marca (ver ronuCadastroJaCompleto).

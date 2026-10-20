@@ -195,6 +195,59 @@
 }
 
 /* ---------- Treino ---------- */
+.ob-sem-treino-bloco {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  margin-bottom: var(--e-6);
+}
+
+/* Largo como uma opção: a escolha "não treino" vale tanto quanto qualquer
+   modalidade, e não some no meio dos chips. */
+.ob-sem-treino {
+  align-self: stretch;
+  justify-content: center;
+  border-style: dashed;
+  border-radius: var(--raio-2);
+}
+
+/* Marcado, não preenche a largura toda de vermelho (Regra do Carimbo): fica
+   no tom de superfície, com o contorno no acento. */
+.ob-sem-treino[aria-pressed="true"] {
+  border-style: solid;
+  border-color: var(--acento);
+  background: var(--superficie-3);
+  color: var(--texto);
+}
+
+.ob-sem-treino-confirma p {
+  margin: 0 0 var(--e-3);
+}
+
+.ob-sem-treino-acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--e-4);
+}
+
+.ob-catalogo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-6);
+  margin-bottom: var(--e-6);
+}
+
+.ob-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.ob-grupo-titulo {
+  margin: 0;
+  color: var(--texto-2);
+}
+
 .ob-escolhidas {
   display: flex;
   flex-direction: column;

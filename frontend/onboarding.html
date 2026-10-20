@@ -145,7 +145,17 @@
               <h1 id="ob-t2" tabindex="-1">O que você treina?</h1>
               <p>Escolha as modalidades, os dias e quanto dura cada sessão. Dá para mudar depois, na tela de Treino.</p>
             </div>
-            <div class="chips" id="ob-catalogo" role="group" aria-label="Modalidades">
+            <div class="ob-sem-treino-bloco">
+              <button type="button" class="chip ob-sem-treino" id="ob-sem-treino" aria-pressed="false">Não treino no momento</button>
+              <div class="aviso ob-sem-treino-confirma" id="ob-sem-treino-confirma" role="group" aria-labelledby="ob-sem-treino-pergunta" hidden>
+                <p id="ob-sem-treino-pergunta">Isso remove as modalidades que você escolheu nesta tela.</p>
+                <div class="ob-sem-treino-acoes">
+                  <button type="button" class="botao botao-fantasma botao-pequeno" id="ob-sem-treino-remover">Remover</button>
+                  <button type="button" class="botao-texto" id="ob-sem-treino-cancelar">Cancelar</button>
+                </div>
+              </div>
+            </div>
+            <div class="ob-catalogo" id="ob-catalogo" role="group" aria-label="Modalidades">
               <p class="apoio">Carregando modalidades...</p>
             </div>
             <div class="ob-escolhidas" id="ob-escolhidas"></div>

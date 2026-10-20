@@ -503,7 +503,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const passos = [
       ['Gasto em repouso', c.gastoRepouso],
-      ['Dia a dia fora do treino (×1,4)', c.atividadeForaDoTreino],
+      // Sem treino no dia, "fora do treino" não diz nada: o dia a dia é tudo.
+      [c.treino.length === 0 ? 'Dia a dia (×1,4)' : 'Dia a dia fora do treino (×1,4)', c.atividadeForaDoTreino],
       ...c.treino.map((t) => [`${t.nome}, ${formatarDecimal(t.horas, 2)} h`, t.kcal])
     ];
     if (c.objetivo !== 0) {
@@ -713,7 +714,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     lista.innerHTML = '';
 
     if (modalidades.length === 0) {
-      lista.appendChild(criar('p', 'apoio', 'Nenhuma modalidade cadastrada ainda.'));
+      lista.appendChild(criar('p', 'apoio', 'Você não treina no momento. A meta usa só o seu gasto do dia a dia.'));
+      const adicionar = criar('a', 'cartao-link', 'Adicionar treino');
+      adicionar.href = 'treino.html';
+      lista.appendChild(adicionar);
     }
 
     modalidades.forEach((um) => {

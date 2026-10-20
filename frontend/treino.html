@@ -63,7 +63,7 @@
         <section class="tr-minhas" aria-labelledby="tr-minhas-titulo">
           <h2 id="tr-minhas-titulo" class="tr-titulo-secao">Suas modalidades</h2>
           <div class="aviso aviso-erro" id="treino-error" role="alert" hidden></div>
-          <p class="vazio" id="tr-vazio" hidden>Nenhum treino cadastrado. Sem treino, a meta usa só o seu gasto do dia a dia. Escolha uma modalidade logo abaixo.</p>
+          <p class="vazio" id="tr-vazio" hidden>Você não treina no momento. A meta usa só o seu gasto do dia a dia (×1,4). Para incluir treino, escolha uma modalidade logo abaixo.</p>
           <div class="tr-lista" id="tr-lista"></div>
         </section>
 
@@ -96,17 +96,10 @@
           <h2 id="tr-catalogo-titulo" class="tr-titulo-secao">Adicionar modalidade</h2>
           <div class="tr-catalogo-direita">
             <span class="apoio tr-so-largo">Intensidades do Compêndio de Atividades Físicas</span>
-            <!-- Pausa da fileira que roda sozinha (js/treino.js). Só aparece
-                 quando ela de fato roda: sem movimento reduzido e com mais
-                 cartas do que cabem. -->
-            <button type="button" class="botao-texto tr-pausar" id="tr-pausar" aria-controls="tr-cartas" hidden>
-              <svg class="tr-icone-pausar" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 2v8M8.5 2v8"/></svg>
-              <svg class="tr-icone-continuar" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 2l6 4-6 4z"/></svg>
-              <span class="tr-pausar-texto">Pausar</span>
-            </button>
           </div>
         </div>
-        <div class="tr-cartas" id="tr-cartas"></div>
+        <!-- Quatro seções por categoria, montadas em js/treino.js. -->
+        <div class="tr-grupos" id="tr-cartas"></div>
       </section>
 
       <!-- No celular o aviso de gerar vai no fim, depois do catálogo. -->
