@@ -51,7 +51,7 @@ Nenhum conteúdo real ainda (sem fotos de atletas, depoimentos, dados de teste o
 
 ## Product Principles
 
-1. O gasto calórico do treino real (modalidade + frequência) é o insumo central — nunca substituir por níveis de atividade genéricos.
+1. O gasto do treino nunca vem de um nível de atividade genérico: vem da modalidade, da duração e dos dias de cada treino. O nível de atividade descreve só o dia fora do treino.
 2. Segurança de dados por padrão: nenhuma rota expõe ou aceita `usuarioId` do cliente; senha nunca trafega nem é retornada em texto plano.
 3. MVP enxuto: histórico limitado (3 dietas), sem funcionalidades especulativas além das user stories confirmadas.
 4. Tom sério e disciplinado acima de motivacional/genérico — o produto fala a quem já treina, não a quem está começando a se interessar por fitness.
