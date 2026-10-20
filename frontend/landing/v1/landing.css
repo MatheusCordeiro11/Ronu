@@ -153,7 +153,7 @@ html {
   gap: 14px;
 }
 
-/* Palco das sete ilustrações (landing/v1/modalidades.js): o balanço do
+/* Palco das nove ilustrações (landing/v1/modalidades.js): o balanço do
    quimono fica no palco, então vale para todas. */
 .lp-hero-quimono {
   position: relative;

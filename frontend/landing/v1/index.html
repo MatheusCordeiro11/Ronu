@@ -26,6 +26,9 @@
   <link rel="stylesheet" href="landing.css">
 
   <script src="landing.js" defer></script>
+  <!-- auth.js só traz o RONU_CONFIG (endereço da API, local ou produção):
+       o modalidades.js usa para ler o catálogo. -->
+  <script src="../../js/auth.js" defer></script>
   <script src="modalidades.js" defer></script>
 </head>
 <body>
@@ -67,14 +70,15 @@
             <a class="botao botao-primario botao-grande" href="../../cadastro.html">Criar minha dieta</a>
             <a class="botao botao-fantasma botao-grande lp-fundo" href="#sec-treino">Ver como funciona</a>
           </div>
-          <!-- Só o catálogo real (GET /api/modalidades). Lutas novas são tarefa
-               futura em docs/lacunas-conhecidas.md: não prometer o que não existe. -->
-          <p class="apoio lp-modalidades"><span class="sobre-grade">Grátis · Jiu-jitsu, muay thai, boxe, musculação, futebol, basquete e natação</span></p>
+          <!-- Sem número no HTML inicial: o modalidades.js troca "outras" por
+               "mais N" com o total do catálogo (GET /api/modalidades). Se a
+               chamada falhar, fica este texto, que vale sempre. -->
+          <p class="apoio lp-modalidades"><span class="sobre-grade" id="lp-apoio-modalidades" data-nomes="4">Grátis · Jiu-jitsu, corrida, vôlei, dança e outras modalidades</span></p>
         </div>
 
-        <!-- A ilustração troca sozinha entre as sete modalidades do catálogo
-             (GET /api/modalidades), para mostrar que o Ronu não é só jiu-jitsu
-             (landing/v1/modalidades.js). Cores só pelos tokens do quimono. -->
+        <!-- A ilustração troca sozinha entre nove modalidades do catálogo, para
+             mostrar que o Ronu não é só jiu-jitsu (landing/v1/modalidades.js).
+             Cores só pelos tokens do quimono. -->
         <div class="lp-hero-arte" id="lp-modalidades">
           <div class="quimono lp-hero-quimono lp-ilustracoes">
             <svg class="lp-ilustracao lp-ilustracao-atual" viewBox="0 0 400 460" role="img" aria-label="Quimono de jiu-jitsu" focusable="false">
@@ -87,15 +91,26 @@
               <path class="q-faixa" d="M212 282 L240 368 L222 373 L203 286 Z"/>
               <rect class="q-etiqueta" x="232" y="262" width="22" height="9"/>
             </svg>
-            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Calção de muay thai" focusable="false">
-              <path class="il-papel" d="M92 128 L308 128 L345 392 L218 392 L200 262 L182 392 L55 392 Z"/>
-              <path class="il-sombra" d="M92 128 L120 128 L104 392 L55 392 Z"/>
-              <path class="il-sombra" d="M308 128 L280 128 L296 392 L345 392 Z"/>
-              <path class="il-traco-costura" d="M200 262 L200 150" stroke-width="2"/>
-              <rect class="il-tinta" x="84" y="70" width="232" height="64" rx="8"/>
-              <rect class="il-acento" x="140" y="92" width="120" height="20" rx="3"/>
-              <path class="il-acento" d="M55 368 L182 368 L182 392 L55 392 Z M218 368 L345 368 L345 392 L218 392 Z"/>
-              <path class="il-traco-costura" d="M84 102 L54 128 M316 102 L346 128" stroke-width="6" stroke-linecap="round"/>
+            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Tênis de corrida" focusable="false">
+              <path class="il-traco-costura" d="M20 250 L70 250 M8 285 L60 285 M28 215 L80 215" stroke-width="6" stroke-linecap="round" fill="none"/>
+              <path class="il-papel" d="M78 318 C76 262 92 222 128 208 L196 196 C226 228 266 248 324 266 C354 276 370 296 366 318 Z"/>
+              <path class="il-sombra" d="M78 318 C74 270 84 238 108 226 L118 300 Z"/>
+              <path class="il-traco-tinta" d="M150 214 L176 240 M168 208 L196 234 M186 204 L214 230" stroke-width="6" stroke-linecap="round" fill="none"/>
+              <path class="il-traco-acento" d="M128 292 C190 268 250 276 340 290" stroke-width="12" fill="none" stroke-linecap="round"/>
+              <path class="il-sombra" d="M62 318 L370 318 L366 336 L66 336 Z"/>
+              <path class="il-tinta" d="M66 336 L366 336 C374 336 376 352 364 356 L76 356 C62 356 58 342 66 336 Z"/>
+            </svg>
+            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Bola de vôlei" focusable="false">
+              <!-- Id único na página: o recorte dos painéis da bola. -->
+              <defs><clipPath id="lp-recorte-bola-volei"><circle cx="200" cy="230" r="150"/></clipPath></defs>
+              <circle class="il-papel" cx="200" cy="230" r="150"/>
+              <g clip-path="url(#lp-recorte-bola-volei)">
+                <path class="il-acento" d="M40 150 C130 118 230 150 320 270 L360 240 C266 108 140 80 40 108 Z"/>
+                <path class="il-tinta" d="M100 400 C116 300 186 226 320 196 L340 236 C222 256 160 316 150 410 Z"/>
+                <path class="il-traco-costura" d="M200 80 C150 150 140 250 190 390" stroke-width="6" fill="none"/>
+              </g>
+              <circle class="il-traco-costura" cx="200" cy="230" r="150" fill="none" stroke-width="4"/>
+              <path class="il-traco-costura" d="M120 410 L280 410" stroke-width="8" stroke-linecap="round"/>
             </svg>
             <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Luvas de boxe" focusable="false">
               <g transform="translate(110 40)">
@@ -111,17 +126,30 @@
                 <rect class="il-acento" x="82" y="312" width="106" height="10"/>
               </g>
             </svg>
-            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Halter de musculação" focusable="false">
-              <g transform="rotate(-18 200 230)">
-                <rect class="il-costura" x="70" y="218" width="260" height="24" rx="4"/>
-                <rect class="il-papel" x="40" y="140" width="44" height="180" rx="8"/>
-                <rect class="il-sombra" x="84" y="162" width="30" height="136" rx="6"/>
-                <rect class="il-papel" x="316" y="140" width="44" height="180" rx="8"/>
-                <rect class="il-sombra" x="286" y="162" width="30" height="136" rx="6"/>
-                <rect class="il-acento" x="114" y="208" width="14" height="44" rx="3"/>
-                <rect class="il-acento" x="272" y="208" width="14" height="44" rx="3"/>
-                <path class="il-traco-tinta" d="M160 222 L160 238 M176 222 L176 238 M192 222 L192 238 M208 222 L208 238 M224 222 L224 238 M240 222 L240 238" stroke-width="3"/>
+            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Par de sapatilhas de ponta" focusable="false">
+              <path class="il-traco-acento" d="M120 200 C130 140 170 100 200 76 M190 200 C196 150 198 110 200 76 M216 222 C210 160 204 110 200 76 M290 214 C276 150 236 104 200 76" stroke-width="7" fill="none" stroke-linecap="round"/>
+              <g transform="translate(112 196) rotate(-9 40 100)">
+                <path class="il-papel" d="M0 0 C-10 44 -12 112 4 160 C10 182 22 196 40 198 C58 196 70 182 76 160 C92 112 90 44 80 0 Z"/>
+                <path class="il-sombra-2" d="M0 0 C-10 44 -12 112 4 160 C10 182 22 196 40 198 C22 170 14 110 16 6 Z"/>
+                <path class="il-traco-costura" d="M6 74 C24 86 56 86 74 74" stroke-width="3" fill="none"/>
+                <path class="il-traco-costura" d="M40 86 L40 190" stroke-width="2" fill="none"/>
+                <ellipse class="il-sombra" cx="40" cy="194" rx="15" ry="5"/>
+                <ellipse class="il-sombra" cx="40" cy="2" rx="40" ry="12"/>
+                <ellipse class="il-costura" cx="40" cy="5" rx="29" ry="7"/>
               </g>
+              <g transform="translate(214 214) rotate(9 40 100)">
+                <path class="il-papel" d="M0 0 C-10 44 -12 112 4 160 C10 182 22 196 40 198 C58 196 70 182 76 160 C92 112 90 44 80 0 Z"/>
+                <path class="il-sombra-2" d="M0 0 C-10 44 -12 112 4 160 C10 182 22 196 40 198 C22 170 14 110 16 6 Z"/>
+                <path class="il-traco-costura" d="M6 74 C24 86 56 86 74 74" stroke-width="3" fill="none"/>
+                <path class="il-traco-costura" d="M40 86 L40 190" stroke-width="2" fill="none"/>
+                <ellipse class="il-sombra" cx="40" cy="194" rx="15" ry="5"/>
+                <ellipse class="il-sombra" cx="40" cy="2" rx="40" ry="12"/>
+                <ellipse class="il-costura" cx="40" cy="5" rx="29" ry="7"/>
+              </g>
+              <path class="il-acento" d="M200 76 C170 50 150 58 160 76 C168 90 188 84 200 76 Z M200 76 C230 50 250 58 240 76 C232 90 212 84 200 76 Z"/>
+              <path class="il-traco-acento" d="M196 82 C186 110 180 130 172 150 M204 82 C214 112 224 128 236 146" stroke-width="7" fill="none" stroke-linecap="round"/>
+              <circle class="il-tinta" cx="200" cy="77" r="9"/>
+              <ellipse class="il-costura" cx="200" cy="432" rx="96" ry="8" opacity=".5"/>
             </svg>
             <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Bola de futebol" focusable="false">
               <!-- Id único na página: o recorte dos gomos da bola. -->
@@ -135,11 +163,32 @@
               <circle class="il-traco-costura" cx="200" cy="230" r="150" fill="none" stroke-width="4"/>
               <path class="il-traco-acento" d="M120 410 L280 410" stroke-width="8" stroke-linecap="round"/>
             </svg>
-            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Bola de basquete" focusable="false">
-              <circle class="il-acento" cx="200" cy="230" r="150"/>
-              <path class="il-traco-tinta" d="M200 80 L200 380 M50 230 L350 230 M96 122 C152 172 152 288 96 338 M304 122 C248 172 248 288 304 338" stroke-width="7" fill="none" stroke-linecap="round"/>
-              <path class="il-traco-papel" d="M120 120 C150 98 180 90 205 90" stroke-width="6" fill="none" stroke-linecap="round" opacity=".55"/>
-              <path class="il-traco-costura" d="M120 410 L280 410" stroke-width="8" stroke-linecap="round"/>
+            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Bicicleta" focusable="false">
+              <g class="il-traco-costura" stroke-width="2" fill="none">
+                <path d="M110 220 L110 380 M30 300 L190 300 M53 243 L167 357 M53 357 L167 243"/>
+                <path d="M290 220 L290 380 M210 300 L370 300 M233 243 L347 357 M233 357 L347 243"/>
+              </g>
+              <circle class="il-traco-papel" cx="110" cy="300" r="80" fill="none" stroke-width="14"/>
+              <circle class="il-traco-papel" cx="290" cy="300" r="80" fill="none" stroke-width="14"/>
+              <path class="il-traco-acento" d="M110 300 L186 300 L162 196 Z M162 196 L256 200 L186 300 M256 200 L290 300" stroke-width="12" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+              <path class="il-traco-tinta" d="M162 196 L156 172" stroke-width="10" stroke-linecap="round" fill="none"/>
+              <path class="il-traco-tinta" d="M132 168 L182 168" stroke-width="14" stroke-linecap="round" fill="none"/>
+              <path class="il-traco-tinta" d="M256 200 L266 164 L298 158" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle class="il-tinta" cx="186" cy="300" r="16"/>
+              <path class="il-traco-tinta" d="M186 300 L206 330 M196 330 L218 330" stroke-width="8" stroke-linecap="round" fill="none"/>
+              <circle class="il-costura" cx="110" cy="300" r="9"/><circle class="il-costura" cx="290" cy="300" r="9"/>
+            </svg>
+            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Halter de musculação" focusable="false">
+              <g transform="rotate(-18 200 230)">
+                <rect class="il-costura" x="70" y="218" width="260" height="24" rx="4"/>
+                <rect class="il-papel" x="40" y="140" width="44" height="180" rx="8"/>
+                <rect class="il-sombra" x="84" y="162" width="30" height="136" rx="6"/>
+                <rect class="il-papel" x="316" y="140" width="44" height="180" rx="8"/>
+                <rect class="il-sombra" x="286" y="162" width="30" height="136" rx="6"/>
+                <rect class="il-acento" x="114" y="208" width="14" height="44" rx="3"/>
+                <rect class="il-acento" x="272" y="208" width="14" height="44" rx="3"/>
+                <path class="il-traco-tinta" d="M160 222 L160 238 M176 222 L176 238 M192 222 L192 238 M208 222 L208 238 M224 222 L224 238 M240 222 L240 238" stroke-width="3"/>
+              </g>
             </svg>
             <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Óculos de natação" focusable="false">
               <path class="il-traco-costura" d="M78 222 C20 222 12 292 60 300 M322 222 C380 222 388 292 340 300" stroke-width="12" fill="none" stroke-linecap="round"/>
@@ -156,11 +205,13 @@
             <span class="mono lp-modalidade-nome" id="lp-modalidade-nome" aria-live="polite">Jiu-jitsu</span>
             <div class="lp-pontos" role="group" aria-label="Modalidades">
               <button type="button" class="lp-ponto" aria-label="Mostrar Jiu-jitsu" aria-pressed="true"><span></span></button>
-              <button type="button" class="lp-ponto" aria-label="Mostrar Muay thai" aria-pressed="false"><span></span></button>
+              <button type="button" class="lp-ponto" aria-label="Mostrar Corrida" aria-pressed="false"><span></span></button>
+              <button type="button" class="lp-ponto" aria-label="Mostrar Vôlei" aria-pressed="false"><span></span></button>
               <button type="button" class="lp-ponto" aria-label="Mostrar Boxe" aria-pressed="false"><span></span></button>
-              <button type="button" class="lp-ponto" aria-label="Mostrar Musculação" aria-pressed="false"><span></span></button>
+              <button type="button" class="lp-ponto" aria-label="Mostrar Dança" aria-pressed="false"><span></span></button>
               <button type="button" class="lp-ponto" aria-label="Mostrar Futebol" aria-pressed="false"><span></span></button>
-              <button type="button" class="lp-ponto" aria-label="Mostrar Basquete" aria-pressed="false"><span></span></button>
+              <button type="button" class="lp-ponto" aria-label="Mostrar Ciclismo" aria-pressed="false"><span></span></button>
+              <button type="button" class="lp-ponto" aria-label="Mostrar Musculação" aria-pressed="false"><span></span></button>
               <button type="button" class="lp-ponto" aria-label="Mostrar Natação" aria-pressed="false"><span></span></button>
             </div>
           </div>

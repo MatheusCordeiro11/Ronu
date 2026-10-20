@@ -1,8 +1,12 @@
 // Ronu — Ilustração do topo da landing que troca entre as modalidades
 //
-// Sete ilustrações (as modalidades do catálogo, GET /api/modalidades) ficam
+// Nove ilustrações (modalidades do catálogo, GET /api/modalidades) ficam
 // empilhadas; a atual tem .lp-ilustracao-atual, e o CSS faz a troca só com
 // opacity e transform. A cada ~3,2 s passa para a próxima.
+//
+// Também troca "outras modalidades" por "mais N modalidades" no texto de apoio
+// do topo, com N vindo do mesmo catálogo. Se a chamada falhar, o texto do HTML
+// continua valendo (sem número).
 //
 // Conteúdo que se move sozinho (WCAG 2.2.2): a troca para enquanto o mouse
 // está em cima da ilustração, enquanto algum ponto tem foco e com a aba
@@ -13,7 +17,30 @@
 // reduzido, e os pontos precisam funcionar nos dois casos.
 (function () {
   var INTERVALO_MS = 3200;
-  var NOMES = ['Jiu-jitsu', 'Muay thai', 'Boxe', 'Musculação', 'Futebol', 'Basquete', 'Natação'];
+  // Mesma ordem das ilustrações e dos pontos no index.html.
+  var NOMES = ['Jiu-jitsu', 'Corrida', 'Vôlei', 'Boxe', 'Dança', 'Futebol', 'Ciclismo', 'Musculação', 'Natação'];
+
+  // "Grátis · Jiu-jitsu, corrida, vôlei, dança e mais N modalidades": N é o
+  // total do catálogo menos os nomes já escritos no texto (data-nomes).
+  function atualizarTextoDeApoio() {
+    var texto = document.getElementById('lp-apoio-modalidades');
+    if (!texto || typeof RONU_CONFIG === 'undefined' || !window.fetch) return;
+    fetch(RONU_CONFIG.API_BASE + '/modalidades')
+      .then(function (resposta) {
+        if (!resposta.ok) throw new Error();
+        return resposta.json();
+      })
+      .then(function (catalogo) {
+        var citados = Number(texto.getAttribute('data-nomes')) || 0;
+        var restantes = Array.isArray(catalogo) ? catalogo.length - citados : 0;
+        if (restantes < 1) return;
+        texto.textContent = texto.textContent.replace(
+          'e outras modalidades',
+          'e mais ' + restantes + (restantes === 1 ? ' modalidade' : ' modalidades')
+        );
+      })
+      .catch(function () { /* fica o texto do HTML, sem número */ });
+  }
 
   function iniciar() {
     var area = document.getElementById('lp-modalidades');
@@ -90,6 +117,9 @@
 
     mostrar(0);
     agendar();
+
+    // Por último e isolado: um erro aqui nunca pode parar a troca das ilustrações.
+    try { atualizarTextoDeApoio(); } catch (erro) { /* fica o texto do HTML */ }
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar);
