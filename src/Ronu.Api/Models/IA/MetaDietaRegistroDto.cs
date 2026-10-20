@@ -15,4 +15,7 @@ public class MetaDietaRegistroDto
 
     // Manutenção da fórmula de cada dia; nula quando desconhecida.
     public decimal[]? ManutencoesPorDia { get; set; }
+
+    // Fator de atividade fora do treino desta dieta (MetaDieta.FatorAtividade).
+    public decimal FatorAtividade { get; set; } = Services.IA.CalculadoraManutencao.FatorPadrao;
 }

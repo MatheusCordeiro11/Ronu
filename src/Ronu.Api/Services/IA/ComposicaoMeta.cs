@@ -34,6 +34,8 @@ public static class ComposicaoMeta
         {
             GastoRepouso = partes[0],
             AtividadeForaDoTreino = partes[1],
+            NivelAtividade = formula.NivelAtividade,
+            FatorAtividade = formula.FatorAtividade,
             Treino = formula.Treinos.Select((t, i) => new TreinoComposicaoDto
             {
                 Nome = t.Nome,

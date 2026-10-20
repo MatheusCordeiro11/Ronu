@@ -26,7 +26,8 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
     // Janela: só o comportamento recente, só sob o objetivo atual — dados de
     // outro objetivo (ex.: um período de ganho antes de um de perda) distorceriam
     // o ritmo esperado — e só a partir da primeira dieta (sem dieta, não se sabe
-    // o que a pessoa comeu).
+    // o que a pessoa comeu) da sequência final com o fator de atividade atual
+    // (InicioDaJanela).
     public const int JanelaDias = 28;
 
     // Mínimos para confiar na inclinação: com menos pontos ou um intervalo
@@ -74,7 +75,8 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
         string objetivoAtual,
         decimal metaBaseMediaDiaria,
         IReadOnlyList<decimal> manutencaoAtualPorDia,
-        DateTime agoraUtc)
+        DateTime agoraUtc,
+        decimal fatorAtividadeAtual = CalculadoraManutencao.FatorPadrao)
     {
         if (historico.Count == 0 || metasDietas.Count == 0 || metaBaseMediaDiaria <= 0)
         {
@@ -91,7 +93,15 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
         var tendencia = _calculadoraPesoTendencia.Calcular(
             ordenado.Select(r => new RegistroPesoDto { Data = r.Data, Peso = r.Peso }).ToList());
 
-        var indicesUsados = IndicesDaJanela(ordenado, dietas[0].DataGeracao, objetivoAtual, agoraUtc);
+        // Trocou o nível de atividade e ainda não há dieta com o fator novo: não
+        // há janela, e a meta fica na fórmula pura (o fator novo já é a correção).
+        var inicioJanela = InicioDaJanela(dietas.Select(d => (d.DataGeracao, d.FatorAtividade)).ToList(), fatorAtividadeAtual);
+        if (inicioJanela is null)
+        {
+            return SemAjuste(MotivoAjusteAdaptativo.HistoricoInsuficiente, pontos: 0);
+        }
+
+        var indicesUsados = IndicesDaJanela(ordenado, inicioJanela.Value, objetivoAtual, agoraUtc);
 
         if (!JanelaSuficiente(ordenado, indicesUsados))
         {
@@ -184,13 +194,31 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
     }
 
     /// <summary>
+    /// Onde a janela começa quanto às dietas: a primeira dieta da sequência
+    /// FINAL com o mesmo fator de atividade que a fórmula usa hoje. Trocar o
+    /// nível recomeça a janela, como trocar o objetivo: o erro aprendido com o
+    /// fator antigo, somado ao fator novo, corrigiria em dobro. Nulo se nenhuma
+    /// dieta tem o fator atual (nível trocado e dieta ainda não gerada) ou se
+    /// não há dieta. Recebe as dietas em ordem de data.
+    /// </summary>
+    public static DateTime? InicioDaJanela(IReadOnlyList<(DateTime DataGeracao, decimal Fator)> dietasOrdenadas, decimal fatorAtual)
+    {
+        DateTime? inicio = null;
+        for (var i = dietasOrdenadas.Count - 1; i >= 0 && dietasOrdenadas[i].Fator == fatorAtual; i--)
+        {
+            inicio = dietasOrdenadas[i].DataGeracao;
+        }
+        return inicio;
+    }
+
+    /// <summary>
     /// Os pontos que a meta adaptativa usaria agora (índices de
     /// <paramref name="ordenado"/>, que já vem em ordem de data). Regra única,
     /// usada pelo Calcular e pelo resumo do Progresso (ResumirJanela), para a
     /// tela nunca contar diferente da dieta.
     /// </summary>
     public static List<int> IndicesDaJanela(
-        IReadOnlyList<RegistroPesoAderenciaDto> ordenado, DateTime primeiraDieta, string objetivoAtual, DateTime agoraUtc)
+        IReadOnlyList<RegistroPesoAderenciaDto> ordenado, DateTime inicioDaJanela, string objetivoAtual, DateTime agoraUtc)
     {
         // Início do período do objetivo atual: volta do registro mais recente
         // até a última troca de objetivo.
@@ -200,13 +228,13 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
             inicioObjetivoAtual = i;
         }
 
-        // Últimos 28 dias, mas nunca antes do dia (UTC) da primeira dieta: a
-        // dieta gerada num dia já vale para aquele dia.
+        // Últimos 28 dias, mas nunca antes do dia (UTC) da dieta em que a janela
+        // começa: a dieta gerada num dia já vale para aquele dia.
         var inicioJanela = agoraUtc.AddDays(-JanelaDias);
-        var diaPrimeiraDieta = primeiraDieta.Date;
-        if (inicioJanela < diaPrimeiraDieta)
+        var diaInicio = inicioDaJanela.Date;
+        if (inicioJanela < diaInicio)
         {
-            inicioJanela = diaPrimeiraDieta;
+            inicioJanela = diaInicio;
         }
         return Enumerable.Range(inicioObjetivoAtual, ordenado.Count - inicioObjetivoAtual)
             .Where(i => ordenado[i].Data >= inicioJanela && ordenado[i].Aderencia != NaoSeguiu)
@@ -223,15 +251,16 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
     /// <summary>
     /// Quanto da janela já está preenchido hoje, para o card "Ajuste pelo
     /// progresso" do Progresso: o que a próxima dieta usaria. Sem dieta gerada
-    /// não há janela (nada conta ainda).
+    /// (ou sem dieta com o fator de atividade atual) não há janela: nada conta
+    /// ainda. <paramref name="inicioDaJanela"/> vem de <see cref="InicioDaJanela"/>.
     /// </summary>
     public static ProgressoAjusteDto ResumirJanela(
-        IReadOnlyList<RegistroPesoAderenciaDto> historico, DateTime? primeiraDieta, string objetivoAtual, DateTime agoraUtc)
+        IReadOnlyList<RegistroPesoAderenciaDto> historico, DateTime? inicioDaJanela, string objetivoAtual, DateTime agoraUtc)
     {
         var ordenado = historico.OrderBy(r => r.Data).ToList();
-        var indices = primeiraDieta is null
+        var indices = inicioDaJanela is null
             ? new List<int>()
-            : IndicesDaJanela(ordenado, primeiraDieta.Value, objetivoAtual, agoraUtc);
+            : IndicesDaJanela(ordenado, inicioDaJanela.Value, objetivoAtual, agoraUtc);
 
         return new ProgressoAjusteDto
         {

@@ -12,8 +12,14 @@ public class ComposicaoMetaDto
     // TMB (Mifflin-St Jeor).
     public int GastoRepouso { get; set; }
 
-    // TMB × (1,4 − 1): o dia a dia fora do treino.
+    // TMB × (fator − 1): o dia a dia fora do treino.
     public int AtividadeForaDoTreino { get; set; }
+
+    // Nível de atividade e fator usados (CalculadoraManutencao). Nulos em
+    // dietas geradas antes da pergunta: a tela mostra o ×1,4 de então. Nível
+    // nulo com fator preenchido = a pessoa ainda não tinha respondido.
+    public string? NivelAtividade { get; set; }
+    public decimal? FatorAtividade { get; set; }
 
     // Sessões do dia (vazio em dia de descanso).
     public List<TreinoComposicaoDto> Treino { get; set; } = new();

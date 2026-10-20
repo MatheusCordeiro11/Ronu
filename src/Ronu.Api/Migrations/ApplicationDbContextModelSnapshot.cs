@@ -61,6 +61,10 @@ namespace Ronu.Api.Migrations
                     b.Property<int?>("DietaIAId")
                         .HasColumnType("integer");
 
+                    b.Property<decimal>("FatorAtividade")
+                        .HasPrecision(3, 2)
+                        .HasColumnType("numeric(3,2)");
+
                     b.PrimitiveCollection<decimal[]>("ManutencoesPorDia")
                         .HasColumnType("numeric[]");
 
@@ -232,6 +236,10 @@ namespace Ronu.Api.Migrations
 
                     b.Property<string>("GoogleId")
                         .HasColumnType("text");
+
+                    b.Property<string>("NivelAtividade")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<string>("Nome")
                         .IsRequired()

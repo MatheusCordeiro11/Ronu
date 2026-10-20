@@ -72,8 +72,10 @@ public class GeradorDietaGemini : IGeradorDietaIA
         var caloriasBasePorDia = CalcularCaloriasBasePorDia(contexto, _calculadora);
         var manutencaoPorDia = CalculadoraManutencao.ManutencaoPorDia(contexto, _calculadora);
         var metaBaseMedia = caloriasBasePorDia.Values.Average();
+        var fatorAtividade = CalculadoraManutencao.FatorDoNivel(contexto.NivelAtividade);
         var ajuste = _calculadoraAjuste.Calcular(
-            contexto.HistoricoPeso, contexto.HistoricoMetas, contexto.Objetivo, metaBaseMedia, manutencaoPorDia, DateTime.UtcNow);
+            contexto.HistoricoPeso, contexto.HistoricoMetas, contexto.Objetivo, metaBaseMedia, manutencaoPorDia,
+            DateTime.UtcNow, fatorAtividade);
         RegistrarAjusteAdaptativo(ajuste, metaBaseMedia);
         var metasPorDia = MontarMetasPorDia(caloriasBasePorDia, ajuste.Percentual, contexto.Peso, contexto.Altura);
         var composicaoPorDia = MontarComposicaoPorDia(contexto, _calculadora, ajuste.Percentual, metasPorDia);
@@ -107,7 +109,13 @@ public class GeradorDietaGemini : IGeradorDietaIA
 
                 RegistrarGeracao(dias, respostaIa, uso, versaoModelo, normalizacao, tentativa, cronometro.ElapsedMilliseconds);
 
-                return new DietaSemanalDto { Dias = dias, AjusteAdaptativo = ajuste, ManutencaoPorDia = manutencaoPorDia };
+                return new DietaSemanalDto
+                {
+                    Dias = dias,
+                    AjusteAdaptativo = ajuste,
+                    ManutencaoPorDia = manutencaoPorDia,
+                    FatorAtividade = fatorAtividade
+                };
             }
             catch (RespostaIaInvalidaException ex) when (tentativa < MaximoTentativas)
             {

@@ -22,4 +22,9 @@ public class PerfilRequest
     public required DateOnly DataNascimento { get; set; }
     public string? RotinaDiaria { get; set; }
     public string? OrcamentoSemanal { get; set; }
+
+    // "sentado", "em_pe", "andando" ou "bracal". Diferente dos outros campos,
+    // ausente ou vazio NÃO apaga: mantém o valor salvo (não há opção de voltar
+    // a "sem resposta", e outras telas reenviam o perfil sem este campo).
+    public string? NivelAtividade { get; set; }
 }

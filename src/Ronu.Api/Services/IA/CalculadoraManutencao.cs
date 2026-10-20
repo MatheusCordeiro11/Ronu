@@ -16,9 +16,10 @@ public static class CalculadoraManutencao
     /// versão, ela mediria a mudança da fórmula, não a pessoa. Toda mudança
     /// nesta classe, na CalculadoraGastoCalorico, no RitmoObjetivo ou nos METs
     /// das modalidades exige incrementar (regra no CLAUDE.md).
-    /// 1 = até 2026-10-03 (TMB + MET bruto, ±15%); 2 = revisão de 2026-10-03.
+    /// 1 = até 2026-10-03 (TMB + MET bruto, ±15%); 2 = revisão de 2026-10-03;
+    /// 3 = nível de atividade do dia a dia (fator por resposta, em vez de ×1,4 fixo).
     /// </summary>
-    public const int VersaoFormula = 2;
+    public const int VersaoFormula = 3;
 
     /// <summary>
     /// Mifflin-St Jeor: fórmula de TMB mais precisa e validada
@@ -34,22 +35,60 @@ public static class CalculadoraManutencao
     /// e o efeito térmico dos alimentos), como múltiplo da TMB. A TMB sozinha
     /// é o gasto em repouso absoluto: sem este fator, "manter peso" num dia de
     /// descanso era a própria TMB.
-    /// 1,4 = limite inferior da faixa "sedentário ou atividade leve" (PAL
-    /// 1,40–1,69) da FAO/WHO/UNU, Human Energy Requirements (2001, publ.
-    /// 2004). O limite inferior porque o PAL da FAO inclui o exercício, que
-    /// aqui entra à parte (gasto líquido do treino, CalculadoraGastoCalorico).
-    /// O mesmo valor para todos por enquanto: a pergunta do nível de
-    /// atividade no perfil está em docs/lacunas-conhecidas.md.
+    ///
+    /// Os fatores representam SÓ a atividade fora do exercício: o treino entra
+    /// à parte (gasto líquido da modalidade, CalculadoraGastoCalorico), então
+    /// um fator que incluísse exercício contaria o treino duas vezes.
+    ///
+    /// Fontes e raciocínio (decisão de 2026-10-19):
+    /// - FAO/WHO/UNU, Human Energy Requirements (2001, publ. 2004), Tabela 5.3:
+    ///   sedentário ou leve = PAL 1,40–1,69; ativo ou moderadamente ativo =
+    ///   1,70–1,99 (exemplos: pedreiro e operário de obra); vigoroso =
+    ///   2,00–2,40. Os níveis da FAO descrevem o estilo de vida inteiro e
+    ///   INCLUEM o exercício de lazer (o texto cita que 1 h de exercício
+    ///   leva um sedentário de ~1,55 para ~1,75). Por isso usamos os pisos
+    ///   das faixas, nunca o meio ou o topo.
+    /// - IOM, Dietary Reference Intakes (2005): "sedentário" = PAL 1,0–1,39,
+    ///   só atividades do dia a dia, sem exercício. É a âncora do nível mais
+    ///   baixo, a única fonte sem exercício embutido.
+    /// - A TMB do Ronu é a de Mifflin-St Jeor, um pouco acima da basal da FAO:
+    ///   outro motivo para ficar nos pisos.
+    ///
+    /// Os valores:
+    /// - sentado 1,30: entre o sedentário do IOM (até 1,39) e o piso da FAO (1,40).
+    /// - em pé 1,45: meio da faixa leve da FAO (1,40–1,69).
+    /// - andando 1,60: alto da faixa leve da FAO (até 1,69); equivale ao "pouco
+    ///   ativo" do IOM (1,40–1,59, com 30–60 min de caminhada por dia).
+    /// - braçal 1,75: piso da faixa "ativa" da FAO, a de pedreiro e operário de obra.
+    /// O encaixe de "em pé" e "andando" na escala é JULGAMENTO nosso: as fontes
+    /// não classificam essas ocupações com esses nomes. A meta adaptativa
+    /// corrige o que sobrar.
+    ///
+    /// Sem resposta (nível nulo): 1,4, o valor único de antes desta pergunta
+    /// (piso da faixa sedentário ou leve da FAO). A meta de ninguém muda sem a
+    /// pessoa responder.
     /// </summary>
-    public const decimal FatorAtividadeForaDoTreino = 1.4m;
+    public const decimal FatorPadrao = 1.4m;
+
+    public static readonly IReadOnlyDictionary<string, decimal> FatoresPorNivel = new Dictionary<string, decimal>
+    {
+        ["sentado"] = 1.30m,
+        ["em_pe"] = 1.45m,
+        ["andando"] = 1.60m,
+        ["bracal"] = 1.75m
+    };
+
+    /// <summary>Fator do nível; nível nulo (sem resposta) usa o padrão de antes.</summary>
+    public static decimal FatorDoNivel(string? nivel) =>
+        nivel is not null && FatoresPorNivel.TryGetValue(nivel, out var fator) ? fator : FatorPadrao;
 
     /// <summary>
     /// Gasto do dia sem o objetivo: TMB × fator de atividade fora do treino +
     /// gasto líquido (acima do repouso) do treino daquele dia. A primeira
     /// parcela é a mesma todos os dias — só o treino varia.
     /// </summary>
-    public static decimal Manutencao(decimal tmb, decimal gastoTreinoDia) =>
-        tmb * FatorAtividadeForaDoTreino + gastoTreinoDia;
+    public static decimal Manutencao(decimal tmb, decimal gastoTreinoDia, decimal fatorAtividade) =>
+        tmb * fatorAtividade + gastoTreinoDia;
 
     /// <summary>
     /// Teto do déficit: no máximo 25% da manutenção do dia. É uma rede de
@@ -95,6 +134,7 @@ public static class CalculadoraManutencao
     public static ComposicaoFormulaDia[] ComposicaoPorDia(ContextoDietaDto contexto, ICalculadoraGastoCalorico calculadora)
     {
         var tmb = Tmb(contexto.Sexo, contexto.Peso, contexto.Altura, contexto.Idade);
+        var fator = FatorDoNivel(contexto.NivelAtividade);
 
         // UsuarioModalidade.DiasSemana usa 1 = segunda ... 7 = domingo (ISO 8601).
         return Enumerable.Range(1, 7).Select(dia =>
@@ -107,11 +147,12 @@ public static class CalculadoraManutencao
                     calculadora.CalcularGastoSessao(x.modalidade.MetReferencia, contexto.Peso, x.modalidade.DuracaoHoras)))
                 .ToList();
 
-            var manutencao = Manutencao(tmb, treinos.Sum(t => t.Kcal));
+            var manutencao = Manutencao(tmb, treinos.Sum(t => t.Kcal), fator);
             var (objetivo, tetoAplicado) = AjusteDoObjetivo(manutencao, contexto.Objetivo, contexto.Peso);
 
             return new ComposicaoFormulaDia(
-                dia, tmb, tmb * (FatorAtividadeForaDoTreino - 1), treinos, manutencao, objetivo, tetoAplicado);
+                dia, tmb, tmb * (fator - 1), treinos, manutencao, objetivo, tetoAplicado,
+                contexto.NivelAtividade, fator);
         }).ToArray();
     }
 
@@ -140,7 +181,7 @@ public sealed record TreinoDoDia(int IndiceModalidade, string Nome, decimal Hora
 
 /// <summary>
 /// As parcelas da meta da fórmula de um dia (1 = segunda ... 7 = domingo):
-/// gasto em repouso (TMB) + atividade fora do treino (TMB × 0,4) + treinos
+/// gasto em repouso (TMB) + atividade fora do treino (TMB × (fator − 1)) + treinos
 /// = manutenção; manutenção + objetivo = meta da fórmula, antes da meta
 /// adaptativa e do piso de carboidrato.
 /// </summary>
@@ -151,7 +192,9 @@ public sealed record ComposicaoFormulaDia(
     IReadOnlyList<TreinoDoDia> Treinos,
     decimal Manutencao,
     decimal Objetivo,
-    bool TetoDeficitAplicado)
+    bool TetoDeficitAplicado,
+    string? NivelAtividade,
+    decimal FatorAtividade)
 {
     public decimal MetaFormula => Manutencao + Objetivo;
 }

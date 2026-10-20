@@ -86,8 +86,8 @@ public class CalculadoraManutencaoTests
     [Fact]
     public void Descanso_E_Tmb_Vezes_Fator_De_Atividade()
     {
-        Assert.Equal(1.4m, CalculadoraManutencao.FatorAtividadeForaDoTreino);
-        Assert.Equal(1767.5m * 1.4m, CalculadoraManutencao.Manutencao(1767.5m, 0m)); // 2474,5
+        Assert.Equal(1.4m, CalculadoraManutencao.FatorPadrao);
+        Assert.Equal(1767.5m * 1.4m, CalculadoraManutencao.Manutencao(1767.5m, 0m, CalculadoraManutencao.FatorPadrao)); // 2474,5
     }
 
     // Perfil A do g3: homem 80 kg, 178 cm, 30 anos, manter peso, jiu-jitsu 1,5 h seg/ter/qui/sex.

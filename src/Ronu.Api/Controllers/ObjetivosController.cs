@@ -161,11 +161,20 @@ public class ObjetivosController : ControllerBase
         // A janela conta a partir da primeira dieta de todas (MetasDieta guarda
         // todas; DietasIA só as 3 mais recentes), com o mesmo histórico que a
         // geração da dieta usa (ContextoDietaBuilder).
-        var primeiraDieta = await _context.MetasDieta
+        // Com o fator de atividade atual: trocar o nível recomeça a janela
+        // (CalculadoraAjusteAdaptativo.InicioDaJanela).
+        var dietas = await _context.MetasDieta
             .Where(m => m.UsuarioId == UsuarioIdLogado)
             .OrderBy(m => m.DataGeracao)
-            .Select(m => (DateTime?)m.DataGeracao)
+            .Select(m => new { m.DataGeracao, m.FatorAtividade })
+            .ToListAsync();
+        var nivelAtividade = await _context.Usuarios
+            .Where(u => u.Id == UsuarioIdLogado)
+            .Select(u => u.NivelAtividade)
             .FirstOrDefaultAsync();
+        var inicioDaJanela = CalculadoraAjusteAdaptativo.InicioDaJanela(
+            dietas.Select(d => (d.DataGeracao, d.FatorAtividade)).ToList(),
+            CalculadoraManutencao.FatorDoNivel(nivelAtividade));
         var historico = await _context.ObjetivosUsuario
             .Where(o => o.UsuarioId == UsuarioIdLogado)
             .Select(o => new RegistroPesoAderenciaDto { Data = o.DataRegistro, Peso = o.Peso, Aderencia = o.Aderencia, Objetivo = o.Objetivo })
@@ -182,7 +191,7 @@ public class ObjetivosController : ControllerBase
             Aderencia = objetivo.Aderencia,
             RegistradoHoje = objetivoDeHoje?.Id == objetivo.Id,
             TemDieta = temDieta,
-            ProgressoAjuste = CalculadoraAjusteAdaptativo.ResumirJanela(historico, primeiraDieta, objetivoMaisRecente, DateTime.UtcNow)
+            ProgressoAjuste = CalculadoraAjusteAdaptativo.ResumirJanela(historico, inicioDaJanela, objetivoMaisRecente, DateTime.UtcNow)
         };
     }
 

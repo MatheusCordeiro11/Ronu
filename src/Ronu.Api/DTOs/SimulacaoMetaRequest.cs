@@ -30,6 +30,10 @@ public class SimulacaoMetaRequest
     // "perder peso", "manter peso" ou "ganhar peso".
     public string? Objetivo { get; set; }
 
+    // "sentado", "em_pe", "andando" ou "bracal"; ausente usa o nível salvo
+    // (e, sem nível salvo, o fator padrão de antes da pergunta).
+    public string? NivelAtividade { get; set; }
+
     // Se vier (mesmo vazia), substitui a lista salva. Mesmas regras do
     // POST /api/usuarios/modalidades.
     public List<UsuarioModalidadeRequest>? Modalidades { get; set; }

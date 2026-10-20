@@ -54,6 +54,9 @@ public class AtividadeSimulacaoDto
 {
     public decimal Fator { get; set; }
 
+    // O nível usado; nulo = sem resposta (fator padrão).
+    public string? Nivel { get; set; }
+
     // TMB × (Fator − 1): o dia a dia fora do treino.
     public int Kcal { get; set; }
 }

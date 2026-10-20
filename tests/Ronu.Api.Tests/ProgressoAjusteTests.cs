@@ -27,7 +27,7 @@ public class ProgressoAjusteTests
     {
         var historico = new[] { Registro(20), Registro(15), Registro(10), Registro(5), Registro(0) };
 
-        var resumo = CalculadoraAjusteAdaptativo.ResumirJanela(historico, primeiraDieta: null, "perder peso", Agora);
+        var resumo = CalculadoraAjusteAdaptativo.ResumirJanela(historico, inicioDaJanela: null, "perder peso", Agora);
 
         Assert.Equal((0, 0, false), (resumo.Pesagens, resumo.DiasCobertos, resumo.Suficiente));
     }

@@ -90,6 +90,7 @@ public class RepositorioDietaIA : IRepositorioDietaIA
             VersaoFormula = CalculadoraManutencao.VersaoFormula,
             MetasPorDia = metas,
             ManutencoesPorDia = dieta.ManutencaoPorDia,
+            FatorAtividade = dieta.FatorAtividade ?? CalculadoraManutencao.FatorPadrao,
             PercentualAjusteAdaptativo = dieta.AjusteAdaptativo?.Percentual
         };
     }

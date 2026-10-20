@@ -20,6 +20,9 @@ public class ContextoDietaDto
     public string? RotinaDiaria { get; set; }
     public string? OrcamentoSemanal { get; set; }
 
+    // Nível de atividade fora do treino (Usuario.NivelAtividade); nulo = sem resposta.
+    public string? NivelAtividade { get; set; }
+
     // Histórico de peso e aderência para a meta calórica adaptativa. Entra só
     // no cálculo das metas (GeradorDietaGemini), não no prompt.
     public List<RegistroPesoAderenciaDto> HistoricoPeso { get; set; } = new();

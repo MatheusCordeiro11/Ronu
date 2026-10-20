@@ -50,6 +50,7 @@ public class PerfilController : ControllerBase
         DataNascimento = usuario.DataNascimento,
         RotinaDiaria = usuario.RotinaDiaria,
         OrcamentoSemanal = usuario.OrcamentoSemanal,
+        NivelAtividade = usuario.NivelAtividade,
         Nome = usuario.Nome,
         Email = usuario.Email,
         // A coluna guarda "" quando não há UF; a resposta devolve null.
@@ -81,6 +82,11 @@ public class PerfilController : ControllerBase
             return BadRequest(new { mensagem = "Orçamento semanal inválido." });
         }
 
+        if (!string.IsNullOrEmpty(request.NivelAtividade) && !RegrasDadosCorporais.NiveisAtividade.Contains(request.NivelAtividade))
+        {
+            return BadRequest(new { mensagem = RegrasDadosCorporais.MensagemNivelAtividade });
+        }
+
         // Mesmas regras da simulação (RegrasDadosCorporais); altura pelo [Range]
         // do PerfilRequest. Valor fora do conjunto cairia na fórmula errada sem aviso.
         if (!RegrasDadosCorporais.Sexos.Contains(request.Sexo))
@@ -101,6 +107,12 @@ public class PerfilController : ControllerBase
         usuario.DataNascimento = request.DataNascimento;
         usuario.RotinaDiaria = request.RotinaDiaria;
         usuario.OrcamentoSemanal = request.OrcamentoSemanal;
+
+        // Ausente ou vazio mantém o salvo (ver PerfilRequest.NivelAtividade).
+        if (!string.IsNullOrEmpty(request.NivelAtividade))
+        {
+            usuario.NivelAtividade = request.NivelAtividade;
+        }
 
         await _context.SaveChangesAsync();
 

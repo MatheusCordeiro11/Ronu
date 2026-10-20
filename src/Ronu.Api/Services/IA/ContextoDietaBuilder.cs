@@ -105,7 +105,8 @@ public class ContextoDietaBuilder : IContextoDietaBuilder
                 DataGeracao = m.DataGeracao,
                 VersaoFormula = m.VersaoFormula,
                 MetasPorDia = m.MetasPorDia,
-                ManutencoesPorDia = m.ManutencoesPorDia
+                ManutencoesPorDia = m.ManutencoesPorDia,
+                FatorAtividade = m.FatorAtividade
             })
             .ToListAsync();
 
@@ -132,6 +133,7 @@ public class ContextoDietaBuilder : IContextoDietaBuilder
             Estado = usuario.Estado,
             RotinaDiaria = usuario.RotinaDiaria,
             OrcamentoSemanal = usuario.OrcamentoSemanal,
+            NivelAtividade = usuario.NivelAtividade,
             HistoricoPeso = historicoPeso,
             HistoricoMetas = historicoMetas
         };

@@ -35,6 +35,13 @@ public class MetaDieta
     // quando desconhecida (dietas anteriores a esta tabela).
     public decimal[]? ManutencoesPorDia { get; set; }
 
+    // Fator de atividade fora do treino usado nesta dieta (1,4 quando a pessoa
+    // não tinha respondido o nível). A janela da meta adaptativa recomeça
+    // quando o fator muda: o erro aprendido com o fator antigo, somado ao
+    // fator novo, corrigiria em dobro. Linhas anteriores à pergunta: 1,40.
+    [Precision(3, 2)]
+    public decimal FatorAtividade { get; set; } = 1.40m;
+
     // Percentual da meta adaptativa aplicado nesta dieta. Só registro: o
     // cálculo não usa (nulo nas dietas anteriores à meta adaptativa).
     public decimal? PercentualAjusteAdaptativo { get; set; }

@@ -18,11 +18,13 @@ public interface ICalculadoraAjusteAdaptativo
     /// <param name="metaBaseMediaDiaria">Média das 7 metas diárias da fórmula atual (sem o ajuste adaptativo), em kcal.</param>
     /// <param name="manutencaoAtualPorDia">Manutenção da fórmula atual por dia (índice 0 = segunda), para os períodos sem manutenção comparável.</param>
     /// <param name="agoraUtc">Momento do cálculo (define a janela dos últimos 28 dias).</param>
+    /// <param name="fatorAtividadeAtual">Fator de atividade fora do treino da fórmula atual. A janela só conta dietas geradas com este mesmo fator (CalculadoraAjusteAdaptativo.InicioDaJanela).</param>
     AjusteAdaptativoDto Calcular(
         IReadOnlyList<RegistroPesoAderenciaDto> historico,
         IReadOnlyList<MetaDietaRegistroDto> metasDietas,
         string objetivoAtual,
         decimal metaBaseMediaDiaria,
         IReadOnlyList<decimal> manutencaoAtualPorDia,
-        DateTime agoraUtc);
+        DateTime agoraUtc,
+        decimal fatorAtividadeAtual = CalculadoraManutencao.FatorPadrao);
 }

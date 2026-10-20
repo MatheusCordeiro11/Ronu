@@ -37,6 +37,12 @@ public class Usuario
     public string? RotinaDiaria { get; set; }
     public string? OrcamentoSemanal { get; set; }
 
+    // Como é o dia fora do treino: "sentado", "em_pe", "andando" ou "bracal"
+    // (CalculadoraManutencao.FatoresPorNivel). Nulo = não respondeu: a fórmula
+    // usa o fator de antes da pergunta (CalculadoraManutencao.FatorPadrao).
+    [MaxLength(20)]
+    public string? NivelAtividade { get; set; }
+
     public ICollection<UsuarioModalidade> UsuarioModalidades { get; set; } = new List<UsuarioModalidade>();
     public ICollection<ObjetivoUsuario> ObjetivosUsuario { get; set; } = new List<ObjetivoUsuario>();
     public ICollection<PreferenciaAlimentar> PreferenciasAlimentares { get; set; } = new List<PreferenciaAlimentar>();

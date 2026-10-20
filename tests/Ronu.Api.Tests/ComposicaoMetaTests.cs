@@ -120,7 +120,7 @@ public class ComposicaoMetaTests
     public void Composicao_Salva_Mostra_O_Piso_Quando_A_Meta_Subiu()
     {
         // Dia sem treino que precisou subir 120,3 kcal para caber o mínimo.
-        var dia = new ComposicaoFormulaDia(3, 1300.25m, 520.1m, Array.Empty<TreinoDoDia>(), 1820.35m, -455.09m, true);
+        var dia = new ComposicaoFormulaDia(3, 1300.25m, 520.1m, Array.Empty<TreinoDoDia>(), 1820.35m, -455.09m, true, null, 1.4m);
         var metaFinal = dia.MetaFormula + 120.3m;
 
         var c = ComposicaoMeta.Montar(dia, 0m, metaFinal);

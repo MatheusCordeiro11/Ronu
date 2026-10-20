@@ -64,6 +64,11 @@ public class MetasController : ControllerBase
             return BadRequest(new { mensagem = RegrasDadosCorporais.MensagemObjetivo });
         }
 
+        if (request.NivelAtividade is not null && !RegrasDadosCorporais.NiveisAtividade.Contains(request.NivelAtividade))
+        {
+            return BadRequest(new { mensagem = RegrasDadosCorporais.MensagemNivelAtividade });
+        }
+
         if (request.DataNascimento is { } nascimentoInformado
             && RegrasDadosCorporais.ValidarNascimento(nascimentoInformado, hoje) is { } erroNascimento)
         {
@@ -141,6 +146,7 @@ public class MetasController : ControllerBase
             Idade = idade,
             Peso = peso,
             Objetivo = objetivo,
+            NivelAtividade = request.NivelAtividade ?? usuario.NivelAtividade,
             Modalidades = modalidades.Select(m => new ModalidadeContextoDto
             {
                 Nome = m.Nome,
@@ -271,7 +277,8 @@ public class MetasController : ControllerBase
             },
             AtividadeForaDoTreino = new AtividadeSimulacaoDto
             {
-                Fator = CalculadoraManutencao.FatorAtividadeForaDoTreino,
+                Fator = composicao[0].FatorAtividade,
+                Nivel = composicao[0].NivelAtividade,
                 Kcal = atividade
             },
             RitmoEsperadoKgSemana = Math.Round(RitmoObjetivo.KgPorSemana(contexto.Objetivo, contexto.Peso), 2, MidpointRounding.AwayFromZero),

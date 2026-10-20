@@ -18,6 +18,11 @@ public static class RegrasDadosCorporais
     public static readonly IReadOnlySet<string> Sexos = new HashSet<string> { "Masculino", "Feminino" };
     public static readonly IReadOnlySet<string> Objetivos = new HashSet<string> { "perder peso", "manter peso", "ganhar peso" };
 
+    // Níveis de atividade fora do treino (Usuario.NivelAtividade). Uma fonte
+    // só: as chaves da tabela de fatores da fórmula.
+    public static readonly IReadOnlySet<string> NiveisAtividade =
+        new HashSet<string>(CalculadoraManutencao.FatoresPorNivel.Keys);
+
     // Decisão de 2026-10-17: o Ronu é para adultos. A fórmula de Mifflin-St
     // Jeor foi validada em adultos, e dieta para menor de idade pede
     // acompanhamento profissional.
@@ -28,6 +33,7 @@ public static class RegrasDadosCorporais
 
     public const string MensagemSexo = "Sexo inválido.";
     public const string MensagemObjetivo = "Objetivo inválido.";
+    public const string MensagemNivelAtividade = "Nível de atividade inválido.";
     public const string MensagemAltura = "Informe uma altura entre 1,00 e 2,50 m.";
     public const string MensagemPeso = "Informe um peso entre 20 e 300 kg.";
     public const string MensagemNascimentoFuturo = "A data de nascimento não pode ser no futuro.";

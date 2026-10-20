@@ -20,4 +20,9 @@ public class DietaSemanalDto
     // da API: a tabela MetasDieta é o lugar dela.
     [JsonIgnore]
     public decimal[]? ManutencaoPorDia { get; set; }
+
+    // Fator de atividade fora do treino usado nesta dieta, também só para o
+    // RepositorioDietaIA gravar em MetaDieta.
+    [JsonIgnore]
+    public decimal? FatorAtividade { get; set; }
 }
