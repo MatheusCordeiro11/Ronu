@@ -92,6 +92,10 @@ namespace Ronu.Api.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Categoria")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<decimal>("MetReferencia")
                         .HasColumnType("numeric");
 

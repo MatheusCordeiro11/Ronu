@@ -27,6 +27,11 @@ public class ModalidadesController : ControllerBase
     private int UsuarioIdLogado =>
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
+    /// <summary>
+    /// Catálogo inteiro, na ordem da tela: por grupo (CategoriasModalidade.Ordem)
+    /// e, dentro dele, por nome. A ordem é feita na memória: são poucas linhas
+    /// e a ordem dos grupos não é alfabética.
+    /// </summary>
     [HttpGet("api/modalidades")]
     public async Task<IActionResult> ListarTodas()
     {
@@ -35,11 +40,16 @@ public class ModalidadesController : ControllerBase
             {
                 Id = m.Id,
                 Nome = m.Nome,
-                MetReferencia = m.MetReferencia
+                MetReferencia = m.MetReferencia,
+                Categoria = m.Categoria
             })
             .ToListAsync();
 
-        return Ok(modalidades);
+        var nomes = StringComparer.Create(new System.Globalization.CultureInfo("pt-BR"), ignoreCase: true);
+        return Ok(modalidades
+            .OrderBy(m => CategoriasModalidade.Posicao(m.Categoria))
+            .ThenBy(m => m.Nome, nomes)
+            .ToList());
     }
 
     /// <summary>
@@ -124,7 +134,8 @@ public class ModalidadesController : ControllerBase
                 {
                     Id = um.Modalidade.Id,
                     Nome = um.Modalidade.Nome,
-                    MetReferencia = um.Modalidade.MetReferencia
+                    MetReferencia = um.Modalidade.MetReferencia,
+                    Categoria = um.Modalidade.Categoria
                 }
             })
             .ToListAsync();

@@ -77,6 +77,40 @@ public class FormulaPontaAPontaTests
         Assert.Contains("13. A soma de proteína, carboidrato e gordura de cada dia deve ficar dentro de uma margem de 10%", gemini.Prompt);
         Assert.Contains("atividade\ndo dia a dia fora do treino", gemini.Prompt.Replace("\r\n", "\n"));
         Assert.DoesNotContain("taxa metabólica basal + gasto", gemini.Prompt);
+        Assert.Contains("Você é um nutricionista esportivo.", gemini.Prompt);
+        Assert.Contains("- Modalidades praticadas (com os dias da semana de cada uma): Jiu-jitsu (Segunda-feira, Terça-feira, Quinta-feira, Sexta-feira)", gemini.Prompt);
+    }
+
+    // "Não treino no momento": a dieta sai com os 7 dias iguais (repouso + dia a
+    // dia), a composição sem treino e um prompt que não presume treino.
+    [Fact]
+    public async Task Sem_Nenhuma_Modalidade_Gera_Sem_Treino_E_O_Prompt_Nao_Presume_Treino()
+    {
+        var gemini = new GeminiQueGuardaOPrompt();
+        var gerador = new GeradorDietaGemini(
+            new HttpClient(gemini), new CalculadoraGastoCalorico(),
+            new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia()),
+            new GeminiOptions { ApiKey = "teste" }, NullLogger<GeradorDietaGemini>.Instance);
+        var contexto = PerfilA();
+        contexto.Modalidades = new();
+
+        var dieta = await gerador.GerarDietaAsync(contexto);
+
+        Assert.All(dieta.Dias, d => Assert.Equal(2474.5m, d.MetaCalculada.Calorias));
+        Assert.All(dieta.ManutencaoPorDia!, m => Assert.Equal(2474.5m, m));
+        Assert.All(dieta.Dias, d =>
+        {
+            Assert.Empty(d.ComposicaoMeta!.Treino);
+            Assert.Equal((1768, 707, 2475), (d.ComposicaoMeta.GastoRepouso, d.ComposicaoMeta.AtividadeForaDoTreino, d.ComposicaoMeta.Meta));
+        });
+
+        Assert.Contains("Você é um nutricionista. Monte", gemini.Prompt);
+        Assert.Contains("- Treino: não treina no momento (nenhuma modalidade cadastrada)", gemini.Prompt);
+        Assert.Contains("o plano não deve citar treino", gemini.Prompt);
+        Assert.DoesNotContain("esportivo", gemini.Prompt);
+        Assert.DoesNotContain("Modalidades praticadas", gemini.Prompt);
+        Assert.DoesNotContain("dias de treino têm meta mais alta", gemini.Prompt);
+        Assert.Contains("- Quarta-feira: 2475 kcal", gemini.Prompt);
     }
 
     // Guarda o texto do prompt e devolve uma semana válida, sem refeições.

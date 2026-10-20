@@ -14,5 +14,9 @@ public class Modalidade
     // base para estimar o gasto calórico do usuário nessa atividade. Valores e
     // premissas (aula de luta em blocos) em Data/MetsCompendio2024.cs.
     public decimal MetReferencia { get; set; }
+
+    // Grupo do catálogo na tela (Lutas, Esportes, Condicionamento, Corpo e
+    // movimento): valores em Data/CategoriasModalidade.cs.
+    public required string Categoria { get; set; }
     public ICollection<UsuarioModalidade> UsuarioModalidades { get; set; } = new List<UsuarioModalidade>();
 }

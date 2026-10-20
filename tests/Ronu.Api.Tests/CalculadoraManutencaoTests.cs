@@ -50,7 +50,25 @@ public class CalculadoraManutencaoTests
         Assert.Equal(7.0m, mets["Futebol"]);
         Assert.Equal(7.5m, mets["Basquete"]);
         Assert.Equal(5.8m, mets["Natação"]);
-        Assert.Equal(7, mets.Count);
+
+        // Catálogo ampliado (AmpliaCatalogoModalidades).
+        foreach (var luta in new[] { "Judô", "Karatê", "MMA", "Wrestling", "Taekwondo", "Kickboxing", "Capoeira" })
+        {
+            Assert.Equal(7.8m, mets[luta]);
+        }
+        Assert.Equal(7.0m, mets["Vôlei"]);             // média de 6,0 (15711) e 8,0 (15725)
+        Assert.Equal(7.8m, mets["Futsal"]);
+        Assert.Equal(8.0m, mets["Handebol"]);
+        Assert.Equal(6.8m, mets["Tênis"]);
+        Assert.Equal(6.0m, mets["Beach tennis"]);
+        Assert.Equal(7.5m, mets["Corrida"]);
+        Assert.Equal(8.0m, mets["Ciclismo"]);
+        Assert.Equal(4.8m, mets["Caminhada"]);
+        Assert.Equal(5.5m, mets["Treino funcional"]);  // 0,5·3,5 (02054) + 0,5·7,5 (02040)
+        Assert.Equal(5.0m, mets["Dança"]);
+        Assert.Equal(2.3m, mets["Yoga"]);
+        Assert.Equal(2.8m, mets["Pilates"]);
+        Assert.Equal(26, mets.Count);
     }
 
     // MET líquido: o repouso (1 MET) já está na TMB e não entra de novo.

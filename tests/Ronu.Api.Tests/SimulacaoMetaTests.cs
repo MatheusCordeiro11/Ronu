@@ -30,8 +30,8 @@ public class SimulacaoMetaTests
         ajustar?.Invoke(usuario);
         banco.Usuarios.Add(usuario);
         banco.Modalidades.AddRange(
-            new Modalidade { Id = 1, Nome = "Jiu-jitsu", MetReferencia = 7.8m },
-            new Modalidade { Id = 2, Nome = "Musculação", MetReferencia = 3.5m });
+            new Modalidade { Id = 1, Nome = "Jiu-jitsu", MetReferencia = 7.8m, Categoria = CategoriasModalidade.Lutas },
+            new Modalidade { Id = 2, Nome = "Musculação", MetReferencia = 3.5m, Categoria = CategoriasModalidade.Condicionamento });
         banco.SaveChanges();
 
         var controller = new MetasController(banco, Calc, new CalculadoraPesoTendencia())
@@ -167,6 +167,26 @@ public class SimulacaoMetaTests
 
         Assert.Empty(r.Modalidades);
         Assert.All(r.Dias, d => Assert.Equal(0, d.TreinoKcal));
+    }
+
+    // "Não treino no momento": nenhuma modalidade salva e o pedido sem lista.
+    // Todo dia é o mesmo: repouso + dia a dia + objetivo, sem treino.
+    [Fact]
+    public async Task Sem_Nenhuma_Modalidade_Salva_Todos_Os_Dias_Sao_Iguais_E_Sem_Treino()
+    {
+        var (_, controller, _) = Montar();
+        var pedido = PedidoCompleto();
+        pedido.Modalidades = null;
+
+        var r = Ok(await controller.Simular(pedido));
+
+        Assert.Empty(r.Modalidades);
+        Assert.All(r.Dias, d =>
+        {
+            Assert.Equal(0, d.TreinoKcal);
+            Assert.Equal(r.GastoRepouso.Total + r.AtividadeForaDoTreino.Kcal, d.Manutencao);
+        });
+        Assert.Single(r.Dias.Select(d => d.MetaFormula).Distinct());
     }
 
     [Theory]

@@ -47,13 +47,56 @@ public static class MetsCompendio2024
     public static readonly Codigo Basquete = new("15055", "Basketball, general", 7.5m);
     public static readonly Codigo Natacao = new("18240", "Swimming laps, freestyle, slow, recreational", 5.8m);
 
+    // Catálogo ampliado (migration AmpliaCatalogoModalidades, valores conferidos
+    // no site em 2026-10-19).
+    //
+    // Lutas sem código próprio de treino usam a mesma aula das artes marciais
+    // (15425 + 15430): judô, karatê, kickboxing e taekwondo estão citados no
+    // 15430; MMA, wrestling e capoeira não têm código de treino. Os códigos
+    // específicos que existem descrevem luta, não treino, e ficam de fora pelo
+    // critério: 15730 "Wrestling, competitive (one match = 5 minutes)" 6,0;
+    // 15432 "Taekwondo, combat simulation" 14,3. O 15433 "Judo" 11,3 não diz o
+    // tipo de treino, e o 15457 "Kickboxing" 7,3 ficaria diferente do Muay
+    // Thai, de treino quase igual.
+
+    // Vôlei: o recreativo (15710, 4,0) subestima quem treina. Média da quadra
+    // competitiva e da praia, porque "Vôlei" cobre as duas.
+    public static readonly Codigo VoleiQuadra = new("15711", "Volleyball, competitive, in gymnasium", 6.0m);
+    public static readonly Codigo VoleiPraia = new("15725", "Volleyball, beach, in sand", 8.0m);
+    public static readonly Codigo Futsal = new("15195", "Futsal", 7.8m);
+    // O 15320 "Handball, general (Taylor Code 520)" 12,0 é o handebol americano
+    // (de parede), outro esporte.
+    public static readonly Codigo Handebol = new("15330", "Handball, team", 8.0m);
+    public static readonly Codigo Tenis = new("15675", "Tennis, general, moderate effort", 6.8m);
+    // Beach tennis não tem código: é jogado em dupla; a areia pesa, mas os
+    // pontos são curtos.
+    public static readonly Codigo TenisDuplas = new("15680", "Tennis, doubles (Taylor Code 430)", 6.0m);
+
+    // Corrida no ritmo de quem não é atleta (o 12145 "Running, self-selected
+    // pace" 10,5 é ritmo de corredor).
+    public static readonly Codigo Corrida = new("12020", "Jogging, general, self-selected pace", 7.5m);
+    public static readonly Codigo Ciclismo = new("01030", "Bicycling, 12-13.9 mph, leisure, moderate effort", 8.0m);
+    public static readonly Codigo Caminhada =
+        new("17200", "Walking, 3.5 to 3.9 mph, level, brisk, firm surface, walking for exercise", 4.8m);
+    // Treino funcional não tem código: aula com um bloco de força (Musculacao)
+    // e um de circuito, pela mesma premissa de tempo das lutas.
+    public static readonly Codigo Circuito =
+        new("02040", "Circuit training, including kettlebells, some aerobic movement with minimal rest", 7.5m);
+
+    public static readonly Codigo Danca = new("03010", "Ballet, modern, or jazz general, rehearsal or class", 5.0m);
+    public static readonly Codigo Yoga = new("02175", "Yoga, General", 2.3m);
+    public static readonly Codigo Pilates = new("02105", "Pilates, general", 2.8m);
+
     /// <summary>MET de uma aula com um bloco leve e um intenso, pela premissa de tempo.</summary>
     public static decimal Aula(Codigo blocoLeve, Codigo blocoIntenso) =>
         Math.Round((1 - FracaoTempoBlocoIntenso) * blocoLeve.Met + FracaoTempoBlocoIntenso * blocoIntenso.Met, 2);
 
+    /// <summary>Média simples de dois códigos (sem premissa de tempo).</summary>
+    public static decimal Media(Codigo a, Codigo b) => Math.Round((a.Met + b.Met) / 2, 2);
+
     /// <summary>
     /// MET por nome de modalidade, como gravado em "Modalidades"."Nome".
-    /// Com a premissa de 50/50: jiu-jitsu e muay thai 7,8; boxe 6,8.
+    /// Com a premissa de 50/50: lutas 7,8 (boxe 6,8); treino funcional 5,5.
     /// </summary>
     public static IReadOnlyDictionary<string, decimal> PorModalidade => new Dictionary<string, decimal>
     {
@@ -63,6 +106,26 @@ public static class MetsCompendio2024
         ["Musculação"] = Musculacao.Met,
         ["Futebol"] = Futebol.Met,
         ["Basquete"] = Basquete.Met,
-        ["Natação"] = Natacao.Met
+        ["Natação"] = Natacao.Met,
+
+        ["Judô"] = Aula(ArtesMarciaisTecnica, ArtesMarciaisRola),
+        ["Karatê"] = Aula(ArtesMarciaisTecnica, ArtesMarciaisRola),
+        ["MMA"] = Aula(ArtesMarciaisTecnica, ArtesMarciaisRola),
+        ["Wrestling"] = Aula(ArtesMarciaisTecnica, ArtesMarciaisRola),
+        ["Taekwondo"] = Aula(ArtesMarciaisTecnica, ArtesMarciaisRola),
+        ["Kickboxing"] = Aula(ArtesMarciaisTecnica, ArtesMarciaisRola),
+        ["Capoeira"] = Aula(ArtesMarciaisTecnica, ArtesMarciaisRola),
+        ["Vôlei"] = Media(VoleiQuadra, VoleiPraia),
+        ["Futsal"] = Futsal.Met,
+        ["Handebol"] = Handebol.Met,
+        ["Tênis"] = Tenis.Met,
+        ["Beach tennis"] = TenisDuplas.Met,
+        ["Corrida"] = Corrida.Met,
+        ["Ciclismo"] = Ciclismo.Met,
+        ["Caminhada"] = Caminhada.Met,
+        ["Treino funcional"] = Aula(Musculacao, Circuito),
+        ["Dança"] = Danca.Met,
+        ["Yoga"] = Yoga.Met,
+        ["Pilates"] = Pilates.Met
     };
 }

@@ -421,8 +421,30 @@ public class GeradorDietaGemini : IGeradorDietaIA
             ? string.Empty
             : $"\n\nOrçamento semanal da pessoa para alimentação: {contexto.OrcamentoSemanal}";
 
+        // "Não treino no momento" (zero modalidades): o prompt não presume
+        // treino — sem "esportivo", sem lista vazia de modalidades e sem a
+        // frase dos dias de treino e de descanso, que não existem.
+        var semTreino = contexto.Modalidades.Count == 0;
+        var papel = semTreino ? "nutricionista" : "nutricionista esportivo";
+        var treinoTexto = semTreino
+            ? "- Treino: não treina no momento (nenhuma modalidade cadastrada)"
+            : $"- Modalidades praticadas (com os dias da semana de cada uma): {modalidadesTexto}";
+        var metasIntro = semTreino
+            ? """
+              Metas diárias (calorias e macronutrientes), calculadas a partir do gasto em repouso e da
+              atividade do dia a dia, já com o déficit ou superávit do objetivo. A pessoa não treina
+              no momento: não há dia de treino nem de descanso, e o plano não deve citar treino,
+              pré-treino nem pós-treino:
+              """
+            : """
+              Metas diárias (calorias e macronutrientes), calculadas a partir do gasto em repouso, da atividade
+              do dia a dia fora do treino e do gasto real do treino de CADA dia específico, já
+              com o déficit ou superávit do objetivo — dias de treino têm meta mais alta que
+              dias de descanso:
+              """;
+
         return $"""
-            Você é um nutricionista esportivo. Monte um plano alimentar semanal (7 dias)
+            Você é um {papel}. Monte um plano alimentar semanal (7 dias)
             para uma pessoa com o seguinte perfil:
 
             - Sexo: {contexto.Sexo}
@@ -430,12 +452,9 @@ public class GeradorDietaGemini : IGeradorDietaIA
             - Peso: {contexto.Peso} kg
             - Altura: {contexto.Altura} cm
             - Objetivo: {contexto.Objetivo}
-            - Modalidades praticadas (com os dias da semana de cada uma): {modalidadesTexto}{estadoTexto}
+            {treinoTexto}{estadoTexto}
 
-            Metas diárias (calorias e macronutrientes), calculadas a partir do gasto em repouso, da atividade
-            do dia a dia fora do treino e do gasto real do treino de CADA dia específico, já
-            com o déficit ou superávit do objetivo — dias de treino têm meta mais alta que
-            dias de descanso:
+            {metasIntro}
             {metasTexto}
 
             Alimentos que a pessoa gosta (use como base do plano, mas NÃO se limite a eles: complete com outros alimentos comuns e adequados ao objetivo, variando as opções ao longo da semana): {(string.IsNullOrEmpty(preferidosTexto) ? "nenhuma preferência informada" : preferidosTexto)}
