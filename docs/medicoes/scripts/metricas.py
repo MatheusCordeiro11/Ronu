@@ -18,6 +18,7 @@ import unicodedata
 
 RAIZ = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 BASE_CS = os.path.join(RAIZ, "src", "Ronu.Api", "Data", "BaseNutricional.cs")
+MEDIDAS_CS = os.path.join(RAIZ, "src", "Ronu.Api", "Data", "BaseNutricionalMedidas.cs")
 PERFIS = ["A", "B", "C", "D", "E", "F", "G"]
 DIAS = ["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"]
 
@@ -37,6 +38,12 @@ def carregar_base():
     for m in padrao.finditer(fonte):
         item = {"id": m.group(1), "kcal": float(m.group(4)), "p": float(m.group(5)), "c": float(m.group(6)), "g": float(m.group(7))}
         base[norm(m.group(2))] = item
+    # Categoria e alérgenos de cada item, para conferir o "evitar" pelo id (2b).
+    por_id = {v["id"]: v for v in base.values()}
+    for m in re.finditer(r'new\("([^"]+)", "[^"]+", CategoriaAlimento\.(\w+),.*?(?:true|false), [\d.]+m, (Alergenos\.\w+(?: \| Alergenos\.\w+)*)', fonte):
+        if m.group(1) in por_id:
+            por_id[m.group(1)]["categoria"] = m.group(2)
+            por_id[m.group(1)]["alergenos"] = set(re.findall(r"Alergenos\.(\w+)", m.group(3)))
     # Apelidos regionais (ex.: Aipim cozido) apontam para o mesmo item.
     for bloco in re.finditer(r'new\("([^"]+)", "([^"]+)",[^\n]*\n(?:[^\n]*\n)?\s*Apelidos: \[(.*)$', fonte, re.M):
         alvo = base.get(norm(bloco.group(2)))
@@ -44,6 +51,12 @@ def carregar_base():
             if alvo:
                 base[norm(apelido)] = alvo
     return base
+
+
+def carregar_contaveis():
+    """Ids dos itens com medida de unidade (EhUnidade) na POF: os contáveis."""
+    fonte = open(MEDIDAS_CS, encoding="utf-8").read()
+    return {bloco.split('"')[0] for bloco in re.split(r'\n\s*\["', fonte)[1:] if "EhUnidade: true" in bloco}
 
 
 def palavras(regex, texto):
@@ -64,6 +77,13 @@ GOSTOS = {
     "G": {"Cerveja": r"\bcerveja\b", "Feijão": r"\bfeijao\b"},
 }
 EVITAR = {"B": ("Carne vermelha", CARNE_VERMELHA), "E": ("Leite", LEITE), "F": ("Peixe", PEIXE)}
+# O mesmo "evitar" pela tabela do Ronu (CasamentoPreferencias), para itens da base: "leite" tira tudo o que
+# tem lactose, não só o leite. Vale igual para o g8c e o g9a, para a comparação ser justa.
+EVITAR_BASE = {
+    "B": lambda i: i.get("categoria") in ("CarneBovina", "CarneSuina"),
+    "E": lambda i: "Lactose" in i.get("alergenos", set()),
+    "F": lambda i: i.get("categoria") == "Peixes",
+}
 MANDIOCA_ESPERADA = {"RJ": "aipim", "PE": "macaxeira", "BA": "macaxeira"}
 
 
@@ -107,6 +127,8 @@ def ler_log(caminho):
 def main():
     pasta = sys.argv[1]
     base = carregar_base()
+    por_id = {v["id"]: v for v in base.values()}
+    contaveis_ids = carregar_contaveis()
     resultado = {"perfis": {}, "itensBase": len({v["id"] for v in base.values()})}
     for pid in PERFIS:
         # A dieta medida é a da primeira repetição que gerou (P.json, depois P-r2.json...).
@@ -119,8 +141,11 @@ def main():
         if status != 200:
             continue
         dias = dados["resposta"]["dieta"]["dias"]
-        itens = casados = refeicoes = refeicoes_base = 0
+        itens = casados = refeicoes = refeicoes_base = com_id = 0
+        contaveis = contaveis_fora = feijao_carioca_sul = 0
         nomes = set()
+        ids_diferentes = set()
+        desvio_base_dias_inteiros = []
         desvio_decl, desvio_base = [], []
         fora_5_decl = fora_5_base = 0
         violacoes = {"alcool": [], "cafeinaNoite": [], "cafeinaFimTarde": [], "evitar": [], "refogadoComOleo": [], "regional": []}
@@ -129,6 +154,7 @@ def main():
         for dia in dias:
             meta = dia["metaCalculada"]
             tot = {"kcal": 0.0, "p": 0.0, "c": 0.0, "g": 0.0}
+            dia_inteiro = True
             for ref in dia["refeicoes"]:
                 refeicoes += 1
                 soma = {"kcal": 0.0, "p": 0.0, "c": 0.0, "g": 0.0}
@@ -138,7 +164,13 @@ def main():
                     itens += 1
                     n = norm(al["nome"])
                     nomes.add(n)
-                    item = base.get(n)
+                    # Desde a 2b-2 o item vem com o id da base; antes, casa pelo nome.
+                    item = por_id.get(al.get("alimentoId") or "") or base.get(n)
+                    com_id += bool(al.get("alimentoId"))
+                    ids_diferentes.add(item["id"] if item else n)
+                    if item and item["id"] in contaveis_ids:
+                        contaveis += 1
+                        contaveis_fora += "(" not in al["nome"]
                     if item:
                         casados += 1
                         fator = float(al["quantidade"]) / 100
@@ -159,7 +191,7 @@ def main():
                             violacoes["cafeinaNoite"].append(rotulo)
                         elif h is not None and h >= 15 * 60:
                             violacoes["cafeinaFimTarde"].append(rotulo)
-                    if pid in EVITAR and palavras(EVITAR[pid][1], al["nome"]):
+                    if pid in EVITAR and ((item and EVITAR_BASE[pid](item)) or (not item and palavras(EVITAR[pid][1], al["nome"]))):
                         violacoes["evitar"].append(rotulo)
                     if palavras(r"\b(refogad\w*|frit\w*)\b", al["nome"]):
                         tem_refogado = True
@@ -169,8 +201,9 @@ def main():
                         if palavras(rx, al["nome"]):
                             gostos[g] += 1
                     # Nomes regionais (regra 9).
+                    # Desde a 2b os dois feijões entram em toda UF (valores diferentes): carioca no Sul é só registro.
                     if palavras(r"\bfeijao\b", al["nome"]) and perfil["uf"] in ("RS", "SC", "PR") and not palavras(r"\bfeijao preto\b", al["nome"]):
-                        violacoes["regional"].append(rotulo + " (esperado feijão preto)")
+                        feijao_carioca_sul += 1
                     if palavras(r"\b(mandioca|aipim|macaxeira)\b", al["nome"]):
                         esperado = MANDIOCA_ESPERADA.get(perfil["uf"], "mandioca")
                         if not palavras(rf"\b{esperado}\b", al["nome"]):
@@ -181,6 +214,7 @@ def main():
                     refeicoes_base += 1
                     usar = soma
                 else:
+                    dia_inteiro = False
                     m = ref["macros"]
                     usar = {"kcal": m["calorias"], "p": m["proteinasG"], "c": m["carboidratosG"], "g": m["gordurasG"]}
                 for k in tot:
@@ -192,6 +226,8 @@ def main():
             desvio_base.append({k: (tot[k] - pares_meta[k]) / pares_meta[k] * 100 for k in pares_meta})
             fora_5_decl += abs(desvio_decl[-1]["kcal"]) > 5
             fora_5_base += abs(desvio_base[-1]["kcal"]) > 5
+            if dia_inteiro:
+                desvio_base_dias_inteiros.append(desvio_base[-1])
 
         # Refeição repetida: mesmo nome de refeição e mesmos alimentos (nome exato) do dia anterior.
         repetidas = []
@@ -213,6 +249,12 @@ def main():
             "itens": itens, "itensNaBase": casados, "pctItensNaBase": round(casados / itens * 100, 1),
             "refeicoes": refeicoes, "pctRefeicoesInteirasNaBase": round(refeicoes_base / refeicoes * 100, 1),
             "alimentosDiferentes": len(nomes),
+            "alimentosDiferentesPorId": len(ids_diferentes),
+            "pctItensComAlimentoId": round(com_id / itens * 100, 1),
+            "contaveis": contaveis, "contaveisForaDoMultiplo": contaveis_fora,
+            "diasInteirosPelaBase": len(desvio_base_dias_inteiros),
+            "desvioPelaBaseDiasInteiros": {k: media_abs(desvio_base_dias_inteiros, k) for k in ("kcal", "p", "c", "g")} if desvio_base_dias_inteiros else None,
+            "feijaoCariocaNoSul": feijao_carioca_sul,
             "desvioDeclarado": {k: media_abs(desvio_decl, k) for k in ("kcal", "p", "c", "g")},
             "desvioPelaBase": {k: media_abs(desvio_base, k) for k in ("kcal", "p", "c", "g")},
             "diasForaDe5Declarado": fora_5_decl, "diasForaDe5PelaBase": fora_5_base,
