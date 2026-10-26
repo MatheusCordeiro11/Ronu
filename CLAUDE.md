@@ -83,6 +83,6 @@ Migration (se houver) → backend no Azure → push do frontend que depende dele
 
 ## Documentação
 
-- `docs/`: `design-api.md`, `lacunas-conhecidas.md` (status de features e pendências ficam **só** aqui), `user-stories.md`, `diagrama-classes.md`, `fluxogramas.md`, DER e fluxos em PNG, `seed-modalidades.sql`, `fontes-nutricionais.md` (fontes, licenças e método da base nutricional própria).
-- `DESIGN.md`: design system "Súmula do Tatame".
+- `docs/`: `design-api.md`, `lacunas-conhecidas.md` (status de features e pendências ficam **só** aqui), `user-stories.md`, `diagrama-classes.md`, `fluxogramas.md`, DER e fluxos em PNG, `seed-modalidades.sql`, `fontes-nutricionais.md` (fontes, licenças e método da base nutricional própria e da conversão para a lista de compras), `compras/` (linhas da TACO e do USDA usadas na lista de compras, com o script de extração).
+- `DESIGN.md`: design system "Dojo Noturno", com os modos escuro e Washi.
 - `PRODUCT.md`: contexto de produto.

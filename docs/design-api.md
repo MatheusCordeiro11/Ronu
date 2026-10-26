@@ -167,6 +167,39 @@ As três rotas devolvem a dieta no mesmo formato, `DietaResponse`:
 
 ---
 
+## Lista de compras
+
+A lista é sempre da dieta atual (a mais recente do usuário do token, a mesma regra do `GET /api/dietas/atual`). Ela é calculada na hora a partir da dieta salva e da conversão de `Data/ConversaoCompras.cs` (fontes e método em `docs/compras/README.md` e em `docs/fontes-nutricionais.md`). Só as marcações "já tenho" são gravadas. Nenhuma das duas rotas recebe nem devolve dado de saúde (peso, meta, kcal, macros, objetivo): é o que a tela mostra e o que o "Compartilhar" manda.
+
+### `GET /api/dietas/atual/lista-compras`
+**Recebe:** nada
+**Devolve:**
+- `dietaId` (o id da dieta de onde a lista saiu, que o `PUT` manda de volta), `dataGeracao` (UTC; a tela mostra no fuso da UF), `versaoConversao` (informativa: a lista é recalculada a cada consulta, nada dela é gravado)
+- `disponivel`: falso nas dietas geradas antes da lista fechada da base nutricional (algum alimento sem `AlimentoId`) ou com um item que a base não tem mais. Nesse caso vem `motivo: "dieta-antiga"` e `secoes` vazio: a lista não adivinha o item pelo nome
+- `avisoOleo`: a dieta tem refogado ou ovo frito (a TACO já conta o óleo do preparo no prato, e ele não vira item da lista)
+- `secoes`, na ordem do mercado (`hortifruti`, `acougue-e-peixaria`, `padaria`, `frios-laticinios-e-ovos`, `mercearia`, `bebidas`, `congelados`), só as que têm item, cada uma com `chave`, `nome` e `itens`. Cada item:
+  - `chave` (o identificador estável do item de compra, ex.: `arroz-branco`, `ovos`), `nome` (com o nome regional pela UF da conta: Aipim no RJ, Macaxeira no Norte e Nordeste)
+  - `quantidade` e `unidade` (`g`, `ml`, `unidades`, `fatias` ou `saches`), já arredondadas **para cima**: contáveis na próxima unidade inteira; gramas e mililitros em passos de 10 até 100 e de 50 acima disso, nunca zero
+  - `texto`: a quantidade pronta para mostrar ("7 bananas", "550 g", "1,25 kg", "1,05 L", "14 sachês")
+  - `pronto` (a quantidade é do prato pronto, sem fonte para converter: refogados e suco de laranja), `nota` (aviso que vai na própria linha, ex.: "de carne, sem osso e sem pele · compre um pouco mais"), `tenho` (marcado como "já tenho" nesta dieta)
+  - `detalhe`: `quantidadeExata` (antes do arredondamento, 2 casas), `origens` (cada item da dieta que entra na linha: ovo cozido, ovo frito e clara entram em "Ovos"), com `alimentoId`, `nome`, `quantidadeNaDieta` (soma da semana), `medida`, `fator`, `convertido` e `passos [{ tipo, descricao, fator }]` (`tipo` = `par-cru-cozido`, `descarte`, `unidade`, `receita`, `calibracao` ou `derivacao`; a `descricao` traz o código e a página da fonte), e `observacoes` (ex.: "Sobram as gemas.")
+**Erros:** 404 `{ "mensagem": "Nenhuma dieta gerada ainda." }` sem dieta. Dieta antiga não é erro: 200 com `disponivel: false`.
+
+### `PUT /api/dietas/atual/lista-compras/itens/{chave}`
+Marca (`tenho: true`) ou desmarca (`tenho: false`) um item como "já tenho" na dieta atual, salvo na conta (tabela `ListaComprasMarcacoes`) para aparecer em qualquer aparelho. Idempotente: marcar o que já está marcado, ou desmarcar o que não está, dá 204 do mesmo jeito. Dieta nova começa sem marcações, e as marcações de uma dieta saem junto com ela quando ela sai do histórico (limite de 3) ou quando a conta é apagada (exclusão em cascata, e o `RepositorioDietaIA` também apaga explicitamente).
+**Recebe:** `dietaId` (a dieta da lista que estava aberta na tela), `tenho` (booleano)
+**Devolve:** 204 sem corpo
+**Erros** (corpo sempre `{ "mensagem" }`):
+- **400** `"Item inválido."`: a `chave` não está no formato `[a-z0-9-]{1,64}`
+- **400** `"Este item não está na sua lista de compras."`: a `chave` é válida mas não está na lista desta dieta (inclusive na dieta antiga, que não tem lista)
+- **400** `"Informe a dieta da lista."` ou `"Informe se você já tem o item."`: falta `dietaId` ou `tenho` no corpo
+- **404** `"Nenhuma dieta gerada ainda."`: o usuário não tem dieta
+- **409** `"Sua dieta mudou desde que a lista foi aberta. Atualize a lista e tente de novo."`: o `dietaId` não é o da dieta atual (outra dieta foi gerada com a lista aberta, por exemplo em outro aparelho). O `dietaId` só é comparado com a dieta atual do usuário do token, então mandar o id da dieta de outra pessoa também cai aqui, e nada é gravado
+
+Dois toques ao mesmo tempo no mesmo item (PC e celular) são barrados pelo índice único (`DietaIAId`, `Chave`): só essa violação de chave única do PostgreSQL (SQLSTATE 23505) é tratada como "já marcado" (204); qualquer outro erro do banco vira 500.
+
+---
+
 ## Metas (simulação)
 
 ### `POST /api/metas/simulacao`
