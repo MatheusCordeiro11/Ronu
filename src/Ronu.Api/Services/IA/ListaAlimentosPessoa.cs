@@ -49,7 +49,7 @@ public static class ListaAlimentosPessoa
 
         var resumo = casadas
             .Select(c => new PreferenciaCasada(c.Preferencia.Alimento, c.Preferencia.Tipo, c.Resultado.Casou,
-                c.Resultado.ItensIds.Count, c.Resultado.TrechosSemCasamento))
+                c.Resultado.ItensIds.Count, c.Resultado.TrechosSemCasamento) { ItensIds = c.Resultado.ItensIds })
             .ToList();
 
         return new ListaAlimentos(itens, resumo, MinimosPorPapel.Conferir(itens.Select(i => i.Item)));
@@ -71,7 +71,11 @@ public static class ListaAlimentosPessoa
 public record ItemDaLista(AlimentoBase Item, string Nome);
 
 /// <summary>Como cada preferência casou com a base (para o aviso na tela, na 2b-3).</summary>
-public record PreferenciaCasada(string Alimento, string Tipo, bool Casou, int ItensCasados, IReadOnlyList<string> TrechosSemCasamento);
+public record PreferenciaCasada(string Alimento, string Tipo, bool Casou, int ItensCasados, IReadOnlyList<string> TrechosSemCasamento)
+{
+    /// <summary>Os itens da base que a preferência casou (o "gosto" vai assim para o prompt).</summary>
+    public IReadOnlySet<string> ItensIds { get; init; } = new HashSet<string>();
+}
 
 public record ListaAlimentos(IReadOnlyList<ItemDaLista> Itens, IReadOnlyList<PreferenciaCasada> Preferencias, ResultadoMinimos Minimos);
 
@@ -125,6 +129,23 @@ public static class MinimosPorPapel
         }
 
         return new ResultadoMinimos(contagens, gruposProteina, vazios, abaixo);
+    }
+
+    /// <summary>
+    /// A mensagem do 400 quando algum papel ficou vazio (DietasController): diz o
+    /// que faltou e onde corrigir, sem citar as preferências da pessoa.
+    /// </summary>
+    public static string MensagemPapeisVazios(IReadOnlyList<PapelNoPrato> vazios)
+    {
+        var faltas = vazios.Select(p => p switch
+        {
+            PapelNoPrato.Proteina => "nenhuma fonte de proteína",
+            PapelNoPrato.Carboidrato => "nenhum carboidrato (arroz, pães, massas ou tubérculos)",
+            PapelNoPrato.Fruta => "nenhuma fruta",
+            _ => "nenhuma hortaliça"
+        }).ToList();
+        var lista = faltas.Count == 1 ? faltas[0] : string.Join(", ", faltas.SkipLast(1)) + " e " + faltas[^1];
+        return $"Com o que você marcou para evitar, não sobrou {lista} entre os alimentos do Ronu. Revise a lista de Evitar em Alimentação.";
     }
 }
 

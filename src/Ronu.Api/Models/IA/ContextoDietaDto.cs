@@ -30,4 +30,9 @@ public class ContextoDietaDto
     // Metas de cada dieta já gerada (MetasDieta), para a meta adaptativa saber
     // o que a pessoa recebeu para comer em cada período. Também fora do prompt.
     public List<MetaDietaRegistroDto> HistoricoMetas { get; set; } = new();
+
+    // Lista fechada de alimentos da pessoa (fase 2b), montada pelo
+    // ContextoDietaBuilder a partir da UF e das preferências. O DietasController
+    // confere os mínimos antes de chamar o Gemini; nula = o gerador monta.
+    public Ronu.Api.Services.IA.ListaAlimentos? Lista { get; set; }
 }

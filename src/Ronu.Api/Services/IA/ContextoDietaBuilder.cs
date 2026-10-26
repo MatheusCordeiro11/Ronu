@@ -135,7 +135,9 @@ public class ContextoDietaBuilder : IContextoDietaBuilder
             OrcamentoSemanal = usuario.OrcamentoSemanal,
             NivelAtividade = usuario.NivelAtividade,
             HistoricoPeso = historicoPeso,
-            HistoricoMetas = historicoMetas
+            HistoricoMetas = historicoMetas,
+            // Sem alérgenos por enquanto: a pessoa só passa a declará-los na fase 2c.
+            Lista = ListaAlimentosPessoa.Montar(usuario.Estado, preferencias)
         };
     }
 }

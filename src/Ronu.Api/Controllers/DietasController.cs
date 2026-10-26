@@ -101,6 +101,16 @@ public class DietasController : ControllerBase
         }
 
         var contexto = await _contextoBuilder.ConstruirAsync(UsuarioIdLogado);
+
+        // Lista fechada sem nenhum item em algum papel no prato (ex.: nenhuma
+        // proteína depois do "evitar"): não dá para montar uma semana, então nem
+        // chama o Gemini. Abaixo do mínimo, mas sem papel vazio, a dieta é gerada
+        // com o aviso gravado (GeradorDietaGemini).
+        var vazios = contexto.Lista?.Minimos.Vazios ?? [];
+        if (vazios.Count > 0)
+        {
+            return BadRequest(new { mensagem = MinimosPorPapel.MensagemPapeisVazios(vazios) });
+        }
         // Falhas de comunicação com o Gemini (rede, status de erro como 503) e
         // respostas inutilizáveis mesmo depois da nova tentativa do gerador
         // (bloqueada, cortada, JSON inválido, dias errados, ou sem resposta no

@@ -141,6 +141,17 @@ public class ListaAlimentosPessoaTests
         Assert.False(minimos.Atende);
     }
 
+    // Mensagem do 400 do DietasController (papel vazio): diz o que faltou e onde corrigir.
+    [Fact]
+    public void Mensagem_Do_400_Diz_O_Que_Faltou()
+    {
+        Assert.Equal(
+            "Com o que você marcou para evitar, não sobrou nenhuma fonte de proteína entre os alimentos do Ronu. Revise a lista de Evitar em Alimentação.",
+            MinimosPorPapel.MensagemPapeisVazios([PapelNoPrato.Proteina]));
+        Assert.Contains("nenhuma fonte de proteína e nenhuma fruta",
+            MinimosPorPapel.MensagemPapeisVazios([PapelNoPrato.Proteina, PapelNoPrato.Fruta]));
+    }
+
     [Fact]
     public void Frutas_Abaixo_Do_Minimo()
     {

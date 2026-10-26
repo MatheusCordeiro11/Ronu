@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Ronu.Api.Data;
 using Ronu.Api.Models.IA;
 
 namespace Ronu.Api.Services.IA;
@@ -80,8 +81,11 @@ public class GeradorDietaGemini : IGeradorDietaIA
         var metasPorDia = MontarMetasPorDia(caloriasBasePorDia, ajuste.Percentual, contexto.Peso, contexto.Altura);
         var composicaoPorDia = MontarComposicaoPorDia(contexto, _calculadora, ajuste.Percentual, metasPorDia);
 
-        var prompt = MontarPrompt(contexto, metasPorDia);
-        var schema = MontarSchema();
+        // Lista fechada da fase 2b: vai no prompt e no enum do schema, então o Gemini só escolhe itens
+        // da base (com valor por 100 g, para a fase 3 calcular de verdade).
+        var lista = contexto.Lista ?? ListaAlimentosPessoa.Montar(contexto.Estado, contexto.Preferencias);
+        var prompt = MontarPrompt(contexto, metasPorDia, lista);
+        var schema = MontarSchema(lista);
 
         var corpoRequisicao = new
         {
@@ -110,13 +114,18 @@ public class GeradorDietaGemini : IGeradorDietaIA
                 var bebidasRemovidas = tentativa < MaximoTentativas
                     ? ValidarBebidaAlcoolica(dias, contexto)
                     : TirarBebidaAlcoolica(dias, contexto);
+                // Depois da regra 8: a rede de segurança da cerveja continua valendo antes da lista.
+                var contaveis = AplicarLista(dias, lista);
+                var oleosTirados = TirarOleoDosRefogados(dias);
 
-                RegistrarGeracao(dias, respostaIa, uso, versaoModelo, normalizacao, tentativa, cronometro.ElapsedMilliseconds);
+                RegistrarGeracao(dias, respostaIa, uso, versaoModelo, normalizacao, tentativa, cronometro.ElapsedMilliseconds, lista, contaveis, oleosTirados);
 
                 return new DietaSemanalDto
                 {
                     Dias = dias,
                     AjusteAdaptativo = ajuste,
+                    VersaoBase = BaseNutricional.VersaoBase,
+                    AvisoListaPobre = AvisoListaPobre(lista.Minimos),
                     ManutencaoPorDia = manutencaoPorDia,
                     FatorAtividade = fatorAtividade,
                     BebidasRemovidas = bebidasRemovidas
@@ -293,6 +302,112 @@ public class GeradorDietaGemini : IGeradorDietaIA
         return removidas;
     }
 
+    // Folga para considerar a quantidade um múltiplo exato do peso da unidade (arredondamento do Gemini).
+    private const decimal ToleranciaMultiploG = 0.5m;
+
+    /// <summary>
+    /// Liga cada alimento da resposta ao item da lista pelo nome (o enum garante
+    /// o nome; fora da lista, a resposta é inválida), preenche o AlimentoId, põe a
+    /// unidade da base (o Gemini não decide g ou ml) e, nos itens contáveis com
+    /// quantidade em múltiplo exato do peso da unidade da POF, acrescenta a
+    /// contagem ao nome exibido ("Ovo de galinha cozido (2 unidades)"). Devolve
+    /// quantos contáveis vieram e quantos ficaram fora do múltiplo, para o log.
+    /// </summary>
+    private static (int Contaveis, int ForaDoMultiplo) AplicarLista(List<DiaDietaDto> dias, ListaAlimentos lista)
+    {
+        var porNome = lista.Itens.ToDictionary(i => i.Nome, StringComparer.Ordinal);
+        int contaveis = 0, foraDoMultiplo = 0;
+
+        foreach (var alimento in dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos))
+        {
+            var nome = alimento.Nome.Trim();
+            if (!porNome.TryGetValue(nome, out var item))
+            {
+                throw new RespostaIaInvalidaException($"Resposta do Gemini com alimento fora da lista: '{alimento.Nome}'.");
+            }
+
+            alimento.Nome = nome;
+            alimento.AlimentoId = item.Item.Id;
+            alimento.Unidade = item.Item.Medida;
+
+            var unidade = item.Item.MedidaUnidade;
+            if (unidade is null)
+            {
+                continue;
+            }
+
+            contaveis++;
+            var quantas = Math.Round(alimento.Quantidade / unidade.Gramas);
+            if (quantas >= 1 && Math.Abs(alimento.Quantidade - quantas * unidade.Gramas) <= ToleranciaMultiploG)
+            {
+                alimento.Nome = $"{nome} ({quantas:0} {(quantas == 1 ? unidade.Nome : unidade.NomePlural)})";
+            }
+            else
+            {
+                foraDoMultiplo++;
+            }
+        }
+
+        return (contaveis, foraDoMultiplo);
+    }
+
+    /// <summary>
+    /// Couve e espinafre refogados da TACO já incluem o óleo do preparo: o azeite
+    /// ou óleo na mesma refeição contaria a gordura duas vezes. O prompt pede para
+    /// não pôr, mas no g9a (2026-10-25) 2 de 7 gerações puseram mesmo assim. Aqui
+    /// o C# tira esse azeite ou óleo da refeição e desconta dela as calorias e a
+    /// gordura pelo valor da base (TACO 260 e 272: 884 kcal e 100 g de gordura
+    /// por 100 g), como a regra 8 faz com a cerveja. Depois de AplicarLista, que
+    /// preenche o AlimentoId usado aqui.
+    /// </summary>
+    private List<OleoTirado> TirarOleoDosRefogados(List<DiaDietaDto> dias)
+    {
+        var tirados = new List<OleoTirado>();
+        foreach (var dia in dias)
+        {
+            foreach (var refeicao in dia.Refeicoes.Where(r => r.Alimentos.Any(a => Refogados.Contains(a.AlimentoId))))
+            {
+                foreach (var oleo in refeicao.Alimentos.Where(a => OleosDoPreparo.Contains(a.AlimentoId)).ToList())
+                {
+                    var item = BaseNutricional.Itens.Single(i => i.Id == oleo.AlimentoId);
+                    var fator = oleo.Quantidade / 100m;
+                    var kcal = item.Kcal * fator;
+                    refeicao.Macros.Calorias = Math.Max(0, refeicao.Macros.Calorias - kcal);
+                    refeicao.Macros.ProteinasG = Math.Max(0, refeicao.Macros.ProteinasG - item.ProteinaG * fator);
+                    refeicao.Macros.CarboidratosG = Math.Max(0, refeicao.Macros.CarboidratosG - item.CarboidratoG * fator);
+                    refeicao.Macros.GordurasG = Math.Max(0, refeicao.Macros.GordurasG - item.GorduraG * fator);
+                    refeicao.Alimentos.Remove(oleo);
+                    tirados.Add(new OleoTirado(dia.DiaSemana, refeicao.Nome, oleo.Nome, oleo.Quantidade, Math.Round(kcal, 1)));
+                }
+            }
+
+            dia.TotalDoDia = SomarRefeicoes(dia.Refeicoes);
+        }
+
+        foreach (var t in tirados)
+        {
+            _logger.LogWarning(
+                "Azeite ou óleo tirado de refeição com refogado (o óleo do preparo já está no refogado): '{Alimento}' ({Quantidade} g), {KcalDescontadas} kcal descontadas, {Dia} {Refeicao}",
+                t.Alimento, t.Quantidade, t.KcalDescontadas, t.Dia, t.Refeicao);
+        }
+
+        return tirados;
+    }
+
+    private record OleoTirado(string Dia, string Refeicao, string Alimento, decimal Quantidade, decimal KcalDescontadas);
+
+    private static AvisoListaPobreDto? AvisoListaPobre(ResultadoMinimos minimos) => minimos.AbaixoDoMinimo.Count == 0
+        ? null
+        : new AvisoListaPobreDto
+        {
+            Papeis = minimos.AbaixoDoMinimo.Select(p => p.ToString()).ToList(),
+            ItensPorPapel = minimos.ItensPorPapel.ToDictionary(p => p.Key.ToString(), p => p.Value),
+            GruposDeProteina = minimos.GruposDeProteina
+        };
+
+    private static readonly string[] Refogados = ["couve-refogada", "espinafre-refogado"];
+    private static readonly string[] OleosDoPreparo = ["azeite-de-oliva-extra-virgem", "oleo-de-soja"];
+
     private static IEnumerable<string> Preferidos(ContextoDietaDto contexto) =>
         contexto.Preferencias.Where(p => p.Tipo == "preferido").Select(p => p.Alimento);
 
@@ -339,8 +454,21 @@ public class GeradorDietaGemini : IGeradorDietaIA
     // Também as unidades: quantas a normalização reescreveu e as que ficaram fora
     // de "g"/"ml" (NormalizadorUnidades), que impedem o cálculo daquele alimento.
     private void RegistrarGeracao(
-        List<DiaDietaDto> dias, RespostaDiasIaDto respostaIa, UsoTokens uso, string? versaoModelo, ResultadoNormalizacao normalizacao, int tentativas, long tempoMs)
+        List<DiaDietaDto> dias, RespostaDiasIaDto respostaIa, UsoTokens uso, string? versaoModelo, ResultadoNormalizacao normalizacao, int tentativas, long tempoMs,
+        ListaAlimentos lista, (int Contaveis, int ForaDoMultiplo) contaveis, List<OleoTirado> oleosTirados)
     {
+        // Lista fechada (fase 2b): o tamanho, os mínimos, quantos "evitar" não casaram com nada (só a
+        // contagem: o texto da preferência pode revelar uma condição de saúde), os contáveis fora do
+        // múltiplo da unidade e quantas vezes o azeite ou óleo saiu de uma refeição com refogado.
+        var refogadoComOleo = oleosTirados.Count;
+        var evitarSemCasamento = lista.Preferencias.Count(p => p.Tipo == "evitar" && p.TrechosSemCasamento.Count > 0);
+        var minimos = lista.Minimos.Atende
+            ? "atende"
+            : string.Join(", ", lista.Minimos.Vazios.Select(p => $"{p} vazio").Concat(lista.Minimos.AbaixoDoMinimo.Select(p => $"{p} abaixo")));
+        _logger.LogInformation(
+            "Lista de alimentos: {Itens} itens, mínimos: {Minimos}, {EvitarSemCasamento} evitar sem casamento; contáveis fora do múltiplo da unidade: {ForaDoMultiplo} de {Contaveis}; azeite/óleo tirado de refeição com refogado: {RefogadoComOleo}",
+            lista.Itens.Count, minimos, evitarSemCasamento, contaveis.ForaDoMultiplo, contaveis.Contaveis, refogadoComOleo);
+
         var declaradoPorDia = respostaIa.Dias.ToDictionary(d => d.DiaSemana.Trim(), d => d.TotalDoDia.Calorias, StringComparer.OrdinalIgnoreCase);
 
         var desvios = string.Join("; ", dias.Select(d =>
@@ -410,14 +538,64 @@ public class GeradorDietaGemini : IGeradorDietaIA
             c => ComposicaoMeta.Montar(c, percentualAjuste, metasPorDia[NomesDias[c.DiaSemana - 1]].Macros.Calorias),
             StringComparer.OrdinalIgnoreCase);
 
-    private static string MontarPrompt(ContextoDietaDto contexto, Dictionary<string, ResultadoMacros> metasPorDia)
+    // Rótulos dos grupos na lista do prompt, na ordem em que aparecem.
+    private static readonly (GrupoDeTroca Grupo, string Rotulo)[] GruposNoPrompt =
+    [
+        (GrupoDeTroca.CarnesEPeixes, "Carnes, aves e peixes"),
+        (GrupoDeTroca.Ovos, "Ovos"),
+        (GrupoDeTroca.Leguminosas, "Leguminosas"),
+        (GrupoDeTroca.LeiteEIogurte, "Leite e iogurte"),
+        (GrupoDeTroca.Queijos, "Queijos"),
+        (GrupoDeTroca.Carboidratos, "Cereais, pães, massas e tubérculos"),
+        (GrupoDeTroca.Frutas, "Frutas"),
+        (GrupoDeTroca.Hortalicas, "Hortaliças"),
+        (GrupoDeTroca.OleaginosasESementes, "Oleaginosas e sementes"),
+        (GrupoDeTroca.OleosEGorduras, "Óleos e gorduras"),
+        (GrupoDeTroca.Adocantes, "Açúcares e mel"),
+        (GrupoDeTroca.CafesEChas, "Cafés e chás"),
+        (GrupoDeTroca.SucosERefrigerantes, "Sucos, refrigerantes e água de coco"),
+        (GrupoDeTroca.BebidasAlcoolicas, "Bebidas alcoólicas"),
+    ];
+
+    private static readonly string[] UfsFeijaoPreto = ["RS", "SC", "PR"];
+
+    private static string MontarPrompt(ContextoDietaDto contexto, Dictionary<string, ResultadoMacros> metasPorDia, ListaAlimentos lista)
     {
         var modalidadesTexto = string.Join(", ", contexto.Modalidades
             .Select(m => $"{m.Nome} ({string.Join(", ", m.DiasSemana.OrderBy(d => d).Select(d => NomesDias[d - 1]))})"));
 
-        var preferidosTexto = string.Join(", ", contexto.Preferencias
+        // "Gosto" vai como os itens da lista que ele casou (CasamentoPreferencias): o que não está na base
+        // (whey, granola) não pode aparecer, e a tela avisa a pessoa (fase 2b-3).
+        var nomePorId = lista.Itens.ToDictionary(i => i.Item.Id, i => i.Nome);
+        var preferidosTexto = string.Join(", ", lista.Preferencias
             .Where(p => p.Tipo == "preferido")
-            .Select(p => p.Alimento));
+            .SelectMany(p => p.ItensIds)
+            .Where(nomePorId.ContainsKey)
+            .Distinct()
+            .Select(id => nomePorId[id]));
+        var temGosto = contexto.Preferencias.Any(p => p.Tipo == "preferido");
+
+        var listaTexto = string.Join("\n", GruposNoPrompt
+            .Select(g => (g.Rotulo, Nomes: lista.Itens.Where(i => i.Item.Grupo == g.Grupo).Select(i => i.Nome).ToList()))
+            .Where(g => g.Nomes.Count > 0)
+            .Select(g => $"- {g.Rotulo}: {string.Join("; ", g.Nomes)}"));
+
+        // Peso de uma unidade dos contáveis (POF/IBGE, BaseNutricionalMedidas), para o Gemini usar
+        // múltiplos e o C# poder exibir a contagem ("(2 unidades)").
+        var pesosTexto = string.Join("; ", lista.Itens
+            .Where(i => i.Item.MedidaUnidade is not null)
+            .Select(i => $"{i.Nome}: 1 {i.Item.MedidaUnidade!.Nome} = {i.Item.MedidaUnidade.Gramas:0} g"));
+
+        var regra9 = UfsFeijaoPreto.Contains(contexto.Estado?.Trim().ToUpperInvariant())
+            ? "Os nomes da lista já seguem o costume da região da pessoa. Nesta região, o feijão mais comum é o preto: prefira \"Feijão preto cozido\" a \"Feijão cozido\"."
+            : "Os nomes da lista já seguem o costume da região da pessoa: use-os como estão, sem trocar por variações regionais.";
+
+        // Couve e espinafre refogados ficam na lista (não há versão sem óleo comum), mas a TACO já inclui o
+        // óleo do refogado: azeite na mesma refeição contaria a gordura duas vezes (fase 2b, 2026-10-25).
+        var refogadosNaLista = lista.Itens.Where(i => Refogados.Contains(i.Item.Id)).Select(i => $"\"{i.Nome}\"").ToList();
+        var regraRefogado = refogadosNaLista.Count == 0
+            ? string.Empty
+            : $" {string.Join(" e ", refogadosNaLista)} já incluem o óleo do preparo: na refeição em que um deles aparecer, não coloque azeite nem óleo.";
 
         var evitarTexto = string.Join(", ", contexto.Preferencias
             .Where(p => p.Tipo == "evitar")
@@ -495,9 +673,14 @@ public class GeradorDietaGemini : IGeradorDietaIA
             {metasIntro}
             {metasTexto}
 
-            Alimentos que a pessoa gosta (use como base do plano, mas NÃO se limite a eles: complete com outros alimentos comuns e adequados ao objetivo, variando as opções ao longo da semana): {(string.IsNullOrEmpty(preferidosTexto) ? "nenhuma preferência informada" : preferidosTexto)}
+            Lista de alimentos permitidos. No campo "nome" de cada alimento, use EXATAMENTE um destes nomes, sem acrescentar nada, e nenhum alimento fora desta lista:
+            {listaTexto}
 
-            Alimentos que a pessoa deve evitar (NUNCA inclua nenhum destes, nem em pequena
+            Peso de uma unidade dos itens contáveis: {(string.IsNullOrEmpty(pesosTexto) ? "nenhum item contável na lista" : pesosTexto)}
+
+            Alimentos da lista que a pessoa gosta (use como base do plano, mas NÃO se limite a eles: complete com outros alimentos da lista adequados ao objetivo, variando as opções ao longo da semana): {(string.IsNullOrEmpty(preferidosTexto) ? (temGosto ? "nenhum dos que ela gosta está na lista" : "nenhuma preferência informada") : preferidosTexto)}
+
+            Alimentos que a pessoa deve evitar (já foram tirados da lista; NUNCA inclua nenhum destes, nem em pequena
             quantidade, nem como ingrediente de outro prato): {(string.IsNullOrEmpty(evitarTexto) ? "nenhuma restrição informada" : evitarTexto)}{rotinaTexto}{orcamentoTexto}
 
             Regras obrigatórias:
@@ -509,19 +692,19 @@ public class GeradorDietaGemini : IGeradorDietaIA
             6. Use EXATAMENTE os nomes dos dias como escritos acima (ex: "Segunda-feira") no campo diaSemana de cada dia — precisa corresponder exatamente a um dos 7 nomes listados.
             7. Adeque o plano ao hábito alimentar brasileiro: use as refeições típicas (café da manhã, lanche da manhã, almoço, lanche da tarde, jantar e, se fizer sentido, ceia leve) e combinações que um brasileiro realmente consome. Bebidas com cafeína (café, chá preto, chá mate, energéticos) apenas de manhã e no início da tarde, nunca no jantar nem na ceia.
             8. {regra8}
-            9. Use os nomes regionais dos alimentos abaixo, de acordo com o estado (UF) da pessoa — esta é a referência oficial, não invente outras variações regionais além destas:
-               - Feijão: nos estados RS, SC e PR, chame de "feijão preto". Em todos os demais estados, ou se o estado não foi informado, chame apenas de "feijão" (sem especificar o tipo).
-               - Mandioca: no estado RJ, chame de "aipim". Nos estados AM, PA, AC, RO, RR, AP, TO, MA, PI, CE, RN, PB, PE, AL, SE e BA, chame de "macaxeira". Em todos os demais estados (SP, MG, ES, PR, SC, RS, MT, MS, GO, DF), ou se o estado não foi informado, chame de "mandioca".
-               Para qualquer outro alimento não listado aqui, use o nome mais comum no Brasil, sem tentar adivinhar outras variações regionais.
-            10. O campo "unidade" aceita só dois valores: "g" ou "ml" (nunca "gramas", "mililitros", "unidades", "fatias" ou colheres). Bebidas (leite, café, chá, suco, vitamina) em "ml"; todo o resto em "g", inclusive azeite, mel e iogurte. Itens contáveis (ovo, fruta inteira, pão, fatia) também vão em "g", com a contagem entre parênteses no nome — ex.: nome "Ovo de galinha cozido (2 unidades)", quantidade 100, unidade "g"; nome "Pão francês (1 unidade)", quantidade 50, unidade "g". Para um mesmo alimento, use a mesma unidade em todas as refeições e dias da semana.
+            9. {regra9}
+            10. A quantidade é sempre em gramas ("g") ou, para as bebidas (leite, café, chá, suco, refrigerante, água de coco), em mililitros ("ml"), nunca em unidades, fatias ou colheres. Para os itens contáveis, use múltiplos exatos do peso de uma unidade listado acima (ex.: duas unidades de um item de 50 g = 100 g).
             11. Preencha o campo "horario" de cada refeição no formato HH:mm (ex: "07:30"). Se a rotina diária da pessoa foi informada, baseie os horários nela; caso contrário, use horários típicos do brasileiro (café da manhã entre 6h30 e 8h, almoço entre 12h e 13h30, jantar entre 19h e 21h).
             12. Se o orçamento semanal informado for "economico", priorize proteínas e ingredientes de menor custo (ex: ovo, frango, peixes populares como tilápia, feijão), evitando itens caros como salmão, camarão ou carnes nobres, sem comprometer a qualidade nutricional. Se for "moderado" ou não informado, use bom senso de custo-benefício. Se for "sem_restricao", não considere custo na escolha dos alimentos.
             13. A soma de proteína, carboidrato e gordura de cada dia deve ficar dentro de uma margem de 10% (para mais ou para menos) dos gramas da meta ESPECÍFICA daquele dia, listados acima. Se não for possível cumprir tudo ao mesmo tempo, priorize nesta ordem: (1) calorias dentro da margem de 5% da regra 1; (2) proteína; (3) carboidrato e gordura.
-            14. Nome de cada alimento: genérico, sem marca, em português correto, com a parte, o corte ou a variedade quando isso muda os valores nutricionais (ex.: "Peito de frango sem pele grelhado", "Patinho bovino grelhado", "Arroz branco cozido", "Pão de forma integral", "Leite desnatado", "Maçã fuji", "Banana prata", "Mamão papaia"). Diga SEMPRE o preparo no nome de carnes, aves, peixes, ovos, arroz, feijão, massas, tubérculos e legumes ("cozido", "grelhado", "assado", "refogado", "frito" ou "cru"): escreva "Feijão cozido" (ou "Feijão preto cozido", conforme a regra 9), nunca só "Feijão". Cada item é um alimento só, e preparações com mais de um ingrediente são separadas em itens na mesma refeição: uma salada vira um item por ingrediente (ex.: "Alface crua" e "Tomate cru", nunca "Salada de alface e tomate"); café adoçado vira "Café coado" e "Açúcar" em itens separados; uma vitamina vira a fruta e o leite em itens separados.
+            14. Cada item é um alimento da lista, e preparações com mais de um ingrediente viram itens separados na mesma refeição: uma salada vira um item por ingrediente; café adoçado vira o café e o açúcar; uma vitamina vira a fruta e o leite.{regraRefogado}
             """;
     }
 
-    private static object MontarSchema()
+    // O enum do nome é a lista da pessoa (no máximo BaseNutricional.TetoDeNomes nomes: a fase 0, em
+    // 2026-10-07, passou com até 180 em gemini-3.5-flash-lite). A unidade também vai em enum, mas o C#
+    // a sobrescreve pela da base (AplicarLista).
+    private static object MontarSchema(ListaAlimentos lista)
     {
         var macros = new
         {
@@ -541,9 +724,9 @@ public class GeradorDietaGemini : IGeradorDietaIA
             type = "OBJECT",
             properties = new
             {
-                nome = new { type = "STRING" },
+                nome = new { type = "STRING", format = "enum", @enum = lista.Itens.Select(i => i.Nome).ToArray() },
                 quantidade = new { type = "NUMBER" },
-                unidade = new { type = "STRING" }
+                unidade = new { type = "STRING", format = "enum", @enum = new[] { NormalizadorUnidades.Gramas, NormalizadorUnidades.Mililitros } }
             },
             required = new[] { "nome", "quantidade", "unidade" }
         };

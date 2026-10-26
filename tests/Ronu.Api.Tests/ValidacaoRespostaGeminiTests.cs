@@ -225,21 +225,216 @@ public class ValidacaoRespostaGeminiTests
 
     // ---------- Unidades ----------
 
-    [Fact]
-    public async Task Unidades_Da_Resposta_Saem_Normalizadas_E_A_Fora_Do_Padrao_Nao_Rejeita()
+    // Desde a lista fechada (2b-2), a unidade vem da base, qualquer que seja a da resposta.
+    [Theory]
+    [InlineData("gramas")]
+    [InlineData("unidades")]
+    [InlineData("ml")]
+    public async Task Unidade_Vem_Da_Base_E_Nao_Da_Resposta(string unidade)
     {
-        var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true, unidade: "gramas")));
+        var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true, unidade: unidade)));
 
         var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
 
         Assert.All(dieta.Dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos), a => Assert.Equal("g", a.Unidade));
+        Assert.Equal(1, gemini.Chamadas);
+    }
 
-        var comUnidades = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true, unidade: "unidades")));
+    // ---------- Lista fechada (fase 2b-2) ----------
 
-        var dietaComUnidades = await NovoGerador(comUnidades).GerarDietaAsync(Contexto());
+    [Fact]
+    public async Task Alimento_Fora_Da_Lista_Tenta_De_Novo_E_Falha()
+    {
+        var texto = TextoDieta(Semana, comRefeicoes: true, alimento: "Arroz");
+        var gemini = new GeminiRoteirizado(Envelope(texto), Envelope(texto));
 
-        Assert.All(dietaComUnidades.Dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos), a => Assert.Equal("unidades", a.Unidade));
-        Assert.Equal(1, comUnidades.Chamadas);
+        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarDietaAsync(Contexto()));
+
+        Assert.Contains("fora da lista", ex.Message);
+        Assert.Equal(2, gemini.Chamadas);
+    }
+
+    [Fact]
+    public async Task Alimento_Da_Lista_Ganha_AlimentoId_E_A_Dieta_A_VersaoBase()
+    {
+        var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true)));
+
+        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+
+        Assert.All(dieta.Dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos), a => Assert.Equal("arroz-branco-cozido", a.AlimentoId));
+        Assert.Equal(Ronu.Api.Data.BaseNutricional.VersaoBase, dieta.VersaoBase);
+        Assert.Null(dieta.AvisoListaPobre);
+    }
+
+    // Peso da unidade do ovo cozido na POF: 45 g. Múltiplo exato ganha a contagem; o resto fica em gramas.
+    [Theory]
+    [InlineData(45, "Ovo de galinha cozido (1 unidade)")]
+    [InlineData(90, "Ovo de galinha cozido (2 unidades)")]
+    [InlineData(90.4, "Ovo de galinha cozido (2 unidades)")]
+    [InlineData(100, "Ovo de galinha cozido")]
+    [InlineData(20, "Ovo de galinha cozido")]
+    public async Task Contavel_Em_Multiplo_Da_Unidade_Ganha_A_Contagem(decimal gramas, string nomeExibido)
+    {
+        var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true, alimento: "Ovo de galinha cozido", quantidade: gramas)));
+
+        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+
+        Assert.All(dieta.Dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos), a =>
+        {
+            Assert.Equal(nomeExibido, a.Nome);
+            Assert.Equal("ovo-de-galinha-cozido", a.AlimentoId);
+        });
+    }
+
+    [Fact]
+    public async Task Fatia_Usa_O_Nome_Da_Medida_Da_Pof()
+    {
+        var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true, alimento: "Pão de forma integral", quantidade: 50)));
+
+        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+
+        Assert.All(dieta.Dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos), a => Assert.Equal("Pão de forma integral (2 fatias)", a.Nome));
+    }
+
+    // Couve e espinafre refogados já incluem o óleo do preparo (TACO): o azeite ou óleo da mesma refeição
+    // sai, com o desconto pela base (884 kcal e 100 g de gordura por 100 g; 12 g = 106,08 kcal e 12 g).
+    [Theory]
+    [InlineData("Couve refogada", "Azeite de oliva extra virgem")]
+    [InlineData("Espinafre refogado", "Óleo de soja")]
+    public async Task Oleo_Sai_Da_Refeicao_Com_Refogado(string refogado, string oleo)
+    {
+        var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true, alimento: refogado,
+            bebidaNoJantar: oleo, unidadeBebida: "g", quantidadeBebida: 12)));
+
+        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+
+        foreach (var dia in dieta.Dias)
+        {
+            var jantar = dia.Refeicoes.Single(r => r.Nome == "Jantar");
+            Assert.Equal(new[] { refogado }, jantar.Alimentos.Select(a => a.Nome));
+            Assert.Equal(735m - 106.08m, jantar.Macros.Calorias);
+            Assert.Equal(25m - 12m, jantar.Macros.GordurasG);
+            Assert.Equal(40m, jantar.Macros.ProteinasG);
+            Assert.Equal(500m + 735m - 106.08m, dia.TotalDoDia.Calorias);
+        }
+        Assert.Equal(1, gemini.Chamadas);
+    }
+
+    [Fact]
+    public async Task Azeite_Em_Refeicao_Sem_Refogado_Fica()
+    {
+        var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true, alimento: "Abobrinha cozida",
+            bebidaNoJantar: "Azeite de oliva extra virgem", unidadeBebida: "g", quantidadeBebida: 12)));
+
+        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+
+        Assert.All(dieta.Dias, d =>
+        {
+            Assert.Contains(d.Refeicoes.Single(r => r.Nome == "Jantar").Alimentos, a => a.AlimentoId == "azeite-de-oliva-extra-virgem");
+            Assert.Equal(1235m, d.TotalDoDia.Calorias);
+        });
+    }
+
+    [Fact]
+    public async Task Nome_Regional_Da_Uf_Tambem_Liga_Ao_Item()
+    {
+        var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true, alimento: "Aipim cozido")));
+        var contexto = Contexto();
+        contexto.Estado = "RJ";
+
+        var dieta = await NovoGerador(gemini).GerarDietaAsync(contexto);
+
+        Assert.All(dieta.Dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos), a => Assert.Equal("mandioca-cozida", a.AlimentoId));
+    }
+
+    [Fact]
+    public async Task Lista_Abaixo_Do_Minimo_Gera_Com_Aviso_Gravado()
+    {
+        var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true)));
+        var contexto = Contexto();
+        contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "vegano", Tipo = "evitar" });
+
+        var dieta = await NovoGerador(gemini).GerarDietaAsync(contexto);
+
+        Assert.NotNull(dieta.AvisoListaPobre);
+        Assert.Equal(["Proteina"], dieta.AvisoListaPobre.Papeis);
+        Assert.Equal(4, dieta.AvisoListaPobre.ItensPorPapel["Proteina"]);
+        Assert.Equal(1, dieta.AvisoListaPobre.GruposDeProteina);
+        // Vai no JSON salvo (o dashboard mostra na 2b-3).
+        Assert.Contains("\"AvisoListaPobre\"", JsonSerializer.Serialize(dieta));
+    }
+
+    // Dietas salvas antes da lista fechada abrem com AlimentoId, VersaoBase e o aviso nulos.
+    [Fact]
+    public void Dieta_Antiga_Abre_Com_Os_Campos_Novos_Nulos()
+    {
+        const string antiga = """
+            {"Dias":[{"DiaSemana":"Segunda-feira","Refeicoes":[{"Nome":"Almoço","Alimentos":[{"Nome":"Feijão cozido","Quantidade":150,"Unidade":"g"}],
+            "Macros":{"Calorias":500,"ProteinasG":30,"CarboidratosG":60,"GordurasG":15},"Horario":"12:00"}],
+            "TotalDoDia":{"Calorias":500,"ProteinasG":30,"CarboidratosG":60,"GordurasG":15},
+            "MetaCalculada":{"Calorias":2000,"ProteinasG":140,"CarboidratosG":250,"GordurasG":60}}]}
+            """;
+
+        var dieta = JsonSerializer.Deserialize<DietaSemanalDto>(antiga)!;
+
+        Assert.Null(dieta.VersaoBase);
+        Assert.Null(dieta.AvisoListaPobre);
+        Assert.Null(dieta.Dias[0].Refeicoes[0].Alimentos[0].AlimentoId);
+        Assert.Equal("Feijão cozido", dieta.Dias[0].Refeicoes[0].Alimentos[0].Nome);
+    }
+
+    [Fact]
+    public async Task Schema_Leva_A_Lista_No_Enum_Do_Nome()
+    {
+        var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana)));
+        var contexto = Contexto();
+        contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "peixe", Tipo = "evitar" });
+
+        await NovoGerador(gemini).GerarDietaAsync(contexto);
+
+        var alimento = JsonDocument.Parse(gemini.UltimoCorpo!).RootElement.GetProperty("generationConfig").GetProperty("responseSchema")
+            .GetProperty("properties").GetProperty("dias").GetProperty("items").GetProperty("properties").GetProperty("refeicoes")
+            .GetProperty("items").GetProperty("properties").GetProperty("alimentos").GetProperty("items").GetProperty("properties");
+        var nomes = alimento.GetProperty("nome").GetProperty("enum").EnumerateArray().Select(e => e.GetString()).ToList();
+        var lista = ListaAlimentosPessoa.Montar(null, contexto.Preferencias);
+
+        Assert.Equal(lista.Itens.Select(i => i.Nome), nomes);
+        Assert.DoesNotContain("Salmão grelhado", nomes);
+        Assert.Equal(["g", "ml"], alimento.GetProperty("unidade").GetProperty("enum").EnumerateArray().Select(e => e.GetString()));
+    }
+
+    [Fact]
+    public async Task Prompt_Leva_A_Lista_Os_Pesos_E_So_O_Gosto_Que_Esta_Na_Base()
+    {
+        var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana)));
+        var contexto = Contexto();
+        contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "Whey protein", Tipo = "preferido" });
+        contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "Batata doce", Tipo = "preferido" });
+
+        await NovoGerador(gemini).GerarDietaAsync(contexto);
+
+        var prompt = PromptEnviado(gemini);
+        Assert.Contains("- Carnes, aves e peixes: Patinho bovino grelhado;", prompt);
+        Assert.Contains("Ovo de galinha cozido: 1 unidade = 45 g", prompt);
+        Assert.Contains("Pão de forma integral: 1 fatia = 25 g", prompt);
+        Assert.Contains("a pessoa gosta (use como base do plano, mas NÃO se limite a eles: complete com outros alimentos da lista adequados ao objetivo, variando as opções ao longo da semana): Batata doce cozida", prompt);
+        Assert.DoesNotContain("Whey", prompt);
+        Assert.Contains("Couve refogada\" e \"Espinafre refogado\" já incluem o óleo do preparo", prompt);
+    }
+
+    [Theory]
+    [InlineData("RS", true)]
+    [InlineData("sc", true)]
+    [InlineData("SP", false)]
+    public async Task Prompt_Prefere_Feijao_Preto_No_Sul(string uf, bool fala)
+    {
+        var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana)));
+        var contexto = Contexto();
+        contexto.Estado = uf;
+
+        await NovoGerador(gemini).GerarDietaAsync(contexto);
+
+        Assert.Equal(fala, PromptEnviado(gemini).Contains("prefira \"Feijão preto cozido\""));
     }
 
     // ---------- Bebida alcoólica (regra 8) ----------
@@ -279,7 +474,7 @@ public class ValidacaoRespostaGeminiTests
         foreach (var dia in dieta.Dias)
         {
             var jantar = dia.Refeicoes.Single(r => r.Nome == "Jantar");
-            Assert.Equal(new[] { "Arroz" }, jantar.Alimentos.Select(a => a.Nome));
+            Assert.Equal(new[] { "Arroz branco cozido" }, jantar.Alimentos.Select(a => a.Nome));
             Assert.Equal(735m - 143.5m, jantar.Macros.Calorias);
             Assert.Equal(40m - 2.1m, jantar.Macros.ProteinasG);
             Assert.Equal(90m - 11.55m, jantar.Macros.CarboidratosG);
@@ -453,8 +648,8 @@ public class ValidacaoRespostaGeminiTests
     // bebidaNoJantar: o jantar ganha esse item (350 ml) além do alimento.
     // ceiaSoComBebida: um terceiro item, a ceia, só com esse item (350 ml, 143,5 kcal declaradas).
     private static string TextoDieta(
-        IEnumerable<string> nomes, bool comRefeicoes = false, string unidade = "g", string alimento = "Arroz",
-        string? bebidaNoJantar = null, string? ceiaSoComBebida = null, string unidadeBebida = "ml")
+        IEnumerable<string> nomes, bool comRefeicoes = false, string unidade = "g", string alimento = "Arroz branco cozido",
+        string? bebidaNoJantar = null, string? ceiaSoComBebida = null, string unidadeBebida = "ml", decimal quantidade = 100, decimal quantidadeBebida = 350)
     {
         object Item(string nome, decimal quantidade, string un) => new { nome, quantidade, unidade = un };
 
@@ -469,11 +664,11 @@ public class ValidacaoRespostaGeminiTests
         object[] Refeicoes()
         {
             var jantar = bebidaNoJantar is null
-                ? new[] { Item(alimento, 100, unidade) }
-                : new[] { Item(alimento, 100, unidade), Item(bebidaNoJantar, 350, unidadeBebida) };
+                ? new[] { Item(alimento, quantidade, unidade) }
+                : new[] { Item(alimento, quantidade, unidade), Item(bebidaNoJantar, quantidadeBebida, unidadeBebida) };
             var lista = new List<object>
             {
-                Refeicao("Almoço", new[] { Item(alimento, 100, unidade) }, 500, 30, 60, 15),
+                Refeicao("Almoço", new[] { Item(alimento, quantidade, unidade) }, 500, 30, 60, 15),
                 Refeicao("Jantar", jantar, 735, 40, 90, 25)
             };
             if (ceiaSoComBebida is not null)

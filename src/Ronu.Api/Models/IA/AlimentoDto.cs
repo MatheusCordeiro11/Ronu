@@ -14,4 +14,9 @@ public class AlimentoDto
     // possível fazendo parsing de texto livre.
     public required decimal Quantidade { get; set; }
     public required string Unidade { get; set; }
+
+    // Id do item na base nutricional (BaseNutricional), preenchido pelo C# a
+    // partir do nome escolhido na lista fechada (fase 2b). Nulo nas dietas
+    // geradas antes da lista, que têm nomes em texto livre.
+    public string? AlimentoId { get; set; }
 }
