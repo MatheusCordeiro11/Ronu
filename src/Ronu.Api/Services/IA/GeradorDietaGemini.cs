@@ -50,6 +50,12 @@ public class GeradorDietaGemini : IGeradorDietaIA
     /// </summary>
     public TimeSpan TimeoutPorTentativa { get; init; } = TimeoutPadraoPorTentativa;
 
+    /// <summary>
+    /// Se o ajuste de quantidades (fase 4) roda. Só os testes desligam, para
+    /// conferir as outras etapas com as quantidades exatas da resposta.
+    /// </summary>
+    public bool AjustarQuantidades { get; init; } = true;
+
     public GeradorDietaGemini(
         HttpClient httpClient,
         ICalculadoraGastoCalorico calculadora,
@@ -118,12 +124,15 @@ public class GeradorDietaGemini : IGeradorDietaIA
                     ? ValidarBebidaAlcoolica(dias, contexto)
                     : TirarBebidaAlcoolica(dias, contexto);
                 // Depois da regra 8: a rede de segurança da cerveja continua valendo antes da lista.
-                var contaveis = AplicarLista(dias, lista);
+                AplicarLista(dias, lista);
                 var oleosTirados = TirarOleoDosRefogados(dias);
+                // Fase 4: quantidades ajustadas para cada dia chegar perto da meta, sem trocar alimento.
+                var ajustes = AjustarQuantidades ? AjusteQuantidades.Ajustar(dias) : [];
+                var contaveis = RotularContaveis(dias);
                 // Fase 3: kcal e macros calculados pela base no lugar dos declarados, que ficam só no log.
                 CalculoPelaBase.Calcular(dias);
 
-                RegistrarGeracao(dias, declarado, uso, versaoModelo, normalizacao, tentativa, cronometro.ElapsedMilliseconds, lista, contaveis, oleosTirados);
+                RegistrarGeracao(dias, declarado, uso, versaoModelo, normalizacao, tentativa, cronometro.ElapsedMilliseconds, lista, contaveis, oleosTirados, ajustes);
 
                 return new DietaSemanalDto
                 {
@@ -307,16 +316,12 @@ public class GeradorDietaGemini : IGeradorDietaIA
 
     /// <summary>
     /// Liga cada alimento da resposta ao item da lista pelo nome (o enum garante
-    /// o nome; fora da lista, a resposta é inválida), preenche o AlimentoId, põe a
-    /// unidade da base (o Gemini não decide g ou ml) e, nos itens contáveis com
-    /// quantidade em múltiplo exato do peso da unidade da POF, acrescenta a
-    /// contagem ao nome exibido ("Ovo de galinha cozido (2 unidades)"). Devolve
-    /// quantos contáveis vieram e quantos ficaram fora do múltiplo, para o log.
+    /// o nome; fora da lista, a resposta é inválida), preenche o AlimentoId e põe a
+    /// unidade da base (o Gemini não decide g ou ml).
     /// </summary>
-    private static (int Contaveis, int ForaDoMultiplo) AplicarLista(List<DiaDietaDto> dias, ListaAlimentos lista)
+    private static void AplicarLista(List<DiaDietaDto> dias, ListaAlimentos lista)
     {
         var porNome = lista.Itens.ToDictionary(i => i.Nome, StringComparer.Ordinal);
-        int contaveis = 0, foraDoMultiplo = 0;
 
         foreach (var alimento in dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos))
         {
@@ -329,8 +334,24 @@ public class GeradorDietaGemini : IGeradorDietaIA
             alimento.Nome = nome;
             alimento.AlimentoId = item.Item.Id;
             alimento.Unidade = item.Item.Medida;
+        }
+    }
 
-            var unidade = item.Item.MedidaUnidade;
+    /// <summary>
+    /// Nos itens contáveis com quantidade em múltiplo exato do peso da unidade da
+    /// POF, acrescenta a contagem ao nome exibido ("Ovo de galinha cozido (2
+    /// unidades)"). Depois do ajuste de quantidades (fase 4), que deixa os
+    /// contáveis em unidade inteira. Devolve quantos contáveis vieram e quantos
+    /// ficaram fora do múltiplo, para o log.
+    /// </summary>
+    private static (int Contaveis, int ForaDoMultiplo) RotularContaveis(List<DiaDietaDto> dias)
+    {
+        int contaveis = 0, foraDoMultiplo = 0;
+
+        foreach (var alimento in dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos))
+        {
+            var nome = alimento.Nome;
+            var unidade = BaseNutricional.Itens.Single(i => i.Id == alimento.AlimentoId).MedidaUnidade;
             if (unidade is null)
             {
                 continue;
@@ -447,8 +468,16 @@ public class GeradorDietaGemini : IGeradorDietaIA
     // de "g"/"ml" (NormalizadorUnidades), que impedem o cálculo daquele alimento.
     private void RegistrarGeracao(
         List<DiaDietaDto> dias, Dictionary<string, MacrosDto> declaradoPorDia, UsoTokens uso, string? versaoModelo, ResultadoNormalizacao normalizacao, int tentativas, long tempoMs,
-        ListaAlimentos lista, (int Contaveis, int ForaDoMultiplo) contaveis, List<OleoTirado> oleosTirados)
+        ListaAlimentos lista, (int Contaveis, int ForaDoMultiplo) contaveis, List<OleoTirado> oleosTirados, List<AjusteDoDia> ajustes)
     {
+        // Ajuste de quantidades (fase 4): por dia, o desvio de kcal antes e depois e quantos itens mudaram;
+        // os dias que ficaram fora dos 5% vão marcados, para acompanhar em produção.
+        _logger.LogInformation(
+            "Ajuste de quantidades: {DentroDaMargem} de {Dias} dias com kcal a até 5% da meta; por dia (kcal antes -> depois, itens mudados): {PorDia}",
+            ajustes.Count(a => a.DentroDaMargem), ajustes.Count,
+            string.Join("; ", ajustes.Select(a => string.Create(CultureInfo.InvariantCulture,
+                $"{a.Dia} {a.DesvioKcalAntes:+0.0;-0.0}% -> {a.DesvioDepois[0]:+0.0;-0.0}% ({a.ItensMudados}){(a.DentroDaMargem ? "" : " FORA")}"))));
+
         // Lista fechada (fase 2b): o tamanho, os mínimos, quantos "evitar" não casaram com nada (só a
         // contagem: o texto da preferência pode revelar uma condição de saúde), os contáveis fora do
         // múltiplo da unidade e quantas vezes o azeite ou óleo saiu de uma refeição com refogado.

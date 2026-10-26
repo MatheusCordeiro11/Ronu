@@ -233,11 +233,13 @@ public static partial class BaseNutricional
             Observacao: "Amendoim marcado por precaução: beneficiamento comum."),
         new("linhaca", "Linhaça", CategoriaAlimento.OleaginosasESementes, "g", FonteNutricional.Taco, "594", "Linhaça, semente", 495m, 14.1m, 43.3m, 32.3m, false, 30m, Alergenos.Nenhum,
             Observacao: "Semente."),
-        new("azeite-de-oliva-extra-virgem", "Azeite de oliva extra virgem", CategoriaAlimento.OleosEGorduras, "g", FonteNutricional.Taco, "260", "Azeite, de oliva, extra virgem", 884m, 0m, 0m, 100m, false, 20m, Alergenos.Nenhum,
+        // Azeite, óleo de soja e manteiga ajustáveis desde a fase 4 (2026-10-26): são o que o ajuste de quantidades
+        // mexe para fechar a gordura do dia (na simulação do g9a, de 23 para 33 dias com P, C e G a até 10%).
+        new("azeite-de-oliva-extra-virgem", "Azeite de oliva extra virgem", CategoriaAlimento.OleosEGorduras, "g", FonteNutricional.Taco, "260", "Azeite, de oliva, extra virgem", 884m, 0m, 0m, 100m, true, 20m, Alergenos.Nenhum,
             Observacao: "Proteína e carboidrato \"NA\" (não se aplica) na TACO, contados como 0."),
-        new("oleo-de-soja", "Óleo de soja", CategoriaAlimento.OleosEGorduras, "g", FonteNutricional.Taco, "272", "Óleo, de soja", 884m, 0m, 0m, 100m, false, 15m, Alergenos.Nenhum,
+        new("oleo-de-soja", "Óleo de soja", CategoriaAlimento.OleosEGorduras, "g", FonteNutricional.Taco, "272", "Óleo, de soja", 884m, 0m, 0m, 100m, true, 15m, Alergenos.Nenhum,
             Observacao: "Proteína e carboidrato \"NA\" (não se aplica) na TACO, contados como 0."),
-        new("manteiga", "Manteiga", CategoriaAlimento.OleosEGorduras, "g", FonteNutricional.Taco, "261", "Manteiga, com sal", 726m, 0.4m, 0.1m, 82.4m, false, 20m, Alergenos.Lactose,
+        new("manteiga", "Manteiga", CategoriaAlimento.OleosEGorduras, "g", FonteNutricional.Taco, "261", "Manteiga, com sal", 726m, 0.4m, 0.1m, 82.4m, true, 20m, Alergenos.Lactose,
             Observacao: "Com sal."),
         new("acucar-refinado", "Açúcar refinado", CategoriaAlimento.AcucaresEMel, "g", FonteNutricional.Taco, "494", "Açúcar, refinado", 387m, 0.3m, 99.5m, 0m, false, 20m, Alergenos.Nenhum),
         new("acucar-mascavo", "Açúcar mascavo", CategoriaAlimento.AcucaresEMel, "g", FonteNutricional.Taco, "493", "Açúcar, mascavo", 369m, 0.8m, 94.5m, 0.1m, false, 20m, Alergenos.Nenhum),

@@ -637,13 +637,29 @@ public class ValidacaoRespostaGeminiTests
     // Limite curto para os testes de timeout não esperarem os 60 s reais.
     private static readonly TimeSpan TimeoutCurto = TimeSpan.FromMilliseconds(200);
 
-    private static GeradorDietaGemini NovoGerador(HttpMessageHandler gemini, TimeSpan? timeoutPorTentativa = null) => new(
+    // O ajuste de quantidades (fase 4) fica desligado aqui: estes testes conferem as outras etapas com as
+    // quantidades exatas da resposta. O ajuste tem os próprios testes (AjusteQuantidadesTests).
+    private static GeradorDietaGemini NovoGerador(HttpMessageHandler gemini, TimeSpan? timeoutPorTentativa = null, bool ajustar = false) => new(
         new HttpClient(gemini), new CalculadoraGastoCalorico(),
         new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia()),
         new GeminiOptions { ApiKey = "teste" }, NullLogger<GeradorDietaGemini>.Instance)
     {
-        TimeoutPorTentativa = timeoutPorTentativa ?? GeradorDietaGemini.TimeoutPadraoPorTentativa
+        TimeoutPorTentativa = timeoutPorTentativa ?? GeradorDietaGemini.TimeoutPadraoPorTentativa,
+        AjustarQuantidades = ajustar
     };
+
+    // Com o ajuste ligado (como em produção): o cardápio de teste (só arroz, 256 kcal no dia) está muito
+    // abaixo da meta, então o arroz sobe até o teto de 150% (150 g por refeição), sem passar dele.
+    [Fact]
+    public async Task Com_O_Ajuste_Ligado_As_Quantidades_Mudam_Dentro_Dos_Limites()
+    {
+        var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true)));
+
+        var dieta = await NovoGerador(gemini, ajustar: true).GerarDietaAsync(Contexto());
+
+        Assert.All(dieta.Dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos), a => Assert.Equal(150m, a.Quantidade));
+        Assert.All(dieta.Dias, d => Assert.Equal(2 * 192m, d.TotalDoDia.Calorias));
+    }
 
     private static ContextoDietaDto Contexto() => new()
     {
