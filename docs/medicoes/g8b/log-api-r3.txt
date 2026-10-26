@@ -1,0 +1,12 @@
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Meta adaptativa: HistoricoInsuficiente, ajuste 0, fator bruto (null), erro da fórmula (null) kcal/dia; ingestão (null), manutenção (null), meta prescrita (null) vs base 2500.8 kcal/dia; 0 pesagens, (null) dias com dieta; ritmos no DTO: nulos
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Dieta gerada pelo Gemini (gemini-3.5-flash-lite) em 15506 ms (1 tentativa(s)); tokens: entrada 1960, resposta 8603, raciocínio 0, total 10563. Unidades: 125 alimentos, 0 normalizados para g/ml, fora de g/ml: nenhuma. Soma das refeições vs. meta por dia (kcal, desvio de proteína, carboidrato e gordura, e 4P+4C+9G dos macros declarados vs. kcal declaradas): Segunda-feira 2851/2851 kcal (+0.0%) P +0% C +0% G +0% 4P+4C+9G -0.1%; Terça-feira 2851/2851 kcal (+0.0%) P +0% C +0% G +0% 4P+4C+9G -0.1%; Quarta-feira 2035/2035 kcal (+0.0%) P +0% C +0% G +1% 4P+4C+9G +0.1%; Quinta-feira 2851/2851 kcal (+0.0%) P +0% C +0% G +0% 4P+4C+9G -0.1%; Sexta-feira 2851/2851 kcal (+0.0%) P +0% C +0% G +0% 4P+4C+9G -0.1%; Sábado 2035/2035 kcal (+0.0%) P +0% C +0% G +1% 4P+4C+9G +0.1%; Domingo 2035/2035 kcal (+0.0%) P +0% C +0% G +1% 4P+4C+9G +0.1%
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Meta adaptativa: HistoricoInsuficiente, ajuste 0, fator bruto (null), erro da fórmula (null) kcal/dia; ingestão (null), manutenção (null), meta prescrita (null) vs base 2311.2 kcal/dia; 0 pesagens, (null) dias com dieta; ritmos no DTO: nulos
+warn: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Resposta inválida do Gemini na tentativa 1 (17444 ms até aqui); tentando de novo
+      Ronu.Api.Services.IA.RespostaIaInvalidaException: Resposta do Gemini com bebida alcoólica fora das preferências da pessoa: 'Cerveja (lata)'.
+warn: Ronu.Api.Controllers.DietasController[0]
+      Resposta inválida do Gemini (após nova tentativa) ao gerar dieta do usuário 103
+      Ronu.Api.Services.IA.RespostaIaInvalidaException: Resposta do Gemini com bebida alcoólica fora das preferências da pessoa: 'Cerveja pilsen'.

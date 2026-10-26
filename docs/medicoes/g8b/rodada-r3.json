@@ -1,0 +1,20 @@
+{
+ "rodada": "g8b",
+ "data": "20261025",
+ "perfis": [
+  {
+   "perfil": "E",
+   "usuarioId": 102,
+   "email": "g8b-e-r3-20261025@exemplo.com",
+   "status": 200,
+   "segundosCliente": 15.7
+  },
+  {
+   "perfil": "F",
+   "usuarioId": 103,
+   "email": "g8b-f-r3-20261025@exemplo.com",
+   "status": 503,
+   "segundosCliente": 33.5
+  }
+ ]
+}

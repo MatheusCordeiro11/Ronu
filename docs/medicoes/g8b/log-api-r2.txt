@@ -1,0 +1,16 @@
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Meta adaptativa: HistoricoInsuficiente, ajuste 0, fator bruto (null), erro da fórmula (null) kcal/dia; ingestão (null), manutenção (null), meta prescrita (null) vs base 2500.8 kcal/dia; 0 pesagens, (null) dias com dieta; ritmos no DTO: nulos
+warn: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Resposta inválida do Gemini na tentativa 1 (16442 ms até aqui); tentando de novo
+      Ronu.Api.Services.IA.RespostaIaInvalidaException: Resposta do Gemini com bebida alcoólica fora das preferências da pessoa: 'Cerveja Pilsen em lata'.
+warn: Ronu.Api.Controllers.DietasController[0]
+      Resposta inválida do Gemini (após nova tentativa) ao gerar dieta do usuário 100
+      Ronu.Api.Services.IA.RespostaIaInvalidaException: Resposta do Gemini com bebida alcoólica fora das preferências da pessoa: 'Cerveja pilsen'.
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Meta adaptativa: HistoricoInsuficiente, ajuste 0, fator bruto (null), erro da fórmula (null) kcal/dia; ingestão (null), manutenção (null), meta prescrita (null) vs base 2311.2 kcal/dia; 0 pesagens, (null) dias com dieta; ritmos no DTO: nulos
+warn: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Resposta inválida do Gemini na tentativa 1 (16320 ms até aqui); tentando de novo
+      Ronu.Api.Services.IA.RespostaIaInvalidaException: Resposta do Gemini com bebida alcoólica fora das preferências da pessoa: 'Cerveja (1 lata)'.
+warn: Ronu.Api.Controllers.DietasController[0]
+      Resposta inválida do Gemini (após nova tentativa) ao gerar dieta do usuário 101
+      Ronu.Api.Services.IA.RespostaIaInvalidaException: Resposta do Gemini com bebida alcoólica fora das preferências da pessoa: 'Cerveja pilsen (1 lata)'.

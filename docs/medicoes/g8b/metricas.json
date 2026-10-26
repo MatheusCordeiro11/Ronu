@@ -1,0 +1,510 @@
+{
+ "perfis": {
+  "A": {
+   "status": 200,
+   "segundosCliente": 16.0,
+   "uf": "SP",
+   "pedidos": 1,
+   "itens": 104,
+   "itensNaBase": 82,
+   "pctItensNaBase": 78.8,
+   "refeicoes": 39,
+   "pctRefeicoesInteirasNaBase": 64.1,
+   "alimentosDiferentes": 29,
+   "desvioDeclarado": {
+    "kcal": 5.5,
+    "p": 10.2,
+    "c": 10.3,
+    "g": 10.4
+   },
+   "desvioPelaBase": {
+    "kcal": 6.0,
+    "p": 9.7,
+    "c": 9.8,
+    "g": 13.6
+   },
+   "diasForaDe5Declarado": 3,
+   "diasForaDe5PelaBase": 3,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Batata doce": 6,
+    "Tapioca": 6
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {
+    "azeite de oliva": 7,
+    "molho de tomate": 4,
+    "macarrao de trigo cozido": 3,
+    "patinho bovino moido cozido": 3,
+    "pasta de amendoim": 2,
+    "file de tilapia assado": 2,
+    "granola": 1
+   },
+   "tentativasGemini": 1,
+   "ms": 15555,
+   "tokensEntrada": 1968,
+   "tokensResposta": 8209
+  },
+  "B": {
+   "status": 200,
+   "segundosCliente": 32.5,
+   "uf": "RJ",
+   "pedidos": 1,
+   "itens": 131,
+   "itensNaBase": 90,
+   "pctItensNaBase": 68.7,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 28.6,
+   "alimentosDiferentes": 36,
+   "desvioDeclarado": {
+    "kcal": 2.7,
+    "p": 11.2,
+    "c": 4.9,
+    "g": 12.0
+   },
+   "desvioPelaBase": {
+    "kcal": 2.9,
+    "p": 12.1,
+    "c": 5.6,
+    "g": 11.6
+   },
+   "diasForaDe5Declarado": 2,
+   "diasForaDe5PelaBase": 2,
+   "refeicoesRepetidas": [
+    "Segunda-feira → Terça-feira: Café da manhã",
+    "Sexta-feira → Sábado: Café da manhã"
+   ],
+   "gostos": {
+    "Banana": 8
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [
+     "Segunda-feira Lanche da tarde 16:00: Chá preto",
+     "Quarta-feira Lanche da tarde 16:00: Chá mate",
+     "Quinta-feira Lanche da tarde 16:00: Chá verde",
+     "Sexta-feira Lanche da tarde 16:00: Chá preto",
+     "Domingo Lanche da tarde 16:00: Chá verde"
+    ],
+    "evitar": [],
+    "refogadoComOleo": [
+     "Quarta-feira Almoço",
+     "Domingo Almoço"
+    ],
+    "regional": []
+   },
+   "foraDaBase": {
+    "azeite de oliva": 14,
+    "acucar cristal": 7,
+    "salada de alface e tomate": 4,
+    "tapioca de frigideira": 3,
+    "file de peito de frango sem pele grelhado": 3,
+    "macarrao de semola cozido": 2,
+    "molho de tomate industrializado": 2,
+    "abobrinha italiana refogada": 2,
+    "cha verde": 2,
+    "requeijao light": 1,
+    "pure de batata inglesa": 1
+   },
+   "tentativasGemini": 2,
+   "ms": 32454,
+   "tokensEntrada": 1952,
+   "tokensResposta": 8838
+  },
+  "C": {
+   "status": 200,
+   "segundosCliente": 18.1,
+   "uf": "RS",
+   "pedidos": 1,
+   "itens": 153,
+   "itensNaBase": 101,
+   "pctItensNaBase": 66.0,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 0.0,
+   "alimentosDiferentes": 34,
+   "desvioDeclarado": {
+    "kcal": 0.0,
+    "p": 21.3,
+    "c": 11.0,
+    "g": 6.8
+   },
+   "desvioPelaBase": {
+    "kcal": 0.0,
+    "p": 21.3,
+    "c": 11.0,
+    "g": 6.8
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "refeicoesRepetidas": [
+    "Segunda-feira → Terça-feira: Café da manhã",
+    "Segunda-feira → Terça-feira: Lanche da manhã",
+    "Segunda-feira → Terça-feira: Lanche da tarde",
+    "Terça-feira → Quarta-feira: Café da manhã",
+    "Terça-feira → Quarta-feira: Lanche da manhã",
+    "Terça-feira → Quarta-feira: Lanche da tarde",
+    "Quarta-feira → Quinta-feira: Café da manhã",
+    "Quarta-feira → Quinta-feira: Lanche da manhã",
+    "Quarta-feira → Quinta-feira: Lanche da tarde",
+    "Quinta-feira → Sexta-feira: Café da manhã",
+    "Quinta-feira → Sexta-feira: Lanche da manhã",
+    "Quinta-feira → Sexta-feira: Lanche da tarde",
+    "Sexta-feira → Sábado: Lanche da tarde",
+    "Sábado → Domingo: Café da manhã",
+    "Sábado → Domingo: Lanche da manhã",
+    "Sábado → Domingo: Lanche da tarde"
+   ],
+   "gostos": {
+    "Whey protein": 7,
+    "Pasta de amendoim": 5
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [
+     "Quinta-feira Almoço"
+    ],
+    "regional": []
+   },
+   "foraDaBase": {
+    "azeite de oliva": 14,
+    "acucar cristal": 7,
+    "whey protein": 7,
+    "leite de vaca integral": 7,
+    "pasta de amendoim": 5,
+    "macarrao espaguete cozido": 3,
+    "molho de tomate": 3,
+    "carne moida cozida": 2,
+    "frango desfiado cozido": 2,
+    "salada de repolho cru": 1,
+    "omelete de ovo de galinha": 1
+   },
+   "tentativasGemini": 1,
+   "ms": 18013,
+   "tokensEntrada": 1999,
+   "tokensResposta": 9617
+  },
+  "D": {
+   "status": 200,
+   "segundosCliente": 15.8,
+   "uf": "MG",
+   "pedidos": 1,
+   "itens": 124,
+   "itensNaBase": 97,
+   "pctItensNaBase": 78.2,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 54.3,
+   "alimentosDiferentes": 43,
+   "desvioDeclarado": {
+    "kcal": 0.0,
+    "p": 2.2,
+    "c": 0.1,
+    "g": 0.3
+   },
+   "desvioPelaBase": {
+    "kcal": 1.5,
+    "p": 6.1,
+    "c": 5.7,
+    "g": 3.3
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "refeicoesRepetidas": [],
+   "gostos": {},
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [
+     "Terça-feira Lanche da tarde 16:00: Chá mate"
+    ],
+    "evitar": [],
+    "refogadoComOleo": [
+     "Segunda-feira Jantar",
+     "Terça-feira Jantar",
+     "Quarta-feira Almoço",
+     "Quarta-feira Jantar",
+     "Sexta-feira Jantar",
+     "Domingo Jantar"
+    ],
+    "regional": []
+   },
+   "foraDaBase": {
+    "azeite de oliva": 14,
+    "cenoura crua ralada": 2,
+    "pera": 2,
+    "carne moida de patinho refogada": 2,
+    "macarrao espaguete cozido": 1,
+    "molho de tomate industrializado": 1,
+    "peito de frango sem pele desfiado refogado": 1,
+    "omelete de ovo de galinha": 1,
+    "mix de legumes cozidos": 1,
+    "file de frango grelhado": 1,
+    "salada de repolho cru": 1
+   },
+   "tentativasGemini": 1,
+   "ms": 15793,
+   "tokensEntrada": 1953,
+   "tokensResposta": 8582
+  },
+  "E": {
+   "status": 200,
+   "segundosCliente": 15.7,
+   "uf": "PE",
+   "pedidos": 3,
+   "itens": 125,
+   "itensNaBase": 100,
+   "pctItensNaBase": 80.0,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 60.0,
+   "alimentosDiferentes": 22,
+   "desvioDeclarado": {
+    "kcal": 0.0,
+    "p": 0.0,
+    "c": 0.2,
+    "g": 0.5
+   },
+   "desvioPelaBase": {
+    "kcal": 4.7,
+    "p": 2.1,
+    "c": 10.9,
+    "g": 0.8
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 3,
+   "refeicoesRepetidas": [
+    "Segunda-feira → Terça-feira: Lanche da manhã",
+    "Segunda-feira → Terça-feira: Lanche da tarde",
+    "Quinta-feira → Sexta-feira: Lanche da manhã",
+    "Quinta-feira → Sexta-feira: Lanche da tarde",
+    "Sábado → Domingo: Café da manhã",
+    "Sábado → Domingo: Lanche da tarde",
+    "Sábado → Domingo: Ceia"
+   ],
+   "gostos": {
+    "Ovo": 14
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {
+    "azeite de oliva": 14,
+    "abobrinha italiana cozida": 4,
+    "tilapia file grelhado": 3,
+    "lombo suino cozido": 2,
+    "patacon": 1,
+    "patinho bovino moido cozido": 1
+   },
+   "tentativasGemini": 1,
+   "ms": 15506,
+   "tokensEntrada": 1960,
+   "tokensResposta": 8603
+  },
+  "F": {
+   "status": 503,
+   "segundosCliente": 33.5,
+   "uf": "SC",
+   "pedidos": 3
+  },
+  "G": {
+   "status": 200,
+   "segundosCliente": 18.1,
+   "uf": "BA",
+   "pedidos": 1,
+   "itens": 142,
+   "itensNaBase": 104,
+   "pctItensNaBase": 73.2,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 34.3,
+   "alimentosDiferentes": 34,
+   "desvioDeclarado": {
+    "kcal": 0.0,
+    "p": 0.2,
+    "c": 0.1,
+    "g": 0.1
+   },
+   "desvioPelaBase": {
+    "kcal": 3.9,
+    "p": 18.1,
+    "c": 7.5,
+    "g": 10.2
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 3,
+   "refeicoesRepetidas": [
+    "Quinta-feira → Sexta-feira: Café da manhã",
+    "Quinta-feira → Sexta-feira: Lanche da manhã",
+    "Sexta-feira → Sábado: Café da manhã",
+    "Sexta-feira → Sábado: Lanche da manhã (Pré-treino)"
+   ],
+   "gostos": {
+    "Cerveja": 1,
+    "Feijão": 7
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [
+     "Segunda-feira Jantar",
+     "Terça-feira Jantar (Pós-treino)",
+     "Sexta-feira Jantar"
+    ],
+    "regional": []
+   },
+   "foraDaBase": {
+    "mamao papaia cru": 7,
+    "acucar cristal": 7,
+    "banana prata crua": 7,
+    "ovo de galinha mexido": 6,
+    "maca fuji crua": 2,
+    "geleia de fruta": 2,
+    "pasta de amendoim": 2,
+    "mix de legumes cozidos": 2,
+    "peixe file de tilapia grelhado": 1,
+    "carne bovina alcatra grelhada": 1,
+    "cerveja": 1
+   },
+   "tentativasGemini": 1,
+   "ms": 18035,
+   "tokensEntrada": 1963,
+   "tokensResposta": 9338
+  }
+ },
+ "itensBase": 121,
+ "pedidos": [
+  {
+   "perfil": "A",
+   "repeticao": "r1",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 15555,
+   "tokensEntrada": 1968,
+   "tokensResposta": 8209
+  },
+  {
+   "perfil": "B",
+   "repeticao": "r1",
+   "invalidas": [
+    "Resposta do Gemini com bebida alcoólica fora das preferências da pessoa: 'Cerveja pilsen'."
+   ],
+   "status": 200,
+   "tentativasGemini": 2,
+   "ms": 32454,
+   "tokensEntrada": 1952,
+   "tokensResposta": 8838
+  },
+  {
+   "perfil": "C",
+   "repeticao": "r1",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 18013,
+   "tokensEntrada": 1999,
+   "tokensResposta": 9617
+  },
+  {
+   "perfil": "D",
+   "repeticao": "r1",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 15793,
+   "tokensEntrada": 1953,
+   "tokensResposta": 8582
+  },
+  {
+   "perfil": "E",
+   "repeticao": "r1",
+   "invalidas": [
+    "Resposta do Gemini com bebida alcoólica fora das preferências da pessoa: 'Cerveja Pilsen em lata'.",
+    "Resposta do Gemini com bebida alcoólica fora das preferências da pessoa: 'Cerveja pilsen'."
+   ],
+   "status": 503,
+   "tentativasGemini": 2
+  },
+  {
+   "perfil": "F",
+   "repeticao": "r1",
+   "invalidas": [
+    "Resposta do Gemini com bebida alcoólica fora das preferências da pessoa: 'Cerveja pilsen'.",
+    "Resposta do Gemini com bebida alcoólica fora das preferências da pessoa: 'Cerveja (1 lata)'."
+   ],
+   "status": 503,
+   "tentativasGemini": 2
+  },
+  {
+   "perfil": "G",
+   "repeticao": "r1",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 18035,
+   "tokensEntrada": 1963,
+   "tokensResposta": 9338
+  },
+  {
+   "perfil": "E",
+   "repeticao": "r2",
+   "invalidas": [
+    "Resposta do Gemini com bebida alcoólica fora das preferências da pessoa: 'Cerveja Pilsen em lata'.",
+    "Resposta do Gemini com bebida alcoólica fora das preferências da pessoa: 'Cerveja pilsen'."
+   ],
+   "status": 503,
+   "tentativasGemini": 2
+  },
+  {
+   "perfil": "F",
+   "repeticao": "r2",
+   "invalidas": [
+    "Resposta do Gemini com bebida alcoólica fora das preferências da pessoa: 'Cerveja (1 lata)'.",
+    "Resposta do Gemini com bebida alcoólica fora das preferências da pessoa: 'Cerveja pilsen (1 lata)'."
+   ],
+   "status": 503,
+   "tentativasGemini": 2
+  },
+  {
+   "perfil": "E",
+   "repeticao": "r3",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 15506,
+   "tokensEntrada": 1960,
+   "tokensResposta": 8603
+  },
+  {
+   "perfil": "F",
+   "repeticao": "r3",
+   "invalidas": [
+    "Resposta do Gemini com bebida alcoólica fora das preferências da pessoa: 'Cerveja (lata)'.",
+    "Resposta do Gemini com bebida alcoólica fora das preferências da pessoa: 'Cerveja pilsen'."
+   ],
+   "status": 503,
+   "tentativasGemini": 2
+  }
+ ],
+ "alcoolSemPedir": {
+  "chamadasGemini": 16,
+  "chamadasComAlcool": 11,
+  "pedidos": 10,
+  "pedidos503": 5
+ }
+}

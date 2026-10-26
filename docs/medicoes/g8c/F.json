@@ -1,0 +1,1411 @@
+{
+ "perfil": {
+  "id": "F",
+  "sexo": "Feminino",
+  "nascimento": "2002-04-12",
+  "peso": 63,
+  "altura": 168,
+  "objetivo": "ganhar peso",
+  "uf": "SC",
+  "nivel": "sentado",
+  "modalidades": [
+   [
+    "Judô",
+    [
+     1,
+     3,
+     5
+    ],
+    1.5
+   ],
+   [
+    "Corrida",
+    [
+     6
+    ],
+    0.75
+   ]
+  ],
+  "gosto": [
+   "Iogurte",
+   "Granola"
+  ],
+  "evitar": [
+   "Peixe"
+  ]
+ },
+ "status": 200,
+ "segundosCliente": 16.9,
+ "resposta": {
+  "dataGeracao": "2026-10-26T00:41:32.0437454Z",
+  "dieta": {
+   "dias": [
+    {
+     "diaSemana": "Segunda-feira",
+     "refeicoes": [
+      {
+       "nome": "Café da manhã",
+       "alimentos": [
+        {
+         "nome": "Iogurte natural",
+         "quantidade": 200,
+         "unidade": "g"
+        },
+        {
+         "nome": "Granola",
+         "quantidade": 60,
+         "unidade": "g"
+        },
+        {
+         "nome": "Banana prata",
+         "quantidade": 100,
+         "unidade": "g"
+        },
+        {
+         "nome": "Café coado",
+         "quantidade": 150,
+         "unidade": "ml"
+        }
+       ],
+       "macros": {
+        "calorias": 450,
+        "proteinasG": 18,
+        "carboidratosG": 75,
+        "gordurasG": 10
+       },
+       "horario": "07:30"
+      },
+      {
+       "nome": "Lanche da manhã",
+       "alimentos": [
+        {
+         "nome": "Pão francês (1 unidade)",
+         "quantidade": 50,
+         "unidade": "g"
+        },
+        {
+         "nome": "Queijo minas frescal",
+         "quantidade": 40,
+         "unidade": "g"
+        },
+        {
+         "nome": "Mamão papaia",
+         "quantidade": 150,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 310,
+        "proteinasG": 15,
+        "carboidratosG": 45,
+        "gordurasG": 9
+       },
+       "horario": "10:00"
+      },
+      {
+       "nome": "Almoço",
+       "alimentos": [
+        {
+         "nome": "Arroz branco cozido",
+         "quantidade": 250,
+         "unidade": "g"
+        },
+        {
+         "nome": "Feijão preto cozido",
+         "quantidade": 120,
+         "unidade": "g"
+        },
+        {
+         "nome": "Peito de frango sem pele grelhado",
+         "quantidade": 160,
+         "unidade": "g"
+        },
+        {
+         "nome": "Mandioca cozida",
+         "quantidade": 100,
+         "unidade": "g"
+        },
+        {
+         "nome": "Azeite de oliva de baixa acidez",
+         "quantidade": 15,
+         "unidade": "g"
+        },
+        {
+         "nome": "Alface crua",
+         "quantidade": 40,
+         "unidade": "g"
+        },
+        {
+         "nome": "Tomate cru",
+         "quantidade": 50,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 890,
+        "proteinasG": 52,
+        "carboidratosG": 115,
+        "gordurasG": 24
+       },
+       "horario": "12:30"
+      },
+      {
+       "nome": "Lanche da tarde",
+       "alimentos": [
+        {
+         "nome": "Aveia em flocos",
+         "quantidade": 50,
+         "unidade": "g"
+        },
+        {
+         "nome": "Leite desnatado",
+         "quantidade": 200,
+         "unidade": "ml"
+        },
+        {
+         "nome": "Pasta de amendoim",
+         "quantidade": 30,
+         "unidade": "g"
+        },
+        {
+         "nome": "Maçã fuji",
+         "quantidade": 120,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 535,
+        "proteinasG": 19,
+        "carboidratosG": 72,
+        "gordurasG": 20
+       },
+       "horario": "16:00"
+      },
+      {
+       "nome": "Jantar",
+       "alimentos": [
+        {
+         "nome": "Arroz branco cozido",
+         "quantidade": 200,
+         "unidade": "g"
+        },
+        {
+         "nome": "Feijão preto cozido",
+         "quantidade": 100,
+         "unidade": "g"
+        },
+        {
+         "nome": "Patinho bovino moído cozido",
+         "quantidade": 120,
+         "unidade": "g"
+        },
+        {
+         "nome": "Azeite de oliva de baixa acidez",
+         "quantidade": 10,
+         "unidade": "g"
+        },
+        {
+         "nome": "Brócolis cozido",
+         "quantidade": 80,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 450,
+        "proteinasG": 10,
+        "carboidratosG": 74,
+        "gordurasG": 10
+       },
+       "horario": "20:00"
+      }
+     ],
+     "totalDoDia": {
+      "calorias": 2635,
+      "proteinasG": 114,
+      "carboidratosG": 381,
+      "gordurasG": 73
+     },
+     "metaCalculada": {
+      "calorias": 2634.55,
+      "proteinasG": 113.4,
+      "carboidratosG": 380.578125,
+      "gordurasG": 73.18194444444444
+     },
+     "metaElevadaPeloPiso": false,
+     "composicaoMeta": {
+      "gastoRepouso": 1399,
+      "atividadeForaDoTreino": 420,
+      "nivelAtividade": "sentado",
+      "fatorAtividade": 1.3,
+      "treino": [
+       {
+        "nome": "Judô",
+        "horas": 1.5,
+        "kcal": 643
+       }
+      ],
+      "objetivo": 173,
+      "ajusteProgresso": 0,
+      "pisoCarboidrato": 0,
+      "meta": 2635
+     }
+    },
+    {
+     "diaSemana": "Terça-feira",
+     "refeicoes": [
+      {
+       "nome": "Café da manhã",
+       "alimentos": [
+        {
+         "nome": "Pão de forma integral",
+         "quantidade": 60,
+         "unidade": "g"
+        },
+        {
+         "nome": "Ovo de galinha cozido (2 unidades)",
+         "quantidade": 100,
+         "unidade": "g"
+        },
+        {
+         "nome": "Mamão papaia",
+         "quantidade": 150,
+         "unidade": "g"
+        },
+        {
+         "nome": "Café coado",
+         "quantidade": 150,
+         "unidade": "ml"
+        }
+       ],
+       "macros": {
+        "calorias": 360,
+        "proteinasG": 20,
+        "carboidratosG": 42,
+        "gordurasG": 12
+       },
+       "horario": "07:30"
+      },
+      {
+       "nome": "Lanche da manhã",
+       "alimentos": [
+        {
+         "nome": "Iogurte natural",
+         "quantidade": 170,
+         "unidade": "g"
+        },
+        {
+         "nome": "Granola",
+         "quantidade": 30,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 240,
+        "proteinasG": 12,
+        "carboidratosG": 35,
+        "gordurasG": 5
+       },
+       "horario": "10:00"
+      },
+      {
+       "nome": "Almoço",
+       "alimentos": [
+        {
+         "nome": "Macarrão espaguete cozido",
+         "quantidade": 220,
+         "unidade": "g"
+        },
+        {
+         "nome": "Patinho bovino moído cozido",
+         "quantidade": 140,
+         "unidade": "g"
+        },
+        {
+         "nome": "Molho de tomate industrializado",
+         "quantidade": 80,
+         "unidade": "g"
+        },
+        {
+         "nome": "Azeite de oliva de baixa acidez",
+         "quantidade": 10,
+         "unidade": "g"
+        },
+        {
+         "nome": "Cenoura cozida",
+         "quantidade": 60,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 650,
+        "proteinasG": 43,
+        "carboidratosG": 78,
+        "gordurasG": 18
+       },
+       "horario": "12:30"
+      },
+      {
+       "nome": "Lanche da tarde",
+       "alimentos": [
+        {
+         "nome": "Banana prata",
+         "quantidade": 120,
+         "unidade": "g"
+        },
+        {
+         "nome": "Aveia em flocos",
+         "quantidade": 30,
+         "unidade": "g"
+        },
+        {
+         "nome": "Leite desnatado",
+         "quantidade": 200,
+         "unidade": "ml"
+        }
+       ],
+       "macros": {
+        "calorias": 290,
+        "proteinasG": 12,
+        "carboidratosG": 52,
+        "gordurasG": 4
+       },
+       "horario": "16:00"
+      },
+      {
+       "nome": "Jantar",
+       "alimentos": [
+        {
+         "nome": "Arroz branco cozido",
+         "quantidade": 180,
+         "unidade": "g"
+        },
+        {
+         "nome": "Feijão preto cozido",
+         "quantidade": 80,
+         "unidade": "g"
+        },
+        {
+         "nome": "Ovo de galinha cozido (2 unidades)",
+         "quantidade": 100,
+         "unidade": "g"
+        },
+        {
+         "nome": "Azeite de oliva de baixa acidez",
+         "quantidade": 15,
+         "unidade": "g"
+        },
+        {
+         "nome": "Alface crua",
+         "quantidade": 40,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 452,
+        "proteinasG": 26,
+        "carboidratosG": 53,
+        "gordurasG": 16
+       },
+       "horario": "20:00"
+      }
+     ],
+     "totalDoDia": {
+      "calorias": 1992,
+      "proteinasG": 113,
+      "carboidratosG": 260,
+      "gordurasG": 55
+     },
+     "metaCalculada": {
+      "calorias": 1991.95,
+      "proteinasG": 113.4,
+      "carboidratosG": 260.090625,
+      "gordurasG": 55.331944444444446
+     },
+     "metaElevadaPeloPiso": false,
+     "composicaoMeta": {
+      "gastoRepouso": 1399,
+      "atividadeForaDoTreino": 420,
+      "nivelAtividade": "sentado",
+      "fatorAtividade": 1.3,
+      "treino": [],
+      "objetivo": 173,
+      "ajusteProgresso": 0,
+      "pisoCarboidrato": 0,
+      "meta": 1992
+     }
+    },
+    {
+     "diaSemana": "Quarta-feira",
+     "refeicoes": [
+      {
+       "nome": "Café da manhã",
+       "alimentos": [
+        {
+         "nome": "Iogurte natural",
+         "quantidade": 200,
+         "unidade": "g"
+        },
+        {
+         "nome": "Granola",
+         "quantidade": 60,
+         "unidade": "g"
+        },
+        {
+         "nome": "Mamão papaia",
+         "quantidade": 150,
+         "unidade": "g"
+        },
+        {
+         "nome": "Café coado",
+         "quantidade": 150,
+         "unidade": "ml"
+        }
+       ],
+       "macros": {
+        "calorias": 460,
+        "proteinasG": 18,
+        "carboidratosG": 78,
+        "gordurasG": 10
+       },
+       "horario": "07:30"
+      },
+      {
+       "nome": "Lanche da manhã",
+       "alimentos": [
+        {
+         "nome": "Pão francês (1 unidade)",
+         "quantidade": 50,
+         "unidade": "g"
+        },
+        {
+         "nome": "Queijo minas frescal",
+         "quantidade": 40,
+         "unidade": "g"
+        },
+        {
+         "nome": "Banana prata",
+         "quantidade": 100,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 305,
+        "proteinasG": 15,
+        "carboidratosG": 46,
+        "gordurasG": 8
+       },
+       "horario": "10:00"
+      },
+      {
+       "nome": "Almoço",
+       "alimentos": [
+        {
+         "nome": "Arroz branco cozido",
+         "quantidade": 250,
+         "unidade": "g"
+        },
+        {
+         "nome": "Feijão preto cozido",
+         "quantidade": 120,
+         "unidade": "g"
+        },
+        {
+         "nome": "Sobrecoxa de frango sem osso assada",
+         "quantidade": 160,
+         "unidade": "g"
+        },
+        {
+         "nome": "Mandioca cozida",
+         "quantidade": 100,
+         "unidade": "g"
+        },
+        {
+         "nome": "Azeite de oliva de baixa acidez",
+         "quantidade": 10,
+         "unidade": "g"
+        },
+        {
+         "nome": "Tomate cru",
+         "quantidade": 50,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 910,
+        "proteinasG": 48,
+        "carboidratosG": 115,
+        "gordurasG": 30
+       },
+       "horario": "12:30"
+      },
+      {
+       "nome": "Lanche da tarde",
+       "alimentos": [
+        {
+         "nome": "Aveia em flocos",
+         "quantidade": 50,
+         "unidade": "g"
+        },
+        {
+         "nome": "Leite desnatado",
+         "quantidade": 200,
+         "unidade": "ml"
+        },
+        {
+         "nome": "Pasta de amendoim",
+         "quantidade": 30,
+         "unidade": "g"
+        },
+        {
+         "nome": "Maçã fuji",
+         "quantidade": 120,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 535,
+        "proteinasG": 19,
+        "carboidratosG": 72,
+        "gordurasG": 20
+       },
+       "horario": "16:00"
+      },
+      {
+       "nome": "Jantar",
+       "alimentos": [
+        {
+         "nome": "Arroz branco cozido",
+         "quantidade": 180,
+         "unidade": "g"
+        },
+        {
+         "nome": "Feijão preto cozido",
+         "quantidade": 80,
+         "unidade": "g"
+        },
+        {
+         "nome": "Ovo de galinha cozido (2 unidades)",
+         "quantidade": 100,
+         "unidade": "g"
+        },
+        {
+         "nome": "Azeite de oliva de baixa acidez",
+         "quantidade": 10,
+         "unidade": "g"
+        },
+        {
+         "nome": "Alface crua",
+         "quantidade": 40,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 425,
+        "proteinasG": 13,
+        "carboidratosG": 70,
+        "gordurasG": 5
+       },
+       "horario": "20:00"
+      }
+     ],
+     "totalDoDia": {
+      "calorias": 2635,
+      "proteinasG": 113,
+      "carboidratosG": 381,
+      "gordurasG": 73
+     },
+     "metaCalculada": {
+      "calorias": 2634.55,
+      "proteinasG": 113.4,
+      "carboidratosG": 380.578125,
+      "gordurasG": 73.18194444444444
+     },
+     "metaElevadaPeloPiso": false,
+     "composicaoMeta": {
+      "gastoRepouso": 1399,
+      "atividadeForaDoTreino": 420,
+      "nivelAtividade": "sentado",
+      "fatorAtividade": 1.3,
+      "treino": [
+       {
+        "nome": "Judô",
+        "horas": 1.5,
+        "kcal": 643
+       }
+      ],
+      "objetivo": 173,
+      "ajusteProgresso": 0,
+      "pisoCarboidrato": 0,
+      "meta": 2635
+     }
+    },
+    {
+     "diaSemana": "Quinta-feira",
+     "refeicoes": [
+      {
+       "nome": "Café da manhã",
+       "alimentos": [
+        {
+         "nome": "Pão de forma integral",
+         "quantidade": 60,
+         "unidade": "g"
+        },
+        {
+         "nome": "Queijo minas frescal",
+         "quantidade": 40,
+         "unidade": "g"
+        },
+        {
+         "nome": "Mamão papaia",
+         "quantidade": 150,
+         "unidade": "g"
+        },
+        {
+         "nome": "Café coado",
+         "quantidade": 150,
+         "unidade": "ml"
+        }
+       ],
+       "macros": {
+        "calorias": 290,
+        "proteinasG": 14,
+        "carboidratosG": 40,
+        "gordurasG": 8
+       },
+       "horario": "07:30"
+      },
+      {
+       "nome": "Lanche da manhã",
+       "alimentos": [
+        {
+         "nome": "Iogurte natural",
+         "quantidade": 170,
+         "unidade": "g"
+        },
+        {
+         "nome": "Granola",
+         "quantidade": 30,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 240,
+        "proteinasG": 12,
+        "carboidratosG": 35,
+        "gordurasG": 5
+       },
+       "horario": "10:00"
+      },
+      {
+       "nome": "Almoço",
+       "alimentos": [
+        {
+         "nome": "Arroz branco cozido",
+         "quantidade": 200,
+         "unidade": "g"
+        },
+        {
+         "nome": "Feijão preto cozido",
+         "quantidade": 90,
+         "unidade": "g"
+        },
+        {
+         "nome": "Patinho bovino grelhado",
+         "quantidade": 140,
+         "unidade": "g"
+        },
+        {
+         "nome": "Azeite de oliva de baixa acidez",
+         "quantidade": 10,
+         "unidade": "g"
+        },
+        {
+         "nome": "Cenoura cozida",
+         "quantidade": 60,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 630,
+        "proteinasG": 48,
+        "carboidratosG": 65,
+        "gordurasG": 18
+       },
+       "horario": "12:30"
+      },
+      {
+       "nome": "Lanche da tarde",
+       "alimentos": [
+        {
+         "nome": "Banana prata",
+         "quantidade": 120,
+         "unidade": "g"
+        },
+        {
+         "nome": "Aveia em flocos",
+         "quantidade": 30,
+         "unidade": "g"
+        },
+        {
+         "nome": "Leite desnatado",
+         "quantidade": 200,
+         "unidade": "ml"
+        }
+       ],
+       "macros": {
+        "calorias": 290,
+        "proteinasG": 12,
+        "carboidratosG": 52,
+        "gordurasG": 4
+       },
+       "horario": "16:00"
+      },
+      {
+       "nome": "Jantar",
+       "alimentos": [
+        {
+         "nome": "Macarrão espaguete cozido",
+         "quantidade": 180,
+         "unidade": "g"
+        },
+        {
+         "nome": "Peito de frango sem pele grelhado",
+         "quantidade": 120,
+         "unidade": "g"
+        },
+        {
+         "nome": "Molho de tomate industrializado",
+         "quantidade": 70,
+         "unidade": "g"
+        },
+        {
+         "nome": "Azeite de oliva de baixa acidez",
+         "quantidade": 10,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 542,
+        "proteinasG": 27,
+        "carboidratosG": 68,
+        "gordurasG": 20
+       },
+       "horario": "20:00"
+      }
+     ],
+     "totalDoDia": {
+      "calorias": 1992,
+      "proteinasG": 113,
+      "carboidratosG": 260,
+      "gordurasG": 55
+     },
+     "metaCalculada": {
+      "calorias": 1991.95,
+      "proteinasG": 113.4,
+      "carboidratosG": 260.090625,
+      "gordurasG": 55.331944444444446
+     },
+     "metaElevadaPeloPiso": false,
+     "composicaoMeta": {
+      "gastoRepouso": 1399,
+      "atividadeForaDoTreino": 420,
+      "nivelAtividade": "sentado",
+      "fatorAtividade": 1.3,
+      "treino": [],
+      "objetivo": 173,
+      "ajusteProgresso": 0,
+      "pisoCarboidrato": 0,
+      "meta": 1992
+     }
+    },
+    {
+     "diaSemana": "Sexta-feira",
+     "refeicoes": [
+      {
+       "nome": "Café da manhã",
+       "alimentos": [
+        {
+         "nome": "Iogurte natural",
+         "quantidade": 200,
+         "unidade": "g"
+        },
+        {
+         "nome": "Granola",
+         "quantidade": 60,
+         "unidade": "g"
+        },
+        {
+         "nome": "Banana prata",
+         "quantidade": 100,
+         "unidade": "g"
+        },
+        {
+         "nome": "Café coado",
+         "quantidade": 150,
+         "unidade": "ml"
+        }
+       ],
+       "macros": {
+        "calorias": 450,
+        "proteinasG": 18,
+        "carboidratosG": 75,
+        "gordurasG": 10
+       },
+       "horario": "07:30"
+      },
+      {
+       "nome": "Lanche da manhã",
+       "alimentos": [
+        {
+         "nome": "Pão francês (1 unidade)",
+         "quantidade": 50,
+         "unidade": "g"
+        },
+        {
+         "nome": "Ovo de galinha cozido (2 unidades)",
+         "quantidade": 100,
+         "unidade": "g"
+        },
+        {
+         "nome": "Mamão papaia",
+         "quantidade": 150,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 320,
+        "proteinasG": 18,
+        "carboidratosG": 42,
+        "gordurasG": 9
+       },
+       "horario": "10:00"
+      },
+      {
+       "nome": "Almoço",
+       "alimentos": [
+        {
+         "nome": "Arroz branco cozido",
+         "quantidade": 250,
+         "unidade": "g"
+        },
+        {
+         "nome": "Feijão preto cozido",
+         "quantidade": 120,
+         "unidade": "g"
+        },
+        {
+         "nome": "Patinho bovino grelhado",
+         "quantidade": 150,
+         "unidade": "g"
+        },
+        {
+         "nome": "Mandioca cozida",
+         "quantidade": 100,
+         "unidade": "g"
+        },
+        {
+         "nome": "Azeite de oliva de baixa acidez",
+         "quantidade": 15,
+         "unidade": "g"
+        },
+        {
+         "nome": "Alface crua",
+         "quantidade": 40,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 900,
+        "proteinasG": 50,
+        "carboidratosG": 110,
+        "gordurasG": 28
+       },
+       "horario": "12:30"
+      },
+      {
+       "nome": "Lanche da tarde",
+       "alimentos": [
+        {
+         "nome": "Aveia em flocos",
+         "quantidade": 50,
+         "unidade": "g"
+        },
+        {
+         "nome": "Leite desnatado",
+         "quantidade": 200,
+         "unidade": "ml"
+        },
+        {
+         "nome": "Pasta de amendoim",
+         "quantidade": 30,
+         "unidade": "g"
+        },
+        {
+         "nome": "Maçã fuji",
+         "quantidade": 120,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 535,
+        "proteinasG": 19,
+        "carboidratosG": 72,
+        "gordurasG": 20
+       },
+       "horario": "16:00"
+      },
+      {
+       "nome": "Jantar",
+       "alimentos": [
+        {
+         "nome": "Arroz branco cozido",
+         "quantidade": 200,
+         "unidade": "g"
+        },
+        {
+         "nome": "Feijão preto cozido",
+         "quantidade": 100,
+         "unidade": "g"
+        },
+        {
+         "nome": "Peito de frango sem pele grelhado",
+         "quantidade": 100,
+         "unidade": "g"
+        },
+        {
+         "nome": "Azeite de oliva de baixa acidez",
+         "quantidade": 10,
+         "unidade": "g"
+        },
+        {
+         "nome": "Tomate cru",
+         "quantidade": 50,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 430,
+        "proteinasG": 8,
+        "carboidratosG": 82,
+        "gordurasG": 6
+       },
+       "horario": "20:00"
+      }
+     ],
+     "totalDoDia": {
+      "calorias": 2635,
+      "proteinasG": 113,
+      "carboidratosG": 381,
+      "gordurasG": 73
+     },
+     "metaCalculada": {
+      "calorias": 2634.55,
+      "proteinasG": 113.4,
+      "carboidratosG": 380.578125,
+      "gordurasG": 73.18194444444444
+     },
+     "metaElevadaPeloPiso": false,
+     "composicaoMeta": {
+      "gastoRepouso": 1399,
+      "atividadeForaDoTreino": 420,
+      "nivelAtividade": "sentado",
+      "fatorAtividade": 1.3,
+      "treino": [
+       {
+        "nome": "Judô",
+        "horas": 1.5,
+        "kcal": 643
+       }
+      ],
+      "objetivo": 173,
+      "ajusteProgresso": 0,
+      "pisoCarboidrato": 0,
+      "meta": 2635
+     }
+    },
+    {
+     "diaSemana": "Sábado",
+     "refeicoes": [
+      {
+       "nome": "Café da manhã",
+       "alimentos": [
+        {
+         "nome": "Iogurte natural",
+         "quantidade": 200,
+         "unidade": "g"
+        },
+        {
+         "nome": "Granola",
+         "quantidade": 50,
+         "unidade": "g"
+        },
+        {
+         "nome": "Banana prata",
+         "quantidade": 100,
+         "unidade": "g"
+        },
+        {
+         "nome": "Café coado",
+         "quantidade": 150,
+         "unidade": "ml"
+        }
+       ],
+       "macros": {
+        "calorias": 415,
+        "proteinasG": 16,
+        "carboidratosG": 70,
+        "gordurasG": 8
+       },
+       "horario": "07:30"
+      },
+      {
+       "nome": "Lanche da manhã",
+       "alimentos": [
+        {
+         "nome": "Pão francês (1 unidade)",
+         "quantidade": 50,
+         "unidade": "g"
+        },
+        {
+         "nome": "Queijo minas frescal",
+         "quantidade": 40,
+         "unidade": "g"
+        },
+        {
+         "nome": "Mamão papaia",
+         "quantidade": 150,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 310,
+        "proteinasG": 15,
+        "carboidratosG": 45,
+        "gordurasG": 9
+       },
+       "horario": "10:00"
+      },
+      {
+       "nome": "Almoço",
+       "alimentos": [
+        {
+         "nome": "Arroz branco cozido",
+         "quantidade": 220,
+         "unidade": "g"
+        },
+        {
+         "nome": "Feijão preto cozido",
+         "quantidade": 100,
+         "unidade": "g"
+        },
+        {
+         "nome": "Peito de frango sem pele grelhado",
+         "quantidade": 150,
+         "unidade": "g"
+        },
+        {
+         "nome": "Azeite de oliva de baixa acidez",
+         "quantidade": 15,
+         "unidade": "g"
+        },
+        {
+         "nome": "Abobrinha italiana cozida",
+         "quantidade": 80,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 750,
+        "proteinasG": 53,
+        "carboidratosG": 80,
+        "gordurasG": 23
+       },
+       "horario": "12:30"
+      },
+      {
+       "nome": "Lanche da tarde",
+       "alimentos": [
+        {
+         "nome": "Aveia em flocos",
+         "quantidade": 40,
+         "unidade": "g"
+        },
+        {
+         "nome": "Leite desnatado",
+         "quantidade": 200,
+         "unidade": "ml"
+        },
+        {
+         "nome": "Pasta de amendoim",
+         "quantidade": 25,
+         "unidade": "g"
+        },
+        {
+         "nome": "Maçã fuji",
+         "quantidade": 120,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 425,
+        "proteinasG": 16,
+        "carboidratosG": 63,
+        "gordurasG": 14
+       },
+       "horario": "16:00"
+      },
+      {
+       "nome": "Jantar",
+       "alimentos": [
+        {
+         "nome": "Arroz branco cozido",
+         "quantidade": 180,
+         "unidade": "g"
+        },
+        {
+         "nome": "Ovo de galinha cozido (2 unidades)",
+         "quantidade": 100,
+         "unidade": "g"
+        },
+        {
+         "nome": "Azeite de oliva de baixa acidez",
+         "quantidade": 10,
+         "unidade": "g"
+        },
+        {
+         "nome": "Alface crua",
+         "quantidade": 40,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 399,
+        "proteinasG": 13,
+        "carboidratosG": 60,
+        "gordurasG": 10
+       },
+       "horario": "20:00"
+      }
+     ],
+     "totalDoDia": {
+      "calorias": 2299,
+      "proteinasG": 113,
+      "carboidratosG": 318,
+      "gordurasG": 64
+     },
+     "metaCalculada": {
+      "calorias": 2299.075,
+      "proteinasG": 113.4,
+      "carboidratosG": 317.6765625,
+      "gordurasG": 63.863194444444446
+     },
+     "metaElevadaPeloPiso": false,
+     "composicaoMeta": {
+      "gastoRepouso": 1399,
+      "atividadeForaDoTreino": 420,
+      "nivelAtividade": "sentado",
+      "fatorAtividade": 1.3,
+      "treino": [
+       {
+        "nome": "Corrida",
+        "horas": 0.75,
+        "kcal": 307
+       }
+      ],
+      "objetivo": 173,
+      "ajusteProgresso": 0,
+      "pisoCarboidrato": 0,
+      "meta": 2299
+     }
+    },
+    {
+     "diaSemana": "Domingo",
+     "refeicoes": [
+      {
+       "nome": "Café da manhã",
+       "alimentos": [
+        {
+         "nome": "Pão de forma integral",
+         "quantidade": 60,
+         "unidade": "g"
+        },
+        {
+         "nome": "Ovo de galinha cozido (2 unidades)",
+         "quantidade": 100,
+         "unidade": "g"
+        },
+        {
+         "nome": "Mamão papaia",
+         "quantidade": 150,
+         "unidade": "g"
+        },
+        {
+         "nome": "Café coado",
+         "quantidade": 150,
+         "unidade": "ml"
+        }
+       ],
+       "macros": {
+        "calorias": 360,
+        "proteinasG": 20,
+        "carboidratosG": 42,
+        "gordurasG": 12
+       },
+       "horario": "07:30"
+      },
+      {
+       "nome": "Lanche da manhã",
+       "alimentos": [
+        {
+         "nome": "Iogurte natural",
+         "quantidade": 170,
+         "unidade": "g"
+        },
+        {
+         "nome": "Granola",
+         "quantidade": 30,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 240,
+        "proteinasG": 12,
+        "carboidratosG": 35,
+        "gordurasG": 5
+       },
+       "horario": "10:00"
+      },
+      {
+       "nome": "Almoço",
+       "alimentos": [
+        {
+         "nome": "Arroz branco cozido",
+         "quantidade": 200,
+         "unidade": "g"
+        },
+        {
+         "nome": "Feijão preto cozido",
+         "quantidade": 90,
+         "unidade": "g"
+        },
+        {
+         "nome": "Patinho bovino grelhado",
+         "quantidade": 140,
+         "unidade": "g"
+        },
+        {
+         "nome": "Azeite de oliva de baixa acidez",
+         "quantidade": 10,
+         "unidade": "g"
+        },
+        {
+         "nome": "Tomate cru",
+         "quantidade": 50,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 630,
+        "proteinasG": 48,
+        "carboidratosG": 65,
+        "gordurasG": 18
+       },
+       "horario": "12:30"
+      },
+      {
+       "nome": "Lanche da tarde",
+       "alimentos": [
+        {
+         "nome": "Banana prata",
+         "quantidade": 120,
+         "unidade": "g"
+        },
+        {
+         "nome": "Aveia em flocos",
+         "quantidade": 30,
+         "unidade": "g"
+        },
+        {
+         "nome": "Leite desnatado",
+         "quantidade": 200,
+         "unidade": "ml"
+        }
+       ],
+       "macros": {
+        "calorias": 290,
+        "proteinasG": 12,
+        "carboidratosG": 52,
+        "gordurasG": 4
+       },
+       "horario": "16:00"
+      },
+      {
+       "nome": "Jantar",
+       "alimentos": [
+        {
+         "nome": "Macarrão espaguete cozido",
+         "quantidade": 180,
+         "unidade": "g"
+        },
+        {
+         "nome": "Peito de frango sem pele grelhado",
+         "quantidade": 120,
+         "unidade": "g"
+        },
+        {
+         "nome": "Molho de tomate industrializado",
+         "quantidade": 70,
+         "unidade": "g"
+        },
+        {
+         "nome": "Azeite de oliva de baixa acidez",
+         "quantidade": 10,
+         "unidade": "g"
+        }
+       ],
+       "macros": {
+        "calorias": 472,
+        "proteinasG": 21,
+        "carboidratosG": 66,
+        "gordurasG": 16
+       },
+       "horario": "20:00"
+      }
+     ],
+     "totalDoDia": {
+      "calorias": 1992,
+      "proteinasG": 113,
+      "carboidratosG": 260,
+      "gordurasG": 55
+     },
+     "metaCalculada": {
+      "calorias": 1991.95,
+      "proteinasG": 113.4,
+      "carboidratosG": 260.090625,
+      "gordurasG": 55.331944444444446
+     },
+     "metaElevadaPeloPiso": false,
+     "composicaoMeta": {
+      "gastoRepouso": 1399,
+      "atividadeForaDoTreino": 420,
+      "nivelAtividade": "sentado",
+      "fatorAtividade": 1.3,
+      "treino": [],
+      "objetivo": 173,
+      "ajusteProgresso": 0,
+      "pisoCarboidrato": 0,
+      "meta": 1992
+     }
+    }
+   ],
+   "ajusteAdaptativo": {
+    "percentual": 0,
+    "motivo": "HistoricoInsuficiente",
+    "aplicado": false,
+    "ritmoRealKgSemana": null,
+    "ritmoEsperadoKgSemana": null,
+    "pontosUsados": 0
+   }
+  }
+ }
+}

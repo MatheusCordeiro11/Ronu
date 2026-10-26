@@ -1,0 +1,509 @@
+{
+ "perfis": {
+  "A": {
+   "status": 200,
+   "segundosCliente": 17.0,
+   "uf": "SP",
+   "pedidos": 1,
+   "itens": 122,
+   "itensNaBase": 94,
+   "pctItensNaBase": 77.0,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 45.7,
+   "alimentosDiferentes": 29,
+   "desvioDeclarado": {
+    "kcal": 5.7,
+    "p": 16.9,
+    "c": 15.4,
+    "g": 6.4
+   },
+   "desvioPelaBase": {
+    "kcal": 6.9,
+    "p": 13.5,
+    "c": 14.5,
+    "g": 7.0
+   },
+   "diasForaDe5Declarado": 3,
+   "diasForaDe5PelaBase": 3,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Batata doce": 6,
+    "Tapioca": 5
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [
+     "Terça-feira Almoço",
+     "Sexta-feira Almoço"
+    ],
+    "regional": []
+   },
+   "foraDaBase": {
+    "azeite de oliva": 14,
+    "pasta de amendoim": 5,
+    "patainho bovino grelhado": 3,
+    "macarrao espaguete cozido": 2,
+    "patainho bovino moido refogado": 2,
+    "molho de tomate": 2
+   },
+   "tentativasGemini": 1,
+   "ms": 16642,
+   "tokensEntrada": 1953,
+   "tokensResposta": 8508
+  },
+  "B": {
+   "status": 200,
+   "segundosCliente": 15.9,
+   "uf": "RJ",
+   "pedidos": 1,
+   "itens": 119,
+   "itensNaBase": 87,
+   "pctItensNaBase": 73.1,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 42.9,
+   "alimentosDiferentes": 34,
+   "desvioDeclarado": {
+    "kcal": 8.6,
+    "p": 12.9,
+    "c": 4.4,
+    "g": 11.3
+   },
+   "desvioPelaBase": {
+    "kcal": 8.0,
+    "p": 10.8,
+    "c": 7.3,
+    "g": 10.6
+   },
+   "diasForaDe5Declarado": 7,
+   "diasForaDe5PelaBase": 6,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Banana": 5
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [
+     "Segunda-feira Lanche da tarde 16:00: Chá mate",
+     "Terça-feira Lanche da tarde (Pré-treino) 16:30: Café coado",
+     "Quarta-feira Lanche da tarde 16:00: Chá preto",
+     "Quinta-feira Lanche da tarde (Pré-treino) 16:30: Café coado",
+     "Sexta-feira Lanche da tarde 16:00: Chá mate",
+     "Sábado Lanche da tarde (Pré-treino) 15:30: Café coado",
+     "Domingo Lanche da tarde 16:00: Chá preto"
+    ],
+    "evitar": [
+     "Terça-feira Almoço 12:30: Lombo suíno cozido",
+     "Quarta-feira Almoço 12:30: Patinho bovino moído cozido",
+     "Quinta-feira Almoço 12:30: Patinho bovino moído cozido",
+     "Sábado Almoço 12:30: Lombo suíno cozido",
+     "Domingo Almoço 12:30: Patinho bovino moído cozido"
+    ],
+    "refogadoComOleo": [
+     "Quarta-feira Jantar",
+     "Domingo Jantar"
+    ],
+    "regional": []
+   },
+   "foraDaBase": {
+    "azeite de oliva": 14,
+    "ovo de galinha mexido": 3,
+    "pasta de amendoim": 3,
+    "patinho bovino moido cozido": 3,
+    "file de peito de frango grelhado": 3,
+    "lombo suino cozido": 2,
+    "macarrao de semola cozido": 2,
+    "molho de tomate industrializado": 2
+   },
+   "tentativasGemini": 1,
+   "ms": 15790,
+   "tokensEntrada": 1937,
+   "tokensResposta": 8417
+  },
+  "C": {
+   "status": 200,
+   "segundosCliente": 16.2,
+   "uf": "RS",
+   "pedidos": 1,
+   "itens": 132,
+   "itensNaBase": 83,
+   "pctItensNaBase": 62.9,
+   "refeicoes": 33,
+   "pctRefeicoesInteirasNaBase": 21.2,
+   "alimentosDiferentes": 27,
+   "desvioDeclarado": {
+    "kcal": 0.4,
+    "p": 38.9,
+    "c": 14.6,
+    "g": 6.3
+   },
+   "desvioPelaBase": {
+    "kcal": 1.5,
+    "p": 38.7,
+    "c": 12.8,
+    "g": 6.2
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "refeicoesRepetidas": [
+    "Segunda-feira → Terça-feira: Lanche da manhã",
+    "Quinta-feira → Sexta-feira: Lanche da manhã"
+   ],
+   "gostos": {
+    "Whey protein": 7,
+    "Pasta de amendoim": 7
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {
+    "azeite de oliva": 14,
+    "leite de vaca desnatado": 10,
+    "whey protein": 7,
+    "pasta de amendoim": 7,
+    "macarrao de trigo cozido": 4,
+    "molho de tomate": 4,
+    "patrilho bovino grelhado": 3
+   },
+   "tentativasGemini": 1,
+   "ms": 16126,
+   "tokensEntrada": 1984,
+   "tokensResposta": 8730
+  },
+  "D": {
+   "status": 200,
+   "segundosCliente": 15.0,
+   "uf": "MG",
+   "pedidos": 1,
+   "itens": 106,
+   "itensNaBase": 78,
+   "pctItensNaBase": 73.6,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 54.3,
+   "alimentosDiferentes": 46,
+   "desvioDeclarado": {
+    "kcal": 0.0,
+    "p": 0.3,
+    "c": 0.1,
+    "g": 0.3
+   },
+   "desvioPelaBase": {
+    "kcal": 1.0,
+    "p": 1.3,
+    "c": 3.4,
+    "g": 3.0
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "refeicoesRepetidas": [],
+   "gostos": {},
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [
+     "Terça-feira Almoço",
+     "Terça-feira Jantar",
+     "Sexta-feira Almoço",
+     "Sexta-feira Jantar",
+     "Sábado Almoço"
+    ],
+    "regional": []
+   },
+   "foraDaBase": {
+    "azeite de oliva": 13,
+    "macarrao espaguete cozido": 2,
+    "molho de tomate": 2,
+    "pasta de amendoim": 2,
+    "pure de batata inglesa": 1,
+    "salada de repolho cru": 1,
+    "omelete de ovos": 1,
+    "granola": 1,
+    "vagem cozida": 1,
+    "carne moida de patinho refogada": 1,
+    "file de pescada assado": 1,
+    "peito de frango sem pele desfiado refogado": 1,
+    "salada de alface crua": 1
+   },
+   "tentativasGemini": 1,
+   "ms": 14951,
+   "tokensEntrada": 1938,
+   "tokensResposta": 7865
+  },
+  "E": {
+   "status": 200,
+   "segundosCliente": 16.5,
+   "uf": "PE",
+   "pedidos": 1,
+   "itens": 137,
+   "itensNaBase": 95,
+   "pctItensNaBase": 69.3,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 25.7,
+   "alimentosDiferentes": 28,
+   "desvioDeclarado": {
+    "kcal": 0.0,
+    "p": 0.1,
+    "c": 0.2,
+    "g": 0.6
+   },
+   "desvioPelaBase": {
+    "kcal": 1.0,
+    "p": 0.7,
+    "c": 1.3,
+    "g": 1.6
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "refeicoesRepetidas": [
+    "Sábado → Domingo: Lanche da manhã"
+   ],
+   "gostos": {
+    "Ovo": 16
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [
+     "Segunda-feira Lanche da tarde 16:00: Chá mate coado",
+     "Terça-feira Lanche da tarde 16:00: Café coado",
+     "Quarta-feira Lanche da tarde 16:00: Chá mate coado",
+     "Quinta-feira Lanche da tarde 16:00: Chá mate coado",
+     "Sexta-feira Lanche da tarde 16:00: Café coado",
+     "Sábado Lanche da tarde 16:00: Chá mate coado",
+     "Domingo Lanche da tarde 16:00: Chá mate coado"
+    ],
+    "evitar": [],
+    "refogadoComOleo": [
+     "Terça-feira Almoço",
+     "Terça-feira Jantar",
+     "Sexta-feira Almoço",
+     "Sexta-feira Jantar",
+     "Domingo Almoço"
+    ],
+    "regional": []
+   },
+   "foraDaBase": {
+    "azeite de oliva": 14,
+    "acucar cristal": 7,
+    "cha mate coado": 5,
+    "patinho bovino moido cozido": 3,
+    "macarrao espaguete cozido": 3,
+    "molho de tomate industrializado": 3,
+    "abobrinha italiana refogada": 3,
+    "ovo de galinha frito em oleo": 2,
+    "file de frango cozido desfiado": 2
+   },
+   "tentativasGemini": 1,
+   "ms": 16459,
+   "tokensEntrada": 1945,
+   "tokensResposta": 9071
+  },
+  "F": {
+   "status": 200,
+   "segundosCliente": 16.9,
+   "uf": "SC",
+   "pedidos": 1,
+   "itens": 142,
+   "itensNaBase": 107,
+   "pctItensNaBase": 75.4,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 28.6,
+   "alimentosDiferentes": 28,
+   "desvioDeclarado": {
+    "kcal": 0.0,
+    "p": 0.4,
+    "c": 0.1,
+    "g": 0.4
+   },
+   "desvioPelaBase": {
+    "kcal": 1.3,
+    "p": 1.5,
+    "c": 3.4,
+    "g": 2.1
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "refeicoesRepetidas": [
+    "Terça-feira → Quarta-feira: Jantar",
+    "Sexta-feira → Sábado: Café da manhã",
+    "Sexta-feira → Sábado: Lanche da tarde"
+   ],
+   "gostos": {
+    "Iogurte": 7,
+    "Granola": 7
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {
+    "azeite de oliva de baixa acidez": 14,
+    "granola": 7,
+    "pasta de amendoim": 4,
+    "macarrao espaguete cozido": 3,
+    "molho de tomate industrializado": 3,
+    "patinho bovino moido cozido": 2,
+    "sobrecoxa de frango sem osso assada": 1,
+    "abobrinha italiana cozida": 1
+   },
+   "tentativasGemini": 1,
+   "ms": 16848,
+   "tokensEntrada": 1950,
+   "tokensResposta": 9214
+  },
+  "G": {
+   "status": 200,
+   "segundosCliente": 16.5,
+   "uf": "BA",
+   "pedidos": 1,
+   "itens": 135,
+   "itensNaBase": 107,
+   "pctItensNaBase": 79.3,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 31.4,
+   "alimentosDiferentes": 29,
+   "desvioDeclarado": {
+    "kcal": 0.0,
+    "p": 0.2,
+    "c": 0.1,
+    "g": 0.1
+   },
+   "desvioPelaBase": {
+    "kcal": 0.5,
+    "p": 0.4,
+    "c": 1.2,
+    "g": 0.9
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "refeicoesRepetidas": [
+    "Sexta-feira → Sábado: Lanche da manhã",
+    "Sábado → Domingo: Lanche da manhã",
+    "Sábado → Domingo: Almoço"
+   ],
+   "gostos": {
+    "Cerveja": 1,
+    "Feijão": 7
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [
+     "Segunda-feira Jantar",
+     "Terça-feira Jantar",
+     "Quinta-feira Jantar",
+     "Sábado Jantar"
+    ],
+    "regional": []
+   },
+   "foraDaBase": {
+    "azeite de oliva": 14,
+    "ovo de galinha mexido": 7,
+    "mel de abelha": 2,
+    "carne bovina patinho grelhado": 2,
+    "sobrecoxa de frango sem osso assada": 1,
+    "atum em lata em conserva em agua": 1,
+    "cerveja": 1
+   },
+   "tentativasGemini": 1,
+   "ms": 16504,
+   "tokensEntrada": 1966,
+   "tokensResposta": 8981
+  }
+ },
+ "itensBase": 121,
+ "pedidos": [
+  {
+   "perfil": "A",
+   "repeticao": "r1",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 16642,
+   "tokensEntrada": 1953,
+   "tokensResposta": 8508
+  },
+  {
+   "perfil": "B",
+   "repeticao": "r1",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 15790,
+   "tokensEntrada": 1937,
+   "tokensResposta": 8417
+  },
+  {
+   "perfil": "C",
+   "repeticao": "r1",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 16126,
+   "tokensEntrada": 1984,
+   "tokensResposta": 8730
+  },
+  {
+   "perfil": "D",
+   "repeticao": "r1",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 14951,
+   "tokensEntrada": 1938,
+   "tokensResposta": 7865
+  },
+  {
+   "perfil": "E",
+   "repeticao": "r1",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 16459,
+   "tokensEntrada": 1945,
+   "tokensResposta": 9071
+  },
+  {
+   "perfil": "F",
+   "repeticao": "r1",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 16848,
+   "tokensEntrada": 1950,
+   "tokensResposta": 9214
+  },
+  {
+   "perfil": "G",
+   "repeticao": "r1",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 16504,
+   "tokensEntrada": 1966,
+   "tokensResposta": 8981
+  }
+ ],
+ "alcoolSemPedir": {
+  "chamadasGemini": 6,
+  "chamadasComAlcool": 0,
+  "pedidos": 6,
+  "pedidos503": 0
+ }
+}

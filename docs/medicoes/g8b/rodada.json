@@ -1,0 +1,55 @@
+{
+ "rodada": "g8b",
+ "data": "20261025",
+ "perfis": [
+  {
+   "perfil": "A",
+   "usuarioId": 93,
+   "email": "g8b-a-20261025@exemplo.com",
+   "status": 200,
+   "segundosCliente": 16.0
+  },
+  {
+   "perfil": "B",
+   "usuarioId": 94,
+   "email": "g8b-b-20261025@exemplo.com",
+   "status": 200,
+   "segundosCliente": 32.5
+  },
+  {
+   "perfil": "C",
+   "usuarioId": 95,
+   "email": "g8b-c-20261025@exemplo.com",
+   "status": 200,
+   "segundosCliente": 18.1
+  },
+  {
+   "perfil": "D",
+   "usuarioId": 96,
+   "email": "g8b-d-20261025@exemplo.com",
+   "status": 200,
+   "segundosCliente": 15.8
+  },
+  {
+   "perfil": "E",
+   "usuarioId": 97,
+   "email": "g8b-e-20261025@exemplo.com",
+   "status": 503,
+   "segundosCliente": 32.0
+  },
+  {
+   "perfil": "F",
+   "usuarioId": 98,
+   "email": "g8b-f-20261025@exemplo.com",
+   "status": 503,
+   "segundosCliente": 33.5
+  },
+  {
+   "perfil": "G",
+   "usuarioId": 99,
+   "email": "g8b-g-20261025@exemplo.com",
+   "status": 200,
+   "segundosCliente": 18.1
+  }
+ ]
+}
