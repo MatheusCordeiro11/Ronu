@@ -311,9 +311,6 @@ public class GeradorDietaGemini : IGeradorDietaIA
         return ValidadorBebidaAlcoolica.TirarNaoPermitidas(dias, Preferidos(contexto));
     }
 
-    // Folga para considerar a quantidade um múltiplo exato do peso da unidade (arredondamento do Gemini).
-    private const decimal ToleranciaMultiploG = 0.5m;
-
     /// <summary>
     /// Liga cada alimento da resposta ao item da lista pelo nome (o enum garante
     /// o nome; fora da lista, a resposta é inválida), preenche o AlimentoId e põe a
@@ -350,22 +347,20 @@ public class GeradorDietaGemini : IGeradorDietaIA
 
         foreach (var alimento in dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos))
         {
-            var nome = alimento.Nome;
-            var unidade = BaseNutricional.Itens.Single(i => i.Id == alimento.AlimentoId).MedidaUnidade;
-            if (unidade is null)
+            var item = BaseNutricional.Itens.Single(i => i.Id == alimento.AlimentoId);
+            if (item.MedidaUnidade is null)
             {
                 continue;
             }
 
             contaveis++;
-            var quantas = Math.Round(alimento.Quantidade / unidade.Gramas);
-            if (quantas >= 1 && Math.Abs(alimento.Quantidade - quantas * unidade.Gramas) <= ToleranciaMultiploG)
+            if (RotuloContavel.Contagem(item, alimento.Quantidade) is null)
             {
-                alimento.Nome = $"{nome} ({quantas:0} {(quantas == 1 ? unidade.Nome : unidade.NomePlural)})";
+                foraDoMultiplo++;
             }
             else
             {
-                foraDoMultiplo++;
+                alimento.Nome = RotuloContavel.Nome(alimento.Nome, item, alimento.Quantidade);
             }
         }
 
@@ -418,8 +413,8 @@ public class GeradorDietaGemini : IGeradorDietaIA
             GruposDeProteina = minimos.GruposDeProteina
         };
 
-    private static readonly string[] Refogados = ["couve-refogada", "espinafre-refogado"];
-    private static readonly string[] OleosDoPreparo = ["azeite-de-oliva-extra-virgem", "oleo-de-soja"];
+    internal static readonly string[] Refogados = ["couve-refogada", "espinafre-refogado"];
+    internal static readonly string[] OleosDoPreparo = ["azeite-de-oliva-extra-virgem", "oleo-de-soja"];
 
     private static IEnumerable<string> Preferidos(ContextoDietaDto contexto) =>
         contexto.Preferencias.Where(p => p.Tipo == "preferido").Select(p => p.Alimento);

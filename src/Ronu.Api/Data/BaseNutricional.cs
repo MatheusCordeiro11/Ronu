@@ -49,7 +49,12 @@ public static partial class BaseNutricional
     private static AlimentoBase Completar(AlimentoBase item)
     {
         var (grupo, nutriente) = Classificacao[item.Id];
-        return item with { Grupo = grupo, Nutriente = nutriente, Medidas = MedidasPorItem.GetValueOrDefault(item.Id) ?? [] };
+        return item with
+        {
+            Grupo = grupo, Nutriente = nutriente, Medidas = MedidasPorItem.GetValueOrDefault(item.Id) ?? [],
+            PorcaoMaximaTroca = PorcoesMaximasTroca.GetValueOrDefault(item.Id, item.PorcaoMaxima),
+            Uso = UsosNaTroca.TryGetValue(item.Id, out var uso) ? uso : null
+        };
     }
 
     /// <summary>
@@ -437,6 +442,12 @@ public record AlimentoBase(
 
     /// <summary>Medidas caseiras, com fonte. Vazio = só gramas.</summary>
     public IReadOnlyList<MedidaCaseira> Medidas { get; init; } = [];
+
+    /// <summary>Maior quantidade como substituto na troca (BaseNutricionalTroca.cs); a PorcaoMaxima quando não há outra.</summary>
+    public decimal PorcaoMaximaTroca { get; init; }
+
+    /// <summary>Uso na troca, só nos carboidratos e nas gorduras (BaseNutricionalTroca.cs); nulo nos outros.</summary>
+    public UsoNaTroca? Uso { get; init; }
 
     /// <summary>O peso de uma unidade inteira (ovo, pão, fruta), para os itens contáveis.</summary>
     public MedidaCaseira? MedidaUnidade => Medidas.FirstOrDefault(m => m.EhUnidade);
