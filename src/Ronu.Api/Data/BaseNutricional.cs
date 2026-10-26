@@ -163,8 +163,10 @@ public static partial class BaseNutricional
             Observacao: "Polpa congelada pura, sem xarope de guaraná."),
         new("patinho-bovino-grelhado", "Patinho bovino grelhado", CategoriaAlimento.CarneBovina, "g", FonteNutricional.Taco, "377", "Carne, bovina, patinho, sem gordura, grelhado", 219m, 35.9m, 0m, 7.3m, true, 300m, Alergenos.Nenhum,
             Observacao: "Sem gordura."),
-        new("patinho-bovino-moido-refogado", "Patinho bovino moído refogado", CategoriaAlimento.CarneBovina, "g", FonteNutricional.Derivado, "377", "Carne, bovina, patinho, sem gordura, grelhado", 219m, 35.9m, 0m, 7.3m, true, 300m, Alergenos.Nenhum,
-            Observacao: "DERIVADO: a TACO não tem patinho moído; usa o valor do patinho sem gordura grelhado (mesmo corte). O óleo do refogado não está incluído."),
+        // Id mantido (é estável); o nome perdeu o "refogado" na fase 2b (2026-10-25): o valor não inclui
+        // óleo, ao contrário dos refogados da TACO, e o nome não pode sugerir o contrário ao Gemini.
+        new("patinho-bovino-moido-refogado", "Patinho bovino moído", CategoriaAlimento.CarneBovina, "g", FonteNutricional.Derivado, "377", "Carne, bovina, patinho, sem gordura, grelhado", 219m, 35.9m, 0m, 7.3m, true, 300m, Alergenos.Nenhum,
+            Observacao: "DERIVADO: a TACO não tem patinho moído; usa o valor do patinho sem gordura grelhado (TACO 377, mesmo corte). Sem óleo: o azeite ou óleo do preparo entra como item separado."),
         new("carne-moida-de-acem-cozida", "Carne moída de acém cozida", CategoriaAlimento.CarneBovina, "g", FonteNutricional.Taco, "326", "Carne, bovina, acém, moído, cozido", 212m, 26.7m, 0m, 10.9m, true, 300m, Alergenos.Nenhum),
         new("acem-bovino-cozido", "Acém bovino cozido", CategoriaAlimento.CarneBovina, "g", FonteNutricional.Taco, "328", "Carne, bovina, acém, sem gordura, cozido", 215m, 27.3m, 0m, 10.9m, true, 300m, Alergenos.Nenhum,
             Observacao: "Sem gordura."),
