@@ -13,8 +13,8 @@
    "alimentosDiferentes": 42,
    "alimentosDiferentesPorId": 42,
    "pctItensComAlimentoId": 100.0,
-   "contaveis": 21,
-   "contaveisForaDoMultiplo": 0,
+   "contaveis": 31,
+   "contaveisForaDoMultiplo": 10,
    "diasInteirosPelaBase": 7,
    "desvioPelaBaseDiasInteiros": {
     "kcal": 4.9,
@@ -37,6 +37,7 @@
    },
    "diasForaDe5Declarado": 1,
    "diasForaDe5PelaBase": 3,
+   "diasMacrosAte10PelaBase": 2,
    "refeicoesRepetidas": [
     "Terça-feira → Quarta-feira: Lanche da tarde",
     "Quarta-feira → Quinta-feira: Lanche da tarde",
@@ -73,8 +74,8 @@
    "alimentosDiferentes": 51,
    "alimentosDiferentesPorId": 51,
    "pctItensComAlimentoId": 100.0,
-   "contaveis": 19,
-   "contaveisForaDoMultiplo": 0,
+   "contaveis": 26,
+   "contaveisForaDoMultiplo": 7,
    "diasInteirosPelaBase": 7,
    "desvioPelaBaseDiasInteiros": {
     "kcal": 10.8,
@@ -97,6 +98,7 @@
    },
    "diasForaDe5Declarado": 0,
    "diasForaDe5PelaBase": 5,
+   "diasMacrosAte10PelaBase": 1,
    "refeicoesRepetidas": [],
    "gostos": {
     "Banana": 5
@@ -128,8 +130,8 @@
    "alimentosDiferentes": 50,
    "alimentosDiferentesPorId": 50,
    "pctItensComAlimentoId": 100.0,
-   "contaveis": 26,
-   "contaveisForaDoMultiplo": 0,
+   "contaveis": 32,
+   "contaveisForaDoMultiplo": 6,
    "diasInteirosPelaBase": 7,
    "desvioPelaBaseDiasInteiros": {
     "kcal": 5.3,
@@ -152,6 +154,7 @@
    },
    "diasForaDe5Declarado": 0,
    "diasForaDe5PelaBase": 6,
+   "diasMacrosAte10PelaBase": 0,
    "refeicoesRepetidas": [],
    "gostos": {
     "Whey protein": 0,
@@ -186,8 +189,8 @@
    "alimentosDiferentes": 66,
    "alimentosDiferentesPorId": 66,
    "pctItensComAlimentoId": 100.0,
-   "contaveis": 16,
-   "contaveisForaDoMultiplo": 0,
+   "contaveis": 29,
+   "contaveisForaDoMultiplo": 13,
    "diasInteirosPelaBase": 7,
    "desvioPelaBaseDiasInteiros": {
     "kcal": 8.5,
@@ -210,6 +213,7 @@
    },
    "diasForaDe5Declarado": 0,
    "diasForaDe5PelaBase": 5,
+   "diasMacrosAte10PelaBase": 0,
    "refeicoesRepetidas": [],
    "gostos": {},
    "violacoes": {
@@ -239,8 +243,8 @@
    "alimentosDiferentes": 41,
    "alimentosDiferentesPorId": 41,
    "pctItensComAlimentoId": 100.0,
-   "contaveis": 17,
-   "contaveisForaDoMultiplo": 0,
+   "contaveis": 21,
+   "contaveisForaDoMultiplo": 4,
    "diasInteirosPelaBase": 7,
    "desvioPelaBaseDiasInteiros": {
     "kcal": 9.1,
@@ -263,6 +267,7 @@
    },
    "diasForaDe5Declarado": 0,
    "diasForaDe5PelaBase": 4,
+   "diasMacrosAte10PelaBase": 1,
    "refeicoesRepetidas": [],
    "gostos": {
     "Ovo": 8
@@ -294,8 +299,8 @@
    "alimentosDiferentes": 43,
    "alimentosDiferentesPorId": 43,
    "pctItensComAlimentoId": 100.0,
-   "contaveis": 22,
-   "contaveisForaDoMultiplo": 0,
+   "contaveis": 29,
+   "contaveisForaDoMultiplo": 7,
    "diasInteirosPelaBase": 7,
    "desvioPelaBaseDiasInteiros": {
     "kcal": 12.3,
@@ -318,6 +323,7 @@
    },
    "diasForaDe5Declarado": 0,
    "diasForaDe5PelaBase": 5,
+   "diasMacrosAte10PelaBase": 0,
    "refeicoesRepetidas": [],
    "gostos": {
     "Iogurte": 7,
@@ -350,8 +356,8 @@
    "alimentosDiferentes": 49,
    "alimentosDiferentesPorId": 49,
    "pctItensComAlimentoId": 100.0,
-   "contaveis": 19,
-   "contaveisForaDoMultiplo": 0,
+   "contaveis": 26,
+   "contaveisForaDoMultiplo": 7,
    "diasInteirosPelaBase": 7,
    "desvioPelaBaseDiasInteiros": {
     "kcal": 4.2,
@@ -374,6 +380,7 @@
    },
    "diasForaDe5Declarado": 2,
    "diasForaDe5PelaBase": 2,
+   "diasMacrosAte10PelaBase": 0,
    "refeicoesRepetidas": [],
    "gostos": {
     "Cerveja": 1,

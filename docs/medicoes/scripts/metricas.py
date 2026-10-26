@@ -142,7 +142,7 @@ def main():
             continue
         dias = dados["resposta"]["dieta"]["dias"]
         itens = casados = refeicoes = refeicoes_base = com_id = 0
-        contaveis = contaveis_fora = feijao_carioca_sul = 0
+        contaveis = contaveis_fora = feijao_carioca_sul = macros_10_base = 0
         nomes = set()
         ids_diferentes = set()
         desvio_base_dias_inteiros = []
@@ -226,6 +226,7 @@ def main():
             desvio_base.append({k: (tot[k] - pares_meta[k]) / pares_meta[k] * 100 for k in pares_meta})
             fora_5_decl += abs(desvio_decl[-1]["kcal"]) > 5
             fora_5_base += abs(desvio_base[-1]["kcal"]) > 5
+            macros_10_base += all(abs(desvio_base[-1][k]) <= 10 for k in ("p", "c", "g"))
             if dia_inteiro:
                 desvio_base_dias_inteiros.append(desvio_base[-1])
 
@@ -258,6 +259,7 @@ def main():
             "desvioDeclarado": {k: media_abs(desvio_decl, k) for k in ("kcal", "p", "c", "g")},
             "desvioPelaBase": {k: media_abs(desvio_base, k) for k in ("kcal", "p", "c", "g")},
             "diasForaDe5Declarado": fora_5_decl, "diasForaDe5PelaBase": fora_5_base,
+            "diasMacrosAte10PelaBase": macros_10_base,
             "refeicoesRepetidas": repetidas, "gostos": gostos, "violacoes": violacoes,
             "foraDaBase": dict(sorted(fora_da_base.items(), key=lambda x: -x[1])),
         })
