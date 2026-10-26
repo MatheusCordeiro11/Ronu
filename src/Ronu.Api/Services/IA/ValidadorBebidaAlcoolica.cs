@@ -52,13 +52,13 @@ public static class ValidadorBebidaAlcoolica
     /// Rede de segurança da última tentativa: tira da dieta a cerveja que a
     /// pessoa não pediu, em vez de descartar a dieta inteira (no g8b, 2026-10-25,
     /// 11 de 16 chamadas ao Gemini de perfis sem bebida nas preferências vieram
-    /// com cerveja, e metade dos pedidos virou 503). As calorias e os macros da
-    /// cerveja saem da refeição pelo valor da base (TACO 474, "Cerveja, pilsen"),
-    /// porque o Gemini declara só o total da refeição, não o de cada item; uma
-    /// refeição que fica sem nenhum alimento sai do dia.
+    /// com cerveja, e metade dos pedidos virou 503). Desde a fase 3, as kcal da
+    /// refeição saem do cálculo pela base depois de tirado o item; as da cerveja
+    /// (TACO 474, "Cerveja, pilsen") vão só para o log. Uma refeição que fica sem
+    /// nenhum alimento sai do dia.
     ///
     /// Só a cerveja é tirada: é a única bebida alcoólica da base, então é a única
-    /// com valor de fonte para descontar. Outra bebida, ou cerveja numa unidade
+    /// com valor de fonte para o log. Outra bebida, ou cerveja numa unidade
     /// que não seja g/ml, continua tornando a resposta inválida (503), assim
     /// como um dia que fique sem nenhuma refeição.
     /// </summary>
@@ -82,13 +82,9 @@ public static class ValidadorBebidaAlcoolica
                             $"Resposta do Gemini com bebida alcoólica fora das preferências da pessoa: '{alimento.Nome}' ({alimento.Quantidade} {alimento.Unidade}), sem valor na base para descontar.");
                     }
 
-                    // Para bebidas, o valor por 100 g da base vale como 100 ml (BaseNutricional).
-                    var fator = alimento.Quantidade / 100m;
-                    var kcal = cerveja.Kcal * fator;
-                    refeicao.Macros.Calorias = Math.Max(0, refeicao.Macros.Calorias - kcal);
-                    refeicao.Macros.ProteinasG = Math.Max(0, refeicao.Macros.ProteinasG - cerveja.ProteinaG * fator);
-                    refeicao.Macros.CarboidratosG = Math.Max(0, refeicao.Macros.CarboidratosG - cerveja.CarboidratoG * fator);
-                    refeicao.Macros.GordurasG = Math.Max(0, refeicao.Macros.GordurasG - cerveja.GorduraG * fator);
+                    // Para bebidas, o valor por 100 g da base vale como 100 ml (BaseNutricional). Só para o log: as
+                    // kcal da refeição saem do cálculo pela base (CalculoPelaBase), depois de tirado o item.
+                    var kcal = cerveja.Kcal * alimento.Quantidade / 100m;
                     refeicao.Alimentos.Remove(alimento);
                     removidas.Add(new BebidaRemovida(dia.DiaSemana, refeicao.Nome, alimento.Nome, alimento.Quantidade, alimento.Unidade, Math.Round(kcal, 1)));
                 }

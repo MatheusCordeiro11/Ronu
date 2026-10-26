@@ -19,4 +19,8 @@ public class AlimentoDto
     // partir do nome escolhido na lista fechada (fase 2b). Nulo nas dietas
     // geradas antes da lista, que têm nomes em texto livre.
     public string? AlimentoId { get; set; }
+
+    // Kcal e macros deste item, calculados pela base (CalculoPelaBase, fase 3),
+    // sem arredondar. Nulo nas dietas antigas e na resposta do Gemini.
+    public MacrosDto? Macros { get; set; }
 }

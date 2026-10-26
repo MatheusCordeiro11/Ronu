@@ -108,6 +108,9 @@ public class GeradorDietaGemini : IGeradorDietaIA
             {
                 var (respostaIa, uso, versaoModelo) = await ChamarGeminiAsync(corpoRequisicao);
                 var dias = MontarDias(respostaIa, metasPorDia, composicaoPorDia);
+                // O que o Gemini declarou para cada dia (soma das refeições), antes de qualquer remoção e do
+                // cálculo pela base: só para o log comparar com o calculado.
+                var declarado = dias.ToDictionary(d => d.DiaSemana.Trim(), d => d.TotalDoDia, StringComparer.OrdinalIgnoreCase);
                 // Normaliza antes da regra 8: tirar a cerveja (última tentativa)
                 // precisa da quantidade em g/ml para descontar as calorias.
                 var normalizacao = NormalizadorUnidades.Normalizar(dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos));
@@ -117,8 +120,10 @@ public class GeradorDietaGemini : IGeradorDietaIA
                 // Depois da regra 8: a rede de segurança da cerveja continua valendo antes da lista.
                 var contaveis = AplicarLista(dias, lista);
                 var oleosTirados = TirarOleoDosRefogados(dias);
+                // Fase 3: kcal e macros calculados pela base no lugar dos declarados, que ficam só no log.
+                CalculoPelaBase.Calcular(dias);
 
-                RegistrarGeracao(dias, respostaIa, uso, versaoModelo, normalizacao, tentativa, cronometro.ElapsedMilliseconds, lista, contaveis, oleosTirados);
+                RegistrarGeracao(dias, declarado, uso, versaoModelo, normalizacao, tentativa, cronometro.ElapsedMilliseconds, lista, contaveis, oleosTirados);
 
                 return new DietaSemanalDto
                 {
@@ -293,13 +298,8 @@ public class GeradorDietaGemini : IGeradorDietaIA
 
     private static List<BebidaRemovida> TirarBebidaAlcoolica(List<DiaDietaDto> dias, ContextoDietaDto contexto)
     {
-        var removidas = ValidadorBebidaAlcoolica.TirarNaoPermitidas(dias, Preferidos(contexto));
-        foreach (var dia in dias)
-        {
-            dia.TotalDoDia = SomarRefeicoes(dia.Refeicoes);
-        }
-
-        return removidas;
+        // Só tira o item: as kcal da refeição e do dia saem do cálculo pela base, depois.
+        return ValidadorBebidaAlcoolica.TirarNaoPermitidas(dias, Preferidos(contexto));
     }
 
     // Folga para considerar a quantidade um múltiplo exato do peso da unidade (arredondamento do Gemini).
@@ -355,10 +355,9 @@ public class GeradorDietaGemini : IGeradorDietaIA
     /// Couve e espinafre refogados da TACO já incluem o óleo do preparo: o azeite
     /// ou óleo na mesma refeição contaria a gordura duas vezes. O prompt pede para
     /// não pôr, mas no g9a (2026-10-25) 2 de 7 gerações puseram mesmo assim. Aqui
-    /// o C# tira esse azeite ou óleo da refeição e desconta dela as calorias e a
-    /// gordura pelo valor da base (TACO 260 e 272: 884 kcal e 100 g de gordura
-    /// por 100 g), como a regra 8 faz com a cerveja. Depois de AplicarLista, que
-    /// preenche o AlimentoId usado aqui.
+    /// o C# tira esse azeite ou óleo da refeição; as kcal saem do cálculo pela
+    /// base, depois (as daqui, pela TACO 260 e 272, são só para o log). Depois de
+    /// AplicarLista, que preenche o AlimentoId usado aqui.
     /// </summary>
     private List<OleoTirado> TirarOleoDosRefogados(List<DiaDietaDto> dias)
     {
@@ -370,24 +369,17 @@ public class GeradorDietaGemini : IGeradorDietaIA
                 foreach (var oleo in refeicao.Alimentos.Where(a => OleosDoPreparo.Contains(a.AlimentoId)).ToList())
                 {
                     var item = BaseNutricional.Itens.Single(i => i.Id == oleo.AlimentoId);
-                    var fator = oleo.Quantidade / 100m;
-                    var kcal = item.Kcal * fator;
-                    refeicao.Macros.Calorias = Math.Max(0, refeicao.Macros.Calorias - kcal);
-                    refeicao.Macros.ProteinasG = Math.Max(0, refeicao.Macros.ProteinasG - item.ProteinaG * fator);
-                    refeicao.Macros.CarboidratosG = Math.Max(0, refeicao.Macros.CarboidratosG - item.CarboidratoG * fator);
-                    refeicao.Macros.GordurasG = Math.Max(0, refeicao.Macros.GordurasG - item.GorduraG * fator);
+                    var kcal = item.Kcal * oleo.Quantidade / 100m;
                     refeicao.Alimentos.Remove(oleo);
                     tirados.Add(new OleoTirado(dia.DiaSemana, refeicao.Nome, oleo.Nome, oleo.Quantidade, Math.Round(kcal, 1)));
                 }
             }
-
-            dia.TotalDoDia = SomarRefeicoes(dia.Refeicoes);
         }
 
         foreach (var t in tirados)
         {
             _logger.LogWarning(
-                "Azeite ou óleo tirado de refeição com refogado (o óleo do preparo já está no refogado): '{Alimento}' ({Quantidade} g), {KcalDescontadas} kcal descontadas, {Dia} {Refeicao}",
+                "Azeite ou óleo tirado de refeição com refogado (o óleo do preparo já está no refogado): '{Alimento}' ({Quantidade} g, {KcalDescontadas} kcal pela base), {Dia} {Refeicao}",
                 t.Alimento, t.Quantidade, t.KcalDescontadas, t.Dia, t.Refeicao);
         }
 
@@ -454,7 +446,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
     // Também as unidades: quantas a normalização reescreveu e as que ficaram fora
     // de "g"/"ml" (NormalizadorUnidades), que impedem o cálculo daquele alimento.
     private void RegistrarGeracao(
-        List<DiaDietaDto> dias, RespostaDiasIaDto respostaIa, UsoTokens uso, string? versaoModelo, ResultadoNormalizacao normalizacao, int tentativas, long tempoMs,
+        List<DiaDietaDto> dias, Dictionary<string, MacrosDto> declaradoPorDia, UsoTokens uso, string? versaoModelo, ResultadoNormalizacao normalizacao, int tentativas, long tempoMs,
         ListaAlimentos lista, (int Contaveis, int ForaDoMultiplo) contaveis, List<OleoTirado> oleosTirados)
     {
         // Lista fechada (fase 2b): o tamanho, os mínimos, quantos "evitar" não casaram com nada (só a
@@ -469,26 +461,18 @@ public class GeradorDietaGemini : IGeradorDietaIA
             "Lista de alimentos: {Itens} itens, mínimos: {Minimos}, {EvitarSemCasamento} evitar sem casamento; contáveis fora do múltiplo da unidade: {ForaDoMultiplo} de {Contaveis}; azeite/óleo tirado de refeição com refogado: {RefogadoComOleo}",
             lista.Itens.Count, minimos, evitarSemCasamento, contaveis.ForaDoMultiplo, contaveis.Contaveis, refogadoComOleo);
 
-        var declaradoPorDia = respostaIa.Dias.ToDictionary(d => d.DiaSemana.Trim(), d => d.TotalDoDia.Calorias, StringComparer.OrdinalIgnoreCase);
-
+        // Por dia: o calculado pela base contra a meta (kcal e cada macro) e o que o Gemini declarou contra
+        // o calculado. O declarado não vai mais para a dieta (fase 3), mas continua medido aqui: no g9a ele
+        // diferia do cardápio real em 12,9% por refeição.
         var desvios = string.Join("; ", dias.Select(d =>
         {
-            var soma = d.TotalDoDia.Calorias;
-            var meta = d.MetaCalculada.Calorias;
-            var desvio = DesvioPercentual(soma, meta);
+            var calculado = d.TotalDoDia;
+            var meta = d.MetaCalculada;
             var declarado = declaradoPorDia[d.DiaSemana.Trim()];
-            var aviso = declarado == soma ? string.Empty : $" [IA declarou {declarado.ToString("F0", CultureInfo.InvariantCulture)}]";
-            var desvioP = DesvioPercentual(d.TotalDoDia.ProteinasG, d.MetaCalculada.ProteinasG);
-            var desvioC = DesvioPercentual(d.TotalDoDia.CarboidratosG, d.MetaCalculada.CarboidratosG);
-            var desvioG = DesvioPercentual(d.TotalDoDia.GordurasG, d.MetaCalculada.GordurasG);
-            // Coerência interna da resposta (só registro, nada é recalculado): as
-            // kcal somadas das refeições contra 4P+4C+9G dos macros declarados. No
-            // g6, uma geração com kcal, carboidrato e gordura idênticos à meta tinha
-            // até +4,7% aqui — sinal de números encaixados na meta.
-            var kcalDosMacros = 4 * d.TotalDoDia.ProteinasG + 4 * d.TotalDoDia.CarboidratosG + 9 * d.TotalDoDia.GordurasG;
-            var divergenciaMacros = DesvioPercentual(kcalDosMacros, soma);
             return string.Create(CultureInfo.InvariantCulture,
-                $"{d.DiaSemana.Trim()} {soma:F0}/{meta:F0} kcal ({desvio:+0.0;-0.0}%) P {desvioP:+0;-0}% C {desvioC:+0;-0}% G {desvioG:+0;-0}% 4P+4C+9G {divergenciaMacros:+0.0;-0.0}%{aviso}");
+                $"{d.DiaSemana.Trim()} {calculado.Calorias:F0}/{meta.Calorias:F0} kcal ({DesvioPercentual(calculado.Calorias, meta.Calorias):+0.0;-0.0}%) " +
+                $"P {DesvioPercentual(calculado.ProteinasG, meta.ProteinasG):+0;-0}% C {DesvioPercentual(calculado.CarboidratosG, meta.CarboidratosG):+0;-0}% " +
+                $"G {DesvioPercentual(calculado.GordurasG, meta.GordurasG):+0;-0}% [IA declarou {declarado.Calorias:F0} kcal, {DesvioPercentual(declarado.Calorias, calculado.Calorias):+0.0;-0.0}% do calculado]");
         }));
 
         var foraDoPadrao = normalizacao.ForaDoPadrao.Count == 0
@@ -496,7 +480,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
             : string.Join(", ", normalizacao.ForaDoPadrao.Select(u => $"\"{u.Key}\" x{u.Value}"));
 
         _logger.LogInformation(
-            "Dieta gerada pelo Gemini ({VersaoModelo}) em {TempoMs} ms ({Tentativas} tentativa(s)); tokens: entrada {TokensEntrada}, resposta {TokensResposta}, raciocínio {TokensRaciocinio}, total {TokensTotal}. Unidades: {Alimentos} alimentos, {UnidadesCorrigidas} normalizados para g/ml, fora de g/ml: {UnidadesForaDoPadrao}. Soma das refeições vs. meta por dia (kcal, desvio de proteína, carboidrato e gordura, e 4P+4C+9G dos macros declarados vs. kcal declaradas): {DesvioPorDia}",
+            "Dieta gerada pelo Gemini ({VersaoModelo}) em {TempoMs} ms ({Tentativas} tentativa(s)); tokens: entrada {TokensEntrada}, resposta {TokensResposta}, raciocínio {TokensRaciocinio}, total {TokensTotal}. Unidades: {Alimentos} alimentos, {UnidadesCorrigidas} normalizados para g/ml, fora de g/ml: {UnidadesForaDoPadrao}. Calculado pela base vs. meta por dia (kcal, desvio de proteína, carboidrato e gordura, e o declarado pela IA vs. o calculado): {DesvioPorDia}",
             versaoModelo ?? "não informada", tempoMs, tentativas, uso.Entrada, uso.Resposta, uso.Raciocinio ?? 0, uso.Total,
             normalizacao.Total, normalizacao.Corrigidos, foraDoPadrao, desvios);
     }

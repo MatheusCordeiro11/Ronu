@@ -205,21 +205,26 @@ public class ValidacaoRespostaGeminiTests
 
     // ---------- TotalDoDia ----------
 
+    // Fase 3: a IA declara refeições de 500 e 735 kcal e 999 kcal no dia, mas os números vêm da base:
+    // 100 g de arroz branco cozido (TACO 3: 128 kcal, 2,5 g P, 28,1 g C, 0,2 g G) em cada refeição.
     [Fact]
-    public async Task TotalDoDia_E_A_Soma_Das_Refeicoes_E_Nao_O_Declarado()
+    public async Task Kcal_E_Macros_Vem_Da_Base_E_Nao_Do_Declarado()
     {
-        // Cada dia: refeições de 500 kcal (30/60/15 g) e 735 kcal (40/90/25 g),
-        // mas a IA declara 999 kcal e macros zerados no total do dia.
         var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true)));
 
         var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
 
         foreach (var dia in dieta.Dias)
         {
-            Assert.Equal(1235m, dia.TotalDoDia.Calorias);
-            Assert.Equal(70m, dia.TotalDoDia.ProteinasG);
-            Assert.Equal(150m, dia.TotalDoDia.CarboidratosG);
-            Assert.Equal(40m, dia.TotalDoDia.GordurasG);
+            Assert.All(dia.Refeicoes, r =>
+            {
+                Assert.Equal(128m, r.Macros.Calorias);
+                Assert.Equal(128m, r.Alimentos.Single().Macros!.Calorias);
+            });
+            Assert.Equal(256m, dia.TotalDoDia.Calorias);
+            Assert.Equal(5m, dia.TotalDoDia.ProteinasG);
+            Assert.Equal(56.2m, dia.TotalDoDia.CarboidratosG);
+            Assert.Equal(0.4m, dia.TotalDoDia.GordurasG);
         }
     }
 
@@ -297,11 +302,12 @@ public class ValidacaoRespostaGeminiTests
     }
 
     // Couve e espinafre refogados já incluem o óleo do preparo (TACO): o azeite ou óleo da mesma refeição
-    // sai, com o desconto pela base (884 kcal e 100 g de gordura por 100 g; 12 g = 106,08 kcal e 12 g).
+    // sai, e o jantar fica só com os 100 g do refogado (couve: TACO 116, 90 kcal e 6,6 g G; espinafre: TACO
+    // 120, 67 kcal e 5,4 g G).
     [Theory]
-    [InlineData("Couve refogada", "Azeite de oliva extra virgem")]
-    [InlineData("Espinafre refogado", "Óleo de soja")]
-    public async Task Oleo_Sai_Da_Refeicao_Com_Refogado(string refogado, string oleo)
+    [InlineData("Couve refogada", "Azeite de oliva extra virgem", 90, 6.6)]
+    [InlineData("Espinafre refogado", "Óleo de soja", 67, 5.4)]
+    public async Task Oleo_Sai_Da_Refeicao_Com_Refogado(string refogado, string oleo, decimal kcal, decimal gordura)
     {
         var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true, alimento: refogado,
             bebidaNoJantar: oleo, unidadeBebida: "g", quantidadeBebida: 12)));
@@ -312,10 +318,9 @@ public class ValidacaoRespostaGeminiTests
         {
             var jantar = dia.Refeicoes.Single(r => r.Nome == "Jantar");
             Assert.Equal(new[] { refogado }, jantar.Alimentos.Select(a => a.Nome));
-            Assert.Equal(735m - 106.08m, jantar.Macros.Calorias);
-            Assert.Equal(25m - 12m, jantar.Macros.GordurasG);
-            Assert.Equal(40m, jantar.Macros.ProteinasG);
-            Assert.Equal(500m + 735m - 106.08m, dia.TotalDoDia.Calorias);
+            Assert.Equal(kcal, jantar.Macros.Calorias);
+            Assert.Equal(gordura, jantar.Macros.GordurasG);
+            Assert.Equal(2 * kcal, dia.TotalDoDia.Calorias);
         }
         Assert.Equal(1, gemini.Chamadas);
     }
@@ -328,10 +333,12 @@ public class ValidacaoRespostaGeminiTests
 
         var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
 
+        // Abobrinha cozida (TACO 73: 15 kcal por 100 g) nas duas refeições + 12 g de azeite (TACO 260:
+        // 884 kcal por 100 g = 106,08 kcal), que fica.
         Assert.All(dieta.Dias, d =>
         {
             Assert.Contains(d.Refeicoes.Single(r => r.Nome == "Jantar").Alimentos, a => a.AlimentoId == "azeite-de-oliva-extra-virgem");
-            Assert.Equal(1235m, d.TotalDoDia.Calorias);
+            Assert.Equal(15m + 15m + 106.08m, d.TotalDoDia.Calorias);
         });
     }
 
@@ -452,9 +459,9 @@ public class ValidacaoRespostaGeminiTests
         Assert.Equal(2, gemini.Chamadas);
     }
 
-    // Na última tentativa, a cerveja sai da refeição em vez do 503, e as calorias
-    // dela saem pelo valor da base: 350 ml × TACO 474 (41 kcal, 0,6 g P, 3,3 g C,
-    // 0 g G por 100 ml) = 143,5 kcal, 2,1 g P, 11,55 g C.
+    // Na última tentativa, a cerveja sai da refeição em vez do 503. As kcal dela vão
+    // para o log pela base (350 ml × TACO 474, 41 kcal por 100 ml = 143,5 kcal), e o
+    // jantar fica com o que sobrou, calculado pela base (100 g de arroz = 128 kcal).
     [Fact]
     public async Task Cerveja_Na_Ultima_Tentativa_Sai_Da_Refeicao_E_Desconta_Pela_Base()
     {
@@ -475,12 +482,11 @@ public class ValidacaoRespostaGeminiTests
         {
             var jantar = dia.Refeicoes.Single(r => r.Nome == "Jantar");
             Assert.Equal(new[] { "Arroz branco cozido" }, jantar.Alimentos.Select(a => a.Nome));
-            Assert.Equal(735m - 143.5m, jantar.Macros.Calorias);
-            Assert.Equal(40m - 2.1m, jantar.Macros.ProteinasG);
-            Assert.Equal(90m - 11.55m, jantar.Macros.CarboidratosG);
-            Assert.Equal(25m, jantar.Macros.GordurasG);
+            Assert.Equal(128m, jantar.Macros.Calorias);
+            Assert.Equal(2.5m, jantar.Macros.ProteinasG);
+            Assert.Equal(28.1m, jantar.Macros.CarboidratosG);
             // TotalDoDia continua sendo a soma das refeições, já sem a cerveja.
-            Assert.Equal(500m + 735m - 143.5m, dia.TotalDoDia.Calorias);
+            Assert.Equal(256m, dia.TotalDoDia.Calorias);
         }
     }
 
@@ -495,28 +501,29 @@ public class ValidacaoRespostaGeminiTests
         Assert.All(dieta.Dias, d =>
         {
             Assert.Equal(new[] { "Almoço", "Jantar" }, d.Refeicoes.Select(r => r.Nome));
-            Assert.Equal(1235m, d.TotalDoDia.Calorias);
+            Assert.Equal(256m, d.TotalDoDia.Calorias);
         });
     }
 
-    // Se o Gemini não contou a cerveja na refeição, o desconto não deixa número negativo.
+    // Desde a fase 3, tirar a cerveja só tira o item (as kcal vêm do cálculo pela base, depois) e informa
+    // as kcal dela para o log: 700 ml × 41 kcal por 100 ml = 287 kcal.
     [Fact]
-    public void Desconto_Da_Cerveja_Nao_Deixa_Macro_Negativo()
+    public void Tirar_A_Cerveja_So_Remove_O_Item_E_Informa_As_Kcal()
     {
+        var declarado = new MacrosDto { Calorias = 100, ProteinasG = 1, CarboidratosG = 10, GordurasG = 0 };
         var refeicao = new RefeicaoDto
         {
             Nome = "Jantar",
             Alimentos = new() { new AlimentoDto { Nome = "Arroz", Quantidade = 100, Unidade = "g" }, new AlimentoDto { Nome = "Cerveja", Quantidade = 700, Unidade = "ml" } },
-            Macros = new MacrosDto { Calorias = 100, ProteinasG = 1, CarboidratosG = 10, GordurasG = 0 }
+            Macros = declarado
         };
-        var dias = new List<DiaDietaDto> { new() { DiaSemana = "Sábado", Refeicoes = new() { refeicao }, TotalDoDia = refeicao.Macros, MetaCalculada = refeicao.Macros } };
+        var dias = new List<DiaDietaDto> { new() { DiaSemana = "Sábado", Refeicoes = new() { refeicao }, TotalDoDia = declarado, MetaCalculada = declarado } };
 
         var removidas = ValidadorBebidaAlcoolica.TirarNaoPermitidas(dias, Array.Empty<string>());
 
         Assert.Equal(287m, Assert.Single(removidas).KcalDescontadas);
-        Assert.Equal(0m, refeicao.Macros.Calorias);
-        Assert.Equal(0m, refeicao.Macros.ProteinasG);
-        Assert.Equal(0m, refeicao.Macros.CarboidratosG);
+        Assert.Equal(new[] { "Arroz" }, refeicao.Alimentos.Select(a => a.Nome));
+        Assert.Equal(100m, refeicao.Macros.Calorias);
     }
 
     // Só a cerveja tem valor na base para descontar: outra bebida, ou cerveja numa
