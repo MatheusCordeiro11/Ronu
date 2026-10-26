@@ -114,6 +114,9 @@ public static partial class BaseNutricional
             ],
             ["batata-doce-cozida"] =
             [
+                // Saiu da espera da 2a em 2026-10-26, conferida no PDF. Sem marca de unidade: 355 g é grande
+                // demais para uma refeição, então o cardápio fica em gramas.
+                new("unidade", "unidades", 355m, OrigemMedida.Direta, "6400401", 51, "Batata-doce cozida - unidade média"),
                 new("fatia", "fatias", 70m, OrigemMedida.Direta, "6400401", 51, "Batata-doce cozida - fatia média"),
                 new("colher de sopa", "colheres de sopa", 42m, OrigemMedida.Direta, "6400401", 51, "Batata-doce cozida - colher de sopa cheia"),
             ],
@@ -157,19 +160,19 @@ public static partial class BaseNutricional
             ],
             ["tomate-cru"] =
             [
-                new("unidade", "unidades", 100m, OrigemMedida.Direta, "6705101", 143, "Tomate - unidade média"),
+                new("unidade", "unidades", 100m, OrigemMedida.Direta, "6705101", 143, "Tomate - unidade média", EhUnidade: true),
                 new("unidade pequena", "unidades pequenas", 50m, OrigemMedida.Direta, "6705101", 143, "Tomate - unidade pequena"),
                 new("fatia", "fatias", 15m, OrigemMedida.Direta, "6705101", 143, "Tomate - fatia média"),
                 new("colher de sopa", "colheres de sopa", 30m, OrigemMedida.Direta, "6705101", 143, "Tomate - colher de sopa cheia em tiras"),
             ],
             ["pepino-cru"] =
             [
-                new("unidade", "unidades", 100m, OrigemMedida.Direta, "6704001", 133, "Pepino - unidade média"),
+                new("unidade", "unidades", 100m, OrigemMedida.Direta, "6704001", 133, "Pepino - unidade média", EhUnidade: true),
                 new("colher de sopa", "colheres de sopa", 18m, OrigemMedida.Direta, "6704001", 132, "Pepino - colher de sopa cheia picada"),
             ],
             ["cenoura-crua"] =
             [
-                new("unidade", "unidades", 120m, OrigemMedida.Direta, "6401201", 69, "Cenoura crua - unidade média"),
+                new("unidade", "unidades", 120m, OrigemMedida.Direta, "6401201", 69, "Cenoura crua - unidade média", EhUnidade: true),
                 new("unidade pequena", "unidades pequenas", 55m, OrigemMedida.Direta, "6401201", 69, "Cenoura crua - unidade pequena"),
                 new("colher de sopa", "colheres de sopa", 12m, OrigemMedida.Direta, "6401201", 68, "Cenoura crua - colher de sopa cheia ralada"),
             ],
@@ -262,7 +265,7 @@ public static partial class BaseNutricional
             ],
             ["cebola-crua"] =
             [
-                new("unidade", "unidades", 70m, OrigemMedida.Direta, "6705701", 148, "Cebola - unidade média"),
+                new("unidade", "unidades", 70m, OrigemMedida.Direta, "6705701", 148, "Cebola - unidade média", EhUnidade: true),
                 new("unidade pequena", "unidades pequenas", 30m, OrigemMedida.Direta, "6705701", 148, "Cebola - unidade pequena"),
                 new("fatia", "fatias", 6m, OrigemMedida.Direta, "6705701", 148, "Cebola - fatia média"),
                 new("colher de sopa", "colheres de sopa", 10m, OrigemMedida.Direta, "6705701", 148, "Cebola - colher de sopa cheia"),
@@ -318,27 +321,27 @@ public static partial class BaseNutricional
             ],
             ["mamao-formosa"] =
             [
-                new("fatia", "fatias", 170m, OrigemMedida.Categoria, "6803101", 160, "Mamão - fatia média"),
+                new("fatia", "fatias", 170m, OrigemMedida.Categoria, "6803101", 160, "Mamão - fatia média", EhUnidade: true),
             ],
             ["abacaxi"] =
             [
                 new("unidade", "unidades", 750m, OrigemMedida.Direta, "6802601", 159, "Abacaxi - unidade média"),
                 new("unidade pequena", "unidades pequenas", 480m, OrigemMedida.Direta, "6802601", 159, "Abacaxi - unidade pequena"),
-                new("fatia", "fatias", 75m, OrigemMedida.Direta, "6802601", 158, "Abacaxi - fatia média"),
+                new("fatia", "fatias", 75m, OrigemMedida.Direta, "6802601", 158, "Abacaxi - fatia média", EhUnidade: true),
             ],
             ["melancia"] =
             [
-                new("fatia", "fatias", 200m, OrigemMedida.Direta, "6803401", 162, "Melancia - fatia média"),
+                new("fatia", "fatias", 200m, OrigemMedida.Direta, "6803401", 162, "Melancia - fatia média", EhUnidade: true),
                 new("pedaço", "pedaços", 150m, OrigemMedida.Direta, "6803401", 162, "Melancia - pedaço médio"),
             ],
             ["melao"] =
             [
                 new("unidade", "unidades", 660m, OrigemMedida.Direta, "6803501", 163, "Melão - unidade média"),
-                new("fatia", "fatias", 90m, OrigemMedida.Direta, "6803501", 162, "Melão - fatia média"),
+                new("fatia", "fatias", 90m, OrigemMedida.Direta, "6803501", 162, "Melão - fatia média", EhUnidade: true),
             ],
             ["morango"] =
             [
-                new("unidade", "unidades", 12m, OrigemMedida.Direta, "6805201", 169, "Morango - unidade média"),
+                new("unidade", "unidades", 12m, OrigemMedida.Direta, "6805201", 169, "Morango - unidade média", EhUnidade: true),
                 new("unidade pequena", "unidades pequenas", 7m, OrigemMedida.Direta, "6805201", 169, "Morango - unidade pequena"),
             ],
             ["uva-italia"] =
@@ -354,7 +357,7 @@ public static partial class BaseNutricional
             ],
             ["goiaba-vermelha"] =
             [
-                new("unidade", "unidades", 170m, OrigemMedida.Categoria, "6804201", 165, "Goiaba - unidade média"),
+                new("unidade", "unidades", 170m, OrigemMedida.Categoria, "6804201", 165, "Goiaba - unidade média", EhUnidade: true),
                 new("unidade pequena", "unidades pequenas", 50m, OrigemMedida.Categoria, "6804201", 166, "Goiaba - unidade pequena"),
             ],
             ["acai-sem-acucar"] =
@@ -466,11 +469,11 @@ public static partial class BaseNutricional
             ],
             ["queijo-mucarela"] =
             [
-                new("fatia", "fatias", 20m, OrigemMedida.Direta, "7901801", 377, "Queijo muçarela - fatia média"),
+                new("fatia", "fatias", 20m, OrigemMedida.Direta, "7901801", 377, "Queijo muçarela - fatia média", EhUnidade: true),
             ],
             ["queijo-prato"] =
             [
-                new("fatia", "fatias", 15m, OrigemMedida.Direta, "7901701", 377, "Queijo prato - fatia média"),
+                new("fatia", "fatias", 15m, OrigemMedida.Direta, "7901701", 377, "Queijo prato - fatia média", EhUnidade: true),
             ],
             ["ricota"] =
             [

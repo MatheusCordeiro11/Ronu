@@ -22,6 +22,19 @@ public class BaseNutricionalClassificacaoEMedidasTests
         ["tangerina"] = 135m, ["kiwi"] = 94m, ["ovo-de-galinha-cozido"] = 45m, ["ovo-de-galinha-frito"] = 50m
     };
 
+    // Marcadas como unidade na fase 2b (2026-10-26), para a contagem "(2 unidades)" no cardápio: medidas da
+    // POF que já estavam no código desde a 2a. Abacate, mamão papaia, chuchu e batata-doce ficam em gramas (a
+    // unidade é grande demais para uma refeição), uva, castanha-do-pará e noz também (bago e unidade pequenos
+    // demais), e a batata inglesa, por ser o carboidrato principal, que a fase 4 precisa ajustar fino.
+    private static readonly Dictionary<string, (string Medida, decimal Gramas)> UnidadesDa2b = new()
+    {
+        ["tomate-cru"] = ("unidade", 100m), ["cenoura-crua"] = ("unidade", 120m), ["cebola-crua"] = ("unidade", 70m),
+        ["pepino-cru"] = ("unidade", 100m), ["morango"] = ("unidade", 12m),
+        ["goiaba-vermelha"] = ("unidade", 170m), ["melao"] = ("fatia", 90m), ["abacaxi"] = ("fatia", 75m),
+        ["melancia"] = ("fatia", 200m), ["mamao-formosa"] = ("fatia", 170m), ["queijo-mucarela"] = ("fatia", 20m),
+        ["queijo-prato"] = ("fatia", 15m)
+    };
+
     // ---------- Classificação ----------
 
     private static T Campo<T>(string nome) =>
@@ -119,11 +132,40 @@ public class BaseNutricionalClassificacaoEMedidasTests
     // ---------- Medidas caseiras ----------
 
     [Fact]
-    public void Os_11_Pesos_Por_Unidade_Da_Fase_1_Continuam_Iguais()
+    public void Os_Pesos_Por_Unidade_Sao_Os_11_Da_Fase_1_E_Os_12_Da_2b()
     {
         var comUnidade = Itens.Where(i => i.MedidaUnidade is not null).ToDictionary(i => i.Id, i => i.MedidaUnidade!.Gramas);
+        var esperado = PesosDaFase1.Concat(UnidadesDa2b.Select(u => KeyValuePair.Create(u.Key, u.Value.Gramas)));
 
-        Assert.Equal(PesosDaFase1.OrderBy(p => p.Key), comUnidade.OrderBy(p => p.Key));
+        Assert.Equal(esperado.OrderBy(p => p.Key), comUnidade.OrderBy(p => p.Key));
+    }
+
+    [Fact]
+    public void Unidades_Da_2b_Usam_A_Medida_Escolhida_E_Ficam_Fora_Os_Grandes_E_Os_Pequenos()
+    {
+        foreach (var (id, (medida, gramas)) in UnidadesDa2b)
+        {
+            var unidade = Itens.Single(i => i.Id == id).MedidaUnidade!;
+            Assert.Equal((medida, gramas), (unidade.Nome, unidade.Gramas));
+        }
+
+        string[] emGramas = ["abacate", "mamao-papaia", "chuchu-cozido", "uva-italia", "castanha-do-para", "noz", "banana-nanica",
+            "batata-inglesa-cozida", "batata-doce-cozida", "lombo-suino-assado"];
+        Assert.All(emGramas, id => Assert.Null(Itens.Single(i => i.Id == id).MedidaUnidade));
+
+        // A batata inglesa continua ajustável (a fase 4 a ajusta fino), mesmo tendo a unidade da POF como medida.
+        Assert.True(Itens.Single(i => i.Id == "batata-inglesa-cozida").Ajustavel);
+    }
+
+    // A unidade de 355 g da batata-doce saiu da espera da 2a (conferida no PDF em 2026-10-26) como medida
+    // direta, sem marca de unidade; a fatia de 190 g do lombo ficou fora (medida improvável, ver lacunas).
+    [Fact]
+    public void Batata_Doce_Ganha_A_Unidade_Da_Pof_E_O_Lombo_Fica_Sem_Fatia()
+    {
+        var unidade = Itens.Single(i => i.Id == "batata-doce-cozida").Medidas.Single(m => m.Nome == "unidade");
+        Assert.Equal((355m, OrigemMedida.Direta, "6400401", 51, false), (unidade.Gramas, unidade.Origem, unidade.CodigoPof, unidade.PaginaPof, unidade.EhUnidade));
+
+        Assert.DoesNotContain(Itens.Single(i => i.Id == "lombo-suino-assado").Medidas, m => m.Nome == "fatia");
     }
 
     [Fact]
