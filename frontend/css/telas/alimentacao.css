@@ -118,6 +118,9 @@
 
 .al-chip {
   padding: 4px 4px 4px 14px;
+}
+
+.al-chip-novo {
   animation: al-chip-entra 350ms cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
 }
 
@@ -143,6 +146,170 @@
 
 [data-tipo="evitar"] .al-chip .chip-remover {
   color: var(--acento-texto);
+}
+
+/* ---------- Conferência com a base (fase 2b-3) ---------- */
+
+/* Sinal de "não encontrado": círculo vazado cortado (SVG), no traço do botão de remover. */
+.al-chip-sinal {
+  display: inline-flex;
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+
+.al-chip-sinal svg {
+  width: 100%;
+  height: 100%;
+}
+
+.al-chip-sem-casamento {
+  border-style: dotted;
+}
+
+[data-tipo="preferido"] .al-chip-sem-casamento {
+  border-color: var(--linha);
+  background: transparent;
+  color: var(--texto-2);
+}
+
+/* "Evitar" que casou: o chip inteiro abre o que ele tira do cardápio. */
+.al-chip-abrir {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-2);
+  margin: -4px 0 -4px -14px;
+  padding: 4px 0 4px 14px;
+  border: 0;
+  border-radius: var(--raio-pilula);
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.al-chip-abrir:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
+.al-chip-tira {
+  padding-left: var(--e-2);
+  border-left: 1px solid var(--linha);
+  font-size: var(--t-pequeno);
+  color: var(--texto-2);
+  white-space: nowrap;
+}
+
+[data-tipo="evitar"] .al-chip:has(.al-chip-abrir[aria-expanded="true"]) {
+  border-style: solid;
+  background: var(--superficie-3);
+}
+
+.al-chip-abrir[aria-expanded="true"] .al-chip-tira {
+  color: var(--acento-texto);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-tipo="evitar"] .al-chip:has(.al-chip-abrir:hover) {
+    background: var(--superficie-2);
+  }
+}
+
+.al-conferencia {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-1);
+}
+
+.al-conferencia:empty {
+  display: none;
+}
+
+.al-conferencia-linha {
+  display: flex;
+  align-items: baseline;
+  gap: var(--e-2);
+  margin: 0;
+  font-size: var(--t-apoio);
+  line-height: 1.5;
+  color: var(--texto-2);
+}
+
+.al-conferencia-linha .al-chip-sinal {
+  transform: translateY(2px);
+}
+
+.al-conferencia-linha[data-tipo="evitar"] {
+  color: var(--acento-texto);
+}
+
+/* O que um "evitar" tira: bloco no fluxo (empurra o resto), não janela por cima. */
+.al-painel {
+  display: grid;
+  gap: var(--e-3);
+  padding: 14px 16px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-2);
+  background: var(--fundo);
+  font-size: var(--t-apoio);
+  line-height: 1.5;
+  animation: entra var(--d-media) var(--curva-saida) both;
+}
+
+.al-painel[hidden] {
+  display: none;
+}
+
+.al-painel-cabeca {
+  margin: 0;
+  color: var(--texto);
+}
+
+.al-painel-lido {
+  color: var(--texto-2);
+}
+
+.al-painel-lista {
+  margin: 0;
+  color: var(--texto-2);
+}
+
+.al-painel-grupos {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--e-2) var(--e-4);
+  margin: 0;
+}
+
+.al-painel-grupos dt {
+  font-size: var(--t-pequeno);
+  font-weight: 500;
+  color: var(--texto);
+}
+
+.al-painel-grupos dd {
+  margin: 0;
+  color: var(--texto-2);
+}
+
+.al-lista-pobre[hidden] {
+  display: none;
+}
+
+.al-lista-pobre p {
+  margin: 0;
+}
+
+@media (max-width: 719px) {
+  .al-painel-grupos {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .al-painel-grupos dd + dt {
+    margin-top: var(--e-2);
+  }
 }
 
 .al-sugestoes {

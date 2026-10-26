@@ -577,8 +577,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  // Lista pobre (fase 2b-3): só na versão que saiu com o aviso gravado; dietas antigas não têm o campo.
+  function renderizarListaPobre(dietaResponse) {
+    const aviso = dietaResponse.dieta.avisoListaPobre;
+    $('db-aviso-lista').hidden = !aviso;
+    if (!aviso) return;
+    $('db-aviso-lista-texto').textContent = ronuTextoListaPobre({
+      papeis: aviso.papeis,
+      itensPorPapel: aviso.itensPorPapel,
+      gruposDeProteina: aviso.gruposDeProteina,
+      passado: true
+    });
+  }
+
   function renderizarVersaoSelecionada() {
     const dietaResponse = historico[versaoSelecionada];
+    renderizarListaPobre(dietaResponse);
     renderizarAjuste(dietaResponse);
     renderizarVersionSwitch();
     renderizarDayRow(dietaResponse);

@@ -56,6 +56,8 @@
         </form>
         <p class="al-aviso" role="status"></p>
         <ul class="chips al-chips" aria-label="Alimentos que você gosta"></ul>
+        <!-- O que não casou com a base (fase 2b-3), pela conferência da API. -->
+        <div class="al-conferencia" aria-live="polite"></div>
         <div class="al-sugestoes">
           <span class="apoio al-so-largo" id="al-sugestoes-rotulo">Sugestões rápidas</span>
           <div class="al-sugestoes-lista" id="al-sugestoes" role="group" aria-label="Sugestões rápidas"></div>
@@ -75,6 +77,10 @@
         </form>
         <p class="al-aviso" role="status"></p>
         <ul class="chips al-chips" aria-label="Alimentos que você prefere evitar"></ul>
+        <!-- Fase 2b-3: o que cada "evitar" tira (abre ao tocar no chip), o que não casou e a lista pobre. -->
+        <div class="al-painel" id="al-painel" hidden></div>
+        <div class="al-conferencia" aria-live="polite"></div>
+        <div class="al-lista-pobre" id="al-lista-pobre" aria-live="polite" hidden></div>
         <p class="apoio al-alergia">Tem alergia? Coloque aqui também, mas confira sempre os rótulos<span class="al-so-largo">: o cardápio é gerado por IA e não substitui orientação médica</span>.</p>
       </section>
 

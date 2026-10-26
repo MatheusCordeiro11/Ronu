@@ -52,39 +52,39 @@ public static class CasamentoPreferencias
         new(["carne branca"], i => Ave(i) || Peixe(i) || Suino(i)),
         new(["carne bovina", "carne de vaca", "carne de boi", "boi", "bovino", "bovina", "vaca"], Bovino),
         // Nome composto da base ("Carne moída de acém"): sem esta linha, "carne" tiraria aves e peixes.
-        new(["carne moida"], Bovino),
-        new(["porco", "carne de porco", "suino", "suina", "carne suina"], Suino),
+        new(["carne moída"], Bovino),
+        new(["porco", "carne de porco", "suíno", "suína", "carne suína"], Suino),
         new(["frango", "ave", "carne de frango"], Ave),
         // "Ovo de galinha" casaria pela metade; os ovos saem inteiros.
         new(["galinha"], i => Ave(i) || i.Categoria == CategoriaAlimento.Ovos),
         new(["peixe", "pescado"], Peixe),
         // A base não tem crustáceo nem molusco; quem escreve "frutos do mar" pode querer dizer "nada do mar".
-        new(["frutos do mar", "fruto do mar", "marisco", "camarao", "crustaceo"], Peixe),
+        new(["frutos do mar", "fruto do mar", "marisco", "camarão", "crustáceo"], Peixe),
         // Leite pode ser gosto, intolerância ou alergia à proteína do leite: sai tudo o que tem lactose.
-        new(["leite", "lactose", "laticinio", "lacteo", "derivados do leite", "derivados de leite"], i => Tem(i, Alergenos.Lactose)),
+        new(["leite", "lactose", "laticínio", "lácteo", "derivados do leite", "derivados de leite"], i => Tem(i, Alergenos.Lactose)),
         new(["queijo"], Ids("queijo-minas-frescal", "queijo-mucarela", "queijo-prato", "queijo-parmesao", "ricota", "requeijao-cremoso", "pao-de-queijo-assado")),
         new(["iogurte"], Ids("iogurte-natural", "iogurte-natural-desnatado")),
         // "Trigo" tira também a aveia (contaminação cruzada) e o cuscuz.
-        new(["gluten", "celiaco", "celiaca", "trigo", "cevada", "centeio"], i => Tem(i, Alergenos.Gluten)),
+        new(["glúten", "celíaco", "celíaca", "trigo", "cevada", "centeio"], i => Tem(i, Alergenos.Gluten)),
         // "Ovo de galinha" é nome composto da base: sem esta linha, "galinha" tiraria também as aves.
         new(["ovo", "ovo de galinha"], i => Tem(i, Alergenos.Ovo)),
         // As castanhas estão marcadas como amendoim na base (falta marca própria, fase 2c); por segurança, nos
         // dois sentidos, e a amêndoa vai junto com as castanhas.
-        new(["amendoim", "castanha", "noz", "oleaginosa", "amendoa", "caju", "castanha de caju", "castanha do para", "castanha do brasil"],
+        new(["amendoim", "castanha", "noz", "oleaginosa", "amêndoa", "caju", "castanha de caju", "castanha do pará", "castanha do brasil"],
             i => Tem(i, Alergenos.Amendoim)),
         new(["semente"], Ids("linhaca")),
         // O óleo refinado quase não tem a proteína alergênica da soja, mas na dúvida sai.
         new(["soja"], Ids("oleo-de-soja")),
         new(["milho"], Ids("cuscuz-de-milho-cozido", "milho-verde-em-conserva")),
         // Quem evita açúcar pode ter diabetes; frutas e suco natural ficam.
-        new(["acucar", "doce"], Ids(Acucares)),
+        new(["açúcar", "doce"], Ids(Acucares)),
         // Nomes compostos da base com uma palavra da linha acima.
         new(["batata doce"], Ids("batata-doce-cozida")),
-        new(["acai sem acucar"], Ids("acai-sem-acucar")),
-        new(["cafeina"], Ids("cafe-coado", "cha-mate", "cha-preto", "refrigerante-de-cola", "refrigerante-de-guarana")),
-        new(["cafe"], Ids("cafe-coado")),
+        new(["açaí sem açúcar"], Ids("acai-sem-acucar")),
+        new(["cafeína"], Ids("cafe-coado", "cha-mate", "cha-preto", "refrigerante-de-cola", "refrigerante-de-guarana")),
+        new(["café"], Ids("cafe-coado")),
         new(["refrigerante"], Ids("refrigerante-de-cola", "refrigerante-de-guarana")),
-        new(["alcool", "bebida alcoolica", "bebida"], i => i.Categoria == CategoriaAlimento.BebidasAlcoolicas),
+        new(["álcool", "bebida alcoólica", "bebida"], i => i.Categoria == CategoriaAlimento.BebidasAlcoolicas),
         new(["vegano", "vegana"], i => Carne(i) || Tem(i, Alergenos.Ovo) || Tem(i, Alergenos.Lactose) || i.Id == "mel"),
     ];
 
@@ -102,9 +102,10 @@ public static class CasamentoPreferencias
 
     private static readonly string[] Separadores = [",", ";", "/", " e ", " ou "];
 
-    // Cada expressão já normalizada e em palavras, da mais longa para a mais curta.
-    private static readonly List<(string[] Palavras, LinhaDaTabela Linha)> Expressoes = Tabela
-        .SelectMany(l => l.Expressoes.Select(e => (Palavras: Palavras(e), Linha: l)))
+    // Cada expressão já normalizada e em palavras, da mais longa para a mais curta. O texto original (com
+    // acento) vai para o "Lido como" da tela quando a palavra casou pela tolerância a 1 letra.
+    private static readonly List<(string[] Palavras, string Texto, LinhaDaTabela Linha)> Expressoes = Tabela
+        .SelectMany(l => l.Expressoes.Select(e => (Palavras: Palavras(e), Texto: e, Linha: l)))
         .OrderByDescending(e => e.Palavras.Length)
         .ToList();
 
@@ -114,11 +115,13 @@ public static class CasamentoPreferencias
         var lista = itens.ToList();
         var casados = new HashSet<string>();
         var semCasamento = new List<string>();
+        var lidoComo = new List<string>();
 
         foreach (var trecho in Trechos(texto))
         {
             var palavras = Palavras(trecho);
-            var (linhas, sobra) = LinhasDaTabela(palavras);
+            var (linhas, sobra, lidos) = LinhasDaTabela(palavras);
+            lidoComo.AddRange(lidos);
             casados.UnionWith(lista.Where(i => linhas.Any(l => l.Tira(i))).Select(i => i.Id));
 
             var sobraConteudo = sobra.Where(p => !PalavrasVazias.Contains(p)).ToArray();
@@ -173,7 +176,7 @@ public static class CasamentoPreferencias
             casados.UnionWith(porNome);
         }
 
-        return new ResultadoCasamento(casados, semCasamento);
+        return new ResultadoCasamento(casados, semCasamento) { LidoComo = lidoComo.Distinct().ToList() };
     }
 
     /// <summary>
@@ -223,11 +226,13 @@ public static class CasamentoPreferencias
         lista.Where(i => NomesDoItem(i).Any(nome => palavras.All(nome.Contains))).Select(i => i.Id).ToList();
 
     // Percorre as palavras procurando, em cada posição, a expressão mais longa que casa ali. Devolve as
-    // linhas casadas e as palavras que não fizeram parte de nenhuma expressão.
-    private static (List<LinhaDaTabela> Linhas, List<string> Sobra) LinhasDaTabela(string[] palavras)
+    // linhas casadas, as palavras que não fizeram parte de nenhuma expressão e as expressões que só casaram
+    // pela tolerância a 1 letra ("lactoze" -> "lactose"), para a tela mostrar como foi lido.
+    private static (List<LinhaDaTabela> Linhas, List<string> Sobra, List<string> LidoComo) LinhasDaTabela(string[] palavras)
     {
         var linhas = new List<LinhaDaTabela>();
         var sobra = new List<string>();
+        var lidoComo = new List<string>();
         for (var i = 0; i < palavras.Length;)
         {
             var achada = Expressoes.FirstOrDefault(e =>
@@ -240,10 +245,15 @@ public static class CasamentoPreferencias
             }
 
             linhas.Add(achada.Linha);
+            if (achada.Palavras.Where((p, k) => palavras[i + k] != p).Any())
+            {
+                lidoComo.Add(achada.Texto);
+            }
+
             i += achada.Palavras.Length;
         }
 
-        return (linhas, sobra);
+        return (linhas, sobra, lidoComo);
     }
 
     private static IEnumerable<HashSet<string>> NomesDoItem(AlimentoBase item) =>
@@ -306,4 +316,7 @@ public static class CasamentoPreferencias
 public record ResultadoCasamento(IReadOnlySet<string> ItensIds, IReadOnlyList<string> TrechosSemCasamento)
 {
     public bool Casou => ItensIds.Count > 0;
+
+    /// <summary>Expressões da tabela que casaram só pela tolerância a 1 letra, como estão na tabela ("lactose").</summary>
+    public IReadOnlyList<string> LidoComo { get; init; } = [];
 }

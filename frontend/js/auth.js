@@ -563,3 +563,37 @@ async function ronuTratarCredencialGoogle(response) {
     cancelarAvisoDeEspera();
   }
 }
+
+// Texto do aviso de lista pobre (fase 2b-3), o mesmo na Alimentação (antes de
+// gerar, pela conferência das preferências) e no dashboard (na dieta que saiu
+// com o aviso gravado, no passado). Os números vêm da API (MinimosPorPapel).
+function ronuTextoListaPobre({ papeis, itensPorPapel, gruposDeProteina, vazios = [], passado = false }) {
+  const NOMES = {
+    Proteina: ['fonte de proteína', 'fontes de proteína'],
+    Carboidrato: ['opção de carboidrato', 'opções de carboidrato'],
+    Fruta: ['fruta', 'frutas'],
+    Hortalica: ['hortaliça', 'hortaliças']
+  };
+  const NENHUM = {
+    Proteina: 'nenhuma fonte de proteína',
+    Carboidrato: 'nenhuma opção de carboidrato',
+    Fruta: 'nenhuma fruta',
+    Hortalica: 'nenhuma hortaliça'
+  };
+  const juntar = (lista) => (lista.length <= 1 ? (lista[0] || '') : `${lista.slice(0, -1).join(', ')} e ${lista[lista.length - 1]}`);
+
+  if (vazios.length) {
+    return `Com o que está em Evitar, não sobra ${juntar(vazios.map((p) => NENHUM[p]))} entre os alimentos do Ronu: a dieta não pode ser gerada. Tire algum item de Evitar.`;
+  }
+
+  const partes = papeis.map((papel) => {
+    const n = itensPorPapel[papel];
+    const [singular, plural] = NOMES[papel];
+    const mesmoTipo = papel === 'Proteina' && n > 1 && gruposDeProteina < 2 ? ', todas do mesmo tipo' : '';
+    return `só ${n} ${n === 1 ? singular : plural}${mesmoTipo}`;
+  });
+  const meta = papeis.includes('Proteina') ? ' e abaixo da meta de proteína' : '';
+  return passado
+    ? `Quando esta dieta foi gerada, com o que estava em Evitar, sobravam ${juntar(partes)}. A semana pode ter ficado repetitiva${meta}.`
+    : `Com o que está em Evitar, sobram ${juntar(partes)}. A semana pode ficar repetitiva${meta}.`;
+}

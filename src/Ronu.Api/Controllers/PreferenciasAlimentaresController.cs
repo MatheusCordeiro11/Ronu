@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Ronu.Api.Data;
 using Ronu.Api.DTOs;
 using Ronu.Api.Models;
+using Ronu.Api.Models.IA;
+using Ronu.Api.Services.IA;
 using System.Security.Claims;
 
 namespace Ronu.Api.Controllers;
@@ -105,6 +107,59 @@ public class PreferenciasAlimentaresController : ControllerBase
             .ToListAsync();
 
         return Ok(preferencias);
+    }
+
+    /// <summary>
+    /// Confere as preferências do usuário logado contra a base nutricional (fase
+    /// 2b-3): o que cada uma casa, o que não casou, como foi lida pela tolerância
+    /// a 1 letra e se a lista que sobra atende aos mínimos por papel no prato.
+    /// Só as preferências de quem está logado (o id vem do token), como as outras
+    /// rotas daqui.
+    /// </summary>
+    [HttpGet("conferencia")]
+    public async Task<IActionResult> Conferir()
+    {
+        var estado = await _context.Usuarios
+            .Where(u => u.Id == UsuarioIdLogado)
+            .Select(u => u.Estado)
+            .FirstOrDefaultAsync();
+
+        var salvas = await _context.PreferenciasAlimentares
+            .Where(p => p.UsuarioId == UsuarioIdLogado)
+            .OrderBy(p => p.Id)
+            .ToListAsync();
+
+        var lista = ListaAlimentosPessoa.Montar(estado, salvas.Select(p => new PreferenciaContextoDto { Alimento = p.Alimento, Tipo = p.Tipo }));
+        var base_ = BaseNutricional.Itens.ToDictionary(i => i.Id);
+
+        // ListaAlimentosPessoa devolve uma conferência por preferência, na mesma ordem em que recebeu.
+        var preferencias = salvas.Zip(lista.Preferencias, (salva, conferida) => new PreferenciaConferidaResponse
+        {
+            Id = salva.Id,
+            Alimento = salva.Alimento,
+            Tipo = salva.Tipo,
+            Casou = conferida.Casou,
+            Alimentos = BaseNutricional.Itens
+                .Where(i => conferida.ItensIds.Contains(i.Id))
+                .Select(i => new AlimentoCasadoResponse { Nome = i.Nome, Grupo = i.Grupo.ToString() })
+                .ToList(),
+            SemCasamento = conferida.TrechosSemCasamento.ToList(),
+            LidoComo = conferida.LidoComo.ToList()
+        }).ToList();
+
+        var minimos = lista.Minimos;
+        return Ok(new ConferenciaPreferenciasResponse
+        {
+            Preferencias = preferencias,
+            Lista = new MinimosListaResponse
+            {
+                Atende = minimos.Atende,
+                Vazios = minimos.Vazios.Select(p => p.ToString()).ToList(),
+                AbaixoDoMinimo = minimos.AbaixoDoMinimo.Select(p => p.ToString()).ToList(),
+                ItensPorPapel = minimos.ItensPorPapel.ToDictionary(p => p.Key.ToString(), p => p.Value),
+                GruposDeProteina = minimos.GruposDeProteina
+            }
+        });
     }
 
     /// <summary>

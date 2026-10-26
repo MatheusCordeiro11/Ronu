@@ -49,7 +49,7 @@ public static class ListaAlimentosPessoa
 
         var resumo = casadas
             .Select(c => new PreferenciaCasada(c.Preferencia.Alimento, c.Preferencia.Tipo, c.Resultado.Casou,
-                c.Resultado.ItensIds.Count, c.Resultado.TrechosSemCasamento) { ItensIds = c.Resultado.ItensIds })
+                c.Resultado.ItensIds.Count, c.Resultado.TrechosSemCasamento) { ItensIds = c.Resultado.ItensIds, LidoComo = c.Resultado.LidoComo })
             .ToList();
 
         return new ListaAlimentos(itens, resumo, MinimosPorPapel.Conferir(itens.Select(i => i.Item)));
@@ -75,6 +75,9 @@ public record PreferenciaCasada(string Alimento, string Tipo, bool Casou, int It
 {
     /// <summary>Os itens da base que a preferência casou (o "gosto" vai assim para o prompt).</summary>
     public IReadOnlySet<string> ItensIds { get; init; } = new HashSet<string>();
+
+    /// <summary>Como a preferência foi lida quando casou pela tolerância a 1 letra ("lactoze" -> "lactose").</summary>
+    public IReadOnlyList<string> LidoComo { get; init; } = [];
 }
 
 public record ListaAlimentos(IReadOnlyList<ItemDaLista> Itens, IReadOnlyList<PreferenciaCasada> Preferencias, ResultadoMinimos Minimos);

@@ -200,6 +200,22 @@
   flex: none;
 }
 
+/* Em tela estreita, o link desce para baixo do texto (o aviso de lista pobre tem várias linhas). */
+@media (max-width: 719px) {
+  .db-nivel {
+    flex-wrap: wrap;
+    align-items: baseline;
+  }
+
+  .db-nivel-texto {
+    flex: 1 1 calc(100% - 14px - var(--e-3));
+  }
+
+  .db-nivel .cartao-link {
+    margin-left: calc(14px + var(--e-3));
+  }
+}
+
 /* ---------- Ajuste pelo progresso (details) ---------- */
 .db-ajuste {
   border-top: 1px solid var(--borda);

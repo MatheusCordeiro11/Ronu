@@ -53,6 +53,30 @@ document.addEventListener('DOMContentLoaded', async () => {
   let perfil = null;
   let mudou = false;
 
+  // Conferência das preferências contra a base nutricional (fase 2b-3): o que
+  // cada uma casa, o que não casou e se a lista que sobra atende aos mínimos.
+  // Vem pronta da API (GET /preferencias-alimentares/conferencia): a tela não
+  // repete a regra. Sem conferência (erro), nenhum sinal: nunca acusar sem certeza.
+  let conferidas = new Map();
+  let listaMinimos = null;
+  let painelAberto = null;
+  // Chips já mostrados: só o chip novo tem a animação de entrada (abrir o painel ou receber a
+  // conferência redesenha a lista, e os outros não podem "pular" de novo).
+  const chipsVistos = new Set();
+
+  // Rótulos dos grupos de troca da base (GrupoDeTroca), para agrupar o que um "evitar" tira.
+  const GRUPOS = {
+    CarnesEPeixes: 'Carnes, aves e peixes', Ovos: 'Ovos', Leguminosas: 'Leguminosas', LeiteEIogurte: 'Leite e iogurte',
+    Queijos: 'Queijos', Carboidratos: 'Pães, cereais e tubérculos', Frutas: 'Frutas', Hortalicas: 'Hortaliças',
+    OleaginosasESementes: 'Castanhas e sementes', OleosEGorduras: 'Óleos e gorduras', Adocantes: 'Açúcares e mel',
+    CafesEChas: 'Cafés e chás', SucosERefrigerantes: 'Sucos e refrigerantes', BebidasAlcoolicas: 'Bebidas alcoólicas'
+  };
+  const AGRUPAR_ACIMA_DE = 8;
+
+  // Sinal do chip que não casou: círculo vazado cortado na diagonal ("não encontrado"), no traço do
+  // botão de remover, para não depender só da cor.
+  const SINAL_SEM_CASAMENTO = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="5.25"/><path d="M3.3 10.7l7.4-7.4"/></svg>';
+
   function criar(tag, classe, texto) {
     const el = document.createElement(tag);
     if (classe) el.className = classe;
@@ -87,7 +111,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       campo: secao.querySelector('input'),
       botao: secao.querySelector('.al-adicionar-botao'),
       aviso: secao.querySelector('.al-aviso'),
-      chips: secao.querySelector('.al-chips')
+      chips: secao.querySelector('.al-chips'),
+      conferencia: secao.querySelector('.al-conferencia')
     };
   });
 
@@ -100,20 +125,144 @@ document.addEventListener('DOMContentLoaded', async () => {
   function criarChip(preferencia) {
     const item = criar('li', 'chip chip-com-remover al-chip');
     item.dataset.id = preferencia.id;
+    if (!chipsVistos.has(preferencia.id)) {
+      item.classList.add('al-chip-novo');
+      chipsVistos.add(preferencia.id);
+    }
     const remover = criar('button', 'chip-remover');
     remover.type = 'button';
     remover.setAttribute('aria-label', `Remover ${preferencia.alimento}`);
     remover.innerHTML = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6"/></svg>';
     remover.addEventListener('click', () => removerPreferencia(preferencia, item));
-    item.append(preferencia.alimento, remover);
+
+    const conferida = conferidas.get(preferencia.id);
+    if (conferida && !conferida.casou) {
+      // Não casou com a base: o sinal e um texto escondido para leitor de tela; a frase fica abaixo da lista.
+      item.classList.add('al-chip-sem-casamento');
+      const sinal = criar('span', 'al-chip-sinal');
+      sinal.innerHTML = SINAL_SEM_CASAMENTO;
+      item.append(sinal, preferencia.alimento, criar('span', 'oculto-visual', ' (não está entre os alimentos do Ronu)'), remover);
+    } else if (conferida && preferencia.tipo === 'evitar') {
+      // "Evitar" que casou: o chip vira o botão que abre o que ele tira do cardápio.
+      const total = conferida.alimentos.length;
+      const abrir = criar('button', 'al-chip-abrir');
+      abrir.type = 'button';
+      abrir.setAttribute('aria-expanded', String(painelAberto === preferencia.id));
+      abrir.setAttribute('aria-controls', 'al-painel');
+      abrir.setAttribute('aria-label', `${preferencia.alimento}, tira ${total} ${total === 1 ? 'alimento' : 'alimentos'} do cardápio`);
+      abrir.append(criar('span', null, preferencia.alimento), criar('span', 'al-chip-tira num', `tira ${total}`));
+      abrir.addEventListener('click', () => {
+        painelAberto = painelAberto === preferencia.id ? null : preferencia.id;
+        renderizarListas();
+        secoes.evitar.chips.querySelector(`[data-id="${preferencia.id}"] .al-chip-abrir`)?.focus();
+      });
+      item.append(abrir, remover);
+    } else {
+      item.append(preferencia.alimento, remover);
+    }
     return item;
   }
 
   function renderizarListas() {
     Object.entries(secoes).forEach(([tipo, s]) => {
       s.chips.replaceChildren(...preferencias.filter((p) => p.tipo === tipo).map(criarChip));
+      renderizarConferencia(tipo);
     });
+    renderizarPainel();
+    renderizarListaPobre();
     renderizarSugestoes();
+  }
+
+  // Abaixo de cada lista: o que não casou (com o nome) e o que foi lido pela tolerância a 1 letra.
+  function renderizarConferencia(tipo) {
+    const daLista = preferencias.filter((p) => p.tipo === tipo).map((p) => [p, conferidas.get(p.id)]).filter(([, c]) => c);
+    const linhas = [];
+    const semCasamento = daLista.filter(([, c]) => !c.casou).map(([p]) => `“${p.alimento}”`);
+    if (semCasamento.length) {
+      const nomes = semCasamento.length === 1 ? semCasamento[0] : `${semCasamento.slice(0, -1).join(', ')} e ${semCasamento[semCasamento.length - 1]}`;
+      const um = semCasamento.length === 1;
+      const linha = criar('p', 'al-conferencia-linha');
+      const sinal = criar('span', 'al-chip-sinal');
+      sinal.innerHTML = SINAL_SEM_CASAMENTO;
+      if (tipo === 'evitar') {
+        // "Evitar" é segurança: no acento, e com o caminho para corrigir.
+        linha.dataset.tipo = 'evitar';
+        linha.append(sinal, `Não achamos ${nomes} entre os alimentos do Ronu. Se for outro nome de um alimento, escreva de outro jeito.`);
+      } else {
+        linha.append(sinal, `${nomes} ${um ? 'não está' : 'não estão'} entre os alimentos do Ronu: ${um ? 'não vai' : 'não vão'} aparecer no cardápio.`);
+      }
+      linhas.push(linha);
+    }
+    daLista.filter(([, c]) => c.casou && c.lidoComo.length).forEach(([p, c]) => {
+      linhas.push(criar('p', 'al-conferencia-linha', `“${p.alimento}” foi lido como ${c.lidoComo.join(' e ')}.`));
+    });
+    secoes[tipo].conferencia.replaceChildren(...linhas);
+  }
+
+  // O que o "evitar" aberto tira do cardápio. Acima de 8 itens, agrupado pelo grupo de troca.
+  function renderizarPainel() {
+    const painel = $('al-painel');
+    const preferencia = preferencias.find((p) => p.id === painelAberto && p.tipo === 'evitar');
+    const conferida = preferencia && conferidas.get(preferencia.id);
+    if (!conferida || !conferida.casou) {
+      painelAberto = null;
+      painel.hidden = true;
+      painel.replaceChildren();
+      return;
+    }
+
+    const total = conferida.alimentos.length;
+    const cabeca = criar('p', 'al-painel-cabeca');
+    cabeca.append(criar('strong', null, `“${preferencia.alimento}”`), ` tira ${total} ${total === 1 ? 'alimento' : 'alimentos'} do cardápio`);
+    if (conferida.lidoComo.length) cabeca.append(criar('span', 'al-painel-lido', ` · lido como ${conferida.lidoComo.join(' e ')}`));
+
+    let corpo;
+    if (total > AGRUPAR_ACIMA_DE) {
+      corpo = criar('dl', 'al-painel-grupos');
+      const porGrupo = new Map();
+      conferida.alimentos.forEach((a) => porGrupo.set(a.grupo, [...(porGrupo.get(a.grupo) || []), a.nome]));
+      porGrupo.forEach((nomes, grupo) => {
+        corpo.append(criar('dt', null, GRUPOS[grupo] || grupo), criar('dd', null, nomes.join(', ')));
+      });
+    } else {
+      corpo = criar('p', 'al-painel-lista', `${conferida.alimentos.map((a) => a.nome).join(', ')}.`);
+    }
+    painel.replaceChildren(cabeca, corpo);
+    painel.hidden = false;
+  }
+
+  // Lista pobre, antes de gerar: nota abaixo do "evitar"; papel vazio, no tom de erro (a dieta não sai).
+  function renderizarListaPobre() {
+    const el = $('al-lista-pobre');
+    if (!listaMinimos || listaMinimos.atende) {
+      el.hidden = true;
+      el.replaceChildren();
+      return;
+    }
+    const texto = ronuTextoListaPobre({
+      papeis: listaMinimos.abaixoDoMinimo,
+      itensPorPapel: listaMinimos.itensPorPapel,
+      gruposDeProteina: listaMinimos.gruposDeProteina,
+      vazios: listaMinimos.vazios
+    });
+    const vazio = listaMinimos.vazios.length > 0;
+    el.replaceChildren(criar('p', vazio ? 'aviso aviso-erro' : 'nota nota-forte', texto));
+    el.hidden = false;
+  }
+
+  async function conferir() {
+    try {
+      const resposta = await ronuFetchAutenticado('/preferencias-alimentares/conferencia');
+      if (!resposta.ok) throw new Error();
+      const dados = await resposta.json();
+      conferidas = new Map(dados.preferencias.map((c) => [c.id, c]));
+      listaMinimos = dados.lista;
+    } catch (erro) {
+      if (erro.message === 'Sessão expirada.') return;
+      conferidas = new Map();
+      listaMinimos = null;
+    }
+    renderizarListas();
   }
 
   function renderizarSugestoes() {
@@ -170,6 +319,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       s.campo.value = '';
       marcarMudanca();
+      conferir();
     } catch (erro) {
       if (erro.message !== 'Sessão expirada.') avisar(tipo, erro.message, true);
     } finally {
@@ -204,6 +354,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       // O chip some com o botão focado: o foco vai para o campo da lista.
       secoes[tipo].campo.focus();
       marcarMudanca();
+      conferir();
     } catch (erro) {
       delete item.dataset.saindo;
       if (erro.message !== 'Sessão expirada.') avisar(tipo, erro.message, true);
@@ -405,6 +556,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!resposta.ok) throw new Error();
       preferencias = await resposta.json();
       renderizarListas();
+      await conferir();
     } catch (erro) {
       if (erro.message === 'Sessão expirada.') return;
       Object.keys(secoes).forEach((tipo) => avisar(tipo, 'Não foi possível carregar suas preferências. Recarregue a página.', true));
