@@ -497,7 +497,7 @@ public enum SecaoMercado
     Congelados
 }
 
-/// <summary>Em que a lista mostra a quantidade. Gramas e mililitros vão em passos de 50 (de 10 abaixo de 50).</summary>
+/// <summary>Em que a lista mostra a quantidade. Gramas e mililitros vão em passos de 10 até 100 e de 50 acima disso.</summary>
 public enum UnidadeCompra
 {
     Gramas,

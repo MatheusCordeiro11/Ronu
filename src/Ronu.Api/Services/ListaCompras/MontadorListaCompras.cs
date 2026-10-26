@@ -113,7 +113,8 @@ public static class MontadorListaCompras
 
     /// <summary>
     /// Sempre para cima. Contáveis: a próxima unidade inteira (pelo menos 1). Gramas e mililitros: o
-    /// próximo múltiplo de 50, ou de 10 abaixo de 50 (D8), nunca zero.
+    /// próximo múltiplo de 10 até 100, e de 50 acima de 100, nunca zero. Até 2026-10-26 os passos de 10
+    /// iam só até 50, e 50,03 g de salmão viravam 100 g, o dobro; o usuário pediu até 100.
     /// </summary>
     public static decimal Arredondar(decimal exato, UnidadeCompra unidade)
     {
@@ -124,7 +125,7 @@ public static class MontadorListaCompras
         return unidade switch
         {
             UnidadeCompra.Unidades or UnidadeCompra.Fatias or UnidadeCompra.Saches => Math.Max(1m, Math.Ceiling(q)),
-            _ when q >= 50m => Math.Ceiling(q / 50m) * 50m,
+            _ when q > 100m => Math.Ceiling(q / 50m) * 50m,
             _ => Math.Max(10m, Math.Ceiling(q / 10m) * 10m)
         };
     }

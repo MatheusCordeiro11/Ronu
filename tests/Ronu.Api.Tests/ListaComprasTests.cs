@@ -164,13 +164,18 @@ public class ListaComprasTests
     [Theory]
     [InlineData(532, 550)]
     [InlineData(500, 500)]
+    [InlineData(100.01, 150)]
+    [InlineData(100, 100)]
+    [InlineData(99.2, 100)]
+    [InlineData(73, 80)]
+    [InlineData(50.03, 60)]   // o salmão do teste de 2026-10-26: com passos de 50 virava 100 g
     [InlineData(50, 50)]
     [InlineData(49.2, 50)]
     [InlineData(23, 30)]
     [InlineData(10, 10)]
     [InlineData(0.4, 10)]
     [InlineData(1050.01, 1100)]
-    public void Gramas_Vao_Para_Cima_Em_50_E_Abaixo_De_50_Em_10_Nunca_Zero(double exato, int esperado)
+    public void Gramas_Vao_Para_Cima_Em_10_Ate_100_E_Em_50_Acima_Nunca_Zero(double exato, int esperado)
     {
         Assert.Equal(esperado, MontadorListaCompras.Arredondar((decimal)exato, UnidadeCompra.Gramas));
         Assert.Equal(esperado, MontadorListaCompras.Arredondar((decimal)exato, UnidadeCompra.Mililitros));

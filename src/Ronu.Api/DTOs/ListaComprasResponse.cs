@@ -38,7 +38,7 @@ public class ItemListaComprasDto
     // O nome regional quando a UF da pessoa tem um (Aipim, Macaxeira).
     public required string Nome { get; set; }
 
-    // Já arredondada para cima: unidades inteiras, ou passos de 50 g/ml (de 10 abaixo de 50).
+    // Já arredondada para cima: unidades inteiras, ou passos de 10 g/ml até 100 e de 50 acima disso.
     public required decimal Quantidade { get; set; }
 
     // "g", "ml", "unidades", "fatias" ou "saches".
