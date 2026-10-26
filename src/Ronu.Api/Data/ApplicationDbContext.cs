@@ -21,6 +21,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<DietaIA> DietasIA { get; set; }
     public DbSet<MetaDieta> MetasDieta { get; set; }
     public DbSet<PedidoRedefinicaoSenha> PedidosRedefinicaoSenha { get; set; }
+    public DbSet<ListaComprasMarcacao> ListaComprasMarcacoes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -40,6 +41,14 @@ public class ApplicationDbContext : DbContext
             pedido.HasIndex(p => p.TokenHash).IsUnique();
             pedido.HasIndex(p => new { p.UsuarioId, p.CriadoEm });
             pedido.HasOne(p => p.Usuario).WithMany().HasForeignKey(p => p.UsuarioId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // A marcação "já tenho" vive com a dieta: quando a regra das 3 dietas apaga a DietaIA, ou quando
+        // a conta é apagada, ela sai junto. O PostgreSQL aceita os dois caminhos de cascata.
+        modelBuilder.Entity<ListaComprasMarcacao>(marcacao =>
+        {
+            marcacao.HasOne(m => m.Usuario).WithMany().HasForeignKey(m => m.UsuarioId).OnDelete(DeleteBehavior.Cascade);
+            marcacao.HasOne(m => m.DietaIA).WithMany().HasForeignKey(m => m.DietaIAId).OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

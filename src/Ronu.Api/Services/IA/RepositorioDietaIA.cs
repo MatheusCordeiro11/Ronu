@@ -33,8 +33,14 @@ public class RepositorioDietaIA : IRepositorioDietaIA
         if (dietasExistentes.Count >= LimiteDietasPorUsuario)
         {
             var quantidadeParaRemover = dietasExistentes.Count - LimiteDietasPorUsuario + 1;
-            var maisAntigas = dietasExistentes.Take(quantidadeParaRemover);
+            var maisAntigas = dietasExistentes.Take(quantidadeParaRemover).ToList();
             _context.DietasIA.RemoveRange(maisAntigas);
+
+            // As marcações "já tenho" dessas dietas saem junto. O banco já apaga em cascata; apagar aqui
+            // também deixa a regra explícita e vale no banco em memória dos testes, que não tem cascata.
+            var idsRemovidos = maisAntigas.Select(d => d.Id).ToList();
+            _context.ListaComprasMarcacoes.RemoveRange(
+                _context.ListaComprasMarcacoes.Where(m => idsRemovidos.Contains(m.DietaIAId)));
         }
 
         // A dieta e as metas dela vão juntas (ou nenhuma das duas): a MetaDieta

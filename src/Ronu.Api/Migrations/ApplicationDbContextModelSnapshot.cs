@@ -47,6 +47,38 @@ namespace Ronu.Api.Migrations
                     b.ToTable("DietasIA");
                 });
 
+            modelBuilder.Entity("Ronu.Api.Models.ListaComprasMarcacao", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Chave")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("DietaIAId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("MarcadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("DietaIAId", "Chave")
+                        .IsUnique();
+
+                    b.ToTable("ListaComprasMarcacoes");
+                });
+
             modelBuilder.Entity("Ronu.Api.Models.MetaDieta", b =>
                 {
                     b.Property<int>("Id")
@@ -306,6 +338,25 @@ namespace Ronu.Api.Migrations
                         .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("Ronu.Api.Models.ListaComprasMarcacao", b =>
+                {
+                    b.HasOne("Ronu.Api.Models.DietaIA", "DietaIA")
+                        .WithMany()
+                        .HasForeignKey("DietaIAId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Ronu.Api.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DietaIA");
 
                     b.Navigation("Usuario");
                 });

@@ -53,6 +53,9 @@ public class ItemListaComprasDto
     // Aviso que vai na própria linha ("de carne, sem osso · compre um pouco mais").
     public string? Nota { get; set; }
 
+    // Marcado como "já tenho" nesta dieta (tabela ListaComprasMarcacoes). Preenchido pelo controller.
+    public bool Tenho { get; set; }
+
     public required DetalheItemListaComprasDto Detalhe { get; set; }
 }
 
