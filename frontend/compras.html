@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ronu — Lista de compras</title>
+  <meta name="description" content="A lista de compras da sua dieta da semana, em peso cru e unidades de mercado.">
+
+  <!-- Antes do CSS: aplica o modo escuro/claro antes da primeira pintura. -->
+  <script src="js/base/tema.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/base/tokens.css">
+  <link rel="stylesheet" href="css/base/base.css">
+  <link rel="stylesheet" href="css/componentes.css">
+  <link rel="stylesheet" href="css/telas/compras.css">
+</head>
+<body class="com-abas">
+  <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
+
+  <!-- Montado por js/base/cabecalho.js. A lista não entra na nav: Dieta continua marcada. -->
+  <header class="cabecalho" data-cabecalho="dieta"></header>
+
+  <section class="faixa-titulo grade">
+    <div class="conteiner faixa-titulo-conteudo">
+      <div class="faixa-titulo-texto">
+        <a class="lc-voltar" href="dashboard.html">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg>
+          Sua dieta
+        </a>
+        <span class="rotulo rotulo-acento" id="lc-data" hidden></span>
+        <h1>Lista de compras</h1>
+        <p>Tudo o que a sua dieta da semana pede, já em peso cru e em unidades de mercado.</p>
+      </div>
+      <div class="lc-acoes" id="lc-acoes" hidden>
+        <button type="button" class="botao botao-fantasma" id="lc-esconder" aria-pressed="false">Esconder marcados</button>
+        <button type="button" class="botao botao-primario" id="lc-abrir-compartilhar" aria-expanded="false" aria-controls="lc-compartilhar">
+          <svg class="lc-icone" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 10V2M5 5l3-3 3 3M3 9v4h10V9"/></svg>
+          Compartilhar
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <main id="conteudo" class="conteiner lc-main">
+    <!-- Erro ao marcar e o 409 ("sua dieta mudou"). -->
+    <div class="aviso aviso-erro lc-aviso" id="lc-aviso" role="alert" hidden>
+      <span id="lc-aviso-texto"></span>
+      <button type="button" class="botao botao-fantasma" id="lc-atualizar" hidden>Atualizar a lista</button>
+    </div>
+
+    <div class="lc-estado" id="lc-carregando" aria-live="polite">
+      <span class="texto-2">Montando sua lista de compras...</span>
+      <div class="carregando" aria-hidden="true"></div>
+    </div>
+
+    <section class="cartao lc-estado-cartao" id="lc-erro" hidden>
+      <h2>Não foi possível carregar sua lista</h2>
+      <p class="texto-2">Verifique sua conexão e tente novamente.</p>
+      <button type="button" class="botao botao-fantasma" id="lc-tentar-novamente">Tentar novamente</button>
+    </section>
+
+    <section class="cartao lc-estado-cartao" id="lc-sem-dieta" hidden>
+      <h2>Você ainda não tem uma dieta</h2>
+      <p class="texto-2">A lista de compras sai da dieta da semana. Gere a sua no painel e volte aqui.</p>
+      <a class="botao botao-primario" href="dashboard.html">Ir para a dieta</a>
+    </section>
+
+    <section class="cartao lc-estado-cartao" id="lc-antiga" hidden>
+      <h2>Esta dieta é anterior à lista de compras</h2>
+      <p class="texto-2">A lista precisa de uma dieta gerada depois que ela existe. Quando quiser, gere uma dieta nova no painel: a atual continua lá até você decidir.</p>
+      <a class="botao botao-fantasma" href="dashboard.html">Voltar para a dieta</a>
+    </section>
+
+    <div class="lc-grade" id="lc-conteudo" hidden>
+      <div class="lc-topo">
+        <section class="cartao lc-andamento" aria-labelledby="lc-andamento-titulo">
+          <h2 class="rotulo" id="lc-andamento-titulo">Andamento</h2>
+          <span class="numero lc-faltam" id="lc-faltam"></span>
+          <div class="trilho" aria-hidden="true"><span class="preenche lc-preenche" id="lc-preenche"></span></div>
+          <p class="apoio"><span class="num" id="lc-feitos"></span> de <span class="num" id="lc-total"></span> itens marcados como "já tenho". A marcação fica salva na conta e aparece também no celular.</p>
+          <span class="lc-oculto" id="lc-anuncio" aria-live="polite"></span>
+        </section>
+
+        <section class="cartao lc-compartilhar" id="lc-compartilhar" aria-labelledby="lc-compartilhar-titulo" hidden>
+          <div class="lc-compartilhar-cabeca">
+            <h2 class="rotulo" id="lc-compartilhar-titulo" tabindex="-1">Texto para compartilhar</h2>
+            <button type="button" class="lc-fechar" id="lc-fechar-compartilhar" aria-label="Fechar o compartilhar">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8"/></svg>
+            </button>
+          </div>
+          <pre class="lc-texto-compartilhar" id="lc-texto-compartilhar"></pre>
+          <p class="apoio">Só o que falta comprar, sem peso, meta nem nenhum dado seu.</p>
+          <p class="nota" id="lc-longo-demais" hidden>A lista é longa demais para abrir direto no WhatsApp. Copie o texto e cole na conversa.</p>
+          <div class="lc-compartilhar-botoes">
+            <button type="button" class="botao botao-primario" id="lc-enviar" hidden>Enviar</button>
+            <a class="botao botao-primario" id="lc-whatsapp" href="#" target="_blank" rel="noopener" hidden>Abrir no WhatsApp</a>
+            <button type="button" class="botao botao-fantasma" id="lc-copiar">Copiar texto</button>
+          </div>
+          <span class="lc-oculto" id="lc-copiado" aria-live="polite"></span>
+        </section>
+      </div>
+
+      <div class="lc-lista">
+        <div id="lc-secoes"></div>
+        <p class="lc-tudo-marcado" id="lc-tudo-marcado" hidden>Tudo marcado como "já tenho".</p>
+        <p class="nota" id="lc-aviso-oleo" hidden>Refogados e ovos fritos levam óleo no preparo, e ele não está na conta.</p>
+      </div>
+
+      <section class="lc-fontes" aria-labelledby="lc-fontes-titulo">
+        <h2 class="rotulo" id="lc-fontes-titulo">De onde vêm os números</h2>
+        <p>Peso cru pela TACO, com o par cru e cozido do mesmo alimento. Unidades pela POF 2008-2009 (IBGE), casca e osso pelo USDA. Tudo arredondado para cima: sobra um pouco, não falta. Quando não há fonte para converter, o item aparece pronto para comer.</p>
+      </section>
+    </div>
+  </main>
+
+  <script src="js/auth.js"></script>
+  <script src="js/base/cabecalho.js"></script>
+  <script src="js/compras.js"></script>
+</body>
+</html>

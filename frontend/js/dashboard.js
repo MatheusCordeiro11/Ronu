@@ -592,6 +592,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function renderizarVersaoSelecionada() {
     const dietaResponse = historico[versaoSelecionada];
+    // A lista de compras é sempre da dieta atual (índice 0 do histórico).
+    $('db-compras').hidden = versaoSelecionada !== 0;
     renderizarListaPobre(dietaResponse);
     renderizarAjuste(dietaResponse);
     renderizarVersionSwitch();

@@ -14,11 +14,19 @@
   font-size: var(--t-h1);
 }
 
+/* Topo alinhado: versões, lista de compras e o "Gerar" (que tem a dica embaixo)
+   começam na mesma linha. */
 .db-acoes {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--e-4);
   flex-wrap: wrap;
+}
+
+.db-compras svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
 }
 
 .db-versoes {
@@ -718,8 +726,9 @@
     display: none;
   }
 
-  /* Com uma dieta só não há versões: o bloco fica vazio e não ocupa espaço. */
-  .db-acoes:has(> .db-versoes[hidden]) {
+  /* Sem versões e sem a lista de compras (versão antiga selecionada não chega
+     aqui: com versões, o seletor aparece), o bloco fica vazio e não ocupa espaço. */
+  .db-acoes:has(> .db-versoes[hidden]):has(> .db-compras[hidden]) {
     display: none;
   }
 
