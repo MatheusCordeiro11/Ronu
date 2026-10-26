@@ -104,8 +104,12 @@ public class GeradorDietaGemini : IGeradorDietaIA
             {
                 var (respostaIa, uso, versaoModelo) = await ChamarGeminiAsync(corpoRequisicao);
                 var dias = MontarDias(respostaIa, metasPorDia, composicaoPorDia);
-                ValidarBebidaAlcoolica(dias, contexto);
+                // Normaliza antes da regra 8: tirar a cerveja (última tentativa)
+                // precisa da quantidade em g/ml para descontar as calorias.
                 var normalizacao = NormalizadorUnidades.Normalizar(dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos));
+                var bebidasRemovidas = tentativa < MaximoTentativas
+                    ? ValidarBebidaAlcoolica(dias, contexto)
+                    : TirarBebidaAlcoolica(dias, contexto);
 
                 RegistrarGeracao(dias, respostaIa, uso, versaoModelo, normalizacao, tentativa, cronometro.ElapsedMilliseconds);
 
@@ -114,7 +118,8 @@ public class GeradorDietaGemini : IGeradorDietaIA
                     Dias = dias,
                     AjusteAdaptativo = ajuste,
                     ManutencaoPorDia = manutencaoPorDia,
-                    FatorAtividade = fatorAtividade
+                    FatorAtividade = fatorAtividade,
+                    BebidasRemovidas = bebidasRemovidas
                 };
             }
             catch (RespostaIaInvalidaException ex) when (tentativa < MaximoTentativas)
@@ -261,19 +266,35 @@ public class GeradorDietaGemini : IGeradorDietaIA
     }
 
     // Regra 8 do prompt: bebida alcoólica só se a pessoa a marcou como
-    // preferida. Fora disso, a resposta é inválida (nova tentativa, depois 503).
-    private static void ValidarBebidaAlcoolica(List<DiaDietaDto> dias, ContextoDietaDto contexto)
+    // preferida. Fora disso, na primeira tentativa a resposta é inválida (nova
+    // tentativa); na última, a cerveja sai da dieta em vez do 503.
+    private static List<BebidaRemovida> ValidarBebidaAlcoolica(List<DiaDietaDto> dias, ContextoDietaDto contexto)
     {
-        var preferidos = contexto.Preferencias.Where(p => p.Tipo == "preferido").Select(p => p.Alimento);
         var bebida = ValidadorBebidaAlcoolica.EncontrarNaoPermitida(
-            dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos), preferidos);
+            dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos), Preferidos(contexto));
 
         if (bebida is not null)
         {
             throw new RespostaIaInvalidaException(
                 $"Resposta do Gemini com bebida alcoólica fora das preferências da pessoa: '{bebida}'.");
         }
+
+        return [];
     }
+
+    private static List<BebidaRemovida> TirarBebidaAlcoolica(List<DiaDietaDto> dias, ContextoDietaDto contexto)
+    {
+        var removidas = ValidadorBebidaAlcoolica.TirarNaoPermitidas(dias, Preferidos(contexto));
+        foreach (var dia in dias)
+        {
+            dia.TotalDoDia = SomarRefeicoes(dia.Refeicoes);
+        }
+
+        return removidas;
+    }
+
+    private static IEnumerable<string> Preferidos(ContextoDietaDto contexto) =>
+        contexto.Preferencias.Where(p => p.Tipo == "preferido").Select(p => p.Alimento);
 
     private static MacrosDto SomarRefeicoes(List<RefeicaoDto> refeicoes) => new()
     {
@@ -402,6 +423,15 @@ public class GeradorDietaGemini : IGeradorDietaIA
             .Where(p => p.Tipo == "evitar")
             .Select(p => p.Alimento));
 
+        // Regra 8 só explica quando a bebida pode aparecer para quem marcou uma
+        // como preferida. Para os outros, a versão que explicava (com o exemplo
+        // "uma lata ou long neck") ia no prompt de todo mundo e, no g8b
+        // (2026-10-25), 11 de 16 chamadas de perfis sem bebida nas preferências
+        // vieram com cerveja: agora eles recebem só a proibição.
+        var regra8 = ValidadorBebidaAlcoolica.PreferidosTemBebida(Preferidos(contexto))
+            ? "Bebida alcoólica só pode aparecer se a mesma bebida estiver entre os alimentos preferidos da pessoa, no máximo uma vez na semana, no sábado ou no domingo, em quantidade moderada (por exemplo, uma lata ou long neck), com as calorias contabilizadas no dia."
+            : "Não inclua nenhuma bebida alcoólica (cerveja, chope, vinho, destilados ou drinques), em nenhuma refeição, em nenhum dia, nem em pequena quantidade.";
+
         // Os gramas de cada macro vão junto das calorias (regra 13): sem eles, o
         // Gemini montava a própria proporção (no g4, gordura em 31% das calorias
         // contra 25% da meta).
@@ -478,7 +508,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
             5. Retorne quantidades realistas e mensuráveis para cada alimento. A quantidade é o peso do alimento PRONTO PARA COMER (ex.: arroz já cozido, frango já grelhado), nunca o peso cru antes do preparo.
             6. Use EXATAMENTE os nomes dos dias como escritos acima (ex: "Segunda-feira") no campo diaSemana de cada dia — precisa corresponder exatamente a um dos 7 nomes listados.
             7. Adeque o plano ao hábito alimentar brasileiro: use as refeições típicas (café da manhã, lanche da manhã, almoço, lanche da tarde, jantar e, se fizer sentido, ceia leve) e combinações que um brasileiro realmente consome. Bebidas com cafeína (café, chá preto, chá mate, energéticos) apenas de manhã e no início da tarde, nunca no jantar nem na ceia.
-            8. Bebida alcoólica só pode aparecer se estiver entre os alimentos preferidos da pessoa, no máximo uma vez na semana, no sábado ou no domingo, em quantidade moderada (por exemplo, uma lata ou long neck), com as calorias contabilizadas no dia.
+            8. {regra8}
             9. Use os nomes regionais dos alimentos abaixo, de acordo com o estado (UF) da pessoa — esta é a referência oficial, não invente outras variações regionais além destas:
                - Feijão: nos estados RS, SC e PR, chame de "feijão preto". Em todos os demais estados, ou se o estado não foi informado, chame apenas de "feijão" (sem especificar o tipo).
                - Mandioca: no estado RJ, chame de "aipim". Nos estados AM, PA, AC, RO, RR, AP, TO, MA, PI, CE, RN, PB, PE, AL, SE e BA, chame de "macaxeira". Em todos os demais estados (SP, MG, ES, PR, SC, RS, MT, MS, GO, DF), ou se o estado não foi informado, chame de "mandioca".

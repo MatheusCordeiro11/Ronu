@@ -25,4 +25,10 @@ public class DietaSemanalDto
     // RepositorioDietaIA gravar em MetaDieta.
     [JsonIgnore]
     public decimal? FatorAtividade { get; set; }
+
+    // Cerveja fora das preferências tirada na última tentativa
+    // (ValidadorBebidaAlcoolica.TirarNaoPermitidas), só para o DietasController
+    // registrar no log com o id do usuário. Fora do JSON salvo e da resposta.
+    [JsonIgnore]
+    public List<Ronu.Api.Services.IA.BebidaRemovida> BebidasRemovidas { get; set; } = [];
 }

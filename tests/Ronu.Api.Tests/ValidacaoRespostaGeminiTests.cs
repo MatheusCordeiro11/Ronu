@@ -244,17 +244,152 @@ public class ValidacaoRespostaGeminiTests
 
     // ---------- Bebida alcoólica (regra 8) ----------
 
+    // Toda refeição só com cerveja: tirar a cerveja deixaria os dias vazios, então continua 503.
     [Fact]
-    public async Task Bebida_Alcoolica_Fora_Das_Preferencias_Tenta_De_Novo_E_Falha()
+    public async Task Bebida_Alcoolica_Que_Esvazia_O_Dia_Tenta_De_Novo_E_Falha()
     {
         var texto = TextoDieta(Semana, comRefeicoes: true, alimento: "Cereais cerveja lata (Cerveja pilsen)");
         var gemini = new GeminiRoteirizado(Envelope(texto), Envelope(texto));
 
         var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarDietaAsync(Contexto()));
 
-        Assert.Contains("bebida alcoólica", ex.Message);
+        Assert.Contains("sem nenhuma refeição", ex.Message);
         Assert.Equal(2, gemini.Chamadas);
     }
+
+    // Na última tentativa, a cerveja sai da refeição em vez do 503, e as calorias
+    // dela saem pelo valor da base: 350 ml × TACO 474 (41 kcal, 0,6 g P, 3,3 g C,
+    // 0 g G por 100 ml) = 143,5 kcal, 2,1 g P, 11,55 g C.
+    [Fact]
+    public async Task Cerveja_Na_Ultima_Tentativa_Sai_Da_Refeicao_E_Desconta_Pela_Base()
+    {
+        var texto = TextoDieta(Semana, comRefeicoes: true, bebidaNoJantar: "Cerveja pilsen (1 lata)");
+        var gemini = new GeminiRoteirizado(Envelope(texto), Envelope(texto));
+
+        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+
+        Assert.Equal(2, gemini.Chamadas);
+        Assert.Equal(7, dieta.BebidasRemovidas.Count);
+        Assert.All(dieta.BebidasRemovidas, b =>
+        {
+            Assert.Equal("Cerveja pilsen (1 lata)", b.Alimento);
+            Assert.Equal("Jantar", b.Refeicao);
+            Assert.Equal(143.5m, b.KcalDescontadas);
+        });
+        foreach (var dia in dieta.Dias)
+        {
+            var jantar = dia.Refeicoes.Single(r => r.Nome == "Jantar");
+            Assert.Equal(new[] { "Arroz" }, jantar.Alimentos.Select(a => a.Nome));
+            Assert.Equal(735m - 143.5m, jantar.Macros.Calorias);
+            Assert.Equal(40m - 2.1m, jantar.Macros.ProteinasG);
+            Assert.Equal(90m - 11.55m, jantar.Macros.CarboidratosG);
+            Assert.Equal(25m, jantar.Macros.GordurasG);
+            // TotalDoDia continua sendo a soma das refeições, já sem a cerveja.
+            Assert.Equal(500m + 735m - 143.5m, dia.TotalDoDia.Calorias);
+        }
+    }
+
+    [Fact]
+    public async Task Refeicao_So_Com_Cerveja_Sai_Do_Dia()
+    {
+        var texto = TextoDieta(Semana, comRefeicoes: true, ceiaSoComBebida: "Cerveja pilsen");
+        var gemini = new GeminiRoteirizado(Envelope(texto), Envelope(texto));
+
+        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+
+        Assert.All(dieta.Dias, d =>
+        {
+            Assert.Equal(new[] { "Almoço", "Jantar" }, d.Refeicoes.Select(r => r.Nome));
+            Assert.Equal(1235m, d.TotalDoDia.Calorias);
+        });
+    }
+
+    // Se o Gemini não contou a cerveja na refeição, o desconto não deixa número negativo.
+    [Fact]
+    public void Desconto_Da_Cerveja_Nao_Deixa_Macro_Negativo()
+    {
+        var refeicao = new RefeicaoDto
+        {
+            Nome = "Jantar",
+            Alimentos = new() { new AlimentoDto { Nome = "Arroz", Quantidade = 100, Unidade = "g" }, new AlimentoDto { Nome = "Cerveja", Quantidade = 700, Unidade = "ml" } },
+            Macros = new MacrosDto { Calorias = 100, ProteinasG = 1, CarboidratosG = 10, GordurasG = 0 }
+        };
+        var dias = new List<DiaDietaDto> { new() { DiaSemana = "Sábado", Refeicoes = new() { refeicao }, TotalDoDia = refeicao.Macros, MetaCalculada = refeicao.Macros } };
+
+        var removidas = ValidadorBebidaAlcoolica.TirarNaoPermitidas(dias, Array.Empty<string>());
+
+        Assert.Equal(287m, Assert.Single(removidas).KcalDescontadas);
+        Assert.Equal(0m, refeicao.Macros.Calorias);
+        Assert.Equal(0m, refeicao.Macros.ProteinasG);
+        Assert.Equal(0m, refeicao.Macros.CarboidratosG);
+    }
+
+    // Só a cerveja tem valor na base para descontar: outra bebida, ou cerveja numa
+    // unidade que não seja g/ml, continua virando 503.
+    [Theory]
+    [InlineData("Vinho tinto seco", "ml")]
+    [InlineData("Cerveja pilsen", "lata")]
+    public async Task Bebida_Sem_Valor_Para_Descontar_Continua_503(string bebida, string unidade)
+    {
+        var texto = TextoDieta(Semana, comRefeicoes: true, bebidaNoJantar: bebida, unidadeBebida: unidade);
+        var gemini = new GeminiRoteirizado(Envelope(texto), Envelope(texto));
+
+        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarDietaAsync(Contexto()));
+
+        Assert.Contains("sem valor na base", ex.Message);
+        Assert.Equal(2, gemini.Chamadas);
+    }
+
+    // Quem marcou cerveja como preferida continua podendo recebê-la, mesmo na última tentativa.
+    [Fact]
+    public async Task Cerveja_Preferida_Nao_E_Tirada_Na_Ultima_Tentativa()
+    {
+        var gemini = new GeminiRoteirizado(
+            Envelope("isto não é JSON"),
+            Envelope(TextoDieta(Semana, comRefeicoes: true, bebidaNoJantar: "Cerveja pilsen")));
+        var contexto = Contexto();
+        contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "Cerveja", Tipo = "preferido" });
+
+        var dieta = await NovoGerador(gemini).GerarDietaAsync(contexto);
+
+        Assert.Empty(dieta.BebidasRemovidas);
+        Assert.All(dieta.Dias, d => Assert.Contains(d.Refeicoes.Single(r => r.Nome == "Jantar").Alimentos, a => a.Nome == "Cerveja pilsen"));
+    }
+
+    // Regra 8 condicional: sem bebida nas preferências, o prompt só proíbe (sem o
+    // exemplo "uma lata ou long neck"); com bebida, explica quando ela pode aparecer.
+    [Fact]
+    public async Task Prompt_Sem_Bebida_Nas_Preferencias_So_Proibe_Alcool()
+    {
+        var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana)));
+        var contexto = Contexto();
+        contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "Banana", Tipo = "preferido" });
+        contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "Cerveja", Tipo = "evitar" });
+
+        await NovoGerador(gemini).GerarDietaAsync(contexto);
+
+        var prompt = PromptEnviado(gemini);
+        Assert.Contains("8. Não inclua nenhuma bebida alcoólica", prompt);
+        Assert.DoesNotContain("long neck", prompt);
+    }
+
+    [Fact]
+    public async Task Prompt_Com_Bebida_Nas_Preferencias_Explica_Quando_Pode()
+    {
+        var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana)));
+        var contexto = Contexto();
+        contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "Cerveja", Tipo = "preferido" });
+
+        await NovoGerador(gemini).GerarDietaAsync(contexto);
+
+        var prompt = PromptEnviado(gemini);
+        Assert.Contains("8. Bebida alcoólica só pode aparecer se a mesma bebida estiver entre os alimentos preferidos", prompt);
+        Assert.DoesNotContain("Não inclua nenhuma bebida alcoólica", prompt);
+    }
+
+    private static string PromptEnviado(GeminiRoteirizado gemini) =>
+        JsonDocument.Parse(gemini.UltimoCorpo!).RootElement
+            .GetProperty("contents")[0].GetProperty("parts")[0].GetProperty("text").GetString()!;
 
     [Fact]
     public async Task Bebida_Alcoolica_Na_Segunda_Tentativa_Some_E_Recupera()
@@ -315,22 +450,44 @@ public class ValidacaoRespostaGeminiTests
     };
 
     // O JSON da dieta que a IA põe em candidates[0].content.parts[0].text.
-    private static string TextoDieta(IEnumerable<string> nomes, bool comRefeicoes = false, string unidade = "g", string alimento = "Arroz")
+    // bebidaNoJantar: o jantar ganha esse item (350 ml) além do alimento.
+    // ceiaSoComBebida: um terceiro item, a ceia, só com esse item (350 ml, 143,5 kcal declaradas).
+    private static string TextoDieta(
+        IEnumerable<string> nomes, bool comRefeicoes = false, string unidade = "g", string alimento = "Arroz",
+        string? bebidaNoJantar = null, string? ceiaSoComBebida = null, string unidadeBebida = "ml")
     {
-        object Refeicao(string nome, decimal kcal, decimal p, decimal c, decimal g) => new
+        object Item(string nome, decimal quantidade, string un) => new { nome, quantidade, unidade = un };
+
+        object Refeicao(string nome, object[] alimentos, decimal kcal, decimal p, decimal c, decimal g) => new
         {
             nome,
-            alimentos = new[] { new { nome = alimento, quantidade = 100, unidade } },
+            alimentos,
             macros = new { calorias = kcal, proteinasG = p, carboidratosG = c, gordurasG = g },
             horario = "12:00"
         };
 
+        object[] Refeicoes()
+        {
+            var jantar = bebidaNoJantar is null
+                ? new[] { Item(alimento, 100, unidade) }
+                : new[] { Item(alimento, 100, unidade), Item(bebidaNoJantar, 350, unidadeBebida) };
+            var lista = new List<object>
+            {
+                Refeicao("Almoço", new[] { Item(alimento, 100, unidade) }, 500, 30, 60, 15),
+                Refeicao("Jantar", jantar, 735, 40, 90, 25)
+            };
+            if (ceiaSoComBebida is not null)
+            {
+                lista.Add(Refeicao("Ceia", new[] { Item(ceiaSoComBebida, 350, unidadeBebida) }, 143.5m, 2.1m, 11.55m, 0));
+            }
+
+            return lista.ToArray();
+        }
+
         var dias = nomes.Select(n => new
         {
             diaSemana = n,
-            refeicoes = comRefeicoes
-                ? new[] { Refeicao("Almoço", 500, 30, 60, 15), Refeicao("Jantar", 735, 40, 90, 25) }
-                : Array.Empty<object>(),
+            refeicoes = comRefeicoes ? Refeicoes() : Array.Empty<object>(),
             totalDoDia = new { calorias = 999, proteinasG = 0, carboidratosG = 0, gordurasG = 0 }
         });
 
@@ -359,6 +516,7 @@ public class ValidacaoRespostaGeminiTests
 
         public int Chamadas { get; private set; }
         public Uri? UltimaUri { get; private set; }
+        public string? UltimoCorpo { get; private set; }
 
         public GeminiRoteirizado(params string[] respostas) => _respostas = new Queue<string>(respostas);
 
@@ -372,6 +530,7 @@ public class ValidacaoRespostaGeminiTests
         {
             Chamadas++;
             UltimaUri = request.RequestUri;
+            UltimoCorpo = request.Content is null ? null : await request.Content.ReadAsStringAsync(cancellationToken);
             var corpo = _status == HttpStatusCode.OK ? _respostas.Dequeue() : "{}";
 
             if (corpo == SemResposta)

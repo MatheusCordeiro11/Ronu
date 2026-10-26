@@ -52,6 +52,16 @@ public class ValidadorBebidaAlcoolicaTests
         Assert.Null(ValidadorBebidaAlcoolica.EncontrarNaoPermitida(Alimentos(nome), Array.Empty<string>()));
     }
 
+    [Theory]
+    [InlineData(true, "Banana", "Cerveja")]
+    [InlineData(true, "vinho tinto")]
+    [InlineData(false, "Banana", "Gengibre")]
+    [InlineData(false)]
+    public void Preferidos_Tem_Bebida(bool esperado, params string[] preferidos)
+    {
+        Assert.Equal(esperado, ValidadorBebidaAlcoolica.PreferidosTemBebida(preferidos));
+    }
+
     private static IEnumerable<AlimentoDto> Alimentos(params string[] nomes) =>
         nomes.Select(n => new AlimentoDto { Nome = n, Quantidade = 100, Unidade = "g" });
 }

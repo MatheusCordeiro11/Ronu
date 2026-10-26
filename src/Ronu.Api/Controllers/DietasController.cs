@@ -129,6 +129,14 @@ public class DietasController : ControllerBase
             return StatusCode(503, new { mensagem = "Não foi possível gerar sua dieta agora. Tente novamente em alguns instantes." });
         }
 
+        // Só o id do usuário, o item e as kcal: nenhum dado pessoal no log.
+        foreach (var bebida in dieta.BebidasRemovidas)
+        {
+            _logger.LogWarning(
+                "Bebida alcoólica fora das preferências tirada da dieta do usuário {UsuarioId}: '{Alimento}' ({Quantidade} {Unidade}), {KcalDescontadas} kcal descontadas, {Dia} {Refeicao}",
+                UsuarioIdLogado, bebida.Alimento, bebida.Quantidade, bebida.Unidade, bebida.KcalDescontadas, bebida.Dia, bebida.Refeicao);
+        }
+
         await _repositorioDieta.SalvarAsync(UsuarioIdLogado, dieta);
 
         var response = new DietaResponse

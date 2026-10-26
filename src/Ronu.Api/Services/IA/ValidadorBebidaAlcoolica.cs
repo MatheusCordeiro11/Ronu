@@ -7,8 +7,9 @@ namespace Ronu.Api.Services.IA;
 /// Proteção da regra 8 do prompt: bebida alcoólica só pode aparecer se estiver
 /// entre os alimentos preferidos da pessoa. No g7, uma conta sem nenhuma
 /// preferência recebeu "Cereais cerveja lata (Cerveja pilsen)" no jantar de
-/// sábado. Resposta com bebida não permitida é tratada como inválida, pelo
-/// mesmo caminho da validação estrutural (nova tentativa, depois 503).
+/// sábado. Na primeira tentativa, resposta com bebida não permitida é tratada
+/// como inválida, pelo mesmo caminho da validação estrutural (nova tentativa);
+/// na última, a cerveja é tirada da dieta (TirarNaoPermitidas) em vez do 503.
 /// </summary>
 public static class ValidadorBebidaAlcoolica
 {
@@ -24,6 +25,8 @@ public static class ValidadorBebidaAlcoolica
         .Select(b => new Regex($@"\b{b}\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
         .ToArray();
 
+    private static readonly Regex Cerveja = new(@"\bcerveja\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
     /// <summary>
     /// Devolve o nome do primeiro alimento com bebida alcoólica que não está
     /// entre os preferidos (a mesma bebida citada em algum preferido libera),
@@ -32,18 +35,86 @@ public static class ValidadorBebidaAlcoolica
     public static string? EncontrarNaoPermitida(IEnumerable<AlimentoDto> alimentos, IEnumerable<string> preferidos)
     {
         var listaPreferidos = preferidos.ToList();
+        return alimentos.FirstOrDefault(a => EhNaoPermitida(a.Nome, listaPreferidos))?.Nome;
+    }
 
-        foreach (var alimento in alimentos)
+    /// <summary>
+    /// Se algum preferido é uma bebida alcoólica. Sem nenhuma, o prompt proíbe
+    /// bebida alcoólica de vez, em vez de explicar quando ela pode aparecer.
+    /// </summary>
+    public static bool PreferidosTemBebida(IEnumerable<string> preferidos)
+    {
+        var listaPreferidos = preferidos.ToList();
+        return Padroes.Any(p => listaPreferidos.Any(p.IsMatch));
+    }
+
+    /// <summary>
+    /// Rede de segurança da última tentativa: tira da dieta a cerveja que a
+    /// pessoa não pediu, em vez de descartar a dieta inteira (no g8b, 2026-10-25,
+    /// 11 de 16 chamadas ao Gemini de perfis sem bebida nas preferências vieram
+    /// com cerveja, e metade dos pedidos virou 503). As calorias e os macros da
+    /// cerveja saem da refeição pelo valor da base (TACO 474, "Cerveja, pilsen"),
+    /// porque o Gemini declara só o total da refeição, não o de cada item; uma
+    /// refeição que fica sem nenhum alimento sai do dia.
+    ///
+    /// Só a cerveja é tirada: é a única bebida alcoólica da base, então é a única
+    /// com valor de fonte para descontar. Outra bebida, ou cerveja numa unidade
+    /// que não seja g/ml, continua tornando a resposta inválida (503), assim
+    /// como um dia que fique sem nenhuma refeição.
+    /// </summary>
+    public static List<BebidaRemovida> TirarNaoPermitidas(List<DiaDietaDto> dias, IEnumerable<string> preferidos)
+    {
+        var listaPreferidos = preferidos.ToList();
+        var cerveja = Ronu.Api.Data.BaseNutricional.Itens.Single(i => i.Id == "cerveja-pilsen");
+        var removidas = new List<BebidaRemovida>();
+
+        foreach (var dia in dias)
         {
-            foreach (var padrao in Padroes)
+            var removidasAntes = removidas.Count;
+            foreach (var refeicao in dia.Refeicoes)
             {
-                if (padrao.IsMatch(alimento.Nome) && !listaPreferidos.Any(padrao.IsMatch))
+                foreach (var alimento in refeicao.Alimentos.Where(a => EhNaoPermitida(a.Nome, listaPreferidos)).ToList())
                 {
-                    return alimento.Nome;
+                    if (!Cerveja.IsMatch(alimento.Nome)
+                        || alimento.Unidade is not (NormalizadorUnidades.Gramas or NormalizadorUnidades.Mililitros))
+                    {
+                        throw new RespostaIaInvalidaException(
+                            $"Resposta do Gemini com bebida alcoólica fora das preferências da pessoa: '{alimento.Nome}' ({alimento.Quantidade} {alimento.Unidade}), sem valor na base para descontar.");
+                    }
+
+                    // Para bebidas, o valor por 100 g da base vale como 100 ml (BaseNutricional).
+                    var fator = alimento.Quantidade / 100m;
+                    var kcal = cerveja.Kcal * fator;
+                    refeicao.Macros.Calorias = Math.Max(0, refeicao.Macros.Calorias - kcal);
+                    refeicao.Macros.ProteinasG = Math.Max(0, refeicao.Macros.ProteinasG - cerveja.ProteinaG * fator);
+                    refeicao.Macros.CarboidratosG = Math.Max(0, refeicao.Macros.CarboidratosG - cerveja.CarboidratoG * fator);
+                    refeicao.Macros.GordurasG = Math.Max(0, refeicao.Macros.GordurasG - cerveja.GorduraG * fator);
+                    refeicao.Alimentos.Remove(alimento);
+                    removidas.Add(new BebidaRemovida(dia.DiaSemana, refeicao.Nome, alimento.Nome, alimento.Quantidade, alimento.Unidade, Math.Round(kcal, 1)));
                 }
+            }
+
+            // Só mexe nos dias de onde saiu alguma bebida: um dia que já veio assim
+            // não é problema desta regra.
+            if (removidas.Count == removidasAntes)
+            {
+                continue;
+            }
+
+            dia.Refeicoes.RemoveAll(r => r.Alimentos.Count == 0);
+            if (dia.Refeicoes.Count == 0)
+            {
+                throw new RespostaIaInvalidaException(
+                    $"Dia '{dia.DiaSemana}' ficou sem nenhuma refeição depois de tirar a bebida alcoólica fora das preferências.");
             }
         }
 
-        return null;
+        return removidas;
     }
+
+    private static bool EhNaoPermitida(string nome, IReadOnlyList<string> preferidos) =>
+        Padroes.Any(p => p.IsMatch(nome) && !preferidos.Any(p.IsMatch));
 }
+
+/// <summary>Uma bebida tirada da dieta por TirarNaoPermitidas, para o log da geração.</summary>
+public record BebidaRemovida(string Dia, string Refeicao, string Alimento, decimal Quantidade, string Unidade, decimal KcalDescontadas);
