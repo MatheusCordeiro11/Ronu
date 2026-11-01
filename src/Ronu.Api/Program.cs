@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Ronu.Api.Middleware;
 using Ronu.Api.Services;
 using Ronu.Api.Services.Consentimentos;
+using Ronu.Api.Services.Conta;
 using Ronu.Api.Services.Email;
 using Ronu.Api.Services.IA;
 using Ronu.Api.Validacao;
@@ -96,6 +97,9 @@ if (string.IsNullOrWhiteSpace(builder.Configuration["Frontend:UrlBase"]))
 }
 builder.Services.AddScoped<ServicoRedefinicaoSenha>();
 builder.Services.AddRateLimiter(LimitesRequisicoes.Configurar);
+
+// Prazos de guarda (docs/privacidade.md): pedidos de redefinição antigos e conta que nunca aceitou o consentimento.
+builder.Services.AddHostedService<ServicoLimpezaRetencao>();
 
 // IP e protocolo reais do cliente atrás do proxy do App Service (X-Forwarded-*),
 // para o limite por IP. O proxy não tem IP fixo conhecido, então as listas de

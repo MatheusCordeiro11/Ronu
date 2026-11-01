@@ -74,6 +74,14 @@ public class LimitesRequisicoesTests
         Assert.Equal((429, LimitesConsentimento.MensagemLimite), await Recusar(LimitesConsentimento.PoliticaAceite));
     }
 
+    [Theory]
+    [InlineData(LimitesConta.PoliticaExclusao, LimitesConta.MensagemExclusao)]
+    [InlineData(LimitesConta.PoliticaExportacao, LimitesConta.MensagemExportacao)]
+    public async Task Conta_Tem_As_Proprias_Mensagens(string politica, string mensagem)
+    {
+        Assert.Equal((429, mensagem), await Recusar(politica));
+    }
+
     [Fact]
     public void Mensagens_Sao_Diferentes()
     {
@@ -81,7 +89,7 @@ public class LimitesRequisicoesTests
         [
             LimitesRedefinicaoSenha.MensagemLimite, LimitesTroca.MensagemLimite,
             LimitesAutenticacao.MensagemEntrada, LimitesAutenticacao.MensagemCadastro,
-            LimitesConsentimento.MensagemLimite
+            LimitesConsentimento.MensagemLimite, LimitesConta.MensagemExclusao, LimitesConta.MensagemExportacao
         ];
         Assert.Equal(mensagens.Length, mensagens.Distinct().Count());
     }

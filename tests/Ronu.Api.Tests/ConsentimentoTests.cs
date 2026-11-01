@@ -174,16 +174,17 @@ public class ConsentimentoTests
 
     // Uma rota nova com [DispensaConsentimento] precisa entrar nesta lista de propósito, não por engano.
     [Fact]
-    public void So_As_Rotas_Do_Aceite_Dispensam_O_Consentimento()
+    public void So_O_Aceite_E_A_Conta_Dispensam_O_Consentimento()
     {
         var dispensados = typeof(ConsentimentosController).Assembly.GetTypes()
             .Where(t => typeof(ControllerBase).IsAssignableFrom(t))
             .SelectMany(t => new MemberInfo[] { t }.Concat(t.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)))
             .Where(m => m.GetCustomAttribute<DispensaConsentimentoAttribute>() is not null)
             .Select(m => m is Type t ? t.Name : $"{m.DeclaringType!.Name}.{m.Name}")
+            .Order()
             .ToList();
 
-        Assert.Equal(new[] { nameof(ConsentimentosController) }, dispensados);
+        Assert.Equal(new[] { nameof(ConsentimentosController), nameof(ContaController) }, dispensados);
     }
 
     // ---------- GET e POST /api/consentimentos ----------
