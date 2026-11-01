@@ -22,10 +22,6 @@ public static class LimitesRedefinicaoSenha
 
     public static void Configurar(RateLimiterOptions opcoes)
     {
-        opcoes.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-        opcoes.OnRejected = (contexto, cancelamento) =>
-            new ValueTask(contexto.HttpContext.Response.WriteAsJsonAsync(new { mensagem = MensagemLimite }, cancelamento));
-
         opcoes.AddPolicy(PoliticaPedido, http => PorIp(http, PedidosPorHoraPorIp));
         // Verificar e redefinir dividem o mesmo limite.
         opcoes.AddPolicy(PoliticaLink, http => PorIp(http, TentativasPorHoraPorIp));

@@ -38,6 +38,15 @@ public class TrocaRequest
     public string? Escopo { get; set; }
 }
 
+/// <summary>
+/// A dieta depois de uma troca, de um desfazer ou de uma volta ao original, e quantas marcações "já tenho" da
+/// lista de compras caíram nessa gravação, para o aviso da troca dizer. Só a contagem: nenhum nome de alimento.
+/// </summary>
+public class TrocaResponse : DietaResponse
+{
+    public required int MarcacoesRemovidas { get; set; }
+}
+
 /// <summary>Os substitutos de um item (GET /api/dietas/atual/trocas/opcoes).</summary>
 public class OpcoesTrocaResponse
 {
@@ -98,6 +107,11 @@ public class OpcaoTrocaDto
     public required decimal Kcal { get; set; }
     public required decimal DifKcal { get; set; }
     public decimal? NutrienteG { get; set; }
+
+    // Substituto de outro uso (macarrão no lugar do pão do café): a tela o identifica. Só aparece nos carboidratos;
+    // nas gorduras, o outro uso fica de fora.
+    public required bool OutroUso { get; set; }
+
     public required int Ocorrencias { get; set; }
     public required List<PreviaDiaDto> Dias { get; set; }
 }

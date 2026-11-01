@@ -129,7 +129,8 @@ public class TrocasController : ControllerBase
             return BadRequest(new { mensagem = "Este substituto não serve aqui (porção, meta do dia ou o que você marcou para evitar). Atualize as opções e escolha outro." });
         }
 
-        if (await Gravar(dietaIA, antes, dieta, uf) is { } conflito)
+        var (conflito, removidas) = await Gravar(dietaIA, antes, dieta, uf);
+        if (conflito is not null)
         {
             return conflito;
         }
@@ -137,7 +138,7 @@ public class TrocasController : ControllerBase
         // Só ids e escopo: nenhum dado de saúde no log.
         _logger.LogInformation("Troca de alimento do usuário {UsuarioId}: '{De}' por '{Para}', {Escopo}, {Itens} itens",
             UsuarioIdLogado, atual.AlimentoId, opcao.AlimentoId, escopo, opcao.Ocorrencias.Count);
-        return Ok(DietasController.Resposta(dietaIA));
+        return Ok(Resposta(dietaIA, removidas));
     }
 
     /// <summary>"Desfazer": volta exatamente ao que estava antes da última troca ou volta ao original.</summary>
@@ -158,12 +159,13 @@ public class TrocasController : ControllerBase
         }
 
         var (_, uf) = await ListaDaPessoa();
-        if (await Gravar(dietaIA, antes, dieta!, uf) is { } conflito)
+        var (conflito, removidas) = await Gravar(dietaIA, antes, dieta!, uf);
+        if (conflito is not null)
         {
             return conflito;
         }
 
-        return Ok(DietasController.Resposta(dietaIA));
+        return Ok(Resposta(dietaIA, removidas));
     }
 
     /// <summary>"Voltar ao original": o item (ou, na semana, todos os trocados do mesmo jeito) volta ao primeiro original.</summary>
@@ -197,12 +199,13 @@ public class TrocasController : ControllerBase
         }
 
         var (_, uf) = await ListaDaPessoa();
-        if (await Gravar(dietaIA, antes, dieta, uf) is { } conflito)
+        var (conflito, removidas) = await Gravar(dietaIA, antes, dieta, uf);
+        if (conflito is not null)
         {
             return conflito;
         }
 
-        return Ok(DietasController.Resposta(dietaIA));
+        return Ok(Resposta(dietaIA, removidas));
     }
 
     // A mesma regra do GET /api/dietas/atual: a mais recente do usuário do token.
@@ -258,14 +261,15 @@ public class TrocasController : ControllerBase
 
     // Grava a dieta com a revisão nova e tira as marcações "já tenho" que deixaram de valer, numa gravação só.
     // A revisão é token de concorrência: se outra aba gravou no meio, o UPDATE não passa e nada é gravado.
-    private async Task<IActionResult?> Gravar(DietaIA dietaIA, DietaSemanalDto antes, DietaSemanalDto depois, string? uf)
+    // Devolve quantas marcações caíram: as que existiam, não todas as chaves que deixaram de valer.
+    private async Task<(IActionResult? Conflito, int MarcacoesRemovidas)> Gravar(
+        DietaIA dietaIA, DietaSemanalDto antes, DietaSemanalDto depois, string? uf)
     {
         var caem = MarcacoesAposTroca.QueCaem(antes, depois, uf);
-        if (caem.Count > 0)
-        {
-            _context.ListaComprasMarcacoes.RemoveRange(
-                _context.ListaComprasMarcacoes.Where(m => m.DietaIAId == dietaIA.Id && caem.Contains(m.Chave)));
-        }
+        List<ListaComprasMarcacao> marcacoes = caem.Count == 0
+            ? []
+            : await _context.ListaComprasMarcacoes.Where(m => m.DietaIAId == dietaIA.Id && caem.Contains(m.Chave)).ToListAsync();
+        _context.ListaComprasMarcacoes.RemoveRange(marcacoes);
 
         dietaIA.ConteudoJson = JsonSerializer.Serialize(depois);
         dietaIA.Revisao++;
@@ -275,10 +279,20 @@ public class TrocasController : ControllerBase
         }
         catch (DbUpdateConcurrencyException)
         {
-            return Conflict(new { mensagem = MensagemMudou });
+            return (Conflict(new { mensagem = MensagemMudou }), 0);
         }
 
-        return null;
+        return (null, marcacoes.Count);
+    }
+
+    private static TrocaResponse Resposta(DietaIA dietaIA, int marcacoesRemovidas)
+    {
+        var r = DietasController.Resposta(dietaIA);
+        return new TrocaResponse
+        {
+            DataGeracao = r.DataGeracao, Dieta = r.Dieta, DietaId = r.DietaId, Revisao = r.Revisao, SemTroca = r.SemTroca,
+            MarcacoesRemovidas = marcacoesRemovidas
+        };
     }
 
     private static EscopoTroca? LerEscopo(string? escopo) => escopo switch
@@ -317,11 +331,13 @@ public class TrocasController : ControllerBase
             Kcal = tocado.Kcal,
             DifKcal = o.DifKcal,
             NutrienteG = tocado.NutrienteG,
+            OutroUso = !o.MesmoUso,
             Ocorrencias = o.Ocorrencias.Count,
             Dias = o.Dias.Select(d => new PreviaDiaDto
             {
                 Dia = d.Dia, DiaSemana = d.DiaSemana, TotalAntes = d.TotalAntes, TotalDepois = d.TotalDepois,
-                Meta = d.Meta, DesvioPct = d.DesvioPct
+                // Arredondado só na resposta: a regra dos 5% (PreviaDia.Passa) usa o valor inteiro.
+                Meta = d.Meta, DesvioPct = Math.Round(d.DesvioPct, 2, MidpointRounding.AwayFromZero)
             }).ToList()
         };
     }

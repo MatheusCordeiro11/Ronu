@@ -142,6 +142,39 @@ public class TrocasControllerTests
         Assert.Null(r.Refeicao.MensagemSemOpcoes);
     }
 
+    // No lugar do pão do café, macarrão e arroz são de outro uso (prato) e vêm marcados; os de café, não.
+    [Fact]
+    public async Task Opcao_De_Outro_Uso_Vem_Marcada()
+    {
+        using var banco = BancoEmMemoria.NovoContexto();
+        var usuario = NovoUsuario(banco, "troca25@exemplo.com");
+        NovaDieta(banco, usuario);
+
+        var r = Valor<OpcoesTrocaResponse>(await Controller(banco, usuario.Id).Opcoes(0, 0, 0)).Refeicao;
+        var todas = r.DasPreferencias.Concat(r.Parecidos).Concat(r.VerMais).ToDictionary(o => o.AlimentoId);
+
+        Assert.True(todas["macarrao-cozido"].OutroUso);
+        Assert.True(todas["arroz-branco-cozido"].OutroUso);
+        Assert.False(todas["pao-de-forma-integral"].OutroUso);
+        Assert.False(todas["tapioca"].OutroUso);
+        Assert.All(r.Parecidos, o => Assert.False(o.OutroUso, o.AlimentoId));
+    }
+
+    // Macarrão no lugar do pão: +0,2 kcal num dia de 2.954,8 = 0,00677%, que a resposta manda como 0,01.
+    [Fact]
+    public async Task Desvio_Do_Dia_Vem_Com_Duas_Casas()
+    {
+        using var banco = BancoEmMemoria.NovoContexto();
+        var usuario = NovoUsuario(banco, "troca28@exemplo.com");
+        NovaDieta(banco, usuario);
+
+        var r = Valor<OpcoesTrocaResponse>(await Controller(banco, usuario.Id).Opcoes(0, 0, 0)).Refeicao;
+
+        Assert.Equal(0.01m, r.VerMais.Single(o => o.AlimentoId == "macarrao-cozido").Dias.Single().DesvioPct);
+        Assert.All(r.DasPreferencias.Concat(r.Parecidos).Concat(r.VerMais).SelectMany(o => o.Dias),
+            d => Assert.Equal(Math.Round(d.DesvioPct, 2), d.DesvioPct));
+    }
+
     [Fact]
     public async Task Sem_Opcao_A_Resposta_Diz_O_Porque()
     {
@@ -235,7 +268,7 @@ public class TrocasControllerTests
         var dietaIA = NovaDieta(banco, usuario);
         var antes = Dieta();
 
-        var r = Valor<DietaResponse>(await Controller(banco, usuario.Id).Trocar(Pedido(dietaIA, "file-de-tilapia-grelhado")));
+        var r = Valor<TrocaResponse>(await Controller(banco, usuario.Id).Trocar(Pedido(dietaIA, "file-de-tilapia-grelhado")));
 
         var salva = Salva(banco, dietaIA.Id);
         var novo = Item(salva);
@@ -248,6 +281,7 @@ public class TrocasControllerTests
         Assert.Null(Item(salva, dia: 1).Original);
         Assert.Equal((1, 1), (r.Revisao, banco.DietasIA.Single().Revisao));
         Assert.Equal(1, salva.UltimaTroca!.Revisao);
+        Assert.Equal(0, r.MarcacoesRemovidas);
     }
 
     // Na semana, cada vez é recalculada pela sua quantidade: 200 g → 245 g; na terça, 100 g → 120 g.
@@ -527,9 +561,57 @@ public class TrocasControllerTests
 
         banco.SaveChanges();
 
-        await Controller(banco, usuario.Id).Trocar(Pedido(dietaIA, "file-de-tilapia-grelhado", "semana"));
+        var r = Valor<TrocaResponse>(await Controller(banco, usuario.Id).Trocar(Pedido(dietaIA, "file-de-tilapia-grelhado", "semana")));
 
         Assert.Equal([chaveOvo], banco.ListaComprasMarcacoes.Select(m => m.Chave));
+        Assert.Equal(1, r.MarcacoesRemovidas);
+    }
+
+    // A contagem é das marcações que existiam: a chave do frango deixou de valer, mas ninguém a tinha marcado.
+    [Fact]
+    public async Task Marcacoes_Removidas_Conta_So_As_Que_Existiam()
+    {
+        using var banco = BancoEmMemoria.NovoContexto();
+        var usuario = NovoUsuario(banco, "troca26@exemplo.com");
+        var dietaIA = NovaDieta(banco, usuario);
+        banco.ListaComprasMarcacoes.Add(new ListaComprasMarcacao
+        {
+            UsuarioId = usuario.Id, DietaIAId = dietaIA.Id, Chave = Chave(Dieta(), "ovo-de-galinha-cozido"), MarcadoEm = DateTime.UtcNow
+        });
+        banco.SaveChanges();
+
+        var r = Valor<TrocaResponse>(await Controller(banco, usuario.Id).Trocar(Pedido(dietaIA, "file-de-tilapia-grelhado", "semana")));
+
+        Assert.Equal(0, r.MarcacoesRemovidas);
+        Assert.Single(banco.ListaComprasMarcacoes);
+    }
+
+    // Desfazer e voltar ao original também contam: a tilápia marcada sai da lista quando o frango volta.
+    [Fact]
+    public async Task Desfazer_E_Voltar_Ao_Original_Contam_As_Marcacoes_Que_Caem()
+    {
+        using var banco = BancoEmMemoria.NovoContexto();
+        var usuario = NovoUsuario(banco, "troca27@exemplo.com");
+        var dietaIA = NovaDieta(banco, usuario);
+        var controller = Controller(banco, usuario.Id);
+        await controller.Trocar(Pedido(dietaIA, "file-de-tilapia-grelhado", "semana"));
+        void MarcarTilapia() => banco.ListaComprasMarcacoes.Add(new ListaComprasMarcacao
+        {
+            UsuarioId = usuario.Id, DietaIAId = dietaIA.Id, Chave = Chave(Salva(banco, dietaIA.Id), "file-de-tilapia-grelhado"),
+            MarcadoEm = DateTime.UtcNow
+        });
+
+        MarcarTilapia();
+        banco.SaveChanges();
+        var desfeita = Valor<TrocaResponse>(await controller.Desfazer(dietaIA.Id, 1));
+
+        await controller.Trocar(Pedido(dietaIA, "file-de-tilapia-grelhado", "semana", revisao: 2));
+        MarcarTilapia();
+        banco.SaveChanges();
+        var voltou = Valor<TrocaResponse>(await controller.VoltarAoOriginal(dietaIA.Id, 3, 0, 1, 2, "semana"));
+
+        Assert.Equal((1, 1), (desfeita.MarcacoesRemovidas, voltou.MarcacoesRemovidas));
+        Assert.Empty(banco.ListaComprasMarcacoes);
     }
 
     // ---------- Formato e limites ----------

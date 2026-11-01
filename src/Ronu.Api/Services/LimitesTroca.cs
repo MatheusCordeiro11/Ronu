@@ -18,6 +18,9 @@ public static class LimitesTroca
     public const int LeiturasPorMinuto = 120;
     public const int EscritasPorMinuto = 30;
 
+    // A janela é de um minuto: dá para dizer quanto esperar, sem o "mais tarde" da redefinição de senha.
+    public const string MensagemLimite = "Muitos pedidos de troca em pouco tempo. Espere um minuto e tente de novo.";
+
     public static void Configurar(RateLimiterOptions opcoes)
     {
         opcoes.AddPolicy(PoliticaLeitura, http => PorUsuario(http, LeiturasPorMinuto));

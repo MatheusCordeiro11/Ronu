@@ -93,11 +93,7 @@ if (string.IsNullOrWhiteSpace(builder.Configuration["Frontend:UrlBase"]))
     throw new InvalidOperationException("Frontend:UrlBase não configurado.");
 }
 builder.Services.AddScoped<ServicoRedefinicaoSenha>();
-builder.Services.AddRateLimiter(opcoes =>
-{
-    LimitesRedefinicaoSenha.Configurar(opcoes);
-    LimitesTroca.Configurar(opcoes);
-});
+builder.Services.AddRateLimiter(LimitesRequisicoes.Configurar);
 
 // IP e protocolo reais do cliente atrás do proxy do App Service (X-Forwarded-*),
 // para o limite por IP. O proxy não tem IP fixo conhecido, então as listas de
