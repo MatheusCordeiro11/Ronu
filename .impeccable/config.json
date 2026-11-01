@@ -227,6 +227,15 @@
         ],
         "createdAt": "2026-10-20T00:58:36.521Z",
         "reason": "user confirmed: rótulo 'SEU TREINO' (.rotulo) é parte do design system Dojo Noturno aprovado em docs/redesign/telas"
+      },
+      {
+        "rule": "kicker-above-heading",
+        "value": "*",
+        "files": [
+          "frontend/dashboard.html"
+        ],
+        "createdAt": "2026-11-01T02:04:41.196Z",
+        "reason": "user confirmed 2026-10-31: o rótulo 'Sua semana' acima do h1 faz parte do redesign aprovado (docs/redesign/telas/Dashboard)"
       }
     ]
   }

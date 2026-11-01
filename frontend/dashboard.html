@@ -130,6 +130,9 @@
           <span class="num" id="db-total"></span>
         </div>
 
+        <!-- Troca de alimento que não pôde seguir (dieta mudou, base mudou): a dieta já foi recarregada. -->
+        <div class="aviso aviso-erro" id="troca-erro" role="alert" tabindex="-1" hidden></div>
+
         <section class="db-refeicoes" id="day-panel" aria-label="Refeições do dia" aria-live="polite"></section>
       </div>
 
@@ -186,6 +189,12 @@
     </div>
   </main>
 
+  <!-- Trocar alimento (js/troca.js): o painel das opções, o "era X" e o aviso de
+       dieta sem troca usam o mesmo diálogo; o aviso com "Desfazer" fica preso embaixo. -->
+  <dialog class="folha" id="troca-dialogo" aria-labelledby="troca-titulo"></dialog>
+  <div class="troca-aviso" id="troca-aviso" hidden></div>
+  <p class="oculto-visual" id="troca-anuncio" aria-live="polite"></p>
+
   <footer class="rodape">
     <div class="conteiner rodape-linha">
       <span>Quantidades com o peso do alimento pronto para comer.</span>
@@ -195,6 +204,7 @@
 
   <script src="js/auth.js"></script>
   <script src="js/base/cabecalho.js"></script>
+  <script src="js/troca.js"></script>
   <script src="js/dashboard.js"></script>
 </body>
 </html>

@@ -7,6 +7,9 @@
   treino, alimentação e a conta da meta.
   Celular: tudo numa coluna, dias e versões rolando na horizontal, e a
   lateral depois das refeições.
+  Trocar alimento (js/troca.js): botão em cada refeição, painel em gaveta
+  (desktop) ou folha de baixo (celular), prévia contra a meta e aviso com
+  "Desfazer" preso embaixo.
 */
 
 /* ---------- Faixa de título ---------- */
@@ -496,6 +499,481 @@
   line-height: 1;
 }
 
+/* ---------- Trocar alimento: no card da refeição ---------- */
+.db-refeicao-lista {
+  flex: 1 1 280px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.db-refeicao-lista .db-alimentos {
+  flex: none;
+}
+
+/* Modo de troca ligado: o card ganha a borda do acento e a dica. */
+.db-refeicao-trocando,
+.db-refeicao-trocando.ergue:hover {
+  border-color: var(--acento);
+}
+
+.db-troca-dica {
+  margin: 0;
+  font-size: var(--t-pequeno);
+  color: var(--acento-texto);
+}
+
+.db-trocar {
+  width: 44px;
+  height: 44px;
+  margin-top: var(--e-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--linha);
+  border-radius: var(--raio);
+  color: var(--texto-2);
+  cursor: pointer;
+  transition: background-color var(--d-rapida) ease, border-color var(--d-rapida) ease, color var(--d-rapida) ease;
+}
+
+.db-trocar:hover {
+  color: var(--texto);
+  border-color: var(--borda-forte);
+}
+
+.db-trocar svg {
+  width: 20px;
+  height: 20px;
+}
+
+.db-trocar[aria-pressed="true"] {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--sobre-acento);
+}
+
+/* Dieta sem troca: o botão continua lá (tocar explica o porquê), tracejado. */
+.db-trocar[aria-disabled="true"] {
+  border-style: dashed;
+}
+
+.db-alimento-nome-linha {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px var(--e-2);
+}
+
+/* Com o modo ligado, cada alimento é um botão da largura da linha. */
+.db-alimentos li:has(> .db-alimento-botao) {
+  padding-bottom: 0;
+}
+
+.db-alimento-botao {
+  width: calc(100% + 2 * var(--e-3));
+  min-height: 44px;
+  margin: 0 calc(var(--e-3) * -1);
+  padding: var(--e-2) var(--e-3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--e-4);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--raio);
+  color: var(--texto);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--d-rapida) ease, border-color var(--d-rapida) ease;
+}
+
+.db-alimento-botao:hover {
+  background: var(--superficie-hover);
+  border-color: var(--borda-hover);
+}
+
+.db-alimento-botao .db-alimento-qtd {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-2);
+}
+
+.db-alimento-botao svg {
+  width: 16px;
+  height: 16px;
+  color: var(--texto-2);
+}
+
+/* Marca "trocado": tracejada, no acento. Como botão, a área de toque passa de 44 px. */
+.db-trocado {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  background: transparent;
+  border: 1px dashed var(--acento);
+  border-radius: var(--raio-pilula);
+  color: var(--acento-texto);
+  font-family: var(--fonte-corpo);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+button.db-trocado {
+  cursor: pointer;
+  transition: background-color var(--d-rapida) ease;
+}
+
+button.db-trocado::after {
+  content: '';
+  position: absolute;
+  inset: -12px -6px;
+}
+
+button.db-trocado:hover {
+  background: var(--superficie-3);
+}
+
+.db-trocado-novo {
+  animation: trocado-carimba 520ms var(--curva-saida) both;
+}
+
+@keyframes trocado-carimba {
+  from { opacity: 0; transform: rotate(-6deg) scale(1.4); }
+  60% { opacity: 1; transform: rotate(-2deg) scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- Trocar alimento: painel ---------- */
+.troca-escopo > button {
+  min-height: 56px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  white-space: normal;
+  text-align: left;
+}
+
+.troca-escopo-titulo {
+  font-weight: 600;
+}
+
+.troca-escopo-dica {
+  font-size: var(--t-rotulo);
+}
+
+.troca-opcoes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-5);
+}
+
+.troca-secao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.troca-secao-titulo {
+  font-family: var(--fonte-corpo);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.troca-opcao {
+  min-height: 60px;
+  padding: 12px 14px;
+}
+
+.troca-opcao-texto {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.troca-opcao-nome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px var(--e-2);
+  font-size: var(--t-corpo);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.troca-opcao-numeros {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  text-align: right;
+}
+
+.troca-opcao-kcal {
+  font-size: var(--t-apoio);
+  font-weight: 500;
+}
+
+.troca-opcao-dica {
+  font-size: var(--t-pequeno);
+  color: var(--texto-2);
+}
+
+.troca-opcao-quanto > span {
+  white-space: nowrap;
+}
+
+.troca-opcao[aria-checked="true"] .troca-opcao-dica,
+.troca-opcao[aria-checked="true"] .troca-etiqueta {
+  color: var(--texto-2-ativo);
+}
+
+.troca-etiqueta {
+  padding: 1px 7px;
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-pilula);
+  color: var(--texto-2);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.troca-ver-mais {
+  align-self: flex-start;
+}
+
+.troca-fora {
+  font-size: var(--t-pequeno);
+  color: var(--texto-2);
+}
+
+.troca-fora summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.troca-fora summary:hover {
+  color: var(--texto);
+}
+
+.troca-fora p {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.troca-carregando {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  color: var(--texto-2);
+}
+
+.troca-carregando p,
+.troca-vazio p,
+.troca-original p {
+  margin: 0;
+}
+
+.troca-vazio,
+.troca-original {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  align-items: flex-start;
+  line-height: 1.55;
+}
+
+.folha .aviso {
+  font-size: var(--t-apoio);
+}
+
+/* Prévia: a faixa é a meta ±10%; a banda do meio, os 5% da regra; o traço, o dia depois da troca. */
+.troca-previa {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.troca-previa-texto {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 4px var(--e-3);
+  flex-wrap: wrap;
+  font-size: var(--t-apoio);
+  color: var(--texto-2);
+}
+
+.troca-previa-texto strong {
+  color: var(--texto);
+  font-weight: 600;
+}
+
+.troca-faixa {
+  position: relative;
+  display: block;
+  height: 12px;
+}
+
+.troca-faixa::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  background: var(--borda);
+  transform: translateY(-50%);
+}
+
+.troca-faixa-banda {
+  position: absolute;
+  left: 25%;
+  right: 25%;
+  top: 50%;
+  height: 6px;
+  background: var(--linha);
+  border-radius: 1px;
+  transform: translateY(-50%);
+}
+
+.troca-faixa-meta {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--texto-2);
+}
+
+.troca-faixa-marca {
+  position: absolute;
+  left: var(--pos);
+  top: -1px;
+  bottom: -1px;
+  width: 3px;
+  margin-left: -1.5px;
+  background: var(--acento);
+  border-radius: 1px;
+  transition: left var(--d-media) var(--curva-saida);
+}
+
+.troca-escala {
+  position: relative;
+  height: 16px;
+  font-size: 11px;
+  color: var(--texto-2);
+}
+
+.troca-escala > span {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.troca-escala > span:nth-child(1) { left: 25%; }
+.troca-escala > span:nth-child(2) { left: 50%; }
+.troca-escala > span:nth-child(3) { left: 75%; }
+
+.troca-dias {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.troca-dia {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 6px var(--e-3);
+  font-size: var(--t-apoio);
+}
+
+.troca-dia .troca-faixa {
+  grid-column: 1 / -1;
+}
+
+.troca-dia-nome,
+.troca-dia-pct {
+  color: var(--texto-2);
+}
+
+/* ---------- Trocar alimento: aviso com "Desfazer" ---------- */
+.troca-aviso {
+  position: fixed;
+  z-index: 30;
+  left: 0;
+  right: 0;
+  bottom: var(--e-6);
+  width: min(560px, calc(100vw - 2 * var(--margem)));
+  margin: 0 auto;
+  padding: var(--e-2) var(--e-2) var(--e-2) var(--e-4);
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  background: var(--superficie-2);
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-card);
+  animation: entra var(--d-media) var(--curva-saida);
+}
+
+.troca-aviso-traco {
+  flex: none;
+  align-self: flex-start;
+  width: 14px;
+  height: 1px;
+  margin-top: 1.35em;
+  background: var(--acento);
+}
+
+.troca-aviso-textos {
+  flex: 1;
+  min-width: 0;
+  padding: var(--e-2) 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--t-apoio);
+  line-height: 1.45;
+}
+
+.troca-aviso-textos p {
+  margin: 0;
+}
+
+.troca-aviso-compras {
+  color: var(--texto-2);
+}
+
+.troca-aviso .botao-texto {
+  flex: none;
+  color: var(--acento-texto);
+  font-weight: 600;
+}
+
+.troca-aviso .folha-fechar {
+  margin: 0;
+}
+
 /* ---------- Lateral ---------- */
 .db-lateral .cartao {
   padding: 22px;
@@ -904,6 +1382,40 @@
   .db-alimentos li {
     font-size: var(--t-apoio);
     padding-bottom: 6px;
+  }
+
+  .db-refeicao-lista {
+    flex: none;
+    width: 100%;
+    gap: var(--e-2);
+  }
+
+  /* Botão de troca na linha dos macros, à direita. */
+  .db-refeicao-totais {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--e-3);
+  }
+
+  .db-trocar {
+    margin-top: 0;
+  }
+
+  /* O aviso fica acima das abas; o texto ocupa a largura e os botões descem. */
+  .troca-aviso {
+    bottom: calc(var(--altura-abas) + env(safe-area-inset-bottom) + var(--e-2));
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+
+  .troca-aviso-textos {
+    flex: 1 1 calc(100% - 14px - var(--e-3));
+    padding-bottom: 0;
+  }
+
+  .troca-aviso .botao-texto {
+    margin-left: auto;
   }
 
   /* Kcal da refeição sobe para a linha do horário, à direita. */

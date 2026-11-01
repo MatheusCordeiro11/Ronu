@@ -49,6 +49,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   let refeicoesAbertas = false;
   const REFEICOES_VISIVEIS_CELULAR = 2;
 
+  // Trocar alimento (js/troca.js): a refeição com o modo de troca ligado (uma
+  // por vez, só na dieta atual), os itens que acabaram de mudar (ganham o
+  // carimbo da marca "trocado") e se as refeições entram com animação (não
+  // quando só o modo de troca liga ou desliga).
+  let refeicaoEmTroca = null;
+  let itensDestacados = new Set();
+  let animarRefeicoes = true;
+
   // ---------- Formatação ----------
 
   function formatarNumero(valor) {
@@ -348,6 +356,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       botao.addEventListener('click', () => {
         versaoSelecionada = indice;
         diaSelecionado = 0;
+        refeicaoEmTroca = null;
         renderizarVersaoSelecionada();
       });
 
@@ -361,6 +370,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Tab; as setas andam entre os dias e já trocam o dia.
   function selecionarDia(dietaResponse, indice, focar) {
     diaSelecionado = indice;
+    refeicaoEmTroca = null;
     Array.from(elDayRow.children).forEach((filho, i) => {
       filho.setAttribute('aria-selected', String(i === diaSelecionado));
       filho.tabIndex = i === diaSelecionado ? 0 : -1;
@@ -419,8 +429,93 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ---------- Render: refeições do dia ----------
 
-  function criarRefeicao(refeicao, indice) {
-    const card = criar('article', 'cartao db-refeicao ergue entra');
+  const ICONE_TROCA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4 3 8l4 4"/><path d="M3 8h14"/><path d="m17 20 4-4-4-4"/><path d="M21 16H7"/></svg>';
+
+  function criarIcone(svg) {
+    const span = criar('span');
+    span.innerHTML = svg;
+    return span.firstChild;
+  }
+
+  // "trocado": botão que abre o "era X" na dieta atual; nas versões antigas e
+  // dentro do botão do alimento (modo de troca ligado), só a marca.
+  function criarMarcaTrocado(alimento, posicao, comoBotao) {
+    const novo = itensDestacados.has(`${posicao.dia}-${posicao.refeicao}-${posicao.item}`);
+    const classe = `db-trocado${novo ? ' db-trocado-novo' : ''}`;
+    if (!comoBotao) return criar('span', classe, 'trocado');
+
+    const original = alimento.original;
+    const marca = criar('button', classe, 'trocado');
+    marca.type = 'button';
+    marca.setAttribute('aria-label',
+      `Trocado: era ${original.nome}, ${formatarNumero(original.quantidade)} ${original.unidade}. Ver o original`);
+    marca.addEventListener('click', () => RonuTroca.abrirOriginal({ ...posicao, alimento, origem: marca }));
+    return marca;
+  }
+
+  function alternarModoTroca(dietaResponse, indice) {
+    refeicaoEmTroca = refeicaoEmTroca === indice ? null : indice;
+    animarRefeicoes = false;
+    renderizarRefeicoes(dietaResponse);
+    animarRefeicoes = true;
+    elDayPanel.querySelector(`[data-refeicao="${indice}"] .db-trocar`)?.focus();
+  }
+
+  function criarBotaoTroca(dietaResponse, refeicao, indice, emTroca) {
+    const botao = criar('button', 'db-trocar');
+    botao.type = 'button';
+    botao.append(criarIcone(ICONE_TROCA));
+
+    if (dietaResponse.semTroca) {
+      // Dieta antiga ou de outra versão da base: o botão fica, e tocar explica o porquê.
+      botao.setAttribute('aria-disabled', 'true');
+      botao.setAttribute('aria-label', `Trocar alimento: ${refeicao.nome}. Indisponível nesta dieta`);
+      botao.title = 'Troca indisponível nesta dieta';
+      botao.addEventListener('click', () => RonuTroca.abrirSemTroca(dietaResponse.semTroca, botao));
+      return botao;
+    }
+
+    botao.setAttribute('aria-pressed', String(emTroca));
+    botao.setAttribute('aria-label', `Trocar alimento: ${refeicao.nome}`);
+    botao.title = emTroca ? 'Parar de trocar' : 'Trocar um alimento';
+    botao.addEventListener('click', () => alternarModoTroca(dietaResponse, indice));
+    return botao;
+  }
+
+  function criarAlimento(dietaResponse, refeicao, indice, alimento, i, emTroca) {
+    const atual = versaoSelecionada === 0;
+    const posicao = { dia: diaSelecionado, refeicao: indice, item: i };
+    const item = criar('li');
+    item.dataset.item = String(i);
+    const qtd = criar('span', 'db-alimento-qtd num', `${formatarNumero(alimento.quantidade)} ${alimento.unidade}`);
+    const nome = criar('span', 'db-alimento-nome-linha');
+    nome.append(criar('span', null, alimento.nome));
+
+    if (emTroca) {
+      if (alimento.original) nome.append(criarMarcaTrocado(alimento, posicao, false));
+      qtd.append(criarIcone(ICONE_TROCA));
+      const botao = criar('button', 'db-alimento-botao');
+      botao.type = 'button';
+      botao.prepend(criar('span', 'oculto-visual', 'Trocar '));
+      botao.append(nome, qtd);
+      botao.addEventListener('click', () => RonuTroca.abrirOpcoes({
+        ...posicao, alimento, nomeRefeicao: refeicao.nome,
+        diaSemana: dietaResponse.dieta.dias[diaSelecionado].diaSemana, origem: botao
+      }));
+      item.append(botao);
+      return item;
+    }
+
+    if (alimento.original) nome.append(criarMarcaTrocado(alimento, posicao, atual));
+    item.append(nome, qtd);
+    return item;
+  }
+
+  function criarRefeicao(dietaResponse, refeicao, indice) {
+    const podeTrocar = versaoSelecionada === 0;
+    const emTroca = podeTrocar && !dietaResponse.semTroca && refeicaoEmTroca === indice;
+    const card = criar('article', `cartao db-refeicao ergue${animarRefeicoes ? ' entra' : ''}${emTroca ? ' db-refeicao-trocando' : ''}`);
+    card.dataset.refeicao = String(indice);
     card.style.setProperty('--atraso', `${indice * 70}ms`);
 
     // Horário antes do nome, como numa agenda. Dietas geradas antes do campo
@@ -433,15 +528,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     titulo.appendChild(criar('h3', 'db-refeicao-nome', refeicao.nome));
 
+    const caixa = criar('div', 'db-refeicao-lista');
+    if (emTroca) caixa.append(criar('p', 'db-troca-dica', 'Toque no alimento que quer trocar.'));
     const lista = criar('ul', 'db-alimentos');
-    refeicao.alimentos.forEach((alimento) => {
-      const item = criar('li');
-      item.append(
-        criar('span', null, alimento.nome),
-        criar('span', 'db-alimento-qtd num', `${formatarNumero(alimento.quantidade)} ${alimento.unidade}`)
-      );
-      lista.appendChild(item);
+    refeicao.alimentos.forEach((alimento, i) => {
+      lista.appendChild(criarAlimento(dietaResponse, refeicao, indice, alimento, i, emTroca));
     });
+    caixa.append(lista);
 
     const m = refeicao.macros;
     const totais = criar('div', 'db-refeicao-totais num');
@@ -451,15 +544,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       kcal,
       criar('span', 'apoio', `P ${formatarNumero(m.proteinasG)} · C ${formatarNumero(m.carboidratosG)} · G ${formatarNumero(m.gordurasG)}`)
     );
+    // Só a dieta atual tem troca: nas versões antigas, o botão nem aparece.
+    if (podeTrocar) totais.append(criarBotaoTroca(dietaResponse, refeicao, indice, emTroca));
 
-    card.append(titulo, lista, totais);
+    card.append(titulo, caixa, totais);
     return card;
   }
 
   function renderizarRefeicoes(dietaResponse) {
     const dia = dietaResponse.dieta.dias[diaSelecionado];
     elDayPanel.setAttribute('aria-labelledby', `db-dia-${diaSelecionado}`);
-    const cards = dia.refeicoes.map(criarRefeicao);
+    const cards = dia.refeicoes.map((refeicao, indice) => criarRefeicao(dietaResponse, refeicao, indice));
     const extras = dia.refeicoes.slice(REFEICOES_VISIVEIS_CELULAR);
 
     // "+ 3 refeições: almoço, pré-treino e jantar" (canvas DashboardMobile).
@@ -833,6 +928,70 @@ document.addEventListener('DOMContentLoaded', async () => {
     tentar(() => { $('db-aviso-nivel').hidden = !perfil || perfil.nivelAtividade != null; });
   }
 
+  // ---------- Trocar alimento (js/troca.js) ----------
+
+  const elTrocaErro = $('troca-erro');
+
+  // Esc desliga o modo de troca da refeição (dentro do painel, o Esc é do diálogo).
+  elDayPanel.addEventListener('keydown', (evento) => {
+    if (evento.key !== 'Escape' || refeicaoEmTroca == null) return;
+    evento.preventDefault();
+    alternarModoTroca(historico[0], refeicaoEmTroca);
+  });
+
+  // O item da posição recebe o foco depois de uma troca: a marca "trocado",
+  // se tiver; senão a própria linha.
+  function focarItem({ dia, refeicao, item }) {
+    if (versaoSelecionada !== 0 || dia !== diaSelecionado) return;
+    const linha = elDayPanel.querySelector(`[data-refeicao="${refeicao}"] [data-item="${item}"]`);
+    if (!linha) return;
+    const alvo = linha.querySelector('button') || linha;
+    if (alvo === linha) linha.tabIndex = -1;
+    alvo.focus();
+  }
+
+  RonuTroca.configurar({
+    dietaAtual: () => historico[0],
+
+    // A resposta da troca é a dieta atual inteira, com a revisão nova: entra
+    // no lugar da [0] e a tela do dia se redesenha com os totais novos.
+    aplicar(resposta, mudadas) {
+      historico[0] = resposta;
+      refeicaoEmTroca = null;
+      elTrocaErro.hidden = true;
+      if (versaoSelecionada !== 0) return;
+      itensDestacados = new Set(mudadas);
+      animarRefeicoes = false;
+      renderizarDia(resposta);
+      animarRefeicoes = true;
+      itensDestacados = new Set();
+    },
+
+    focarItem,
+
+    // 409, 422 e afins: a dieta mudou por fora. Recarrega e diz o porquê.
+    async recarregar(mensagem) {
+      refeicaoEmTroca = null;
+      try {
+        await carregarHistorico();
+        if (versaoSelecionada >= historico.length) versaoSelecionada = 0;
+        if (diaSelecionado >= (historico[versaoSelecionada]?.dieta.dias.length ?? 0)) diaSelecionado = 0;
+        renderizarTudo();
+      } catch (erro) {
+        if (erro.message === 'Sessão expirada.') return;
+        mensagem = 'Não foi possível recarregar a sua dieta. Atualize a página.';
+      }
+      elTrocaErro.textContent = mensagem;
+      elTrocaErro.hidden = false;
+      elTrocaErro.focus();
+    },
+
+    gerar() {
+      const celular = window.matchMedia('(max-width: 720px)').matches;
+      gerarDieta(celular ? btnGerarFim : btnGerar);
+    }
+  });
+
   // ---------- Gerar ----------
 
   async function gerarDieta(botao) {
@@ -857,6 +1016,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       await carregarHistorico();
       versaoSelecionada = 0;
       diaSelecionado = 0;
+      refeicaoEmTroca = null;
+      // A dieta nova não tem as trocas da anterior: o "Desfazer" não vale mais.
+      RonuTroca.fecharAviso();
+      elTrocaErro.hidden = true;
       renderizarTudo();
     } catch (erro) {
       ronuMostrarErroFormulario(elGerarError, erro.message);

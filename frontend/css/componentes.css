@@ -5,7 +5,7 @@
   Índice: logo · tema · avatar · cabeçalho · abas do celular · faixa de título
   · grade · botões · campos · segmentado · opções · chips · dias · cards
   · avisos · nota · carimbo · quimono · etapas · barras e anéis · carregando
-  · vazio · tabela · rodapé · gráficos que se desenham · entrada
+  · vazio · tabela · rodapé · gráficos que se desenham · entrada · folha (diálogo)
 */
 
 /* ---------- Logo: quadrado com 浪 + RONU ---------- */
@@ -1316,4 +1316,173 @@ button.chip:hover {
 ::view-transition-new(root) {
   animation-duration: 280ms;
   animation-timing-function: var(--curva-suave);
+}
+
+/* ---------- Folha: diálogo modal (<dialog> com showModal) ----------
+   O <dialog> nativo prende o foco e fecha com Esc. No desktop, .folha-lateral
+   é uma gaveta à direita e .folha-pequena um cartão no centro; no celular, as
+   duas viram folha de baixo. Cabeça e rodapé ficam fixos; só o corpo rola. */
+.folha {
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  border: 1px solid var(--linha);
+  background: var(--superficie);
+  color: var(--texto);
+}
+
+.folha[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.folha::backdrop {
+  background: color-mix(in srgb, var(--fundo) 72%, transparent);
+}
+
+body:has(.folha[open]) {
+  overflow: hidden;
+}
+
+.folha-cabeca {
+  flex: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--e-4);
+  padding: var(--e-5) var(--e-6);
+  border-bottom: 1px solid var(--borda);
+}
+
+.folha-cabeca-texto {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-1);
+}
+
+.folha-titulo {
+  font-size: var(--t-h3);
+  font-weight: 800;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.folha-titulo:focus-visible {
+  outline-offset: 4px;
+}
+
+.folha-apoio {
+  font-size: var(--t-pequeno);
+  color: var(--texto-2);
+}
+
+.folha-fechar {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  margin: -6px -10px 0 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  color: var(--texto-2);
+  cursor: pointer;
+  transition: color var(--d-rapida) ease, border-color var(--d-rapida) ease;
+}
+
+.folha-fechar:hover {
+  color: var(--texto);
+  border-color: var(--borda-hover);
+}
+
+.folha-fechar svg {
+  width: 18px;
+  height: 18px;
+}
+
+.folha-corpo {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--e-5) var(--e-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-5);
+}
+
+/* O corpo rola; os filhos mantêm a altura (um segmentado com overflow escondido sumiria). */
+.folha-corpo > * {
+  flex-shrink: 0;
+}
+
+.folha-rodape {
+  flex: none;
+  padding: var(--e-4) var(--e-6) var(--e-5);
+  border-top: 1px solid var(--borda);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+@media (min-width: 721px) {
+  .folha-lateral {
+    inset: 0 0 0 auto;
+    margin: 0;
+    width: min(440px, 100vw);
+    height: 100dvh;
+    border-width: 0 0 0 1px;
+    animation: folha-entra-lado var(--d-media) var(--curva-saida);
+  }
+
+  .folha-pequena {
+    margin: auto;
+    width: min(440px, calc(100vw - 2 * var(--e-4)));
+    max-height: calc(100dvh - 2 * var(--e-7));
+    border-radius: var(--raio-card);
+    animation: entra var(--d-media) var(--curva-saida);
+  }
+}
+
+@media (max-width: 720px) {
+  .folha-lateral,
+  .folha-pequena {
+    inset: auto 0 0 0;
+    margin: 0;
+    width: 100%;
+    max-height: 88dvh;
+    border-width: 1px 0 0;
+    border-radius: var(--raio-card) var(--raio-card) 0 0;
+    animation: folha-sobe var(--d-media) var(--curva-saida);
+  }
+
+  .folha-cabeca {
+    padding: var(--e-4) var(--e-4) var(--e-3);
+  }
+
+  .folha-titulo {
+    font-size: 1.25rem;
+  }
+
+  .folha-corpo {
+    padding: var(--e-4);
+    gap: var(--e-4);
+  }
+
+  .folha-rodape {
+    padding: var(--e-3) var(--e-4) calc(var(--e-4) + env(safe-area-inset-bottom));
+  }
+}
+
+@keyframes folha-entra-lado {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes folha-sobe {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: none; opacity: 1; }
 }
