@@ -135,8 +135,14 @@ O email sai em segundo plano (a resposta não espera o SMTP). Limite por conta: 
 As três rotas devolvem a dieta no mesmo formato, `DietaResponse`:
 
 - `dataGeracao`
+- `dietaId` e `revisao`: o id da dieta e quantas gravações ela já teve (começa em 0 e sobe a cada troca, desfazer ou volta ao original). A troca de alimento manda os dois de volta, e uma revisão velha dá 409. Nulos na resposta do `POST /api/dietas/gerar`
+- `semTroca`: por que a dieta não tem troca de alimento, `"dieta-anterior"` (algum alimento sem `alimentoId`, gerada antes da lista fechada) ou `"outra-versao-da-base"` (`versaoBase` diferente da atual); nulo quando tem. Só a dieta atual tem troca: no histórico, a tela não oferece mesmo com `semTroca` nulo
 - `dieta`
-  - `dias`: os 7 dias da semana, cada um com `diaSemana`, `refeicoes` (cada refeição com `nome`, `horario` opcional, `alimentos [{ nome, quantidade, unidade }]` e `macros`), `totalDoDia`, `metaCalculada`, `metaElevadaPeloPiso` e `composicaoMeta`
+  - `dias`: os 7 dias da semana, cada um com `diaSemana`, `refeicoes` (cada refeição com `nome`, `horario` opcional, `alimentos` e `macros`), `totalDoDia`, `metaCalculada`, `metaElevadaPeloPiso` e `composicaoMeta`
+  - cada alimento: `nome` (com a contagem nos contáveis, ex.: "Pão francês (2 unidades)"), `quantidade`, `unidade`, `alimentoId` (o item da base nutricional; nulo nas dietas anteriores à lista fechada), `macros` (calculados pela base; nulos nas dietas antigas) e, só nos itens trocados, `original`: o alimento como veio na dieta antes da primeira troca (mesmo formato, sem `original`), para a marca "trocado" e o "Voltar ao original"
+  - `versaoBase`: a versão da base nutricional usada (nula nas dietas anteriores à lista fechada)
+  - `avisoListaPobre` (nulo quando a lista de alimentos atendeu aos mínimos): `papeis`, `itensPorPapel` e `gruposDeProteina`
+  - `ultimaTroca` (só quando há o que desfazer): `revisao` (a gravação que o "Desfazer" desfaz) e `itens [{ dia, refeicao, item, anterior }]`, cada posição com o alimento como estava antes
   - `composicaoMeta` (nulo nas dietas geradas antes do campo): as partes da meta daquele dia, gravadas na geração, em kcal inteiras que somam exatamente `meta` (o arredondamento de `metaCalculada.calorias`): `gastoRepouso`, `atividadeForaDoTreino`, `nivelAtividade` e `fatorAtividade` (o nível e o fator usados; `fatorAtividade` é nulo em dietas anteriores à pergunta, que a tela mostra como ×1,4, e `nivelAtividade` é nulo quando a pessoa ainda não tinha respondido), `treino [{ nome, horas, kcal }]`, `objetivo`, `ajusteProgresso`, `pisoCarboidrato`, `meta`. A diferença de arredondamento cai na última parte diferente de zero
   - `ajusteAdaptativo` (pode ser nulo): `percentual`, `motivo`, `aplicado`, `ritmoRealKgSemana`, `ritmoEsperadoKgSemana`, `pontosUsados`
 - `macros`, `totalDoDia` e `metaCalculada` têm `calorias`, `proteinasG`, `carboidratosG` e `gordurasG`
@@ -159,11 +165,53 @@ As três rotas devolvem a dieta no mesmo formato, `DietaResponse`:
   `{ "mensagem": "Não foi possível gerar sua dieta agora. Tente novamente em alguns instantes." }`
 
 ### `GET /api/dietas/atual`
-**Devolve:** a dieta mais recente do usuário logado (`dataGeracao`, `dieta`)
+**Devolve:** a dieta mais recente do usuário logado (`dataGeracao`, `dietaId`, `revisao`, `semTroca`, `dieta`)
 **Erros:** 404 se o usuário ainda não gerou nenhuma dieta.
 
 ### `GET /api/dietas/historico`
-**Devolve:** lista das dietas salvas do usuário (até 3), da mais recente para a mais antiga, cada uma com `dataGeracao` e `dieta`
+**Devolve:** lista das dietas salvas do usuário (até 3), da mais recente para a mais antiga, cada uma no formato `DietaResponse` completo (`dataGeracao`, `dietaId`, `revisao`, `semTroca`, `dieta`)
+
+---
+
+## Trocar alimento
+
+Troca um alimento da dieta atual por um substituto da base nutricional, só na refeição tocada ou na semana toda (cada vez em que o mesmo alimento aparece). Tudo é calculado em C# pela base (`CalculadoraTroca`), sem chamar a IA. A dieta é sempre a atual do usuário do token: o `dietaId` do cliente só é comparado com ela, então o id da dieta de outra pessoa cai no 409, sem saber se ela existe. Toda gravação confere a `revisao` (token de concorrência no banco): duas abas trocando ao mesmo tempo não sobrescrevem uma à outra.
+
+Regras do substituto: mesmo grupo de troca, na lista de alimentos da pessoa com as preferências **atuais** (um "evitar" novo vale já), quantidade que mantém o nutriente principal do original (o peso ou o volume nos itens sem nutriente principal), até a porção máxima da troca (`PorcaoMaximaTroca`, calibração do projeto). Fica de fora o que deixaria algum dia afetado mais de 5% fora da meta (um dia que já estava fora aceita o que não piora), o que já está na refeição, o refogado numa refeição com azeite ou óleo (e vice-versa) e, nas gorduras, o item de outro uso. Só o item trocado muda: os outros alimentos não são reajustados, e a meta do dia não muda. As marcações "já tenho" da lista de compras dos itens que saíram, ou que passaram a pedir mais, caem na mesma gravação.
+
+**Limites por usuário** (do token, em memória), contados à parte: 120 leituras e 30 gravações por minuto. Acima disso, **429** `{ "mensagem": "Muitos pedidos de troca em pouco tempo. Espere um minuto e tente de novo." }` (a mensagem do 429 é escolhida pela política da rota; a redefinição de senha tem a dela).
+
+**Erros comuns às quatro rotas** (corpo sempre `{ "mensagem" }`):
+- **404** `"Nenhuma dieta gerada ainda."`
+- **422** quando a dieta não tem troca: `"Esta dieta foi gerada antes da troca de alimentos existir. Gere uma dieta nova para trocar alimentos."` ou `"A base de alimentos do Ronu mudou desde que esta dieta foi gerada. Gere uma dieta nova para trocar alimentos."`
+- **400** `"Alimento não encontrado na dieta."`: a posição (`dia`, `refeicao`, `item`, índices a partir de 0, na ordem da dieta salva) não existe
+
+### `GET /api/dietas/atual/trocas/opcoes?dia=&refeicao=&item=`
+**Devolve:**
+- `dietaId`, `revisao`
+- `original`: `alimentoId`, `nome`, `quantidade`, `unidade`, `kcal` e `nutrienteG` (gramas do nutriente principal; nulo sem nutriente principal)
+- `nutriente`: `proteina`, `carboidrato`, `gordura` ou `livre` (sem nutriente a manter: fica o peso)
+- `ocorrenciasNaSemana`: quantas vezes o mesmo alimento aparece na semana
+- `foraPeloEvitar`: quantos itens do grupo saíram pelo que a pessoa marcou para evitar
+- `refeicao` e `semana`, os dois escopos, cada um com:
+  - `dasPreferencias` (até 3, no máximo um por gosto), `parecidos` (até 3) e `verMais` (o resto que passa nas regras). Primeiro o mesmo uso, depois o que menos muda as kcal. Cada opção: `alimentoId`, `nome` (regional pela UF, com a contagem nos contáveis), `quantidade`, `unidade`, `contagem` (nos contáveis), `kcal` e `nutrienteG` do item tocado, `difKcal` (a soma das diferenças de todas as vezes do escopo), `outroUso` (substituto de outro uso, como macarrão no lugar do pão do café), `ocorrencias` e `dias [{ dia, diaSemana, totalAntes, totalDepois, meta, desvioPct }]` (a prévia de cada dia afetado; `desvioPct` com 2 casas)
+  - `fora`: quantas opções ficaram de fora por motivo (`porcaoMaxima`, `foraDaMeta`, `jaNaRefeicao`, `refogadoComOleo`, `usoDiferente`)
+  - `mensagemSemOpcoes`: só quando nenhuma opção passou, o porquê em uma frase (ex.: `"Nenhum substituto serve aqui: 2 passariam da porção máxima e 1 já está nesta refeição."`)
+
+### `POST /api/dietas/atual/trocas`
+**Recebe:** `dietaId`, `revisao`, `dia`, `refeicao`, `item`, `alimentoIdAtual` (o alimento que a tela mostrava na posição), `alimentoIdNovo` e `escopo` (`refeicao` ou `semana`). Sem quantidade nem kcal: o servidor recalcula tudo e confere as regras de novo.
+**Devolve:** a `DietaResponse` com a revisão nova e `marcacoesRemovidas` (quantas marcações "já tenho" caíram nesta gravação; só a contagem). Trocar de novo um item já trocado mantém o primeiro `original`.
+**Erros:** **400** `"Escopo inválido."`; **400** `"Este substituto não serve aqui (porção, meta do dia ou o que você marcou para evitar). Atualize as opções e escolha outro."` (por exemplo, as preferências mudaram em outra aba); **409** `"Sua dieta mudou desde que a tela foi aberta. Atualize e tente de novo."` (revisão velha, outra dieta gerada ou outro alimento na posição)
+
+### `DELETE /api/dietas/atual/trocas/ultima?dietaId=&revisao=`
+"Desfazer": volta exatamente ao que estava antes da última gravação (troca ou volta ao original), se ela ainda é a última.
+**Devolve:** a `DietaResponse` com a revisão nova e `marcacoesRemovidas`
+**Erros:** **409** `"Não há troca para desfazer."` ou a mensagem de dieta mudada
+
+### `DELETE /api/dietas/atual/trocas?dietaId=&revisao=&dia=&refeicao=&item=&escopo=`
+"Voltar ao original": o item volta ao primeiro original, só ele (`escopo=refeicao`) ou, na semana, todos os itens com o mesmo alimento que vieram do mesmo original (`escopo=semana`).
+**Devolve:** a `DietaResponse` com a revisão nova e `marcacoesRemovidas`. Pode ser desfeito como uma troca.
+**Erros:** **400** `"Escopo inválido."`; **400** `"Este alimento não foi trocado."`; **409** a mensagem de dieta mudada
 
 ---
 
