@@ -1,5 +1,6 @@
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
@@ -33,6 +34,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("cadastro")]
+    [EnableRateLimiting(LimitesAutenticacao.PoliticaCadastro)]
     public async Task<IActionResult> Cadastro(CadastroRequest request)
     {
         var email = NormalizacaoEmail.Normalizar(request.Email);
@@ -68,6 +70,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
+    [EnableRateLimiting(LimitesAutenticacao.PoliticaLogin)]
     public async Task<IActionResult> Login(LoginRequest request)
     {
         var email = NormalizacaoEmail.Normalizar(request.Email);
@@ -110,6 +113,7 @@ public class AuthController : ControllerBase
     /// verificado pelo Google (EmailVerified).
     /// </summary>
     [HttpPost("google")]
+    [EnableRateLimiting(LimitesAutenticacao.PoliticaGoogle)]
     public async Task<IActionResult> LoginComGoogle(GoogleLoginRequest request)
     {
         GoogleJsonWebSignature.Payload payload;

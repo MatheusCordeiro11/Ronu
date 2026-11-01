@@ -161,8 +161,8 @@ app.UseCors(FrontendCorsPolicy);
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Limites das rotas com [EnableRateLimiting]: por IP na redefinição de senha, por usuário na troca de
-// alimento (depois da autenticação, que preenche o usuário).
+// Limites das rotas com [EnableRateLimiting]: por IP na redefinição de senha e na entrada (login, Google,
+// cadastro), por usuário na troca de alimento (depois da autenticação, que preenche o usuário).
 app.UseRateLimiter();
 
 // Configure the HTTP request pipeline.

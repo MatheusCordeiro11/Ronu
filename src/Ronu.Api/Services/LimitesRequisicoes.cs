@@ -13,6 +13,7 @@ public static class LimitesRequisicoes
     {
         LimitesRedefinicaoSenha.Configurar(opcoes);
         LimitesTroca.Configurar(opcoes);
+        LimitesAutenticacao.Configurar(opcoes);
 
         opcoes.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         opcoes.OnRejected = (contexto, cancelamento) =>
@@ -25,6 +26,8 @@ public static class LimitesRequisicoes
     public static string Mensagem(string? politica) => politica switch
     {
         LimitesTroca.PoliticaLeitura or LimitesTroca.PoliticaEscrita => LimitesTroca.MensagemLimite,
+        LimitesAutenticacao.PoliticaLogin or LimitesAutenticacao.PoliticaGoogle => LimitesAutenticacao.MensagemEntrada,
+        LimitesAutenticacao.PoliticaCadastro => LimitesAutenticacao.MensagemCadastro,
         _ => LimitesRedefinicaoSenha.MensagemLimite
     };
 }

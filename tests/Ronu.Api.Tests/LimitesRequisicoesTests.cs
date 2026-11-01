@@ -54,9 +54,28 @@ public class LimitesRequisicoesTests
         Assert.Equal((429, LimitesRedefinicaoSenha.MensagemLimite), await Recusar(politica));
     }
 
+    [Theory]
+    [InlineData(LimitesAutenticacao.PoliticaLogin)]
+    [InlineData(LimitesAutenticacao.PoliticaGoogle)]
+    public async Task Login_E_Google_Dizem_Quanto_Esperar(string politica)
+    {
+        Assert.Equal((429, LimitesAutenticacao.MensagemEntrada), await Recusar(politica));
+    }
+
+    [Fact]
+    public async Task Cadastro_Tem_A_Propria_Mensagem()
+    {
+        Assert.Equal((429, LimitesAutenticacao.MensagemCadastro), await Recusar(LimitesAutenticacao.PoliticaCadastro));
+    }
+
     [Fact]
     public void Mensagens_Sao_Diferentes()
     {
-        Assert.NotEqual(LimitesRedefinicaoSenha.MensagemLimite, LimitesTroca.MensagemLimite);
+        string[] mensagens =
+        [
+            LimitesRedefinicaoSenha.MensagemLimite, LimitesTroca.MensagemLimite,
+            LimitesAutenticacao.MensagemEntrada, LimitesAutenticacao.MensagemCadastro
+        ];
+        Assert.Equal(mensagens.Length, mensagens.Distinct().Count());
     }
 }
