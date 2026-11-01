@@ -22,6 +22,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<MetaDieta> MetasDieta { get; set; }
     public DbSet<PedidoRedefinicaoSenha> PedidosRedefinicaoSenha { get; set; }
     public DbSet<ListaComprasMarcacao> ListaComprasMarcacoes { get; set; }
+    public DbSet<Consentimento> Consentimentos { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -49,6 +50,16 @@ public class ApplicationDbContext : DbContext
         {
             marcacao.HasOne(m => m.Usuario).WithMany().HasForeignKey(m => m.UsuarioId).OnDelete(DeleteBehavior.Cascade);
             marcacao.HasOne(m => m.DietaIA).WithMany().HasForeignKey(m => m.DietaIAId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Apagar a conta apaga os aceites. O índice único parcial barra dois aceites valendo da mesma versão
+        // (duas abas aceitando ao mesmo tempo); os revogados ficam fora dele, para o histórico poder repetir.
+        modelBuilder.Entity<Consentimento>(consentimento =>
+        {
+            consentimento.HasOne(c => c.Usuario).WithMany().HasForeignKey(c => c.UsuarioId).OnDelete(DeleteBehavior.Cascade);
+            consentimento.HasIndex(c => new { c.UsuarioId, c.Tipo, c.Versao })
+                .IsUnique()
+                .HasFilter("\"RevogadoEm\" IS NULL");
         });
     }
 }

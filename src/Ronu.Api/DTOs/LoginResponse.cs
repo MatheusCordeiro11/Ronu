@@ -9,6 +9,10 @@ public class LoginResponse
     public required string Token { get; set; }
     public required UsuarioResumo Usuario { get; set; }
     public bool PrecisaInformarEstado { get; set; }
+
+    // A conta ainda não aceitou a versão vigente do consentimento geral (conta Google nova, conta anterior ao
+    // consentimento ou texto novo): a tela leva ao aceite antes de tudo.
+    public bool PrecisaConsentimento { get; set; }
 }
 
 /// <summary>

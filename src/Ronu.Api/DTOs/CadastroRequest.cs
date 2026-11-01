@@ -32,4 +32,8 @@ public class CadastroRequest
 
     [Required(ErrorMessage = "Informe seu estado.")]
     public required string Estado { get; init; }
+
+    // A caixa do consentimento geral, marcada na tela de cadastro. Obrigatória enquanto Consentimento:Exigir está
+    // ligado; o AuthController confere (não dá para pôr [Required] aqui, porque depende do interruptor).
+    public ConsentimentoCadastroRequest? ConsentimentoGeral { get; init; }
 }

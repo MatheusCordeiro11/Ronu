@@ -4,6 +4,7 @@ using Ronu.Api.Controllers;
 using Ronu.Api.DTOs;
 using Ronu.Api.Models;
 using Ronu.Api.Services;
+using Ronu.Api.Services.Consentimentos;
 
 namespace Ronu.Api.Tests;
 
@@ -65,5 +66,9 @@ public class NormalizacaoEmailTests
     }
 
     private static CadastroRequest Cadastro(string email) =>
-        new() { Nome = "Fulano", Email = email, Senha = "senha-de-teste", Estado = "SP" };
+        new()
+        {
+            Nome = "Fulano", Email = email, Senha = "senha-de-teste", Estado = "SP",
+            ConsentimentoGeral = new ConsentimentoCadastroRequest { Versao = TextosConsentimento.VersaoVigente(TextosConsentimento.TipoGeral) }
+        };
 }

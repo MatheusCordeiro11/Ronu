@@ -28,6 +28,14 @@ public class Usuario
     // senha nunca foi trocada.
     public DateTime? SenhaAlteradaEm { get; set; }
 
+    // Prazos de guarda (docs/privacidade.md). Nulo nas contas anteriores ao campo: a limpeza de conta sem aceite
+    // só apaga quando CriadoEm é conhecido, para nunca tomar uma conta antiga por recém-criada.
+    public DateTime? CriadoEm { get; set; }
+
+    // Atualizado a cada login (senha ou Google). O token vale 2 horas, então o último login é um bom retrato do
+    // último uso, sem gravar nada a cada requisição. Nulo até o primeiro login depois do campo existir.
+    public DateTime? UltimoLoginEm { get; set; }
+
     public decimal? Altura { get; set; }
     public DateOnly? DataNascimento { get; set; }
     public string? Sexo { get; set; }

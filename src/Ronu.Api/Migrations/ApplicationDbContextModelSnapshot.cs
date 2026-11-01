@@ -22,6 +22,42 @@ namespace Ronu.Api.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Ronu.Api.Models.Consentimento", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AceitoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("RevogadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Versao")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId", "Tipo");
+
+                    b.HasIndex("UsuarioId", "Tipo", "Versao")
+                        .IsUnique()
+                        .HasFilter("\"RevogadoEm\" IS NULL");
+
+                    b.ToTable("Consentimentos");
+                });
+
             modelBuilder.Entity("Ronu.Api.Models.DietaIA", b =>
                 {
                     b.Property<int>("Id")
@@ -258,6 +294,9 @@ namespace Ronu.Api.Migrations
                     b.Property<decimal?>("Altura")
                         .HasColumnType("numeric");
 
+                    b.Property<DateTime?>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateOnly?>("DataNascimento")
                         .HasColumnType("date");
 
@@ -297,6 +336,9 @@ namespace Ronu.Api.Migrations
                     b.Property<string>("Sexo")
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("UltimoLoginEm")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
@@ -333,6 +375,17 @@ namespace Ronu.Api.Migrations
                     b.HasIndex("UsuarioId");
 
                     b.ToTable("UsuarioModalidades");
+                });
+
+            modelBuilder.Entity("Ronu.Api.Models.Consentimento", b =>
+                {
+                    b.HasOne("Ronu.Api.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("Ronu.Api.Models.DietaIA", b =>

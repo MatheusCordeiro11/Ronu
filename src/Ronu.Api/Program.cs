@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Ronu.Api.Middleware;
 using Ronu.Api.Services;
+using Ronu.Api.Services.Consentimentos;
 using Ronu.Api.Services.Email;
 using Ronu.Api.Services.IA;
 using Ronu.Api.Validacao;
@@ -35,7 +36,8 @@ builder.Services.AddCors(options =>
 // O 400 automático do [ApiController] (DTO inválido) sai no formato dos demais
 // erros da API, { mensagem }, em vez do ValidationProblemDetails padrão, que o
 // frontend não lê. Ver RespostaValidacao.
-builder.Services.AddControllers()
+// FiltroConsentimento em todos os controllers: rota autenticada sem o aceite do consentimento geral responde 403.
+builder.Services.AddControllers(options => options.Filters.Add<FiltroConsentimento>())
     .ConfigureApiBehaviorOptions(options =>
     {
         options.InvalidModelStateResponseFactory = contexto => new BadRequestObjectResult(new

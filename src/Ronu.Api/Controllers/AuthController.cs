@@ -8,6 +8,7 @@ using Ronu.Api.Data;
 using Ronu.Api.DTOs;
 using Ronu.Api.Models;
 using Ronu.Api.Services;
+using Ronu.Api.Services.Consentimentos;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -37,6 +38,19 @@ public class AuthController : ControllerBase
     [EnableRateLimiting(LimitesAutenticacao.PoliticaCadastro)]
     public async Task<IActionResult> Cadastro(CadastroRequest request)
     {
+        // A conta e o aceite nascem juntos: nunca existe conta criada por aqui sem o consentimento, com o
+        // interruptor ligado. Desligado (só durante a publicação), o frontend antigo ainda cadastra sem ele.
+        if (request.ConsentimentoGeral is null && RegrasConsentimento.Exigir(_configuration))
+        {
+            return BadRequest(new { mensagem = RegrasConsentimento.MensagemCadastroSemAceite });
+        }
+
+        var vigente = TextosConsentimento.VersaoVigente(TextosConsentimento.TipoGeral);
+        if (request.ConsentimentoGeral is not null && request.ConsentimentoGeral.Versao != vigente)
+        {
+            return Conflict(new { mensagem = RegrasConsentimento.MensagemVersaoMudou, versaoVigente = vigente });
+        }
+
         var email = NormalizacaoEmail.Normalizar(request.Email);
 
         bool emailJaExiste = await _context.Usuarios.AnyAsync(u => u.Email == email);
@@ -50,10 +64,22 @@ public class AuthController : ControllerBase
             Nome = request.Nome,
             Email = email,
             Estado = request.Estado,
-            SenhaHash = BCrypt.Net.BCrypt.HashPassword(request.Senha)
+            SenhaHash = BCrypt.Net.BCrypt.HashPassword(request.Senha),
+            CriadoEm = DateTime.UtcNow
         };
 
         _context.Usuarios.Add(usuario);
+
+        if (request.ConsentimentoGeral is not null)
+        {
+            _context.Consentimentos.Add(new Consentimento
+            {
+                Usuario = usuario,
+                Tipo = TextosConsentimento.TipoGeral,
+                Versao = vigente,
+                AceitoEm = usuario.CriadoEm.Value
+            });
+        }
 
         try
         {
@@ -89,16 +115,10 @@ public class AuthController : ControllerBase
             return Unauthorized(new { mensagem = "Email ou senha inválidos." });
         }
 
-        var token = GerarToken(usuario);
+        usuario.UltimoLoginEm = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
 
-        var response = new LoginResponse
-        {
-            Token = token,
-            Usuario = new UsuarioResumo { Id = usuario.Id, Nome = usuario.Nome },
-            PrecisaInformarEstado = string.IsNullOrEmpty(usuario.Estado)
-        };
-
-        return Ok(response);
+        return Ok(await RespostaLogin(usuario));
     }
 
     /// <summary>
@@ -149,7 +169,8 @@ public class AuthController : ControllerBase
                 Nome = payload.Name,
                 Email = email,
                 SenhaHash = null,
-                GoogleId = payload.Subject
+                GoogleId = payload.Subject,
+                CriadoEm = DateTime.UtcNow
             };
 
             _context.Usuarios.Add(usuario);
@@ -159,19 +180,21 @@ public class AuthController : ControllerBase
             usuario.GoogleId = payload.Subject;
         }
 
+        // A conta Google nasce só com nome e email, sem aceite: o consentimento vem na tela seguinte, antes de
+        // qualquer dado de saúde (o FiltroConsentimento barra o resto até lá).
+        usuario.UltimoLoginEm = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
-        var token = GerarToken(usuario);
-
-        var response = new LoginResponse
-        {
-            Token = token,
-            Usuario = new UsuarioResumo { Id = usuario.Id, Nome = usuario.Nome },
-            PrecisaInformarEstado = string.IsNullOrEmpty(usuario.Estado)
-        };
-
-        return Ok(response);
+        return Ok(await RespostaLogin(usuario));
     }
+
+    private async Task<LoginResponse> RespostaLogin(Usuario usuario) => new()
+    {
+        Token = GerarToken(usuario),
+        Usuario = new UsuarioResumo { Id = usuario.Id, Nome = usuario.Nome },
+        PrecisaInformarEstado = string.IsNullOrEmpty(usuario.Estado),
+        PrecisaConsentimento = !await RegrasConsentimento.TemAceiteVigenteAsync(_context, usuario.Id, TextosConsentimento.TipoGeral)
+    };
 
     private string GerarToken(Usuario usuario)
     {
