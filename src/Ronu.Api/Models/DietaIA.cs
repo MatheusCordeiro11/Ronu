@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Ronu.Api.Models;
 
 /// <summary>
@@ -10,6 +12,12 @@ public class DietaIA
     public int Id { get; set; }
     public DateTime DataGeracao { get; set; }
     public required string ConteudoJson { get; set; }
+
+    // Sobe a cada troca de alimento gravada (trocar, desfazer, voltar ao original). Token de concorrência: o
+    // UPDATE só passa se a revisão no banco ainda é a lida, então duas abas trocando ao mesmo tempo não
+    // sobrescrevem uma à outra (a segunda recebe 409). O cliente manda a revisão que viu, pelo mesmo motivo.
+    [ConcurrencyCheck]
+    public int Revisao { get; set; }
 
     public int UsuarioId { get; set; }
 

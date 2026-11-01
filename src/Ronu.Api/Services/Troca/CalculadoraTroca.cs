@@ -28,7 +28,8 @@ public static class CalculadoraTroca
     // Calibração do projeto: a mesma margem com que a fase 4 conta um dia "na meta".
     public const decimal MargemDoDia = 0.05m;
 
-    // Até 3 das preferências e até 3 parecidos; o resto que passa nas regras vai para o "ver mais".
+    // Até 3 das preferências (no máximo um item por gosto) e até 3 parecidos; o resto que passa nas regras vai
+    // para o "ver mais".
     public const int OpcoesPorSecao = 3;
 
     // Teto só para o Legivel: a porção máxima é conferida depois, e uma quantidade acima dela tira a opção.
@@ -83,7 +84,13 @@ public static class CalculadoraTroca
 
         var naSemana = Posicoes(dias).Where(p => Encontrar(dias, p)!.AlimentoId == baseOriginal.Id).ToList();
 
-        var preferidos = lista.Preferencias.Where(p => p.Tipo == "preferido").SelectMany(p => p.ItensIds).ToHashSet();
+        // De cada item preferido, os gostos (índices em lista.Preferencias) que o casaram.
+        var preferidos = lista.Preferencias
+            .Select((p, indice) => (p, indice))
+            .Where(x => x.p.Tipo == "preferido")
+            .SelectMany(x => x.p.ItensIds.Select(id => (id, x.indice)))
+            .GroupBy(x => x.id)
+            .ToDictionary(g => g.Key, g => g.Select(x => x.indice).ToList());
         var evitados = lista.Preferencias.Where(p => p.Tipo == "evitar").SelectMany(p => p.ItensIds).ToHashSet();
         var candidatos = lista.Itens.Where(i => i.Item.Grupo == baseOriginal.Grupo && i.Item.Id != baseOriginal.Id).ToList();
         var naLista = candidatos.Select(c => c.Item.Id).ToHashSet();
@@ -138,10 +145,10 @@ public static class CalculadoraTroca
 
     private static OpcoesDoEscopo Escopo(
         IReadOnlyList<DiaDietaDto> dias, List<PosicaoItem> posicoes, AlimentoBase baseOriginal,
-        List<ItemDaLista> candidatos, HashSet<string> preferidos)
+        List<ItemDaLista> candidatos, Dictionary<string, List<int>> preferidos)
     {
         var opcoes = candidatos
-            .Select(c => Opcao(dias, posicoes, baseOriginal, c, preferidos.Contains(c.Item.Id)))
+            .Select(c => Opcao(dias, posicoes, baseOriginal, c, preferidos.ContainsKey(c.Item.Id)))
             .OfType<OpcaoTroca>()
             .ToList();
 
@@ -154,8 +161,23 @@ public static class CalculadoraTroca
             .ThenBy(o => o.Nome, StringComparer.Ordinal)
             .ToList();
 
-        var dasPreferencias = disponiveis.Where(o => o.Preferido).Take(OpcoesPorSecao).ToList();
-        var parecidos = disponiveis.Where(o => !o.Preferido).Take(OpcoesPorSecao).ToList();
+        // Um item por gosto, o primeiro na ordem acima (o que menos muda as kcal). Um item que casou com um gosto já
+        // representado também fica de fora; os de fora seguem para os parecidos e o "ver mais".
+        var gostosUsados = new HashSet<int>();
+        var dasPreferencias = new List<OpcaoTroca>();
+        foreach (var opcao in disponiveis.Where(o => o.Preferido))
+        {
+            var gostos = preferidos[opcao.AlimentoId];
+            if (dasPreferencias.Count == OpcoesPorSecao || gostos.Any(gostosUsados.Contains))
+            {
+                continue;
+            }
+
+            dasPreferencias.Add(opcao);
+            gostosUsados.UnionWith(gostos);
+        }
+
+        var parecidos = disponiveis.Except(dasPreferencias).Take(OpcoesPorSecao).ToList();
         var verMais = disponiveis.Except(dasPreferencias).Except(parecidos).ToList();
 
         var fora = opcoes

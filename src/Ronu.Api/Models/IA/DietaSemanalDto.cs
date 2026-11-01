@@ -25,6 +25,11 @@ public class DietaSemanalDto
     // Nulo quando a lista atende aos mínimos e nas dietas antigas.
     public AvisoListaPobreDto? AvisoListaPobre { get; set; }
 
+    // A última troca de alimento gravada (ou volta ao original), com os itens como estavam antes, para o
+    // "Desfazer" voltar exatamente ali, mesmo quando o item já tinha sido trocado. Nulo sem troca a desfazer.
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public UltimaTrocaDto? UltimaTroca { get; set; }
+
     // Manutenção da fórmula de cada dia (índice 0 = segunda), só para o
     // RepositorioDietaIA gravar em MetaDieta. Fora do JSON salvo e da resposta
     // da API: a tabela MetasDieta é o lugar dela.

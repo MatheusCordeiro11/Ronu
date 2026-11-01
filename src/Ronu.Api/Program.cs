@@ -93,7 +93,11 @@ if (string.IsNullOrWhiteSpace(builder.Configuration["Frontend:UrlBase"]))
     throw new InvalidOperationException("Frontend:UrlBase não configurado.");
 }
 builder.Services.AddScoped<ServicoRedefinicaoSenha>();
-builder.Services.AddRateLimiter(LimitesRedefinicaoSenha.Configurar);
+builder.Services.AddRateLimiter(opcoes =>
+{
+    LimitesRedefinicaoSenha.Configurar(opcoes);
+    LimitesTroca.Configurar(opcoes);
+});
 
 // IP e protocolo reais do cliente atrás do proxy do App Service (X-Forwarded-*),
 // para o limite por IP. O proxy não tem IP fixo conhecido, então as listas de
@@ -161,7 +165,8 @@ app.UseCors(FrontendCorsPolicy);
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Limite por IP das rotas com [EnableRateLimiting] (redefinição de senha).
+// Limites das rotas com [EnableRateLimiting]: por IP na redefinição de senha, por usuário na troca de
+// alimento (depois da autenticação, que preenche o usuário).
 app.UseRateLimiter();
 
 // Configure the HTTP request pipeline.

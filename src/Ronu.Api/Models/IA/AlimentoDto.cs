@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Ronu.Api.Models.IA;
 
 /// <summary>
@@ -23,4 +25,10 @@ public class AlimentoDto
     // Kcal e macros deste item, calculados pela base (CalculoPelaBase, fase 3),
     // sem arredondar. Nulo nas dietas antigas e na resposta do Gemini.
     public MacrosDto? Macros { get; set; }
+
+    // O item que a dieta trazia antes da primeira troca (trocar alimento), para a marca "trocado" e o "Voltar
+    // ao original". Trocar de novo um item já trocado mantém o primeiro original. Fora do JSON quando nulo:
+    // os itens nunca trocados, e todos das dietas anteriores à troca, continuam iguais.
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public AlimentoDto? Original { get; set; }
 }

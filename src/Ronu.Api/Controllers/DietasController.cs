@@ -6,6 +6,7 @@ using Ronu.Api.DTOs;
 using Ronu.Api.Models;
 using Ronu.Api.Models.IA;
 using Ronu.Api.Services.IA;
+using Ronu.Api.Services.Troca;
 using System.Security.Claims;
 using System.Text.Json;
 
@@ -174,13 +175,7 @@ public class DietasController : ControllerBase
             return NotFound(new { mensagem = "Nenhuma dieta gerada ainda." });
         }
 
-        var response = new DietaResponse
-        {
-            DataGeracao = dietaIA.DataGeracao,
-            Dieta = JsonSerializer.Deserialize<DietaSemanalDto>(dietaIA.ConteudoJson)!
-        };
-
-        return Ok(response);
+        return Ok(Resposta(dietaIA));
     }
 
     /// <summary>
@@ -196,12 +191,25 @@ public class DietasController : ControllerBase
             .OrderByDescending(d => d.DataGeracao)
             .ToListAsync();
 
-        var response = dietasIA.Select(d => new DietaResponse
-        {
-            DataGeracao = d.DataGeracao,
-            Dieta = JsonSerializer.Deserialize<DietaSemanalDto>(d.ConteudoJson)!
-        });
+        return Ok(dietasIA.Select(Resposta));
+    }
 
-        return Ok(response);
+    /// <summary>A dieta salva com o id, a revisão e, quando não tem troca de alimento, o porquê.</summary>
+    public static DietaResponse Resposta(DietaIA dietaIA)
+    {
+        var dieta = JsonSerializer.Deserialize<DietaSemanalDto>(dietaIA.ConteudoJson)!;
+        return new DietaResponse
+        {
+            DataGeracao = dietaIA.DataGeracao,
+            Dieta = dieta,
+            DietaId = dietaIA.Id,
+            Revisao = dietaIA.Revisao,
+            SemTroca = CalculadoraTroca.MotivoSemTroca(dieta) switch
+            {
+                MotivoSemTroca.DietaAnterior => "dieta-anterior",
+                MotivoSemTroca.OutraVersaoDaBase => "outra-versao-da-base",
+                _ => null
+            }
+        };
     }
 }

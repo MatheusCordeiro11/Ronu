@@ -216,6 +216,30 @@ public class CalculadoraTrocaTests
         Assert.DoesNotContain(r.Parecidos.Concat(r.VerMais), o => o.AlimentoId == "file-de-tilapia-grelhado");
     }
 
+    // "Peixe" casa vários peixes: só o que menos muda as kcal fica nas preferências, os outros seguem nos
+    // parecidos e no "ver mais".
+    [Fact]
+    public void Um_Item_Por_Gosto_Nas_Preferencias()
+    {
+        var r = Calcular(AlmocoComFrango(), Frango, Lista(null, Gosto("peixe"))).Refeicao;
+
+        var peixes = Disponiveis(r).Where(o => Base(o.AlimentoId).Categoria == CategoriaAlimento.Peixes).ToList();
+        Assert.True(peixes.Count >= 2);
+        var escolhido = Assert.Single(r.DasPreferencias);
+        Assert.Equal(peixes.Min(o => Math.Abs(o.DifKcal)), Math.Abs(escolhido.DifKcal));
+        Assert.All(peixes.Where(o => o != escolhido), o => Assert.Contains(o, r.Parecidos.Concat(r.VerMais)));
+    }
+
+    [Fact]
+    public void Cada_Gosto_Tem_O_Seu_Item_Nas_Preferencias()
+    {
+        var r = Calcular(AlmocoComFrango(), Frango, Lista(null, Gosto("peixe"), Gosto("lombo"))).Refeicao;
+
+        Assert.Equal(2, r.DasPreferencias.Count);
+        Assert.Contains(r.DasPreferencias, o => o.AlimentoId == "lombo-suino-assado");
+        Assert.Single(r.DasPreferencias, o => Base(o.AlimentoId).Categoria == CategoriaAlimento.Peixes);
+    }
+
     [Fact]
     public void Ate_Tres_Parecidos_E_O_Resto_No_Ver_Mais_Pelas_Kcal()
     {

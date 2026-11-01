@@ -37,6 +37,10 @@ namespace Ronu.Api.Migrations
                     b.Property<DateTime>("DataGeracao")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("Revisao")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
                     b.Property<int>("UsuarioId")
                         .HasColumnType("integer");
 
