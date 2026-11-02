@@ -2,7 +2,9 @@
 
 Lista de endpoints da API, definidos a partir das user stories (`docs/user-stories.md`) e do modelo de dados (`docs/der.png` / `docs/diagrama-classes.md`).
 
-**Convenção geral:** todas as rotas exigem autenticação via token JWT (header `Authorization: Bearer <token>`), exceto `POST /api/auth/cadastro`, `POST /api/auth/login`, `POST /api/auth/google`, as três rotas de redefinição de senha (`POST /api/auth/esqueci-senha`, `POST /api/auth/redefinir-senha/verificar` e `POST /api/auth/redefinir-senha`) e `GET /api/modalidades`. O `usuarioId` nunca é enviado pelo cliente — é sempre extraído do token, para evitar que um usuário manipule dados de outra conta. Sem token (ou com token expirado), a resposta é **401** — também quando o token foi emitido antes da última troca de senha da conta (claim `iat` contra `Usuario.SenhaAlteradaEm`; tokens sem `iat`, anteriores a essa regra, valem até expirar) ou quando a conta não existe mais.
+**Convenção geral:** todas as rotas exigem autenticação via token JWT (header `Authorization: Bearer <token>`), exceto `POST /api/auth/cadastro`, `POST /api/auth/login`, `POST /api/auth/google`, as três rotas de redefinição de senha (`POST /api/auth/esqueci-senha`, `POST /api/auth/redefinir-senha/verificar` e `POST /api/auth/redefinir-senha`), `GET /api/modalidades` e `GET /api/consentimentos/vigente/{tipo}`. O `usuarioId` nunca é enviado pelo cliente — é sempre extraído do token, para evitar que um usuário manipule dados de outra conta. Sem token (ou com token expirado), a resposta é **401** — também quando o token foi emitido antes da última troca de senha da conta (claim `iat` contra `Usuario.SenhaAlteradaEm`; tokens sem `iat`, anteriores a essa regra, valem até expirar) ou quando a conta não existe mais.
+
+**Consentimento:** toda rota com login exige que a conta tenha aceitado a versão vigente do consentimento geral (dados de saúde; LGPD, art. 11, I). Sem esse aceite, a resposta é **403** `{ "mensagem": "Para continuar, autorize o uso dos seus dados de saúde.", "motivo": "consentimento" }`, e o frontend leva a pessoa à tela de consentimento pelo `motivo`. Ficam de fora as rotas de `/api/consentimentos` (é por elas que se aceita) e as de `/api/conta` (apagar a conta e baixar os dados são direitos de quem nunca aceitou ou quer revogar). Quem decide é o `FiltroConsentimento`, global; uma rota se dispensa com `[DispensaConsentimento]`. A regra fica ligada pela configuração `Consentimento:Exigir`, que vale `true` quando falta: só um `false` explícito a desliga, durante a publicação (passo a passo em `docs/privacidade.md`).
 
 **Erros:** todos os erros vêm com corpo `{ "mensagem": "<texto para o usuário>" }`, em português. Isso vale também para os da validação automática do modelo (**400**): campo obrigatório vazio ou nulo, `[MinLength]`, `[Range]` devolvem a **primeira** mensagem de erro, escrita no atributo do DTO (ex.: `{ "mensagem": "A senha deve ter pelo menos 8 caracteres." }`). Erros que não vêm de um atributo — JSON malformado ou com tipo errado, campo obrigatório ausente do JSON, corpo vazio, parâmetro de rota inválido — devolvem a genérica `{ "mensagem": "Requisição inválida. Confira os dados enviados." }`. Nenhuma mensagem padrão do ASP.NET (em inglês) chega ao cliente (`Validacao/RespostaValidacao.cs`). Exceções não tratadas viram **500** com `{ "mensagem" }` genérica em produção.
 
@@ -14,21 +16,26 @@ Lista de endpoints da API, definidos a partir das user stories (`docs/user-stori
 
 **Senha:** as mesmas regras no cadastro e na redefinição (`Validacao/RegrasSenha.cs`): de 8 a 64 caracteres, e no máximo 72 bytes (o limite do BCrypt; acentos e símbolos ocupam mais de 1 byte).
 
+**Limites por IP** (`Services/LimitesAutenticacao.cs`, em memória: zeram quando o App Service reinicia). O login, contra força bruta de senha; o Google e o cadastro, contra conta criada em massa. Contam toda requisição, certa ou errada, e as folgas cobrem IP compartilhado (CGNAT do celular, rede de faculdade). O IP é o do cliente, pelos forwarded headers:
+- `POST /api/auth/login` e `POST /api/auth/google`: 20 tentativas a cada 15 minutos, cada rota com a sua contagem (quem errou a senha ainda entra com o Google). Acima disso, **429** `{ "mensagem": "Muitas tentativas de entrar. Espere 15 minutos e tente de novo." }`;
+- `POST /api/auth/cadastro`: 5 cadastros por hora. Acima disso, **429** `{ "mensagem": "Muitas contas criadas a partir desta conexão. Tente de novo em até uma hora." }`.
+
 ### `POST /api/auth/cadastro`
-**Recebe:** `nome`, `email`, `senha` (8 a 64 caracteres), `estado` (UF)
+**Recebe:** `nome`, `email`, `senha` (8 a 64 caracteres), `estado` (UF), `consentimentoGeral { versao }` (a versão do texto que a caixa do cadastro mostrou, lida do `GET /api/consentimentos/vigente/geral`)
 **Devolve:** `id`, `nome`, `email` (normalizado; a senha nunca é retornada, mesmo em hash)
-**Erros:** 409 se o email já está cadastrado (sem diferenciar maiúsculas); 400 se a senha for curta ou longa demais ou se algum campo vier vazio.
+*(a conta e o aceite são gravados juntos, na mesma transação: com `Consentimento:Exigir` ligado, nenhuma conta nasce por aqui sem o aceite. A conta grava `CriadoEm`)*
+**Erros:** 400 "Para criar a conta, autorize o uso dos seus dados de saúde." sem `consentimentoGeral`; 409 `{ mensagem, versaoVigente }` se a versão enviada não é a vigente (o texto mudou com a tela aberta); 409 `{ mensagem }` sem `versaoVigente` se o email já está cadastrado (sem diferenciar maiúsculas); 400 se a senha for curta ou longa demais ou se algum campo vier vazio. O frontend separa os dois 409 pela presença de `versaoVigente`. **429** acima do limite por IP (acima).
 
 ### `POST /api/auth/login`
 **Recebe:** `email` (sem diferenciar maiúsculas), `senha`
-**Devolve:** `token` (JWT, válido por 2 horas, com a claim `iat`), `usuario { id, nome }`, `precisaInformarEstado` (true quando a conta ainda não tem UF — contas via Google ou anteriores ao campo)
-**Erros:** 401 com "Email ou senha inválidos." ou, se a conta foi criada pelo Google e não tem senha, com orientação para entrar com o Google.
+**Devolve:** `token` (JWT, válido por 2 horas, com a claim `iat`), `usuario { id, nome }`, `precisaInformarEstado` (true quando a conta ainda não tem UF — contas via Google ou anteriores ao campo), `precisaConsentimento` (true quando a conta não tem aceite da versão vigente do consentimento geral — conta Google nova, conta anterior ao consentimento ou texto novo; o frontend vai para a tela de consentimento antes de tudo)
+**Erros:** 401 com "Email ou senha inválidos." ou, se a conta foi criada pelo Google e não tem senha, com orientação para entrar com o Google; **429** acima do limite por IP (acima).
 
 ### `POST /api/auth/google`
 **Recebe:** `idToken` (o credential devolvido pelo botão do Google)
 **Devolve:** o mesmo formato do `POST /api/auth/login`
-*(a API valida a assinatura do token junto ao Google antes de usar qualquer dado dele. Se não existe conta com o email, cria uma sem senha; se existe, vincula o login com Google a ela. Por isso exige o email verificado pelo Google — `EmailVerified`)*
-**Erros:** 401 se o token do Google for inválido ou se o email da conta Google não estiver verificado.
+*(a API valida a assinatura do token junto ao Google antes de usar qualquer dado dele. Se não existe conta com o email, cria uma sem senha; se existe, vincula o login com Google a ela. Por isso exige o email verificado pelo Google — `EmailVerified`. A conta criada aqui nasce sem aceite do consentimento, e a resposta vem com `precisaConsentimento: true`)*
+**Erros:** 401 se o token do Google for inválido ou se o email da conta Google não estiver verificado; **429** acima do limite por IP (acima).
 
 ### `POST /api/auth/esqueci-senha`
 **Recebe:** `email`
@@ -255,6 +262,54 @@ Calcula a meta da fórmula sem gravar nada e sem chamar a IA, com as mesmas clas
 **Recebe (tudo opcional; o que não vier usa o dado salvo):** `sexo` (`Masculino` ou `Feminino`), `altura` (cm, 100 a 250), `dataNascimento` (idade de 18 a 100 anos), `peso` (kg, 20 a 300; ausente = peso de tendência salvo), `objetivo` (`perder peso`, `manter peso` ou `ganhar peso`; ausente = o do registro mais recente), `nivelAtividade` (`sentado`, `em_pe`, `andando` ou `bracal`; ausente = o salvo, e sem nível salvo o fator 1,4 de antes da pergunta), `modalidades [{ modalidadeId, diasSemana, duracaoMediaHoras }]` (mesmas regras do `POST /api/usuarios/modalidades`, sem repetir modalidade; se vier, mesmo vazia, substitui a lista salva)
 **Devolve:** `versaoFormula`; `entradas { sexo, altura, dataNascimento, idade, peso, pesoOrigem ("informado" ou "tendencia"), objetivo }`; `gastoRepouso { total, peso, altura, idade, sexo }` (as parcelas de Mifflin-St Jeor, que somam o total pelo maior resto); `atividadeForaDoTreino { fator, nivel, kcal }` (`nivel` nulo = sem resposta, fator 1,4); `ritmoEsperadoKgSemana`; `modalidades [{ modalidadeId, nome, metReferencia, duracaoHoras, diasSemana, kcalSessao }]`; `dias` (sempre 7, de 1 = segunda a 7 = domingo) com `diaSemana`, `treinoKcal`, `manutencao`, `objetivoKcal`, `tetoDeficitAplicado` e `metaFormula`. Valores em kcal inteiras: cada parte é arredondada uma vez e todo total é a soma das partes mostradas
 **Erros:** 400 `{ mensagem }` para valor fora do conjunto ou da faixa e quando falta um dado que também não está salvo ("Informe seu peso." etc.); 404 se uma modalidade não existe.
+
+---
+
+## Consentimento
+
+O texto de cada tipo de consentimento fica no código, por versão (`Services/Consentimentos/TextosConsentimento.cs`); a vigente é a maior versão do tipo, e o histórico do git guarda o que cada versão dizia. Hoje só existe o tipo `geral`. Mudar o que um texto publicado diz pede uma versão nova, e aí todo mundo aceita de novo no próximo acesso (o aceite vale só se é da versão vigente e não foi revogado). A tela sempre mostra o texto que vem da API e manda de volta a versão que mostrou: o texto lido e a versão gravada não têm como divergir.
+
+### `GET /api/consentimentos/vigente/{tipo}`
+Sem login: é o que a caixa do cadastro mostra, antes de a conta existir.
+**Devolve:** `tipo`, `versao`, `titulo`, `texto`. Nenhum dado de conta
+**Erros:** 400 "Tipo de autorização inválido."; **429** `{ mensagem }` acima de 60 leituras por minuto do mesmo IP.
+
+### `GET /api/consentimentos/{tipo}`
+**Devolve:** `tipo`, `versaoVigente`, `titulo`, `texto`, `aceito` (o aceite mais recente ainda não revogado, de qualquer versão: `{ versao, aceitoEm }`; nulo se nunca aceitou) e `precisaAceitar` (sem aceite da versão vigente). Responde do mesmo jeito com `Consentimento:Exigir` desligado: o interruptor só decide se a API barra
+**Erros:** 400 "Tipo de autorização inválido."
+
+### `POST /api/consentimentos`
+**Recebe:** `tipo`, `versao` (a que a tela mostrou)
+**Devolve:** 204 sem corpo. A data é a do servidor e o usuário vem do token. Aceitar de novo a versão já aceita não duplica (e duas abas ao mesmo tempo esbarram no índice único parcial, tratado como já aceito)
+**Erros:** 400 "Tipo de autorização inválido." ou campo faltando; **409** `{ mensagem: "O texto da autorização mudou. Leia de novo e aceite a versão nova.", versaoVigente }` se a versão não é a vigente; **429** acima de 10 aceites por minuto do mesmo usuário.
+
+Não há rota para revogar: revogar o consentimento geral é apagar a conta (`DELETE /api/conta`), porque sem ele o Ronu não funciona.
+
+---
+
+## Conta (direitos do titular)
+
+As três rotas exigem login, mas não o consentimento: valem também para quem nunca aceitou ou quer revogar (LGPD, art. 18).
+
+### `GET /api/conta`
+**Devolve:** `temSenha`, só isso: diz se a exclusão se confirma com a senha ou com a frase. Existe à parte do `GET /api/perfil` porque a tela de consentimento precisa dele, e lá o perfil ainda responde 403
+**Erros:** 404 se a conta não existe mais.
+
+### `GET /api/conta/exportacao`
+"Baixar meus dados" (art. 18, II e V).
+**Devolve:** um arquivo JSON (`application/json`, anexo `ronu-dados-AAAA-MM-DD.json`, com `Cache-Control: no-store`), formato `ronu-exportacao-v1`: `geradoEm`, `conta` (nome, email, UF, datas, se tem senha e se tem Google vinculado, com o `googleId`), `perfil`, `pesagens`, `modalidades`, `preferenciasAlimentares`, `dietas` (com o cardápio como JSON), `metasDieta`, `listaComprasMarcacoes`, `consentimentos` e `pedidosRedefinicaoSenha`. Montado campo a campo, nunca serializando as entidades: ficam de fora o hash da senha e o hash do token de redefinição, e um campo novo no modelo só entra se alguém o escrever em `ExportacaoConta`
+**Erros:** 404 "Conta não encontrada."; **429** acima de 5 exportações por hora do mesmo usuário.
+
+### `DELETE /api/conta`
+Apaga a conta e tudo dela (art. 18, VI), também usado para revogar o consentimento.
+**Recebe:** conta com senha: `senha`; conta só com Google: `confirmacao` com a frase `apagar minha conta` (sem diferenciar maiúsculas, ignorando espaços nas pontas)
+**Devolve:** 204 sem corpo, também se a conta já tinha sido apagada (outra aba). `ExclusaoConta` apaga cada tabela com `UsuarioId` explicitamente, num `SaveChanges` só (tudo ou nada), com a cascata do PostgreSQL como segunda garantia; um teste por reflexão falha se uma tabela nova com `UsuarioId` não entrar na lista. Depois disso, todo token da conta responde 401. O log guarda só o id. As cópias de segurança do banco seguem o prazo de `docs/privacidade.md`
+**Erros:** 400 "Digite sua senha para confirmar.", "Senha incorreta." ou `Digite "apagar minha conta" para confirmar.` (400, não 401: o 401 faria a tela encerrar a sessão por uma senha errada); **429** acima de 5 tentativas em 15 minutos do mesmo usuário.
+
+### Limpeza automática (sem rota)
+O `ServicoLimpezaRetencao` roda a `LimpezaRetencao` 1 minuto depois de a API subir e a cada 24 horas (no App Service F1 a API dorme sem uso, então roda pelo menos a cada subida). Ela apaga:
+- pedidos de redefinição de senha com mais de 30 dias;
+- contas com mais de 30 dias que nunca aceitaram nenhuma versão do consentimento e não têm nenhum dado além de nome e email. Contas com `CriadoEm` nulo (anteriores ao campo) nunca entram.
 
 ---
 
