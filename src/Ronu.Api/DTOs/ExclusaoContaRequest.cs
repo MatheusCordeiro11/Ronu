@@ -11,3 +11,11 @@ public class ExclusaoContaRequest
     public string? Senha { get; set; }
     public string? Confirmacao { get; set; }
 }
+
+/// <summary>
+/// GET /api/conta: só se a conta tem senha (confirma a exclusão com ela) ou não (confirma com a frase).
+/// </summary>
+public class ContaResponse
+{
+    public bool TemSenha { get; set; }
+}

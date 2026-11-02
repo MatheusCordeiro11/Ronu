@@ -35,6 +35,31 @@ public class ConsentimentosController : ControllerBase
     private int UsuarioIdLogado =>
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
+    /// <summary>
+    /// O texto vigente sem login. O cadastro mostra a caixa antes de a conta existir, e o texto da tela tem de ser o
+    /// mesmo que a API cobra no POST do cadastro: escrito no HTML, os dois só ficariam iguais por sorte. Devolve só o
+    /// texto público, nenhum dado de conta.
+    /// </summary>
+    [HttpGet("vigente/{tipo}")]
+    [AllowAnonymous]
+    [EnableRateLimiting(LimitesConsentimento.PoliticaTextoPublico)]
+    public IActionResult TextoVigente(string tipo)
+    {
+        if (!TextosConsentimento.TipoValido(tipo))
+        {
+            return BadRequest(new { mensagem = MensagemTipoInvalido });
+        }
+
+        var texto = TextosConsentimento.TextoVigente(tipo);
+        return Ok(new ConsentimentoTextoResponse
+        {
+            Tipo = tipo,
+            Versao = TextosConsentimento.VersaoVigente(tipo),
+            Titulo = texto.Titulo,
+            Texto = texto.Corpo
+        });
+    }
+
     [HttpGet("{tipo}")]
     public async Task<IActionResult> Consultar(string tipo)
     {

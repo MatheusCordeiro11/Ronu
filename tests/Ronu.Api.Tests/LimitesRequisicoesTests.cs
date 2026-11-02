@@ -68,10 +68,12 @@ public class LimitesRequisicoesTests
         Assert.Equal((429, LimitesAutenticacao.MensagemCadastro), await Recusar(LimitesAutenticacao.PoliticaCadastro));
     }
 
-    [Fact]
-    public async Task Aceite_Do_Consentimento_Tem_A_Propria_Mensagem()
+    [Theory]
+    [InlineData(LimitesConsentimento.PoliticaAceite)]
+    [InlineData(LimitesConsentimento.PoliticaTextoPublico)]
+    public async Task Consentimento_Tem_A_Propria_Mensagem(string politica)
     {
-        Assert.Equal((429, LimitesConsentimento.MensagemLimite), await Recusar(LimitesConsentimento.PoliticaAceite));
+        Assert.Equal((429, LimitesConsentimento.MensagemLimite), await Recusar(politica));
     }
 
     [Theory]

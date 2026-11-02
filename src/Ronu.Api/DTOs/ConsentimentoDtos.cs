@@ -42,6 +42,17 @@ public class ConsentimentoResponse
     public bool PrecisaAceitar { get; set; }
 }
 
+/// <summary>
+/// GET /api/consentimentos/vigente/{tipo}, sem login: só o texto vigente, para a caixa do cadastro.
+/// </summary>
+public class ConsentimentoTextoResponse
+{
+    public required string Tipo { get; set; }
+    public int Versao { get; set; }
+    public required string Titulo { get; set; }
+    public required string Texto { get; set; }
+}
+
 public class AceiteResponse
 {
     public int Versao { get; set; }

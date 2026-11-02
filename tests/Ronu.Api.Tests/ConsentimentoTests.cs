@@ -13,6 +13,7 @@ using Ronu.Api.Controllers;
 using Ronu.Api.Data;
 using Ronu.Api.DTOs;
 using Ronu.Api.Models;
+using Ronu.Api.Services;
 using Ronu.Api.Services.Consentimentos;
 
 namespace Ronu.Api.Tests;
@@ -204,6 +205,49 @@ public class ConsentimentoTests
         Assert.Contains("Antes de apagar, você pode baixar seus dados no Perfil.", resposta.Texto);
         Assert.Null(resposta.Aceito);
         Assert.True(resposta.PrecisaAceitar);
+    }
+
+    // ---------- GET /api/consentimentos/vigente/{tipo}, sem login ----------
+
+    [Fact]
+    public void Texto_Publico_Traz_O_Mesmo_Texto_Da_Consulta_Logada_Sem_Login()
+    {
+        using var banco = BancoEmMemoria.NovoContexto();
+        var anonimo = new ConsentimentosController(banco)
+        {
+            ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
+        };
+
+        var resposta = Assert.IsType<ConsentimentoTextoResponse>(Assert.IsType<OkObjectResult>(
+            anonimo.TextoVigente(TextosConsentimento.TipoGeral)).Value);
+
+        var vigente = TextosConsentimento.TextoVigente(TextosConsentimento.TipoGeral);
+        Assert.Equal(Vigente, resposta.Versao);
+        Assert.Equal(vigente.Titulo, resposta.Titulo);
+        Assert.Equal(vigente.Corpo, resposta.Texto);
+    }
+
+    [Theory]
+    [InlineData("alergias")]
+    [InlineData("")]
+    public void Texto_Publico_De_Tipo_Desconhecido_Da_400(string tipo)
+    {
+        using var banco = BancoEmMemoria.NovoContexto();
+        Assert.IsType<BadRequestObjectResult>(new ConsentimentosController(banco).TextoVigente(tipo));
+    }
+
+    // A rota pública não pode herdar o [Authorize] da classe: o cadastro a chama antes de a conta existir.
+    [Fact]
+    public void Texto_Publico_E_A_Unica_Rota_Anonima_Do_Consentimento_E_Tem_Limite()
+    {
+        var anonimas = typeof(ConsentimentosController).GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+            .Where(m => m.GetCustomAttribute<AllowAnonymousAttribute>() is not null)
+            .ToList();
+
+        var metodo = Assert.Single(anonimas);
+        Assert.Equal(nameof(ConsentimentosController.TextoVigente), metodo.Name);
+        Assert.Equal(LimitesConsentimento.PoliticaTextoPublico,
+            metodo.GetCustomAttribute<Microsoft.AspNetCore.RateLimiting.EnableRateLimitingAttribute>()?.PolicyName);
     }
 
     [Fact]

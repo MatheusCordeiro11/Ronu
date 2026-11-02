@@ -87,6 +87,30 @@ public class ContaTests
         }
     };
 
+    // ---------- Consultar como a conta confirma a exclusão ----------
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Consulta_Diz_So_Se_A_Conta_Tem_Senha(bool comSenha)
+    {
+        using var banco = BancoEmMemoria.NovoContexto();
+        var (conta, _) = await ContaCompleta(banco, "consulta@exemplo.test", "banana", 80, comSenha);
+
+        var resposta = Assert.IsType<ContaResponse>(Assert.IsType<OkObjectResult>(await Controller(banco, conta.Id).Consultar()).Value);
+
+        Assert.Equal(comSenha, resposta.TemSenha);
+        // Nada além disso: nenhum dado da conta sai por aqui.
+        Assert.Equal(new[] { nameof(ContaResponse.TemSenha) }, typeof(ContaResponse).GetProperties().Select(p => p.Name));
+    }
+
+    [Fact]
+    public async Task Consulta_De_Conta_Que_Nao_Existe_Da_404()
+    {
+        using var banco = BancoEmMemoria.NovoContexto();
+        Assert.IsType<NotFoundResult>(await Controller(banco, 999).Consultar());
+    }
+
     // ---------- Apagar conta ----------
 
     [Fact]

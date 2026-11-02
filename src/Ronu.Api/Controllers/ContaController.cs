@@ -35,6 +35,20 @@ public class ContaController : ControllerBase
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
     /// <summary>
+    /// Só como a conta confirma a exclusão: com senha, ou com a frase (conta só Google). A tela de consentimento
+    /// precisa disso para abrir a exclusão, e lá o /api/perfil ainda responde 403.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> Consultar()
+    {
+        var conta = await _context.Usuarios.AsNoTracking()
+            .Where(u => u.Id == UsuarioIdLogado)
+            .Select(u => new ContaResponse { TemSenha = u.SenhaHash != null })
+            .FirstOrDefaultAsync();
+        return conta is null ? NotFound() : Ok(conta);
+    }
+
+    /// <summary>
     /// Apaga a conta e tudo dela. Os erros de confirmação são 400, não 401: o 401 faria a tela encerrar a sessão, e a
     /// pessoa só errou a senha. Depois de apagada, todo token da conta deixa de valer (ValidacaoSessaoJwt).
     /// </summary>

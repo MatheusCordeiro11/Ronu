@@ -30,7 +30,7 @@ public static class LimitesRequisicoes
         LimitesTroca.PoliticaLeitura or LimitesTroca.PoliticaEscrita => LimitesTroca.MensagemLimite,
         LimitesAutenticacao.PoliticaLogin or LimitesAutenticacao.PoliticaGoogle => LimitesAutenticacao.MensagemEntrada,
         LimitesAutenticacao.PoliticaCadastro => LimitesAutenticacao.MensagemCadastro,
-        LimitesConsentimento.PoliticaAceite => LimitesConsentimento.MensagemLimite,
+        LimitesConsentimento.PoliticaAceite or LimitesConsentimento.PoliticaTextoPublico => LimitesConsentimento.MensagemLimite,
         LimitesConta.PoliticaExclusao => LimitesConta.MensagemExclusao,
         LimitesConta.PoliticaExportacao => LimitesConta.MensagemExportacao,
         _ => LimitesRedefinicaoSenha.MensagemLimite
