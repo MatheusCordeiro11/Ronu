@@ -1,0 +1,124 @@
+// Ronu — Caixa do consentimento geral (cadastro.html e consentimento.html)
+// O título, o texto e a versão vêm sempre da API: escritos no HTML, o texto
+// da tela e o que a API cobra só ficariam iguais por sorte. O cadastro lê a
+// rota pública (ainda não há conta); o consentimento.html lê a rota logada,
+// que também diz se a pessoa já aceitou. A tela envia a versão que mostrou.
+//
+// A caixa no HTML:
+//   <div class="aceite" data-aceite aria-busy="true">
+//     <label class="aceite-marcar"><input type="checkbox" disabled ...><span data-aceite-titulo></span></label>
+//     <p class="aceite-texto" data-aceite-texto></p>
+//     <span class="campo-erro" data-aceite-erro hidden></span>
+//   </div>
+
+window.RonuAceite = (function () {
+  const TIPO = 'geral';
+  const MSG_CARREGAR = 'Não foi possível carregar o texto da autorização.';
+  const MSG_SEM_MARCAR = 'Para continuar, autorize o uso dos seus dados de saúde.';
+
+  function partes(caixa) {
+    return {
+      caixa,
+      marcar: caixa.querySelector('input[type="checkbox"]'),
+      titulo: caixa.querySelector('[data-aceite-titulo]'),
+      texto: caixa.querySelector('[data-aceite-texto]'),
+      erro: caixa.querySelector('[data-aceite-erro]')
+    };
+  }
+
+  function mostrarErro(p, mensagem, { comTentar = null } = {}) {
+    p.erro.replaceChildren(mensagem);
+    if (comTentar) {
+      const tentar = document.createElement('button');
+      tentar.type = 'button';
+      tentar.className = 'link-botao';
+      tentar.textContent = 'Tentar de novo';
+      tentar.addEventListener('click', comTentar);
+      p.erro.append(' ', tentar);
+    }
+    p.erro.hidden = false;
+  }
+
+  function limparErro(p) {
+    p.erro.hidden = true;
+    p.erro.replaceChildren();
+    p.caixa.removeAttribute('aria-invalid');
+  }
+
+  // Busca o texto e preenche a caixa. logado: usa a rota com login (que traz o
+  // aceite da pessoa); senão, a pública. Devolve o corpo da API, ou null se não
+  // carregou (a caixa já mostra o erro com "Tentar de novo").
+  async function carregar(caixa, { logado = false } = {}) {
+    const p = partes(caixa);
+    limparErro(p);
+    caixa.setAttribute('aria-busy', 'true');
+    p.marcar.disabled = true;
+    p.marcar.checked = false;
+    delete caixa.dataset.versao;
+
+    let corpo = null;
+    try {
+      const resposta = logado
+        ? await ronuFetchAutenticado(`/consentimentos/${TIPO}`)
+        : await fetch(`${RONU_CONFIG.API_BASE}/consentimentos/vigente/${TIPO}`);
+      corpo = resposta.ok ? await resposta.json().catch(() => null) : null;
+    } catch (erro) {
+      if (erro.message === 'Sessão expirada.') return null;
+    }
+
+    const versao = corpo?.versaoVigente ?? corpo?.versao;
+    if (!corpo || !versao || !corpo.titulo || !corpo.texto) {
+      p.titulo.textContent = 'Autorização dos dados de saúde';
+      p.texto.textContent = '';
+      mostrarErro(p, MSG_CARREGAR, { comTentar: () => carregar(caixa, { logado }) });
+      caixa.removeAttribute('aria-busy');
+      return null;
+    }
+
+    p.titulo.textContent = corpo.titulo;
+    p.texto.textContent = corpo.texto;
+    caixa.dataset.versao = String(versao);
+    p.marcar.disabled = false;
+    caixa.removeAttribute('aria-busy');
+    caixa.dispatchEvent(new CustomEvent('aceite:carregado', { detail: corpo }));
+    return corpo;
+  }
+
+  // Confere antes de enviar. Devolve a versão marcada, ou null (e mostra o
+  // erro e leva o foco à caixa).
+  function versaoMarcada(caixa) {
+    const p = partes(caixa);
+    if (!caixa.dataset.versao) {
+      mostrarErro(p, MSG_CARREGAR, { comTentar: () => carregar(caixa, { logado: caixa.dataset.logado === 'true' }) });
+      p.marcar.focus();
+      return null;
+    }
+    if (!p.marcar.checked) {
+      caixa.setAttribute('aria-invalid', 'true');
+      mostrarErro(p, MSG_SEM_MARCAR);
+      p.marcar.focus();
+      return null;
+    }
+    limparErro(p);
+    return Number(caixa.dataset.versao);
+  }
+
+  // O texto mudou entre abrir a tela e enviar (409): recarrega, desmarca e diz por quê.
+  async function textoMudou(caixa, mensagem) {
+    const logado = caixa.dataset.logado === 'true';
+    await carregar(caixa, { logado });
+    const p = partes(caixa);
+    caixa.setAttribute('aria-invalid', 'true');
+    mostrarErro(p, mensagem || 'O texto da autorização mudou. Leia de novo e marque para continuar.');
+    p.marcar.focus();
+  }
+
+  function iniciar(caixa) {
+    const p = partes(caixa);
+    p.marcar.addEventListener('change', () => {
+      if (p.marcar.checked) limparErro(p);
+    });
+  }
+
+  return { carregar, versaoMarcada, textoMudou, iniciar };
+})();

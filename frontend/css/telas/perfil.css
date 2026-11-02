@@ -331,6 +331,60 @@ button.pf-conta-item:focus-visible {
 .pf-conta-seta {
   color: var(--texto-2);
   font-size: 1.125rem;
+  transition: transform var(--d-rapida) var(--curva-saida);
+}
+
+/* Itens que são link (Política, Termos) têm a mesma cara dos botões. */
+a.pf-conta-item {
+  text-decoration: none;
+}
+
+a.pf-conta-item:hover {
+  color: var(--texto);
+  background: var(--superficie-hover);
+}
+
+a.pf-conta-item:focus-visible {
+  outline-offset: -3px;
+}
+
+/* Autorização: abre no lugar, com a seta virada para baixo. */
+.pf-conta-abre[aria-expanded="true"] .pf-conta-seta {
+  transform: rotate(90deg);
+}
+
+.pf-autorizacao {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--e-3);
+  padding: 0 26px 22px;
+}
+
+.pf-autorizacao-titulo {
+  font-weight: 600;
+}
+
+.pf-autorizacao .apoio {
+  font-size: var(--t-apoio);
+  max-width: 62ch;
+}
+
+/* --acento-texto, não --erro-campo: o título precisa passar 4,5:1 nos dois modos. */
+.pf-conta-perigo {
+  color: var(--acento-texto);
+}
+
+.pf-conta-item[data-loading="true"] {
+  cursor: progress;
+}
+
+.pf-conta-status {
+  padding: 0 26px 16px;
+}
+
+.pf-conta-status:empty {
+  display: none;
 }
 
 /* ---------- Gasto em repouso ---------- */
@@ -536,6 +590,12 @@ button.pf-conta-item:focus-visible {
   .pf-cabeca h2,
   .pf-conta-titulo {
     font-size: 1.25rem;
+  }
+
+  .pf-autorizacao,
+  .pf-conta-status {
+    padding-left: 18px;
+    padding-right: 18px;
   }
 
   .pf-objetivos {

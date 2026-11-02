@@ -8,10 +8,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const submitBtn = document.getElementById('submit-btn');
   const campoConfirmarSenha = document.getElementById('field-confirmar-senha');
   const confirmarSenhaErro = document.getElementById('confirmar-senha-error');
+  const caixaAceite = document.getElementById('aceite');
 
   // Etapas do envio que já deram certo nesta página (ver o submit).
   let contaCriada = false;
   let sessaoIniciada = false;
+
+  // O texto da autorização vem da rota pública: ainda não há conta.
+  RonuAceite.iniciar(caixaAceite);
+  RonuAceite.carregar(caixaAceite);
 
   // Desde o redesign (tela aprovada Cadastro, out/2026) todos os campos
   // aparecem de uma vez; a revelação um por um saiu junto com o accordeon.
@@ -38,6 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    // A conta já criada numa tentativa anterior já levou o aceite.
+    const versaoConsentimento = contaCriada ? null : RonuAceite.versaoMarcada(caixaAceite);
+    if (!contaCriada && versaoConsentimento == null) return;
+
     ronuDefinirCarregando(submitBtn, true, 'Criando conta...');
     // Um aviso só para o fluxo inteiro (cadastro + login automático +
     // redirecionamento): a demora pode cair em qualquer uma das chamadas.
@@ -48,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // foi criada (ex.: a checagem pós-login falhou com a API instável),
       // repetir o cadastro daria "email já cadastrado".
       if (!contaCriada) {
-        await ronuCadastrar(nome, email, senha, estado);
+        await ronuCadastrar(nome, email, senha, estado, versaoConsentimento);
         contaCriada = true;
       }
       if (!sessaoIniciada) {
@@ -57,8 +66,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       await ronuRedirecionarPosAuth();
     } catch (erro) {
-      ronuMostrarErroFormulario(formError, erro.message);
       ronuDefinirCarregando(submitBtn, false);
+      // O texto mudou entre abrir a tela e enviar: a caixa mostra o novo, desmarcada.
+      if (erro.textoMudou && !contaCriada) {
+        await RonuAceite.textoMudou(caixaAceite, erro.message);
+        return;
+      }
+      ronuMostrarErroFormulario(formError, erro.message);
     } finally {
       cancelarAvisoDeEspera();
     }

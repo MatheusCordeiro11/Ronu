@@ -182,7 +182,7 @@
             <div class="ob-outro">
               <div class="campo ob-outro-campo">
                 <label class="campo-rotulo" for="ob-outro">Outro alimento</label>
-                <input class="entrada" type="text" id="ob-outro" maxlength="60" autocomplete="off" placeholder="Ex.: camarão, leite, fígado">
+                <input class="entrada" type="text" id="ob-outro" maxlength="60" autocomplete="off" placeholder="Ex.: camarão, leite, fígado" aria-describedby="ob-outro-aviso">
               </div>
               <div class="segmentado ob-outro-tipo" role="radiogroup" aria-label="Tipo do alimento" id="ob-outro-tipo">
                 <button type="button" role="radio" aria-checked="true" data-valor="gosto">Gosto</button>
@@ -190,6 +190,8 @@
               </div>
               <button type="button" class="botao botao-fantasma" id="ob-outro-adicionar">Adicionar</button>
             </div>
+            <!-- LGPD: o texto digitado aqui vai para a IA como foi escrito. -->
+            <p class="nota" id="ob-outro-aviso">Escreva só o alimento. Não escreva doenças, remédios ou diagnósticos: este texto vai para a IA.</p>
             <p class="apoio">Tem alergia? Marque como “prefiro evitar”, mas confira sempre os rótulos: o cardápio é gerado por IA e não substitui orientação médica.</p>
           </section>
 

@@ -926,6 +926,107 @@ button.chip:hover {
   color: var(--texto);
 }
 
+/* ---------- Aceite: a caixa do consentimento (cadastro e consentimento.html) ----------
+   Uma caixa de marcar de verdade, desmarcada, com o título como rótulo e o
+   texto inteiro embaixo: a pessoa lê o que autoriza sem abrir nada. */
+.aceite {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  padding: var(--e-4);
+  border: 1px solid var(--borda-campo);
+  border-radius: var(--raio-2);
+  background: var(--superficie);
+  transition: border-color var(--d-rapida) ease;
+}
+
+.aceite:has(input:checked) {
+  border-color: var(--acento);
+}
+
+.aceite[aria-invalid="true"] {
+  border-color: var(--erro-campo);
+}
+
+.aceite-marcar {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e-3);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--texto);
+  cursor: pointer;
+}
+
+.aceite-marcar input {
+  flex: none;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  display: grid;
+  place-content: center;
+  border: 1px solid var(--borda-campo);
+  border-radius: var(--raio);
+  background: var(--fundo);
+  cursor: pointer;
+  transition: background-color var(--d-rapida) ease, border-color var(--d-rapida) ease;
+}
+
+/* O visto é desenhado por bordas: sem ícone, sem glifo. */
+.aceite-marcar input::after {
+  content: '';
+  width: 6px;
+  height: 11px;
+  border: solid var(--sobre-acento);
+  border-width: 0 2px 2px 0;
+  transform: translateY(-1px) rotate(45deg) scale(0);
+  transition: transform var(--d-rapida) var(--curva-saida);
+}
+
+.aceite-marcar input:checked {
+  background: var(--acento);
+  border-color: var(--acento);
+}
+
+.aceite-marcar input:checked::after {
+  transform: translateY(-1px) rotate(45deg) scale(1);
+}
+
+.aceite-marcar:hover input:not(:checked) {
+  border-color: var(--borda-forte);
+}
+
+.aceite-texto {
+  padding-left: calc(22px + var(--e-3));
+  font-size: var(--t-apoio);
+  line-height: 1.55;
+  color: var(--texto-2);
+}
+
+.aceite .campo-erro {
+  padding-left: calc(22px + var(--e-3));
+}
+
+/* Enquanto o texto vem da API: a caixa existe, mas não dá para marcar. */
+.aceite[aria-busy="true"] .aceite-marcar {
+  color: var(--texto-2);
+  cursor: progress;
+}
+
+/* ---------- Ação que apaga: tom de erro, nunca o vermelho do botão principal ---------- */
+.botao-perigo {
+  background: var(--erro-fundo);
+  border-color: var(--erro-campo);
+  color: var(--texto);
+}
+
+.botao-perigo:hover:not(:disabled) {
+  color: var(--texto);
+  border-color: var(--acento);
+}
+
 /* ---------- Carimbo 浪人 ---------- */
 .carimbo {
   width: 60px;
@@ -1221,6 +1322,28 @@ button.chip:hover {
   color: var(--texto-2);
 }
 
+/* Privacidade e Termos: em todo rodapé e embaixo dos formulários de entrada. */
+.links-legais {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e-2);
+  font-size: var(--t-pequeno);
+  color: var(--texto-2);
+}
+
+.links-legais a {
+  color: var(--texto-2);
+}
+
+.links-legais a:hover {
+  color: var(--acento-texto);
+}
+
+.links-legais-sep {
+  color: var(--texto-3);
+}
+
 /* ---------- Gráficos que se desenham (ver js/base/movimento.js) ----------
    O estado "antes" só existe com .anima no <html>: sem JS, ou com movimento
    reduzido, o gráfico aparece pronto. */
@@ -1412,6 +1535,23 @@ body:has(.folha[open]) {
   display: flex;
   flex-direction: column;
   gap: var(--e-5);
+}
+
+/* Folha que é um formulário (apagar a conta): o <form> some do layout, e corpo
+   e rodapé continuam filhos diretos da folha (Enter no campo envia). */
+.folha-form {
+  display: contents;
+}
+
+.exclusao-baixar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--e-2);
+}
+
+.exclusao-baixar .apoio:empty {
+  display: none;
 }
 
 /* O corpo rola; os filhos mantêm a altura (um segmentado com overflow escondido sumiria). */

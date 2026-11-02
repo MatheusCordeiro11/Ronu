@@ -1,0 +1,246 @@
+/*
+  Ronu — Páginas legais (privacidade.html e termos.html)
+  Modo leitura: uma coluna de ~68 caracteres, sumário fixo à esquerda no
+  desktop (a seção da vez marcada no acento) e lista no topo no celular.
+  As tabelas viram cartões empilhados no celular, sem rolagem lateral.
+*/
+
+.lg-cabecalho .cabecalho-linha {
+  justify-content: space-between;
+}
+
+.lg-faixa .faixa-titulo-texto p {
+  font-size: var(--t-apoio);
+}
+
+.lg-main {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 68ch);
+  justify-content: center;
+  gap: var(--e-10);
+  padding-top: var(--e-9);
+  padding-bottom: var(--e-11);
+}
+
+/* ---------- Sumário ---------- */
+.lg-sumario {
+  position: sticky;
+  top: var(--e-7);
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.lg-sumario ol {
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--borda);
+}
+
+.lg-sumario a {
+  display: block;
+  margin-left: -1px;
+  padding: 6px 0 6px var(--e-4);
+  border-left: 1px solid transparent;
+  font-size: var(--t-apoio);
+  line-height: 1.4;
+  color: var(--texto-2);
+  text-decoration: none;
+  transition: color var(--d-rapida) ease, border-color var(--d-rapida) ease;
+}
+
+.lg-sumario a:hover {
+  color: var(--texto);
+}
+
+.lg-sumario a[aria-current="true"] {
+  color: var(--texto);
+  border-left-color: var(--acento);
+}
+
+/* ---------- Texto ---------- */
+.lg-texto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-9);
+  font-size: var(--t-lead);
+  line-height: 1.7;
+}
+
+.lg-intro {
+  color: var(--texto-2);
+}
+
+.lg-secao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  scroll-margin-top: var(--e-7);
+}
+
+.lg-secao h2 {
+  margin-bottom: var(--e-1);
+}
+
+.lg-secao h3 {
+  margin-top: var(--e-3);
+  font-family: var(--fonte-corpo);
+  font-size: var(--t-corpo-g);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.lg-secao ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.lg-secao li {
+  position: relative;
+  padding-left: var(--e-6);
+}
+
+/* O mesmo traço curto da .nota marca cada item. */
+.lg-secao li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.85em;
+  width: 12px;
+  height: 1px;
+  background: var(--acento);
+}
+
+.lg-secao a {
+  color: var(--texto);
+}
+
+.lg-secao a:hover {
+  color: var(--acento-texto);
+}
+
+.lg-destaque {
+  padding: var(--e-4) var(--e-5);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie);
+  font-size: var(--t-corpo-g);
+}
+
+/* ---------- Tabelas ---------- */
+.lg-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--t-apoio);
+  line-height: 1.5;
+}
+
+.lg-tabela th {
+  padding: 0 var(--e-4) var(--e-3) 0;
+  border-bottom: 1px solid var(--linha);
+  font-size: var(--t-rotulo);
+  font-weight: 500;
+  letter-spacing: var(--rastreio-rotulo);
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--texto-2);
+}
+
+.lg-tabela td {
+  padding: var(--e-3) var(--e-4) var(--e-3) 0;
+  border-bottom: 1px solid var(--divisor);
+  vertical-align: top;
+}
+
+.lg-tabela td:first-child {
+  font-weight: 500;
+}
+
+@media (max-width: 960px) {
+  .lg-main {
+    grid-template-columns: minmax(0, 68ch);
+    gap: var(--e-7);
+    padding-top: var(--e-7);
+  }
+
+  .lg-sumario {
+    position: static;
+    padding-bottom: var(--e-6);
+    border-bottom: 1px solid var(--borda);
+  }
+
+  .lg-sumario ol {
+    border-left: 0;
+  }
+
+  .lg-sumario a {
+    margin-left: 0;
+    padding: 8px 0;
+    border-left: 0;
+  }
+
+  .lg-sumario a[aria-current="true"] {
+    color: var(--texto-2);
+  }
+}
+
+@media (max-width: 720px) {
+  .lg-texto {
+    font-size: var(--t-corpo-g);
+    gap: var(--e-8);
+  }
+
+  /* Cada linha vira um cartão, com o nome da coluna antes de cada valor. */
+  .lg-tabela thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .lg-tabela,
+  .lg-tabela tbody,
+  .lg-tabela tr,
+  .lg-tabela td {
+    display: block;
+  }
+
+  .lg-tabela tbody {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e-3);
+  }
+
+  .lg-tabela tr {
+    padding: var(--e-3) var(--e-4);
+    border: 1px solid var(--borda);
+    border-radius: var(--raio-2);
+    background: var(--superficie);
+  }
+
+  .lg-tabela td {
+    padding: 4px 0;
+    border: 0;
+  }
+
+  .lg-tabela td[data-rotulo]::before {
+    content: attr(data-rotulo);
+    display: block;
+    font-size: var(--t-rotulo);
+    font-weight: 500;
+    letter-spacing: var(--rastreio-rotulo);
+    text-transform: uppercase;
+    color: var(--texto-2);
+  }
+
+  .lg-tabela td:first-child::before {
+    display: none;
+  }
+
+  .lg-tabela td:first-child {
+    font-weight: 600;
+  }
+}

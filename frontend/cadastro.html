@@ -120,6 +120,18 @@
 
           <p class="campo-dica entra" id="estado-dica" style="--atraso: 280ms">O estado serve para o cardápio usar os nomes de alimentos da sua região e para contar os dias no seu fuso.</p>
 
+          <!-- Título, texto e versão vêm da API (js/base/aceite.js). Desmarcada sempre. -->
+          <div class="aceite entra" id="aceite" data-aceite aria-busy="true" style="--atraso: 300ms">
+            <label class="aceite-marcar">
+              <input type="checkbox" id="aceite-caixa" name="aceite" aria-describedby="aceite-texto aceite-erro" disabled>
+              <span data-aceite-titulo>Carregando o texto da autorização...</span>
+            </label>
+            <p class="aceite-texto" id="aceite-texto" data-aceite-texto></p>
+            <span class="campo-erro" id="aceite-erro" data-aceite-erro role="alert" hidden></span>
+          </div>
+
+          <p class="campo-dica entra" style="--atraso: 310ms">Ao criar a conta, você aceita os <a href="termos.html" target="_blank" rel="noopener">Termos de uso</a>, confirma ter 18 anos ou mais e leu a <a href="privacidade.html" target="_blank" rel="noopener">Política de privacidade</a>.</p>
+
           <button type="submit" class="botao botao-primario botao-grande botao-bloco entra" id="submit-btn" style="--atraso: 320ms">
             <span class="btn-label">Criar conta</span>
           </button>
@@ -137,6 +149,7 @@
   </div>
 
   <script src="js/auth.js"></script>
+  <script src="js/base/aceite.js"></script>
   <script src="js/cadastro.js"></script>
   <script src="js/base/senha.js"></script>
   <script src="js/base/google.js"></script>

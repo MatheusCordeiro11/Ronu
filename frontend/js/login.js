@@ -15,9 +15,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Vindo de redefinir-senha.html. O parâmetro sai da URL logo em seguida,
   // para a faixa não voltar ao recarregar a página.
+  // Vindo da exclusão da conta (Perfil ou consentimento): só um sinal, sem dado nenhum.
+  if (parametros.get('conta') === 'apagada') {
+    ronuMostrarErroFormulario(formSuccess, 'Sua conta e seus dados foram apagados.');
+    parametros.delete('conta');
+  }
+
   if (parametros.get('senha') === 'redefinida') {
     ronuMostrarErroFormulario(formSuccess, 'Senha alterada. Entre com a senha nova.');
     parametros.delete('senha');
+  }
+
+  if (window.location.search !== (parametros.toString() ? `?${parametros}` : '')) {
     const busca = parametros.toString();
     history.replaceState(null, '', window.location.pathname + (busca ? `?${busca}` : '') + window.location.hash);
   }

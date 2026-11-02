@@ -72,9 +72,11 @@
         </div>
         <form class="al-adicionar" novalidate>
           <label class="oculto-visual" for="al-evitar-campo">Adicionar alimento para evitar</label>
-          <input class="entrada entrada-no-card" id="al-evitar-campo" type="text" maxlength="100" autocomplete="off" placeholder="Ex.: camarão, leite, fígado">
+          <input class="entrada entrada-no-card" id="al-evitar-campo" type="text" maxlength="100" autocomplete="off" placeholder="Ex.: camarão, leite, fígado" aria-describedby="al-evitar-aviso">
           <button type="submit" class="botao botao-fantasma al-adicionar-botao" aria-label="Adicionar aos que você prefere evitar"><span class="btn-label"><span class="al-so-largo">Adicionar</span><span class="al-so-celular" aria-hidden="true">+</span></span></button>
         </form>
+        <!-- LGPD: o texto do "evitar" vai para a IA como foi digitado. -->
+        <p class="nota" id="al-evitar-aviso">Escreva só o alimento. Não escreva doenças, remédios ou diagnósticos: este texto vai para a IA.</p>
         <p class="al-aviso" role="status"></p>
         <ul class="chips al-chips" aria-label="Alimentos que você prefere evitar"></ul>
         <!-- Fase 2b-3: o que cada "evitar" tira (abre ao tocar no chip), o que não casou e a lista pobre. -->
@@ -90,11 +92,12 @@
           <h2 id="al-rotina-titulo"><label for="al-rotina-texto">Sua rotina</label></h2>
           <span class="apoio al-so-largo">Usada para os horários das refeições</span>
         </div>
-        <textarea class="entrada entrada-no-card" id="al-rotina-texto" rows="3" maxlength="500" placeholder="Ex.: acordo às 6h30, trabalho das 8h às 17h e treino às 19h" aria-describedby="al-rotina-ajuda al-rotina-status"></textarea>
+        <textarea class="entrada entrada-no-card" id="al-rotina-texto" rows="3" maxlength="500" placeholder="Ex.: acordo às 6h30, trabalho das 8h às 17h e treino às 19h" aria-describedby="al-rotina-ajuda al-rotina-aviso al-rotina-status"></textarea>
         <div class="al-rotina-pe">
           <span id="al-rotina-ajuda"><span class="al-so-largo">Escreva do seu jeito: quando acorda, trabalha, treina e dorme.</span><span class="al-so-celular">Usada para os horários das refeições</span></span>
           <span class="num" id="al-rotina-contador">0/500</span>
         </div>
+        <p class="nota" id="al-rotina-aviso">Só horários e rotina. Nada de doenças, remédios ou diagnósticos: este texto vai para a IA.</p>
         <p class="al-salvo" id="al-rotina-status" role="status"></p>
       </section>
 
@@ -146,6 +149,7 @@
     <div class="conteiner rodape-linha">
       <span>O que você prefere evitar fica fora do cardápio, inclusive como ingrediente de outro prato.</span>
       <span>Dados nutricionais: TACO (NEPA/UNICAMP) e USDA FoodData Central.</span>
+      <nav class="links-legais" aria-label="Documentos legais"><a href="privacidade.html">Privacidade</a><span class="links-legais-sep" aria-hidden="true">·</span><a href="termos.html">Termos</a></nav>
     </div>
   </footer>
 

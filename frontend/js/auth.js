@@ -25,6 +25,10 @@ const RONU_USUARIO_KEY = 'ronu:usuario';
 const RONU_PRECISA_ESTADO_KEY = 'ronu:precisaEstado';
 // Id do usuário cujo cadastro já foi visto completo (ver ronuCadastroJaCompleto).
 const RONU_CADASTRO_COMPLETO_KEY = 'ronu:cadastroCompleto';
+// 'true' quando a conta ainda não aceitou a versão vigente do consentimento
+// geral (o login avisou, ou a API respondeu 403 com motivo "consentimento").
+// Vem antes de tudo no ronuRedirecionarPosAuth.
+const RONU_PRECISA_CONSENTIMENTO_KEY = 'ronu:precisaConsentimento';
 
 function ronuSalvarSessao(token, usuario) {
   localStorage.setItem(RONU_TOKEN_KEY, token);
@@ -36,6 +40,13 @@ function ronuLimparSessao() {
   localStorage.removeItem(RONU_USUARIO_KEY);
   localStorage.removeItem(RONU_PRECISA_ESTADO_KEY);
   localStorage.removeItem(RONU_CADASTRO_COMPLETO_KEY);
+  localStorage.removeItem(RONU_PRECISA_CONSENTIMENTO_KEY);
+}
+
+// O que todo login (email ou Google) guarda além da sessão.
+function ronuGuardarAvisosDoLogin(dados) {
+  localStorage.setItem(RONU_PRECISA_ESTADO_KEY, String(dados.precisaInformarEstado));
+  localStorage.setItem(RONU_PRECISA_CONSENTIMENTO_KEY, String(Boolean(dados.precisaConsentimento)));
 }
 
 function ronuUsuarioLogado() {
@@ -66,7 +77,7 @@ async function ronuLogin(email, senha) {
   }
 
   ronuSalvarSessao(dados.token, dados.usuario);
-  localStorage.setItem(RONU_PRECISA_ESTADO_KEY, String(dados.precisaInformarEstado));
+  ronuGuardarAvisosDoLogin(dados);
   return dados;
 }
 
@@ -88,21 +99,26 @@ async function ronuLoginComGoogle(idToken) {
   }
 
   ronuSalvarSessao(dados.token, dados.usuario);
-  localStorage.setItem(RONU_PRECISA_ESTADO_KEY, String(dados.precisaInformarEstado));
+  ronuGuardarAvisosDoLogin(dados);
   return dados;
 }
 
-async function ronuCadastrar(nome, email, senha, estado) {
+// versaoConsentimento: a versão do texto que a caixa do cadastro mostrou (lida
+// da API, nunca escrita na tela). O erro leva textoMudou quando o 409 é do
+// texto (traz a versaoVigente), e não do email já cadastrado (também 409).
+async function ronuCadastrar(nome, email, senha, estado, versaoConsentimento) {
   const resposta = await fetch(`${RONU_CONFIG.API_BASE}/auth/cadastro`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ nome, email, senha, estado })
+    body: JSON.stringify({ nome, email, senha, estado, consentimentoGeral: { versao: versaoConsentimento } })
   });
 
   const dados = await resposta.json().catch(() => null);
 
   if (!resposta.ok) {
-    throw new Error(dados?.mensagem || 'Não foi possível criar sua conta. Tente novamente.');
+    const erro = new Error(dados?.mensagem || 'Não foi possível criar sua conta. Tente novamente.');
+    erro.textoMudou = resposta.status === 409 && dados?.versaoVigente != null;
+    throw erro;
   }
 
   return dados;
@@ -193,7 +209,21 @@ async function ronuFetchAutenticado(caminho, opcoes = {}) {
     throw new Error('Sessão expirada.');
   }
 
+  // Conta sem o aceite vigente (texto novo, ou aceite que nunca houve): a API
+  // barra tudo menos o aceite e a conta. Vai para o consentimento e a promessa
+  // nunca termina, para nenhuma tela mostrar erro no meio da troca de página.
+  if (resposta.status === 403 && await ronuEhFaltaDeConsentimento(resposta)) {
+    localStorage.setItem(RONU_PRECISA_CONSENTIMENTO_KEY, 'true');
+    window.location.href = 'consentimento.html';
+    return new Promise(() => {});
+  }
+
   return resposta;
+}
+
+async function ronuEhFaltaDeConsentimento(resposta) {
+  const corpo = await resposta.clone().json().catch(() => null);
+  return corpo?.motivo === 'consentimento';
 }
 
 // Mensagem de quando a checagem de cadastro não consegue uma resposta válida
@@ -322,6 +352,12 @@ function ronuCadastroJaCompleto() {
 // saber se o caminho é o dashboard ou o onboarding. O 401 também sobe, mas
 // ronuFetchAutenticado já redirecionou pro login.
 async function ronuRedirecionarPosAuth() {
+  // O consentimento vem antes do estado: sem ele, a API recusa até o PUT do estado.
+  if (localStorage.getItem(RONU_PRECISA_CONSENTIMENTO_KEY) === 'true') {
+    window.location.href = 'consentimento.html';
+    return;
+  }
+
   if (localStorage.getItem(RONU_PRECISA_ESTADO_KEY) === 'true') {
     window.location.href = 'estado.html';
     return;

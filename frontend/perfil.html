@@ -141,6 +141,13 @@
           <h2 id="pf-conta-titulo" class="pf-conta-titulo">Conta</h2>
           <ul class="pf-conta-lista" id="pf-conta-lista"></ul>
         </section>
+
+        <!-- LGPD: a autorização aceita, baixar os dados, os textos legais e
+             apagar a conta (js/base/conta.js abre a folha da exclusão). -->
+        <section class="cartao pf-conta pf-seus-dados" aria-labelledby="pf-seus-dados-titulo">
+          <h2 id="pf-seus-dados-titulo" class="pf-conta-titulo">Seus dados</h2>
+          <ul class="pf-conta-lista" id="pf-seus-dados-lista"></ul>
+        </section>
       </div>
 
       <aside class="pf-lateral" aria-label="Gasto em repouso, região e aparência">
@@ -196,11 +203,13 @@
     <div class="conteiner rodape-linha">
       <span>Gasto em repouso: Mifflin-St Jeor, com o seu peso de tendência.</span>
       <span>O Ronu é para maiores de 18 anos.</span>
+      <nav class="links-legais" aria-label="Documentos legais"><a href="privacidade.html">Privacidade</a><span class="links-legais-sep" aria-hidden="true">·</span><a href="termos.html">Termos</a></nav>
     </div>
   </footer>
 
   <script src="js/auth.js"></script>
   <script src="js/base/cabecalho.js"></script>
+  <script src="js/base/conta.js"></script>
   <script src="js/perfil.js"></script>
 </body>
 </html>

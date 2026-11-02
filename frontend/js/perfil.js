@@ -605,6 +605,120 @@ document.addEventListener('DOMContentLoaded', async () => {
     $('pf-conta-lista').replaceChildren(...itens);
   }
 
+  // ---------- Seus dados (LGPD) ----------
+
+  // GET /consentimentos/geral: o texto e a data do aceite. Se falhar, o resto
+  // do Perfil abre igual e o item diz que não carregou.
+  let consentimento = null;
+
+  async function carregarConsentimento() {
+    try {
+      const resposta = await ronuFetchAutenticado('/consentimentos/geral');
+      consentimento = resposta.ok ? await resposta.json() : null;
+    } catch (erro) {
+      if (erro.message === 'Sessão expirada.') throw erro;
+      consentimento = null;
+    }
+  }
+
+  function seta() {
+    const el = criar('span', 'pf-conta-seta', '›');
+    el.setAttribute('aria-hidden', 'true');
+    return el;
+  }
+
+  function textosItem(titulo, texto, classeTitulo = '') {
+    const textos = criar('span', 'pf-conta-textos');
+    textos.append(criar('span', `pf-conta-item-titulo ${classeTitulo}`.trim(), titulo), criar('span', 'apoio', texto));
+    return textos;
+  }
+
+  function itemLink(titulo, texto, href) {
+    const li = criar('li');
+    const a = criar('a', 'pf-conta-item');
+    a.href = href;
+    a.append(textosItem(titulo, texto), seta());
+    li.append(a);
+    return li;
+  }
+
+  // Tocar mostra o texto aceito e a data; o "Revogar" é que abre a exclusão.
+  function itemAutorizacao() {
+    const li = criar('li');
+    const aceito = consentimento?.aceito;
+    const data = aceito ? new Date(aceito.aceitoEm).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }) : null;
+
+    if (!aceito) {
+      const info = criar('div', 'pf-conta-item pf-conta-info');
+      info.append(textosItem('Autorização dos dados de saúde', 'Não foi possível carregar agora. Recarregue a página para tentar de novo.'));
+      li.append(info);
+      return li;
+    }
+
+    const botao = criar('button', 'pf-conta-item pf-conta-abre');
+    botao.type = 'button';
+    botao.setAttribute('aria-expanded', 'false');
+    botao.setAttribute('aria-controls', 'pf-autorizacao');
+    botao.append(textosItem('Autorização dos dados de saúde', `Aceita em ${data}`), seta());
+
+    const painel = criar('div', 'pf-autorizacao');
+    painel.id = 'pf-autorizacao';
+    painel.hidden = true;
+    const revogar = criar('button', 'botao botao-perigo botao-pequeno', 'Revogar (apaga a conta)');
+    revogar.type = 'button';
+    revogar.addEventListener('click', () => RonuConta.abrirExclusao({ temSenha: perfil.temSenha, revogando: true, origem: revogar }));
+    painel.append(
+      criar('p', 'pf-autorizacao-titulo', consentimento.titulo),
+      criar('p', 'apoio', consentimento.texto),
+      criar('p', 'apoio', `Você aceitou em ${data} (versão ${aceito.versao}). Sem essa autorização o Ronu não consegue montar a sua dieta: por isso, revogar apaga a conta.`),
+      revogar
+    );
+
+    botao.addEventListener('click', () => {
+      const abrir = painel.hidden;
+      painel.hidden = !abrir;
+      botao.setAttribute('aria-expanded', String(abrir));
+    });
+
+    li.append(botao, painel);
+    return li;
+  }
+
+  function itemBaixar() {
+    const li = criar('li');
+    const botao = criar('button', 'pf-conta-item');
+    botao.type = 'button';
+    const textos = criar('span', 'pf-conta-textos');
+    // O texto de apoio é o .btn-label: vira "Preparando o arquivo..." enquanto baixa.
+    textos.append(criar('span', 'pf-conta-item-titulo', 'Baixar meus dados'), criar('span', 'apoio btn-label', 'Um arquivo com tudo da sua conta.'));
+    botao.append(textos, seta());
+    const status = criar('p', 'apoio pf-conta-status');
+    status.setAttribute('role', 'status');
+    botao.addEventListener('click', () => RonuConta.baixarDados(botao, status));
+    li.append(botao, status);
+    return li;
+  }
+
+  function itemApagar() {
+    const li = criar('li');
+    const botao = criar('button', 'pf-conta-item');
+    botao.type = 'button';
+    botao.append(textosItem('Apagar minha conta', 'Apaga tudo, na hora e sem volta.', 'pf-conta-perigo'), seta());
+    botao.addEventListener('click', () => RonuConta.abrirExclusao({ temSenha: perfil.temSenha, origem: botao }));
+    li.append(botao);
+    return li;
+  }
+
+  function renderizarSeusDados() {
+    $('pf-seus-dados-lista').replaceChildren(
+      itemAutorizacao(),
+      itemBaixar(),
+      itemLink('Política de privacidade', 'Que dados o Ronu usa, para quê e por quanto tempo', 'privacidade.html'),
+      itemLink('Termos de uso', 'As regras do Ronu, em poucas linhas', 'termos.html'),
+      itemApagar()
+    );
+  }
+
   // ---------- Carga ----------
 
   async function carregarTendencia() {
@@ -623,7 +737,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const [respostaPerfil, respostaObjetivo] = await Promise.all([
         ronuFetchAutenticado('/perfil'),
         ronuFetchAutenticado('/objetivos/atual'),
-        carregarTendencia()
+        carregarTendencia(),
+        carregarConsentimento()
       ]);
       if (!respostaPerfil.ok) throw new Error('Falha ao carregar.');
       perfil = await respostaPerfil.json();
@@ -636,6 +751,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       renderizarNivel();
       renderizarRegiao();
       renderizarConta();
+      renderizarSeusDados();
       renderizarPeso();
       mostrarSomente(elContent);
       // Vindo do aviso do dashboard (perfil.html#seu-dia): o conteúdo só

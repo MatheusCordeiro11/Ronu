@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ronu — Política de privacidade</title>
+  <meta name="description" content="Quais dados o Ronu usa, para quê, onde ficam, com quem são compartilhados, por quanto tempo e como você controla tudo.">
+
+  <!-- Antes do CSS: aplica o modo escuro/claro antes da primeira pintura. -->
+  <script src="js/base/tema.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/base/tokens.css">
+  <link rel="stylesheet" href="css/base/base.css">
+  <link rel="stylesheet" href="css/componentes.css">
+  <link rel="stylesheet" href="css/telas/legal.css">
+</head>
+<body>
+  <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
+
+  <!-- Igual para quem está logado ou não: logo e sol/lua, sem a nav do app.
+       Texto vindo de docs/textos-legais/politica-de-privacidade.md, sem as notas
+       de advogado. Os marcadores entre colchetes saem antes de publicar. -->
+  <header class="cabecalho lg-cabecalho">
+    <div class="conteiner cabecalho-linha">
+      <a class="logo" href="landing/v1/index.html" aria-label="Ronu, página inicial">
+        <span class="logo-selo" aria-hidden="true">浪</span>
+        <span class="logo-nome" aria-hidden="true">RONU</span>
+      </a>
+      <div class="cabecalho-acoes">
+        <button type="button" class="botao-tema" data-alternar-tema aria-label="Mudar para o modo claro">
+          <svg class="icone-sol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></svg>
+          <svg class="icone-lua" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="faixa-titulo grade lg-faixa">
+    <div class="conteiner faixa-titulo-conteudo">
+      <div class="faixa-titulo-texto sobre-grade">
+        <span class="rotulo rotulo-acento">Seus dados</span>
+        <h1>Política de privacidade</h1>
+        <p>Vigente desde [DATA_VIGENCIA].</p>
+      </div>
+    </div>
+  </section>
+
+  <main class="conteiner lg-main" id="conteudo">
+    <nav class="lg-sumario" aria-labelledby="lg-sumario-titulo">
+      <span class="rotulo" id="lg-sumario-titulo">Nesta página</span>
+      <ol>
+        <li><a href="#quem">Quem cuida dos seus dados</a></li>
+        <li><a href="#dados">Que dados o Ronu usa</a></li>
+        <li><a href="#finalidades">Para que servem</a></li>
+        <li><a href="#compartilhamento">Com quem são compartilhados</a></li>
+        <li><a href="#exterior">Dados fora do Brasil</a></li>
+        <li><a href="#prazos">Por quanto tempo</a></li>
+        <li><a href="#direitos">Seus direitos</a></li>
+        <li><a href="#seguranca">Segurança</a></li>
+        <li><a href="#navegador">Armazenamento no navegador</a></li>
+        <li><a href="#idade">Idade</a></li>
+        <li><a href="#mudancas">Mudanças nesta política</a></li>
+      </ol>
+    </nav>
+
+    <article class="lg-texto">
+      <p class="lg-intro">O Ronu monta uma dieta semanal a partir do seu treino, do seu corpo e do que você gosta de comer. Para isso, ele precisa de dados seus, alguns deles de saúde. Esta página explica, sem rodeios, quais dados são esses, para que servem, onde ficam, com quem são compartilhados, por quanto tempo e como você controla tudo.</p>
+
+      <section class="lg-secao" id="quem" aria-labelledby="quem-titulo">
+        <h2 id="quem-titulo">Quem cuida dos seus dados</h2>
+        <p>O Ronu é um projeto pessoal de <strong>Matheus Cordeiro Berto</strong>, que é o controlador dos dados (quem decide como eles são usados) e também o encarregado (a pessoa com quem você fala sobre seus dados).</p>
+        <p>Contato para qualquer assunto de privacidade: <strong>[EMAIL_PRIVACIDADE]</strong>.</p>
+      </section>
+
+      <section class="lg-secao" id="dados" aria-labelledby="dados-titulo">
+        <h2 id="dados-titulo">Que dados o Ronu usa</h2>
+        <h3>Da sua conta</h3>
+        <ul>
+          <li>nome e e-mail;</li>
+          <li>senha, guardada só como um código embaralhado (hash), que nem o Ronu consegue reverter;</li>
+          <li>se você entra com o Google: o identificador da sua conta Google (não recebemos sua senha do Google);</li>
+          <li>estado (UF) onde mora, para usar nomes regionais dos alimentos e o fuso certo;</li>
+          <li>quando a conta foi criada e quando foi seu último login.</li>
+        </ul>
+        <h3>De saúde e do corpo (dados sensíveis, art. 5º, II da LGPD)</h3>
+        <ul>
+          <li>peso e cada pesagem que você registra, com o objetivo (perder, manter ou ganhar peso) e se você seguiu a dieta;</li>
+          <li>altura, sexo e data de nascimento;</li>
+          <li>como é o seu dia fora do treino (sentado, em pé, andando, braçal);</li>
+          <li>as modalidades que você treina, os dias e a duração;</li>
+          <li>os alimentos que você gosta e os que prefere evitar;</li>
+          <li>sua rotina, se você escrever (horários de acordar, treinar, comer);</li>
+          <li>seu orçamento para alimentação, se você informar;</li>
+          <li>as dietas geradas e as metas de calorias de cada uma.</li>
+        </ul>
+        <h3>Do uso do app</h3>
+        <ul>
+          <li>a lista de compras: quais itens você marcou como "já tenho";</li>
+          <li>seus aceites de consentimento (qual texto, qual versão e quando);</li>
+          <li>pedidos de "esqueci minha senha" (quando foram feitos e se foram usados).</li>
+        </ul>
+        <p class="lg-destaque"><strong>O que o Ronu não pede:</strong> CPF, endereço, telefone, documentos, cartão ou dado bancário. Nos campos de texto livre ("prefiro evitar" e rotina), escreva só o alimento ou o horário: <strong>não escreva doenças, remédios ou diagnósticos</strong>, porque esse texto vai para a IA.</p>
+      </section>
+
+      <section class="lg-secao" id="finalidades" aria-labelledby="finalidades-titulo">
+        <h2 id="finalidades-titulo">Para que esses dados servem, e com que base</h2>
+        <table class="lg-tabela">
+          <thead><tr><th scope="col">Para quê</th><th scope="col">Quais dados</th><th scope="col">Base legal</th></tr></thead>
+          <tbody>
+            <tr><td>Criar e manter sua conta, deixar você entrar e recuperar a senha</td><td data-rotulo="Quais dados">conta</td><td data-rotulo="Base legal">execução do contrato (art. 7º, V)</td></tr>
+            <tr><td>Calcular sua meta de calorias e macros</td><td data-rotulo="Quais dados">saúde e corpo</td><td data-rotulo="Base legal">seu consentimento (art. 11, I)</td></tr>
+            <tr><td>Montar o cardápio com a IA do Google (Gemini)</td><td data-rotulo="Quais dados">sexo, idade, peso, altura, objetivo, modalidades, UF, orçamento, nível de atividade, o "prefiro evitar" e a rotina</td><td data-rotulo="Base legal">seu consentimento (art. 11, I)</td></tr>
+            <tr><td>Mostrar seu progresso e ajustar a meta pelo que aconteceu de verdade</td><td data-rotulo="Quais dados">pesagens, metas, dietas</td><td data-rotulo="Base legal">seu consentimento (art. 11, I)</td></tr>
+            <tr><td>Proteger o app contra abuso (limite de tentativas, registros técnicos)</td><td data-rotulo="Quais dados">endereço IP, identificador da conta</td><td data-rotulo="Base legal">legítimo interesse (art. 7º, IX)</td></tr>
+          </tbody>
+        </table>
+        <p>A meta é calculada por fórmulas publicadas (Mifflin-St Jeor e o Compêndio de Atividades Físicas) e ajustada pelas pesagens que você registra. Se quiser entender como chegamos no seu número, escreva para [EMAIL_PRIVACIDADE].</p>
+        <p>O consentimento é pedido numa caixa própria, desmarcada, antes de qualquer dado de saúde. Sem ele, o Ronu não funciona, porque não dá para montar a dieta sem esses dados.</p>
+        <p><strong>Seu nome e seu e-mail nunca vão para a IA.</strong> O Gemini recebe só o que está na tabela acima, sem seu nome, seu e-mail ou o número da sua conta.</p>
+        <p>O Ronu não vende seus dados, não mostra anúncios e não usa seus dados para nada além do que está nesta página.</p>
+      </section>
+
+      <section class="lg-secao" id="compartilhamento" aria-labelledby="compartilhamento-titulo">
+        <h2 id="compartilhamento-titulo">Com quem os dados são compartilhados</h2>
+        <p>O Ronu usa serviços de outras empresas para funcionar. Elas tratam os dados em nome do Ronu (são operadoras), só para prestar o serviço:</p>
+        <table class="lg-tabela">
+          <thead><tr><th scope="col">Empresa</th><th scope="col">Para quê</th><th scope="col">O que recebe</th><th scope="col">Onde</th></tr></thead>
+          <tbody>
+            <tr><td>Microsoft Azure</td><td data-rotulo="Para quê">servidor da API e banco de dados</td><td data-rotulo="O que recebe">todos os dados da conta</td><td data-rotulo="Onde">Chile</td></tr>
+            <tr><td>Google (Gemini)</td><td data-rotulo="Para quê">montar o cardápio</td><td data-rotulo="O que recebe">os dados da linha "Montar o cardápio" acima, sem nome nem e-mail</td><td data-rotulo="Onde">EUA</td></tr>
+            <tr><td>Google (login)</td><td data-rotulo="Para quê">"Entrar com Google", se você usar</td><td data-rotulo="O que recebe">o que o Google já tem da sua conta; o Ronu recebe nome, e-mail e identificador</td><td data-rotulo="Onde">EUA</td></tr>
+            <tr><td>Google (Gmail)</td><td data-rotulo="Para quê">enviar o e-mail de "esqueci minha senha"</td><td data-rotulo="O que recebe">seu e-mail e o link</td><td data-rotulo="Onde">EUA</td></tr>
+            <tr><td>Google (Fonts)</td><td data-rotulo="Para quê">as fontes do site</td><td data-rotulo="O que recebe">seu endereço IP, ao abrir as páginas</td><td data-rotulo="Onde">EUA</td></tr>
+            <tr><td>Vercel</td><td data-rotulo="Para quê">hospedar as páginas do site</td><td data-rotulo="O que recebe">seu endereço IP e as páginas que você abre</td><td data-rotulo="Onde">EUA e outros países</td></tr>
+          </tbody>
+        </table>
+        <p>Fora esses casos, o Ronu só entrega dados a uma autoridade se a lei obrigar.</p>
+      </section>
+
+      <section class="lg-secao" id="exterior" aria-labelledby="exterior-titulo">
+        <h2 id="exterior-titulo">Dados fora do Brasil</h2>
+        <p>Seus dados ficam guardados no <strong>Chile</strong> (Microsoft Azure) e passam pelos <strong>EUA</strong> (Google, Vercel). A LGPD permite essa transferência com o seu consentimento específico (art. 33, VIII), que você dá na caixa do consentimento, e com as garantias contratuais que essas empresas oferecem.</p>
+      </section>
+
+      <section class="lg-secao" id="prazos" aria-labelledby="prazos-titulo">
+        <h2 id="prazos-titulo">Por quanto tempo</h2>
+        <table class="lg-tabela">
+          <thead><tr><th scope="col">Dado</th><th scope="col">Quanto tempo</th></tr></thead>
+          <tbody>
+            <tr><td>Conta, perfil, pesagens, treinos, preferências, metas</td><td data-rotulo="Quanto tempo">enquanto a conta existir</td></tr>
+            <tr><td>Dietas</td><td data-rotulo="Quanto tempo">as 3 mais recentes (a mais antiga sai quando você gera uma nova)</td></tr>
+            <tr><td>Marcações "já tenho" da lista de compras</td><td data-rotulo="Quanto tempo">enquanto a dieta delas estiver entre as 3</td></tr>
+            <tr><td>Pedidos de "esqueci minha senha"</td><td data-rotulo="Quanto tempo">30 dias</td></tr>
+            <tr><td>E-mails de recuperação de senha enviados (pasta Enviados do e-mail do Ronu)</td><td data-rotulo="Quanto tempo">até 30 dias</td></tr>
+            <tr><td>Conta criada que nunca aceitou o consentimento e não tem nenhum dado além de nome e e-mail</td><td data-rotulo="Quanto tempo">30 dias</td></tr>
+            <tr><td>Registros técnicos do servidor (só o número da conta, sem dado de saúde)</td><td data-rotulo="Quanto tempo">7 dias</td></tr>
+            <tr><td>Registros de acesso e diagnóstico da Azure (endereço IP, página da API pedida, erros)</td><td data-rotulo="Quanto tempo">até 30 dias</td></tr>
+            <tr><td>Cópias de segurança automáticas do banco</td><td data-rotulo="Quanto tempo">7 dias</td></tr>
+            <tr><td>O que vai para o Gemini</td><td data-rotulo="Quanto tempo">Com o plano pago, o Google não usa esses dados para treinar a IA e os guarda por um período limitado, só para detectar abuso e cumprir a lei</td></tr>
+          </tbody>
+        </table>
+        <p>Quando você apaga a conta, tudo sai do banco na hora. As cópias de segurança somem sozinhas no prazo acima e não são usadas para nada além de recuperar o sistema em caso de falha.</p>
+      </section>
+
+      <section class="lg-secao" id="direitos" aria-labelledby="direitos-titulo">
+        <h2 id="direitos-titulo">Seus direitos, e como usar</h2>
+        <p>A LGPD (art. 18) garante que você pode:</p>
+        <ul>
+          <li><strong>saber</strong> se o Ronu trata dados seus e <strong>ver</strong> quais são;</li>
+          <li><strong>corrigir</strong> dados errados ou desatualizados;</li>
+          <li><strong>baixar</strong> seus dados num arquivo, para guardar ou levar para outro serviço;</li>
+          <li><strong>apagar</strong> sua conta e todos os seus dados;</li>
+          <li><strong>revogar</strong> o consentimento;</li>
+          <li>saber <strong>com quem</strong> os dados são compartilhados;</li>
+          <li>reclamar na <strong>Autoridade Nacional de Proteção de Dados</strong> (ANPD).</li>
+        </ul>
+        <p>A maioria você faz sozinho, no app:</p>
+        <ul>
+          <li><strong>Corrigir:</strong> no Perfil, em Treino e em Alimentação. Pesagens erradas podem ser apagadas no Progresso.</li>
+          <li><strong>Baixar seus dados:</strong> no Perfil, em "Baixar meus dados". Vem um arquivo com tudo da sua conta.</li>
+          <li><strong>Apagar a conta:</strong> no Perfil, em "Apagar minha conta". Pedimos sua senha (ou, se você só usa o Google, que digite uma frase) e apagamos tudo na hora.</li>
+          <li><strong>Revogar o consentimento:</strong> como o Ronu não funciona sem esses dados, revogar é apagar a conta. Antes, você pode baixar seus dados.</li>
+        </ul>
+        <p>Para qualquer outro pedido, escreva para <strong>[EMAIL_PRIVACIDADE]</strong>. Respondemos em até 15 dias.</p>
+      </section>
+
+      <section class="lg-secao" id="seguranca" aria-labelledby="seguranca-titulo">
+        <h2 id="seguranca-titulo">Segurança</h2>
+        <ul>
+          <li>toda comunicação com o Ronu é criptografada (HTTPS);</li>
+          <li>a senha é guardada só como hash (BCrypt);</li>
+          <li>o login vale por 2 horas, e trocar a senha encerra as outras sessões;</li>
+          <li>tentativas de login, cadastro e "apagar conta" têm limite, contra quem tenta adivinhar senhas;</li>
+          <li>o banco de dados só aceita conexão de dentro da Azure, sempre com senha;</li>
+          <li>os registros do servidor não guardam dados de saúde.</li>
+        </ul>
+        <p>Se acontecer um incidente que possa trazer risco a você, avisamos você e a ANPD.</p>
+      </section>
+
+      <section class="lg-secao" id="navegador" aria-labelledby="navegador-titulo">
+        <h2 id="navegador-titulo">Armazenamento no navegador</h2>
+        <p>O Ronu não usa cookies próprios nem rastreadores de anúncio. Ele guarda no seu navegador (armazenamento local) só o necessário para funcionar: o login, seu nome para o cabeçalho, sua escolha de tema (claro ou escuro), alguns avisos que você dispensou e, durante a troca de senha, o código do link de recuperação e o e-mail digitado. Ao sair da conta, o login é apagado. O botão "Entrar com Google" é do Google e segue as regras do Google.</p>
+      </section>
+
+      <section class="lg-secao" id="idade" aria-labelledby="idade-titulo">
+        <h2 id="idade-titulo">Idade</h2>
+        <p>O Ronu é só para maiores de 18 anos.</p>
+      </section>
+
+      <section class="lg-secao" id="mudancas" aria-labelledby="mudancas-titulo">
+        <h2 id="mudancas-titulo">Mudanças nesta política</h2>
+        <p>Se esta política mudar, a data no topo muda. Se a mudança afetar o que você autorizou, pedimos seu consentimento de novo antes de continuar.</p>
+        <p>Veja também os <a href="termos.html">Termos de uso</a>.</p>
+      </section>
+    </article>
+  </main>
+
+  <footer class="rodape">
+    <div class="conteiner rodape-linha">
+      <span>Ronu · dieta para quem treina</span>
+      <nav class="links-legais" aria-label="Documentos legais"><a href="privacidade.html" aria-current="page">Privacidade</a><span class="links-legais-sep" aria-hidden="true">·</span><a href="termos.html">Termos</a></nav>
+    </div>
+  </footer>
+
+  <script src="js/legal.js"></script>
+</body>
+</html>

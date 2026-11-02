@@ -236,6 +236,44 @@
         ],
         "createdAt": "2026-11-01T02:04:41.196Z",
         "reason": "user confirmed 2026-10-31: o rótulo 'Sua semana' acima do h1 faz parte do redesign aprovado (docs/redesign/telas/Dashboard)"
+      },
+      {
+        "rule": "kicker-above-heading",
+        "value": "*",
+        "files": [
+          "frontend/consentimento.html",
+          "frontend/perfil.html"
+        ],
+        "createdAt": "2026-11-02T19:12:12.073Z",
+        "reason": "User confirmed: .rotulo acima do h1 é padrão aprovado do Dojo Noturno (2026-11-02)"
+      },
+      {
+        "rule": "marquee",
+        "value": "*",
+        "files": [
+          "frontend/consentimento.html"
+        ],
+        "createdAt": "2026-11-02T19:12:12.343Z",
+        "reason": "User confirmed: grade deslizando no painel de entrada é enfeite aprovado do Dojo Noturno, para com movimento reduzido (2026-11-02)"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "frontend/privacidade.html",
+          "frontend/termos.html"
+        ],
+        "createdAt": "2026-11-02T19:12:12.627Z",
+        "reason": "Agent: cada link do sumário tem padding-left var(--e-4)=16px; o detector não resolve o var()"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "frontend/perfil.html"
+        ],
+        "createdAt": "2026-11-02T19:12:12.913Z",
+        "reason": "Agent: .pf-peso-linha tem padding-top var(--e-4)=16px acima da borda (no celular, sem borda); o detector não resolve o var()"
       }
     ]
   }
