@@ -42,6 +42,7 @@ como complemento, mas nunca substitui o teste manual do usuário.
 ## Dados de teste
 
 - Usar sempre uma conta descartável.
+- Todo e-mail fictício (contas de teste, medições, testes automáticos novos) usa o domínio `@exemplo.test`: o `.test` é reservado e não existe na internet, ao contrário de `@exemplo.com`.
 - Existe o `DELETE /api/conta` (LGPD base), que apaga a conta logada e tudo dela, mas a limpeza das contas de teste continua sendo feita direto no banco: dentro de uma transação, filtrando por id **e** email juntos. Antes de apagar, listar o que vai ser apagado.
 - A limpeza inclui a tabela `PedidosRedefinicaoSenha` (apaga em cascata junto com o `Usuario`, mas convém listar e apagar explicitamente).
 - A limpeza inclui a tabela `MetasDieta`. Ela apaga em cascata junto com o `Usuario`, mas não tem chave estrangeira para a `DietaIA` (de propósito: guarda todas as dietas, não só as 3 da tela). Ao apagar só as dietas de alguém, apagar também as `MetasDieta` do mesmo usuário, senão a meta adaptativa continua lendo essas metas.

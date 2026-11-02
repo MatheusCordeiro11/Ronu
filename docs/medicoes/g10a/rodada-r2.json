@@ -5,49 +5,49 @@
   {
    "perfil": "A",
    "usuarioId": 146,
-   "email": "g10a-a-r2-20261102@exemplo.com",
+   "email": "g10a-a-r2-20261102@exemplo.test",
    "status": 200,
    "segundosCliente": 17.9
   },
   {
    "perfil": "B",
    "usuarioId": 147,
-   "email": "g10a-b-r2-20261102@exemplo.com",
+   "email": "g10a-b-r2-20261102@exemplo.test",
    "status": 200,
    "segundosCliente": 16.4
   },
   {
    "perfil": "C",
    "usuarioId": 148,
-   "email": "g10a-c-r2-20261102@exemplo.com",
+   "email": "g10a-c-r2-20261102@exemplo.test",
    "status": 200,
    "segundosCliente": 17.5
   },
   {
    "perfil": "D",
    "usuarioId": 149,
-   "email": "g10a-d-r2-20261102@exemplo.com",
+   "email": "g10a-d-r2-20261102@exemplo.test",
    "status": 200,
    "segundosCliente": 18.5
   },
   {
    "perfil": "E",
    "usuarioId": 150,
-   "email": "g10a-e-r2-20261102@exemplo.com",
+   "email": "g10a-e-r2-20261102@exemplo.test",
    "status": 200,
    "segundosCliente": 9.6
   },
   {
    "perfil": "F",
    "usuarioId": 151,
-   "email": "g10a-f-r2-20261102@exemplo.com",
+   "email": "g10a-f-r2-20261102@exemplo.test",
    "status": 200,
    "segundosCliente": 20.5
   },
   {
    "perfil": "G",
    "usuarioId": 152,
-   "email": "g10a-g-r2-20261102@exemplo.com",
+   "email": "g10a-g-r2-20261102@exemplo.test",
    "status": 200,
    "segundosCliente": 27.0
   }
