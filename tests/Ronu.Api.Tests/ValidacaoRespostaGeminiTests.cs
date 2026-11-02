@@ -637,15 +637,18 @@ public class ValidacaoRespostaGeminiTests
     // Limite curto para os testes de timeout não esperarem os 60 s reais.
     private static readonly TimeSpan TimeoutCurto = TimeSpan.FromMilliseconds(200);
 
-    // O ajuste de quantidades (fase 4) fica desligado aqui: estes testes conferem as outras etapas com as
-    // quantidades exatas da resposta. O ajuste tem os próprios testes (AjusteQuantidadesTests).
+    // O ajuste de quantidades (fase 4) e o mínimo de refeições (regra 15) ficam desligados aqui: estes testes
+    // conferem as outras etapas com as quantidades exatas de respostas de poucas refeições. O ajuste tem os próprios
+    // testes (AjusteQuantidadesTests), e o mínimo, os da seção "Mínimo de refeições" deste arquivo.
     private static GeradorDietaGemini NovoGerador(HttpMessageHandler gemini, TimeSpan? timeoutPorTentativa = null, bool ajustar = false) => new(
         new HttpClient(gemini), new CalculadoraGastoCalorico(),
         new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia()),
         new GeminiOptions { ApiKey = "teste" }, NullLogger<GeradorDietaGemini>.Instance)
     {
         TimeoutPorTentativa = timeoutPorTentativa ?? GeradorDietaGemini.TimeoutPadraoPorTentativa,
-        AjustarQuantidades = ajustar
+        AjustarQuantidades = ajustar,
+        ExigirMinimoDeRefeicoes = false,
+        ExigirFonteDeGordura = false
     };
 
     // Com o ajuste ligado (como em produção): o cardápio de teste (só arroz, 256 kcal no dia) está muito
@@ -661,6 +664,115 @@ public class ValidacaoRespostaGeminiTests
         Assert.All(dieta.Dias, d => Assert.Equal(2 * 192m, d.TotalDoDia.Calorias));
     }
 
+    // ---------- Mínimo de refeições (regra 15, g10c) ----------
+
+    [Theory]
+    [InlineData(1500, 5)]
+    [InlineData(3499.9, 5)]
+    [InlineData(3500, 6)]
+    [InlineData(4200, 6)]
+    public void Minimo_De_Refeicoes_Pela_Meta(double meta, int minimo) =>
+        Assert.Equal(minimo, GeradorDietaGemini.MinimoDeRefeicoes((decimal)meta));
+
+    // O perfil de teste tem meta de ~2450 kcal (sem treino): mínimo 5. Duas refeições recusam a primeira resposta, e a segunda,
+    // com cinco, é a usada.
+    [Fact]
+    public async Task Menos_Refeicoes_Que_O_Minimo_Pede_De_Novo()
+    {
+        var gemini = new GeminiRoteirizado(
+            Envelope(TextoDieta(Semana, comRefeicoes: true)),
+            Envelope(TextoDieta(Semana, comRefeicoes: true, lanchesExtras: 3)));
+
+        var dieta = await GeradorComMinimo(gemini).GerarDietaAsync(Contexto());
+
+        Assert.Equal(2, gemini.Chamadas);
+        Assert.All(dieta.Dias, d => Assert.Equal(5, d.Refeicoes.Count));
+    }
+
+    // Na última tentativa a dieta é aceita mesmo abaixo do mínimo: uma refeição a menos não vira 503.
+    [Fact]
+    public async Task Na_Ultima_Tentativa_Aceita_Abaixo_Do_Minimo()
+    {
+        var gemini = new GeminiRoteirizado(
+            Envelope(TextoDieta(Semana, comRefeicoes: true)),
+            Envelope(TextoDieta(Semana, comRefeicoes: true, lanchesExtras: 1)));
+
+        var dieta = await GeradorComMinimo(gemini).GerarDietaAsync(Contexto());
+
+        Assert.Equal(2, gemini.Chamadas);
+        Assert.All(dieta.Dias, d => Assert.Equal(3, d.Refeicoes.Count));
+    }
+
+    [Fact]
+    public async Task No_Minimo_Passa_Na_Primeira()
+    {
+        var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true, lanchesExtras: 3)));
+
+        await GeradorComMinimo(gemini).GerarDietaAsync(Contexto());
+
+        Assert.Equal(1, gemini.Chamadas);
+    }
+
+    // ---------- Fonte de gordura (regra 16, g10d) ----------
+
+    // Só arroz: almoço e jantar sem fonte de gordura e o dia muito abaixo da gordura da meta. A primeira resposta é
+    // recusada; a segunda, com azeite no jantar, é a usada.
+    [Fact]
+    public async Task Dia_Sem_Fonte_De_Gordura_Pede_De_Novo()
+    {
+        var gemini = new GeminiRoteirizado(
+            Envelope(TextoDieta(Semana, comRefeicoes: true)),
+            Envelope(TextoDieta(Semana, comRefeicoes: true, bebidaNoJantar: "Azeite de oliva extra virgem", unidadeBebida: "g", quantidadeBebida: 10)));
+
+        var dieta = await GeradorComGordura(gemini).GerarDietaAsync(Contexto());
+
+        Assert.Equal(2, gemini.Chamadas);
+        Assert.All(dieta.Dias, d => Assert.Contains(d.Refeicoes.Single(r => r.Nome == "Jantar").Alimentos, a => a.AlimentoId == "azeite-de-oliva-extra-virgem"));
+    }
+
+    [Fact]
+    public async Task Na_Ultima_Tentativa_Aceita_Sem_Fonte_De_Gordura()
+    {
+        var gemini = new GeminiRoteirizado(
+            Envelope(TextoDieta(Semana, comRefeicoes: true)),
+            Envelope(TextoDieta(Semana, comRefeicoes: true)));
+
+        var dieta = await GeradorComGordura(gemini).GerarDietaAsync(Contexto());
+
+        Assert.Equal(2, gemini.Chamadas);
+        Assert.Equal(7, dieta.Dias.Count);
+    }
+
+    [Fact]
+    public async Task Com_Azeite_No_Jantar_Passa_Na_Primeira_E_O_Prompt_Tem_A_Regra_16()
+    {
+        var gemini = new GeminiRoteirizado(
+            Envelope(TextoDieta(Semana, comRefeicoes: true, bebidaNoJantar: "Azeite de oliva extra virgem", unidadeBebida: "g", quantidadeBebida: 10)));
+
+        await GeradorComGordura(gemini).GerarDietaAsync(Contexto());
+
+        Assert.Equal(1, gemini.Chamadas);
+        Assert.Contains("16. Use as fontes de gordura da lista", PromptEnviado(gemini));
+    }
+
+    private static GeradorDietaGemini GeradorComGordura(HttpMessageHandler gemini) => new(
+        new HttpClient(gemini), new CalculadoraGastoCalorico(),
+        new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia()),
+        new GeminiOptions { ApiKey = "teste" }, NullLogger<GeradorDietaGemini>.Instance)
+    {
+        AjustarQuantidades = false,
+        ExigirMinimoDeRefeicoes = false
+    };
+
+    private static GeradorDietaGemini GeradorComMinimo(HttpMessageHandler gemini) => new(
+        new HttpClient(gemini), new CalculadoraGastoCalorico(),
+        new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia()),
+        new GeminiOptions { ApiKey = "teste" }, NullLogger<GeradorDietaGemini>.Instance)
+    {
+        AjustarQuantidades = false,
+        ExigirFonteDeGordura = false
+    };
+
     private static ContextoDietaDto Contexto() => new()
     {
         Altura = 175, Sexo = "Masculino", Idade = 30, Peso = 80, Objetivo = "manter peso",
@@ -672,7 +784,8 @@ public class ValidacaoRespostaGeminiTests
     // ceiaSoComBebida: um terceiro item, a ceia, só com esse item (350 ml, 143,5 kcal declaradas).
     private static string TextoDieta(
         IEnumerable<string> nomes, bool comRefeicoes = false, string unidade = "g", string alimento = "Arroz branco cozido",
-        string? bebidaNoJantar = null, string? ceiaSoComBebida = null, string unidadeBebida = "ml", decimal quantidade = 100, decimal quantidadeBebida = 350)
+        string? bebidaNoJantar = null, string? ceiaSoComBebida = null, string unidadeBebida = "ml", decimal quantidade = 100, decimal quantidadeBebida = 350,
+        int lanchesExtras = 0)
     {
         object Item(string nome, decimal quantidade, string un) => new { nome, quantidade, unidade = un };
 
@@ -694,6 +807,10 @@ public class ValidacaoRespostaGeminiTests
                 Refeicao("Almoço", new[] { Item(alimento, quantidade, unidade) }, 500, 30, 60, 15),
                 Refeicao("Jantar", jantar, 735, 40, 90, 25)
             };
+            for (var i = 1; i <= lanchesExtras; i++)
+            {
+                lista.Add(Refeicao($"Lanche {i}", new[] { Item(alimento, quantidade, unidade) }, 128, 3, 28, 0));
+            }
             if (ceiaSoComBebida is not null)
             {
                 lista.Add(Refeicao("Ceia", new[] { Item(ceiaSoComBebida, 350, unidadeBebida) }, 143.5m, 2.1m, 11.55m, 0));

@@ -23,6 +23,10 @@ public class ContextoDietaDto
     // Nível de atividade fora do treino (Usuario.NivelAtividade); nulo = sem resposta.
     public string? NivelAtividade { get; set; }
 
+    // Horários estruturados (Usuario.HorarioAcordar/HorarioDormir); vão ao prompt no lugar da RotinaDiaria.
+    public TimeOnly? HorarioAcordar { get; set; }
+    public TimeOnly? HorarioDormir { get; set; }
+
     // Histórico de peso e aderência para a meta calórica adaptativa. Entra só
     // no cálculo das metas (GeradorDietaGemini), não no prompt.
     public List<RegistroPesoAderenciaDto> HistoricoPeso { get; set; } = new();

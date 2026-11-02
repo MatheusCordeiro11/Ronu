@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Ronu.Api.Data;
 using Ronu.Api.Models.IA;
+using Ronu.Api.Validacao;
 
 namespace Ronu.Api.Services.IA;
 
@@ -55,6 +56,18 @@ public class GeradorDietaGemini : IGeradorDietaIA
     /// conferir as outras etapas com as quantidades exatas da resposta.
     /// </summary>
     public bool AjustarQuantidades { get; init; } = true;
+
+    /// <summary>
+    /// Se o mínimo de refeições por dia (regra 15) é exigido. Só os testes desligam, para conferir as outras
+    /// etapas com respostas de poucas refeições.
+    /// </summary>
+    public bool ExigirMinimoDeRefeicoes { get; init; } = true;
+
+    /// <summary>
+    /// Se a fonte de gordura no almoço ou no jantar (regra 16) é exigida. Só os testes desligam, para conferir as
+    /// outras etapas com respostas sem gordura.
+    /// </summary>
+    public bool ExigirFonteDeGordura { get; init; } = true;
 
     public GeradorDietaGemini(
         HttpClient httpClient,
@@ -114,6 +127,17 @@ public class GeradorDietaGemini : IGeradorDietaIA
             {
                 var (respostaIa, uso, versaoModelo) = await ChamarGeminiAsync(corpoRequisicao);
                 var dias = MontarDias(respostaIa, metasPorDia, composicaoPorDia);
+                var abaixoDoMinimo = ExigirMinimoDeRefeicoes ? DiasAbaixoDoMinimo(dias) : [];
+                if (abaixoDoMinimo.Count > 0)
+                {
+                    if (tentativa < MaximoTentativas)
+                    {
+                        throw new RespostaIaInvalidaException(
+                            $"Dias com menos refeições que o mínimo da meta: {string.Join(", ", abaixoDoMinimo)}.");
+                    }
+                    _logger.LogWarning("Dieta aceita com menos refeições que o mínimo na última tentativa: {Dias}",
+                        string.Join(", ", abaixoDoMinimo));
+                }
                 // O que o Gemini declarou para cada dia (soma das refeições), antes de qualquer remoção e do
                 // cálculo pela base: só para o log comparar com o calculado.
                 var declarado = dias.ToDictionary(d => d.DiaSemana.Trim(), d => d.TotalDoDia, StringComparer.OrdinalIgnoreCase);
@@ -125,6 +149,17 @@ public class GeradorDietaGemini : IGeradorDietaIA
                     : TirarBebidaAlcoolica(dias, contexto);
                 // Depois da regra 8: a rede de segurança da cerveja continua valendo antes da lista.
                 AplicarLista(dias, lista);
+                var semGordura = ExigirFonteDeGordura && ListaTemFonteDeGordura(lista) ? DiasSemFonteDeGordura(dias) : [];
+                if (semGordura.Count > 0)
+                {
+                    if (tentativa < MaximoTentativas)
+                    {
+                        throw new RespostaIaInvalidaException(
+                            $"Dias sem fonte de gordura no almoço e no jantar e com gordura abaixo da meta: {string.Join(", ", semGordura)}.");
+                    }
+                    _logger.LogWarning("Dieta aceita sem fonte de gordura suficiente na última tentativa: {Dias}",
+                        string.Join(", ", semGordura));
+                }
                 var oleosTirados = TirarOleoDosRefogados(dias);
                 // Fase 4: quantidades ajustadas para cada dia chegar perto da meta, sem trocar alimento.
                 var ajustes = AjustarQuantidades ? AjusteQuantidades.Ajustar(dias) : [];
@@ -569,8 +604,10 @@ public class GeradorDietaGemini : IGeradorDietaIA
 
     private static string MontarPrompt(ContextoDietaDto contexto, Dictionary<string, ResultadoMacros> metasPorDia, ListaAlimentos lista)
     {
-        var modalidadesTexto = string.Join(", ", contexto.Modalidades
-            .Select(m => $"{m.Nome} ({string.Join(", ", m.DiasSemana.OrderBy(d => d).Select(d => NomesDias[d - 1]))})"));
+        // Plano gratuito do Gemini (decisão de 2026-11-02): os termos pedem para não mandar dado pessoal, e o Google
+        // usa o conteúdo. Por isso o prompt não leva sexo, idade, peso, altura, objetivo, nome das modalidades nem
+        // texto livre: as metas de cada dia já saem calculadas daqui com tudo isso, e o resto vai como dado
+        // estruturado (dia de treino ou de descanso, horários, UF, orçamento, itens da base).
 
         // "Gosto" vai como os itens da lista que ele casou (CasamentoPreferencias): o que não está na base
         // (whey, granola) não pode aparecer, e a tela avisa a pessoa (fase 2b-3).
@@ -605,9 +642,12 @@ public class GeradorDietaGemini : IGeradorDietaIA
             ? string.Empty
             : $" {string.Join(" e ", refogadosNaLista)} já incluem o óleo do preparo: na refeição em que um deles aparecer, não coloque azeite nem óleo.";
 
-        var evitarTexto = string.Join(", ", contexto.Preferencias
+        // Do "evitar" vão só os trechos que não casaram com a base ("carne de caça"): o que casou já saiu da lista,
+        // e o enum do nome não deixa o Gemini escolher fora dela. O texto como foi digitado não vai.
+        var evitarTexto = string.Join(", ", lista.Preferencias
             .Where(p => p.Tipo == "evitar")
-            .Select(p => p.Alimento));
+            .SelectMany(p => p.TrechosSemCasamento)
+            .Distinct(StringComparer.OrdinalIgnoreCase));
 
         // Regra 8 só explica quando a bebida pode aparecer para quem marcou uma
         // como preferida. Para os outros, a versão que explicava (com o exemplo
@@ -621,23 +661,42 @@ public class GeradorDietaGemini : IGeradorDietaIA
         // Os gramas de cada macro vão junto das calorias (regra 13): sem eles, o
         // Gemini montava a própria proporção (no g4, gordura em 31% das calorias
         // contra 25% da meta).
-        var metasTexto = string.Join("\n", NomesDias.Select(nome =>
+        // "Não treino no momento" (zero modalidades): o prompt não presume
+        // treino — sem "esportivo", sem marca de dia de treino ou de descanso e
+        // sem a frase dos dias de treino e de descanso, que não existem.
+        var semTreino = contexto.Modalidades.Count == 0;
+
+        // Cada dia diz se é de déficit, manutenção ou superávit (no lugar do objetivo, g10c) e, para quem treina, se é de
+        // treino e de quando a quando, sem o nome da modalidade.
+        var marcaObjetivo = MarcaDoObjetivo(contexto.Objetivo);
+        var metasTexto = string.Join("\n", NomesDias.Select((nome, i) =>
         {
             var meta = metasPorDia[nome].Macros;
-            return $"- {nome}: {meta.Calorias:F0} kcal (proteína {meta.ProteinasG:F0} g, carboidrato {meta.CarboidratosG:F0} g, gordura {meta.GordurasG:F0} g)";
+            var linha = $"- {nome}: {meta.Calorias:F0} kcal (proteína {meta.ProteinasG:F0} g, carboidrato {meta.CarboidratosG:F0} g, gordura {meta.GordurasG:F0} g) — {marcaObjetivo}";
+            return semTreino ? linha : $"{linha}; {MarcaDoTreino(contexto.Modalidades, i + 1)}";
         }));
 
         // Contas via Google ou anteriores ao campo podem estar sem estado —
-        // nesse caso a linha some do perfil (sem deixar linha em branco).
+        // nesse caso a linha some (sem deixar linha em branco).
         var estadoTexto = string.IsNullOrEmpty(contexto.Estado)
             ? string.Empty
-            : $"\n- Estado onde mora (UF): {contexto.Estado}";
+            : $"\n\nEstado onde a pessoa mora (UF): {contexto.Estado}";
 
-        // Rotina é opcional — sem ela o parágrafo some e os horários seguem
-        // o padrão típico brasileiro (regra 11).
-        var rotinaTexto = string.IsNullOrEmpty(contexto.RotinaDiaria)
-            ? string.Empty
-            : $"\n\nRotina diária da pessoa (use para estimar os horários de cada refeição): {contexto.RotinaDiaria}";
+        // Horários estruturados no lugar da rotina em texto. Sem eles, o parágrafo some e os horários seguem o
+        // padrão típico brasileiro (regra 11).
+        var acordar = RegrasHorario.Formatar(contexto.HorarioAcordar);
+        var dormir = RegrasHorario.Formatar(contexto.HorarioDormir);
+        var horariosTexto = (acordar, dormir) switch
+        {
+            (null, null) => string.Empty,
+            (not null, null) => $"\n\nHorário em que a pessoa acorda: {acordar}.",
+            (null, not null) => $"\n\nHorário em que a pessoa vai dormir: {dormir}.",
+            _ => $"\n\nHorários da pessoa: acorda às {acordar} e vai dormir às {dormir}."
+        };
+        var temHorarios = horariosTexto.Length > 0 || contexto.Modalidades.Any(m => m.HorarioInicio is not null);
+        var regra11 = temHorarios
+            ? "Preencha o campo \"horario\" de cada refeição no formato HH:mm (ex: \"07:30\"). Use os horários informados: todas as refeições ficam entre o horário de acordar e o de dormir. Nos dias de treino com horário, nenhuma refeição durante o treino; coloque uma refeição de 1 a 3 horas antes do início e outra até 2 horas depois do fim. O que não foi informado segue os horários típicos do brasileiro (café da manhã entre 6h30 e 8h, almoço entre 12h e 13h30, jantar entre 19h e 21h)."
+            : "Preencha o campo \"horario\" de cada refeição no formato HH:mm (ex: \"07:30\"), com horários típicos do brasileiro (café da manhã entre 6h30 e 8h, almoço entre 12h e 13h30, jantar entre 19h e 21h).";
 
         // Orçamento é opcional — sem ele o parágrafo some e a regra 12 trata
         // como "não informado" (bom senso de custo-benefício).
@@ -645,38 +704,23 @@ public class GeradorDietaGemini : IGeradorDietaIA
             ? string.Empty
             : $"\n\nOrçamento semanal da pessoa para alimentação: {contexto.OrcamentoSemanal}";
 
-        // "Não treino no momento" (zero modalidades): o prompt não presume
-        // treino — sem "esportivo", sem lista vazia de modalidades e sem a
-        // frase dos dias de treino e de descanso, que não existem.
-        var semTreino = contexto.Modalidades.Count == 0;
         var papel = semTreino ? "nutricionista" : "nutricionista esportivo";
-        var treinoTexto = semTreino
-            ? "- Treino: não treina no momento (nenhuma modalidade cadastrada)"
-            : $"- Modalidades praticadas (com os dias da semana de cada uma): {modalidadesTexto}";
         var metasIntro = semTreino
             ? """
               Metas diárias (calorias e macronutrientes), calculadas a partir do gasto em repouso e da
               atividade do dia a dia, já com o déficit ou superávit do objetivo. A pessoa não treina
               no momento: não há dia de treino nem de descanso, e o plano não deve citar treino,
-              pré-treino nem pós-treino:
+              pré-treino nem pós-treino. Cada dia diz se é de déficit, de manutenção ou de superávit:
               """
             : """
               Metas diárias (calorias e macronutrientes), calculadas a partir do gasto em repouso, da atividade
               do dia a dia fora do treino e do gasto real do treino de CADA dia específico, já
               com o déficit ou superávit do objetivo — dias de treino têm meta mais alta que
-              dias de descanso:
+              dias de descanso. Cada dia diz se é de déficit, de manutenção ou de superávit, e se é de treino ou de descanso:
               """;
 
         return $"""
-            Você é um {papel}. Monte um plano alimentar semanal (7 dias)
-            para uma pessoa com o seguinte perfil:
-
-            - Sexo: {contexto.Sexo}
-            - Idade: {contexto.Idade} anos
-            - Peso: {contexto.Peso} kg
-            - Altura: {contexto.Altura} cm
-            - Objetivo: {contexto.Objetivo}
-            {treinoTexto}{estadoTexto}
+            Você é um {papel}. Monte um plano alimentar semanal (7 dias) para uma pessoa.{estadoTexto}{horariosTexto}
 
             {metasIntro}
             {metasTexto}
@@ -688,8 +732,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
 
             Alimentos da lista que a pessoa gosta (use como base do plano, mas NÃO se limite a eles: complete com outros alimentos da lista adequados ao objetivo, variando as opções ao longo da semana): {(string.IsNullOrEmpty(preferidosTexto) ? (temGosto ? "nenhum dos que ela gosta está na lista" : "nenhuma preferência informada") : preferidosTexto)}
 
-            Alimentos que a pessoa deve evitar (já foram tirados da lista; NUNCA inclua nenhum destes, nem em pequena
-            quantidade, nem como ingrediente de outro prato): {(string.IsNullOrEmpty(evitarTexto) ? "nenhuma restrição informada" : evitarTexto)}{rotinaTexto}{orcamentoTexto}
+            O que a pessoa pediu para evitar já foi tirado da lista. Restrições que não correspondem a um item específico da lista (respeite o sentido delas: NUNCA inclua alimento que se encaixe nelas, nem em pequena quantidade, nem como ingrediente de outro prato): {(string.IsNullOrEmpty(evitarTexto) ? "nenhuma" : evitarTexto)}{orcamentoTexto}
 
             Regras obrigatórias:
             1. A soma de calorias de cada dia deve ficar dentro de uma margem de 5% (para mais ou para menos) da meta ESPECÍFICA daquele dia, listada acima — cada dia tem uma meta diferente, não use um valor único para todos os 7.
@@ -702,12 +745,93 @@ public class GeradorDietaGemini : IGeradorDietaIA
             8. {regra8}
             9. {regra9}
             10. A quantidade é sempre em gramas ("g") ou, para as bebidas (leite, café, chá, suco, refrigerante, água de coco), em mililitros ("ml"), nunca em unidades, fatias ou colheres. Para os itens contáveis, use múltiplos exatos do peso de uma unidade listado acima (ex.: duas unidades de um item de 50 g = 100 g).
-            11. Preencha o campo "horario" de cada refeição no formato HH:mm (ex: "07:30"). Se a rotina diária da pessoa foi informada, baseie os horários nela; caso contrário, use horários típicos do brasileiro (café da manhã entre 6h30 e 8h, almoço entre 12h e 13h30, jantar entre 19h e 21h).
+            11. {regra11}
             12. Se o orçamento semanal informado for "economico", priorize proteínas e ingredientes de menor custo (ex: ovo, frango, peixes populares como tilápia, feijão), evitando itens caros como salmão, camarão ou carnes nobres, sem comprometer a qualidade nutricional. Se for "moderado" ou não informado, use bom senso de custo-benefício. Se for "sem_restricao", não considere custo na escolha dos alimentos.
             13. A soma de proteína, carboidrato e gordura de cada dia deve ficar dentro de uma margem de 10% (para mais ou para menos) dos gramas da meta ESPECÍFICA daquele dia, listados acima. Se não for possível cumprir tudo ao mesmo tempo, priorize nesta ordem: (1) calorias dentro da margem de 5% da regra 1; (2) proteína; (3) carboidrato e gordura.
             14. Cada item é um alimento da lista, e preparações com mais de um ingrediente viram itens separados na mesma refeição: uma salada vira um item por ingrediente; café adoçado vira o café e o açúcar; uma vitamina vira a fruta e o leite.{regraRefogado}
+            15. Monte pelo menos {RefeicoesMinimas} refeições em cada dia e, nos dias com meta a partir de {MetaComMaisRefeicoes} kcal, pelo menos {RefeicoesMinimasMetaAlta}.{(semTreino ? "" : " O lanche antes e o depois do treino contam como refeições a mais, sem tirar as outras do dia.")}{(ListaTemFonteDeGordura(lista) ? RegraGordura : "")}
             """;
     }
+
+    // "dia de déficit", "dia de manutenção" ou "dia de superávit": a direção do objetivo, sem dizer o objetivo da
+    // pessoa nem o tamanho do déficit (que já está na meta). Objetivo desconhecido conta como manutenção, como na fórmula.
+    private static string MarcaDoObjetivo(string objetivo) => objetivo switch
+    {
+        "perder peso" => "dia de déficit",
+        "ganhar peso" => "dia de superávit",
+        _ => "dia de manutenção"
+    };
+
+    // "treino das 19:30 às 21:00", "treino" (sem hora informada) ou "descanso". Dois treinos no mesmo dia vão em ordem
+    // de início.
+    private static string MarcaDoTreino(IEnumerable<ModalidadeContextoDto> modalidades, int dia)
+    {
+        var doDia = modalidades.Where(m => m.DiasSemana.Contains(dia)).ToList();
+        if (doDia.Count == 0)
+        {
+            return "descanso";
+        }
+
+        var horarios = doDia
+            .Where(m => m.HorarioInicio is not null)
+            .OrderBy(m => m.HorarioInicio)
+            .Select(m =>
+            {
+                var inicio = m.HorarioInicio!.Value;
+                var fim = inicio.AddMinutes((double)(m.DuracaoHoras * 60));
+                return $"das {RegrasHorario.Formatar(inicio)} às {RegrasHorario.Formatar(fim)}";
+            })
+            .ToList();
+        return horarios.Count == 0 ? "treino" : $"treino {string.Join(" e ", horarios)}";
+    }
+
+    // Regra 16 (g10d): sem o perfil no prompt, o Gemini passou a montar dias magros demais (no g10c, o perfil F ficou
+    // 20,6% abaixo da gordura da meta, sem azeite). A checagem só recusa o caso claro: almoço e jantar sem nenhuma fonte
+    // de gordura e o dia abaixo de 85% da gordura da meta (no g10a, que estava bom, isso não aconteceu em nenhum dia).
+    private const string RegraGordura = "\n16. Use as fontes de gordura da lista (óleos e gorduras, como o azeite no almoço e no jantar, e oleaginosas e sementes) para chegar à gordura da meta de cada dia: sem elas, o dia fica abaixo da gordura da meta.";
+    private const decimal FracaoMinimaDaGordura = 0.85m;
+
+    private static bool EFonteDeGordura(AlimentoBase item) =>
+        item.Categoria is CategoriaAlimento.OleosEGorduras or CategoriaAlimento.OleaginosasESementes
+        || Refogados.Contains(item.Id);
+
+    private static bool ListaTemFonteDeGordura(ListaAlimentos lista) => lista.Itens.Any(i => EFonteDeGordura(i.Item));
+
+    private static List<string> DiasSemFonteDeGordura(IEnumerable<DiaDietaDto> dias)
+    {
+        var porId = BaseNutricional.Itens.ToDictionary(i => i.Id);
+        AlimentoBase? Item(AlimentoDto a) => a.AlimentoId is not null && porId.TryGetValue(a.AlimentoId, out var i) ? i : null;
+
+        var semGordura = new List<string>();
+        foreach (var dia in dias)
+        {
+            var almocoEJantar = dia.Refeicoes.Where(r =>
+                r.Nome.Contains("almo", StringComparison.OrdinalIgnoreCase) || r.Nome.Contains("jant", StringComparison.OrdinalIgnoreCase));
+            var temFonte = almocoEJantar.SelectMany(r => r.Alimentos).Any(a => Item(a) is { } i && EFonteDeGordura(i));
+            var gordura = dia.Refeicoes.SelectMany(r => r.Alimentos).Sum(a => (Item(a)?.GorduraG ?? 0m) * a.Quantidade / 100m);
+            var meta = dia.MetaCalculada.GordurasG;
+            if (!temFonte && gordura < meta * FracaoMinimaDaGordura)
+            {
+                semGordura.Add($"{dia.DiaSemana} ({gordura:F0} de {meta:F0} g)");
+            }
+        }
+        return semGordura;
+    }
+
+    // Mínimo de refeições do dia pela meta (regra 15, g10c): com poucas refeições, o Gemini não chegava às metas altas.
+    // Na primeira tentativa, um dia abaixo do mínimo recusa a resposta; na última, a dieta é aceita assim (como a
+    // cerveja da regra 8, que sai em vez de virar erro): uma refeição a menos não vale um 503 para a pessoa.
+    public const int RefeicoesMinimas = 5;
+    public const int RefeicoesMinimasMetaAlta = 6;
+    public const int MetaComMaisRefeicoes = 3500;
+
+    public static int MinimoDeRefeicoes(decimal metaKcal) =>
+        metaKcal >= MetaComMaisRefeicoes ? RefeicoesMinimasMetaAlta : RefeicoesMinimas;
+
+    private static List<string> DiasAbaixoDoMinimo(IEnumerable<DiaDietaDto> dias) => dias
+        .Where(d => d.Refeicoes.Count < MinimoDeRefeicoes(d.MetaCalculada.Calorias))
+        .Select(d => $"{d.DiaSemana} ({d.Refeicoes.Count} de {MinimoDeRefeicoes(d.MetaCalculada.Calorias)})")
+        .ToList();
 
     // O enum do nome é a lista da pessoa (no máximo BaseNutricional.TetoDeNomes nomes: a fase 0, em
     // 2026-10-07, passou com até 180 em gemini-3.5-flash-lite). A unidade também vai em enum, mas o C#

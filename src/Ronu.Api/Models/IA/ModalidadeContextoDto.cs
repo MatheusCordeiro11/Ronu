@@ -13,4 +13,8 @@ public class ModalidadeContextoDto
     // 1=Segunda ... 7=Domingo (ISO 8601). Usado para calcular uma meta
     // calórica diferente por dia da semana, em vez de uma meta única semanal.
     public required int[] DiasSemana { get; set; }
+
+    // Hora de início (UsuarioModalidade.HorarioInicio): o prompt diz a hora do treino de cada dia, sem o nome da
+    // modalidade. Nula = não informada.
+    public TimeOnly? HorarioInicio { get; set; }
 }

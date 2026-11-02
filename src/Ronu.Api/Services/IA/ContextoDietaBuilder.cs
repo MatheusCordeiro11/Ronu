@@ -91,7 +91,8 @@ public class ContextoDietaBuilder : IContextoDietaBuilder
                 Nome = m.Modalidade.Nome,
                 MetReferencia = m.Modalidade.MetReferencia,
                 DuracaoHoras = m.DuracaoMediaHoras,
-                DiasSemana = m.DiasSemana
+                DiasSemana = m.DiasSemana,
+                HorarioInicio = m.HorarioInicio
             })
             .ToListAsync();
 
@@ -134,6 +135,8 @@ public class ContextoDietaBuilder : IContextoDietaBuilder
             RotinaDiaria = usuario.RotinaDiaria,
             OrcamentoSemanal = usuario.OrcamentoSemanal,
             NivelAtividade = usuario.NivelAtividade,
+            HorarioAcordar = usuario.HorarioAcordar,
+            HorarioDormir = usuario.HorarioDormir,
             HistoricoPeso = historicoPeso,
             HistoricoMetas = historicoMetas,
             // Sem alérgenos por enquanto: a pessoa só passa a declará-los na fase 2c.

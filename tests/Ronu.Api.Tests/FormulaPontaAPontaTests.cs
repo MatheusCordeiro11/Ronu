@@ -78,7 +78,48 @@ public class FormulaPontaAPontaTests
         Assert.Contains("atividade\ndo dia a dia fora do treino", gemini.Prompt.Replace("\r\n", "\n"));
         Assert.DoesNotContain("taxa metabólica basal + gasto", gemini.Prompt);
         Assert.Contains("Você é um nutricionista esportivo.", gemini.Prompt);
-        Assert.Contains("- Modalidades praticadas (com os dias da semana de cada uma): Jiu-jitsu (Segunda-feira, Terça-feira, Quinta-feira, Sexta-feira)", gemini.Prompt);
+        // Dia de treino ou de descanso, sem o nome da modalidade (plano gratuito do Gemini).
+        Assert.Contains("- Segunda-feira: 3291 kcal (proteína 144 g, carboidrato 473 g, gordura 91 g) — dia de manutenção; treino\n", gemini.Prompt.Replace("\r\n", "\n"));
+        Assert.Contains("- Quarta-feira: 2475 kcal (proteína 144 g, carboidrato 320 g, gordura 69 g) — dia de manutenção; descanso", gemini.Prompt);
+        Assert.Contains("15. Monte pelo menos 5 refeições em cada dia e, nos dias com meta a partir de 3500 kcal, pelo menos 6. O lanche antes e o depois do treino contam", gemini.Prompt);
+        Assert.DoesNotContain("Jiu-jitsu", gemini.Prompt);
+    }
+
+    // O prompt não leva dado pessoal: sexo, idade, peso, altura, objetivo, nome da modalidade, rotina em texto e o
+    // "evitar" como foi digitado ficam de fora. Vão os horários estruturados e só os trechos do "evitar" sem casamento.
+    [Fact]
+    public async Task Prompt_Sem_Dado_Pessoal_Com_Horarios_E_So_O_Evitar_Sem_Casamento()
+    {
+        var gemini = new GeminiQueGuardaOPrompt();
+        var gerador = new GeradorDietaGemini(
+            new HttpClient(gemini), new CalculadoraGastoCalorico(),
+            new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia()),
+            new GeminiOptions { ApiKey = "teste" }, NullLogger<GeradorDietaGemini>.Instance);
+        var contexto = PerfilA();
+        contexto.Estado = "SP";
+        contexto.RotinaDiaria = "Rotina em texto livre que nao pode ir";
+        contexto.HorarioAcordar = new TimeOnly(6, 0);
+        contexto.HorarioDormir = new TimeOnly(23, 0);
+        contexto.Modalidades[0].HorarioInicio = new TimeOnly(19, 30);
+        contexto.Preferencias = new()
+        {
+            new() { Alimento = "Leite", Tipo = "evitar" },
+            new() { Alimento = "Kiwano dourado", Tipo = "evitar" }
+        };
+
+        await gerador.GerarDietaAsync(contexto);
+        var prompt = gemini.Prompt.Replace("\r\n", "\n");
+
+        foreach (var proibido in new[] { "Sexo", "Masculino", "Idade", "30 anos", "80 kg", "178", "Altura", "manter peso", "Objetivo:", "Jiu-jitsu", "Rotina em texto livre", "Leite, " })
+        {
+            Assert.DoesNotContain(proibido, prompt);
+        }
+        Assert.Contains("Estado onde a pessoa mora (UF): SP", prompt);
+        Assert.Contains("Horários da pessoa: acorda às 06:00 e vai dormir às 23:00.", prompt);
+        Assert.Contains("- Segunda-feira: 3291 kcal (proteína 144 g, carboidrato 473 g, gordura 91 g) — dia de manutenção; treino das 19:30 às 21:00", prompt);
+        Assert.Contains("- Sábado: 2475 kcal (proteína 144 g, carboidrato 320 g, gordura 69 g) — dia de manutenção; descanso", prompt);
+        Assert.Contains("nem como ingrediente de outro prato): kiwano dourado", prompt, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("11. Preencha o campo \"horario\" de cada refeição no formato HH:mm (ex: \"07:30\"). Use os horários informados", prompt);
     }
 
     // "Não treino no momento": a dieta sai com os 7 dias iguais (repouso + dia a
@@ -105,7 +146,11 @@ public class FormulaPontaAPontaTests
         });
 
         Assert.Contains("Você é um nutricionista. Monte", gemini.Prompt);
-        Assert.Contains("- Treino: não treina no momento (nenhuma modalidade cadastrada)", gemini.Prompt);
+        Assert.Contains("gordura 69 g) — dia de manutenção\n", gemini.Prompt.Replace("\r\n", "\n"));
+        Assert.DoesNotContain("; treino", gemini.Prompt);
+        Assert.DoesNotContain("; descanso", gemini.Prompt);
+        Assert.DoesNotContain("O lanche antes e o depois do treino", gemini.Prompt);
+        Assert.Contains("com horários típicos do brasileiro", gemini.Prompt);
         Assert.Contains("o plano não deve citar treino", gemini.Prompt);
         Assert.DoesNotContain("esportivo", gemini.Prompt);
         Assert.DoesNotContain("Modalidades praticadas", gemini.Prompt);
