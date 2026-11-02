@@ -11,9 +11,14 @@ API, na ordem do onboarding, e gera uma dieta. Grava a resposta bruta de cada pe
 e um resumo em <pasta>/rodada.json. A senha é gerada na hora e não é gravada em lugar nenhum.
 
 Só fala com http://localhost:5011: nunca com a produção.
+
+O cadastro manda o aceite do consentimento geral (LGPD base), com a versão lida da rota pública. O limite do cadastro
+é de 5 contas por hora por IP, em memória: uma rodada com mais de 5 contas roda em lotes, reiniciando a API local
+entre eles (o reinício zera o limite).
 """
 import datetime
 import json
+import os
 import secrets
 import sys
 import time
@@ -23,16 +28,23 @@ import urllib.request
 API = "http://localhost:5011/api"
 
 # Mesmos dados de docs/medicoes/perfis-g.md. Dias: 1 = segunda ... 7 = domingo.
+# A, C e F têm rotina (fictícia, desde o g10a): o texto vai no perfil e os "horarios" estruturados ficam só aqui, para
+# o metricas.py conferir os horários das refeições. Os dois dizem a mesma coisa.
 PERFIS = [
     {"id": "A", "sexo": "Masculino", "nascimento": "1996-05-10", "peso": 80, "altura": 178, "objetivo": "manter peso",
      "uf": "SP", "nivel": None, "modalidades": [("Jiu-jitsu", [1, 2, 4, 5], 1.5)],
-     "gosto": ["Batata doce", "Tapioca"], "evitar": []},
+     "gosto": ["Batata doce", "Tapioca"], "evitar": [],
+     "rotina": "Acordo às 6h, trabalho das 8h às 17h e treino jiu-jitsu às 19h30 na segunda, terça, quinta e sexta. Durmo às 23h.",
+     "horarios": {"acordar": "06:00", "dormir": "23:00", "treinos": [{"dias": [1, 2, 4, 5], "inicio": "19:30", "horas": 1.5}]}},
     {"id": "B", "sexo": "Feminino", "nascimento": "1998-03-15", "peso": 58, "altura": 162, "objetivo": "perder peso",
      "uf": "RJ", "nivel": None, "modalidades": [("Muay Thai", [2, 4, 6], 1.0)],
      "gosto": ["Banana"], "evitar": ["Carne vermelha"]},
     {"id": "C", "sexo": "Masculino", "nascimento": "1995-02-20", "peso": 95, "altura": 180, "objetivo": "ganhar peso",
      "uf": "RS", "nivel": None, "modalidades": [("Jiu-jitsu", [1, 2, 3, 4, 5], 1.5), ("Musculação", [1, 3, 5], 1.0)],
-     "gosto": ["Whey protein", "Pasta de amendoim"], "evitar": []},
+     "gosto": ["Whey protein", "Pasta de amendoim"], "evitar": [],
+     "rotina": "Acordo às 5h30. Segunda, quarta e sexta faço musculação às 6h. Trabalho das 8h às 17h e treino jiu-jitsu às 19h de segunda a sexta. Durmo às 22h30.",
+     "horarios": {"acordar": "05:30", "dormir": "22:30", "treinos": [{"dias": [1, 3, 5], "inicio": "06:00", "horas": 1.0},
+                                                                    {"dias": [1, 2, 3, 4, 5], "inicio": "19:00", "horas": 1.5}]}},
     {"id": "D", "sexo": "Feminino", "nascimento": "1990-06-01", "peso": 90, "altura": 160, "objetivo": "perder peso",
      "uf": "MG", "nivel": None, "modalidades": [],
      "gosto": [], "evitar": []},
@@ -41,7 +53,10 @@ PERFIS = [
      "gosto": ["Ovo"], "evitar": ["Leite"]},
     {"id": "F", "sexo": "Feminino", "nascimento": "2002-04-12", "peso": 63, "altura": 168, "objetivo": "ganhar peso",
      "uf": "SC", "nivel": "sentado", "modalidades": [("Judô", [1, 3, 5], 1.5), ("Corrida", [6], 0.75)],
-     "gosto": ["Iogurte", "Granola"], "evitar": ["Peixe"]},
+     "gosto": ["Iogurte", "Granola"], "evitar": ["Peixe"],
+     "rotina": "Acordo às 7h, estudo de manhã e trabalho das 13h às 18h. Judô às 20h na segunda, quarta e sexta, e corrida no sábado às 8h. Durmo à meia-noite.",
+     "horarios": {"acordar": "07:00", "dormir": "24:00", "treinos": [{"dias": [1, 3, 5], "inicio": "20:00", "horas": 1.5},
+                                                                    {"dias": [6], "inicio": "08:00", "horas": 0.75}]}},
     {"id": "G", "sexo": "Masculino", "nascimento": "1979-08-30", "peso": 74, "altura": 172, "objetivo": "manter peso",
      "uf": "BA", "nivel": "bracal", "modalidades": [("Boxe", [2, 4], 1.0), ("Natação", [6], 1.0)],
      "gosto": ["Cerveja", "Feijão"], "evitar": []},
@@ -80,12 +95,16 @@ def main():
     status, modalidades = chamar("GET", "/modalidades")
     exigir(status, modalidades, (200,), "modalidades")
     id_modalidade = {m["nome"]: m["id"] for m in modalidades}
+    status, texto = chamar("GET", "/consentimentos/vigente/geral")
+    exigir(status, texto, (200,), "texto do consentimento")
+    versao_consentimento = texto["versao"]
 
     resumo = []
     for p in (p for p in PERFIS if p["id"] in escolhidos):
         email = f"{rodada}-{p['id'].lower()}{marca}-{data}@exemplo.com"
         senha = secrets.token_urlsafe(18)  # não é gravada: a conta é descartável
-        s, c = chamar("POST", "/auth/cadastro", {"nome": f"Perfil {p['id']} {rodada}", "email": email, "senha": senha, "estado": p["uf"]})
+        s, c = chamar("POST", "/auth/cadastro", {"nome": f"Perfil {p['id']} {rodada}", "email": email, "senha": senha, "estado": p["uf"],
+                                                "consentimentoGeral": {"versao": versao_consentimento}})
         exigir(s, c, (200, 201), f"{p['id']} cadastro")
         s, c = chamar("POST", "/auth/login", {"email": email, "senha": senha})
         exigir(s, c, (200,), f"{p['id']} login")
@@ -94,6 +113,8 @@ def main():
         perfil = {"altura": p["altura"], "sexo": p["sexo"], "dataNascimento": p["nascimento"]}
         if p["nivel"]:
             perfil["nivelAtividade"] = p["nivel"]
+        if p.get("rotina"):
+            perfil["rotinaDiaria"] = p["rotina"]
         s, c = chamar("PUT", "/perfil", perfil, token)
         exigir(s, c, (200,), f"{p['id']} perfil")
         s, c = chamar("POST", "/objetivos", {"peso": p["peso"], "objetivo": p["objetivo"]}, token)
@@ -114,8 +135,15 @@ def main():
         resumo.append({"perfil": p["id"], "usuarioId": usuario_id, "email": email, "status": s, "segundosCliente": segundos})
         print(f"{p['id']}: status {s} em {segundos} s", flush=True)
 
-    with open(f"{pasta}/rodada{marca}.json", "w", encoding="utf-8") as f:
-        json.dump({"rodada": rodada, "data": data, "perfis": resumo}, f, ensure_ascii=False, indent=1)
+    # Em lotes (limite do cadastro), o segundo lote soma os perfis dele aos do primeiro, na ordem em que rodaram:
+    # o metricas.py casa essa ordem com a do log da API.
+    caminho = f"{pasta}/rodada{marca}.json"
+    anteriores = []
+    if os.path.exists(caminho):
+        rodados = {x["perfil"] for x in resumo}
+        anteriores = [x for x in json.load(open(caminho, encoding="utf-8"))["perfis"] if x["perfil"] not in rodados]
+    with open(caminho, "w", encoding="utf-8") as f:
+        json.dump({"rodada": rodada, "data": data, "perfis": anteriores + resumo}, f, ensure_ascii=False, indent=1)
 
 
 if __name__ == "__main__":

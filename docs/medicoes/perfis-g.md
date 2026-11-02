@@ -32,7 +32,24 @@ O que cada perfil cobre:
 - **F:** mulher que treina e ganha peso, luta + corrida, nível de atividade baixo; feijão preto (SC).
 - **G:** mais velho, boxe e natação (modalidade de luta diferente do jiu-jitsu e uma de condicionamento), nível braçal; macaxeira (BA).
 
-Rotina diária e orçamento semanal ficam **vazios** em todos (sem variável a mais entre as rodadas).
+Orçamento semanal fica **vazio** em todos (sem variável a mais entre as rodadas). A rotina diária ficou vazia até o
+g9c; desde o g10a, A, C e F têm uma rotina fictícia, para medir os horários das refeições (o prompt reduzido tira a
+rotina, e o g10a é a linha de base dele):
+
+| Perfil | Rotina (texto enviado) | O que o `metricas.py` confere |
+|---|---|---|
+| A | "Acordo às 6h, trabalho das 8h às 17h e treino jiu-jitsu às 19h30 na segunda, terça, quinta e sexta. Durmo às 23h." | acordar 6h, dormir 23h, treino 19h30–21h |
+| C | "Acordo às 5h30. Segunda, quarta e sexta faço musculação às 6h. Trabalho das 8h às 17h e treino jiu-jitsu às 19h de segunda a sexta. Durmo às 22h30." | acordar 5h30, dormir 22h30, musculação 6h–7h, jiu-jitsu 19h–20h30 |
+| F | "Acordo às 7h, estudo de manhã e trabalho das 13h às 18h. Judô às 20h na segunda, quarta e sexta, e corrida no sábado às 8h. Durmo à meia-noite." | acordar 7h, dormir 24h, judô 20h–21h30, corrida 8h–8h45 |
+
+Métricas de horário (só A, C e F): refeição fora da janela acordado; refeição durante o treino; dia de treino sem
+refeição nas 3 horas antes do início; dia de treino sem refeição nas 2 horas depois do fim.
+
+**n=2 desde o g10a.** Cada perfil roda duas vezes (`P.json` e `P-r2.json`), e o `metricas.py` mede as duas e tira o
+`resumo` (médias e totais). O cadastro tem limite de 5 contas por hora por IP, em memória: cada repetição roda em
+dois lotes (A a E, depois F e G), com a API local reiniciada antes de cada lote (configuração `api-local-medicao` do
+`.claude/launch.json`, que grava o log). O log de cada lote é somado ao `log-api.txt` (ou `log-api-r2.txt`) na
+ordem em que rodou.
 
 ## Preferências (idênticas no g8b e no g9a)
 
@@ -52,7 +69,7 @@ recebê-la, e qualquer cerveja nos outros perfis é falha. O G testa o álcool, 
 
 ## Contas
 
-Uma conta descartável por perfil e por rodada: `g8b-a-20261025@exemplo.com`, `g9a-a-AAAAMMDD@exemplo.com` etc.
+Uma conta descartável por perfil e por rodada: `g8b-a-20261025@exemplo.com`, `g9a-a-AAAAMMDD@exemplo.com` etc. Desde a LGPD base, o cadastro manda o aceite do consentimento geral.
 Senha gerada na hora e não guardada (as contas são apagadas depois, no banco local, numa transação
 filtrando por id e email, com a lista mostrada antes). Tudo pela API HTTP local, na ordem do onboarding:
-cadastro → estado → perfil → objetivo (peso) → modalidades → preferências → `POST /dietas/gerar`.
+cadastro (com o aceite) → estado → perfil (com a rotina, se houver) → objetivo (peso) → modalidades → preferências → `POST /dietas/gerar`.
