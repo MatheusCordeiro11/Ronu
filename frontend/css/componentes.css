@@ -483,10 +483,11 @@ textarea.entrada {
   line-height: 1.5;
 }
 
-/* Campo de data: no celular (iOS e alguns Androids) o navegador dá ao campo
-   uma largura mínima própria e o texto da data passa da caixa. Aqui ele
+/* Campos de data e de hora: no celular (iOS e alguns Androids) o navegador dá
+   ao campo uma largura mínima própria e o texto passa da caixa. Aqui ele
    obedece à coluna, com a mesma altura dos outros campos. */
-.entrada[type="date"] {
+.entrada[type="date"],
+.entrada[type="time"] {
   -webkit-appearance: none;
   appearance: none;
   display: block;
@@ -497,18 +498,22 @@ textarea.entrada {
 }
 
 @media (max-width: 380px) {
-  .entrada[type="date"] {
+  .entrada[type="date"],
+  .entrada[type="time"] {
     font-size: 0.9375rem;
   }
 }
 
-.entrada[type="date"]::-webkit-date-and-time-value {
+.entrada[type="date"]::-webkit-date-and-time-value,
+.entrada[type="time"]::-webkit-date-and-time-value {
   min-width: 0;
   text-align: left;
 }
 
 .entrada[type="date"]::-webkit-datetime-edit,
-.entrada[type="date"]::-webkit-datetime-edit-fields-wrapper {
+.entrada[type="date"]::-webkit-datetime-edit-fields-wrapper,
+.entrada[type="time"]::-webkit-datetime-edit,
+.entrada[type="time"]::-webkit-datetime-edit-fields-wrapper {
   padding: 0;
 }
 

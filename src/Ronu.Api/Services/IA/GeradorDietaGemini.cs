@@ -702,6 +702,9 @@ public class GeradorDietaGemini : IGeradorDietaIA
             (null, null) => string.Empty,
             (not null, null) => $"\n\nHorário em que a pessoa acorda: {acordar}.",
             (null, not null) => $"\n\nHorário em que a pessoa vai dormir: {dormir}.",
+            // Dormir mais cedo que acordar (00:30 com acordar às 07:00) é dormir depois da meia-noite: o dia vira.
+            _ when contexto.HorarioDormir < contexto.HorarioAcordar
+                => $"\n\nHorários da pessoa: acorda às {acordar} e vai dormir às {dormir}, já depois da meia-noite.",
             _ => $"\n\nHorários da pessoa: acorda às {acordar} e vai dormir às {dormir}."
         };
         var temHorarios = horariosTexto.Length > 0 || contexto.Modalidades.Any(m => m.HorarioInicio is not null);

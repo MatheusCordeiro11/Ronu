@@ -122,6 +122,26 @@ public class FormulaPontaAPontaTests
         Assert.Contains("11. Preencha o campo \"horario\" de cada refeição no formato HH:mm (ex: \"07:30\"). Use os horários informados", prompt);
     }
 
+    // Dormir depois da meia-noite: "durmo" menor que "acordo" vira o dia, e o prompt diz isso.
+    [Theory]
+    [InlineData(7, 0, 0, 30, "acorda às 07:00 e vai dormir às 00:30, já depois da meia-noite.")]
+    [InlineData(6, 0, 23, 0, "acorda às 06:00 e vai dormir às 23:00.")]
+    public async Task Dormir_Depois_Da_Meia_Noite_Vira_O_Dia_No_Prompt(int hA, int mA, int hD, int mD, string esperado)
+    {
+        var gemini = new GeminiQueGuardaOPrompt();
+        var gerador = new GeradorDietaGemini(
+            new HttpClient(gemini), new CalculadoraGastoCalorico(),
+            new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia()),
+            new GeminiOptions { ApiKey = "teste" }, NullLogger<GeradorDietaGemini>.Instance);
+        var contexto = PerfilA();
+        contexto.HorarioAcordar = new TimeOnly(hA, mA);
+        contexto.HorarioDormir = new TimeOnly(hD, mD);
+
+        await gerador.GerarDietaAsync(contexto);
+
+        Assert.Contains("Horários da pessoa: " + esperado, gemini.Prompt);
+    }
+
     // "Não treino no momento": a dieta sai com os 7 dias iguais (repouso + dia a
     // dia), a composição sem treino e um prompt que não presume treino.
     [Fact]

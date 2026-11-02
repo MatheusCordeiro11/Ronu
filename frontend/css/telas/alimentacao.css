@@ -2,7 +2,7 @@
   Ronu — Alimentação (tela aprovada: docs/redesign/telas/Alimentacao, ...Mobile, ...Washi)
   Depende de tokens, base e componentes.
 
-  Desktop: gosto, evitar e rotina à esquerda; orçamento, nomes regionais e
+  Desktop: gosto, evitar e horários à esquerda; orçamento, nomes regionais e
   "quando muda na dieta" à direita.
   Celular: uma coluna, "Adicionar" vira "+", sugestões rolam na horizontal.
 */
@@ -79,7 +79,7 @@
 
 /* ---------- Gosto / evitar ---------- */
 .al-lista,
-.al-rotina {
+.al-horarios {
   padding: 24px 26px;
 }
 
@@ -348,27 +348,38 @@
 }
 
 /* ---------- Rotina ---------- */
-.al-rotina {
-  gap: var(--e-3);
-}
-
-.al-rotina h2 label {
-  cursor: pointer;
-}
-
-.al-rotina textarea {
-  min-height: 92px;
-}
-
-.al-rotina-pe {
-  display: flex;
-  justify-content: space-between;
+.al-horarios {
   gap: var(--e-4);
-  font-size: var(--t-pequeno);
-  color: var(--texto-2);
 }
 
-/* "Salvando..." / "Salvo" de rotina e orçamento. */
+/* Acordo e Durmo lado a lado, também no celular: são dois valores curtos. */
+.al-horarios-campos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 12rem));
+  gap: var(--e-4);
+}
+
+.al-horarios .campo-dica a {
+  color: var(--texto);
+  text-underline-offset: 3px;
+}
+
+.al-horarios .campo-dica a:hover {
+  color: var(--acento-texto);
+}
+
+/* Avisos que não bloqueiam (js/base/horarios.js): um por combinação estranha de horários. */
+.al-horarios-aviso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.al-horarios-aviso:empty {
+  display: none;
+}
+
+/* "Salvando..." / "Salvo" de horários e orçamento. */
 .al-salvo {
   font-size: var(--t-pequeno);
   color: var(--texto-2);
@@ -520,7 +531,7 @@
   }
 
   .al-lista,
-  .al-rotina {
+  .al-horarios {
     padding: 18px;
     gap: 14px;
   }
@@ -567,10 +578,6 @@
   }
 
   .al-alergia {
-    font-size: var(--t-rotulo);
-  }
-
-  .al-rotina-pe {
     font-size: var(--t-rotulo);
   }
 

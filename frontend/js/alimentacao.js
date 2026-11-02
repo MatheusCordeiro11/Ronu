@@ -1,12 +1,12 @@
-// Ronu — Alimentação (gosto, evitar, rotina, orçamento e nomes regionais)
+// Ronu — Alimentação (gosto, evitar, horários, orçamento e nomes regionais)
 //
 // Como no canvas aprovado, tudo é salvo na hora, sem botão Salvar:
 // - Gosto / evitar: cada chip é uma PreferenciaAlimentar (POST faz upsert pelo
 //   nome, sem diferenciar maiúsculas; DELETE remove). Mandar para a outra
 //   lista um alimento que já está numa só troca o tipo.
-// - Rotina e orçamento vivem no perfil (PUT /perfil grava todos os campos
-//   juntos). A rotina salva pouco depois de parar de digitar e ao sair do
-//   campo; o orçamento, no clique.
+// - Horários (acordar e dormir) e orçamento vivem no perfil (PUT /perfil grava
+//   todos os campos juntos). Os horários salvam ao sair do campo ou pouco
+//   depois de mudar, nunca no meio da digitação; o orçamento, no clique.
 
 document.addEventListener('DOMContentLoaded', async () => {
   const usuario = ronuUsuarioLogado();
@@ -46,11 +46,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   // prévia do estado.js. Se uma mudar, mudar a outra também.
   const NORTE_NORDESTE = ['AC', 'AM', 'AP', 'PA', 'RO', 'RR', 'TO', 'AL', 'BA', 'CE', 'MA', 'PB', 'PE', 'PI', 'RN', 'SE'];
 
-  const ROTINA_LIMITE = 500;
-  const ESPERA_ROTINA_MS = 1000;
+  const ESPERA_HORARIO_MS = 800;
 
   let preferencias = [];
   let perfil = null;
+  // Para os avisos de treino fora da janela acordado: nome, início e duração de cada modalidade.
+  let modalidades = [];
   let mudou = false;
 
   // Conferência das preferências contra a base nutricional (fase 2b-3): o que
@@ -361,7 +362,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // ---------- Perfil: rotina e orçamento ----------
+  // ---------- Perfil: horários e orçamento ----------
   // PUT /perfil grava todos os campos juntos (altura, sexo e data de
   // nascimento são obrigatórios). Para não apagar o que outra aba salvou, o
   // perfil é lido de novo logo antes de cada PUT, e só o campo da seção muda
@@ -411,66 +412,76 @@ document.addEventListener('DOMContentLoaded', async () => {
     el.dataset.tipo = tipo || '';
   }
 
-  // Sem os dados do perfil o PUT sempre falharia: rotina e orçamento já
+  // Sem os dados do perfil o PUT sempre falharia: horários e orçamento já
   // abrem travados, com o caminho para completar.
   function mostrarPerfilIncompleto() {
     const erro = $('al-perfil-erro');
     erro.textContent = 'Complete seus dados pessoais em ';
     const link = criar('a', null, 'Perfil');
     link.href = 'perfil.html';
-    erro.append(link, ' para salvar sua rotina e seu orçamento.');
+    erro.append(link, ' para salvar seus horários e seu orçamento.');
     erro.hidden = false;
-    $('al-rotina-texto').disabled = true;
+    Object.values(camposHorario).forEach((el) => { el.disabled = true; });
     botoesOrcamento.forEach((b) => { b.disabled = true; });
   }
 
-  // ----- Rotina -----
+  // ----- Horários -----
+  // Ausente no PUT mantém o horário salvo, e vazio apaga (RegrasHorario, na API): vai só o que mudou. O campo
+  // de hora só muda o valor com a hora completa; a espera cobre quem ainda vai mexer nos minutos.
 
-  const elRotina = $('al-rotina-texto');
-  const elRotinaStatus = $('al-rotina-status');
-  let rotinaPendente = null;
-  let rotinaSalvando = false;
-  let rotinaDeNovo = false;
+  const camposHorario = { horarioAcordar: $('al-acordo'), horarioDormir: $('al-durmo') };
+  const elHorariosStatus = $('al-horarios-status');
+  let horarioPendente = null;
+  let horarioSalvando = false;
+  let horarioDeNovo = false;
 
-  function atualizarContador() {
-    $('al-rotina-contador').textContent = `${elRotina.value.length}/${ROTINA_LIMITE}`;
+  // Avisos que não bloqueiam (js/base/horarios.js), montados só com textContent.
+  function renderizarAvisos() {
+    const lista = RonuHorarios.avisos(camposHorario.horarioAcordar.value, camposHorario.horarioDormir.value, modalidades);
+    $('al-horarios-aviso').replaceChildren(...lista.map((texto) => criar('p', 'nota', texto)));
   }
 
-  // Vazio (ou só espaços) vira null: "sem rotina" tem um valor só no banco.
-  function rotinaDoCampo() {
-    return elRotina.value.trim() || null;
+  function horariosAlterados() {
+    const alteracoes = {};
+    Object.entries(camposHorario).forEach(([campo, el]) => {
+      if (el.value !== (perfil[campo] ?? '')) alteracoes[campo] = el.value;
+    });
+    return alteracoes;
   }
 
-  const salvarRotina = ronuComGravacao(async () => {
-    clearTimeout(rotinaPendente);
+  const salvarHorarios = ronuComGravacao(async () => {
+    clearTimeout(horarioPendente);
     if (!perfil || perfilIncompleto()) return;
-    if (rotinaDoCampo() === (perfil.rotinaDiaria ?? null)) return;
-    if (rotinaSalvando) { rotinaDeNovo = true; return; }
+    const alteracoes = horariosAlterados();
+    if (Object.keys(alteracoes).length === 0) return;
+    if (horarioSalvando) { horarioDeNovo = true; return; }
 
-    rotinaSalvando = true;
-    status(elRotinaStatus, 'Salvando...');
+    horarioSalvando = true;
+    status(elHorariosStatus, 'Salvando...');
     try {
-      await salvarNoPerfil({ rotinaDiaria: rotinaDoCampo() });
-      status(elRotinaStatus, 'Salvo', 'ok');
+      await salvarNoPerfil(alteracoes);
+      status(elHorariosStatus, 'Salvo', 'ok');
       marcarMudanca();
     } catch (erro) {
-      if (erro.message !== 'Sessão expirada.') status(elRotinaStatus, erro.message, 'erro');
+      if (erro.message !== 'Sessão expirada.') status(elHorariosStatus, erro.message, 'erro');
     } finally {
-      rotinaSalvando = false;
-      if (rotinaDeNovo) {
-        rotinaDeNovo = false;
-        salvarRotina();
+      horarioSalvando = false;
+      if (horarioDeNovo) {
+        horarioDeNovo = false;
+        salvarHorarios();
       }
     }
   });
 
-  elRotina.addEventListener('input', () => {
-    atualizarContador();
-    status(elRotinaStatus, '');
-    clearTimeout(rotinaPendente);
-    rotinaPendente = setTimeout(salvarRotina, ESPERA_ROTINA_MS);
+  Object.values(camposHorario).forEach((el) => {
+    el.addEventListener('change', () => {
+      renderizarAvisos();
+      status(elHorariosStatus, '');
+      clearTimeout(horarioPendente);
+      horarioPendente = setTimeout(salvarHorarios, ESPERA_HORARIO_MS);
+    });
+    el.addEventListener('blur', salvarHorarios);
   });
-  elRotina.addEventListener('blur', salvarRotina);
 
   // ----- Orçamento -----
 
@@ -542,8 +553,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   $('al-gerar').addEventListener('click', () => {
     ronuGerarDietaEIrAoPainel($('al-gerar'), $('al-gerar-erro'), {
-      // Rotina ainda no atraso de salvar (sem mudança, salvarRotina não grava).
-      descarregar: salvarRotina,
+      // Horário ainda na espera de salvar (sem mudança, salvarHorarios não grava).
+      descarregar: salvarHorarios,
       travar: [document.querySelector('.al-coluna'), document.querySelector('.al-orcamento')]
     });
   });
@@ -568,23 +579,37 @@ document.addEventListener('DOMContentLoaded', async () => {
       const resposta = await ronuFetchAutenticado('/perfil');
       if (!resposta.ok) throw new Error();
       perfil = await resposta.json();
-      elRotina.value = perfil.rotinaDiaria ?? '';
-      atualizarContador();
+      camposHorario.horarioAcordar.value = perfil.horarioAcordar ?? '';
+      camposHorario.horarioDormir.value = perfil.horarioDormir ?? '';
+      renderizarAvisos();
       renderizarOrcamento(perfil.orcamentoSemanal);
       renderizarNomes();
       if (perfilIncompleto()) mostrarPerfilIncompleto();
     } catch (erro) {
       if (erro.message === 'Sessão expirada.') return;
       const elErro = $('al-perfil-erro');
-      ronuMostrarErroFormulario(elErro, 'Não foi possível carregar sua rotina e seu orçamento. Recarregue a página.');
-      elRotina.disabled = true;
+      ronuMostrarErroFormulario(elErro, 'Não foi possível carregar seus horários e seu orçamento. Recarregue a página.');
+      Object.values(camposHorario).forEach((el) => { el.disabled = true; });
       botoesOrcamento.forEach((b) => { b.disabled = true; });
       renderizarOrcamento(null);
       renderizarNomes();
     }
   }
 
+  // Só para os avisos de treino fora da janela: sem as modalidades, os avisos de treino não aparecem.
+  async function carregarModalidades() {
+    try {
+      const resposta = await ronuFetchAutenticado('/usuarios/modalidades');
+      if (!resposta.ok) return;
+      modalidades = (await resposta.json()).map((m) => ({
+        nome: m.modalidade.nome, horarioInicio: m.horarioInicio, duracaoMediaHoras: m.duracaoMediaHoras
+      }));
+    } catch (erro) {
+      // Sem aviso de treino, nada mais muda.
+    }
+  }
+
   renderizarSugestoes();
   // Seções independentes: uma falha numa não impede a outra de carregar.
-  await Promise.all([carregarPreferencias(), carregarPerfil()]);
+  await Promise.all([carregarPreferencias(), carregarModalidades().then(carregarPerfil)]);
 });

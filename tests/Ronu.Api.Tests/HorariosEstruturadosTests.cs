@@ -60,6 +60,20 @@ public class HorariosEstruturadosTests
         Assert.Equal((new TimeOnly(6, 0), new TimeOnly(23, 0)), (salvo.HorarioAcordar, salvo.HorarioDormir));
     }
 
+    // Quem dorme depois da meia-noite grava "durmo" menor que "acordo": a API aceita, sem comparar os dois.
+    [Fact]
+    public async Task Perfil_Aceita_Dormir_Depois_Da_Meia_Noite()
+    {
+        var (banco, controller, usuario) = MontarPerfil();
+
+        var resposta = Assert.IsType<PerfilResponse>(Assert.IsType<OkObjectResult>(
+            await controller.Atualizar(Pedido(acordar: "07:00", dormir: "00:30"))).Value);
+
+        Assert.Equal(("07:00", "00:30"), (resposta.HorarioAcordar, resposta.HorarioDormir));
+        var salvo = await banco.Usuarios.SingleAsync(u => u.Id == usuario.Id);
+        Assert.Equal((new TimeOnly(7, 0), new TimeOnly(0, 30)), (salvo.HorarioAcordar, salvo.HorarioDormir));
+    }
+
     [Fact]
     public async Task Perfil_Sem_Os_Campos_Mantem_E_Vazio_Apaga()
     {

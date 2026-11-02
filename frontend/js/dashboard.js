@@ -895,8 +895,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     chips.hidden = ordenadas.length === 0;
 
     $('db-orcamento').textContent = (perfil && NOMES_ORCAMENTO[perfil.orcamentoSemanal]) || 'Não informado';
-    $('db-rotina').textContent = (perfil && perfil.rotinaDiaria) || 'Não informada';
+    $('db-horarios').textContent = textoHorarios(perfil);
     $('db-card-alimentacao').hidden = false;
+  }
+
+  // "acorda 06:00 · dorme 23:00", só o que foi informado, ou "Não informados".
+  function textoHorarios(p) {
+    const partes = [];
+    if (p && p.horarioAcordar) partes.push(`acorda ${p.horarioAcordar}`);
+    if (p && p.horarioDormir) partes.push(`dorme ${p.horarioDormir}`);
+    return partes.length ? partes.join(' · ') : 'Não informados';
   }
 
   async function carregarLateral() {

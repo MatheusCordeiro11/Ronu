@@ -101,6 +101,16 @@ durante a publicação, para o frontend antigo não ficar travado entre o deploy
 
 Se algo der errado entre os passos 3 e 5, o interruptor desligado mantém o app funcionando como antes.
 
+**Depois da publicação: a rotina em texto livre (`Usuario.RotinaDiaria`).** Ela saiu da tela e do prompt (pendência 6).
+Decisão de 2026-11-02, em dois tempos e nunca no mesmo deploy:
+
+1. Durante 60 dias a partir da publicação, quem tem texto antigo o vê uma vez na Alimentação (mostrado só com
+   `textContent`) e pode apagá-lo; a exportação dos dados continua levando o texto. No fim do prazo, a limpeza
+   automática apaga todos os textos que sobraram.
+2. Só depois disso, e com o backend em produção já sem ler nem gravar a coluna (um deploy antes), uma **migration
+   separada** remove a coluna `RotinaDiaria`, pelo roteiro do `CLAUDE.md`. A ordem importa: se a coluna sair antes
+   do backend que ainda a lê, a API quebra.
+
 ## 4. Pendências
 
 1. **Plano gratuito do Gemini.** Decisão de 2026-11-02: o Ronu fica no plano gratuito. Pelos termos da Gemini API

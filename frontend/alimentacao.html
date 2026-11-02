@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ronu — Alimentação</title>
-  <meta name="description" content="Do que você gosta, o que prefere evitar, sua rotina e seu orçamento.">
+  <meta name="description" content="Do que você gosta, o que prefere evitar, seus horários e seu orçamento.">
 
   <!-- Antes do CSS: aplica o modo escuro/claro antes da primeira pintura. -->
   <script src="js/base/tema.js"></script>
@@ -84,19 +84,26 @@
         <p class="apoio al-alergia">Tem alergia? Coloque aqui também, mas confira sempre os rótulos<span class="al-so-largo">: o cardápio é gerado por IA e não substitui orientação médica</span>.</p>
       </section>
 
-      <!-- Rotina -->
-      <section class="cartao al-rotina" aria-labelledby="al-rotina-titulo">
+      <!-- Seus horários: acordar e dormir, no lugar da rotina em texto livre (que não vai mais para a IA).
+           O horário de cada treino fica na tela de Treino. Salva ao sair do campo ou pouco depois de mudar. -->
+      <section class="cartao al-horarios" aria-labelledby="al-horarios-titulo">
         <div class="al-cabeca">
-          <h2 id="al-rotina-titulo"><label for="al-rotina-texto">Sua rotina</label></h2>
-          <span class="apoio al-so-largo">Usada para os horários das refeições</span>
+          <h2 id="al-horarios-titulo">Seus horários</h2>
+          <span class="apoio al-so-largo">Usados para os horários das refeições</span>
         </div>
-        <textarea class="entrada entrada-no-card" id="al-rotina-texto" rows="3" maxlength="500" placeholder="Ex.: acordo às 6h30, trabalho das 8h às 17h e treino às 19h" aria-describedby="al-rotina-ajuda al-rotina-aviso al-rotina-status"></textarea>
-        <div class="al-rotina-pe">
-          <span id="al-rotina-ajuda"><span class="al-so-largo">Escreva do seu jeito: quando acorda, trabalha, treina e dorme.</span><span class="al-so-celular">Usada para os horários das refeições</span></span>
-          <span class="num" id="al-rotina-contador">0/500</span>
+        <div class="al-horarios-campos">
+          <div class="campo">
+            <label class="campo-rotulo" for="al-acordo">Acordo</label>
+            <input class="entrada entrada-no-card num" id="al-acordo" type="time" step="300" aria-describedby="al-horarios-ajuda al-horarios-aviso al-horarios-status">
+          </div>
+          <div class="campo">
+            <label class="campo-rotulo" for="al-durmo">Durmo</label>
+            <input class="entrada entrada-no-card num" id="al-durmo" type="time" step="300" aria-describedby="al-horarios-ajuda al-horarios-aviso al-horarios-status">
+          </div>
         </div>
-        <p class="nota" id="al-rotina-aviso">Só horários e rotina. Nada de doenças, remédios ou diagnósticos: este texto vai para a IA.</p>
-        <p class="al-salvo" id="al-rotina-status" role="status"></p>
+        <p class="campo-dica" id="al-horarios-ajuda">As refeições ficam entre esses horários e em volta dos treinos. Dorme depois da meia-noite? Ponha a hora mesmo, como 00:30. O horário de cada treino fica na <a href="treino.html">tela de Treino</a>.</p>
+        <div class="al-horarios-aviso" id="al-horarios-aviso" role="status"></div>
+        <p class="al-salvo" id="al-horarios-status" role="status"></p>
       </section>
 
       <div class="aviso aviso-erro" id="al-perfil-erro" role="alert" hidden></div>
@@ -153,6 +160,7 @@
 
   <script src="js/auth.js"></script>
   <script src="js/base/cabecalho.js"></script>
+  <script src="js/base/horarios.js"></script>
   <script src="js/alimentacao.js"></script>
 </body>
 </html>
