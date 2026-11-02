@@ -90,6 +90,28 @@ de extração, os links e o SHA-256 dos arquivos usados estão em [`docs/compras
   pronto (71,1%). O fator pelo carboidrato (0,320) e pela matéria seca (0,328) concordam, mas é o item menos
   seguro da lista.
 
+## Cafeína (regra 7 do prompt)
+
+A regra 7 só permite bebida com cafeína de manhã e no início da tarde, e o `ValidadorCafeina` confere em C# (jantar,
+ceia ou a partir das 18:00). A TACO não informa cafeína; os valores vêm de duas fontes:
+
+- U.S. Department of Agriculture, Agricultural Research Service. **FoodData Central**, SR Legacy (abril de 2018),
+  nutriente 1057 (Caffeine), lido do arquivo `FoodData_Central_sr_legacy_food_csv_2018-04.zip` em 2026-11-02.
+- ROCHA, P. L. A.; LIMA, A. L. C.; SAUNDERS, B.; REIS, C. E. G. **Development of a Caffeine Content Table for Foods,
+  Drinks, Medications and Supplements Typically Consumed by the Brazilian Population (BraCaffT).** *Nutrients*, v.
+  14, n. 20, 4417, 2022. https://doi.org/10.3390/nu14204417 (licença CC BY; valores da Tabela 1).
+
+| Item da base | USDA (mg/100 ml) | BraCaffT (mg/100 ml) | BraCaffT por porção | Na regra 7 |
+|---|---|---|---|---|
+| Café coado | 40 (fdcId 171890, coado com água da torneira) | 30 (11 a 54) | 45 mg em 150 ml | sim |
+| Chá preto | 20 (fdcId 173227) | 18 (12 a 32) | 36 mg em 200 ml | sim |
+| Chá mate | não tem | 5 (3 a 6) na infusão; 26 (14 a 52) no chimarrão; 24 (17 a 36) no tereré | 10 mg em 200 ml | sim: a base não separa o preparo, e chimarrão e tereré passam de 20 |
+| Refrigerante de cola | 9 (fdcId 174852) | 9 (8 a 10) | 32 mg em 350 ml | sim |
+| Refrigerante de guaraná | não tem | 1 | 4 mg em 350 ml | não: menos que um café descafeinado (1 mg/100 ml na USDA, fdcId 171889) |
+| Chá de erva-doce | 0 (fdcId 173232, chá de ervas exceto camomila) | não tem | | não; é o substituto na última tentativa |
+
+Decisão de 2026-11-02. Os outros itens da base não têm cafeína (não há chocolate, cacau nem bebida energética).
+
 ## O que não vem de tabela
 
 - **Itens derivados:** quando a fonte não tem o alimento, mas tem um equivalente próximo (ex.: patinho

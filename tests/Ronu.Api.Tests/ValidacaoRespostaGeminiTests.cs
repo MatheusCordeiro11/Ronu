@@ -713,6 +713,39 @@ public class ValidacaoRespostaGeminiTests
         Assert.Equal(1, gemini.Chamadas);
     }
 
+    // ---------- Cafeína à noite (regra 7, ValidadorCafeina) ----------
+
+    [Fact]
+    public async Task Cafeina_No_Jantar_Pede_De_Novo()
+    {
+        var gemini = new GeminiRoteirizado(
+            Envelope(TextoDieta(Semana, comRefeicoes: true, bebidaNoJantar: "Chá mate", quantidadeBebida: 200)),
+            Envelope(TextoDieta(Semana, comRefeicoes: true)));
+
+        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+
+        Assert.Equal(2, gemini.Chamadas);
+        Assert.DoesNotContain(dieta.Dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos), a => a.AlimentoId == "cha-mate");
+    }
+
+    // Na última tentativa, sem 503: o chá mate do jantar vira chá de erva-doce, na mesma quantidade.
+    [Fact]
+    public async Task Na_Ultima_Tentativa_A_Cafeina_A_Noite_E_Trocada()
+    {
+        var comMate = Envelope(TextoDieta(Semana, comRefeicoes: true, bebidaNoJantar: "Chá mate", quantidadeBebida: 200));
+        var gemini = new GeminiRoteirizado(comMate, comMate);
+
+        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+
+        Assert.Equal(2, gemini.Chamadas);
+        Assert.All(dieta.Dias, d =>
+        {
+            var jantar = d.Refeicoes.Single(r => r.Nome == "Jantar");
+            Assert.DoesNotContain(jantar.Alimentos, a => a.AlimentoId == "cha-mate");
+            Assert.Contains(jantar.Alimentos, a => a.AlimentoId == ValidadorCafeina.SemCafeina && a.Quantidade == 200);
+        });
+    }
+
     // ---------- Fonte de gordura (regra 16, g10d) ----------
 
     // Só arroz: almoço e jantar sem fonte de gordura e o dia muito abaixo da gordura da meta. A primeira resposta é

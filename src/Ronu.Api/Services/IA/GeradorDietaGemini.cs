@@ -149,6 +149,17 @@ public class GeradorDietaGemini : IGeradorDietaIA
                     : TirarBebidaAlcoolica(dias, contexto);
                 // Depois da regra 8: a rede de segurança da cerveja continua valendo antes da lista.
                 AplicarLista(dias, lista);
+                // Regra 7: cafeína à noite recusa a primeira resposta; na última, o item é trocado ou tirado.
+                var cafeinaANoite = ValidadorCafeina.Encontrar(dias);
+                if (cafeinaANoite.Count > 0)
+                {
+                    if (tentativa < MaximoTentativas)
+                    {
+                        throw new RespostaIaInvalidaException($"Bebida com cafeína à noite: {string.Join("; ", cafeinaANoite)}.");
+                    }
+                    _logger.LogWarning("Cafeína à noite corrigida na última tentativa: {Mudancas}",
+                        string.Join("; ", ValidadorCafeina.Corrigir(dias, lista)));
+                }
                 var semGordura = ExigirFonteDeGordura && ListaTemFonteDeGordura(lista) ? DiasSemFonteDeGordura(dias) : [];
                 if (semGordura.Count > 0)
                 {
