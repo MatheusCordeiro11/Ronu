@@ -62,14 +62,15 @@ O email sai em segundo plano (a resposta não espera o SMTP). Limite por conta: 
 ## Perfil (dados pessoais)
 
 ### `GET /api/perfil`
-**Devolve:** `altura` (cm), `sexo`, `dataNascimento`, `rotinaDiaria`, `orcamentoSemanal`, `nivelAtividade` — todos podem vir nulos enquanto o onboarding não os preencheu — e os dados da conta: `nome`, `email`, `estado` (UF, `null` se ainda não informado), `temSenha` e `temGoogle` (se a conta tem senha própria e se tem login com Google vinculado; a senha e o hash nunca vêm)
+**Devolve:** `altura` (cm), `sexo`, `dataNascimento`, `rotinaDiaria`, `orcamentoSemanal`, `nivelAtividade`, `horarioAcordar` e `horarioDormir` ("HH:mm") — todos podem vir nulos enquanto o onboarding não os preencheu — e os dados da conta: `nome`, `email`, `estado` (UF, `null` se ainda não informado), `temSenha` e `temGoogle` (se a conta tem senha própria e se tem login com Google vinculado; a senha e o hash nunca vêm)
 
 ### `PUT /api/perfil`
-**Recebe:** `altura` (cm, de 100 a 250), `sexo` (`Masculino` ou `Feminino`), `dataNascimento` (idade de 18 a 100 anos) (obrigatórios); `rotinaDiaria`, `orcamentoSemanal` e `nivelAtividade` (opcionais; `orcamentoSemanal` aceita `economico`, `moderado` ou `sem_restricao`; `nivelAtividade` aceita `sentado`, `em_pe`, `andando` ou `bracal`)
-**Atenção, comportamento diferente dos outros campos:** `nivelAtividade` **ausente, nulo ou vazio NÃO apaga** o valor salvo, ele é mantido. Os outros campos opcionais são sobrescritos (ausente = apagado). A razão: não existe opção de voltar a "sem resposta" na tela, e as telas que reenviam o perfil sem o campo (Alimentação, por exemplo) não podem zerar a resposta sem querer. Não há como limpar o nível pela API
+**Recebe:** `altura` (cm, de 100 a 250), `sexo` (`Masculino` ou `Feminino`), `dataNascimento` (idade de 18 a 100 anos) (obrigatórios); `rotinaDiaria`, `orcamentoSemanal`, `nivelAtividade`, `horarioAcordar` e `horarioDormir` (opcionais; `orcamentoSemanal` aceita `economico`, `moderado` ou `sem_restricao`; `nivelAtividade` aceita `sentado`, `em_pe`, `andando` ou `bracal`; os horários vão em "HH:mm", de 00:00 a 23:59, exatamente nesse formato)
+**Atenção, comportamento diferente dos outros campos:** `nivelAtividade` **ausente, nulo ou vazio NÃO apaga** o valor salvo, ele é mantido. Os horários seguem quase a mesma regra (`Validacao/RegrasHorario.cs`): ausente ou nulo mantém o salvo, mas **texto vazio (`""`) apaga**. Os outros campos opcionais são sobrescritos (ausente = apagado). A razão: não existe opção de voltar a "sem resposta" na tela, e as telas que reenviam o perfil sem o campo (Alimentação, por exemplo) não podem zerar a resposta sem querer. Não há como limpar o nível pela API
 **Devolve:** o mesmo formato do `GET /api/perfil`
 *(sobrescreve os valores atuais; não é histórico)*
-**Erros:** 400 `{ mensagem }` se o `orcamentoSemanal` não for um dos valores aceitos, se o `nivelAtividade` não for um dos quatro ("Nível de atividade inválido."), se o `sexo` não for um dos dois, se a altura estiver fora da faixa, ou se a data de nascimento for no futuro, der menos de 18 anos ("O Ronu é para maiores de 18 anos.") ou mais de 100. As regras ficam em `Validacao/RegrasDadosCorporais.cs`, as mesmas do `POST /objetivos` e da simulação.
+A `rotinaDiaria` continua gravada, mas **não vai mais para o Gemini** desde o prompt sem dado pessoal: no lugar dela vão os horários (seção Dietas).
+**Erros:** 400 `{ mensagem }` se um horário não estiver em "HH:mm" ("Horário inválido. Use o formato HH:mm, de 00:00 a 23:59."), se o `orcamentoSemanal` não for um dos valores aceitos, se o `nivelAtividade` não for um dos quatro ("Nível de atividade inválido."), se o `sexo` não for um dos dois, se a altura estiver fora da faixa, ou se a data de nascimento for no futuro, der menos de 18 anos ("O Ronu é para maiores de 18 anos.") ou mais de 100. As regras ficam em `Validacao/RegrasDadosCorporais.cs`, as mesmas do `POST /objetivos` e da simulação.
 
 ### `PUT /api/perfil/estado`
 **Recebe:** `estado` (UF; a API ignora espaços e maiúsculas/minúsculas)
@@ -106,13 +107,13 @@ O email sai em segundo plano (a resposta não espera o SMTP). Limite por conta: 
 *(rota pública — é um catálogo do sistema, não dado de usuário)*
 
 ### `POST /api/usuarios/modalidades`
-**Recebe:** `modalidadeId`, `diasSemana` (lista de dias, de 1 = segunda a 7 = domingo, sem repetição, pelo menos um), `duracaoMediaHoras` (de 0,25 a 5)
-**Devolve:** `id`, `modalidadeId`, `diasSemana`, `duracaoMediaHoras`
-*(se o usuário já pratica a modalidade, atualiza dias e duração em vez de duplicar o vínculo)*
-**Erros:** 404 se a modalidade não existe; 400 se um dia estiver fora de 1–7, se houver dia repetido, se a lista vier vazia ou se a duração estiver fora da faixa.
+**Recebe:** `modalidadeId`, `diasSemana` (lista de dias, de 1 = segunda a 7 = domingo, sem repetição, pelo menos um), `duracaoMediaHoras` (de 0,25 a 5), `horarioInicio` (opcional, "HH:mm": a hora de início, a mesma em todos os dias da modalidade)
+**Devolve:** `id`, `modalidadeId`, `diasSemana`, `duracaoMediaHoras`, `horarioInicio`
+*(se o usuário já pratica a modalidade, atualiza dias e duração em vez de duplicar o vínculo; o `horarioInicio` ausente ou nulo mantém o salvo e vazio apaga, porque a tela de treino de hoje não manda o campo)*
+**Erros:** 404 se a modalidade não existe; 400 se o `horarioInicio` não estiver em "HH:mm", se um dia estiver fora de 1–7, se houver dia repetido, se a lista vier vazia ou se a duração estiver fora da faixa.
 
 ### `GET /api/usuarios/modalidades`
-**Devolve:** lista das modalidades que o usuário logado pratica, cada uma com `id`, `modalidade { id, nome, metReferencia }`, `diasSemana`, `duracaoMediaHoras` e `frequenciaSemanal` (calculada a partir da quantidade de `diasSemana`, nunca armazenada)
+**Devolve:** lista das modalidades que o usuário logado pratica, cada uma com `id`, `modalidade { id, nome, metReferencia }`, `diasSemana`, `duracaoMediaHoras`, `horarioInicio` ("HH:mm" ou nulo) e `frequenciaSemanal` (calculada a partir da quantidade de `diasSemana`, nunca armazenada)
 
 ### `DELETE /api/usuarios/modalidades/{id}`
 **Devolve:** 204 sem corpo
@@ -158,6 +159,23 @@ As três rotas devolvem a dieta no mesmo formato, `DietaResponse`:
 **Recebe:** nada — a API já busca internamente o perfil, o objetivo/peso mais recente, as modalidades e as preferências do usuário logado
 **Devolve:** `dataGeracao`, `dieta` (formato acima)
 *(regra de negócio: o usuário fica com no máximo 3 dietas salvas — ao salvar uma nova, as mais antigas que passarem desse limite são removidas)*
+
+**O que vai para o Gemini** (`GeradorDietaGemini.MontarPrompt`). O Ronu usa o plano gratuito, em que o Google usa o conteúdo e pede para não mandar dado pessoal; por isso o prompt leva só o necessário para montar o cardápio, e as metas já saem calculadas em C#:
+- as metas de cada dia (kcal e gramas de proteína, carboidrato e gordura), cada uma marcada como dia de déficit, de manutenção ou de superávit e, para quem treina, de treino (com o horário de início e de fim, se informado) ou de descanso, sem o nome da modalidade;
+- os horários de acordar e de dormir, se informados;
+- a UF (os nomes regionais e o feijão preto no Sul) e a faixa de orçamento;
+- a lista fechada de alimentos (itens da base, sem o que a pessoa evita), o peso de uma unidade dos contáveis, os "gostos" que casaram com a base e, do "evitar", só os termos que não casaram com nenhum item, como foram digitados.
+
+Não vão: nome, e-mail, id da conta, sexo, idade, peso, altura, objetivo, nome das modalidades, a rotina em texto e o "evitar" como foi digitado.
+
+**Checagens da resposta**, antes de salvar. Em todas, a 1ª resposta com o problema é recusada e o Gemini é chamado de novo; o que muda é a última tentativa:
+- estrutura (JSON, 7 dias únicos com os nomes certos, alimentos da lista): na última, vira 503;
+- regra 8, bebida alcoólica fora dos "gostos" (`ValidadorBebidaAlcoolica`): na última, a bebida sai;
+- regra 7, café coado, chá mate, chá preto ou refrigerante de cola no jantar, na ceia ou a partir das 18:00 (`ValidadorCafeina`; lista e fontes em `docs/fontes-nutricionais.md`): na última, o café e o chá viram chá de erva-doce (se ele está na lista da pessoa) e o refrigerante sai;
+- regra 15, menos de 5 refeições num dia (6 a partir de 3500 kcal): na última, a dieta é aceita assim;
+- regra 16, almoço e jantar sem nenhuma fonte de gordura (óleos e gorduras, oleaginosas e sementes, refogados) e o dia abaixo de 85% da gordura da meta: na última, a dieta é aceita assim.
+
+O que foi trocado, tirado ou aceito na última tentativa vai para o log: o dia, a refeição e o alimento, sem nome, e-mail nem id da conta. Medições que embasaram as regras: `docs/medicoes/perfis-g.md` (g10a a g10d).
 
 **Respostas de erro** (corpo sempre `{ "mensagem": "<texto para o usuário>" }`):
 
@@ -297,7 +315,7 @@ As três rotas exigem login, mas não o consentimento: valem também para quem n
 
 ### `GET /api/conta/exportacao`
 "Baixar meus dados" (art. 18, II e V).
-**Devolve:** um arquivo JSON (`application/json`, anexo `ronu-dados-AAAA-MM-DD.json`, com `Cache-Control: no-store`), formato `ronu-exportacao-v1`: `geradoEm`, `conta` (nome, email, UF, datas, se tem senha e se tem Google vinculado, com o `googleId`), `perfil`, `pesagens`, `modalidades`, `preferenciasAlimentares`, `dietas` (com o cardápio como JSON), `metasDieta`, `listaComprasMarcacoes`, `consentimentos` e `pedidosRedefinicaoSenha`. Montado campo a campo, nunca serializando as entidades: ficam de fora o hash da senha e o hash do token de redefinição, e um campo novo no modelo só entra se alguém o escrever em `ExportacaoConta`
+**Devolve:** um arquivo JSON (`application/json`, anexo `ronu-dados-AAAA-MM-DD.json`, com `Cache-Control: no-store`), formato `ronu-exportacao-v1`: `geradoEm`, `conta` (nome, email, UF, datas, se tem senha e se tem Google vinculado, com o `googleId`), `perfil` (com os horários de acordar e dormir), `pesagens`, `modalidades` (com a hora de início), `preferenciasAlimentares`, `dietas` (com o cardápio como JSON), `metasDieta`, `listaComprasMarcacoes`, `consentimentos` e `pedidosRedefinicaoSenha`. Montado campo a campo, nunca serializando as entidades: ficam de fora o hash da senha e o hash do token de redefinição, e um campo novo no modelo só entra se alguém o escrever em `ExportacaoConta`
 **Erros:** 404 "Conta não encontrada."; **429** acima de 5 exportações por hora do mesmo usuário.
 
 ### `DELETE /api/conta`

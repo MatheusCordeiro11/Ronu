@@ -21,11 +21,13 @@ existir".
 | `GoogleId` | `Usuario` | login com Google | contrato | Azure | ninguém (vem do Google) | enquanto a conta existir |
 | UF | `Usuario.Estado` | nomes regionais, fuso do "hoje", regra do feijão | consentimento (art. 11, I), junto do perfil | Azure | Gemini | enquanto a conta existir |
 | `CriadoEm`, `UltimoLoginEm` | `Usuario` | prazos de guarda | legítimo interesse (art. 7º, IX) | Azure | ninguém | enquanto a conta existir |
-| Altura, sexo, nascimento, nível de atividade | `Usuario` | meta da fórmula | consentimento (art. 11, I) | Azure | Gemini (idade, não a data) | enquanto a conta existir |
-| Rotina, orçamento (texto e opção) | `Usuario` | horários e custo do cardápio | consentimento | Azure | Gemini | enquanto a conta existir |
-| Pesagens: peso, objetivo, aderência, data | `ObjetivoUsuario` | meta, progresso, meta adaptativa | consentimento | Azure | Gemini (peso e objetivo atuais) | enquanto a conta existir |
-| Modalidades, dias, duração | `UsuarioModalidade` | gasto do treino | consentimento | Azure | Gemini (nome e dias) | enquanto a conta existir |
-| "Gosto" e "prefiro evitar" | `PreferenciaAlimentar` | lista de alimentos e cardápio | consentimento | Azure | Gemini ("gosto": só itens da base que casaram; "evitar": o texto como foi digitado) | enquanto a conta existir |
+| Altura, sexo, nascimento, nível de atividade | `Usuario` | meta da fórmula | consentimento (art. 11, I) | Azure | Gemini, só de forma derivada: não vão crus, mas a meta diária (kcal e macros) é calculada a partir deles | enquanto a conta existir |
+| Rotina (texto livre) | `Usuario.RotinaDiaria` | antes, horários do cardápio; hoje sem uso (ver pendência 6) | consentimento | Azure | ninguém (saiu do prompt em 2026-11-02) | enquanto a conta existir |
+| Orçamento (uma de três opções) | `Usuario.OrcamentoSemanal` | custo do cardápio | consentimento | Azure | Gemini | enquanto a conta existir |
+| Horários: acordar, dormir, início de cada treino | `Usuario.HorarioAcordar`, `Usuario.HorarioDormir`, `UsuarioModalidade.HorarioInicio` | horários das refeições | consentimento | Azure | Gemini | enquanto a conta existir |
+| Pesagens: peso, objetivo, aderência, data | `ObjetivoUsuario` | meta, progresso, meta adaptativa | consentimento | Azure | Gemini, só de forma derivada: peso e objetivo não vão crus, mas a meta diária e a marca de déficit, manutenção ou superávit de cada dia são calculadas a partir deles | enquanto a conta existir |
+| Modalidades, dias, duração | `UsuarioModalidade` | gasto do treino | consentimento | Azure | Gemini (só quais dias são de treino e o horário, sem o nome da modalidade) | enquanto a conta existir |
+| "Gosto" e "prefiro evitar" | `PreferenciaAlimentar` | lista de alimentos e cardápio | consentimento | Azure | Gemini ("gosto": só itens da base que casaram; "evitar": só os termos que não casaram com nenhum item, como foram digitados) | enquanto a conta existir |
 | Dietas geradas | `DietaIA` | mostrar o cardápio, troca, lista de compras | consentimento | Azure | ninguém | as 3 mais recentes |
 | Metas de cada dieta | `MetaDieta` | meta adaptativa | consentimento | Azure | ninguém | enquanto a conta existir (todas) |
 | Marcações "já tenho" | `ListaComprasMarcacao` | lista de compras | consentimento | Azure | ninguém | enquanto a dieta estiver entre as 3 |
@@ -43,9 +45,15 @@ existir".
 | IP ao abrir login e cadastro, mesmo sem usar o botão | script `accounts.google.com/gsi/client` em `login.html` e `cadastro.html` | botão "Entrar com Google" | legítimo interesse | Google, EUA | Google | o do Google |
 | Navegador: token, nome, tema, avisos dispensados; na troca de senha, o código do link e o e-mail digitado (`sessionStorage`, só a aba) | `localStorage` / `sessionStorage` | funcionamento | contrato | aparelho da pessoa | ninguém | até sair da conta (token) ou limpar o navegador |
 
-O que vai para o Gemini, exatamente: `GeradorDietaGemini.MontarPrompt` (sexo, idade, peso, altura, objetivo,
-modalidades com dias, UF, metas por dia, lista de alimentos permitidos, "gosto" casado com a base, "evitar" como
-digitado, rotina e orçamento). Nome, e-mail e id da conta não vão.
+O que vai para o Gemini, exatamente (`GeradorDietaGemini.MontarPrompt`, desde 2026-11-02): as metas de cada dia
+(kcal e gramas de proteína, carboidrato e gordura), cada dia marcado como de déficit, manutenção ou superávit e, para
+quem treina, de treino (com o horário) ou de descanso; os horários de acordar e dormir; a UF; a faixa de orçamento; a
+lista fechada de alimentos (itens da base), os "gostos" que casaram com a base e os termos do "evitar" que não casaram,
+como foram digitados.
+Não vão: nome, e-mail, id da conta, nome das modalidades, a rotina em texto e o "evitar" inteiro como foi digitado. Não
+vão crus: sexo, idade, peso, altura e objetivo. A meta diária e a marca de cada dia são calculadas a partir de altura, peso, sexo,
+nascimento, nível de atividade, treino e objetivo: não dizem o peso nem a idade e não identificam a pessoa, mas a marca
+mostra a direção do objetivo (perder, manter ou ganhar peso). Detalhes e as checagens da resposta em `docs/design-api.md`, seção Dietas.
 
 ## 2. Plano de resposta a incidente (art. 48; Res. CD/ANPD 15/2024)
 
@@ -78,8 +86,9 @@ durante a publicação, para o frontend antigo não ficar travado entre o deploy
 
 1. No App Service `ronu-api` → Configurações → Variáveis de ambiente, criar `Consentimento__Exigir` = `false`
    (dois sublinhados) e salvar. O App Service reinicia.
-2. Migration `CriaConsentimentosEDatasUsuario` em produção, pelo roteiro do `CLAUDE.md` (regra temporária no firewall,
-   apagada na mesma janela). Ela só cria a tabela e duas colunas nulas.
+2. Migrations `CriaConsentimentosEDatasUsuario` e `AdicionaHorariosEstruturados` em produção, pelo roteiro do
+   `CLAUDE.md` (regra temporária no firewall, apagada na mesma janela). Elas só criam a tabela `Consentimentos` e
+   colunas nulas (`CriadoEm`, `UltimoLoginEm` e os três horários).
 3. Deploy do backend, pelo roteiro do `CLAUDE.md`. Com o interruptor desligado, o frontend antigo continua funcionando.
    Na primeira subida, a limpeza (1 minuto depois) apaga os pedidos de redefinição de senha com mais de 30 dias:
    é a regra, e o log mostra só a contagem. Nenhuma conta antiga entra (todas com `CriadoEm` nulo).
@@ -97,9 +106,10 @@ Se algo der errado entre os passos 3 e 5, o interruptor desligado mantém o app 
 1. **Plano gratuito do Gemini.** Decisão de 2026-11-02: o Ronu fica no plano gratuito. Pelos termos da Gemini API
    ("Unpaid Services", vigentes desde 2026-03-23), o Google usa o que recebe e o que responde para melhorar os
    produtos dele, e revisores humanos podem ler, depois de o Google desligar o conteúdo da conta, da chave e do
-   projeto. A política e a caixa do consentimento dizem isso. ⚠️ Os mesmos termos pedem que não se envie informação
-   sensível, confidencial ou pessoal ao plano gratuito, e o prompt hoje manda sexo, idade, peso, altura, objetivo,
-   modalidades e texto livre: tirar esses dados do prompt está em proposta (passo 0, com medição).
+   projeto. A política e a caixa do consentimento dizem isso. Os mesmos termos pedem que não se envie informação
+   sensível, confidencial ou pessoal ao plano gratuito: desde 2026-11-02 o prompt não leva sexo, idade, peso, altura,
+   objetivo, nome das modalidades nem texto livre (medido do g10a ao g10d, sem perda de qualidade; `docs/medicoes/`).
+   Falta a política e a caixa dizerem a lista nova do que vai para a IA.
 2. **Advogado.** Os pontos "⚖️" deste documento e dos rascunhos em `docs/textos-legais/`.
 3. **"Enviados" do Gmail: tarefa mensal.** Os e-mails de "esqueci a senha" ficam na caixa de enviados da conta do
    Ronu, e apagar a conta não os apaga. Decidido em 2026-11-01: o Matheus apaga os enviados uma vez por mês (lembrete
@@ -123,8 +133,10 @@ Se algo der errado entre os passos 3 e 5, o interruptor desligado mantém o app 
    o que zera o arquivo, que antes guardava mais 60 dias), e o componente para `RetentionInDays` 30. Releitura da
    `AppRequests`: retenção 30, total 30. A política diz "até 30 dias". **Resolvido.** Cuidado: um recurso novo de
    Application Insights nessa região grava no mesmo workspace, e uma tabela `App*` nova pode nascer com outro prazo.
-6. **Menos texto livre no Gemini.** Mandar só os trechos do "evitar" que não casaram com a base (os que casaram já saem
-   da lista fechada) e, depois, trocar a rotina por horários estruturados. Mexe no prompt: precisa de medição.
+6. **Menos texto livre no Gemini.** Feito no prompt em 2026-11-02: do "evitar" vão só os termos que não casaram com a
+   base, e a rotina em texto deu lugar aos horários estruturados. Falta a tela dos horários (Perfil, onboarding e
+   treino) e decidir o que fazer com o campo "Sua rotina" e com o texto já gravado, que não é mais usado: guardar dado
+   sem uso vai contra a necessidade (art. 6º, III). A tela precisa estar pronta antes de publicar.
 7. **Regra de firewall "todos os serviços da Azure".** A única regra do `ronu-db` é
    `AllowAllAzureServicesAndResourcesWithinAzureIps_2026-9-22_18-31-2` (0.0.0.0): libera conexão de qualquer recurso
    dentro da Azure, inclusive de outros clientes, não só do `ronu-api`. A senha continua exigida, mas a superfície é
