@@ -37,7 +37,7 @@ existir".
 | Cópias de segurança do banco | PostgreSQL Flexible | recuperar o sistema | legítimo interesse | Azure, Chile Central, sem cópia em outra região | ninguém | 7 dias (conferido em 2026-11-01) |
 | Requisições, exceções e dependências (provável: URL, status, duração; IP mascarado por padrão) | Application Insights, pelo agente automático do App Service | diagnóstico | legítimo interesse | Azure | ninguém | 30 dias no total, sem arquivo (ajustado e conferido em 2026-11-01) |
 | Logs HTTP do servidor web (IP, URL, status) | App Service (`WEBSITE_HTTPLOGGING_RETENTION_DAYS`) | diagnóstico | legítimo interesse | Azure | ninguém | 7 dias (conferido em 2026-11-01) |
-| Prompt e resposta da geração | Gemini API | montar o cardápio | consentimento | Google, EUA | Google | plano pago: período limitado, só para abuso e lei, sem treino da IA (pendência 1) |
+| Prompt e resposta da geração | Gemini API | montar o cardápio | consentimento | Google, EUA | Google | o do Google: no plano gratuito, ele pode usar para melhorar os produtos dele, e revisores humanos podem ler, sem ligar à conta (pendência 1) |
 | E-mails enviados | caixa "Enviados" da conta Gmail do Ronu | "esqueci a senha" | contrato | Google, EUA | Google | até 30 dias (apagados à mão todo mês; pendência 3) |
 | IP e páginas abertas | Vercel | servir o site | legítimo interesse | Vercel | Vercel | o da Vercel |
 | IP ao abrir login e cadastro, mesmo sem usar o botão | script `accounts.google.com/gsi/client` em `login.html` e `cadastro.html` | botão "Entrar com Google" | legítimo interesse | Google, EUA | Google | o do Google |
@@ -76,8 +76,6 @@ real num commit; bug que mostra dado de uma conta para outra.
 O padrão no código é **ligado** (`appsettings.json`, e a chave ausente também conta como ligada). Ele só fica desligado
 durante a publicação, para o frontend antigo não ficar travado entre o deploy do backend e o push do frontend.
 
-**Antes de tudo:** faturamento do Gemini ativo (pendência 1). Sem isso, nada da LGPD base é publicado.
-
 1. No App Service `ronu-api` → Configurações → Variáveis de ambiente, criar `Consentimento__Exigir` = `false`
    (dois sublinhados) e salvar. O App Service reinicia.
 2. Migration `CriaConsentimentosEDatasUsuario` em produção, pelo roteiro do `CLAUDE.md` (regra temporária no firewall,
@@ -96,9 +94,12 @@ Se algo der errado entre os passos 3 e 5, o interruptor desligado mantém o app 
 
 ## 4. Pendências
 
-1. **Faturamento do Gemini.** A chave está no plano gratuito (conferido em 2026-11-01), em que o Google pode usar o
-   conteúdo para melhorar produtos. Ativar antes de publicar. ⚠️ A frase da política sobre o Gemini ("com o plano
-   pago, o Google não usa esses dados para treinar a IA...") só pode ir ao ar com o faturamento ativo.
+1. **Plano gratuito do Gemini.** Decisão de 2026-11-02: o Ronu fica no plano gratuito. Pelos termos da Gemini API
+   ("Unpaid Services", vigentes desde 2026-03-23), o Google usa o que recebe e o que responde para melhorar os
+   produtos dele, e revisores humanos podem ler, depois de o Google desligar o conteúdo da conta, da chave e do
+   projeto. A política e a caixa do consentimento dizem isso. ⚠️ Os mesmos termos pedem que não se envie informação
+   sensível, confidencial ou pessoal ao plano gratuito, e o prompt hoje manda sexo, idade, peso, altura, objetivo,
+   modalidades e texto livre: tirar esses dados do prompt está em proposta (passo 0, com medição).
 2. **Advogado.** Os pontos "⚖️" deste documento e dos rascunhos em `docs/textos-legais/`.
 3. **"Enviados" do Gmail: tarefa mensal.** Os e-mails de "esqueci a senha" ficam na caixa de enviados da conta do
    Ronu, e apagar a conta não os apaga. Decidido em 2026-11-01: o Matheus apaga os enviados uma vez por mês (lembrete

@@ -202,6 +202,7 @@ public class ConsentimentoTests
         Assert.Equal(Vigente, resposta.VersaoVigente);
         Assert.False(string.IsNullOrWhiteSpace(resposta.Titulo));
         Assert.Contains("Seu nome e e-mail não vão para a IA.", resposta.Texto);
+        Assert.Contains("revisores humanos podem ler esse conteúdo", resposta.Texto);
         Assert.Contains("Antes de apagar, você pode baixar seus dados no Perfil.", resposta.Texto);
         Assert.Null(resposta.Aceito);
         Assert.True(resposta.PrecisaAceitar);

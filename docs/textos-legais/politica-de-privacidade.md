@@ -3,7 +3,8 @@
 > **Rascunho para aprovação (LGPD base, etapa 3, 2026-11-01).** Ainda não está publicado. Na etapa 5 este texto vira a
 > página `/privacidade`; as notas "⚖️ Advogado" e os marcadores entre colchetes saem antes disso.
 > Marcadores: `[EMAIL_PRIVACIDADE]` (o e-mail que o Matheus vai criar) e `[DATA_VIGENCIA]` (dia da publicação).
-> A frase do Gemini em "Por quanto tempo" vale só para o plano pago: não vai ao ar antes do faturamento ativo.
+> O Ronu usa o plano gratuito do Gemini (decisão de 2026-11-02): os trechos sobre o Gemini dizem o que esse plano permite
+> ao Google (termos da Gemini API, "Unpaid Services", vigentes desde 2026-03-23).
 > Conferidos na Azure em 2026-11-01: backup de 7 dias e região Chile Central; logs HTTP do App Service, 7 dias;
 > Application Insights, 30 dias no total.
 
@@ -70,7 +71,7 @@ O consentimento é pedido numa caixa própria, desmarcada, antes de qualquer dad
 funciona, porque não dá para montar a dieta sem esses dados.
 
 **Seu nome e seu e-mail nunca vão para a IA.** O Gemini recebe só o que está na tabela acima, sem seu nome, seu e-mail
-ou o número da sua conta.
+ou o número da sua conta. O Ronu usa o plano gratuito do Gemini. Nesse plano, o Google pode usar o que recebe para melhorar os produtos dele, e revisores humanos podem ler esse conteúdo, sem ligá-lo à sua conta.
 
 O Ronu não vende seus dados, não mostra anúncios e não usa seus dados para nada além do que está nesta página.
 
@@ -79,12 +80,17 @@ O Ronu não vende seus dados, não mostra anúncios e não usa seus dados para n
 ## Com quem os dados são compartilhados
 
 O Ronu usa serviços de outras empresas para funcionar. Elas tratam os dados em nome do Ronu (são operadoras), só
-para prestar o serviço:
+para prestar o serviço, com uma exceção: no plano gratuito do Gemini, o Google também pode usar o que recebe para
+melhorar os produtos dele.
+
+> ⚖️ Advogado: nesse uso para os próprios produtos, o Google deixa de ser só operador. Conferir se a política precisa
+> tratá-lo como controlador nessa parte, e se o consentimento da caixa cobre esse compartilhamento.
+
 
 | Empresa | Para quê | O que recebe | Onde |
 |---|---|---|---|
 | **Microsoft Azure** | servidor da API e banco de dados | todos os dados da conta | Chile |
-| **Google (Gemini)** | montar o cardápio | os dados da linha "Montar o cardápio" acima, sem nome nem e-mail | EUA |
+| **Google (Gemini)** | montar o cardápio | os dados da linha "Montar o cardápio" acima, sem nome nem e-mail. No plano gratuito, o Google também pode usá-los para melhorar os produtos dele | EUA |
 | **Google (login)** | "Entrar com Google", se você usar | o que o Google já tem da sua conta; o Ronu recebe nome, e-mail e identificador. Mesmo sem você usar o botão, o Google recebe o seu endereço IP ao abrir as telas de login e cadastro | EUA |
 | **Google (Gmail)** | enviar o e-mail de "esqueci minha senha" | seu e-mail e o link | EUA |
 | **Vercel** | hospedar as páginas do site | seu endereço IP e as páginas que você abre | EUA e outros países |
@@ -113,7 +119,7 @@ as garantias contratuais que essas empresas oferecem.
 | Registros técnicos do servidor (só o número da conta, sem dado de saúde) | 7 dias |
 | Registros de acesso e diagnóstico da Azure (endereço IP, página da API pedida, erros) | até 30 dias |
 | Cópias de segurança automáticas do banco | 7 dias |
-| O que vai para o Gemini | Com o plano pago, o Google não usa esses dados para treinar a IA e os guarda por um período limitado, só para detectar abuso e cumprir a lei |
+| O que vai para o Gemini | o prazo do Google: no plano gratuito, ele pode guardar e usar esse conteúdo para melhorar os produtos dele, sem ligá-lo à sua conta |
 
 Quando você apaga a conta, tudo sai do banco na hora. As cópias de segurança somem sozinhas no prazo acima e não são
 usadas para nada além de recuperar o sistema em caso de falha.

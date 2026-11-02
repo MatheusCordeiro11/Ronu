@@ -20,11 +20,14 @@ public static class TextosConsentimento
         [TipoGeral] = new()
         {
             // Rascunho aprovado em 2026-11-01. A caixa do dado de saúde fica sozinha e desmarcada (art. 8º, §1º e
-            // art. 11, I); os termos são uma frase à parte, na tela.
+            // art. 11, I); os termos são uma frase à parte, na tela. Em 2026-11-02 o Ronu ficou no plano gratuito do
+            // Gemini, e a caixa passou a dizer o que esse plano permite ao Google (termos da Gemini API, "Unpaid Services").
             [1] = new Texto(
                 "Autorizo o Ronu a usar meus dados de saúde.",
                 "O Ronu usa seu peso, altura, idade, sexo, objetivo, treinos e preferências alimentares para calcular sua meta, "
                 + "montar o cardápio com a IA do Google (Gemini) e mostrar seu progresso. Seu nome e e-mail não vão para a IA. "
+                + "O Ronu usa o plano gratuito do Gemini: o Google pode usar o que recebe para melhorar os produtos dele, e "
+                + "revisores humanos podem ler esse conteúdo, sem ligá-lo à sua conta. "
                 + "Esses dados ficam guardados fora do Brasil, no Chile (Microsoft Azure) e nos EUA (Google). "
                 + "Você pode apagar tudo a qualquer momento no Perfil. Antes de apagar, você pode baixar seus dados no Perfil.")
         }
