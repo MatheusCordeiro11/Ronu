@@ -27,4 +27,8 @@ public class PerfilRequest
     // ausente ou vazio NÃO apaga: mantém o valor salvo (não há opção de voltar
     // a "sem resposta", e outras telas reenviam o perfil sem este campo).
     public string? NivelAtividade { get; set; }
+
+    // "HH:mm". Como o NivelAtividade, ausente ou nulo mantém o salvo; vazio apaga (RegrasHorario).
+    public string? HorarioAcordar { get; set; }
+    public string? HorarioDormir { get; set; }
 }

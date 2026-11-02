@@ -15,4 +15,8 @@ public class UsuarioModalidadeRequest
 
     [Range(0.25, 5, ErrorMessage = "A duração deve estar entre 15 minutos (0,25h) e 5 horas.")]
     public required decimal DuracaoMediaHoras { get; set; }
+
+    // "HH:mm", a hora de início em todos os dias. Ao atualizar um vínculo, ausente ou nulo mantém o salvo e vazio
+    // apaga (RegrasHorario): a tela de treino que já existe não manda este campo.
+    public string? HorarioInicio { get; set; }
 }

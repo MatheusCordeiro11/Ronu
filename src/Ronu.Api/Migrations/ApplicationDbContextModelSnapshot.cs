@@ -312,6 +312,12 @@ namespace Ronu.Api.Migrations
                     b.Property<string>("GoogleId")
                         .HasColumnType("text");
 
+                    b.Property<TimeOnly?>("HorarioAcordar")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<TimeOnly?>("HorarioDormir")
+                        .HasColumnType("time without time zone");
+
                     b.Property<string>("NivelAtividade")
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
@@ -361,6 +367,9 @@ namespace Ronu.Api.Migrations
 
                     b.Property<decimal>("DuracaoMediaHoras")
                         .HasColumnType("numeric");
+
+                    b.Property<TimeOnly?>("HorarioInicio")
+                        .HasColumnType("time without time zone");
 
                     b.Property<int>("ModalidadeId")
                         .HasColumnType("integer");

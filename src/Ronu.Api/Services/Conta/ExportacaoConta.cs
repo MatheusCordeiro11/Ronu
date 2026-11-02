@@ -2,6 +2,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Ronu.Api.Data;
+using Ronu.Api.Validacao;
 
 namespace Ronu.Api.Services.Conta;
 
@@ -37,7 +38,7 @@ public static class ExportacaoConta
 
         var modalidades = await contexto.UsuarioModalidades.AsNoTracking()
             .Where(m => m.UsuarioId == usuarioId).OrderBy(m => m.Id)
-            .Select(m => new { Modalidade = m.Modalidade.Nome, m.DiasSemana, m.DuracaoMediaHoras })
+            .Select(m => new { Modalidade = m.Modalidade.Nome, m.DiasSemana, m.DuracaoMediaHoras, HorarioInicio = RegrasHorario.Formatar(m.HorarioInicio) })
             .ToListAsync();
 
         var preferencias = await contexto.PreferenciasAlimentares.AsNoTracking()
@@ -88,7 +89,11 @@ public static class ExportacaoConta
                 TemSenha = u.SenhaHash is not null, u.SenhaAlteradaEm,
                 GoogleVinculado = u.GoogleId is not null, u.GoogleId
             },
-            Perfil = new { u.Altura, u.Sexo, u.DataNascimento, u.NivelAtividade, u.RotinaDiaria, u.OrcamentoSemanal },
+            Perfil = new
+            {
+                u.Altura, u.Sexo, u.DataNascimento, u.NivelAtividade, u.RotinaDiaria, u.OrcamentoSemanal,
+                HorarioAcordar = RegrasHorario.Formatar(u.HorarioAcordar), HorarioDormir = RegrasHorario.Formatar(u.HorarioDormir)
+            },
             Pesagens = pesagens,
             Modalidades = modalidades,
             PreferenciasAlimentares = preferencias,

@@ -51,6 +51,10 @@ public class Usuario
     [MaxLength(20)]
     public string? NivelAtividade { get; set; }
 
+    // Horários estruturados (RegrasHorario), no lugar da rotina em texto no prompt. Nulos = não informados.
+    public TimeOnly? HorarioAcordar { get; set; }
+    public TimeOnly? HorarioDormir { get; set; }
+
     public ICollection<UsuarioModalidade> UsuarioModalidades { get; set; } = new List<UsuarioModalidade>();
     public ICollection<ObjetivoUsuario> ObjetivosUsuario { get; set; } = new List<ObjetivoUsuario>();
     public ICollection<PreferenciaAlimentar> PreferenciasAlimentares { get; set; } = new List<PreferenciaAlimentar>();

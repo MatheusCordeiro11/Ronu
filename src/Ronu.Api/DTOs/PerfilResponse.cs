@@ -17,6 +17,10 @@ public class PerfilResponse
     // Nulo = a pessoa ainda não respondeu como é o dia fora do treino.
     public string? NivelAtividade { get; set; }
 
+    // "HH:mm"; nulos = não informados.
+    public string? HorarioAcordar { get; set; }
+    public string? HorarioDormir { get; set; }
+
     // Dados da conta para o cabeçalho do Perfil (redesign de out/2026). Só
     // acrescentam campos: o frontend antigo ignora. Nunca a senha nem o hash,
     // só se existem.

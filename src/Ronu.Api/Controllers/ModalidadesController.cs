@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Ronu.Api.Data;
 using Ronu.Api.DTOs;
 using Ronu.Api.Models;
+using Ronu.Api.Validacao;
 using System.Security.Claims;
 
 namespace Ronu.Api.Controllers;
@@ -79,6 +80,12 @@ public class ModalidadesController : ControllerBase
             return BadRequest(new { mensagem = "Não é possível repetir o mesmo dia da semana." });
         }
 
+        var horario = RegrasHorario.Interpretar(request.HorarioInicio);
+        if (horario.Erro is not null)
+        {
+            return BadRequest(new { mensagem = RegrasHorario.MensagemFormato });
+        }
+
         var usuarioModalidadeExistente = await _context.UsuarioModalidades
             .FirstOrDefaultAsync(um => um.UsuarioId == UsuarioIdLogado && um.ModalidadeId == request.ModalidadeId);
 
@@ -88,6 +95,7 @@ public class ModalidadesController : ControllerBase
         {
             usuarioModalidadeExistente.DiasSemana = request.DiasSemana;
             usuarioModalidadeExistente.DuracaoMediaHoras = request.DuracaoMediaHoras;
+            usuarioModalidadeExistente.HorarioInicio = RegrasHorario.Aplicar(usuarioModalidadeExistente.HorarioInicio, horario);
             usuarioModalidade = usuarioModalidadeExistente;
         }
         else
@@ -97,7 +105,8 @@ public class ModalidadesController : ControllerBase
                 UsuarioId = UsuarioIdLogado,
                 ModalidadeId = request.ModalidadeId,
                 DiasSemana = request.DiasSemana,
-                DuracaoMediaHoras = request.DuracaoMediaHoras
+                DuracaoMediaHoras = request.DuracaoMediaHoras,
+                HorarioInicio = RegrasHorario.Aplicar(null, horario)
             };
 
             _context.UsuarioModalidades.Add(usuarioModalidade);
@@ -110,7 +119,8 @@ public class ModalidadesController : ControllerBase
             usuarioModalidade.Id,
             usuarioModalidade.ModalidadeId,
             usuarioModalidade.DiasSemana,
-            usuarioModalidade.DuracaoMediaHoras
+            usuarioModalidade.DuracaoMediaHoras,
+            HorarioInicio = RegrasHorario.Formatar(usuarioModalidade.HorarioInicio)
         });
     }
 
@@ -130,6 +140,7 @@ public class ModalidadesController : ControllerBase
                 Id = um.Id,
                 DiasSemana = um.DiasSemana,
                 DuracaoMediaHoras = um.DuracaoMediaHoras,
+                HorarioInicio = RegrasHorario.Formatar(um.HorarioInicio),
                 Modalidade = new ModalidadeResponse
                 {
                     Id = um.Modalidade.Id,

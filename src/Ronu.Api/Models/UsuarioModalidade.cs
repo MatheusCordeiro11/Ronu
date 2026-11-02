@@ -20,4 +20,7 @@ public class UsuarioModalidade
     public int[] DiasSemana { get; set; } = Array.Empty<int>();
 
     public decimal DuracaoMediaHoras { get; set; }
+
+    // Hora de início do treino, a mesma em todos os DiasSemana (RegrasHorario). Nula = não informada.
+    public TimeOnly? HorarioInicio { get; set; }
 }

@@ -51,6 +51,8 @@ public class PerfilController : ControllerBase
         RotinaDiaria = usuario.RotinaDiaria,
         OrcamentoSemanal = usuario.OrcamentoSemanal,
         NivelAtividade = usuario.NivelAtividade,
+        HorarioAcordar = RegrasHorario.Formatar(usuario.HorarioAcordar),
+        HorarioDormir = RegrasHorario.Formatar(usuario.HorarioDormir),
         Nome = usuario.Nome,
         Email = usuario.Email,
         // A coluna guarda "" quando não há UF; a resposta devolve null.
@@ -100,8 +102,17 @@ public class PerfilController : ControllerBase
             return BadRequest(new { mensagem = erroNascimento });
         }
 
+        var acordar = RegrasHorario.Interpretar(request.HorarioAcordar);
+        var dormir = RegrasHorario.Interpretar(request.HorarioDormir);
+        if (acordar.Erro is not null || dormir.Erro is not null)
+        {
+            return BadRequest(new { mensagem = RegrasHorario.MensagemFormato });
+        }
+
         var usuario = await _context.Usuarios.FirstAsync(u => u.Id == UsuarioIdLogado);
 
+        usuario.HorarioAcordar = RegrasHorario.Aplicar(usuario.HorarioAcordar, acordar);
+        usuario.HorarioDormir = RegrasHorario.Aplicar(usuario.HorarioDormir, dormir);
         usuario.Altura = request.Altura;
         usuario.Sexo = request.Sexo;
         usuario.DataNascimento = request.DataNascimento;
