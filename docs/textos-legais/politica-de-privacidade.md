@@ -85,13 +85,9 @@ para prestar o serviço:
 |---|---|---|---|
 | **Microsoft Azure** | servidor da API e banco de dados | todos os dados da conta | Chile |
 | **Google (Gemini)** | montar o cardápio | os dados da linha "Montar o cardápio" acima, sem nome nem e-mail | EUA |
-| **Google (login)** | "Entrar com Google", se você usar | o que o Google já tem da sua conta; o Ronu recebe nome, e-mail e identificador | EUA |
+| **Google (login)** | "Entrar com Google", se você usar | o que o Google já tem da sua conta; o Ronu recebe nome, e-mail e identificador. Mesmo sem você usar o botão, o Google recebe o seu endereço IP ao abrir as telas de login e cadastro | EUA |
 | **Google (Gmail)** | enviar o e-mail de "esqueci minha senha" | seu e-mail e o link | EUA |
-| **Google (Fonts)** | as fontes do site | seu endereço IP, ao abrir as páginas | EUA |
 | **Vercel** | hospedar as páginas do site | seu endereço IP e as páginas que você abre | EUA e outros países |
-
-> Na etapa 6 as fontes passam a vir do próprio site; aí a linha do Google Fonts sai. O botão "Entrar com Google"
-> continua carregando um script do Google nas telas de login e cadastro.
 
 Fora esses casos, o Ronu só entrega dados a uma autoridade se a lei obrigar.
 
