@@ -57,6 +57,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     return el;
   }
 
+  // O texto do consentimento vem com as linhas separadas por \n: cada uma vira um parágrafo, como na caixa do
+  // cadastro (js/base/aceite.js).
+  function textoAceito(texto) {
+    const bloco = criar('div', 'pf-autorizacao-texto');
+    bloco.append(...texto.split('\n').map((linha) => criar('p', 'apoio', linha)));
+    return bloco;
+  }
+
   function formatarNumero(valor) {
     return Math.round(valor).toLocaleString('pt-BR');
   }
@@ -669,7 +677,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     revogar.addEventListener('click', () => RonuConta.abrirExclusao({ temSenha: perfil.temSenha, revogando: true, origem: revogar }));
     painel.append(
       criar('p', 'pf-autorizacao-titulo', consentimento.titulo),
-      criar('p', 'apoio', consentimento.texto),
+      textoAceito(consentimento.texto),
       criar('p', 'apoio', `Você aceitou em ${data} (versão ${aceito.versao}). Sem essa autorização o Ronu não consegue montar a sua dieta: por isso, revogar apaga a conta.`),
       revogar
     );

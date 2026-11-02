@@ -22,14 +22,20 @@ public static class TextosConsentimento
             // Rascunho aprovado em 2026-11-01. A caixa do dado de saúde fica sozinha e desmarcada (art. 8º, §1º e
             // art. 11, I); os termos são uma frase à parte, na tela. Em 2026-11-02 o Ronu ficou no plano gratuito do
             // Gemini, e a caixa passou a dizer o que esse plano permite ao Google (termos da Gemini API, "Unpaid Services").
+            // Ainda em 2026-11-02, com o prompt sem dado pessoal, a caixa diz o que vai e o que não vai para a IA, em 4
+            // linhas curtas (separadas por \n; as telas mostram as quebras com white-space: pre-line).
             [1] = new Texto(
                 "Autorizo o Ronu a usar meus dados de saúde.",
-                "O Ronu usa seu peso, altura, idade, sexo, objetivo, treinos e preferências alimentares para calcular sua meta, "
-                + "montar o cardápio com a IA do Google (Gemini) e mostrar seu progresso. Seu nome e e-mail não vão para a IA. "
+                "O Ronu usa seu peso, altura, idade, sexo, objetivo e treinos para calcular sua meta de cada dia e mostrar "
+                + "seu progresso.\n"
+                + "Para montar o cardápio, a IA do Google (Gemini) recebe só a meta de cada dia, se o dia é de déficit, "
+                + "manutenção ou superávit, os dias e horários de treino, seus horários de acordar e dormir, seu estado, seu "
+                + "orçamento e os alimentos que você gosta ou evita. Seu nome, e-mail, peso, altura, idade e sexo não vão para "
+                + "a IA.\n"
                 + "O Ronu usa o plano gratuito do Gemini: o Google pode usar o que recebe para melhorar os produtos dele, e "
-                + "revisores humanos podem ler esse conteúdo, sem ligá-lo à sua conta. "
-                + "Esses dados ficam guardados fora do Brasil, no Chile (Microsoft Azure) e nos EUA (Google). "
-                + "Você pode apagar tudo a qualquer momento no Perfil. Antes de apagar, você pode baixar seus dados no Perfil.")
+                + "revisores humanos podem ler esse conteúdo. O Ronu não envia nada que identifique você.\n"
+                + "Seus dados ficam guardados no Chile (Microsoft Azure); o que vai para a IA passa pelos EUA (Google). Você "
+                + "pode apagar tudo a qualquer momento no Perfil. Antes de apagar, você pode baixar seus dados no Perfil.")
         }
     };
 

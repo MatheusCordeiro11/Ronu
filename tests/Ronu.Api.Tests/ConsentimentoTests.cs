@@ -201,8 +201,15 @@ public class ConsentimentoTests
 
         Assert.Equal(Vigente, resposta.VersaoVigente);
         Assert.False(string.IsNullOrWhiteSpace(resposta.Titulo));
-        Assert.Contains("Seu nome e e-mail não vão para a IA.", resposta.Texto);
-        Assert.Contains("revisores humanos podem ler esse conteúdo", resposta.Texto);
+        // As 4 linhas da caixa: para que usamos; o que vai e o que não vai para a IA; plano gratuito; onde fica e
+        // como apagar ou baixar.
+        var linhas = resposta.Texto.Split('\n');
+        Assert.Equal(4, linhas.Length);
+        Assert.StartsWith("O Ronu usa seu peso, altura, idade, sexo, objetivo e treinos", linhas[0]);
+        Assert.Contains("Seu nome, e-mail, peso, altura, idade e sexo não vão para a IA.", linhas[1]);
+        Assert.Contains("O Ronu não envia nada que identifique você.", linhas[2]);
+        Assert.DoesNotContain("sem ligá-lo", resposta.Texto);
+        Assert.StartsWith("Seus dados ficam guardados no Chile", linhas[3]);
         Assert.Contains("Antes de apagar, você pode baixar seus dados no Perfil.", resposta.Texto);
         Assert.Null(resposta.Aceito);
         Assert.True(resposta.PrecisaAceitar);

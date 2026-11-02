@@ -59,7 +59,7 @@ porque esse texto vai para a IA.
 |---|---|---|
 | Criar e manter sua conta, deixar você entrar e recuperar a senha | conta | execução do contrato (art. 7º, V) |
 | Calcular sua meta de calorias e macros | saúde e corpo | seu consentimento (art. 11, I) |
-| Montar o cardápio com a IA do Google (Gemini) | sexo, idade, peso, altura, objetivo, modalidades, UF, orçamento, nível de atividade, o "prefiro evitar" e a rotina | seu consentimento (art. 11, I) |
+| Montar o cardápio com a IA do Google (Gemini) | a meta de cada dia (calculada com seus dados de saúde e do corpo), se o dia é de déficit, manutenção ou superávit, os dias e horários de treino, seus horários de acordar e dormir, o estado (UF), o orçamento e os alimentos que você gosta ou evita | seu consentimento (art. 11, I) |
 | Mostrar seu progresso e ajustar a meta pelo que aconteceu de verdade | pesagens, metas, dietas | seu consentimento (art. 11, I) |
 | Proteger o app contra abuso (limite de tentativas, registros técnicos) | endereço IP, identificador da conta | legítimo interesse (art. 7º, IX) |
 
@@ -70,8 +70,7 @@ como chegamos no seu número, escreva para [EMAIL_PRIVACIDADE].
 O consentimento é pedido numa caixa própria, desmarcada, antes de qualquer dado de saúde. Sem ele, o Ronu não
 funciona, porque não dá para montar a dieta sem esses dados.
 
-**Seu nome e seu e-mail nunca vão para a IA.** O Gemini recebe só o que está na tabela acima, sem seu nome, seu e-mail
-ou o número da sua conta. O Ronu usa o plano gratuito do Gemini. Nesse plano, o Google pode usar o que recebe para melhorar os produtos dele, e revisores humanos podem ler esse conteúdo, sem ligá-lo à sua conta.
+**O que a IA recebe.** O Gemini recebe só o que está na linha "Montar o cardápio" da tabela acima. Seu nome, seu e-mail, o número da sua conta, seu peso, sua altura, sua idade, seu sexo e o nome das modalidades que você treina não vão para a IA: ela recebe a meta de cada dia já calculada, sem os dados usados no cálculo. Dos alimentos que você evita, os que estão na nossa lista são tirados antes, e só os que não estão vão como você escreveu. O Ronu usa o plano gratuito do Gemini. Nesse plano, o Google pode usar o que recebe para melhorar os produtos dele, e revisores humanos podem ler esse conteúdo. O Ronu não envia nada que identifique você.
 
 O Ronu não vende seus dados, não mostra anúncios e não usa seus dados para nada além do que está nesta página.
 
@@ -119,7 +118,7 @@ as garantias contratuais que essas empresas oferecem.
 | Registros técnicos do servidor (só o número da conta, sem dado de saúde) | 7 dias |
 | Registros de acesso e diagnóstico da Azure (endereço IP, página da API pedida, erros) | até 30 dias |
 | Cópias de segurança automáticas do banco | 7 dias |
-| O que vai para o Gemini | o prazo do Google: no plano gratuito, ele pode guardar e usar esse conteúdo para melhorar os produtos dele, sem ligá-lo à sua conta |
+| O que vai para o Gemini | o prazo do Google: no plano gratuito, ele pode guardar e usar esse conteúdo para melhorar os produtos dele. O Ronu não envia nada que identifique você |
 
 Quando você apaga a conta, tudo sai do banco na hora. As cópias de segurança somem sozinhas no prazo acima e não são
 usadas para nada além de recuperar o sistema em caso de falha.

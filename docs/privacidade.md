@@ -39,7 +39,7 @@ existir".
 | Cópias de segurança do banco | PostgreSQL Flexible | recuperar o sistema | legítimo interesse | Azure, Chile Central, sem cópia em outra região | ninguém | 7 dias (conferido em 2026-11-01) |
 | Requisições, exceções e dependências (provável: URL, status, duração; IP mascarado por padrão) | Application Insights, pelo agente automático do App Service | diagnóstico | legítimo interesse | Azure | ninguém | 30 dias no total, sem arquivo (ajustado e conferido em 2026-11-01) |
 | Logs HTTP do servidor web (IP, URL, status) | App Service (`WEBSITE_HTTPLOGGING_RETENTION_DAYS`) | diagnóstico | legítimo interesse | Azure | ninguém | 7 dias (conferido em 2026-11-01) |
-| Prompt e resposta da geração | Gemini API | montar o cardápio | consentimento | Google, EUA | Google | o do Google: no plano gratuito, ele pode usar para melhorar os produtos dele, e revisores humanos podem ler, sem ligar à conta (pendência 1) |
+| Prompt e resposta da geração | Gemini API | montar o cardápio | consentimento | Google, EUA | Google | o do Google: no plano gratuito, ele pode usar para melhorar os produtos dele, e revisores humanos podem ler. O Ronu não envia nada que identifique você (pendência 1) |
 | E-mails enviados | caixa "Enviados" da conta Gmail do Ronu | "esqueci a senha" | contrato | Google, EUA | Google | até 30 dias (apagados à mão todo mês; pendência 3) |
 | IP e páginas abertas | Vercel | servir o site | legítimo interesse | Vercel | Vercel | o da Vercel |
 | IP ao abrir login e cadastro, mesmo sem usar o botão | script `accounts.google.com/gsi/client` em `login.html` e `cadastro.html` | botão "Entrar com Google" | legítimo interesse | Google, EUA | Google | o do Google |

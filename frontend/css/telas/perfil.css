@@ -370,6 +370,11 @@ a.pf-conta-item:focus-visible {
   max-width: 62ch;
 }
 
+/* O texto aceito, um parágrafo por linha (perfil.js), com o mesmo espaço da caixa do cadastro. */
+.pf-autorizacao-texto p + p {
+  margin-top: var(--e-2);
+}
+
 /* --acento-texto, não --erro-campo: o título precisa passar 4,5:1 nos dois modos. */
 .pf-conta-perigo {
   color: var(--acento-texto);

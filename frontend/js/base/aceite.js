@@ -7,7 +7,7 @@
 // A caixa no HTML:
 //   <div class="aceite" data-aceite aria-busy="true">
 //     <label class="aceite-marcar"><input type="checkbox" disabled ...><span data-aceite-titulo></span></label>
-//     <p class="aceite-texto" data-aceite-texto></p>
+//     <div class="aceite-texto" data-aceite-texto></div>
 //     <span class="campo-erro" data-aceite-erro hidden></span>
 //   </div>
 
@@ -24,6 +24,16 @@ window.RonuAceite = (function () {
       texto: caixa.querySelector('[data-aceite-texto]'),
       erro: caixa.querySelector('[data-aceite-erro]')
     };
+  }
+
+  // O texto vem com as linhas separadas por \n (TextosConsentimento): cada uma vira um parágrafo, só com
+  // textContent. O Perfil (perfil.js) monta o texto aceito do mesmo jeito.
+  function paragrafos(texto) {
+    return texto.split('\n').map((linha) => {
+      const el = document.createElement('p');
+      el.textContent = linha;
+      return el;
+    });
   }
 
   function mostrarErro(p, mensagem, { comTentar = null } = {}) {
@@ -69,14 +79,14 @@ window.RonuAceite = (function () {
     const versao = corpo?.versaoVigente ?? corpo?.versao;
     if (!corpo || !versao || !corpo.titulo || !corpo.texto) {
       p.titulo.textContent = 'Autorização dos dados de saúde';
-      p.texto.textContent = '';
+      p.texto.replaceChildren();
       mostrarErro(p, MSG_CARREGAR, { comTentar: () => carregar(caixa, { logado }) });
       caixa.removeAttribute('aria-busy');
       return null;
     }
 
     p.titulo.textContent = corpo.titulo;
-    p.texto.textContent = corpo.texto;
+    p.texto.replaceChildren(...paragrafos(corpo.texto));
     caixa.dataset.versao = String(versao);
     p.marcar.disabled = false;
     caixa.removeAttribute('aria-busy');
