@@ -57,7 +57,7 @@ public class RegrasDadosCorporaisTests
     private static (ApplicationDbContext Banco, Usuario Usuario, ControllerContext Contexto) Conta()
     {
         var banco = BancoEmMemoria.NovoContexto();
-        var usuario = new Usuario { Nome = "Teste", Email = "teste@exemplo.com", Estado = "SP" };
+        var usuario = new Usuario { Nome = "Teste", Email = "teste@exemplo.test", Estado = "SP" };
         banco.Usuarios.Add(usuario);
         banco.SaveChanges();
         var contexto = new ControllerContext

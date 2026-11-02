@@ -25,7 +25,7 @@ public class PerfilTendenciaTests
     public async Task Perfil_Traz_Nome_Email_Estado_E_O_Tipo_De_Login()
     {
         var banco = BancoEmMemoria.NovoContexto();
-        var usuario = new Usuario { Nome = "Ana", Email = "ana@exemplo.com", Estado = "RJ", GoogleId = "sub-123" };
+        var usuario = new Usuario { Nome = "Ana", Email = "ana@exemplo.test", Estado = "RJ", GoogleId = "sub-123" };
         banco.Usuarios.Add(usuario);
         banco.SaveChanges();
         var controller = new PerfilController(banco)
@@ -41,7 +41,7 @@ public class PerfilTendenciaTests
 
         var perfil = Assert.IsType<PerfilResponse>(Assert.IsType<OkObjectResult>(await controller.ObterAtual()).Value);
 
-        Assert.Equal(("Ana", "ana@exemplo.com", "RJ"), (perfil.Nome, perfil.Email, perfil.Estado));
+        Assert.Equal(("Ana", "ana@exemplo.test", "RJ"), (perfil.Nome, perfil.Email, perfil.Estado));
         Assert.False(perfil.TemSenha);
         Assert.True(perfil.TemGoogle);
         Assert.Null(perfil.Altura);
@@ -51,7 +51,7 @@ public class PerfilTendenciaTests
     public async Task Perfil_Sem_Estado_Devolve_Nulo_E_Nao_Vazio()
     {
         var banco = BancoEmMemoria.NovoContexto();
-        var usuario = new Usuario { Nome = "Bia", Email = "bia@exemplo.com", SenhaHash = "hash" }; // Estado = "" (padrão da coluna)
+        var usuario = new Usuario { Nome = "Bia", Email = "bia@exemplo.test", SenhaHash = "hash" }; // Estado = "" (padrão da coluna)
         banco.Usuarios.Add(usuario);
         banco.SaveChanges();
         var controller = new PerfilController(banco)

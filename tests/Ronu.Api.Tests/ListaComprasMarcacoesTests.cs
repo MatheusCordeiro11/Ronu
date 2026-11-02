@@ -94,7 +94,7 @@ public class ListaComprasMarcacoesTests
     public async Task Sem_Marcacao_O_Get_Vem_Com_Tenho_Falso()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "marca1@exemplo.com");
+        var usuario = NovoUsuario(banco, "marca1@exemplo.test");
         NovaDieta(banco, usuario, Hoje);
 
         var lista = await Lista(banco, usuario.Id);
@@ -106,7 +106,7 @@ public class ListaComprasMarcacoesTests
     public async Task Marcar_E_Desmarcar_E_Idempotente()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "marca2@exemplo.com");
+        var usuario = NovoUsuario(banco, "marca2@exemplo.test");
         var dieta = NovaDieta(banco, usuario, Hoje);
         var controller = Controller(banco, usuario.Id);
 
@@ -129,7 +129,7 @@ public class ListaComprasMarcacoesTests
     public async Task DietaId_Que_Nao_E_O_Da_Dieta_Atual_Da_409_E_Nao_Grava()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "marca3@exemplo.com");
+        var usuario = NovoUsuario(banco, "marca3@exemplo.test");
         var antiga = NovaDieta(banco, usuario, Ontem);
         NovaDieta(banco, usuario, Hoje);
 
@@ -144,7 +144,7 @@ public class ListaComprasMarcacoesTests
     public async Task Dieta_Nova_Comeca_Sem_Marcacoes()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "marca4@exemplo.com");
+        var usuario = NovoUsuario(banco, "marca4@exemplo.test");
         var antiga = NovaDieta(banco, usuario, Ontem);
         await Controller(banco, usuario.Id).Marcar("ovos", Pedido(antiga.Id, true));
 
@@ -164,7 +164,7 @@ public class ListaComprasMarcacoesTests
     public async Task Chave_Fora_Do_Formato_Da_400_Item_Invalido(string chave)
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "marca5@exemplo.com");
+        var usuario = NovoUsuario(banco, "marca5@exemplo.test");
         var dieta = NovaDieta(banco, usuario, Hoje);
 
         var resultado = await Controller(banco, usuario.Id).Marcar(chave, Pedido(dieta.Id, true));
@@ -178,7 +178,7 @@ public class ListaComprasMarcacoesTests
     public async Task Chave_De_65_Caracteres_Da_400()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "marca6@exemplo.com");
+        var usuario = NovoUsuario(banco, "marca6@exemplo.test");
         var dieta = NovaDieta(banco, usuario, Hoje);
 
         var resultado = await Controller(banco, usuario.Id).Marcar(new string('a', 65), Pedido(dieta.Id, true));
@@ -192,7 +192,7 @@ public class ListaComprasMarcacoesTests
     public async Task Chave_Fora_Da_Lista_Da_Dieta_Da_400(string chave)
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "marca7@exemplo.com");
+        var usuario = NovoUsuario(banco, "marca7@exemplo.test");
         var dieta = NovaDieta(banco, usuario, Hoje);
 
         var resultado = await Controller(banco, usuario.Id).Marcar(chave, Pedido(dieta.Id, true));
@@ -206,7 +206,7 @@ public class ListaComprasMarcacoesTests
     public async Task Dieta_Antiga_Sem_Lista_Nao_Aceita_Marcacao()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "marca8@exemplo.com");
+        var usuario = NovoUsuario(banco, "marca8@exemplo.test");
         var dieta = NovaDieta(banco, usuario, Hoje, Dieta(Alimento(null, 150)));
 
         var resultado = await Controller(banco, usuario.Id).Marcar("ovos", Pedido(dieta.Id, true));
@@ -219,7 +219,7 @@ public class ListaComprasMarcacoesTests
     public async Task Sem_Dieta_Da_404()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "marca9@exemplo.com");
+        var usuario = NovoUsuario(banco, "marca9@exemplo.test");
 
         Assert.IsType<NotFoundObjectResult>(await Controller(banco, usuario.Id).Marcar("ovos", Pedido(1, true)));
     }
@@ -231,8 +231,8 @@ public class ListaComprasMarcacoesTests
     public async Task Ninguem_Marca_Na_Dieta_De_Outra_Pessoa()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var dona = NovoUsuario(banco, "marca10@exemplo.com");
-        var intrusa = NovoUsuario(banco, "marca11@exemplo.com");
+        var dona = NovoUsuario(banco, "marca10@exemplo.test");
+        var intrusa = NovoUsuario(banco, "marca11@exemplo.test");
         var dietaDaDona = NovaDieta(banco, dona, Hoje);
         await Controller(banco, dona.Id).Marcar("ovos", Pedido(dietaDaDona.Id, true));
 
@@ -282,8 +282,8 @@ public class ListaComprasMarcacoesTests
     public async Task Marcacoes_Somem_Quando_A_Dieta_Sai_Do_Historico()
     {
         using var banco = BancoQueAceitaTransacao();
-        var usuario = NovoUsuario(banco, "marca12@exemplo.com");
-        var outro = NovoUsuario(banco, "marca13@exemplo.com");
+        var usuario = NovoUsuario(banco, "marca12@exemplo.test");
+        var outro = NovoUsuario(banco, "marca13@exemplo.test");
         var repositorio = new RepositorioDietaIA(banco);
 
         // Três dietas, cada uma com uma marcação; e uma marcação de outra pessoa, que não pode sumir.

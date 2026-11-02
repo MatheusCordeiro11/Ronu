@@ -99,7 +99,7 @@ public class ProgressoAjusteTests
     public async Task Objetivo_Atual_Usa_A_Primeira_Dieta_De_MetasDieta()
     {
         var banco = BancoEmMemoria.NovoContexto();
-        var usuario = new Usuario { Nome = "Ana", Email = "ana@exemplo.com", SenhaHash = "hash" };
+        var usuario = new Usuario { Nome = "Ana", Email = "ana@exemplo.test", SenhaHash = "hash" };
         banco.Usuarios.Add(usuario);
         banco.SaveChanges();
         var agora = DateTime.UtcNow;

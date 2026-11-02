@@ -307,7 +307,7 @@ public class ListaComprasTests
     public async Task Sem_Dieta_Da_404()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "lista1@exemplo.com", "SP");
+        var usuario = NovoUsuario(banco, "lista1@exemplo.test", "SP");
 
         var resultado = await Controller(banco, usuario.Id).Obter();
 
@@ -318,7 +318,7 @@ public class ListaComprasTests
     public async Task Usa_A_Dieta_Mais_Recente_E_A_Uf_Do_Usuario()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "lista2@exemplo.com", "RJ");
+        var usuario = NovoUsuario(banco, "lista2@exemplo.test", "RJ");
         NovaDieta(banco, usuario, new DateTime(2026, 10, 20, 12, 0, 0, DateTimeKind.Utc), Dieta([Alimento("arroz-branco-cozido", 200)]));
         var atual = NovaDieta(banco, usuario, new DateTime(2026, 10, 25, 12, 0, 0, DateTimeKind.Utc), Dieta([Alimento("mandioca-cozida", 200)]));
 
@@ -336,8 +336,8 @@ public class ListaComprasTests
     public async Task Nao_Ve_A_Dieta_De_Outro_Usuario()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var dono = NovoUsuario(banco, "lista3@exemplo.com", "SP");
-        var outro = NovoUsuario(banco, "lista4@exemplo.com", "SP");
+        var dono = NovoUsuario(banco, "lista3@exemplo.test", "SP");
+        var outro = NovoUsuario(banco, "lista4@exemplo.test", "SP");
         NovaDieta(banco, dono, DateTime.UtcNow, Dieta([Alimento("arroz-branco-cozido", 200)]));
 
         Assert.IsType<NotFoundObjectResult>(await Controller(banco, outro.Id).Obter());
@@ -347,7 +347,7 @@ public class ListaComprasTests
     public async Task Dieta_Antiga_Da_200_Sem_Lista()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "lista5@exemplo.com", "SP");
+        var usuario = NovoUsuario(banco, "lista5@exemplo.test", "SP");
         NovaDieta(banco, usuario, DateTime.UtcNow, Dieta([Alimento(null, 150)]));
 
         var resposta = (ListaComprasResponse)((OkObjectResult)await Controller(banco, usuario.Id).Obter()).Value!;
@@ -362,7 +362,7 @@ public class ListaComprasTests
     public async Task Resposta_Nao_Leva_Dado_De_Saude()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "lista6@exemplo.com", "SP");
+        var usuario = NovoUsuario(banco, "lista6@exemplo.test", "SP");
         NovaDieta(banco, usuario, DateTime.UtcNow, Dieta(SeteDias(
             Alimento("arroz-branco-cozido", 200), Alimento("patinho-bovino-grelhado", 150), Alimento("banana-prata", 75))));
 

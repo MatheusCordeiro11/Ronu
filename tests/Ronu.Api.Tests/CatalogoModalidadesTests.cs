@@ -77,7 +77,7 @@ public class CatalogoModalidadesTests
                 INSERT INTO "Modalidades" ("Nome", "MetReferencia") VALUES ('Futebol', 7.0);
                 INSERT INTO "Modalidades" ("Nome", "MetReferencia") VALUES ('Basquete', 7.5);
                 INSERT INTO "Modalidades" ("Nome", "MetReferencia") VALUES ('Natação', 5.8);
-                INSERT INTO "Usuarios" ("Nome", "Email", "Estado") VALUES ('Teste', 'teste-migracao@exemplo.com', 'MG');
+                INSERT INTO "Usuarios" ("Nome", "Email", "Estado") VALUES ('Teste', 'teste-migracao@exemplo.test', 'MG');
                 INSERT INTO "UsuarioModalidades" ("UsuarioId", "ModalidadeId", "DiasSemana", "DuracaoMediaHoras")
                     SELECT u."Id", m."Id", ARRAY[1, 3], 1.5 FROM "Usuarios" u, "Modalidades" m WHERE m."Nome" IN ('Jiu-jitsu', 'Natação');
                 """);

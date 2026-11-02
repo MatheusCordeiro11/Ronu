@@ -129,7 +129,7 @@ public class TrocasControllerTests
     public async Task Opcoes_Trazem_Dieta_Revisao_Original_E_Os_Dois_Escopos()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca1@exemplo.com", ("preferido", "tilápia"));
+        var usuario = NovoUsuario(banco, "troca1@exemplo.test", ("preferido", "tilápia"));
         var dieta = NovaDieta(banco, usuario);
 
         var r = Valor<OpcoesTrocaResponse>(await Controller(banco, usuario.Id).Opcoes(0, 1, 2));
@@ -147,7 +147,7 @@ public class TrocasControllerTests
     public async Task Opcao_De_Outro_Uso_Vem_Marcada()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca25@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca25@exemplo.test");
         NovaDieta(banco, usuario);
 
         var r = Valor<OpcoesTrocaResponse>(await Controller(banco, usuario.Id).Opcoes(0, 0, 0)).Refeicao;
@@ -165,7 +165,7 @@ public class TrocasControllerTests
     public async Task Desvio_Do_Dia_Vem_Com_Duas_Casas()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca28@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca28@exemplo.test");
         NovaDieta(banco, usuario);
 
         var r = Valor<OpcoesTrocaResponse>(await Controller(banco, usuario.Id).Opcoes(0, 0, 0)).Refeicao;
@@ -179,7 +179,7 @@ public class TrocasControllerTests
     public async Task Sem_Opcao_A_Resposta_Diz_O_Porque()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca2@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca2@exemplo.test");
         NovaDieta(banco, usuario);
 
         // Azeite: o óleo de soja é o único do mesmo uso; com ele já no almoço, não sobra nada.
@@ -209,7 +209,7 @@ public class TrocasControllerTests
     public async Task Dieta_Anterior_A_Lista_Nao_Tem_Troca_E_Diz_Por_Que()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca3@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca3@exemplo.test");
         var antiga = Dieta();
         antiga.VersaoBase = null;
         foreach (var a in antiga.Dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos)) a.AlimentoId = null;
@@ -225,7 +225,7 @@ public class TrocasControllerTests
     public async Task Dieta_De_Outra_Versao_Da_Base_Nao_Tem_Troca_E_Diz_Por_Que()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca4@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca4@exemplo.test");
         var dieta = Dieta();
         dieta.VersaoBase = BaseNutricional.VersaoBase - 1;
         var dietaIA = NovaDieta(banco, usuario, dieta);
@@ -241,7 +241,7 @@ public class TrocasControllerTests
     public async Task Posicao_Fora_Da_Dieta_Da_400()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca5@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca5@exemplo.test");
         NovaDieta(banco, usuario);
 
         Assert.Equal(400, Status(await Controller(banco, usuario.Id).Opcoes(7, 0, 0)));
@@ -252,7 +252,7 @@ public class TrocasControllerTests
     public async Task Sem_Dieta_Da_404()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca6@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca6@exemplo.test");
 
         Assert.Equal(404, Status(await Controller(banco, usuario.Id).Opcoes(0, 0, 0)));
     }
@@ -264,7 +264,7 @@ public class TrocasControllerTests
     public async Task Troca_Na_Refeicao_Grava_O_Substituto_O_Original_E_Os_Totais()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca7@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca7@exemplo.test");
         var dietaIA = NovaDieta(banco, usuario);
         var antes = Dieta();
 
@@ -289,7 +289,7 @@ public class TrocasControllerTests
     public async Task Troca_Na_Semana_Muda_Todas_As_Vezes()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca8@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca8@exemplo.test");
         var dietaIA = NovaDieta(banco, usuario, Dieta(frangoNaTerca: 100));
 
         Assert.IsType<OkObjectResult>(await Controller(banco, usuario.Id).Trocar(Pedido(dietaIA, "file-de-tilapia-grelhado", "semana")));
@@ -306,7 +306,7 @@ public class TrocasControllerTests
     public async Task Trocar_De_Novo_Guarda_O_Primeiro_Original()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca9@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca9@exemplo.test");
         var dietaIA = NovaDieta(banco, usuario);
         var controller = Controller(banco, usuario.Id);
 
@@ -324,7 +324,7 @@ public class TrocasControllerTests
     public async Task Substituto_Fora_Das_Regras_Da_400_E_Nao_Grava()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca10@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca10@exemplo.test");
         var dietaIA = NovaDieta(banco, usuario);
         var json = dietaIA.ConteudoJson;
 
@@ -341,7 +341,7 @@ public class TrocasControllerTests
     public async Task Evitar_Atual_Vale_Na_Troca()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca11@exemplo.com", ("evitar", "peixe"));
+        var usuario = NovoUsuario(banco, "troca11@exemplo.test", ("evitar", "peixe"));
         var dietaIA = NovaDieta(banco, usuario);
 
         var r = await Controller(banco, usuario.Id).Trocar(Pedido(dietaIA, "file-de-tilapia-grelhado"));
@@ -353,7 +353,7 @@ public class TrocasControllerTests
     public async Task Escopo_Invalido_Da_400()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca12@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca12@exemplo.test");
         var dietaIA = NovaDieta(banco, usuario);
 
         Assert.Equal(400, Status(await Controller(banco, usuario.Id).Trocar(Pedido(dietaIA, "file-de-tilapia-grelhado", "mes"))));
@@ -366,7 +366,7 @@ public class TrocasControllerTests
     public async Task Revisao_Antiga_Da_409()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca13@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca13@exemplo.test");
         var dietaIA = NovaDieta(banco, usuario);
         await Controller(banco, usuario.Id).Trocar(Pedido(dietaIA, "file-de-tilapia-grelhado"));
 
@@ -381,7 +381,7 @@ public class TrocasControllerTests
     public async Task Alimento_Diferente_Na_Posicao_Da_409()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca14@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca14@exemplo.test");
         var dietaIA = NovaDieta(banco, usuario);
 
         var r = await Controller(banco, usuario.Id).Trocar(Pedido(dietaIA, "file-de-tilapia-grelhado", atual: "patinho-bovino-grelhado"));
@@ -394,8 +394,8 @@ public class TrocasControllerTests
     public async Task Dieta_De_Outra_Pessoa_Nao_E_Tocada()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var dona = NovoUsuario(banco, "troca15a@exemplo.com");
-        var outra = NovoUsuario(banco, "troca15b@exemplo.com");
+        var dona = NovoUsuario(banco, "troca15a@exemplo.test");
+        var outra = NovoUsuario(banco, "troca15b@exemplo.test");
         var dietaDaDona = NovaDieta(banco, dona);
         NovaDieta(banco, outra);
         var json = dietaDaDona.ConteudoJson;
@@ -415,7 +415,7 @@ public class TrocasControllerTests
         var nome = Guid.NewGuid().ToString();
         using (var banco = BancoEmMemoria.NovoContexto(nome))
         {
-            NovaDieta(banco, NovoUsuario(banco, "troca16@exemplo.com"));
+            NovaDieta(banco, NovoUsuario(banco, "troca16@exemplo.test"));
         }
 
         using var aba1 = BancoEmMemoria.NovoContexto(nome);
@@ -435,7 +435,7 @@ public class TrocasControllerTests
     public async Task Desfazer_Volta_Exatamente_Ao_Que_Estava()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca17@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca17@exemplo.test");
         var dietaIA = NovaDieta(banco, usuario);
         var json = dietaIA.ConteudoJson;
         var controller = Controller(banco, usuario.Id);
@@ -454,7 +454,7 @@ public class TrocasControllerTests
     public async Task Desfazer_Volta_A_Ultima_Troca_E_Nao_Ao_Original()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca18@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca18@exemplo.test");
         var dietaIA = NovaDieta(banco, usuario);
         var controller = Controller(banco, usuario.Id);
         await controller.Trocar(Pedido(dietaIA, "file-de-tilapia-grelhado"));
@@ -471,7 +471,7 @@ public class TrocasControllerTests
     public async Task Voltar_Ao_Original_So_Nesta_Refeicao()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca19@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca19@exemplo.test");
         var dietaIA = NovaDieta(banco, usuario);
         var antes = Dieta();
         var controller = Controller(banco, usuario.Id);
@@ -492,7 +492,7 @@ public class TrocasControllerTests
     public async Task Voltar_Ao_Original_Na_Semana_Volta_Todos_Os_Trocados_Do_Mesmo_Jeito()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca20@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca20@exemplo.test");
         var dietaIA = NovaDieta(banco, usuario);
         var json = dietaIA.ConteudoJson;
         var controller = Controller(banco, usuario.Id);
@@ -509,7 +509,7 @@ public class TrocasControllerTests
     public async Task Voltar_Ao_Original_De_Item_Nao_Trocado_Da_400()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca21@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca21@exemplo.test");
         var dietaIA = NovaDieta(banco, usuario);
 
         var r = await Controller(banco, usuario.Id).VoltarAoOriginal(dietaIA.Id, 0, 0, 1, 2, "refeicao");
@@ -550,7 +550,7 @@ public class TrocasControllerTests
     public async Task Troca_Tira_A_Marca_Do_Item_Que_Saiu_E_Deixa_As_Outras()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca22@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca22@exemplo.test");
         var dietaIA = NovaDieta(banco, usuario);
         var chaveFrango = Chave(Dieta(), "peito-de-frango-sem-pele-grelhado");
         var chaveOvo = Chave(Dieta(), "ovo-de-galinha-cozido");
@@ -572,7 +572,7 @@ public class TrocasControllerTests
     public async Task Marcacoes_Removidas_Conta_So_As_Que_Existiam()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca26@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca26@exemplo.test");
         var dietaIA = NovaDieta(banco, usuario);
         banco.ListaComprasMarcacoes.Add(new ListaComprasMarcacao
         {
@@ -591,7 +591,7 @@ public class TrocasControllerTests
     public async Task Desfazer_E_Voltar_Ao_Original_Contam_As_Marcacoes_Que_Caem()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca27@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca27@exemplo.test");
         var dietaIA = NovaDieta(banco, usuario);
         var controller = Controller(banco, usuario.Id);
         await controller.Trocar(Pedido(dietaIA, "file-de-tilapia-grelhado", "semana"));
@@ -630,7 +630,7 @@ public class TrocasControllerTests
     public async Task Get_Atual_Traz_Id_Revisao_E_Se_Tem_Troca()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca23@exemplo.com");
+        var usuario = NovoUsuario(banco, "troca23@exemplo.test");
         var dietaIA = NovaDieta(banco, usuario);
         var dietas = new DietasController(banco, null!, null!, null!, NullLogger<DietasController>.Instance)
         {

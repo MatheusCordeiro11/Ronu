@@ -21,8 +21,8 @@ public class ConferenciaPreferenciasTests
     private static (ApplicationDbContext Banco, Usuario Ana, Usuario Bia) Montar()
     {
         var banco = BancoEmMemoria.NovoContexto();
-        var ana = new Usuario { Nome = "Ana", Email = "ana@exemplo.com", Estado = "RJ" };
-        var bia = new Usuario { Nome = "Bia", Email = "bia@exemplo.com", Estado = "SP" };
+        var ana = new Usuario { Nome = "Ana", Email = "ana@exemplo.test", Estado = "RJ" };
+        var bia = new Usuario { Nome = "Bia", Email = "bia@exemplo.test", Estado = "SP" };
         banco.Usuarios.AddRange(ana, bia);
         banco.SaveChanges();
         banco.PreferenciasAlimentares.AddRange(
@@ -101,7 +101,7 @@ public class ConferenciaPreferenciasTests
     public async Task Traz_Os_Minimos_Da_Lista()
     {
         var banco = BancoEmMemoria.NovoContexto();
-        var usuario = new Usuario { Nome = "Caio", Email = "caio@exemplo.com" };
+        var usuario = new Usuario { Nome = "Caio", Email = "caio@exemplo.test" };
         banco.Usuarios.Add(usuario);
         banco.SaveChanges();
         banco.PreferenciasAlimentares.Add(new PreferenciaAlimentar { UsuarioId = usuario.Id, Alimento = "sou vegano", Tipo = "evitar" });

@@ -21,6 +21,9 @@
 # Saídas locais do scanner de segurança Strix
 strix_runs/
 
+# Telas do redesign (Dojo Noturno/Washi) exportadas do canvas de design: referência local, fora do repositório
+docs/redesign/
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

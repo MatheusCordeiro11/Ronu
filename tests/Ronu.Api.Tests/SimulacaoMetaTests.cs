@@ -26,7 +26,7 @@ public class SimulacaoMetaTests
     private static (ApplicationDbContext Banco, MetasController Controller, Usuario Usuario) Montar(Action<Usuario>? ajustar = null)
     {
         var banco = BancoEmMemoria.NovoContexto();
-        var usuario = new Usuario { Nome = "Teste", Email = "teste@exemplo.com", Estado = "MG" };
+        var usuario = new Usuario { Nome = "Teste", Email = "teste@exemplo.test", Estado = "MG" };
         ajustar?.Invoke(usuario);
         banco.Usuarios.Add(usuario);
         banco.Modalidades.AddRange(

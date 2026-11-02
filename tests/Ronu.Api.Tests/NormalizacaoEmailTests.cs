@@ -17,7 +17,7 @@ public class NormalizacaoEmailTests
     [Theory]
     [InlineData("Fulano@Gmail.com", "fulano@gmail.com")]
     [InlineData("  fulano@gmail.com ", "fulano@gmail.com")]
-    [InlineData("FULANO@EXEMPLO.COM.BR", "fulano@exemplo.com.br")]
+    [InlineData("FULANO@SUB.EXEMPLO.TEST", "fulano@sub.exemplo.test")]
     public void Normaliza_Para_Minusculas_Sem_Espacos(string escrito, string esperado)
     {
         Assert.Equal(esperado, NormalizacaoEmail.Normalizar(escrito));

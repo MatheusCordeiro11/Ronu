@@ -105,7 +105,7 @@ public class NivelAtividadeTests
     private static (ApplicationDbContext Banco, PerfilController Controller, Usuario Usuario) MontarPerfil(string? nivel = null)
     {
         var banco = BancoEmMemoria.NovoContexto();
-        var usuario = new Usuario { Nome = "Teste", Email = "teste@exemplo.com", Estado = "MG", NivelAtividade = nivel };
+        var usuario = new Usuario { Nome = "Teste", Email = "teste@exemplo.test", Estado = "MG", NivelAtividade = nivel };
         banco.Usuarios.Add(usuario);
         banco.SaveChanges();
         var controller = new PerfilController(banco)
@@ -190,7 +190,7 @@ public class NivelAtividadeTests
     private static (MetasController Controller, Usuario Usuario) MontarSimulacao(string? nivelSalvo = null)
     {
         var banco = BancoEmMemoria.NovoContexto();
-        var usuario = new Usuario { Nome = "Teste", Email = "teste@exemplo.com", Estado = "MG", NivelAtividade = nivelSalvo };
+        var usuario = new Usuario { Nome = "Teste", Email = "teste@exemplo.test", Estado = "MG", NivelAtividade = nivelSalvo };
         banco.Usuarios.Add(usuario);
         banco.Modalidades.Add(new Modalidade { Id = 1, Nome = "Jiu-jitsu", MetReferencia = 7.8m, Categoria = CategoriasModalidade.Lutas });
         banco.SaveChanges();
