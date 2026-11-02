@@ -110,6 +110,16 @@ def ler_log(caminho):
         if m:
             eventos.append({"tipo": "ok", "ms": int(m.group(2)), "tentativas": int(m.group(3)), "entrada": int(m.group(4)), "resposta": int(m.group(5))})
             continue
+        # Regra 15 (g10c): a última tentativa aceita a dieta abaixo do mínimo de refeições, com este aviso.
+        m = re.search(r"Dieta aceita com menos refei..es que o m.nimo na .ltima tentativa: (.*)", linha)
+        if m:
+            eventos.append({"tipo": "aceita_abaixo", "dias": m.group(1).strip()})
+            continue
+        # Regra 16 (g10d): idem, sem fonte de gordura.
+        m = re.search(r"Dieta aceita sem fonte de gordura suficiente na .ltima tentativa: (.*)", linha)
+        if m:
+            eventos.append({"tipo": "aceita_sem_gordura", "dias": m.group(1).strip()})
+            continue
         m = re.search(r"Resposta inv.lida do Gemini na tentativa (\d+)", linha)
         if m:
             eventos.append({"tipo": "tentativa_invalida"})
@@ -271,7 +281,25 @@ def medir(pid, dados, base, por_id, contaveis_ids):
     def media_abs(lista, k):
         return round(sum(abs(x[k]) for x in lista) / len(lista), 1)
 
+    # Regra 15 (g10c): mínimo de refeições pela meta do dia (5; 6 a partir de 3500 kcal). Medido em toda rodada,
+    # também nas anteriores à regra, para comparar.
+    abaixo_minimo = [f"{d['diaSemana']} ({len(d['refeicoes'])})" for d in dias
+                     if len(d["refeicoes"]) < (6 if d["metaCalculada"]["calorias"] >= 3500 else 5)]
+    # Regra 16 (g10d), a mesma checagem do C#: almoço e jantar sem fonte de gordura (óleos e gorduras, oleaginosas e
+    # sementes, refogados) e o dia abaixo de 85% da gordura da meta, pela base.
+    def gordo(al):
+        i = por_id.get(al.get("alimentoId") or "") or base.get(norm(al["nome"])) or {}
+        return i.get("categoria") in ("OleosEGorduras", "OleaginosasESementes") or i.get("id") in ("couve-refogada", "espinafre-refogado")
+    sem_gordura = []
+    for d in dias:
+        aj = [x for x in d["refeicoes"] if re.search("almo|jant", norm(x["nome"]))]
+        g = sum(((por_id.get(a.get("alimentoId") or "") or base.get(norm(a["nome"])) or {}).get("g", 0)) * float(a["quantidade"]) / 100
+                for x in d["refeicoes"] for a in x["alimentos"])
+        if not any(gordo(a) for x in aj for a in x["alimentos"]) and g < 0.85 * d["metaCalculada"]["gordurasG"]:
+            sem_gordura.append(f"{d['diaSemana']} ({g:.0f} de {d['metaCalculada']['gordurasG']:.0f} g)")
     r.update({
+        "diasSemFonteDeGordura": sem_gordura,
+        "diasAbaixoDoMinimoDeRefeicoes": abaixo_minimo,
         "itens": itens, "itensNaBase": casados, "pctItensNaBase": round(casados / itens * 100, 1),
         "refeicoes": refeicoes, "pctRefeicoesInteirasNaBase": round(refeicoes_base / refeicoes * 100, 1),
         "alimentosDiferentes": len(nomes),
@@ -323,7 +351,11 @@ def main():
             pedido = {"perfil": pid, "repeticao": sufixo or "r1", "invalidas": []}
             while fila:
                 ev = fila.pop(0)
-                if ev["tipo"] == "tentativa_invalida":
+                if ev["tipo"] == "aceita_abaixo":
+                    pedido["aceitaAbaixoDoMinimo"] = ev["dias"]
+                elif ev["tipo"] == "aceita_sem_gordura":
+                    pedido["aceitaSemFonteDeGordura"] = ev["dias"]
+                elif ev["tipo"] == "tentativa_invalida":
                     pedido["invalidas"].append(ev.get("motivo", "?"))
                 elif ev["tipo"] == "ok":
                     pedido.update({"status": 200, "tentativasGemini": ev["tentativas"], "ms": ev["ms"], "tokensEntrada": ev["entrada"], "tokensResposta": ev["resposta"]})
@@ -365,6 +397,14 @@ def main():
             "diasMacrosAte10PelaBase": sum(r["diasMacrosAte10PelaBase"] for r in geradas),
             "violacoes": {k: sum(len(r["violacoes"][k]) for r in geradas) for k in geradas[0]["violacoes"]},
             "refeicoesRepetidas": sum(len(r["refeicoesRepetidas"]) for r in geradas),
+            "diasAbaixoDoMinimoDeRefeicoes": sum(len(r["diasAbaixoDoMinimoDeRefeicoes"]) for r in geradas),
+            "recusasPorPoucasRefeicoes": sum(sum("menos refei" in m for m in p["invalidas"]) for p in resultado["pedidos"]),
+            "aceitasAbaixoDoMinimo": sum("aceitaAbaixoDoMinimo" in p for p in resultado["pedidos"]),
+            "diasSemFonteDeGordura": sum(len(r["diasSemFonteDeGordura"]) for r in geradas),
+            "recusasSemFonteDeGordura": sum(sum("fonte de gordura" in m for m in p["invalidas"]) for p in resultado["pedidos"]),
+            "aceitasSemFonteDeGordura": sum("aceitaSemFonteDeGordura" in p for p in resultado["pedidos"]),
+            "recusasOutrosMotivos": sum(sum("menos refei" not in m and "fonte de gordura" not in m for m in p["invalidas"]) for p in resultado["pedidos"]),
+            "pedidos503": sum(p.get("status") == 503 for p in resultado["pedidos"]),
             "alimentosDiferentesPorId": media(lambda r: r["alimentosDiferentesPorId"]),
             "contaveisForaDoMultiplo": sum(r["contaveisForaDoMultiplo"] for r in geradas),
             "horarios": {k: sum(len(r["horarios"][k]) for r in geradas if "horarios" in r)

@@ -1,0 +1,2091 @@
+{
+ "perfil": {
+  "id": "E",
+  "sexo": "Masculino",
+  "nascimento": "1996-05-10",
+  "peso": 80,
+  "altura": 178,
+  "objetivo": "perder peso",
+  "uf": "PE",
+  "nivel": null,
+  "modalidades": [
+   [
+    "Jiu-jitsu",
+    [
+     1,
+     2,
+     4,
+     5
+    ],
+    1.5
+   ]
+  ],
+  "gosto": [
+   "Ovo"
+  ],
+  "evitar": [
+   "Leite"
+  ]
+ },
+ "status": 200,
+ "segundosCliente": 49.5,
+ "resposta": {
+  "dataGeracao": "2026-11-02T20:52:06.0623906Z",
+  "dieta": {
+   "dias": [
+    {
+     "diaSemana": "Segunda-feira",
+     "refeicoes": [
+      {
+       "nome": "Café da manhã",
+       "alimentos": [
+        {
+         "nome": "Pão francês (2 unidades)",
+         "quantidade": 100,
+         "unidade": "g",
+         "alimentoId": "pao-frances",
+         "macros": {
+          "calorias": 300,
+          "proteinasG": 8,
+          "carboidratosG": 58.6,
+          "gordurasG": 3.1
+         }
+        },
+        {
+         "nome": "Ovo de galinha cozido (2 unidades)",
+         "quantidade": 90,
+         "unidade": "g",
+         "alimentoId": "ovo-de-galinha-cozido",
+         "macros": {
+          "calorias": 131.4,
+          "proteinasG": 11.97,
+          "carboidratosG": 0.54,
+          "gordurasG": 8.55
+         }
+        },
+        {
+         "nome": "Café coado",
+         "quantidade": 200,
+         "unidade": "ml",
+         "alimentoId": "cafe-coado",
+         "macros": {
+          "calorias": 18,
+          "proteinasG": 1.4,
+          "carboidratosG": 3.0,
+          "gordurasG": 0.2
+         }
+        },
+        {
+         "nome": "Açúcar refinado",
+         "quantidade": 20,
+         "unidade": "g",
+         "alimentoId": "acucar-refinado",
+         "macros": {
+          "calorias": 77.4,
+          "proteinasG": 0.06,
+          "carboidratosG": 19.9,
+          "gordurasG": 0.0
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 526.8,
+        "proteinasG": 21.43,
+        "carboidratosG": 82.04,
+        "gordurasG": 11.85
+       },
+       "horario": "07:30"
+      },
+      {
+       "nome": "Lanche da manhã",
+       "alimentos": [
+        {
+         "nome": "Banana prata (2 unidades)",
+         "quantidade": 150,
+         "unidade": "g",
+         "alimentoId": "banana-prata",
+         "macros": {
+          "calorias": 147.0,
+          "proteinasG": 1.95,
+          "carboidratosG": 39.0,
+          "gordurasG": 0.15
+         }
+        },
+        {
+         "nome": "Aveia em flocos",
+         "quantidade": 55,
+         "unidade": "g",
+         "alimentoId": "aveia-em-flocos",
+         "macros": {
+          "calorias": 216.7,
+          "proteinasG": 7.645,
+          "carboidratosG": 36.63,
+          "gordurasG": 4.675
+         }
+        },
+        {
+         "nome": "Pasta de amendoim integral",
+         "quantidade": 30,
+         "unidade": "g",
+         "alimentoId": "pasta-de-amendoim-integral",
+         "macros": {
+          "calorias": 179.4,
+          "proteinasG": 6.66,
+          "carboidratosG": 6.69,
+          "gordurasG": 15.42
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 543.1,
+        "proteinasG": 16.255,
+        "carboidratosG": 82.32,
+        "gordurasG": 20.245
+       },
+       "horario": "10:00"
+      },
+      {
+       "nome": "Almoço",
+       "alimentos": [
+        {
+         "nome": "Arroz branco cozido",
+         "quantidade": 230,
+         "unidade": "g",
+         "alimentoId": "arroz-branco-cozido",
+         "macros": {
+          "calorias": 294.4,
+          "proteinasG": 5.75,
+          "carboidratosG": 64.63,
+          "gordurasG": 0.46
+         }
+        },
+        {
+         "nome": "Feijão cozido",
+         "quantidade": 85,
+         "unidade": "g",
+         "alimentoId": "feijao-cozido",
+         "macros": {
+          "calorias": 64.6,
+          "proteinasG": 4.08,
+          "carboidratosG": 11.56,
+          "gordurasG": 0.425
+         }
+        },
+        {
+         "nome": "Peito de frango sem pele grelhado",
+         "quantidade": 115,
+         "unidade": "g",
+         "alimentoId": "peito-de-frango-sem-pele-grelhado",
+         "macros": {
+          "calorias": 182.85,
+          "proteinasG": 36.8,
+          "carboidratosG": 0.0,
+          "gordurasG": 2.875
+         }
+        },
+        {
+         "nome": "Alface crua",
+         "quantidade": 50,
+         "unidade": "g",
+         "alimentoId": "alface-crua",
+         "macros": {
+          "calorias": 5.5,
+          "proteinasG": 0.65,
+          "carboidratosG": 0.85,
+          "gordurasG": 0.1
+         }
+        },
+        {
+         "nome": "Tomate cru (1 unidade)",
+         "quantidade": 100,
+         "unidade": "g",
+         "alimentoId": "tomate-cru",
+         "macros": {
+          "calorias": 15,
+          "proteinasG": 1.1,
+          "carboidratosG": 3.1,
+          "gordurasG": 0.2
+         }
+        },
+        {
+         "nome": "Azeite de oliva extra virgem",
+         "quantidade": 17,
+         "unidade": "g",
+         "alimentoId": "azeite-de-oliva-extra-virgem",
+         "macros": {
+          "calorias": 150.28,
+          "proteinasG": 0.0,
+          "carboidratosG": 0.0,
+          "gordurasG": 17.0
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 712.63,
+        "proteinasG": 48.38,
+        "carboidratosG": 80.14,
+        "gordurasG": 21.06
+       },
+       "horario": "12:30"
+      },
+      {
+       "nome": "Lanche da tarde",
+       "alimentos": [
+        {
+         "nome": "Tapioca",
+         "quantidade": 90,
+         "unidade": "g",
+         "alimentoId": "tapioca",
+         "macros": {
+          "calorias": 267.3,
+          "proteinasG": 0.36,
+          "carboidratosG": 65.43,
+          "gordurasG": 0.27
+         }
+        },
+        {
+         "nome": "Clara de ovo cozida",
+         "quantidade": 85,
+         "unidade": "g",
+         "alimentoId": "clara-de-ovo-cozida",
+         "macros": {
+          "calorias": 50.15,
+          "proteinasG": 11.39,
+          "carboidratosG": 0.0,
+          "gordurasG": 0.085
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 317.45,
+        "proteinasG": 11.75,
+        "carboidratosG": 65.43,
+        "gordurasG": 0.355
+       },
+       "horario": "16:00"
+      },
+      {
+       "nome": "Jantar",
+       "alimentos": [
+        {
+         "nome": "Macarrão cozido",
+         "quantidade": 230,
+         "unidade": "g",
+         "alimentoId": "macarrao-cozido",
+         "macros": {
+          "calorias": 363.4,
+          "proteinasG": 13.34,
+          "carboidratosG": 71.07,
+          "gordurasG": 2.139
+         }
+        },
+        {
+         "nome": "Patinho bovino moído",
+         "quantidade": 85,
+         "unidade": "g",
+         "alimentoId": "patinho-bovino-moido-refogado",
+         "macros": {
+          "calorias": 186.15,
+          "proteinasG": 30.515,
+          "carboidratosG": 0.0,
+          "gordurasG": 6.205
+         }
+        },
+        {
+         "nome": "Cenoura cozida",
+         "quantidade": 100,
+         "unidade": "g",
+         "alimentoId": "cenoura-cozida",
+         "macros": {
+          "calorias": 30,
+          "proteinasG": 0.8,
+          "carboidratosG": 6.7,
+          "gordurasG": 0.2
+         }
+        },
+        {
+         "nome": "Azeite de oliva extra virgem",
+         "quantidade": 17,
+         "unidade": "g",
+         "alimentoId": "azeite-de-oliva-extra-virgem",
+         "macros": {
+          "calorias": 150.28,
+          "proteinasG": 0.0,
+          "carboidratosG": 0.0,
+          "gordurasG": 17.0
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 729.83,
+        "proteinasG": 44.655,
+        "carboidratosG": 77.77,
+        "gordurasG": 25.544
+       },
+       "horario": "20:00"
+      }
+     ],
+     "totalDoDia": {
+      "calorias": 2829.81,
+      "proteinasG": 142.47,
+      "carboidratosG": 387.7,
+      "gordurasG": 79.054
+     },
+     "metaCalculada": {
+      "calorias": 2850.5,
+      "proteinasG": 144.0,
+      "carboidratosG": 390.46875,
+      "gordurasG": 79.18055555555556
+     },
+     "metaElevadaPeloPiso": false,
+     "composicaoMeta": {
+      "gastoRepouso": 1768,
+      "atividadeForaDoTreino": 707,
+      "nivelAtividade": null,
+      "fatorAtividade": 1.4,
+      "treino": [
+       {
+        "nome": "Jiu-jitsu",
+        "horas": 1.5,
+        "kcal": 816
+       }
+      ],
+      "objetivo": -440,
+      "ajusteProgresso": 0,
+      "pisoCarboidrato": 0,
+      "meta": 2851
+     }
+    },
+    {
+     "diaSemana": "Terça-feira",
+     "refeicoes": [
+      {
+       "nome": "Café da manhã",
+       "alimentos": [
+        {
+         "nome": "Cuscuz de milho cozido",
+         "quantidade": 230,
+         "unidade": "g",
+         "alimentoId": "cuscuz-de-milho-cozido",
+         "macros": {
+          "calorias": 259.9,
+          "proteinasG": 5.06,
+          "carboidratosG": 58.19,
+          "gordurasG": 1.61
+         }
+        },
+        {
+         "nome": "Ovo de galinha cozido (2 unidades)",
+         "quantidade": 90,
+         "unidade": "g",
+         "alimentoId": "ovo-de-galinha-cozido",
+         "macros": {
+          "calorias": 131.4,
+          "proteinasG": 11.97,
+          "carboidratosG": 0.54,
+          "gordurasG": 8.55
+         }
+        },
+        {
+         "nome": "Café coado",
+         "quantidade": 200,
+         "unidade": "ml",
+         "alimentoId": "cafe-coado",
+         "macros": {
+          "calorias": 18,
+          "proteinasG": 1.4,
+          "carboidratosG": 3.0,
+          "gordurasG": 0.2
+         }
+        },
+        {
+         "nome": "Açúcar refinado",
+         "quantidade": 15,
+         "unidade": "g",
+         "alimentoId": "acucar-refinado",
+         "macros": {
+          "calorias": 58.05,
+          "proteinasG": 0.045,
+          "carboidratosG": 14.925,
+          "gordurasG": 0.0
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 467.35,
+        "proteinasG": 18.475,
+        "carboidratosG": 76.655,
+        "gordurasG": 10.36
+       },
+       "horario": "07:30"
+      },
+      {
+       "nome": "Lanche da manhã",
+       "alimentos": [
+        {
+         "nome": "Mamão papaia",
+         "quantidade": 230,
+         "unidade": "g",
+         "alimentoId": "mamao-papaia",
+         "macros": {
+          "calorias": 92.0,
+          "proteinasG": 1.15,
+          "carboidratosG": 23.92,
+          "gordurasG": 0.23
+         }
+        },
+        {
+         "nome": "Aveia em flocos",
+         "quantidade": 55,
+         "unidade": "g",
+         "alimentoId": "aveia-em-flocos",
+         "macros": {
+          "calorias": 216.7,
+          "proteinasG": 7.645,
+          "carboidratosG": 36.63,
+          "gordurasG": 4.675
+         }
+        },
+        {
+         "nome": "Castanha-do-pará",
+         "quantidade": 20,
+         "unidade": "g",
+         "alimentoId": "castanha-do-para",
+         "macros": {
+          "calorias": 128.6,
+          "proteinasG": 2.9,
+          "carboidratosG": 3.02,
+          "gordurasG": 12.7
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 437.3,
+        "proteinasG": 11.695,
+        "carboidratosG": 63.57,
+        "gordurasG": 17.605
+       },
+       "horario": "10:00"
+      },
+      {
+       "nome": "Almoço",
+       "alimentos": [
+        {
+         "nome": "Macarrão cozido",
+         "quantidade": 345,
+         "unidade": "g",
+         "alimentoId": "macarrao-cozido",
+         "macros": {
+          "calorias": 545.1,
+          "proteinasG": 20.01,
+          "carboidratosG": 106.605,
+          "gordurasG": 3.2085
+         }
+        },
+        {
+         "nome": "Filé de tilápia grelhado",
+         "quantidade": 110,
+         "unidade": "g",
+         "alimentoId": "file-de-tilapia-grelhado",
+         "macros": {
+          "calorias": 140.8,
+          "proteinasG": 28.82,
+          "carboidratosG": 0.0,
+          "gordurasG": 2.915
+         }
+        },
+        {
+         "nome": "Brócolis cozido",
+         "quantidade": 100,
+         "unidade": "g",
+         "alimentoId": "brocolis-cozido",
+         "macros": {
+          "calorias": 25,
+          "proteinasG": 2.1,
+          "carboidratosG": 4.4,
+          "gordurasG": 0.5
+         }
+        },
+        {
+         "nome": "Azeite de oliva extra virgem",
+         "quantidade": 17,
+         "unidade": "g",
+         "alimentoId": "azeite-de-oliva-extra-virgem",
+         "macros": {
+          "calorias": 150.28,
+          "proteinasG": 0.0,
+          "carboidratosG": 0.0,
+          "gordurasG": 17.0
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 861.18,
+        "proteinasG": 50.93,
+        "carboidratosG": 111.005,
+        "gordurasG": 23.6235
+       },
+       "horario": "12:30"
+      },
+      {
+       "nome": "Lanche da tarde",
+       "alimentos": [
+        {
+         "nome": "Pão francês (2 unidades)",
+         "quantidade": 100,
+         "unidade": "g",
+         "alimentoId": "pao-frances",
+         "macros": {
+          "calorias": 300,
+          "proteinasG": 8,
+          "carboidratosG": 58.6,
+          "gordurasG": 3.1
+         }
+        },
+        {
+         "nome": "Clara de ovo cozida",
+         "quantidade": 110,
+         "unidade": "g",
+         "alimentoId": "clara-de-ovo-cozida",
+         "macros": {
+          "calorias": 64.9,
+          "proteinasG": 14.74,
+          "carboidratosG": 0.0,
+          "gordurasG": 0.11
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 364.9,
+        "proteinasG": 22.74,
+        "carboidratosG": 58.6,
+        "gordurasG": 3.21
+       },
+       "horario": "16:00"
+      },
+      {
+       "nome": "Jantar",
+       "alimentos": [
+        {
+         "nome": "Batata doce cozida",
+         "quantidade": 400,
+         "unidade": "g",
+         "alimentoId": "batata-doce-cozida",
+         "macros": {
+          "calorias": 308,
+          "proteinasG": 2.4,
+          "carboidratosG": 73.6,
+          "gordurasG": 0.4
+         }
+        },
+        {
+         "nome": "Patinho bovino grelhado",
+         "quantidade": 100,
+         "unidade": "g",
+         "alimentoId": "patinho-bovino-grelhado",
+         "macros": {
+          "calorias": 219,
+          "proteinasG": 35.9,
+          "carboidratosG": 0,
+          "gordurasG": 7.3
+         }
+        },
+        {
+         "nome": "Cenoura cozida",
+         "quantidade": 100,
+         "unidade": "g",
+         "alimentoId": "cenoura-cozida",
+         "macros": {
+          "calorias": 30,
+          "proteinasG": 0.8,
+          "carboidratosG": 6.7,
+          "gordurasG": 0.2
+         }
+        },
+        {
+         "nome": "Azeite de oliva extra virgem",
+         "quantidade": 17,
+         "unidade": "g",
+         "alimentoId": "azeite-de-oliva-extra-virgem",
+         "macros": {
+          "calorias": 150.28,
+          "proteinasG": 0.0,
+          "carboidratosG": 0.0,
+          "gordurasG": 17.0
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 707.28,
+        "proteinasG": 39.1,
+        "carboidratosG": 80.3,
+        "gordurasG": 24.9
+       },
+       "horario": "20:00"
+      }
+     ],
+     "totalDoDia": {
+      "calorias": 2838.01,
+      "proteinasG": 142.94,
+      "carboidratosG": 390.13,
+      "gordurasG": 79.6985
+     },
+     "metaCalculada": {
+      "calorias": 2850.5,
+      "proteinasG": 144.0,
+      "carboidratosG": 390.46875,
+      "gordurasG": 79.18055555555556
+     },
+     "metaElevadaPeloPiso": false,
+     "composicaoMeta": {
+      "gastoRepouso": 1768,
+      "atividadeForaDoTreino": 707,
+      "nivelAtividade": null,
+      "fatorAtividade": 1.4,
+      "treino": [
+       {
+        "nome": "Jiu-jitsu",
+        "horas": 1.5,
+        "kcal": 816
+       }
+      ],
+      "objetivo": -440,
+      "ajusteProgresso": 0,
+      "pisoCarboidrato": 0,
+      "meta": 2851
+     }
+    },
+    {
+     "diaSemana": "Quarta-feira",
+     "refeicoes": [
+      {
+       "nome": "Café da manhã",
+       "alimentos": [
+        {
+         "nome": "Pão francês (1 unidade)",
+         "quantidade": 50,
+         "unidade": "g",
+         "alimentoId": "pao-frances",
+         "macros": {
+          "calorias": 150.0,
+          "proteinasG": 4.0,
+          "carboidratosG": 29.3,
+          "gordurasG": 1.55
+         }
+        },
+        {
+         "nome": "Ovo de galinha cozido (2 unidades)",
+         "quantidade": 90,
+         "unidade": "g",
+         "alimentoId": "ovo-de-galinha-cozido",
+         "macros": {
+          "calorias": 131.4,
+          "proteinasG": 11.97,
+          "carboidratosG": 0.54,
+          "gordurasG": 8.55
+         }
+        },
+        {
+         "nome": "Café coado",
+         "quantidade": 200,
+         "unidade": "ml",
+         "alimentoId": "cafe-coado",
+         "macros": {
+          "calorias": 18,
+          "proteinasG": 1.4,
+          "carboidratosG": 3.0,
+          "gordurasG": 0.2
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 299.4,
+        "proteinasG": 17.37,
+        "carboidratosG": 32.84,
+        "gordurasG": 10.3
+       },
+       "horario": "07:30"
+      },
+      {
+       "nome": "Almoço",
+       "alimentos": [
+        {
+         "nome": "Arroz integral cozido",
+         "quantidade": 195,
+         "unidade": "g",
+         "alimentoId": "arroz-integral-cozido",
+         "macros": {
+          "calorias": 241.8,
+          "proteinasG": 5.07,
+          "carboidratosG": 50.31,
+          "gordurasG": 1.95
+         }
+        },
+        {
+         "nome": "Feijão preto cozido",
+         "quantidade": 100,
+         "unidade": "g",
+         "alimentoId": "feijao-preto-cozido",
+         "macros": {
+          "calorias": 77,
+          "proteinasG": 4.5,
+          "carboidratosG": 14,
+          "gordurasG": 0.5
+         }
+        },
+        {
+         "nome": "Peito de frango sem pele cozido",
+         "quantidade": 150,
+         "unidade": "g",
+         "alimentoId": "peito-de-frango-sem-pele-cozido",
+         "macros": {
+          "calorias": 244.5,
+          "proteinasG": 47.25,
+          "carboidratosG": 0.0,
+          "gordurasG": 4.8
+         }
+        },
+        {
+         "nome": "Tomate cru (1 unidade)",
+         "quantidade": 100,
+         "unidade": "g",
+         "alimentoId": "tomate-cru",
+         "macros": {
+          "calorias": 15,
+          "proteinasG": 1.1,
+          "carboidratosG": 3.1,
+          "gordurasG": 0.2
+         }
+        },
+        {
+         "nome": "Azeite de oliva extra virgem",
+         "quantidade": 15,
+         "unidade": "g",
+         "alimentoId": "azeite-de-oliva-extra-virgem",
+         "macros": {
+          "calorias": 132.6,
+          "proteinasG": 0.0,
+          "carboidratosG": 0.0,
+          "gordurasG": 15.0
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 710.9,
+        "proteinasG": 57.92,
+        "carboidratosG": 67.41,
+        "gordurasG": 22.45
+       },
+       "horario": "12:30"
+      },
+      {
+       "nome": "Lanche da tarde",
+       "alimentos": [
+        {
+         "nome": "Maçã fuji (1 unidade)",
+         "quantidade": 150,
+         "unidade": "g",
+         "alimentoId": "maca-fuji",
+         "macros": {
+          "calorias": 84.0,
+          "proteinasG": 0.45,
+          "carboidratosG": 22.8,
+          "gordurasG": 0.0
+         }
+        },
+        {
+         "nome": "Aveia em flocos",
+         "quantidade": 39,
+         "unidade": "g",
+         "alimentoId": "aveia-em-flocos",
+         "macros": {
+          "calorias": 153.66,
+          "proteinasG": 5.421,
+          "carboidratosG": 25.974,
+          "gordurasG": 3.315
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 237.66,
+        "proteinasG": 5.871,
+        "carboidratosG": 48.774,
+        "gordurasG": 3.315
+       },
+       "horario": "16:00"
+      },
+      {
+       "nome": "Jantar",
+       "alimentos": [
+        {
+         "nome": "Macaxeira cozida",
+         "quantidade": 260,
+         "unidade": "g",
+         "alimentoId": "mandioca-cozida",
+         "macros": {
+          "calorias": 325.0,
+          "proteinasG": 1.56,
+          "carboidratosG": 78.26,
+          "gordurasG": 0.78
+         }
+        },
+        {
+         "nome": "Atum em conserva em água",
+         "quantidade": 120,
+         "unidade": "g",
+         "alimentoId": "atum-em-conserva-em-agua",
+         "macros": {
+          "calorias": 139.2,
+          "proteinasG": 30.6,
+          "carboidratosG": 0.0,
+          "gordurasG": 0.984
+         }
+        },
+        {
+         "nome": "Couve refogada",
+         "quantidade": 100,
+         "unidade": "g",
+         "alimentoId": "couve-refogada",
+         "macros": {
+          "calorias": 90,
+          "proteinasG": 1.7,
+          "carboidratosG": 8.7,
+          "gordurasG": 6.6
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 554.2,
+        "proteinasG": 33.86,
+        "carboidratosG": 86.96,
+        "gordurasG": 8.364
+       },
+       "horario": "20:00"
+      },
+      {
+       "nome": "Ceia",
+       "alimentos": [
+        {
+         "nome": "Clara de ovo cozida",
+         "quantidade": 200,
+         "unidade": "g",
+         "alimentoId": "clara-de-ovo-cozida",
+         "macros": {
+          "calorias": 118,
+          "proteinasG": 26.8,
+          "carboidratosG": 0,
+          "gordurasG": 0.2
+         }
+        },
+        {
+         "nome": "Castanha-de-caju",
+         "quantidade": 20,
+         "unidade": "g",
+         "alimentoId": "castanha-de-caju",
+         "macros": {
+          "calorias": 114.0,
+          "proteinasG": 3.7,
+          "carboidratosG": 5.82,
+          "gordurasG": 9.26
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 232.0,
+        "proteinasG": 30.5,
+        "carboidratosG": 5.82,
+        "gordurasG": 9.46
+       },
+       "horario": "22:00"
+      }
+     ],
+     "totalDoDia": {
+      "calorias": 2034.16,
+      "proteinasG": 145.521,
+      "carboidratosG": 241.804,
+      "gordurasG": 53.889
+     },
+     "metaCalculada": {
+      "calorias": 2034.5,
+      "proteinasG": 144.0,
+      "carboidratosG": 237.46875,
+      "gordurasG": 56.513888888888886
+     },
+     "metaElevadaPeloPiso": false,
+     "composicaoMeta": {
+      "gastoRepouso": 1768,
+      "atividadeForaDoTreino": 707,
+      "nivelAtividade": null,
+      "fatorAtividade": 1.4,
+      "treino": [],
+      "objetivo": -440,
+      "ajusteProgresso": 0,
+      "pisoCarboidrato": 0,
+      "meta": 2035
+     }
+    },
+    {
+     "diaSemana": "Quinta-feira",
+     "refeicoes": [
+      {
+       "nome": "Café da manhã",
+       "alimentos": [
+        {
+         "nome": "Tapioca",
+         "quantidade": 120,
+         "unidade": "g",
+         "alimentoId": "tapioca",
+         "macros": {
+          "calorias": 356.4,
+          "proteinasG": 0.48,
+          "carboidratosG": 87.24,
+          "gordurasG": 0.36
+         }
+        },
+        {
+         "nome": "Ovo de galinha cozido (2 unidades)",
+         "quantidade": 90,
+         "unidade": "g",
+         "alimentoId": "ovo-de-galinha-cozido",
+         "macros": {
+          "calorias": 131.4,
+          "proteinasG": 11.97,
+          "carboidratosG": 0.54,
+          "gordurasG": 8.55
+         }
+        },
+        {
+         "nome": "Café coado",
+         "quantidade": 200,
+         "unidade": "ml",
+         "alimentoId": "cafe-coado",
+         "macros": {
+          "calorias": 18,
+          "proteinasG": 1.4,
+          "carboidratosG": 3.0,
+          "gordurasG": 0.2
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 505.8,
+        "proteinasG": 13.85,
+        "carboidratosG": 90.78,
+        "gordurasG": 9.11
+       },
+       "horario": "07:30"
+      },
+      {
+       "nome": "Lanche da manhã",
+       "alimentos": [
+        {
+         "nome": "Banana nanica",
+         "quantidade": 150,
+         "unidade": "g",
+         "alimentoId": "banana-nanica",
+         "macros": {
+          "calorias": 138.0,
+          "proteinasG": 2.1,
+          "carboidratosG": 35.7,
+          "gordurasG": 0.15
+         }
+        },
+        {
+         "nome": "Aveia em flocos",
+         "quantidade": 50,
+         "unidade": "g",
+         "alimentoId": "aveia-em-flocos",
+         "macros": {
+          "calorias": 197.0,
+          "proteinasG": 6.95,
+          "carboidratosG": 33.3,
+          "gordurasG": 4.25
+         }
+        },
+        {
+         "nome": "Pasta de amendoim integral",
+         "quantidade": 25,
+         "unidade": "g",
+         "alimentoId": "pasta-de-amendoim-integral",
+         "macros": {
+          "calorias": 149.5,
+          "proteinasG": 5.55,
+          "carboidratosG": 5.575,
+          "gordurasG": 12.85
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 484.5,
+        "proteinasG": 14.6,
+        "carboidratosG": 74.575,
+        "gordurasG": 17.25
+       },
+       "horario": "10:00"
+      },
+      {
+       "nome": "Almoço",
+       "alimentos": [
+        {
+         "nome": "Arroz branco cozido",
+         "quantidade": 250,
+         "unidade": "g",
+         "alimentoId": "arroz-branco-cozido",
+         "macros": {
+          "calorias": 320.0,
+          "proteinasG": 6.25,
+          "carboidratosG": 70.25,
+          "gordurasG": 0.5
+         }
+        },
+        {
+         "nome": "Feijão fradinho cozido",
+         "quantidade": 90,
+         "unidade": "g",
+         "alimentoId": "feijao-fradinho-cozido",
+         "macros": {
+          "calorias": 70.2,
+          "proteinasG": 4.59,
+          "carboidratosG": 12.15,
+          "gordurasG": 0.54
+         }
+        },
+        {
+         "nome": "Alcatra bovina grelhada",
+         "quantidade": 105,
+         "unidade": "g",
+         "alimentoId": "alcatra-bovina-grelhada",
+         "macros": {
+          "calorias": 253.05,
+          "proteinasG": 33.495,
+          "carboidratosG": 0.0,
+          "gordurasG": 12.18
+         }
+        },
+        {
+         "nome": "Alface crua",
+         "quantidade": 50,
+         "unidade": "g",
+         "alimentoId": "alface-crua",
+         "macros": {
+          "calorias": 5.5,
+          "proteinasG": 0.65,
+          "carboidratosG": 0.85,
+          "gordurasG": 0.1
+         }
+        },
+        {
+         "nome": "Tomate cru (1 unidade)",
+         "quantidade": 100,
+         "unidade": "g",
+         "alimentoId": "tomate-cru",
+         "macros": {
+          "calorias": 15,
+          "proteinasG": 1.1,
+          "carboidratosG": 3.1,
+          "gordurasG": 0.2
+         }
+        },
+        {
+         "nome": "Azeite de oliva extra virgem",
+         "quantidade": 15,
+         "unidade": "g",
+         "alimentoId": "azeite-de-oliva-extra-virgem",
+         "macros": {
+          "calorias": 132.6,
+          "proteinasG": 0.0,
+          "carboidratosG": 0.0,
+          "gordurasG": 15.0
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 796.35,
+        "proteinasG": 46.085,
+        "carboidratosG": 86.35,
+        "gordurasG": 28.52
+       },
+       "horario": "12:30"
+      },
+      {
+       "nome": "Lanche da tarde",
+       "alimentos": [
+        {
+         "nome": "Pão francês (2 unidades)",
+         "quantidade": 100,
+         "unidade": "g",
+         "alimentoId": "pao-frances",
+         "macros": {
+          "calorias": 300,
+          "proteinasG": 8,
+          "carboidratosG": 58.6,
+          "gordurasG": 3.1
+         }
+        },
+        {
+         "nome": "Clara de ovo cozida",
+         "quantidade": 90,
+         "unidade": "g",
+         "alimentoId": "clara-de-ovo-cozida",
+         "macros": {
+          "calorias": 53.1,
+          "proteinasG": 12.06,
+          "carboidratosG": 0.0,
+          "gordurasG": 0.09
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 353.1,
+        "proteinasG": 20.06,
+        "carboidratosG": 58.6,
+        "gordurasG": 3.19
+       },
+       "horario": "16:00"
+      },
+      {
+       "nome": "Jantar",
+       "alimentos": [
+        {
+         "nome": "Macarrão cozido",
+         "quantidade": 250,
+         "unidade": "g",
+         "alimentoId": "macarrao-cozido",
+         "macros": {
+          "calorias": 395.0,
+          "proteinasG": 14.5,
+          "carboidratosG": 77.25,
+          "gordurasG": 2.325
+         }
+        },
+        {
+         "nome": "Peito de frango sem pele cozido",
+         "quantidade": 105,
+         "unidade": "g",
+         "alimentoId": "peito-de-frango-sem-pele-cozido",
+         "macros": {
+          "calorias": 171.15,
+          "proteinasG": 33.075,
+          "carboidratosG": 0.0,
+          "gordurasG": 3.36
+         }
+        },
+        {
+         "nome": "Abobrinha cozida",
+         "quantidade": 100,
+         "unidade": "g",
+         "alimentoId": "abobrinha-cozida",
+         "macros": {
+          "calorias": 15,
+          "proteinasG": 1.1,
+          "carboidratosG": 3,
+          "gordurasG": 0.2
+         }
+        },
+        {
+         "nome": "Azeite de oliva extra virgem",
+         "quantidade": 15,
+         "unidade": "g",
+         "alimentoId": "azeite-de-oliva-extra-virgem",
+         "macros": {
+          "calorias": 132.6,
+          "proteinasG": 0.0,
+          "carboidratosG": 0.0,
+          "gordurasG": 15.0
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 713.75,
+        "proteinasG": 48.675,
+        "carboidratosG": 80.25,
+        "gordurasG": 20.885
+       },
+       "horario": "20:00"
+      }
+     ],
+     "totalDoDia": {
+      "calorias": 2853.5,
+      "proteinasG": 143.27,
+      "carboidratosG": 390.555,
+      "gordurasG": 78.955
+     },
+     "metaCalculada": {
+      "calorias": 2850.5,
+      "proteinasG": 144.0,
+      "carboidratosG": 390.46875,
+      "gordurasG": 79.18055555555556
+     },
+     "metaElevadaPeloPiso": false,
+     "composicaoMeta": {
+      "gastoRepouso": 1768,
+      "atividadeForaDoTreino": 707,
+      "nivelAtividade": null,
+      "fatorAtividade": 1.4,
+      "treino": [
+       {
+        "nome": "Jiu-jitsu",
+        "horas": 1.5,
+        "kcal": 816
+       }
+      ],
+      "objetivo": -440,
+      "ajusteProgresso": 0,
+      "pisoCarboidrato": 0,
+      "meta": 2851
+     }
+    },
+    {
+     "diaSemana": "Sexta-feira",
+     "refeicoes": [
+      {
+       "nome": "Café da manhã",
+       "alimentos": [
+        {
+         "nome": "Pão francês (3 unidades)",
+         "quantidade": 150,
+         "unidade": "g",
+         "alimentoId": "pao-frances",
+         "macros": {
+          "calorias": 450.0,
+          "proteinasG": 12.0,
+          "carboidratosG": 87.9,
+          "gordurasG": 4.65
+         }
+        },
+        {
+         "nome": "Ovo de galinha cozido (2 unidades)",
+         "quantidade": 90,
+         "unidade": "g",
+         "alimentoId": "ovo-de-galinha-cozido",
+         "macros": {
+          "calorias": 131.4,
+          "proteinasG": 11.97,
+          "carboidratosG": 0.54,
+          "gordurasG": 8.55
+         }
+        },
+        {
+         "nome": "Café coado",
+         "quantidade": 200,
+         "unidade": "ml",
+         "alimentoId": "cafe-coado",
+         "macros": {
+          "calorias": 18,
+          "proteinasG": 1.4,
+          "carboidratosG": 3.0,
+          "gordurasG": 0.2
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 599.4,
+        "proteinasG": 25.37,
+        "carboidratosG": 91.44,
+        "gordurasG": 13.4
+       },
+       "horario": "07:30"
+      },
+      {
+       "nome": "Lanche da manhã",
+       "alimentos": [
+        {
+         "nome": "Mamão formosa (1 fatia)",
+         "quantidade": 170,
+         "unidade": "g",
+         "alimentoId": "mamao-formosa",
+         "macros": {
+          "calorias": 76.5,
+          "proteinasG": 1.36,
+          "carboidratosG": 19.72,
+          "gordurasG": 0.17
+         }
+        },
+        {
+         "nome": "Aveia em flocos",
+         "quantidade": 60,
+         "unidade": "g",
+         "alimentoId": "aveia-em-flocos",
+         "macros": {
+          "calorias": 236.4,
+          "proteinasG": 8.34,
+          "carboidratosG": 39.96,
+          "gordurasG": 5.1
+         }
+        },
+        {
+         "nome": "Amendoim torrado",
+         "quantidade": 20,
+         "unidade": "g",
+         "alimentoId": "amendoim-torrado",
+         "macros": {
+          "calorias": 121.2,
+          "proteinasG": 4.5,
+          "carboidratosG": 3.74,
+          "gordurasG": 10.8
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 434.1,
+        "proteinasG": 14.2,
+        "carboidratosG": 63.42,
+        "gordurasG": 16.07
+       },
+       "horario": "10:00"
+      },
+      {
+       "nome": "Almoço",
+       "alimentos": [
+        {
+         "nome": "Batata inglesa cozida",
+         "quantidade": 400,
+         "unidade": "g",
+         "alimentoId": "batata-inglesa-cozida",
+         "macros": {
+          "calorias": 208,
+          "proteinasG": 4.8,
+          "carboidratosG": 47.6,
+          "gordurasG": 0
+         }
+        },
+        {
+         "nome": "Lombo suíno assado",
+         "quantidade": 120,
+         "unidade": "g",
+         "alimentoId": "lombo-suino-assado",
+         "macros": {
+          "calorias": 252.0,
+          "proteinasG": 42.84,
+          "carboidratosG": 0.0,
+          "gordurasG": 7.68
+         }
+        },
+        {
+         "nome": "Cenoura cozida",
+         "quantidade": 100,
+         "unidade": "g",
+         "alimentoId": "cenoura-cozida",
+         "macros": {
+          "calorias": 30,
+          "proteinasG": 0.8,
+          "carboidratosG": 6.7,
+          "gordurasG": 0.2
+         }
+        },
+        {
+         "nome": "Azeite de oliva extra virgem",
+         "quantidade": 18,
+         "unidade": "g",
+         "alimentoId": "azeite-de-oliva-extra-virgem",
+         "macros": {
+          "calorias": 159.12,
+          "proteinasG": 0.0,
+          "carboidratosG": 0.0,
+          "gordurasG": 18.0
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 649.12,
+        "proteinasG": 48.44,
+        "carboidratosG": 54.3,
+        "gordurasG": 25.88
+       },
+       "horario": "12:30"
+      },
+      {
+       "nome": "Lanche da tarde",
+       "alimentos": [
+        {
+         "nome": "Tapioca",
+         "quantidade": 125,
+         "unidade": "g",
+         "alimentoId": "tapioca",
+         "macros": {
+          "calorias": 371.25,
+          "proteinasG": 0.5,
+          "carboidratosG": 90.875,
+          "gordurasG": 0.375
+         }
+        },
+        {
+         "nome": "Clara de ovo cozida",
+         "quantidade": 100,
+         "unidade": "g",
+         "alimentoId": "clara-de-ovo-cozida",
+         "macros": {
+          "calorias": 59,
+          "proteinasG": 13.4,
+          "carboidratosG": 0,
+          "gordurasG": 0.1
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 430.25,
+        "proteinasG": 13.9,
+        "carboidratosG": 90.875,
+        "gordurasG": 0.475
+       },
+       "horario": "16:00"
+      },
+      {
+       "nome": "Jantar",
+       "alimentos": [
+        {
+         "nome": "Arroz branco cozido",
+         "quantidade": 305,
+         "unidade": "g",
+         "alimentoId": "arroz-branco-cozido",
+         "macros": {
+          "calorias": 390.4,
+          "proteinasG": 7.625,
+          "carboidratosG": 85.705,
+          "gordurasG": 0.61
+         }
+        },
+        {
+         "nome": "Filé de tilápia grelhado",
+         "quantidade": 120,
+         "unidade": "g",
+         "alimentoId": "file-de-tilapia-grelhado",
+         "macros": {
+          "calorias": 153.6,
+          "proteinasG": 31.44,
+          "carboidratosG": 0.0,
+          "gordurasG": 3.18
+         }
+        },
+        {
+         "nome": "Brócolis cozido",
+         "quantidade": 100,
+         "unidade": "g",
+         "alimentoId": "brocolis-cozido",
+         "macros": {
+          "calorias": 25,
+          "proteinasG": 2.1,
+          "carboidratosG": 4.4,
+          "gordurasG": 0.5
+         }
+        },
+        {
+         "nome": "Azeite de oliva extra virgem",
+         "quantidade": 18,
+         "unidade": "g",
+         "alimentoId": "azeite-de-oliva-extra-virgem",
+         "macros": {
+          "calorias": 159.12,
+          "proteinasG": 0.0,
+          "carboidratosG": 0.0,
+          "gordurasG": 18.0
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 728.12,
+        "proteinasG": 41.165,
+        "carboidratosG": 90.105,
+        "gordurasG": 22.29
+       },
+       "horario": "20:00"
+      }
+     ],
+     "totalDoDia": {
+      "calorias": 2840.99,
+      "proteinasG": 143.075,
+      "carboidratosG": 390.14,
+      "gordurasG": 78.115
+     },
+     "metaCalculada": {
+      "calorias": 2850.5,
+      "proteinasG": 144.0,
+      "carboidratosG": 390.46875,
+      "gordurasG": 79.18055555555556
+     },
+     "metaElevadaPeloPiso": false,
+     "composicaoMeta": {
+      "gastoRepouso": 1768,
+      "atividadeForaDoTreino": 707,
+      "nivelAtividade": null,
+      "fatorAtividade": 1.4,
+      "treino": [
+       {
+        "nome": "Jiu-jitsu",
+        "horas": 1.5,
+        "kcal": 816
+       }
+      ],
+      "objetivo": -440,
+      "ajusteProgresso": 0,
+      "pisoCarboidrato": 0,
+      "meta": 2851
+     }
+    },
+    {
+     "diaSemana": "Sábado",
+     "refeicoes": [
+      {
+       "nome": "Café da manhã",
+       "alimentos": [
+        {
+         "nome": "Pão francês (1 unidade)",
+         "quantidade": 50,
+         "unidade": "g",
+         "alimentoId": "pao-frances",
+         "macros": {
+          "calorias": 150.0,
+          "proteinasG": 4.0,
+          "carboidratosG": 29.3,
+          "gordurasG": 1.55
+         }
+        },
+        {
+         "nome": "Ovo de galinha cozido (2 unidades)",
+         "quantidade": 90,
+         "unidade": "g",
+         "alimentoId": "ovo-de-galinha-cozido",
+         "macros": {
+          "calorias": 131.4,
+          "proteinasG": 11.97,
+          "carboidratosG": 0.54,
+          "gordurasG": 8.55
+         }
+        },
+        {
+         "nome": "Café coado",
+         "quantidade": 200,
+         "unidade": "ml",
+         "alimentoId": "cafe-coado",
+         "macros": {
+          "calorias": 18,
+          "proteinasG": 1.4,
+          "carboidratosG": 3.0,
+          "gordurasG": 0.2
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 299.4,
+        "proteinasG": 17.37,
+        "carboidratosG": 32.84,
+        "gordurasG": 10.3
+       },
+       "horario": "07:30"
+      },
+      {
+       "nome": "Almoço",
+       "alimentos": [
+        {
+         "nome": "Arroz integral cozido",
+         "quantidade": 200,
+         "unidade": "g",
+         "alimentoId": "arroz-integral-cozido",
+         "macros": {
+          "calorias": 248,
+          "proteinasG": 5.2,
+          "carboidratosG": 51.6,
+          "gordurasG": 2
+         }
+        },
+        {
+         "nome": "Lentilha cozida",
+         "quantidade": 85,
+         "unidade": "g",
+         "alimentoId": "lentilha-cozida",
+         "macros": {
+          "calorias": 79.05,
+          "proteinasG": 5.355,
+          "carboidratosG": 13.855,
+          "gordurasG": 0.425
+         }
+        },
+        {
+         "nome": "Peito de frango sem pele grelhado",
+         "quantidade": 125,
+         "unidade": "g",
+         "alimentoId": "peito-de-frango-sem-pele-grelhado",
+         "macros": {
+          "calorias": 198.75,
+          "proteinasG": 40.0,
+          "carboidratosG": 0.0,
+          "gordurasG": 3.125
+         }
+        },
+        {
+         "nome": "Tomate cru (1 unidade)",
+         "quantidade": 100,
+         "unidade": "g",
+         "alimentoId": "tomate-cru",
+         "macros": {
+          "calorias": 15,
+          "proteinasG": 1.1,
+          "carboidratosG": 3.1,
+          "gordurasG": 0.2
+         }
+        },
+        {
+         "nome": "Azeite de oliva extra virgem",
+         "quantidade": 9,
+         "unidade": "g",
+         "alimentoId": "azeite-de-oliva-extra-virgem",
+         "macros": {
+          "calorias": 79.56,
+          "proteinasG": 0.0,
+          "carboidratosG": 0.0,
+          "gordurasG": 9.0
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 620.36,
+        "proteinasG": 51.655,
+        "carboidratosG": 68.555,
+        "gordurasG": 14.75
+       },
+       "horario": "12:30"
+      },
+      {
+       "nome": "Lanche da tarde",
+       "alimentos": [
+        {
+         "nome": "Banana prata (2 unidades)",
+         "quantidade": 150,
+         "unidade": "g",
+         "alimentoId": "banana-prata",
+         "macros": {
+          "calorias": 147.0,
+          "proteinasG": 1.95,
+          "carboidratosG": 39.0,
+          "gordurasG": 0.15
+         }
+        },
+        {
+         "nome": "Aveia em flocos",
+         "quantidade": 40,
+         "unidade": "g",
+         "alimentoId": "aveia-em-flocos",
+         "macros": {
+          "calorias": 157.6,
+          "proteinasG": 5.56,
+          "carboidratosG": 26.64,
+          "gordurasG": 3.4
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 304.6,
+        "proteinasG": 7.51,
+        "carboidratosG": 65.64,
+        "gordurasG": 3.55
+       },
+       "horario": "16:00"
+      },
+      {
+       "nome": "Jantar",
+       "alimentos": [
+        {
+         "nome": "Macarrão cozido",
+         "quantidade": 200,
+         "unidade": "g",
+         "alimentoId": "macarrao-cozido",
+         "macros": {
+          "calorias": 316,
+          "proteinasG": 11.6,
+          "carboidratosG": 61.8,
+          "gordurasG": 1.86
+         }
+        },
+        {
+         "nome": "Patinho bovino moído",
+         "quantidade": 100,
+         "unidade": "g",
+         "alimentoId": "patinho-bovino-moido-refogado",
+         "macros": {
+          "calorias": 219,
+          "proteinasG": 35.9,
+          "carboidratosG": 0,
+          "gordurasG": 7.3
+         }
+        },
+        {
+         "nome": "Cenoura cozida",
+         "quantidade": 100,
+         "unidade": "g",
+         "alimentoId": "cenoura-cozida",
+         "macros": {
+          "calorias": 30,
+          "proteinasG": 0.8,
+          "carboidratosG": 6.7,
+          "gordurasG": 0.2
+         }
+        },
+        {
+         "nome": "Azeite de oliva extra virgem",
+         "quantidade": 9,
+         "unidade": "g",
+         "alimentoId": "azeite-de-oliva-extra-virgem",
+         "macros": {
+          "calorias": 79.56,
+          "proteinasG": 0.0,
+          "carboidratosG": 0.0,
+          "gordurasG": 9.0
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 644.56,
+        "proteinasG": 48.3,
+        "carboidratosG": 68.5,
+        "gordurasG": 18.36
+       },
+       "horario": "20:00"
+      },
+      {
+       "nome": "Ceia",
+       "alimentos": [
+        {
+         "nome": "Clara de ovo cozida",
+         "quantidade": 125,
+         "unidade": "g",
+         "alimentoId": "clara-de-ovo-cozida",
+         "macros": {
+          "calorias": 73.75,
+          "proteinasG": 16.75,
+          "carboidratosG": 0.0,
+          "gordurasG": 0.125
+         }
+        },
+        {
+         "nome": "Castanha-do-pará",
+         "quantidade": 15,
+         "unidade": "g",
+         "alimentoId": "castanha-do-para",
+         "macros": {
+          "calorias": 96.45,
+          "proteinasG": 2.175,
+          "carboidratosG": 2.265,
+          "gordurasG": 9.525
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 170.2,
+        "proteinasG": 18.925,
+        "carboidratosG": 2.265,
+        "gordurasG": 9.65
+       },
+       "horario": "22:00"
+      }
+     ],
+     "totalDoDia": {
+      "calorias": 2039.12,
+      "proteinasG": 143.76,
+      "carboidratosG": 237.8,
+      "gordurasG": 56.61
+     },
+     "metaCalculada": {
+      "calorias": 2034.5,
+      "proteinasG": 144.0,
+      "carboidratosG": 237.46875,
+      "gordurasG": 56.513888888888886
+     },
+     "metaElevadaPeloPiso": false,
+     "composicaoMeta": {
+      "gastoRepouso": 1768,
+      "atividadeForaDoTreino": 707,
+      "nivelAtividade": null,
+      "fatorAtividade": 1.4,
+      "treino": [],
+      "objetivo": -440,
+      "ajusteProgresso": 0,
+      "pisoCarboidrato": 0,
+      "meta": 2035
+     }
+    },
+    {
+     "diaSemana": "Domingo",
+     "refeicoes": [
+      {
+       "nome": "Café da manhã",
+       "alimentos": [
+        {
+         "nome": "Cuscuz de milho cozido",
+         "quantidade": 205,
+         "unidade": "g",
+         "alimentoId": "cuscuz-de-milho-cozido",
+         "macros": {
+          "calorias": 231.65,
+          "proteinasG": 4.51,
+          "carboidratosG": 51.865,
+          "gordurasG": 1.435
+         }
+        },
+        {
+         "nome": "Ovo de galinha cozido (2 unidades)",
+         "quantidade": 90,
+         "unidade": "g",
+         "alimentoId": "ovo-de-galinha-cozido",
+         "macros": {
+          "calorias": 131.4,
+          "proteinasG": 11.97,
+          "carboidratosG": 0.54,
+          "gordurasG": 8.55
+         }
+        },
+        {
+         "nome": "Café coado",
+         "quantidade": 200,
+         "unidade": "ml",
+         "alimentoId": "cafe-coado",
+         "macros": {
+          "calorias": 18,
+          "proteinasG": 1.4,
+          "carboidratosG": 3.0,
+          "gordurasG": 0.2
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 381.05,
+        "proteinasG": 17.88,
+        "carboidratosG": 55.405,
+        "gordurasG": 10.185
+       },
+       "horario": "07:30"
+      },
+      {
+       "nome": "Almoço",
+       "alimentos": [
+        {
+         "nome": "Batata doce cozida",
+         "quantidade": 270,
+         "unidade": "g",
+         "alimentoId": "batata-doce-cozida",
+         "macros": {
+          "calorias": 207.9,
+          "proteinasG": 1.62,
+          "carboidratosG": 49.68,
+          "gordurasG": 0.27
+         }
+        },
+        {
+         "nome": "Feijão cozido",
+         "quantidade": 100,
+         "unidade": "g",
+         "alimentoId": "feijao-cozido",
+         "macros": {
+          "calorias": 76,
+          "proteinasG": 4.8,
+          "carboidratosG": 13.6,
+          "gordurasG": 0.5
+         }
+        },
+        {
+         "nome": "Frango sem pele assado",
+         "quantidade": 155,
+         "unidade": "g",
+         "alimentoId": "frango-sem-pele-assado",
+         "macros": {
+          "calorias": 289.85,
+          "proteinasG": 43.4,
+          "carboidratosG": 0.0,
+          "gordurasG": 11.625
+         }
+        },
+        {
+         "nome": "Alface crua",
+         "quantidade": 50,
+         "unidade": "g",
+         "alimentoId": "alface-crua",
+         "macros": {
+          "calorias": 5.5,
+          "proteinasG": 0.65,
+          "carboidratosG": 0.85,
+          "gordurasG": 0.1
+         }
+        },
+        {
+         "nome": "Azeite de oliva extra virgem",
+         "quantidade": 11,
+         "unidade": "g",
+         "alimentoId": "azeite-de-oliva-extra-virgem",
+         "macros": {
+          "calorias": 97.24,
+          "proteinasG": 0.0,
+          "carboidratosG": 0.0,
+          "gordurasG": 11.0
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 676.49,
+        "proteinasG": 50.47,
+        "carboidratosG": 64.13,
+        "gordurasG": 23.495
+       },
+       "horario": "12:30"
+      },
+      {
+       "nome": "Lanche da tarde",
+       "alimentos": [
+        {
+         "nome": "Maçã fuji (1 unidade)",
+         "quantidade": 150,
+         "unidade": "g",
+         "alimentoId": "maca-fuji",
+         "macros": {
+          "calorias": 84.0,
+          "proteinasG": 0.45,
+          "carboidratosG": 22.8,
+          "gordurasG": 0.0
+         }
+        },
+        {
+         "nome": "Aveia em flocos",
+         "quantidade": 41,
+         "unidade": "g",
+         "alimentoId": "aveia-em-flocos",
+         "macros": {
+          "calorias": 161.54,
+          "proteinasG": 5.699,
+          "carboidratosG": 27.306,
+          "gordurasG": 3.485
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 245.54,
+        "proteinasG": 6.149,
+        "carboidratosG": 50.106,
+        "gordurasG": 3.485
+       },
+       "horario": "16:00"
+      },
+      {
+       "nome": "Jantar",
+       "alimentos": [
+        {
+         "nome": "Arroz branco cozido",
+         "quantidade": 205,
+         "unidade": "g",
+         "alimentoId": "arroz-branco-cozido",
+         "macros": {
+          "calorias": 262.4,
+          "proteinasG": 5.125,
+          "carboidratosG": 57.605,
+          "gordurasG": 0.41
+         }
+        },
+        {
+         "nome": "Sardinha assada",
+         "quantidade": 125,
+         "unidade": "g",
+         "alimentoId": "sardinha-assada",
+         "macros": {
+          "calorias": 205.0,
+          "proteinasG": 40.25,
+          "carboidratosG": 0.0,
+          "gordurasG": 3.75
+         }
+        },
+        {
+         "nome": "Couve refogada",
+         "quantidade": 100,
+         "unidade": "g",
+         "alimentoId": "couve-refogada",
+         "macros": {
+          "calorias": 90,
+          "proteinasG": 1.7,
+          "carboidratosG": 8.7,
+          "gordurasG": 6.6
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 557.4,
+        "proteinasG": 47.075,
+        "carboidratosG": 66.305,
+        "gordurasG": 10.76
+       },
+       "horario": "20:00"
+      },
+      {
+       "nome": "Ceia",
+       "alimentos": [
+        {
+         "nome": "Clara de ovo cozida",
+         "quantidade": 155,
+         "unidade": "g",
+         "alimentoId": "clara-de-ovo-cozida",
+         "macros": {
+          "calorias": 91.45,
+          "proteinasG": 20.77,
+          "carboidratosG": 0.0,
+          "gordurasG": 0.155
+         }
+        },
+        {
+         "nome": "Amendoim torrado",
+         "quantidade": 15,
+         "unidade": "g",
+         "alimentoId": "amendoim-torrado",
+         "macros": {
+          "calorias": 90.9,
+          "proteinasG": 3.375,
+          "carboidratosG": 2.805,
+          "gordurasG": 8.1
+         }
+        }
+       ],
+       "macros": {
+        "calorias": 182.35,
+        "proteinasG": 24.145,
+        "carboidratosG": 2.805,
+        "gordurasG": 8.255
+       },
+       "horario": "22:00"
+      }
+     ],
+     "totalDoDia": {
+      "calorias": 2042.83,
+      "proteinasG": 145.719,
+      "carboidratosG": 238.751,
+      "gordurasG": 56.18
+     },
+     "metaCalculada": {
+      "calorias": 2034.5,
+      "proteinasG": 144.0,
+      "carboidratosG": 237.46875,
+      "gordurasG": 56.513888888888886
+     },
+     "metaElevadaPeloPiso": false,
+     "composicaoMeta": {
+      "gastoRepouso": 1768,
+      "atividadeForaDoTreino": 707,
+      "nivelAtividade": null,
+      "fatorAtividade": 1.4,
+      "treino": [],
+      "objetivo": -440,
+      "ajusteProgresso": 0,
+      "pisoCarboidrato": 0,
+      "meta": 2035
+     }
+    }
+   ],
+   "ajusteAdaptativo": {
+    "percentual": 0,
+    "motivo": "HistoricoInsuficiente",
+    "aplicado": false,
+    "ritmoRealKgSemana": null,
+    "ritmoEsperadoKgSemana": null,
+    "pontosUsados": 0
+   },
+   "versaoBase": 1,
+   "avisoListaPobre": null
+  },
+  "dietaId": null,
+  "revisao": null,
+  "semTroca": null
+ }
+}

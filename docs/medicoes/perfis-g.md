@@ -45,6 +45,22 @@ rotina, e o g10a é a linha de base dele):
 Métricas de horário (só A, C e F): refeição fora da janela acordado; refeição durante o treino; dia de treino sem
 refeição nas 3 horas antes do início; dia de treino sem refeição nas 2 horas depois do fim.
 
+Desde o g10b, os mesmos horários também vão para a API como dados estruturados (`horarioAcordar` e `horarioDormir` no
+perfil, `horarioInicio` em cada modalidade; a meia-noite do F vai como "00:00"). O prompt reduzido os usa no lugar da
+rotina em texto, que continua gravada mas não vai mais ao Gemini.
+
+**g10a r3 e g10c (n=3).** A 3ª repetição do g10a rodou com o prompt atual numa cópia do commit `04bbd05`
+(`git worktree`), para comparar com o g10c em n=3. No g10c, o C da repetição 1 recebeu um 503 do próprio Gemini
+(serviço indisponível, sem nova tentativa por desenho): a conta foi apagada e o C rodou de novo no lote seguinte, e
+o 503 não entra na comparação de qualidade. O `metricas.py` passou a contar os dias abaixo do mínimo de refeições
+(regra 15 do g10c: 5 por dia, 6 a partir de 3500 kcal), as recusas por isso e as dietas aceitas abaixo do mínimo na
+última tentativa.
+
+**g10d (n=3).** Regra 16: fontes de gordura da lista para chegar à gordura da meta. Recusa na 1ª tentativa o dia com
+almoço e jantar sem fonte de gordura (óleos e gorduras, oleaginosas e sementes, refogados) e abaixo de 85% da gordura
+da meta; na última, aceita e registra. Calibrada para não recusar nenhum dia do g10a (0 de 147) e pegar os 9 do g10c.
+O `metricas.py` conta esses dias, as recusas e as aceitas.
+
 **n=2 desde o g10a.** Cada perfil roda duas vezes (`P.json` e `P-r2.json`), e o `metricas.py` mede as duas e tira o
 `resumo` (médias e totais). O cadastro tem limite de 5 contas por hora por IP, em memória: cada repetição roda em
 dois lotes (A a E, depois F e G), com a API local reiniciada antes de cada lote (configuração `api-local-medicao` do
@@ -69,7 +85,10 @@ recebê-la, e qualquer cerveja nos outros perfis é falha. O G testa o álcool, 
 
 ## Contas
 
-Uma conta descartável por perfil e por rodada: `g8b-a-20261025@exemplo.com`, `g9a-a-AAAAMMDD@exemplo.com` etc. Desde a LGPD base, o cadastro manda o aceite do consentimento geral.
+Uma conta descartável por perfil e por rodada: `g10a-a-20261102@exemplo.test`, `g10b-a-r2-AAAAMMDD@exemplo.test` etc.
+O domínio é `@exemplo.test` desde o g10 (o `.test` é reservado e não existe na internet). Até o g10a as contas
+usavam `@exemplo.com`, que é um domínio de verdade; nos arquivos dessas rodadas só o domínio foi trocado depois,
+num commit à parte. Desde a LGPD base, o cadastro manda o aceite do consentimento geral.
 Senha gerada na hora e não guardada (as contas são apagadas depois, no banco local, numa transação
 filtrando por id e email, com a lista mostrada antes). Tudo pela API HTTP local, na ordem do onboarding:
 cadastro (com o aceite) → estado → perfil (com a rotina, se houver) → objetivo (peso) → modalidades → preferências → `POST /dietas/gerar`.

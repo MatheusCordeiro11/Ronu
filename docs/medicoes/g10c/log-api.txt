@@ -1,0 +1,165 @@
+Usando as configurações de inicialização de src\Ronu.Api\Properties\launchSettings.json...
+Compilando...
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5011
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Projetos\Ronu\src\Ronu.Api
+warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
+      Failed to determine the https port for redirect.
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Meta adaptativa: HistoricoInsuficiente, ajuste 0, fator bruto (null), erro da fórmula (null) kcal/dia; ingestão (null), manutenção (null), meta prescrita (null) vs base 2940.8 kcal/dia; 0 pesagens, (null) dias com dieta; ritmos no DTO: nulos
+info: System.Net.Http.HttpClient.IGeradorDietaIA.LogicalHandler[100]
+      Start processing HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent
+info: System.Net.Http.HttpClient.IGeradorDietaIA.ClientHandler[100]
+      Sending HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent
+info: System.Net.Http.HttpClient.IGeradorDietaIA.ClientHandler[101]
+      Received HTTP response headers after 18560.9089ms - 200
+info: System.Net.Http.HttpClient.IGeradorDietaIA.LogicalHandler[101]
+      End processing HTTP request after 18569.3005ms - 200
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Ajuste de quantidades: 7 de 7 dias com kcal a até 5% da meta; por dia (kcal antes -> depois, itens mudados): Segunda-feira +26.1% -> -1.0% (13); Terça-feira +9.4% -> -3.5% (7); Quarta-feira +5.4% -> -1.2% (11); Quinta-feira +21.3% -> -0.8% (12); Sexta-feira +12.7% -> -3.0% (12); Sábado +9.9% -> -0.7% (10); Domingo +9.2% -> +0.1% (11)
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Lista de alimentos: 118 itens, mínimos: atende, 0 evitar sem casamento; contáveis fora do múltiplo da unidade: 0 de 30; azeite/óleo tirado de refeição com refogado: 0
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Dieta gerada pelo Gemini (gemini-3.5-flash-lite) em 18688 ms (1 tentativa(s)); tokens: entrada 2801, resposta 9604, raciocínio 0, total 12405. Unidades: 143 alimentos, 0 normalizados para g/ml, fora de g/ml: nenhuma. Calculado pela base vs. meta por dia (kcal, desvio de proteína, carboidrato e gordura, e o declarado pela IA vs. o calculado): Segunda-feira 3257/3291 kcal (-1.0%) P +2% C +2% G -8% [IA declarou 3335 kcal, +2.4% do calculado]; Terça-feira 3176/3291 kcal (-3.5%) P +5% C +5% G -26% [IA declarou 3300 kcal, +3.9% do calculado]; Quarta-feira 2445/2475 kcal (-1.2%) P +2% C +2% G -10% [IA declarou 2435 kcal, -0.4% do calculado]; Quinta-feira 3264/3291 kcal (-0.8%) P +1% C +1% G +0% [IA declarou 3290 kcal, +0.8% do calculado]; Sexta-feira 3192/3291 kcal (-3.0%) P +7% C +7% G -27% [IA declarou 3300 kcal, +3.4% do calculado]; Sábado 2457/2475 kcal (-0.7%) P +1% C +1% G -5% [IA declarou 2430 kcal, -1.1% do calculado]; Domingo 2478/2475 kcal (+0.1%) P +1% C +1% G -1% [IA declarou 2420 kcal, -2.3% do calculado]
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Meta adaptativa: HistoricoInsuficiente, ajuste 0, fator bruto (null), erro da fórmula (null) kcal/dia; ingestão (null), manutenção (null), meta prescrita (null) vs base 1658.1 kcal/dia; 0 pesagens, (null) dias com dieta; ritmos no DTO: nulos
+info: System.Net.Http.HttpClient.IGeradorDietaIA.LogicalHandler[100]
+      Start processing HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent
+info: System.Net.Http.HttpClient.IGeradorDietaIA.ClientHandler[100]
+      Sending HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent
+info: System.Net.Http.HttpClient.IGeradorDietaIA.ClientHandler[101]
+      Received HTTP response headers after 14838.9951ms - 200
+info: System.Net.Http.HttpClient.IGeradorDietaIA.LogicalHandler[101]
+      End processing HTTP request after 14839.1403ms - 200
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Ajuste de quantidades: 7 de 7 dias com kcal a até 5% da meta; por dia (kcal antes -> depois, itens mudados): Segunda-feira +19.6% -> +0.5% (12); Terça-feira +2.2% -> -0.2% (9); Quarta-feira +9.7% -> +1.9% (11); Quinta-feira +1.7% -> -1.4% (8); Sexta-feira +20.1% -> +1.2% (9); Sábado +4.6% -> +0.3% (10); Domingo +5.0% -> +1.2% (8)
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Lista de alimentos: 104 itens, mínimos: atende, 0 evitar sem casamento; contáveis fora do múltiplo da unidade: 0 de 24; azeite/óleo tirado de refeição com refogado: 0
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Dieta gerada pelo Gemini (gemini-3.5-flash-lite) em 14870 ms (1 tentativa(s)); tokens: entrada 2539, resposta 7995, raciocínio 0, total 10534. Unidades: 110 alimentos, 0 normalizados para g/ml, fora de g/ml: nenhuma. Calculado pela base vs. meta por dia (kcal, desvio de proteína, carboidrato e gordura, e o declarado pela IA vs. o calculado): Segunda-feira 1496/1489 kcal (+0.5%) P -3% C -2% G +10% [IA declarou 1500 kcal, +0.3% do calculado]; Terça-feira 1880/1884 kcal (-0.2%) P +1% C +1% G +2% [IA declarou 1880 kcal, +0.0% do calculado]; Quarta-feira 1517/1489 kcal (+1.9%) P -1% C -3% G +22% [IA declarou 1500 kcal, -1.1% do calculado]; Quinta-feira 1858/1884 kcal (-1.4%) P -1% C +2% G -1% [IA declarou 1870 kcal, +0.7% do calculado]; Sexta-feira 1507/1489 kcal (+1.2%) P -5% C -2% G +17% [IA declarou 1520 kcal, +0.9% do calculado]; Sábado 1888/1884 kcal (+0.3%) P +0% C +0% G +2% [IA declarou 1870 kcal, -1.0% do calculado]; Domingo 1506/1489 kcal (+1.2%) P -13% C -2% G +30% [IA declarou 1480 kcal, -1.7% do calculado]
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Meta adaptativa: HistoricoInsuficiente, ajuste 0, fator bruto (null), erro da fórmula (null) kcal/dia; ingestão (null), manutenção (null), meta prescrita (null) vs base 3750.2 kcal/dia; 0 pesagens, (null) dias com dieta; ritmos no DTO: nulos
+info: System.Net.Http.HttpClient.IGeradorDietaIA.LogicalHandler[100]
+      Start processing HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent
+info: System.Net.Http.HttpClient.IGeradorDietaIA.ClientHandler[100]
+      Sending HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent
+info: System.Net.Http.HttpClient.IGeradorDietaIA.ClientHandler[101]
+      Received HTTP response headers after 6241.3916ms - 503
+info: System.Net.Http.HttpClient.IGeradorDietaIA.LogicalHandler[101]
+      End processing HTTP request after 6241.4975ms - 503
+warn: Ronu.Api.Controllers.DietasController[0]
+      Falha ao chamar o Gemini para gerar dieta do usuário 176
+      System.Net.Http.HttpRequestException: Response status code does not indicate success: 503 (Service Unavailable).
+         at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+         at Ronu.Api.Services.IA.GeradorDietaGemini.ChamarGeminiAsync(Object corpoRequisicao) in C:\Projetos\Ronu\src\Ronu.Api\Services\IA\GeradorDietaGemini.cs:line 194
+         at Ronu.Api.Services.IA.GeradorDietaGemini.GerarDietaAsync(ContextoDietaDto contexto) in C:\Projetos\Ronu\src\Ronu.Api\Services\IA\GeradorDietaGemini.cs:line 122
+         at Ronu.Api.Controllers.DietasController.Gerar() in C:\Projetos\Ronu\src\Ronu.Api\Controllers\DietasController.cs:line 125
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Meta adaptativa: HistoricoInsuficiente, ajuste 0, fator bruto (null), erro da fórmula (null) kcal/dia; ingestão (null), manutenção (null), meta prescrita (null) vs base 1687.6 kcal/dia; 0 pesagens, (null) dias com dieta; ritmos no DTO: nulos
+info: System.Net.Http.HttpClient.IGeradorDietaIA.LogicalHandler[100]
+      Start processing HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent
+info: System.Net.Http.HttpClient.IGeradorDietaIA.ClientHandler[100]
+      Sending HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent
+info: Ronu.Api.Services.Conta.ServicoLimpezaRetencao[0]
+      Limpeza de retenção: 0 pedidos de redefinição de senha e 0 contas sem aceite apagados
+info: System.Net.Http.HttpClient.IGeradorDietaIA.ClientHandler[101]
+      Received HTTP response headers after 14315.6471ms - 200
+info: System.Net.Http.HttpClient.IGeradorDietaIA.LogicalHandler[101]
+      End processing HTTP request after 14315.7365ms - 200
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Ajuste de quantidades: 7 de 7 dias com kcal a até 5% da meta; por dia (kcal antes -> depois, itens mudados): Segunda-feira +12.4% -> +0.3% (9); Terça-feira +10.5% -> -0.6% (5); Quarta-feira +6.6% -> +1.0% (6); Quinta-feira +10.1% -> +0.3% (8); Sexta-feira +20.9% -> +1.5% (10); Sábado +13.6% -> +1.7% (8); Domingo +1.3% -> -0.1% (9)
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Lista de alimentos: 118 itens, mínimos: atende, 0 evitar sem casamento; contáveis fora do múltiplo da unidade: 0 de 25; azeite/óleo tirado de refeição com refogado: 0
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Dieta gerada pelo Gemini (gemini-3.5-flash-lite) em 14348 ms (1 tentativa(s)); tokens: entrada 2609, resposta 8104, raciocínio 0, total 10713. Unidades: 113 alimentos, 0 normalizados para g/ml, fora de g/ml: nenhuma. Calculado pela base vs. meta por dia (kcal, desvio de proteína, carboidrato e gordura, e o declarado pela IA vs. o calculado): Segunda-feira 1692/1688 kcal (+0.3%) P +0% C +0% G -1% [IA declarou 1688 kcal, -0.3% do calculado]; Terça-feira 1678/1688 kcal (-0.6%) P +0% C +0% G +3% [IA declarou 1688 kcal, +0.6% do calculado]; Quarta-feira 1705/1688 kcal (+1.0%) P -10% C +0% G +20% [IA declarou 1688 kcal, -1.0% do calculado]; Quinta-feira 1693/1688 kcal (+0.3%) P -1% C +0% G +6% [IA declarou 1688 kcal, -0.3% do calculado]; Sexta-feira 1712/1688 kcal (+1.5%) P -15% C +0% G +24% [IA declarou 1688 kcal, -1.4% do calculado]; Sábado 1716/1688 kcal (+1.7%) P -17% C +2% G +27% [IA declarou 1688 kcal, -1.7% do calculado]; Domingo 1686/1688 kcal (-0.1%) P -1% C +1% G +1% [IA declarou 1688 kcal, +0.1% do calculado]
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Meta adaptativa: HistoricoInsuficiente, ajuste 0, fator bruto (null), erro da fórmula (null) kcal/dia; ingestão (null), manutenção (null), meta prescrita (null) vs base 2500.8 kcal/dia; 0 pesagens, (null) dias com dieta; ritmos no DTO: nulos
+info: System.Net.Http.HttpClient.IGeradorDietaIA.LogicalHandler[100]
+      Start processing HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent
+info: System.Net.Http.HttpClient.IGeradorDietaIA.ClientHandler[100]
+      Sending HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent
+info: System.Net.Http.HttpClient.IGeradorDietaIA.ClientHandler[101]
+      Received HTTP response headers after 49445.9376ms - 200
+info: System.Net.Http.HttpClient.IGeradorDietaIA.LogicalHandler[101]
+      End processing HTTP request after 49446.1201ms - 200
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Ajuste de quantidades: 7 de 7 dias com kcal a até 5% da meta; por dia (kcal antes -> depois, itens mudados): Segunda-feira +16.9% -> -0.7% (11); Terça-feira +6.5% -> -0.4% (11); Quarta-feira -10.4% -> -+0.0% (4); Quinta-feira +15.9% -> +0.1% (5); Sexta-feira -3.9% -> -0.3% (12); Sábado -2.3% -> +0.2% (9); Domingo -12.3% -> +0.4% (8)
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Lista de alimentos: 105 itens, mínimos: atende, 0 evitar sem casamento; contáveis fora do múltiplo da unidade: 0 de 22; azeite/óleo tirado de refeição com refogado: 0
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Dieta gerada pelo Gemini (gemini-3.5-flash-lite) em 49478 ms (1 tentativa(s)); tokens: entrada 2511, resposta 8247, raciocínio 0, total 10758. Unidades: 116 alimentos, 0 normalizados para g/ml, fora de g/ml: nenhuma. Calculado pela base vs. meta por dia (kcal, desvio de proteína, carboidrato e gordura, e o declarado pela IA vs. o calculado): Segunda-feira 2830/2851 kcal (-0.7%) P -1% C -1% G +0% [IA declarou 2860 kcal, +1.1% do calculado]; Terça-feira 2838/2851 kcal (-0.4%) P -1% C +0% G +1% [IA declarou 2850 kcal, +0.4% do calculado]; Quarta-feira 2034/2035 kcal (+0.0%) P +1% C +2% G -5% [IA declarou 1710 kcal, -15.9% do calculado]; Quinta-feira 2854/2851 kcal (+0.1%) P -1% C +0% G +0% [IA declarou 2810 kcal, -1.5% do calculado]; Sexta-feira 2841/2851 kcal (-0.3%) P -1% C +0% G -1% [IA declarou 2760 kcal, -2.9% do calculado]; Sábado 2039/2035 kcal (+0.2%) P +0% C +0% G +0% [IA declarou 1790 kcal, -12.2% do calculado]; Domingo 2043/2035 kcal (+0.4%) P +1% C +1% G -1% [IA declarou 1700 kcal, -16.8% do calculado]
+Usando as configurações de inicialização de src\Ronu.Api\Properties\launchSettings.json...
+Compilando...
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5011
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Projetos\Ronu\src\Ronu.Api
+warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
+      Failed to determine the https port for redirect.
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Meta adaptativa: HistoricoInsuficiente, ajuste 0, fator bruto (null), erro da fórmula (null) kcal/dia; ingestão (null), manutenção (null), meta prescrita (null) vs base 2311.2 kcal/dia; 0 pesagens, (null) dias com dieta; ritmos no DTO: nulos
+info: System.Net.Http.HttpClient.IGeradorDietaIA.LogicalHandler[100]
+      Start processing HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent
+info: System.Net.Http.HttpClient.IGeradorDietaIA.ClientHandler[100]
+      Sending HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent
+info: System.Net.Http.HttpClient.IGeradorDietaIA.ClientHandler[101]
+      Received HTTP response headers after 16442.2152ms - 200
+info: System.Net.Http.HttpClient.IGeradorDietaIA.LogicalHandler[101]
+      End processing HTTP request after 16451.3333ms - 200
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Ajuste de quantidades: 7 de 7 dias com kcal a até 5% da meta; por dia (kcal antes -> depois, itens mudados): Segunda-feira +20.1% -> -2.8% (12); Terça-feira +14.9% -> -1.4% (9); Quarta-feira +17.5% -> -3.2% (12); Quinta-feira +13.4% -> -3.4% (9); Sexta-feira +21.6% -> -2.3% (12); Sábado +16.6% -> +0.2% (10); Domingo +13.2% -> -3.0% (10)
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Lista de alimentos: 112 itens, mínimos: atende, 0 evitar sem casamento; contáveis fora do múltiplo da unidade: 0 de 36; azeite/óleo tirado de refeição com refogado: 0
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Dieta gerada pelo Gemini (gemini-3.5-flash-lite) em 16504 ms (1 tentativa(s)); tokens: entrada 2796, resposta 9113, raciocínio 0, total 11909. Unidades: 133 alimentos, 0 normalizados para g/ml, fora de g/ml: nenhuma. Calculado pela base vs. meta por dia (kcal, desvio de proteína, carboidrato e gordura, e o declarado pela IA vs. o calculado): Segunda-feira 2561/2635 kcal (-2.8%) P +4% C +6% G -22% [IA declarou 2640 kcal, +3.1% do calculado]; Terça-feira 1964/1992 kcal (-1.4%) P +1% C +2% G -7% [IA declarou 1990 kcal, +1.3% do calculado]; Quarta-feira 2551/2635 kcal (-3.2%) P +4% C +6% G -20% [IA declarou 2640 kcal, +3.5% do calculado]; Quinta-feira 1924/1992 kcal (-3.4%) P +5% C +3% G -21% [IA declarou 1980 kcal, +2.9% do calculado]; Sexta-feira 2575/2635 kcal (-2.3%) P +4% C +6% G -19% [IA declarou 2660 kcal, +3.3% do calculado]; Sábado 2303/2299 kcal (+0.2%) P +1% C +2% G +1% [IA declarou 2280 kcal, -1.0% do calculado]; Domingo 1933/1992 kcal (-3.0%) P +6% C +3% G -20% [IA declarou 1990 kcal, +3.0% do calculado]
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Meta adaptativa: HistoricoInsuficiente, ajuste 0, fator bruto (null), erro da fórmula (null) kcal/dia; ingestão (null), manutenção (null), meta prescrita (null) vs base 2947.1 kcal/dia; 0 pesagens, (null) dias com dieta; ritmos no DTO: nulos
+info: System.Net.Http.HttpClient.IGeradorDietaIA.LogicalHandler[100]
+      Start processing HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent
+info: System.Net.Http.HttpClient.IGeradorDietaIA.ClientHandler[100]
+      Sending HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent
+info: Ronu.Api.Services.Conta.ServicoLimpezaRetencao[0]
+      Limpeza de retenção: 0 pedidos de redefinição de senha e 0 contas sem aceite apagados
+info: System.Net.Http.HttpClient.IGeradorDietaIA.ClientHandler[101]
+      Received HTTP response headers after 16578.6911ms - 200
+info: System.Net.Http.HttpClient.IGeradorDietaIA.LogicalHandler[101]
+      End processing HTTP request after 16578.8925ms - 200
+warn: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Azeite ou óleo tirado de refeição com refogado (o óleo do preparo já está no refogado): 'Azeite de oliva extra virgem' (10 g, 88.4 kcal pela base), Terça-feira Jantar
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Ajuste de quantidades: 7 de 7 dias com kcal a até 5% da meta; por dia (kcal antes -> depois, itens mudados): Segunda-feira +8.5% -> -1.8% (12); Terça-feira -4.9% -> -2.1% (11); Quarta-feira +5.3% -> -0.2% (9); Quinta-feira +0.6% -> -1.6% (12); Sexta-feira +4.2% -> -0.9% (12); Sábado +5.5% -> +1.1% (13); Domingo -+0.0% -> -1.3% (12)
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Lista de alimentos: 119 itens, mínimos: atende, 0 evitar sem casamento; contáveis fora do múltiplo da unidade: 0 de 29; azeite/óleo tirado de refeição com refogado: 1
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Dieta gerada pelo Gemini (gemini-3.5-flash-lite) em 16611 ms (1 tentativa(s)); tokens: entrada 2704, resposta 9308, raciocínio 0, total 12012. Unidades: 138 alimentos, 0 normalizados para g/ml, fora de g/ml: nenhuma. Calculado pela base vs. meta por dia (kcal, desvio de proteína, carboidrato e gordura, e o declarado pela IA vs. o calculado): Segunda-feira 2724/2774 kcal (-1.8%) P +2% C +1% G -12% [IA declarou 2674 kcal, -1.9% do calculado]; Terça-feira 3137/3203 kcal (-2.1%) P +4% C +6% G -16% [IA declarou 3203 kcal, +2.1% do calculado]; Quarta-feira 2769/2774 kcal (-0.2%) P +0% C +0% G +0% [IA declarou 2774 kcal, +0.2% do calculado]; Quinta-feira 3151/3203 kcal (-1.6%) P +2% C +3% G -13% [IA declarou 3203 kcal, +1.7% do calculado]; Sexta-feira 2749/2774 kcal (-0.9%) P +1% C +3% G -4% [IA declarou 2674 kcal, -2.7% do calculado]; Sábado 3163/3129 kcal (+1.1%) P +0% C -2% G -4% [IA declarou 3129 kcal, -1.1% do calculado]; Domingo 2737/2774 kcal (-1.3%) P +3% C +3% G -10% [IA declarou 2774 kcal, +1.4% do calculado]
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Meta adaptativa: HistoricoInsuficiente, ajuste 0, fator bruto (null), erro da fórmula (null) kcal/dia; ingestão (null), manutenção (null), meta prescrita (null) vs base 3750.2 kcal/dia; 0 pesagens, (null) dias com dieta; ritmos no DTO: nulos
+info: System.Net.Http.HttpClient.IGeradorDietaIA.LogicalHandler[100]
+      Start processing HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent
+info: System.Net.Http.HttpClient.IGeradorDietaIA.ClientHandler[100]
+      Sending HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent
+info: System.Net.Http.HttpClient.IGeradorDietaIA.ClientHandler[101]
+      Received HTTP response headers after 18677.0773ms - 200
+info: System.Net.Http.HttpClient.IGeradorDietaIA.LogicalHandler[101]
+      End processing HTTP request after 18677.1636ms - 200
+warn: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Azeite ou óleo tirado de refeição com refogado (o óleo do preparo já está no refogado): 'Azeite de oliva extra virgem' (10 g, 88.4 kcal pela base), Terça-feira Jantar pós-treino
+warn: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Azeite ou óleo tirado de refeição com refogado (o óleo do preparo já está no refogado): 'Azeite de oliva extra virgem' (10 g, 88.4 kcal pela base), Quinta-feira Jantar pós-treino
+warn: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Azeite ou óleo tirado de refeição com refogado (o óleo do preparo já está no refogado): 'Azeite de oliva extra virgem' (10 g, 88.4 kcal pela base), Sábado Jantar
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Ajuste de quantidades: 7 de 7 dias com kcal a até 5% da meta; por dia (kcal antes -> depois, itens mudados): Segunda-feira +7.6% -> -0.6% (11); Terça-feira -2.3% -> -1.1% (12); Quarta-feira +3.8% -> -0.5% (11); Quinta-feira -3.5% -> -1.5% (12); Sexta-feira +6.0% -> -0.3% (9); Sábado +1.8% -> -0.7% (9); Domingo +11.9% -> -0.7% (12)
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Lista de alimentos: 118 itens, mínimos: atende, 0 evitar sem casamento; contáveis fora do múltiplo da unidade: 0 de 34; azeite/óleo tirado de refeição com refogado: 3
+info: Ronu.Api.Services.IA.GeradorDietaGemini[0]
+      Dieta gerada pelo Gemini (gemini-3.5-flash-lite) em 18711 ms (1 tentativa(s)); tokens: entrada 2924, resposta 10498, raciocínio 0, total 13422. Unidades: 158 alimentos, 0 normalizados para g/ml, fora de g/ml: nenhuma. Calculado pela base vs. meta por dia (kcal, desvio de proteína, carboidrato e gordura, e o declarado pela IA vs. o calculado): Segunda-feira 4136/4163 kcal (-0.6%) P +3% C +0% G +1% [IA declarou 4170 kcal, +0.8% do calculado]; Terça-feira 3884/3925 kcal (-1.1%) P +1% C +3% G -3% [IA declarou 3940 kcal, +1.4% do calculado]; Quarta-feira 4143/4163 kcal (-0.5%) P +0% C +1% G +0% [IA declarou 4120 kcal, -0.6% do calculado]; Quinta-feira 3867/3925 kcal (-1.5%) P +1% C +3% G -5% [IA declarou 3880 kcal, +0.3% do calculado]; Sexta-feira 4150/4163 kcal (-0.3%) P +0% C +1% G +1% [IA declarou 4150 kcal, +0.0% do calculado]; Sábado 2937/2956 kcal (-0.7%) P +0% C +1% G +5% [IA declarou 2920 kcal, -0.6% do calculado]; Domingo 2936/2956 kcal (-0.7%) P -1% C -1% G +0% [IA declarou 3100 kcal, +5.6% do calculado]

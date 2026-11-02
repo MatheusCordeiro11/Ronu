@@ -28,14 +28,15 @@ import urllib.request
 API = "http://localhost:5011/api"
 
 # Mesmos dados de docs/medicoes/perfis-g.md. Dias: 1 = segunda ... 7 = domingo.
-# A, C e F têm rotina (fictícia, desde o g10a): o texto vai no perfil e os "horarios" estruturados ficam só aqui, para
-# o metricas.py conferir os horários das refeições. Os dois dizem a mesma coisa.
+# A, C e F têm rotina (fictícia, desde o g10a). O texto vai no perfil (RotinaDiaria). Os "horarios" estruturados dizem
+# a mesma coisa: o metricas.py confere as refeições contra eles e, desde o g10b, eles também vão para a API (acordar e
+# dormir no perfil, a hora de início em cada modalidade), que os manda ao prompt no lugar do texto.
 PERFIS = [
     {"id": "A", "sexo": "Masculino", "nascimento": "1996-05-10", "peso": 80, "altura": 178, "objetivo": "manter peso",
      "uf": "SP", "nivel": None, "modalidades": [("Jiu-jitsu", [1, 2, 4, 5], 1.5)],
      "gosto": ["Batata doce", "Tapioca"], "evitar": [],
      "rotina": "Acordo às 6h, trabalho das 8h às 17h e treino jiu-jitsu às 19h30 na segunda, terça, quinta e sexta. Durmo às 23h.",
-     "horarios": {"acordar": "06:00", "dormir": "23:00", "treinos": [{"dias": [1, 2, 4, 5], "inicio": "19:30", "horas": 1.5}]}},
+     "horarios": {"acordar": "06:00", "dormir": "23:00", "treinos": [{"modalidade": "Jiu-jitsu", "dias": [1, 2, 4, 5], "inicio": "19:30", "horas": 1.5}]}},
     {"id": "B", "sexo": "Feminino", "nascimento": "1998-03-15", "peso": 58, "altura": 162, "objetivo": "perder peso",
      "uf": "RJ", "nivel": None, "modalidades": [("Muay Thai", [2, 4, 6], 1.0)],
      "gosto": ["Banana"], "evitar": ["Carne vermelha"]},
@@ -43,8 +44,8 @@ PERFIS = [
      "uf": "RS", "nivel": None, "modalidades": [("Jiu-jitsu", [1, 2, 3, 4, 5], 1.5), ("Musculação", [1, 3, 5], 1.0)],
      "gosto": ["Whey protein", "Pasta de amendoim"], "evitar": [],
      "rotina": "Acordo às 5h30. Segunda, quarta e sexta faço musculação às 6h. Trabalho das 8h às 17h e treino jiu-jitsu às 19h de segunda a sexta. Durmo às 22h30.",
-     "horarios": {"acordar": "05:30", "dormir": "22:30", "treinos": [{"dias": [1, 3, 5], "inicio": "06:00", "horas": 1.0},
-                                                                    {"dias": [1, 2, 3, 4, 5], "inicio": "19:00", "horas": 1.5}]}},
+     "horarios": {"acordar": "05:30", "dormir": "22:30", "treinos": [{"modalidade": "Musculação", "dias": [1, 3, 5], "inicio": "06:00", "horas": 1.0},
+                                                                    {"modalidade": "Jiu-jitsu", "dias": [1, 2, 3, 4, 5], "inicio": "19:00", "horas": 1.5}]}},
     {"id": "D", "sexo": "Feminino", "nascimento": "1990-06-01", "peso": 90, "altura": 160, "objetivo": "perder peso",
      "uf": "MG", "nivel": None, "modalidades": [],
      "gosto": [], "evitar": []},
@@ -55,8 +56,8 @@ PERFIS = [
      "uf": "SC", "nivel": "sentado", "modalidades": [("Judô", [1, 3, 5], 1.5), ("Corrida", [6], 0.75)],
      "gosto": ["Iogurte", "Granola"], "evitar": ["Peixe"],
      "rotina": "Acordo às 7h, estudo de manhã e trabalho das 13h às 18h. Judô às 20h na segunda, quarta e sexta, e corrida no sábado às 8h. Durmo à meia-noite.",
-     "horarios": {"acordar": "07:00", "dormir": "24:00", "treinos": [{"dias": [1, 3, 5], "inicio": "20:00", "horas": 1.5},
-                                                                    {"dias": [6], "inicio": "08:00", "horas": 0.75}]}},
+     "horarios": {"acordar": "07:00", "dormir": "24:00", "treinos": [{"modalidade": "Judô", "dias": [1, 3, 5], "inicio": "20:00", "horas": 1.5},
+                                                                    {"modalidade": "Corrida", "dias": [6], "inicio": "08:00", "horas": 0.75}]}},
     {"id": "G", "sexo": "Masculino", "nascimento": "1979-08-30", "peso": 74, "altura": 172, "objetivo": "manter peso",
      "uf": "BA", "nivel": "bracal", "modalidades": [("Boxe", [2, 4], 1.0), ("Natação", [6], 1.0)],
      "gosto": ["Cerveja", "Feijão"], "evitar": []},
@@ -101,7 +102,7 @@ def main():
 
     resumo = []
     for p in (p for p in PERFIS if p["id"] in escolhidos):
-        email = f"{rodada}-{p['id'].lower()}{marca}-{data}@exemplo.com"
+        email = f"{rodada}-{p['id'].lower()}{marca}-{data}@exemplo.test"
         senha = secrets.token_urlsafe(18)  # não é gravada: a conta é descartável
         s, c = chamar("POST", "/auth/cadastro", {"nome": f"Perfil {p['id']} {rodada}", "email": email, "senha": senha, "estado": p["uf"],
                                                 "consentimentoGeral": {"versao": versao_consentimento}})
@@ -115,12 +116,19 @@ def main():
             perfil["nivelAtividade"] = p["nivel"]
         if p.get("rotina"):
             perfil["rotinaDiaria"] = p["rotina"]
+        horarios = p.get("horarios")
+        if horarios:
+            perfil["horarioAcordar"] = horarios["acordar"]
+            # A API não aceita 24:00; "00:00" é meia-noite (a métrica continua usando 24:00 como fim do dia).
+            perfil["horarioDormir"] = "00:00" if horarios["dormir"] == "24:00" else horarios["dormir"]
+        inicio_por_modalidade = {t["modalidade"]: t["inicio"] for t in (horarios or {}).get("treinos", [])}
         s, c = chamar("PUT", "/perfil", perfil, token)
         exigir(s, c, (200,), f"{p['id']} perfil")
         s, c = chamar("POST", "/objetivos", {"peso": p["peso"], "objetivo": p["objetivo"]}, token)
         exigir(s, c, (200, 201), f"{p['id']} objetivo")
         for nome, dias, horas in p["modalidades"]:
-            s, c = chamar("POST", "/usuarios/modalidades", {"modalidadeId": id_modalidade[nome], "diasSemana": dias, "duracaoMediaHoras": horas}, token)
+            s, c = chamar("POST", "/usuarios/modalidades", {"modalidadeId": id_modalidade[nome], "diasSemana": dias, "duracaoMediaHoras": horas,
+                                                               "horarioInicio": inicio_por_modalidade.get(nome)}, token)
             exigir(s, c, (200, 201), f"{p['id']} modalidade {nome}")
         for tipo, lista in (("preferido", p["gosto"]), ("evitar", p["evitar"])):
             for alimento in lista:

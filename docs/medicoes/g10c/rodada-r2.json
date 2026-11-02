@@ -1,0 +1,55 @@
+{
+ "rodada": "g10c",
+ "data": "20261102",
+ "perfis": [
+  {
+   "perfil": "A",
+   "usuarioId": 182,
+   "email": "g10c-a-r2-20261102@exemplo.test",
+   "status": 200,
+   "segundosCliente": 19.4
+  },
+  {
+   "perfil": "B",
+   "usuarioId": 183,
+   "email": "g10c-b-r2-20261102@exemplo.test",
+   "status": 200,
+   "segundosCliente": 16.1
+  },
+  {
+   "perfil": "C",
+   "usuarioId": 184,
+   "email": "g10c-c-r2-20261102@exemplo.test",
+   "status": 200,
+   "segundosCliente": 18.4
+  },
+  {
+   "perfil": "D",
+   "usuarioId": 185,
+   "email": "g10c-d-r2-20261102@exemplo.test",
+   "status": 200,
+   "segundosCliente": 13.7
+  },
+  {
+   "perfil": "E",
+   "usuarioId": 186,
+   "email": "g10c-e-r2-20261102@exemplo.test",
+   "status": 200,
+   "segundosCliente": 14.0
+  },
+  {
+   "perfil": "F",
+   "usuarioId": 187,
+   "email": "g10c-f-r2-20261102@exemplo.test",
+   "status": 200,
+   "segundosCliente": 15.6
+  },
+  {
+   "perfil": "G",
+   "usuarioId": 188,
+   "email": "g10c-g-r2-20261102@exemplo.test",
+   "status": 200,
+   "segundosCliente": 16.1
+  }
+ ]
+}

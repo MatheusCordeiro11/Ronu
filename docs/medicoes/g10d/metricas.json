@@ -1,0 +1,2007 @@
+{
+ "perfis": {
+  "A": {
+   "status": 200,
+   "segundosCliente": 17.6,
+   "uf": "SP",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 132,
+   "itensNaBase": 132,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 39,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 35,
+   "alimentosDiferentesPorId": 35,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 25,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.7,
+    "p": 0.4,
+    "c": 0.9,
+    "g": 1.0
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 0.7,
+    "p": 0.4,
+    "c": 0.9,
+    "g": 1.0
+   },
+   "desvioPelaBase": {
+    "kcal": 0.7,
+    "p": 0.4,
+    "c": 0.9,
+    "g": 1.0
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 7,
+   "refeicoesRepetidas": [
+    "Sábado → Domingo: Café da manhã",
+    "Sábado → Domingo: Lanche da tarde",
+    "Sábado → Domingo: Ceia"
+   ],
+   "gostos": {
+    "Batata doce": 5,
+    "Tapioca": 7
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "horarios": {
+    "diasDeTreino": 4,
+    "foraDaJanela": [],
+    "duranteTreino": [],
+    "semRefeicaoAntes": [],
+    "semRefeicaoDepois": []
+   },
+   "pedidos": 3,
+   "tentativasGemini": 1,
+   "ms": 17104,
+   "tokensEntrada": 2866,
+   "tokensResposta": 9326
+  },
+  "B": {
+   "status": 200,
+   "segundosCliente": 14.6,
+   "uf": "RJ",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 108,
+   "itensNaBase": 108,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 42,
+   "alimentosDiferentesPorId": 42,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 30,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.5,
+    "p": 3.0,
+    "c": 1.2,
+    "g": 10.9
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 0.5,
+    "p": 3.0,
+    "c": 1.2,
+    "g": 10.9
+   },
+   "desvioPelaBase": {
+    "kcal": 0.5,
+    "p": 3.0,
+    "c": 1.2,
+    "g": 10.9
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 4,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Banana": 7
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "pedidos": 3,
+   "tentativasGemini": 1,
+   "ms": 14582,
+   "tokensEntrada": 2604,
+   "tokensResposta": 7893
+  },
+  "C": {
+   "status": 200,
+   "segundosCliente": 19.5,
+   "uf": "RS",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 157,
+   "itensNaBase": 157,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 42,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 43,
+   "alimentosDiferentesPorId": 43,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 33,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 1.0,
+    "p": 1.8,
+    "c": 1.3,
+    "g": 1.9
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 1.0,
+    "p": 1.8,
+    "c": 1.3,
+    "g": 1.9
+   },
+   "desvioPelaBase": {
+    "kcal": 1.0,
+    "p": 1.8,
+    "c": 1.3,
+    "g": 1.9
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 7,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Whey protein": 0,
+    "Pasta de amendoim": 6
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "horarios": {
+    "diasDeTreino": 8,
+    "foraDaJanela": [],
+    "duranteTreino": [],
+    "semRefeicaoAntes": [],
+    "semRefeicaoDepois": [
+     "Segunda-feira treino 06:00",
+     "Quarta-feira treino 06:00",
+     "Sexta-feira treino 06:00"
+    ]
+   },
+   "pedidos": 3,
+   "tentativasGemini": 1,
+   "ms": 19441,
+   "tokensEntrada": 2989,
+   "tokensResposta": 10440
+  },
+  "D": {
+   "status": 200,
+   "segundosCliente": 14.9,
+   "uf": "MG",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 115,
+   "itensNaBase": 115,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 62,
+   "alimentosDiferentesPorId": 62,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 24,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.8,
+    "p": 4.6,
+    "c": 0.5,
+    "g": 10.8
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 0.8,
+    "p": 4.6,
+    "c": 0.5,
+    "g": 10.8
+   },
+   "desvioPelaBase": {
+    "kcal": 0.8,
+    "p": 4.6,
+    "c": 0.5,
+    "g": 10.8
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 3,
+   "refeicoesRepetidas": [],
+   "gostos": {},
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "pedidos": 3,
+   "tentativasGemini": 1,
+   "ms": 14876,
+   "tokensEntrada": 2674,
+   "tokensResposta": 8178
+  },
+  "E": {
+   "status": 200,
+   "segundosCliente": 15.2,
+   "uf": "PE",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 123,
+   "itensNaBase": 123,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 40,
+   "alimentosDiferentesPorId": 40,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 24,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.5,
+    "p": 1.0,
+    "c": 0.7,
+    "g": 3.1
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 0.5,
+    "p": 1.0,
+    "c": 0.7,
+    "g": 3.1
+   },
+   "desvioPelaBase": {
+    "kcal": 0.5,
+    "p": 1.0,
+    "c": 0.7,
+    "g": 3.1
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 6,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Ovo": 11
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "pedidos": 3,
+   "tentativasGemini": 1,
+   "ms": 15220,
+   "tokensEntrada": 2576,
+   "tokensResposta": 8496
+  },
+  "F": {
+   "status": 200,
+   "segundosCliente": 17.4,
+   "uf": "SC",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 128,
+   "itensNaBase": 128,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 38,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 46,
+   "alimentosDiferentesPorId": 46,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 34,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.9,
+    "p": 1.4,
+    "c": 1.3,
+    "g": 3.4
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 0.9,
+    "p": 1.4,
+    "c": 1.3,
+    "g": 3.4
+   },
+   "desvioPelaBase": {
+    "kcal": 0.9,
+    "p": 1.4,
+    "c": 1.3,
+    "g": 3.4
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 6,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Iogurte": 7,
+    "Granola": 0
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "horarios": {
+    "diasDeTreino": 4,
+    "foraDaJanela": [],
+    "duranteTreino": [],
+    "semRefeicaoAntes": [],
+    "semRefeicaoDepois": []
+   },
+   "pedidos": 3,
+   "tentativasGemini": 1,
+   "ms": 16909,
+   "tokensEntrada": 2861,
+   "tokensResposta": 9023
+  },
+  "G": {
+   "status": 200,
+   "segundosCliente": 18.7,
+   "uf": "BA",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 150,
+   "itensNaBase": 150,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 49,
+   "alimentosDiferentesPorId": 49,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 36,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 1.0,
+    "p": 1.3,
+    "c": 1.7,
+    "g": 5.2
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 1.0,
+    "p": 1.3,
+    "c": 1.7,
+    "g": 5.2
+   },
+   "desvioPelaBase": {
+    "kcal": 1.0,
+    "p": 1.3,
+    "c": 1.7,
+    "g": 5.2
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 6,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Cerveja": 1,
+    "Feijão": 7
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "pedidos": 3,
+   "tentativasGemini": 1,
+   "ms": 18626,
+   "tokensEntrada": 2769,
+   "tokensResposta": 9588
+  }
+ },
+ "repeticoes": {
+  "A-r1": {
+   "status": 200,
+   "segundosCliente": 17.6,
+   "uf": "SP",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 132,
+   "itensNaBase": 132,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 39,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 35,
+   "alimentosDiferentesPorId": 35,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 25,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.7,
+    "p": 0.4,
+    "c": 0.9,
+    "g": 1.0
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 0.7,
+    "p": 0.4,
+    "c": 0.9,
+    "g": 1.0
+   },
+   "desvioPelaBase": {
+    "kcal": 0.7,
+    "p": 0.4,
+    "c": 0.9,
+    "g": 1.0
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 7,
+   "refeicoesRepetidas": [
+    "Sábado → Domingo: Café da manhã",
+    "Sábado → Domingo: Lanche da tarde",
+    "Sábado → Domingo: Ceia"
+   ],
+   "gostos": {
+    "Batata doce": 5,
+    "Tapioca": 7
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "horarios": {
+    "diasDeTreino": 4,
+    "foraDaJanela": [],
+    "duranteTreino": [],
+    "semRefeicaoAntes": [],
+    "semRefeicaoDepois": []
+   },
+   "tentativasGemini": 1,
+   "ms": 17104,
+   "tokensEntrada": 2866,
+   "tokensResposta": 9326,
+   "invalidas": []
+  },
+  "A-r2": {
+   "status": 200,
+   "segundosCliente": 18.3,
+   "uf": "SP",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 144,
+   "itensNaBase": 144,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 39,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 42,
+   "alimentosDiferentesPorId": 42,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 27,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.3,
+    "p": 0.7,
+    "c": 0.9,
+    "g": 1.0
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 0.3,
+    "p": 0.7,
+    "c": 0.9,
+    "g": 1.0
+   },
+   "desvioPelaBase": {
+    "kcal": 0.3,
+    "p": 0.7,
+    "c": 0.9,
+    "g": 1.0
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 7,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Batata doce": 5,
+    "Tapioca": 6
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "horarios": {
+    "diasDeTreino": 4,
+    "foraDaJanela": [],
+    "duranteTreino": [],
+    "semRefeicaoAntes": [],
+    "semRefeicaoDepois": []
+   },
+   "tentativasGemini": 1,
+   "ms": 17803,
+   "tokensEntrada": 2866,
+   "tokensResposta": 9657,
+   "invalidas": []
+  },
+  "A-r3": {
+   "status": 200,
+   "segundosCliente": 18.1,
+   "uf": "SP",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 137,
+   "itensNaBase": 137,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 39,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 31,
+   "alimentosDiferentesPorId": 31,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 27,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.8,
+    "p": 1.6,
+    "c": 1.6,
+    "g": 4.7
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 0.8,
+    "p": 1.6,
+    "c": 1.6,
+    "g": 4.7
+   },
+   "desvioPelaBase": {
+    "kcal": 0.8,
+    "p": 1.6,
+    "c": 1.6,
+    "g": 4.7
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 5,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Batata doce": 7,
+    "Tapioca": 7
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "horarios": {
+    "diasDeTreino": 4,
+    "foraDaJanela": [],
+    "duranteTreino": [],
+    "semRefeicaoAntes": [],
+    "semRefeicaoDepois": []
+   },
+   "tentativasGemini": 1,
+   "ms": 17671,
+   "tokensEntrada": 2866,
+   "tokensResposta": 9442,
+   "invalidas": []
+  },
+  "B-r1": {
+   "status": 200,
+   "segundosCliente": 14.6,
+   "uf": "RJ",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 108,
+   "itensNaBase": 108,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 42,
+   "alimentosDiferentesPorId": 42,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 30,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.5,
+    "p": 3.0,
+    "c": 1.2,
+    "g": 10.9
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 0.5,
+    "p": 3.0,
+    "c": 1.2,
+    "g": 10.9
+   },
+   "desvioPelaBase": {
+    "kcal": 0.5,
+    "p": 3.0,
+    "c": 1.2,
+    "g": 10.9
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 4,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Banana": 7
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "tentativasGemini": 1,
+   "ms": 14582,
+   "tokensEntrada": 2604,
+   "tokensResposta": 7893,
+   "invalidas": []
+  },
+  "B-r2": {
+   "status": 200,
+   "segundosCliente": 15.8,
+   "uf": "RJ",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 114,
+   "itensNaBase": 114,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 42,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 43,
+   "alimentosDiferentesPorId": 43,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 26,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.7,
+    "p": 2.2,
+    "c": 1.1,
+    "g": 6.7
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 0.7,
+    "p": 2.2,
+    "c": 1.1,
+    "g": 6.7
+   },
+   "desvioPelaBase": {
+    "kcal": 0.7,
+    "p": 2.2,
+    "c": 1.1,
+    "g": 6.7
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 4,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Banana": 7
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [
+     "Sexta-feira Ceia 21:30: Chá mate"
+    ],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "tentativasGemini": 1,
+   "ms": 15788,
+   "tokensEntrada": 2604,
+   "tokensResposta": 8739,
+   "invalidas": []
+  },
+  "B-r3": {
+   "status": 200,
+   "segundosCliente": 14.6,
+   "uf": "RJ",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 110,
+   "itensNaBase": 110,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 48,
+   "alimentosDiferentesPorId": 48,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 26,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.7,
+    "p": 3.6,
+    "c": 1.1,
+    "g": 9.7
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 0.7,
+    "p": 3.6,
+    "c": 1.1,
+    "g": 9.7
+   },
+   "desvioPelaBase": {
+    "kcal": 0.7,
+    "p": 3.6,
+    "c": 1.1,
+    "g": 9.7
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 4,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Banana": 5
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "tentativasGemini": 1,
+   "ms": 14578,
+   "tokensEntrada": 2604,
+   "tokensResposta": 8011,
+   "invalidas": []
+  },
+  "C-r1": {
+   "status": 200,
+   "segundosCliente": 19.5,
+   "uf": "RS",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 157,
+   "itensNaBase": 157,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 42,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 43,
+   "alimentosDiferentesPorId": 43,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 33,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 1.0,
+    "p": 1.8,
+    "c": 1.3,
+    "g": 1.9
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 1.0,
+    "p": 1.8,
+    "c": 1.3,
+    "g": 1.9
+   },
+   "desvioPelaBase": {
+    "kcal": 1.0,
+    "p": 1.8,
+    "c": 1.3,
+    "g": 1.9
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 7,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Whey protein": 0,
+    "Pasta de amendoim": 6
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "horarios": {
+    "diasDeTreino": 8,
+    "foraDaJanela": [],
+    "duranteTreino": [],
+    "semRefeicaoAntes": [],
+    "semRefeicaoDepois": [
+     "Segunda-feira treino 06:00",
+     "Quarta-feira treino 06:00",
+     "Sexta-feira treino 06:00"
+    ]
+   },
+   "tentativasGemini": 1,
+   "ms": 19441,
+   "tokensEntrada": 2989,
+   "tokensResposta": 10440,
+   "invalidas": []
+  },
+  "C-r2": {
+   "status": 200,
+   "segundosCliente": 19.2,
+   "uf": "RS",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 161,
+   "itensNaBase": 161,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 40,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 49,
+   "alimentosDiferentesPorId": 49,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 34,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.6,
+    "p": 2.5,
+    "c": 1.0,
+    "g": 6.3
+   },
+   "feijaoCariocaNoSul": 1,
+   "desvioDeclarado": {
+    "kcal": 0.6,
+    "p": 2.5,
+    "c": 1.0,
+    "g": 6.3
+   },
+   "desvioPelaBase": {
+    "kcal": 0.6,
+    "p": 2.5,
+    "c": 1.0,
+    "g": 6.3
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 4,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Whey protein": 0,
+    "Pasta de amendoim": 5
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "horarios": {
+    "diasDeTreino": 8,
+    "foraDaJanela": [],
+    "duranteTreino": [],
+    "semRefeicaoAntes": [],
+    "semRefeicaoDepois": [
+     "Segunda-feira treino 06:00",
+     "Quarta-feira treino 06:00",
+     "Sexta-feira treino 06:00"
+    ]
+   },
+   "tentativasGemini": 1,
+   "ms": 19067,
+   "tokensEntrada": 2989,
+   "tokensResposta": 10395,
+   "invalidas": []
+  },
+  "C-r3": {
+   "status": 200,
+   "segundosCliente": 18.7,
+   "uf": "RS",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 157,
+   "itensNaBase": 157,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 40,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 47,
+   "alimentosDiferentesPorId": 47,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 33,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 1.1,
+    "p": 4.4,
+    "c": 1.3,
+    "g": 4.6
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 1.1,
+    "p": 4.4,
+    "c": 1.3,
+    "g": 4.6
+   },
+   "desvioPelaBase": {
+    "kcal": 1.1,
+    "p": 4.4,
+    "c": 1.3,
+    "g": 4.6
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 6,
+   "refeicoesRepetidas": [
+    "Sábado → Domingo: Ceia"
+   ],
+   "gostos": {
+    "Whey protein": 0,
+    "Pasta de amendoim": 7
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "horarios": {
+    "diasDeTreino": 8,
+    "foraDaJanela": [],
+    "duranteTreino": [],
+    "semRefeicaoAntes": [],
+    "semRefeicaoDepois": []
+   },
+   "tentativasGemini": 1,
+   "ms": 18627,
+   "tokensEntrada": 2989,
+   "tokensResposta": 10242,
+   "invalidas": []
+  },
+  "D-r1": {
+   "status": 200,
+   "segundosCliente": 14.9,
+   "uf": "MG",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 115,
+   "itensNaBase": 115,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 62,
+   "alimentosDiferentesPorId": 62,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 24,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.8,
+    "p": 4.6,
+    "c": 0.5,
+    "g": 10.8
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 0.8,
+    "p": 4.6,
+    "c": 0.5,
+    "g": 10.8
+   },
+   "desvioPelaBase": {
+    "kcal": 0.8,
+    "p": 4.6,
+    "c": 0.5,
+    "g": 10.8
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 3,
+   "refeicoesRepetidas": [],
+   "gostos": {},
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "tentativasGemini": 1,
+   "ms": 14876,
+   "tokensEntrada": 2674,
+   "tokensResposta": 8178,
+   "invalidas": []
+  },
+  "D-r2": {
+   "status": 200,
+   "segundosCliente": 15.4,
+   "uf": "MG",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 116,
+   "itensNaBase": 116,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 52,
+   "alimentosDiferentesPorId": 52,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 22,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.4,
+    "p": 6.3,
+    "c": 0.9,
+    "g": 12.4
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 0.4,
+    "p": 6.3,
+    "c": 0.9,
+    "g": 12.4
+   },
+   "desvioPelaBase": {
+    "kcal": 0.4,
+    "p": 6.3,
+    "c": 0.9,
+    "g": 12.4
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 2,
+   "refeicoesRepetidas": [],
+   "gostos": {},
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "tentativasGemini": 1,
+   "ms": 15336,
+   "tokensEntrada": 2674,
+   "tokensResposta": 8345,
+   "invalidas": []
+  },
+  "D-r3": {
+   "status": 200,
+   "segundosCliente": 15.0,
+   "uf": "MG",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 116,
+   "itensNaBase": 116,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 49,
+   "alimentosDiferentesPorId": 49,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 25,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.6,
+    "p": 3.3,
+    "c": 0.7,
+    "g": 7.1
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 0.6,
+    "p": 3.3,
+    "c": 0.7,
+    "g": 7.1
+   },
+   "desvioPelaBase": {
+    "kcal": 0.6,
+    "p": 3.3,
+    "c": 0.7,
+    "g": 7.1
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 5,
+   "refeicoesRepetidas": [],
+   "gostos": {},
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "tentativasGemini": 1,
+   "ms": 15007,
+   "tokensEntrada": 2674,
+   "tokensResposta": 8207,
+   "invalidas": []
+  },
+  "E-r1": {
+   "status": 200,
+   "segundosCliente": 15.2,
+   "uf": "PE",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 123,
+   "itensNaBase": 123,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 40,
+   "alimentosDiferentesPorId": 40,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 24,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.5,
+    "p": 1.0,
+    "c": 0.7,
+    "g": 3.1
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 0.5,
+    "p": 1.0,
+    "c": 0.7,
+    "g": 3.1
+   },
+   "desvioPelaBase": {
+    "kcal": 0.5,
+    "p": 1.0,
+    "c": 0.7,
+    "g": 3.1
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 6,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Ovo": 11
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "tentativasGemini": 1,
+   "ms": 15220,
+   "tokensEntrada": 2576,
+   "tokensResposta": 8496,
+   "invalidas": []
+  },
+  "E-r2": {
+   "status": 200,
+   "segundosCliente": 15.9,
+   "uf": "PE",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 128,
+   "itensNaBase": 128,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 38,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 40,
+   "alimentosDiferentesPorId": 40,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 25,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.8,
+    "p": 1.2,
+    "c": 1.7,
+    "g": 4.5
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 0.8,
+    "p": 1.2,
+    "c": 1.7,
+    "g": 4.5
+   },
+   "desvioPelaBase": {
+    "kcal": 0.8,
+    "p": 1.2,
+    "c": 1.7,
+    "g": 4.5
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 6,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Ovo": 15
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "tentativasGemini": 1,
+   "ms": 15892,
+   "tokensEntrada": 2576,
+   "tokensResposta": 9036,
+   "invalidas": []
+  },
+  "E-r3": {
+   "status": 200,
+   "segundosCliente": 16.1,
+   "uf": "PE",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 130,
+   "itensNaBase": 130,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 41,
+   "alimentosDiferentesPorId": 41,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 31,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.5,
+    "p": 1.3,
+    "c": 1.1,
+    "g": 3.1
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 0.5,
+    "p": 1.3,
+    "c": 1.1,
+    "g": 3.1
+   },
+   "desvioPelaBase": {
+    "kcal": 0.5,
+    "p": 1.3,
+    "c": 1.1,
+    "g": 3.1
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 6,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Ovo": 10
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "tentativasGemini": 1,
+   "ms": 16021,
+   "tokensEntrada": 2576,
+   "tokensResposta": 8792,
+   "invalidas": []
+  },
+  "F-r1": {
+   "status": 200,
+   "segundosCliente": 17.4,
+   "uf": "SC",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 128,
+   "itensNaBase": 128,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 38,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 46,
+   "alimentosDiferentesPorId": 46,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 34,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.9,
+    "p": 1.4,
+    "c": 1.3,
+    "g": 3.4
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 0.9,
+    "p": 1.4,
+    "c": 1.3,
+    "g": 3.4
+   },
+   "desvioPelaBase": {
+    "kcal": 0.9,
+    "p": 1.4,
+    "c": 1.3,
+    "g": 3.4
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 6,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Iogurte": 7,
+    "Granola": 0
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "horarios": {
+    "diasDeTreino": 4,
+    "foraDaJanela": [],
+    "duranteTreino": [],
+    "semRefeicaoAntes": [],
+    "semRefeicaoDepois": []
+   },
+   "tentativasGemini": 1,
+   "ms": 16909,
+   "tokensEntrada": 2861,
+   "tokensResposta": 9023,
+   "invalidas": []
+  },
+  "F-r2": {
+   "status": 200,
+   "segundosCliente": 16.7,
+   "uf": "SC",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 123,
+   "itensNaBase": 123,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 38,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 36,
+   "alimentosDiferentesPorId": 36,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 38,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.6,
+    "p": 0.8,
+    "c": 1.0,
+    "g": 1.9
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 0.6,
+    "p": 0.8,
+    "c": 1.0,
+    "g": 1.9
+   },
+   "desvioPelaBase": {
+    "kcal": 0.6,
+    "p": 0.8,
+    "c": 1.0,
+    "g": 1.9
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 7,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Iogurte": 6,
+    "Granola": 0
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "horarios": {
+    "diasDeTreino": 4,
+    "foraDaJanela": [],
+    "duranteTreino": [],
+    "semRefeicaoAntes": [],
+    "semRefeicaoDepois": []
+   },
+   "tentativasGemini": 1,
+   "ms": 16234,
+   "tokensEntrada": 2861,
+   "tokensResposta": 8770,
+   "invalidas": []
+  },
+  "F-r3": {
+   "status": 200,
+   "segundosCliente": 17.5,
+   "uf": "SC",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 127,
+   "itensNaBase": 127,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 39,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 43,
+   "alimentosDiferentesPorId": 43,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 30,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.8,
+    "p": 1.2,
+    "c": 1.7,
+    "g": 3.5
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 0.8,
+    "p": 1.2,
+    "c": 1.7,
+    "g": 3.5
+   },
+   "desvioPelaBase": {
+    "kcal": 0.8,
+    "p": 1.2,
+    "c": 1.7,
+    "g": 3.5
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 6,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Iogurte": 7,
+    "Granola": 0
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "horarios": {
+    "diasDeTreino": 4,
+    "foraDaJanela": [],
+    "duranteTreino": [],
+    "semRefeicaoAntes": [],
+    "semRefeicaoDepois": []
+   },
+   "tentativasGemini": 1,
+   "ms": 17074,
+   "tokensEntrada": 2861,
+   "tokensResposta": 8997,
+   "invalidas": []
+  },
+  "G-r1": {
+   "status": 200,
+   "segundosCliente": 18.7,
+   "uf": "BA",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 150,
+   "itensNaBase": 150,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 49,
+   "alimentosDiferentesPorId": 49,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 36,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 1.0,
+    "p": 1.3,
+    "c": 1.7,
+    "g": 5.2
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 1.0,
+    "p": 1.3,
+    "c": 1.7,
+    "g": 5.2
+   },
+   "desvioPelaBase": {
+    "kcal": 1.0,
+    "p": 1.3,
+    "c": 1.7,
+    "g": 5.2
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 6,
+   "refeicoesRepetidas": [],
+   "gostos": {
+    "Cerveja": 1,
+    "Feijão": 7
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "tentativasGemini": 1,
+   "ms": 18626,
+   "tokensEntrada": 2769,
+   "tokensResposta": 9588,
+   "invalidas": []
+  },
+  "G-r2": {
+   "status": 200,
+   "segundosCliente": 16.9,
+   "uf": "BA",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 137,
+   "itensNaBase": 137,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 38,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 46,
+   "alimentosDiferentesPorId": 46,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 32,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 1.0,
+    "p": 0.9,
+    "c": 1.9,
+    "g": 5.3
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 1.0,
+    "p": 0.9,
+    "c": 1.9,
+    "g": 5.3
+   },
+   "desvioPelaBase": {
+    "kcal": 1.0,
+    "p": 0.9,
+    "c": 1.9,
+    "g": 5.3
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 6,
+   "refeicoesRepetidas": [
+    "Segunda-feira → Terça-feira: Lanche da tarde"
+   ],
+   "gostos": {
+    "Cerveja": 1,
+    "Feijão": 7
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "tentativasGemini": 1,
+   "ms": 16819,
+   "tokensEntrada": 2769,
+   "tokensResposta": 9291,
+   "invalidas": []
+  },
+  "G-r3": {
+   "status": 200,
+   "segundosCliente": 15.9,
+   "uf": "BA",
+   "diasSemFonteDeGordura": [],
+   "diasAbaixoDoMinimoDeRefeicoes": [],
+   "itens": 133,
+   "itensNaBase": 133,
+   "pctItensNaBase": 100.0,
+   "refeicoes": 35,
+   "pctRefeicoesInteirasNaBase": 100.0,
+   "alimentosDiferentes": 43,
+   "alimentosDiferentesPorId": 43,
+   "pctItensComAlimentoId": 100.0,
+   "contaveis": 25,
+   "contaveisForaDoMultiplo": 0,
+   "diasInteirosPelaBase": 7,
+   "desvioPelaBaseDiasInteiros": {
+    "kcal": 0.9,
+    "p": 2.9,
+    "c": 2.1,
+    "g": 1.6
+   },
+   "feijaoCariocaNoSul": 0,
+   "desvioDeclarado": {
+    "kcal": 0.9,
+    "p": 2.9,
+    "c": 2.1,
+    "g": 1.6
+   },
+   "desvioPelaBase": {
+    "kcal": 0.9,
+    "p": 2.9,
+    "c": 2.1,
+    "g": 1.6
+   },
+   "diasForaDe5Declarado": 0,
+   "diasForaDe5PelaBase": 0,
+   "diasMacrosAte10PelaBase": 7,
+   "refeicoesRepetidas": [
+    "Quarta-feira → Quinta-feira: Café da manhã"
+   ],
+   "gostos": {
+    "Cerveja": 1,
+    "Feijão": 7
+   },
+   "violacoes": {
+    "alcool": [],
+    "cafeinaNoite": [],
+    "cafeinaFimTarde": [],
+    "evitar": [],
+    "refogadoComOleo": [],
+    "regional": []
+   },
+   "foraDaBase": {},
+   "tentativasGemini": 1,
+   "ms": 15864,
+   "tokensEntrada": 2769,
+   "tokensResposta": 8911,
+   "invalidas": []
+  }
+ },
+ "itensBase": 121,
+ "pedidos": [
+  {
+   "perfil": "A",
+   "repeticao": "r1",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 17104,
+   "tokensEntrada": 2866,
+   "tokensResposta": 9326
+  },
+  {
+   "perfil": "B",
+   "repeticao": "r1",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 14582,
+   "tokensEntrada": 2604,
+   "tokensResposta": 7893
+  },
+  {
+   "perfil": "C",
+   "repeticao": "r1",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 19441,
+   "tokensEntrada": 2989,
+   "tokensResposta": 10440
+  },
+  {
+   "perfil": "D",
+   "repeticao": "r1",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 14876,
+   "tokensEntrada": 2674,
+   "tokensResposta": 8178
+  },
+  {
+   "perfil": "E",
+   "repeticao": "r1",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 15220,
+   "tokensEntrada": 2576,
+   "tokensResposta": 8496
+  },
+  {
+   "perfil": "F",
+   "repeticao": "r1",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 16909,
+   "tokensEntrada": 2861,
+   "tokensResposta": 9023
+  },
+  {
+   "perfil": "G",
+   "repeticao": "r1",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 18626,
+   "tokensEntrada": 2769,
+   "tokensResposta": 9588
+  },
+  {
+   "perfil": "A",
+   "repeticao": "r2",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 17803,
+   "tokensEntrada": 2866,
+   "tokensResposta": 9657
+  },
+  {
+   "perfil": "B",
+   "repeticao": "r2",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 15788,
+   "tokensEntrada": 2604,
+   "tokensResposta": 8739
+  },
+  {
+   "perfil": "C",
+   "repeticao": "r2",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 19067,
+   "tokensEntrada": 2989,
+   "tokensResposta": 10395
+  },
+  {
+   "perfil": "D",
+   "repeticao": "r2",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 15336,
+   "tokensEntrada": 2674,
+   "tokensResposta": 8345
+  },
+  {
+   "perfil": "E",
+   "repeticao": "r2",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 15892,
+   "tokensEntrada": 2576,
+   "tokensResposta": 9036
+  },
+  {
+   "perfil": "F",
+   "repeticao": "r2",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 16234,
+   "tokensEntrada": 2861,
+   "tokensResposta": 8770
+  },
+  {
+   "perfil": "G",
+   "repeticao": "r2",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 16819,
+   "tokensEntrada": 2769,
+   "tokensResposta": 9291
+  },
+  {
+   "perfil": "A",
+   "repeticao": "r3",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 17671,
+   "tokensEntrada": 2866,
+   "tokensResposta": 9442
+  },
+  {
+   "perfil": "B",
+   "repeticao": "r3",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 14578,
+   "tokensEntrada": 2604,
+   "tokensResposta": 8011
+  },
+  {
+   "perfil": "C",
+   "repeticao": "r3",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 18627,
+   "tokensEntrada": 2989,
+   "tokensResposta": 10242
+  },
+  {
+   "perfil": "D",
+   "repeticao": "r3",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 15007,
+   "tokensEntrada": 2674,
+   "tokensResposta": 8207
+  },
+  {
+   "perfil": "E",
+   "repeticao": "r3",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 16021,
+   "tokensEntrada": 2576,
+   "tokensResposta": 8792
+  },
+  {
+   "perfil": "F",
+   "repeticao": "r3",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 17074,
+   "tokensEntrada": 2861,
+   "tokensResposta": 8997
+  },
+  {
+   "perfil": "G",
+   "repeticao": "r3",
+   "invalidas": [],
+   "status": 200,
+   "tentativasGemini": 1,
+   "ms": 15864,
+   "tokensEntrada": 2769,
+   "tokensResposta": 8911
+  }
+ ],
+ "alcoolSemPedir": {
+  "chamadasGemini": 18,
+  "chamadasComAlcool": 0,
+  "pedidos": 18,
+  "pedidos503": 0
+ },
+ "resumo": {
+  "geradas": 21,
+  "repeticoes": 21,
+  "desvioPelaBase": {
+   "kcal": 0.72,
+   "p": 2.21,
+   "c": 1.22,
+   "g": 5.18
+  },
+  "diasForaDe5PelaBase": 0,
+  "diasMacrosAte10PelaBase": 114,
+  "violacoes": {
+   "alcool": 0,
+   "cafeinaNoite": 1,
+   "cafeinaFimTarde": 0,
+   "evitar": 0,
+   "refogadoComOleo": 0,
+   "regional": 0
+  },
+  "refeicoesRepetidas": 6,
+  "diasAbaixoDoMinimoDeRefeicoes": 0,
+  "recusasPorPoucasRefeicoes": 0,
+  "aceitasAbaixoDoMinimo": 0,
+  "diasSemFonteDeGordura": 0,
+  "recusasSemFonteDeGordura": 0,
+  "aceitasSemFonteDeGordura": 0,
+  "recusasOutrosMotivos": 0,
+  "pedidos503": 0,
+  "alimentosDiferentesPorId": 44.14,
+  "contaveisForaDoMultiplo": 0,
+  "horarios": {
+   "foraDaJanela": 0,
+   "duranteTreino": 0,
+   "semRefeicaoAntes": 0,
+   "semRefeicaoDepois": 6
+  },
+  "diasDeTreinoComRotina": 48
+ }
+}
