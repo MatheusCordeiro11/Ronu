@@ -195,6 +195,27 @@
   flex-wrap: wrap;
 }
 
+/* Duração e hora de início, lado a lado. */
+.tr-tempos {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--e-5);
+  flex-wrap: wrap;
+}
+
+/* 48px de altura, como o controle de duração com a borda: o recuo padrão do .entrada deixaria o campo de hora
+   com 50px e o rótulo desalinhado do "Duração". */
+.tr-horario {
+  width: 8.5rem;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+/* Aviso que não bloqueia: treino fora da janela entre acordar e dormir. */
+.tr-aviso:empty {
+  display: none;
+}
+
 .tr-duracao {
   display: inline-flex;
   align-items: center;
@@ -719,13 +740,15 @@
     font-size: var(--t-rotulo);
   }
 
-  .tr-linha {
+  .tr-linha,
+  .tr-tempos {
     flex-direction: column;
     align-items: stretch;
     gap: var(--e-4);
   }
 
-  .tr-bloco-duracao {
+  .tr-bloco-duracao,
+  .tr-bloco-horario {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;

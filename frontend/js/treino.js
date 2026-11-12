@@ -1,11 +1,14 @@
 // Ronu — Treino (modalidades praticadas)
-// Lista, adiciona, edita (dias + duração) e remove as modalidades do usuário.
+// Lista, adiciona, edita (dias, duração e hora de início) e remove as modalidades do usuário.
 //
 // Como no canvas aprovado, não há botão "Salvar": cada mudança é gravada
 // sozinha (POST /usuarios/modalidades faz upsert pela modalidade) pouco depois
 // do último toque, e o card mostra "Salvando..." / "Salvo" — nunca em
 // silêncio. Uma modalidade nova só vai para a API quando ganha o primeiro dia,
-// porque a API exige pelo menos um.
+// porque a API exige pelo menos um. A hora de início ("Começa às") é opcional
+// e vai para a IA no lugar da rotina em texto; ela salva no change do campo de
+// hora, nunca no meio da digitação, e um aviso que não bloqueia aponta treino
+// fora da janela entre acordar e dormir (js/base/horarios.js).
 //
 // Os números (kcal por sessão, gasto por dia, total da semana) vêm do
 // POST /metas/simulacao com a lista em edição, a mesma conta da dieta, com o
@@ -28,6 +31,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const elVazio = $('tr-vazio');
   const elCartas = $('tr-cartas');
   const elBarras = $('tr-barras');
+
+  // Acordar e dormir do perfil, só para o aviso de treino fora da janela.
+  let horariosDoDia = { acordar: '', dormir: '' };
 
   // 1 = segunda ... 7 = domingo (ISO 8601, mesmo padrão do backend).
   const DIAS = [
@@ -227,8 +233,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     controle.append(menos, valor, mais);
     blocoDuracao.append(rotuloDuracao, controle);
 
+    // Hora de início, opcional: vazio apaga (a API mantém o salvo só quando o campo nem vem).
+    const blocoHorario = criar('div', 'tr-bloco tr-bloco-horario');
+    const rotuloHorario = criar('label', 'campo-rotulo', 'Começa às');
+    rotuloHorario.htmlFor = `tr-horario-${id}`;
+    const horario = criar('input', 'entrada entrada-no-card num tr-horario');
+    horario.type = 'time';
+    horario.step = 300;
+    horario.id = `tr-horario-${id}`;
+    horario.setAttribute('aria-describedby', `tr-aviso-${id} tr-status-${id}`);
+    horario.addEventListener('change', () => { item.horario = horario.value; aoMudar(item); });
+    horario.addEventListener('blur', () => salvarJa(item));
+    blocoHorario.append(rotuloHorario, horario);
+
+    const tempos = criar('div', 'tr-tempos');
+    tempos.append(blocoDuracao, blocoHorario);
+
     const acoes = criar('div', 'tr-acoes');
-    linha.append(blocoDuracao, acoes);
+    linha.append(tempos, acoes);
+
+    const aviso = criar('div', 'tr-aviso');
+    aviso.id = `tr-aviso-${id}`;
+    aviso.setAttribute('role', 'status');
 
     // Conta da sessão
     const conta = criar('div', 'tr-conta');
@@ -241,12 +267,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     );
 
     const status = criar('p', 'tr-status');
+    status.id = `tr-status-${id}`;
     status.setAttribute('role', 'status');
 
-    corpo.append(blocoDias, linha, conta, status);
+    corpo.append(blocoDias, linha, aviso, conta, status);
     card.append(cabeca, corpo);
 
-    item.el = { card, cabeca, resumo, kcal, corpo, grupoDias, valor, menos, mais, acoes, formula: conta.querySelector('.tr-conta-formula'), status };
+    item.el = { card, cabeca, resumo, kcal, corpo, grupoDias, valor, menos, mais, horario, aviso, acoes, formula: conta.querySelector('.tr-conta-formula'), status };
     renderizarAcoes(item);
     return card;
   }
@@ -289,10 +316,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function atualizarCard(item) {
-    const { resumo, kcal, grupoDias, valor, menos, mais, formula } = item.el;
+    const { resumo, kcal, grupoDias, valor, menos, mais, horario, aviso, formula } = item.el;
     const dias = diasOrdenados(item);
     const nomesDias = dias.map((d) => DIAS[d - 1].curto).join(', ');
-    resumo.textContent = `${dias.length ? nomesDias : 'Nenhum dia escolhido'} · ${formatarDuracao(item.duracao)}`;
+    resumo.textContent = [dias.length ? nomesDias : 'Nenhum dia escolhido', formatarDuracao(item.duracao), item.horario]
+      .filter(Boolean).join(' · ');
+    if (horario.value !== item.horario) horario.value = item.horario;
+    // Só o aviso do treino: o de "poucas horas acordado" é da tela de Alimentação.
+    const avisos = RonuHorarios.avisos(horariosDoDia.acordar, horariosDoDia.dormir,
+      [{ nome: item.modalidade.nome, horarioInicio: item.horario, duracaoMediaHoras: item.duracao / 60 }])
+      .filter((texto) => texto.startsWith('O treino'));
+    aviso.replaceChildren(...avisos.map((texto) => criar('p', 'nota', texto)));
 
     grupoDias.querySelectorAll('button').forEach((botao) => {
       botao.setAttribute('aria-pressed', String(item.dias.has(Number(botao.dataset.dia))));
@@ -354,13 +388,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
     mostrarStatus(item, '');
-    item.salvarPendente = setTimeout(() => salvar(item), ESPERA_SALVAR_MS);
+    item.salvarPendente = setTimeout(() => { item.salvarPendente = null; salvar(item); }, ESPERA_SALVAR_MS);
   }
 
   function igualAoSalvo(item) {
     return item.salvo
       && item.salvo.duracao === item.duracao
+      && item.salvo.horario === item.horario
       && JSON.stringify(item.salvo.dias) === JSON.stringify(diasOrdenados(item));
+  }
+
+  // Ao sair do campo de hora: grava já o que estava na espera.
+  function salvarJa(item) {
+    if (!item.salvarPendente) return;
+    clearTimeout(item.salvarPendente);
+    item.salvarPendente = null;
+    if (item.dias.size > 0) salvar(item);
   }
 
   // Uma gravação por vez por card: o que mudar durante uma vai na seguinte.
@@ -371,6 +414,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     item.salvando = true;
     const dias = diasOrdenados(item);
     const duracao = item.duracao;
+    const horario = item.horario;
     mostrarStatus(item, 'Salvando...');
     ronuOcultarErroFormulario(elErro);
 
@@ -378,7 +422,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const resposta = await ronuFetchAutenticado('/usuarios/modalidades', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ modalidadeId: item.modalidade.id, diasSemana: dias, duracaoMediaHoras: duracao / 60 })
+        body: JSON.stringify({ modalidadeId: item.modalidade.id, diasSemana: dias, duracaoMediaHoras: duracao / 60, horarioInicio: horario })
       });
       if (!resposta.ok) {
         const corpo = await resposta.json().catch(() => null);
@@ -386,7 +430,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       const salvo = await resposta.json();
       item.vinculoId = salvo.id;
-      item.salvo = { dias, duracao };
+      item.salvo = { dias, duracao, horario };
       mudou = true;
       atualizarAvisoGerar();
       mostrarStatus(item, igualAoSalvo(item) ? 'Salvo' : '', 'ok');
@@ -708,7 +752,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Entra na tela aberta e sem dia; só vai para a API com o primeiro dia.
   function adicionar(modalidade) {
-    const item = { modalidade, vinculoId: null, dias: new Set(), duracao: 60, salvo: null };
+    const item = { modalidade, vinculoId: null, dias: new Set(), duracao: 60, horario: '', salvo: null };
     criarCard(item);
     itens.push(item);
     aberta = modalidade.id;
@@ -771,11 +815,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function iniciar() {
     mostrarSomente(elLoading);
     try {
-      const [respostaCatalogo, respostaPraticadas] = await Promise.all([
+      const [respostaCatalogo, respostaPraticadas, respostaPerfil] = await Promise.all([
         fetch(`${RONU_CONFIG.API_BASE}/modalidades`),
-        ronuFetchAutenticado('/usuarios/modalidades')
+        ronuFetchAutenticado('/usuarios/modalidades'),
+        ronuFetchAutenticado('/perfil')
       ]);
       if (!respostaCatalogo.ok || !respostaPraticadas.ok) throw new Error('Falha ao carregar.');
+      // Sem o perfil, a página funciona do mesmo jeito; só não há aviso de treino fora da janela.
+      if (respostaPerfil.ok) {
+        const perfil = await respostaPerfil.json().catch(() => null);
+        horariosDoDia = { acordar: perfil?.horarioAcordar ?? '', dormir: perfil?.horarioDormir ?? '' };
+      }
       catalogo = await respostaCatalogo.json();
       const praticadas = await respostaPraticadas.json();
 
@@ -783,7 +833,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const modalidade = catalogo.find((m) => m.id === vinculo.modalidade.id) || vinculo.modalidade;
         const dias = [...vinculo.diasSemana].sort((a, b) => a - b);
         const duracao = horasParaMinutos(vinculo.duracaoMediaHoras);
-        const item = { modalidade, vinculoId: vinculo.id, dias: new Set(dias), duracao, salvo: { dias, duracao } };
+        const horario = vinculo.horarioInicio ?? '';
+        const item = { modalidade, vinculoId: vinculo.id, dias: new Set(dias), duracao, horario, salvo: { dias, duracao, horario } };
         criarCard(item);
         return item;
       });
