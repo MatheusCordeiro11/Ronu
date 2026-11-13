@@ -119,6 +119,43 @@ Decisão de 2026-11-02. Os outros itens da base não têm cafeína (não há cho
   fécula de mandioca da TACO (124) hidratada na proporção da tapioca medida pela própria TACO (551, com a
   manteiga descontada): 100 g de tapioca pronta = 89,7 g de fécula + 10,3 g de água.
 - **Porção máxima por refeição:** calibração do projeto.
-- **Marcas de alérgenos** (lactose, glúten, amendoim, peixe, crustáceo, ovo): conservadoras, ou seja, na
-  dúvida o item é marcado. Servem para tirar itens do cardápio de quem informou a restrição e **não
-  substituem orientação de um médico ou nutricionista**.
+- **Marcas de alérgenos** (lactose, glúten, amendoim, castanhas, soja, peixe, crustáceo, ovo): conservadoras, ou
+  seja, na dúvida o item é marcado. Servem para tirar itens do cardápio de quem informou a restrição e **não
+  substituem orientação de um médico ou nutricionista**. A observação de cada item marcado por precaução diz
+  o porquê.
+
+## Alergias declaradas (fase 2c)
+
+A pessoa marca as alergias em 8 chips (Alimentação e onboarding). A lista de referência é o **Anexo III da
+RDC nº 727, de 1º de julho de 2022, da ANVISA** ("Lista dos principais alimentos que causam alergias
+alimentares"), em vigor desde 01/09/2022, que revogou a RDC 26/2015 com a mesma lista
+([DOU](https://www.in.gov.br/en/web/dou/-/resolucao-rdc-n-727-de-1-de-julho-de-2022-413249279), acesso em
+2026-11-13).
+
+| Anexo III | Chip | Marca na base |
+|---|---|---|
+| 1. trigo, centeio, cevada, aveia e híbridos | Glúten | `Gluten` |
+| 2. crustáceos | Crustáceos e frutos do mar | `Crustaceo` |
+| 3. ovos | Ovo | `Ovo` |
+| 4. peixes | Peixe | `Peixe` |
+| 5. amendoim | Amendoim | `Amendoim` |
+| 6. soja | Soja | `Soja` |
+| 7. leites de mamíferos | Leite e derivados | `Lactose` |
+| 8 a 17. amêndoa, avelã, castanha-de-caju, castanha-do-pará, macadâmia, nozes, pecã, pistache, pinoli, castanhas (*Castanea*) | Castanhas | `Castanhas` |
+
+- O látex natural (item 18) não é alimento e fica fora.
+- **Regra cruzada:** o chip Amendoim e o chip Castanhas tiram as duas marcas, porque os dois costumam ser
+  processados juntos e quem reage a um pode reagir ao outro. A regra fica só em `RegrasAlergias`; as marcas
+  continuam separadas na base para a regra poder mudar num lugar só, se um nutricionista orientar diferente.
+- **Soja por precaução** (decisão de 2026-11-13): além do óleo de soja (o próprio alimento), a aveia em flocos
+  ("pode conter soja" em rótulos comuns), o pão francês (melhoradores de farinha de padaria declaram "contém
+  derivados de trigo e soja", e o pão de padaria não tem rótulo), o pão de forma integral e o pão de queijo
+  (óleo ou grão de soja e "pode conter soja" nos rótulos de marcas comuns).
+- **Castanhas:** castanha-de-caju, castanha-do-pará, amêndoa e noz passaram da marca `Amendoim` (provisória) para
+  `Castanhas`.
+- O que não está nos chips (gergelim, por exemplo) fica no "Prefiro evitar", que casa pelo nome e manda o texto
+  à IA sem as palavras de saúde.
+- **Revisão em curso:** a consulta pública da rotulagem aprovada pela ANVISA em 30/10/2025 (Voto nº
+  311/2025, que absorveu a revisão de alergênicos) propõe incluir gergelim, trigo-sarraceno, aipo, tremoço e
+  mostarda e excluir as castanhas do gênero *Castanea*. Até 2026-11-13 não havia norma nova publicada; a
+  pendência está em `docs/lacunas-conhecidas.md`.
