@@ -81,6 +81,9 @@ real num commit; bug que mostra dado de uma conta para outra.
 
 ## 3. Publicação da LGPD base com o interruptor `Consentimento:Exigir`
 
+> **Publicada em 2026-11-13** (main 6263879), seguindo os passos abaixo. `Retencao__RotinaForaDaTelaEm` = `2026-11-13`,
+> mesma data da vigência da política; `Consentimento__Exigir` apagada no fim. O passo 6 foi conferido com conta descartável.
+
 O padrão no código é **ligado** (`appsettings.json`, e a chave ausente também conta como ligada). Ele só fica desligado
 durante a publicação, para o frontend antigo não ficar travado entre o deploy do backend e o push do frontend.
 
