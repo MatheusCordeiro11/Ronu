@@ -1,10 +1,7 @@
 {
   "cleanUrls": true,
   "redirects": [
-    {
-      "source": "/landing/v1",
-      "destination": "/landing/v1/",
-      "permanent": false
-    }
+    { "source": "/", "destination": "/landing/v1/", "permanent": false },
+    { "source": "/landing/v1", "destination": "/landing/v1/", "permanent": false }
   ]
 }
