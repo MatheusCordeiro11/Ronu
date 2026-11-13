@@ -98,7 +98,10 @@ if (string.IsNullOrWhiteSpace(builder.Configuration["Frontend:UrlBase"]))
 builder.Services.AddScoped<ServicoRedefinicaoSenha>();
 builder.Services.AddRateLimiter(LimitesRequisicoes.Configurar);
 
-// Prazos de guarda (docs/privacidade.md): pedidos de redefinição antigos e conta que nunca aceitou o consentimento.
+// Prazos de guarda (docs/privacidade.md): pedidos de redefinição antigos, conta que nunca aceitou o consentimento e,
+// 60 dias depois da publicação, a rotina em texto livre. Uma data da rotina com formato errado falha aqui, na subida,
+// em vez de deixar a limpeza da rotina parada sem ninguém ver.
+LimpezaRetencao.LerRotinaForaDaTelaEm(builder.Configuration);
 builder.Services.AddHostedService<ServicoLimpezaRetencao>();
 
 // IP e protocolo reais do cliente atrás do proxy do App Service (X-Forwarded-*),

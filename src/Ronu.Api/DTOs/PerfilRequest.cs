@@ -20,6 +20,11 @@ public class PerfilRequest
     public required string Sexo { get; set; }
 
     public required DateOnly DataNascimento { get; set; }
+
+    // Lido e ignorado (LGPD base, etapa 3 dos horários): a rotina em texto livre saiu da tela e do prompt, e a API
+    // não grava mais o campo. Ele continua aqui, sem validação de tamanho, só para um frontend antigo em cache que
+    // ainda o mande não receber 400 nem apagar o texto antigo sem querer. O texto antigo sai pelo
+    // DELETE /api/perfil/rotina ou pela limpeza dos prazos de guarda (LimpezaRetencao).
     public string? RotinaDiaria { get; set; }
     public string? OrcamentoSemanal { get; set; }
 

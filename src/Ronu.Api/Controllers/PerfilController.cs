@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ronu.Api.Data;
 using Ronu.Api.DTOs;
+using Ronu.Api.Services.Consentimentos;
 using Ronu.Api.Validacao;
 using System.Security.Claims;
 
@@ -116,7 +117,8 @@ public class PerfilController : ControllerBase
         usuario.Altura = request.Altura;
         usuario.Sexo = request.Sexo;
         usuario.DataNascimento = request.DataNascimento;
-        usuario.RotinaDiaria = request.RotinaDiaria;
+        // request.RotinaDiaria é ignorado de propósito (ver PerfilRequest): nem grava um texto novo vindo de uma
+        // tela antiga, nem apaga o antigo quando uma tela nova não manda o campo.
         usuario.OrcamentoSemanal = request.OrcamentoSemanal;
 
         // Ausente ou vazio mantém o salvo (ver PerfilRequest.NivelAtividade).
@@ -129,6 +131,30 @@ public class PerfilController : ControllerBase
 
         return Ok(MontarResposta(usuario));
 
+    }
+
+    /// <summary>
+    /// Apaga a rotina em texto livre antiga (Usuario.RotinaDiaria), que não é mais usada desde os horários
+    /// estruturados. É o "apagar" do aviso da Alimentação; quem não apagar perde o texto na limpeza dos prazos de
+    /// guarda, 60 dias depois da publicação (LimpezaRetencao). Sem texto, não faz nada e responde igual: repetir o
+    /// pedido (duas abas, clique duplo) não é erro.
+    ///
+    /// Dispensa o consentimento, como apagar a conta e baixar os dados: apagar o próprio dado é direito (art. 18, VI)
+    /// e não pode depender de aceitar o tratamento antes. O usuário vem sempre do token.
+    /// </summary>
+    [HttpDelete("rotina")]
+    [DispensaConsentimento]
+    public async Task<IActionResult> ApagarRotina()
+    {
+        var usuario = await _context.Usuarios.FirstAsync(u => u.Id == UsuarioIdLogado);
+
+        if (usuario.RotinaDiaria is not null)
+        {
+            usuario.RotinaDiaria = null;
+            await _context.SaveChangesAsync();
+        }
+
+        return NoContent();
     }
 
     private static readonly HashSet<string> SiglasUf = new()

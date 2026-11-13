@@ -15,10 +15,15 @@ public class ServicoLimpezaRetencao : BackgroundService
     private readonly IServiceScopeFactory _escopos;
     private readonly ILogger<ServicoLimpezaRetencao> _logger;
 
-    public ServicoLimpezaRetencao(IServiceScopeFactory escopos, ILogger<ServicoLimpezaRetencao> logger)
+    // Lida uma vez, na subida: a variável do App Service só muda com reinício. O formato já foi conferido no
+    // Program.cs, que não deixa a API subir com uma data inválida.
+    private readonly DateTime? _rotinaForaDaTelaEm;
+
+    public ServicoLimpezaRetencao(IServiceScopeFactory escopos, ILogger<ServicoLimpezaRetencao> logger, IConfiguration configuracao)
     {
         _escopos = escopos;
         _logger = logger;
+        _rotinaForaDaTelaEm = LimpezaRetencao.LerRotinaForaDaTelaEm(configuracao);
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancelamento)
@@ -47,11 +52,13 @@ public class ServicoLimpezaRetencao : BackgroundService
         {
             using var escopo = _escopos.CreateScope();
             var contexto = escopo.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var resultado = await LimpezaRetencao.ExecutarAsync(contexto, DateTime.UtcNow);
+            var resultado = await LimpezaRetencao.ExecutarAsync(contexto, DateTime.UtcNow, _rotinaForaDaTelaEm);
 
-            // Só as contagens: nem ids nem emails das contas apagadas.
-            _logger.LogInformation("Limpeza de retenção: {Pedidos} pedidos de redefinição de senha e {Contas} contas sem aceite apagados",
-                resultado.PedidosApagados, resultado.ContasApagadas);
+            // Só as contagens: nem ids nem emails das contas, nem o texto das rotinas. A data da rotina vai junto para
+            // dar para conferir no log que a configuração chegou (vazia = a limpeza da rotina ainda não está ligada).
+            _logger.LogInformation("Limpeza de retenção: {Pedidos} pedidos de redefinição de senha, {Contas} contas sem aceite e {Rotinas} rotinas em texto apagados (rotina fora da tela desde: {RotinaForaDaTelaEm})",
+                resultado.PedidosApagados, resultado.ContasApagadas, resultado.RotinasApagadas,
+                _rotinaForaDaTelaEm?.ToString("yyyy-MM-dd") ?? "não configurado");
         }
         catch (Exception ex)
         {

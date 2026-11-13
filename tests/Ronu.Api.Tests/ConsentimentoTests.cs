@@ -173,7 +173,8 @@ public class ConsentimentoTests
         Assert.Null(await Filtrar(banco, usuario.Id, exigir: null, new AuthorizeAttribute(), new DispensaConsentimentoAttribute()));
     }
 
-    // Uma rota nova com [DispensaConsentimento] precisa entrar nesta lista de propósito, não por engano.
+    // Uma rota nova com [DispensaConsentimento] precisa entrar nesta lista de propósito, não por engano. Apagar a rotina
+    // antiga entrou em 2026-11-13: apagar o próprio dado é direito (art. 18, VI).
     [Fact]
     public void So_O_Aceite_E_A_Conta_Dispensam_O_Consentimento()
     {
@@ -185,7 +186,35 @@ public class ConsentimentoTests
             .Order()
             .ToList();
 
-        Assert.Equal(new[] { nameof(ConsentimentosController), nameof(ContaController) }, dispensados);
+        Assert.Equal(new[] { nameof(ConsentimentosController), nameof(ContaController), $"{nameof(PerfilController)}.{nameof(PerfilController.ApagarRotina)}" }, dispensados);
+    }
+
+    // Com os metadados reais da rota (o [Authorize] da classe e os atributos do método), o filtro deixa passar uma
+    // conta sem aceite, e a rota apaga a rotina dela, só dela.
+    [Fact]
+    public async Task Apagar_Rotina_Funciona_Em_Conta_Sem_Aceite()
+    {
+        using var banco = BancoEmMemoria.NovoContexto();
+        var usuario = await NovoUsuario(banco, "rotina-sem-aceite@exemplo.test");
+        var outro = await NovoUsuario(banco, "rotina-outro@exemplo.test");
+        usuario.RotinaDiaria = "Acordo às 6h";
+        outro.RotinaDiaria = "Durmo às 23h";
+        await banco.SaveChangesAsync();
+
+        var metadados = typeof(PerfilController).GetCustomAttributes(true)
+            .Concat(typeof(PerfilController).GetMethod(nameof(PerfilController.ApagarRotina))!.GetCustomAttributes(true))
+            .ToArray();
+        Assert.Contains(metadados, m => m is AuthorizeAttribute);
+
+        Assert.Null(await Filtrar(banco, usuario.Id, exigir: true, metadados));
+
+        var controller = new PerfilController(banco)
+        {
+            ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = Logado(usuario.Id) } }
+        };
+        Assert.IsType<NoContentResult>(await controller.ApagarRotina());
+        Assert.Null(banco.Usuarios.AsNoTracking().Single(u => u.Id == usuario.Id).RotinaDiaria);
+        Assert.Equal("Durmo às 23h", banco.Usuarios.AsNoTracking().Single(u => u.Id == outro.Id).RotinaDiaria);
     }
 
     // ---------- GET e POST /api/consentimentos ----------
@@ -206,7 +235,7 @@ public class ConsentimentoTests
         var linhas = resposta.Texto.Split('\n');
         Assert.Equal(4, linhas.Length);
         Assert.StartsWith("O Ronu usa seu peso, altura, idade, sexo, objetivo e treinos", linhas[0]);
-        Assert.Contains("Seu nome, e-mail, peso, altura, idade e sexo não vão para a IA.", linhas[1]);
+        Assert.Contains("Seu nome, e-mail, peso, altura, idade, sexo e o nome das modalidades que você treina não vão para a IA.", linhas[1]);
         Assert.Contains("O Ronu não envia nada que identifique você.", linhas[2]);
         Assert.DoesNotContain("sem ligá-lo", resposta.Texto);
         Assert.StartsWith("Seus dados ficam guardados no Chile", linhas[3]);
