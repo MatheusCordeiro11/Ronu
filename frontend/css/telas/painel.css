@@ -216,17 +216,7 @@
   gap: var(--e-2);
 }
 
-/* Etiqueta no alimento afetado, na lista de refeições: contorno de erro, texto no acento de texto. */
-.db-tem-alergia {
-  display: inline-flex;
-  align-items: center;
-  padding: 1px 8px;
-  border: 1px solid var(--erro-campo);
-  border-radius: var(--raio-pilula);
-  color: var(--acento-texto);
-  font-size: var(--t-pequeno);
-  line-height: 1.4;
-}
+/* A etiqueta no alimento afetado é o .etiqueta-alergia de componentes.css (painel e lista de compras). */
 
 .db-nivel-traco {
   flex: none;

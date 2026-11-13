@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const elSecoes = $('lc-secoes');
   const elTudoMarcado = $('lc-tudo-marcado');
   const elAvisoOleo = $('lc-aviso-oleo');
+  const elAlergia = $('lc-alergia');
   const elAviso = $('lc-aviso');
   const elAvisoTexto = $('lc-aviso-texto');
   const btnAtualizar = $('lc-atualizar');
@@ -156,6 +157,31 @@ document.addEventListener('DOMContentLoaded', () => {
     return `para ${quantidade} ${PREPAROS.includes(ultima) ? ultima : 'pronto'}`;
   }
 
+  // ---------- Alergia (TACO 2c, D10) ----------
+  // Um chip marcado depois da geração: o item continua na lista (a lista é a da dieta), com a etiqueta do painel.
+
+  function etiquetaAlergia(codigos, classeExtra) {
+    const nomes = window.RonuAlergias.ordenar(codigos).map(window.RonuAlergias.rotulo).join(', ');
+    const el = criar('span', `etiqueta-alergia${classeExtra ? ` ${classeExtra}` : ''}`, nomes);
+    el.prepend(criar('span', 'oculto-visual', 'tem alergia: '));
+    return el;
+  }
+
+  function renderizarAlergia() {
+    const itens = todosItens().filter((i) => i.temAlergeno);
+    elAlergia.hidden = itens.length === 0;
+    if (!itens.length) return;
+    const RA = window.RonuAlergias;
+    const codigos = RA.ordenar([...new Set(itens.flatMap((i) => i.alergias))]);
+    $('lc-alergia-texto').replaceChildren(
+      'Esta lista vem da dieta atual, gerada antes de você marcar ',
+      criar('strong', null, RA.juntar(codigos.map(RA.rotulo))),
+      itens.length === 1
+        ? '. 1 item tem uma das suas alergias: troque no painel ou gere a dieta de novo.'
+        : `. ${itens.length} itens têm uma das suas alergias: troque no painel ou gere a dieta de novo.`
+    );
+  }
+
   // ---------- Detalhe ----------
 
   function montarDetalhe(item) {
@@ -168,7 +194,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const titulo = item.detalhe.origens.length > 1
         ? `${origem.nome}: ${formatarMedida(origem.quantidadeNaDieta, origem.medida)} na dieta, ${formatarNumero(convertido)} ${unidadeDoItem(item, convertido)}`
         : `Na dieta: ${formatarMedida(origem.quantidadeNaDieta, origem.medida)} de ${origem.nome.toLowerCase()} na semana.`;
-      bloco.appendChild(criar('span', 'lc-origem-titulo', titulo));
+      const tituloEl = criar('span', 'lc-origem-titulo', titulo);
+      // TACO 2c: qual alimento da linha tem a alergia, para saber o que trocar no painel.
+      if (origem.alergias?.length) tituloEl.appendChild(etiquetaAlergia(origem.alergias, 'lc-origem-alergia'));
+      bloco.appendChild(tituloEl);
 
       if (origem.passos.length) {
         const passos = criar('ol', 'lc-passos');
@@ -226,7 +255,13 @@ document.addEventListener('DOMContentLoaded', () => {
     abrir.setAttribute('aria-controls', `lc-det-${item.chave}`);
 
     const texto = criar('span', 'lc-item-texto');
-    texto.appendChild(criar('span', 'lc-item-nome', item.nome));
+    if (item.temAlergeno && item.alergias?.length) {
+      const cabeca = criar('span', 'lc-item-cabeca');
+      cabeca.append(criar('span', 'lc-item-nome', item.nome), etiquetaAlergia(item.alergias));
+      texto.appendChild(cabeca);
+    } else {
+      texto.appendChild(criar('span', 'lc-item-nome', item.nome));
+    }
     texto.appendChild(criar('span', 'lc-item-apoio', linhaDeApoio(item)));
     if (item.nota) texto.appendChild(criar('span', 'nota lc-item-nota', item.nota));
 
@@ -279,6 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     elSecoes.replaceChildren(fragmento);
+    renderizarAlergia();
     elTudoMarcado.hidden = algumVisivel;
     renderizarAndamento();
     if (!elCompartilhar.hidden) atualizarCompartilhar();

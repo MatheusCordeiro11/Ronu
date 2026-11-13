@@ -91,6 +91,10 @@ public class OrigemItemListaComprasDto
     public required decimal Convertido { get; set; }
 
     public required List<PassoListaComprasDto> Passos { get; set; }
+
+    // TACO 2c: os chips marcados pela pessoa que tiram este alimento, na ordem da tela (o "tem Soja" do "Ver
+    // detalhe", para saber qual alimento trocar). Preenchido pelo controller; o "Compartilhar" não leva.
+    public List<string> Alergias { get; set; } = [];
 }
 
 public class PassoListaComprasDto

@@ -503,7 +503,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Alergia marcada depois da geração: a etiqueta com o nome do chip, só na dieta atual.
     const alergias = atual ? alergiasDoAlimento(dietaResponse, alimento) : [];
     if (alergias.length) {
-      const etiqueta = criar('span', 'db-tem-alergia', alergias.join(', '));
+      const etiqueta = criar('span', 'etiqueta-alergia', alergias.join(', '));
       etiqueta.prepend(criar('span', 'oculto-visual', 'tem alergia: '));
       nome.append(etiqueta);
     }

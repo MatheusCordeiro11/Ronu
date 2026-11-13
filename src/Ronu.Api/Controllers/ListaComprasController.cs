@@ -77,10 +77,16 @@ public partial class ListaComprasController : ControllerBase
         foreach (var item in lista.Secoes.SelectMany(s => s.Itens))
         {
             item.Tenho = marcadas.Contains(item.Chave);
-            item.Alergias = item.Detalhe.Origens
-                .SelectMany(o => CodigosAlergia.ChipsQueTiram(BaseNutricional.Itens.Single(i => i.Id == o.AlimentoId), alergias))
+            foreach (var origem in item.Detalhe.Origens)
+            {
+                origem.Alergias = CodigosAlergia.ChipsQueTiram(BaseNutricional.Itens.Single(i => i.Id == origem.AlimentoId), alergias)
+                    .Select(c => c.Codigo)
+                    .ToList();
+            }
+            // Na ordem dos chips (a mesma da tela), sem repetir.
+            item.Alergias = CodigosAlergia.Chips
                 .Select(c => c.Codigo)
-                .Distinct()
+                .Where(c => item.Detalhe.Origens.Any(o => o.Alergias.Contains(c)))
                 .ToList();
             item.TemAlergeno = item.Alergias.Count > 0;
         }

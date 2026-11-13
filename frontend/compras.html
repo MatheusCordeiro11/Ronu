@@ -103,6 +103,12 @@
       </div>
 
       <div class="lc-lista">
+        <!-- TACO 2c (D10): item com alergia marcada depois da geração. O "Compartilhar" não leva nada disto. -->
+        <aside class="aviso aviso-erro lc-alergia" id="lc-alergia" aria-labelledby="lc-alergia-titulo" hidden>
+          <h2 class="rotulo rotulo-acento" id="lc-alergia-titulo">Alergia na lista</h2>
+          <p class="lc-alergia-texto" id="lc-alergia-texto"></p>
+          <a class="botao botao-fantasma botao-pequeno" href="dashboard.html">Ir ao painel</a>
+        </aside>
         <div id="lc-secoes"></div>
         <p class="lc-tudo-marcado" id="lc-tudo-marcado" hidden>Tudo marcado como "já tenho".</p>
         <p class="nota" id="lc-aviso-oleo" hidden>Refogados e ovos fritos levam óleo no preparo, e ele não está na conta.</p>
@@ -117,6 +123,7 @@
 
   <script src="js/auth.js"></script>
   <script src="js/base/cabecalho.js"></script>
+  <script src="js/base/alergias.js"></script>
   <script src="js/compras.js"></script>
 </body>
 </html>

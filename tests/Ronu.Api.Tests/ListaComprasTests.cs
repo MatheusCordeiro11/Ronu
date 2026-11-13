@@ -376,9 +376,11 @@ public class ListaComprasTests
         var pao = itens.Single(i => i.Detalhe.Origens.Any(o => o.AlimentoId == "pao-frances"));
         Assert.True(pao.TemAlergeno);
         Assert.Equal(["soja"], pao.Alergias);
+        Assert.Equal(["soja"], pao.Detalhe.Origens.Single(o => o.AlimentoId == "pao-frances").Alergias);
         var arroz = itens.Single(i => i.Detalhe.Origens.Any(o => o.AlimentoId == "arroz-branco-cozido"));
         Assert.False(arroz.TemAlergeno);
         Assert.Empty(arroz.Alergias);
+        Assert.All(arroz.Detalhe.Origens, o => Assert.Empty(o.Alergias));
     }
 
     // A resposta vai para o "Compartilhar": nada de calorias, macros, meta ou objetivo.

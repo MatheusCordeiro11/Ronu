@@ -128,6 +128,19 @@
   flex-wrap: wrap;
 }
 
+/* ---------- Alergia na lista (TACO 2c, D10) ----------
+   O mesmo aviso do painel, no tom de erro: um problema da dieta salva. Sem "Gerar" aqui: a geração fica no painel. */
+.lc-alergia {
+  display: grid;
+  justify-items: start;
+  gap: var(--e-3);
+  padding: 16px 18px;
+}
+
+.lc-alergia-texto {
+  margin: 0;
+}
+
 /* Os rótulos das caixas são <h2> pela estrutura, mas no visual do rótulo (como no painel). */
 .lc-main h2.rotulo {
   font-family: var(--fonte-corpo);
@@ -277,6 +290,20 @@
   font-size: var(--t-corpo);
   font-weight: 500;
   line-height: 1.35;
+}
+
+/* Nome + etiqueta de alergia na mesma linha; a etiqueta quebra para baixo se faltar espaço. O riscado do
+   "já tenho" fica só no nome: a etiqueta continua legível. */
+.lc-item-cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px var(--e-2);
+}
+
+.lc-origem-alergia {
+  margin-left: var(--e-2);
+  vertical-align: 1px;
 }
 
 .lc-item-apoio {
