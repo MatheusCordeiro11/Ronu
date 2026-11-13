@@ -122,6 +122,32 @@ public class FormulaPontaAPontaTests
         Assert.Contains("11. Preencha o campo \"horario\" de cada refeição no formato HH:mm (ex: \"07:30\"). Use os horários informados", prompt);
     }
 
+    // Alergia fora da base escrita no "evitar": o alimento vai ao prompt, a palavra "alergia" e o "tenho" não.
+    [Fact]
+    public async Task Evitar_Sem_Casamento_Vai_Sem_A_Condicao_De_Saude()
+    {
+        var gemini = new GeminiQueGuardaOPrompt();
+        var gerador = new GeradorDietaGemini(
+            new HttpClient(gemini), new CalculadoraGastoCalorico(),
+            new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia()),
+            new GeminiOptions { ApiKey = "teste" }, NullLogger<GeradorDietaGemini>.Instance);
+        var contexto = PerfilA();
+        contexto.Preferencias = new()
+        {
+            new() { Alimento = "Tenho alergia a gergelim", Tipo = "evitar" },
+            new() { Alimento = "sou diabético", Tipo = "evitar" }
+        };
+
+        await gerador.GerarDietaAsync(contexto);
+        var prompt = gemini.Prompt.Replace("\r\n", "\n");
+
+        Assert.Contains("nem como ingrediente de outro prato): gergelim", prompt);
+        foreach (var proibido in new[] { "alergia", "tenho", "diabetic" })
+        {
+            Assert.DoesNotContain(proibido, prompt, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
     // Dormir depois da meia-noite: "durmo" menor que "acordo" vira o dia, e o prompt diz isso.
     [Theory]
     [InlineData(7, 0, 0, 30, "acorda às 07:00 e vai dormir às 00:30, já depois da meia-noite.")]

@@ -248,6 +248,22 @@ public class CasamentoPreferenciasTests
         Assert.Equal([texto], resultado.TrechosSemCasamento);
     }
 
+    // ---------- O que vai ao Gemini do trecho sem casamento ----------
+
+    [Theory]
+    [InlineData("tenho alergia a gergelim", "gergelim")]
+    [InlineData("Alérgica a kiwi", "kiwi")]
+    [InlineData("sou intolerante à frutose", "frutose")]
+    [InlineData("não como cordeiro", "cordeiro")]
+    [InlineData("kiwano dourado", "kiwano dourado")]
+    // As vazias do meio ficam: tirar o "sem" inverteria o sentido.
+    [InlineData("comida sem sal", "comida sem sal")]
+    [InlineData("eu tenho alergia", "")]
+    [InlineData("sou diabético", "")]
+    [InlineData("gastrite: nada apimentado", "apimentado")]
+    public void Termo_Para_IA_Tira_O_Que_Fala_Da_Pessoa(string trecho, string esperado) =>
+        Assert.Equal(esperado, CasamentoPreferencias.TermoParaIA(trecho));
+
     // ---------- Tolerância a 1 letra (palavras da tabela com 5 letras ou mais) ----------
 
     [Fact]

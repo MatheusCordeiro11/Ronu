@@ -100,6 +100,47 @@ public static class CasamentoPreferencias
         "frito", "frita", "torrado", "torrada"
     ];
 
+    // Palavras que falam da pessoa e não do alimento, e condições de saúde (LGPD, art. 11). Saem do trecho
+    // sem casamento antes de ele ir ao Gemini (plano gratuito: o Google usa o conteúdo). Não pega toda forma
+    // de escrever uma condição de saúde; pega as mais comuns no "evitar".
+    private static readonly HashSet<string> PalavrasDaPessoa =
+    [
+        "eu", "me", "meu", "minha", "tenho", "sou", "estou",
+        "alergia", "alergico", "alergica", "intolerancia", "intolerante", "reacao", "sensibilidade", "sensivel",
+        "diabete", "diabetico", "diabetica", "doenca", "gastrite", "refluxo", "colesterol",
+        "hipertensao", "hipertenso", "hipertensa", "gravida", "gravidez", "gestante",
+        "medico", "medica", "nutricionista", "recomendacao", "orientacao"
+    ];
+
+    /// <summary>
+    /// O trecho sem casamento como vai ao prompt: sem as palavras que falam da
+    /// pessoa ou de uma condição de saúde e sem as palavras vazias que sobram nas
+    /// pontas ("tenho alergia a gergelim" vira "gergelim"). As do meio ficam,
+    /// porque mudam o sentido ("comida sem sal"). Vazio quando nada sobra.
+    /// A tela continua mostrando o trecho como a pessoa escreveu.
+    /// </summary>
+    public static string TermoParaIA(string trecho)
+    {
+        var palavras = new StringBuilder();
+        foreach (var c in SemAcento(trecho.ToLowerInvariant()))
+        {
+            palavras.Append(char.IsLetterOrDigit(c) ? c : ' ');
+        }
+
+        var restantes = palavras.ToString().Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Where(p => !PalavrasDaPessoa.Contains(Singular(p)))
+            .ToList();
+        bool Vazia(string p) => PalavrasVazias.Contains(Singular(p));
+        var inicio = restantes.FindIndex(p => !Vazia(p));
+        if (inicio < 0)
+        {
+            return string.Empty;
+        }
+
+        var fim = restantes.FindLastIndex(p => !Vazia(p));
+        return string.Join(' ', restantes.Skip(inicio).Take(fim - inicio + 1));
+    }
+
     private static readonly string[] Separadores = [",", ";", "/", " e ", " ou "];
 
     // Cada expressão já normalizada e em palavras, da mais longa para a mais curta. O texto original (com

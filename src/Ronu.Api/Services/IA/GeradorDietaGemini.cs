@@ -654,10 +654,13 @@ public class GeradorDietaGemini : IGeradorDietaIA
             : $" {string.Join(" e ", refogadosNaLista)} já incluem o óleo do preparo: na refeição em que um deles aparecer, não coloque azeite nem óleo.";
 
         // Do "evitar" vão só os trechos que não casaram com a base ("carne de caça"): o que casou já saiu da lista,
-        // e o enum do nome não deixa o Gemini escolher fora dela. O texto como foi digitado não vai.
+        // e o enum do nome não deixa o Gemini escolher fora dela. E vão sem as palavras sobre a pessoa ou a saúde
+        // dela: "tenho alergia a gergelim" chega como "gergelim" (TermoParaIA).
         var evitarTexto = string.Join(", ", lista.Preferencias
             .Where(p => p.Tipo == "evitar")
             .SelectMany(p => p.TrechosSemCasamento)
+            .Select(CasamentoPreferencias.TermoParaIA)
+            .Where(t => t.Length > 0)
             .Distinct(StringComparer.OrdinalIgnoreCase));
 
         // Regra 8 só explica quando a bebida pode aparecer para quem marcou uma
