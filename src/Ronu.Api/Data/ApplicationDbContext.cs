@@ -24,6 +24,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<ListaComprasMarcacao> ListaComprasMarcacoes { get; set; }
     public DbSet<Consentimento> Consentimentos { get; set; }
     public DbSet<AlergiaUsuario> AlergiasUsuario { get; set; }
+    public DbSet<Casa> Casas { get; set; }
+    public DbSet<MembroCasa> MembrosCasa { get; set; }
+    public DbSet<ConviteCasa> ConvitesCasa { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -66,5 +69,27 @@ public class ApplicationDbContext : DbContext
         // Apagar a conta apaga as alergias (o índice único por pessoa e código está no modelo).
         modelBuilder.Entity<AlergiaUsuario>()
             .HasOne(a => a.Usuario).WithMany().HasForeignKey(a => a.UsuarioId).OnDelete(DeleteBehavior.Cascade);
+
+        // Plano família. O índice único em UsuarioId é o "uma casa por pessoa": barra dois aceites de convites
+        // diferentes ao mesmo tempo, que a checagem no controller sozinha deixaria passar. O parcial em CasaId é o
+        // "um dono por casa" (a transferência rebaixa o dono antes de promover o outro, por isso em dois passos).
+        modelBuilder.Entity<MembroCasa>(membro =>
+        {
+            membro.HasIndex(m => m.UsuarioId).IsUnique();
+            membro.HasIndex(m => m.CasaId)
+                .IsUnique()
+                .HasFilter($"\"Papel\" = '{MembroCasa.PapelDono}'");
+            membro.HasOne(m => m.Casa).WithMany().HasForeignKey(m => m.CasaId).OnDelete(DeleteBehavior.Cascade);
+            membro.HasOne(m => m.Usuario).WithMany().HasForeignKey(m => m.UsuarioId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // O token é procurado pelo hash; os abertos da casa, pela data. Apagar a casa ou quem gerou apaga o convite.
+        modelBuilder.Entity<ConviteCasa>(convite =>
+        {
+            convite.HasIndex(c => c.TokenHash).IsUnique();
+            convite.HasIndex(c => new { c.CasaId, c.CriadoEm });
+            convite.HasOne(c => c.Casa).WithMany().HasForeignKey(c => c.CasaId).OnDelete(DeleteBehavior.Cascade);
+            convite.HasOne(c => c.Usuario).WithMany().HasForeignKey(c => c.UsuarioId).OnDelete(DeleteBehavior.Cascade);
+        });
     }
 }

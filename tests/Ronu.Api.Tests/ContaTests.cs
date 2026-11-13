@@ -53,10 +53,17 @@ public class ContaTests
         banco.Consentimentos.Add(new Consentimento { UsuarioId = usuario.Id, Tipo = "alergias", Versao = 1, AceitoEm = DateTime.UtcNow });
         banco.AlergiasUsuario.Add(new AlergiaUsuario { UsuarioId = usuario.Id, Codigo = "soja", MarcadoEm = DateTime.UtcNow });
         banco.PedidosRedefinicaoSenha.Add(new PedidoRedefinicaoSenha { UsuarioId = usuario.Id, Tipo = PedidoRedefinicaoSenha.TipoLink, TokenHash = tokenHash, CriadoEm = DateTime.UtcNow, ExpiraEm = DateTime.UtcNow.AddMinutes(30) });
+        // Plano família: dono de uma casa só dele, com um convite aberto (o hash do convite também não pode sair).
+        var casa = new Casa { CriadaEm = DateTime.UtcNow };
+        banco.Casas.Add(casa);
+        banco.MembrosCasa.Add(new MembroCasa { Casa = casa, UsuarioId = usuario.Id, Papel = MembroCasa.PapelDono, EntrouEm = DateTime.UtcNow });
+        banco.ConvitesCasa.Add(new ConviteCasa { Casa = casa, UsuarioId = usuario.Id, TokenHash = ConviteHashDe(email), CriadoEm = DateTime.UtcNow, ExpiraEm = DateTime.UtcNow.AddDays(7) });
         await banco.SaveChangesAsync();
 
         return (usuario, tokenHash);
     }
+
+    private static string ConviteHashDe(string email) => Ronu.Api.Services.PlanoFamilia.OperacoesCasa.Hash($"convite-{email}");
 
     // Quantas linhas da pessoa existem em cada tabela do modelo que tem UsuarioId (mais a própria conta). Por
     // reflexão: uma tabela nova (2c, casa) entra sozinha na conferência.
@@ -127,12 +134,14 @@ public class ContaTests
         var resultado = await Controller(banco, apagar.Id).Apagar(new ExclusaoContaRequest { Senha = Senha });
 
         Assert.IsType<NoContentResult>(resultado);
-        // A conferência viu as 10 tabelas (9 com UsuarioId, AlergiasUsuario incluída desde a 2c, e a conta), e a conta
-        // tinha linha em todas.
-        Assert.Equal(10, antes.Count);
+        // A conferência viu as 12 tabelas (11 com UsuarioId: AlergiasUsuario desde a 2c, MembroCasa e ConviteCasa desde o
+        // plano família; e a conta), e a conta tinha linha em todas.
+        Assert.Equal(12, antes.Count);
         Assert.All(antes, t => Assert.True(t.Value > 0, $"a conta de teste deveria ter linha em {t.Key}"));
         Assert.All(LinhasDe(banco, apagar.Id), t => Assert.True(t.Value == 0, $"sobrou {t.Value} linha(s) em {t.Key}"));
         Assert.Equal(outroAntes, LinhasDe(banco, outro.Id));
+        // Era dono sozinho: a casa dele acabou, a do outro ficou.
+        Assert.Equal(1, await banco.Casas.CountAsync());
     }
 
     [Fact]
@@ -225,6 +234,10 @@ public class ContaTests
         Assert.Equal("soja", raiz.GetProperty("alergias")[0].GetProperty("codigo").GetString());
         Assert.Contains(raiz.GetProperty("consentimentos").EnumerateArray(), c => c.GetProperty("tipo").GetString() == "alergias");
         Assert.Equal("link", raiz.GetProperty("pedidosRedefinicaoSenha")[0].GetProperty("tipo").GetString());
+        // Plano família: o papel na casa e os convites gerados, sem o hash.
+        Assert.Equal("dono", raiz.GetProperty("casa").GetProperty("papel").GetString());
+        Assert.Equal(1, raiz.GetProperty("convitesCasa").GetArrayLength());
+        Assert.DoesNotContain(ConviteHashDe("pessoa@exemplo.test"), texto, StringComparison.OrdinalIgnoreCase);
 
         // Sem hash nem token: nem o campo, nem o valor.
         Assert.DoesNotContain(NomesDePropriedades(raiz), nome => nome.Contains("hash", StringComparison.OrdinalIgnoreCase)
@@ -323,6 +336,7 @@ public class ContaTests
     [InlineData("dieta")]
     [InlineData("meta")]
     [InlineData("alergia")]
+    [InlineData("casa")]
     public async Task Conta_Nova_Com_Qualquer_Dado_Ou_Aceite_Nao_E_Apagada(string dado)
     {
         using var banco = BancoEmMemoria.NovoContexto();
@@ -346,6 +360,9 @@ public class ContaTests
             case "dieta": banco.DietasIA.Add(new DietaIA { UsuarioId = conta.Id, DataGeracao = Agora.AddDays(-89), ConteudoJson = "{}" }); break;
             case "meta": banco.MetasDieta.Add(new MetaDieta { UsuarioId = conta.Id, DataGeracao = Agora.AddDays(-89), VersaoFormula = 3 }); break;
             case "alergia": banco.AlergiasUsuario.Add(new AlergiaUsuario { UsuarioId = conta.Id, Codigo = "ovo", MarcadoEm = Agora.AddDays(-89) }); break;
+            case "casa":
+                banco.MembrosCasa.Add(new MembroCasa { Casa = new Casa { CriadaEm = Agora.AddDays(-89) }, UsuarioId = conta.Id, Papel = MembroCasa.PapelDono, EntrouEm = Agora.AddDays(-89) });
+                break;
         }
         await banco.SaveChangesAsync();
 

@@ -49,6 +49,26 @@ namespace Ronu.Api.Migrations
                     b.ToTable("AlergiasUsuario");
                 });
 
+            modelBuilder.Entity("Ronu.Api.Models.Casa", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CriadaEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("OrcamentoSemanal")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Casas");
+                });
+
             modelBuilder.Entity("Ronu.Api.Models.Consentimento", b =>
                 {
                     b.Property<int>("Id")
@@ -83,6 +103,49 @@ namespace Ronu.Api.Migrations
                         .HasFilter("\"RevogadoEm\" IS NULL");
 
                     b.ToTable("Consentimentos");
+                });
+
+            modelBuilder.Entity("Ronu.Api.Models.ConviteCasa", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CasaId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiraEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("RevogadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTime?>("UsadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("CasaId", "CriadoEm");
+
+                    b.ToTable("ConvitesCasa");
                 });
 
             modelBuilder.Entity("Ronu.Api.Models.DietaIA", b =>
@@ -144,6 +207,43 @@ namespace Ronu.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("ListaComprasMarcacoes");
+                });
+
+            modelBuilder.Entity("Ronu.Api.Models.MembroCasa", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CasaId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("EntrouEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Papel")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<DateTime?>("TransferenciaOferecidaEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CasaId")
+                        .IsUnique()
+                        .HasFilter("\"Papel\" = 'dono'");
+
+                    b.HasIndex("UsuarioId")
+                        .IsUnique();
+
+                    b.ToTable("MembrosCasa");
                 });
 
             modelBuilder.Entity("Ronu.Api.Models.MetaDieta", b =>
@@ -435,6 +535,25 @@ namespace Ronu.Api.Migrations
                     b.Navigation("Usuario");
                 });
 
+            modelBuilder.Entity("Ronu.Api.Models.ConviteCasa", b =>
+                {
+                    b.HasOne("Ronu.Api.Models.Casa", "Casa")
+                        .WithMany()
+                        .HasForeignKey("CasaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Ronu.Api.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Casa");
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("Ronu.Api.Models.DietaIA", b =>
                 {
                     b.HasOne("Ronu.Api.Models.Usuario", "Usuario")
@@ -461,6 +580,25 @@ namespace Ronu.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("DietaIA");
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("Ronu.Api.Models.MembroCasa", b =>
+                {
+                    b.HasOne("Ronu.Api.Models.Casa", "Casa")
+                        .WithMany()
+                        .HasForeignKey("CasaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Ronu.Api.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Casa");
 
                     b.Navigation("Usuario");
                 });

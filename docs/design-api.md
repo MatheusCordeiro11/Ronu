@@ -322,7 +322,7 @@ Calcula a meta da fórmula sem gravar nada e sem chamar a IA, com as mesmas clas
 
 ## Consentimento
 
-O texto de cada tipo de consentimento fica no código, por versão (`Services/Consentimentos/TextosConsentimento.cs`); a vigente é a maior versão do tipo, e o histórico do git guarda o que cada versão dizia. Existem dois tipos: `geral` (dados de saúde, obrigatório para usar o Ronu) e `alergias` (TACO 2c, v1: só para gravar chips de alergia; o aceite é gravado pelo `PUT /api/perfil/alergias/{codigo}` junto com o chip, ou por aqui). Mudar o que um texto publicado diz pede uma versão nova, e aí todo mundo aceita de novo no próximo acesso (o aceite vale só se é da versão vigente e não foi revogado). A tela sempre mostra o texto que vem da API e manda de volta a versão que mostrou: o texto lido e a versão gravada não têm como divergir.
+O texto de cada tipo de consentimento fica no código, por versão (`Services/Consentimentos/TextosConsentimento.cs`); a vigente é a maior versão do tipo, e o histórico do git guarda o que cada versão dizia. Existem três tipos: `geral` (dados de saúde, obrigatório para usar o Ronu), `alergias` (TACO 2c, v1: só para gravar chips de alergia; o aceite é gravado pelo `PUT /api/perfil/alergias/{codigo}` junto com o chip) e `casa` (plano família, v1: dividir com as pessoas da casa o que a casa precisa; o aceite é gravado pelo `POST /api/casa` ou pelo `POST /api/casa/convites/aceitar`, e sair da casa o revoga). Mudar o que um texto publicado diz pede uma versão nova, e aí todo mundo aceita de novo no próximo acesso (o aceite vale só se é da versão vigente e não foi revogado). A tela sempre mostra o texto que vem da API e manda de volta a versão que mostrou: o texto lido e a versão gravada não têm como divergir.
 
 ### `GET /api/consentimentos/vigente/{tipo}`
 Sem login: é o que a caixa do cadastro mostra, antes de a conta existir.
@@ -336,7 +336,7 @@ Sem login: é o que a caixa do cadastro mostra, antes de a conta existir.
 ### `POST /api/consentimentos`
 **Recebe:** `tipo`, `versao` (a que a tela mostrou)
 **Devolve:** 204 sem corpo. A data é a do servidor e o usuário vem do token. Aceitar de novo a versão já aceita não duplica (e duas abas ao mesmo tempo esbarram no índice único parcial, tratado como já aceito)
-**Erros:** 400 "Tipo de autorização inválido." ou campo faltando; 400 "A autorização das alergias é dada ao marcar a primeira alergia." com `tipo` = `alergias` (esse aceite só nasce junto com o primeiro chip, no `PUT /api/perfil/alergias/{codigo}`; por aqui ficaria um aceite de dado de saúde sem alergia nenhuma, que nada revogaria); **409** `{ mensagem: "O texto da autorização mudou. Leia de novo e aceite a versão nova.", versaoVigente }` se a versão não é a vigente; **429** acima de 10 aceites por minuto do mesmo usuário.
+**Erros:** 400 "Tipo de autorização inválido." ou campo faltando; 400 "A autorização das alergias é dada ao marcar a primeira alergia." com `tipo` = `alergias` (esse aceite só nasce junto com o primeiro chip, no `PUT /api/perfil/alergias/{codigo}`; por aqui ficaria um aceite de dado de saúde sem alergia nenhuma, que nada revogaria); 400 "A autorização da casa é dada ao criar a casa ou ao aceitar um convite." com `tipo` = `casa` (pelo mesmo motivo: um aceite sem casa, que sair da casa nunca revogaria); **409** `{ mensagem: "O texto da autorização mudou. Leia de novo e aceite a versão nova.", versaoVigente }` se a versão não é a vigente; **429** acima de 10 aceites por minuto do mesmo usuário.
 
 Não há rota para revogar: revogar o consentimento geral é apagar a conta (`DELETE /api/conta`), porque sem ele o Ronu não funciona. O de `alergias` é revogado quando a pessoa tira o último chip (`DELETE /api/perfil/alergias/{codigo}`): as alergias saem e o aceite ganha `RevogadoEm`.
 
@@ -352,19 +352,86 @@ As três rotas exigem login, mas não o consentimento: valem também para quem n
 
 ### `GET /api/conta/exportacao`
 "Baixar meus dados" (art. 18, II e V).
-**Devolve:** um arquivo JSON (`application/json`, anexo `ronu-dados-AAAA-MM-DD.json`, com `Cache-Control: no-store`), formato `ronu-exportacao-v1`: `geradoEm`, `conta` (nome, email, UF, datas, se tem senha e se tem Google vinculado, com o `googleId`), `perfil` (com os horários de acordar e dormir), `pesagens`, `modalidades` (com a hora de início), `preferenciasAlimentares`, `alergias` (`codigo`, `marcadoEm`), `dietas` (com o cardápio como JSON), `metasDieta`, `listaComprasMarcacoes`, `consentimentos` (os dois tipos, com `revogadoEm`) e `pedidosRedefinicaoSenha`. Montado campo a campo, nunca serializando as entidades: ficam de fora o hash da senha e o hash do token de redefinição, e um campo novo no modelo só entra se alguém o escrever em `ExportacaoConta`
+**Devolve:** um arquivo JSON (`application/json`, anexo `ronu-dados-AAAA-MM-DD.json`, com `Cache-Control: no-store`), formato `ronu-exportacao-v1`: `geradoEm`, `conta` (nome, email, UF, datas, se tem senha e se tem Google vinculado, com o `googleId`), `perfil` (com os horários de acordar e dormir), `pesagens`, `modalidades` (com a hora de início), `preferenciasAlimentares`, `alergias` (`codigo`, `marcadoEm`), `dietas` (com o cardápio como JSON), `metasDieta`, `listaComprasMarcacoes`, `consentimentos` (todos os tipos, com `revogadoEm`), `pedidosRedefinicaoSenha`, `casa` (`papel`, `entrouEm`, `transferenciaOferecidaEm`; nulo sem casa, e nada dos outros membros) e `convitesCasa` (os convites que a pessoa gerou: `criadoEm`, `expiraEm`, `usadoEm`, `revogadoEm`). Montado campo a campo, nunca serializando as entidades: ficam de fora o hash da senha, o hash do token de redefinição e o do convite, e um campo novo no modelo só entra se alguém o escrever em `ExportacaoConta`
 **Erros:** 404 "Conta não encontrada."; **429** acima de 5 exportações por hora do mesmo usuário.
 
 ### `DELETE /api/conta`
 Apaga a conta e tudo dela (art. 18, VI), também usado para revogar o consentimento.
 **Recebe:** conta com senha: `senha`; conta só com Google: `confirmacao` com a frase `apagar minha conta` (sem diferenciar maiúsculas, ignorando espaços nas pontas)
-**Devolve:** 204 sem corpo, também se a conta já tinha sido apagada (outra aba). `ExclusaoConta` apaga cada tabela com `UsuarioId` explicitamente, num `SaveChanges` só (tudo ou nada), com a cascata do PostgreSQL como segunda garantia; um teste por reflexão falha se uma tabela nova com `UsuarioId` não entrar na lista. Depois disso, todo token da conta responde 401. O log guarda só o id. As cópias de segurança do banco seguem o prazo de `docs/privacidade.md`
+**Devolve:** 204 sem corpo, também se a conta já tinha sido apagada (outra aba). `ExclusaoConta` apaga cada tabela com `UsuarioId` explicitamente, numa transação (tudo ou nada). Com casa: o membro sai; o dono sozinho leva a casa junto; o dono com membros não precisa transferir antes, a casa passa sozinha ao membro mais antigo (`EntrouEm`), e os convites que ele gerou saem com a conta, com a cascata do PostgreSQL como segunda garantia; um teste por reflexão falha se uma tabela nova com `UsuarioId` não entrar na lista. Depois disso, todo token da conta responde 401. O log guarda só o id. As cópias de segurança do banco seguem o prazo de `docs/privacidade.md`
 **Erros:** 400 "Digite sua senha para confirmar.", "Senha incorreta." ou `Digite "apagar minha conta" para confirmar.` (400, não 401: o 401 faria a tela encerrar a sessão por uma senha errada); **429** acima de 5 tentativas em 15 minutos do mesmo usuário.
 
 ### Limpeza automática (sem rota)
 O `ServicoLimpezaRetencao` roda a `LimpezaRetencao` 1 minuto depois de a API subir e a cada 24 horas (no App Service F1 a API dorme sem uso, então roda pelo menos a cada subida). Ela apaga:
 - pedidos de redefinição de senha com mais de 30 dias;
-- contas com mais de 30 dias que nunca aceitaram nenhuma versão do consentimento e não têm nenhum dado além de nome e email. Contas com `CriadoEm` nulo (anteriores ao campo) nunca entram.
+- convites da casa usados, vencidos ou revogados há mais de 30 dias;
+- contas com mais de 30 dias que nunca aceitaram nenhuma versão do consentimento e não têm nenhum dado além de nome e email (estar numa casa conta como dado). Contas com `CriadoEm` nulo (anteriores ao campo) nunca entram.
+
+---
+
+## Casa (plano família)
+
+Etapa 1: formar a casa (até 6 pessoas, um dono). O cardápio da casa, os pedidos e a lista da casa vêm nas próximas etapas. Todas as rotas exigem login e o consentimento geral (como as outras). Regras comuns:
+- `usuarioId` sempre do token. Quem não está numa casa recebe **404** `"Você não está em nenhuma casa."` em toda rota de membro, mesmo passando o id de algo de outra casa: a resposta não revela casa nenhuma. Membro em rota de dono recebe **403** `"Só quem cuida da casa pode fazer isso."`.
+- As rotas que mostram ou mudam a casa exigem também o aceite `casa` vigente: sem ele, **409** `{ mensagem, motivo: "consentimento_casa", versaoVigente }`. Sair (`DELETE /api/casa/eu`) e recusar ou cancelar a transferência não exigem: deixar de dividir os dados não pode depender de aceitar dividir. Sair dispensa até o consentimento geral.
+- Sair ou ser removido apaga a linha em `MembrosCasa` e preenche o `RevogadoEm` do aceite `casa`.
+- Sobre os outros, nenhuma resposta leva e-mail, sobrenome, idade, peso, altura, sexo, objetivo, meta ou treino.
+- **429** `{ mensagem }`: gerar convite acima de 10 por hora do mesmo usuário; verificar e aceitar convite (contagem única) acima de 20 por hora do mesmo IP; as demais escritas acima de 30 por minuto do mesmo usuário.
+
+**`CasaResponse`:** `souDono`, `membros [{ membroId, primeiroNome, dono, souEu, transferenciaPendente }]` (ordem de entrada; `primeiroNome` é só a primeira palavra do nome), `orcamento` (`economico`, `moderado`, `sem_restricao` ou nulo) e, só para o dono, `convitesAbertos [{ id, expiraEm }]` (nulo para os membros).
+
+### `GET /api/casa`
+**Devolve:** `CasaResponse`
+**Erros:** 404 sem casa; 409 `consentimento_casa`.
+
+### `POST /api/casa`
+Cria a casa com a pessoa como dono e grava o aceite `casa` junto (não há outro caminho para ele).
+**Recebe:** `versaoConsentimento` (a do texto que a tela mostrou, lido do `GET /api/consentimentos/vigente/casa`), `orcamento?`
+**Devolve:** 201 `CasaResponse`
+**Erros:** 400 "Orçamento semanal inválido."; 409 `ja_em_casa` (também quando duas abas criam ao mesmo tempo: o índice único em `MembrosCasa.UsuarioId` barra a segunda); 409 `consentimento_casa` com `versaoVigente` se a versão falta ou não é a vigente.
+
+### `PUT /api/casa/orcamento` (dono)
+**Recebe:** `orcamento` (nulo ou vazio = sem orçamento)
+**Devolve:** `CasaResponse`
+**Erros:** 400 "Orçamento semanal inválido."
+
+### `POST /api/casa/convites` (dono)
+**Devolve:** 201 `{ link, expiraEm }`. O link é `{Frontend:UrlBase}/casa-convite.html#convite=<token>` (endereço da configuração, nunca dos cabeçalhos; token no fragmento, que não chega a servidor nenhum). Token de 32 bytes aleatórios em Base64Url; o banco guarda só o SHA-256. Vale 7 dias e uma vez. Gerar outro não invalida os anteriores
+**Erros:** 409 `casa_cheia` com 6 pessoas.
+
+### `DELETE /api/casa/convites/{id}` (dono)
+Revoga (`RevogadoEm`). **Devolve:** 204, também se já estava revogado ou usado (sem mudar nada)
+**Erros:** 404 se o convite não é desta casa.
+
+### `POST /api/casa/convites/verificar`
+**Recebe:** `token`
+**Devolve:** `{ primeiroNomeDono, membros (a contagem), consentimento: { tipo, versao, titulo, texto } }`. Não usa o convite
+**Erros, nesta ordem:** 400 `invalido` (não existe ou foi revogado), 400 `usado`, 400 `expirado`; 409 `ja_em_casa` (inclusive a mesma casa); 409 `cadastro_incompleto` (sem data de nascimento, altura, sexo ou nenhum registro de objetivo); 403 `menor_de_18`; 409 `casa_cheia`. Todos como `{ mensagem, motivo }`.
+
+### `POST /api/casa/convites/aceitar`
+**Recebe:** `token`, `versaoConsentimento`
+**Devolve:** `CasaResponse`. As checagens da verificação são refeitas com a casa travada (`SELECT ... FOR UPDATE`), e o aceite `casa`, a linha em `MembrosCasa` e o `UsadoEm` são gravados numa transação. O uso único é um `UPDATE ... WHERE UsadoEm IS NULL AND RevogadoEm IS NULL AND ExpiraEm > agora` que precisa mudar 1 linha: de dois aceites ao mesmo tempo, só um passa
+**Erros:** os da verificação; 409 `consentimento_casa` com `versaoVigente` (versão ausente ou velha; o convite não é usado).
+
+### `DELETE /api/casa/membros/{membroId}` (dono)
+Tira alguém da casa. **Devolve:** 204
+**Erros:** 400 se for o próprio dono ("Para sair da casa, use a opção Sair."); 404 se não é desta casa.
+
+### `DELETE /api/casa/eu`
+Sair. **Devolve:** 204. O dono sozinho leva a casa (e os convites) junto
+**Erros:** 409 `{ mensagem: "Passe a casa para outra pessoa antes de sair.", motivo: "transferir_antes" }` para o dono com membros.
+
+### `POST /api/casa/transferencia` (dono)
+**Recebe:** `membroId`. Oferece a casa; uma oferta por vez (oferecer a outro desfaz a anterior). **Devolve:** 204
+**Erros:** 400 se for o próprio dono; 404 se não é desta casa.
+
+### `POST /api/casa/transferencia/aceitar`
+O membro escolhido vira dono, e o antigo dono vira membro. **Devolve:** `CasaResponse`
+**Erros:** 409 "Não há nenhuma casa sendo passada para você."
+
+### `DELETE /api/casa/transferencia`
+O dono cancela a oferta, ou o escolhido recusa. **Devolve:** 204 (sem oferta, não muda nada)
+**Erros:** 403 para um membro que não é o escolhido.
 
 ---
 

@@ -9,7 +9,7 @@ namespace Ronu.Api.Services.Conta;
 /// <summary>
 /// "Baixar meus dados" (LGPD, art. 18, II e V): tudo da conta num JSON. Montado campo a campo, nunca serializando as
 /// entidades: um campo novo no modelo (como um hash) não entra no arquivo sem alguém escrevê-lo aqui. Ficam de fora o
-/// hash da senha e o hash do token de redefinição. Toda consulta filtra pelo usuário do token.
+/// hash da senha, o hash do token de redefinição e o do convite da casa. Toda consulta filtra pelo usuário do token.
 /// </summary>
 public static class ExportacaoConta
 {
@@ -84,6 +84,18 @@ public static class ExportacaoConta
             .Select(p => new { p.Tipo, p.CriadoEm, p.ExpiraEm, p.UsadoEm, p.InvalidadoEm })
             .ToListAsync();
 
+        // Plano família: o papel da pessoa na casa e os convites que ela gerou, sem o TokenHash (como o da redefinição).
+        // Nada dos outros membros: nem nomes, nem quantos são.
+        var casa = await contexto.MembrosCasa.AsNoTracking()
+            .Where(m => m.UsuarioId == usuarioId)
+            .Select(m => new { m.Papel, m.EntrouEm, m.TransferenciaOferecidaEm })
+            .FirstOrDefaultAsync();
+
+        var convitesCasa = await contexto.ConvitesCasa.AsNoTracking()
+            .Where(c => c.UsuarioId == usuarioId).OrderBy(c => c.CriadoEm)
+            .Select(c => new { c.CriadoEm, c.ExpiraEm, c.UsadoEm, c.RevogadoEm })
+            .ToListAsync();
+
         var arquivo = new
         {
             Formato,
@@ -108,7 +120,9 @@ public static class ExportacaoConta
             MetasDieta = metas,
             ListaComprasMarcacoes = marcacoes,
             Consentimentos = consentimentos,
-            PedidosRedefinicaoSenha = pedidos
+            PedidosRedefinicaoSenha = pedidos,
+            Casa = casa,
+            ConvitesCasa = convitesCasa
         };
 
         return JsonSerializer.SerializeToUtf8Bytes(arquivo, Opcoes);

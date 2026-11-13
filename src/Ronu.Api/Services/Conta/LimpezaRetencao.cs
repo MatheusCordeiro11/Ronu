@@ -6,6 +6,7 @@ namespace Ronu.Api.Services.Conta;
 
 /// <summary>
 /// Os prazos de guarda de docs/privacidade.md que a API cumpre sozinha:
+/// - convites da casa usados, vencidos ou revogados há mais de 30 dias saem;
 /// - pedidos de redefinição de senha com mais de 30 dias saem (o limite por conta só olha as últimas 24 horas, e o
 ///   link vale 30 minutos: depois disso o pedido só serviria para investigar abuso recente);
 /// - conta que nunca aceitou o consentimento geral sai depois de 30 dias, mas só quando as três coisas valem (decisão
@@ -29,7 +30,11 @@ public static class LimpezaRetencao
     // vazia = a limpeza da rotina não roda (nenhuma data inventada antes da publicação).
     public const string ChaveRotinaForaDaTelaEm = "Retencao:RotinaForaDaTelaEm";
 
-    public record Resultado(int PedidosApagados, int ContasApagadas, int RotinasApagadas = 0);
+    // Plano família: um convite usado, vencido ou revogado não serve para mais nada; os 30 dias deixam o dono ver o
+    // que aconteceu com ele e investigar abuso recente.
+    public static readonly TimeSpan PrazoConvitesCasa = TimeSpan.FromDays(30);
+
+    public record Resultado(int PedidosApagados, int ContasApagadas, int RotinasApagadas = 0, int ConvitesCasaApagados = 0);
 
     /// <summary>
     /// Lê a data de ChaveRotinaForaDaTelaEm como o início do dia em UTC. Nulo se ausente ou vazia; exceção se o
@@ -60,6 +65,13 @@ public static class LimpezaRetencao
         contexto.PedidosRedefinicaoSenha.RemoveRange(pedidos);
         await contexto.SaveChangesAsync();
 
+        var limiteConvites = agora - PrazoConvitesCasa;
+        var convites = await contexto.ConvitesCasa
+            .Where(c => c.UsadoEm < limiteConvites || c.RevogadoEm < limiteConvites || c.ExpiraEm < limiteConvites)
+            .ToListAsync();
+        contexto.ConvitesCasa.RemoveRange(convites);
+        await contexto.SaveChangesAsync();
+
         var limiteContas = agora - PrazoContaSemAceite;
         var contas = await contexto.Usuarios
             .Where(u => u.CriadoEm != null && u.CriadoEm < limiteContas)
@@ -74,7 +86,9 @@ public static class LimpezaRetencao
                 && !contexto.ListaComprasMarcacoes.Any(x => x.UsuarioId == u.Id)
                 // Na prática, quem tem alergia já tem o aceite "alergias" e nem chega aqui; fica pela regra de "nenhuma
                 // linha em outra tabela", para não depender disso.
-                && !contexto.AlergiasUsuario.Any(x => x.UsuarioId == u.Id))
+                && !contexto.AlergiasUsuario.Any(x => x.UsuarioId == u.Id)
+                // Idem para a casa: entrar numa pede o aceite "casa". Quem gerou convite é dono, então já está aqui.
+                && !contexto.MembrosCasa.Any(x => x.UsuarioId == u.Id))
             .Select(u => u.Id)
             .ToListAsync();
 
@@ -102,6 +116,6 @@ public static class LimpezaRetencao
             rotinasApagadas = comRotina.Count;
         }
 
-        return new Resultado(pedidos.Count, apagadas, rotinasApagadas);
+        return new Resultado(pedidos.Count, apagadas, rotinasApagadas, convites.Count);
     }
 }

@@ -175,7 +175,8 @@ public class ConsentimentoTests
 
     // Uma rota nova com [DispensaConsentimento] precisa entrar nesta lista de propósito, não por engano. Apagar a rotina
     // antiga entrou em 2026-11-13: apagar o próprio dado é direito (art. 18, VI). Desmarcar um chip de alergia (TACO
-    // 2c) entrou pelo mesmo motivo; marcar e listar continuam exigindo o geral.
+    // 2c) entrou pelo mesmo motivo; marcar e listar continuam exigindo o geral. Sair da casa (plano família) também:
+    // é o "desfazer" da autorização de dividir os dados com a casa.
     [Fact]
     public void So_O_Aceite_E_A_Conta_Dispensam_O_Consentimento()
     {
@@ -189,6 +190,7 @@ public class ConsentimentoTests
 
         Assert.Equal(new[]
         {
+            $"{nameof(CasaController)}.{nameof(CasaController.Sair)}",
             nameof(ConsentimentosController), nameof(ContaController),
             $"{nameof(PerfilController)}.{nameof(PerfilController.ApagarRotina)}",
             $"{nameof(PerfilController)}.{nameof(PerfilController.DesmarcarAlergia)}"
@@ -271,7 +273,7 @@ public class ConsentimentoTests
     }
 
     [Theory]
-    [InlineData("casa")]
+    [InlineData("familia")]
     [InlineData("Alergias")]
     [InlineData("")]
     public void Texto_Publico_De_Tipo_Desconhecido_Da_400(string tipo)
@@ -360,8 +362,23 @@ public class ConsentimentoTests
         Assert.Equal(0, await banco.Consentimentos.CountAsync());
     }
 
+    // Plano família: o aceite da casa só nasce com a casa (POST /api/casa) ou com o convite aceito.
+    [Fact]
+    public async Task Aceite_Da_Casa_Pela_Rota_Geral_Da_400_E_Nao_Grava()
+    {
+        using var banco = BancoEmMemoria.NovoContexto();
+        var usuario = await NovoUsuario(banco, "casa-sem-convite@exemplo.test");
+        var versao = TextosConsentimento.VersaoVigente(TextosConsentimento.TipoCasa);
+
+        var resultado = await Controller(banco, usuario.Id).Aceitar(new ConsentimentoRequest { Tipo = "casa", Versao = versao });
+
+        Assert.IsType<BadRequestObjectResult>(resultado);
+        Assert.Equal(0, await banco.Consentimentos.CountAsync());
+    }
+
     [Theory]
-    [InlineData("casa")]
+    [InlineData("familia")]
+    [InlineData("Casa")]
     [InlineData("Geral")]
     [InlineData("")]
     public async Task Tipo_Desconhecido_Da_400(string tipo)

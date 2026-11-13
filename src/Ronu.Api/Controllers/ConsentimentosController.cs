@@ -24,6 +24,7 @@ public class ConsentimentosController : ControllerBase
 {
     private const string MensagemTipoInvalido = "Tipo de autorização inválido.";
     private const string MensagemAlergiasPeloChip = "A autorização das alergias é dada ao marcar a primeira alergia.";
+    private const string MensagemCasaPeloConvite = "A autorização da casa é dada ao criar a casa ou ao aceitar um convite.";
 
     private readonly ApplicationDbContext _context;
 
@@ -107,6 +108,13 @@ public class ConsentimentosController : ControllerBase
         if (request.Tipo == TextosConsentimento.TipoAlergias)
         {
             return BadRequest(new { mensagem = MensagemAlergiasPeloChip });
+        }
+
+        // O da casa só nasce junto com criar a casa ou aceitar o convite: por aqui ficaria um aceite sem casa, que sair
+        // da casa nunca revogaria.
+        if (request.Tipo == TextosConsentimento.TipoCasa)
+        {
+            return BadRequest(new { mensagem = MensagemCasaPeloConvite });
         }
 
         var vigente = TextosConsentimento.VersaoVigente(request.Tipo);

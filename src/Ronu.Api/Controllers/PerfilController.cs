@@ -67,13 +67,6 @@ public class PerfilController : ControllerBase
         TemGoogle = usuario.GoogleId is not null
     };
 
-    // Valores fixos enviados pelas pills de alimentacao.html — sem normalização
-    // (diferente do Estado), porque não vêm de digitação livre.
-    private static readonly HashSet<string> ValoresOrcamentoSemanal = new()
-    {
-        "economico", "moderado", "sem_restricao"
-    };
-
     /// <summary>
     /// Atualiza os dados pessoais do usuário logado. Diferente de
     /// ObjetivoUsuario, não é histórico — sobrescreve os valores atuais,
@@ -84,10 +77,11 @@ public class PerfilController : ControllerBase
     public async Task<IActionResult> Atualizar(PerfilRequest request)
     {
         // Opcional: nulo ou vazio segue normalmente; qualquer outro valor
-        // precisa ser uma das faixas conhecidas pela regra 12 do prompt.
-        if (!string.IsNullOrEmpty(request.OrcamentoSemanal) && !ValoresOrcamentoSemanal.Contains(request.OrcamentoSemanal))
+        // precisa ser uma das faixas conhecidas pela regra 12 do prompt (as
+        // mesmas da casa, RegrasOrcamento).
+        if (!RegrasOrcamento.Valido(request.OrcamentoSemanal))
         {
-            return BadRequest(new { mensagem = "Orçamento semanal inválido." });
+            return BadRequest(new { mensagem = RegrasOrcamento.MensagemInvalido });
         }
 
         if (!string.IsNullOrEmpty(request.NivelAtividade) && !RegrasDadosCorporais.NiveisAtividade.Contains(request.NivelAtividade))

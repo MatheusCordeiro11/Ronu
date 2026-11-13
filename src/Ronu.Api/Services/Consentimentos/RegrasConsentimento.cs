@@ -20,6 +20,10 @@ public static class RegrasConsentimento
     public const string MotivoSemAceiteAlergias = "consentimento_alergias";
     public const string MensagemSemAceiteAlergias = "Para salvar suas alergias, autorize o uso delas para montar o cardápio.";
 
+    // Plano família: 409 como o das alergias, pelo mesmo motivo (só a casa pede a caixa).
+    public const string MotivoSemAceiteCasa = "consentimento_casa";
+    public const string MensagemSemAceiteCasa = "Para usar a casa, autorize dividir com as pessoas dela o que a casa precisa.";
+
     // Ligado quando a chave falta: esquecer a configuração não pode desligar o consentimento. Só se desliga com
     // "false" explícito no App Service, durante a publicação (passo a passo em docs/privacidade.md).
     public static bool Exigir(IConfiguration configuracao) => configuracao.GetValue<bool?>(ChaveExigir) ?? true;

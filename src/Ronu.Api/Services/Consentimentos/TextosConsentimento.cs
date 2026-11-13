@@ -16,6 +16,10 @@ public static class TextosConsentimento
     // chip, numa caixa própria, e o geral não cobre esse uso.
     public const string TipoAlergias = "alergias";
 
+    // Plano família: dividir dados com as pessoas da casa é um uso novo, que o geral não cobre. O aceite nasce junto
+    // com criar a casa ou aceitar o convite, e sair da casa o revoga.
+    public const string TipoCasa = "casa";
+
     public record Texto(string Titulo, string Corpo);
 
     // Tipo → versão → texto. A vigente é a maior versão do tipo.
@@ -52,6 +56,23 @@ public static class TextosConsentimento
                 "As alergias marcadas tiram do cardápio os alimentos que as contêm. Elas ficam guardadas na sua conta e "
                 + "não vão para a IA: ela recebe a lista de alimentos já sem esses itens.\n"
                 + "Desmarque a qualquer momento: sem nenhuma marcada, o Ronu apaga suas alergias.")
+        },
+        [TipoCasa] = new()
+        {
+            // Plano família, etapa 1 (2026-11-13), ainda não aprovado na tela: o shape da etapa 2 revisa a forma. Diz o
+            // que os outros veem, o que fica só com a pessoa e o que dá para deduzir numa casa pequena, porque a lista
+            // da casa soma o que cada um come, inclusive no café e nos lanches.
+            [1] = new Texto(
+                "Autorizo o Ronu a dividir com as pessoas da minha casa o que a casa precisa para montar o cardápio.",
+                "As pessoas da casa veem seu primeiro nome, o cardápio do almoço e do jantar da semana e a lista de "
+                + "compras da casa, com os itens de todos somados, inclusive os do seu café da manhã e dos seus lanches. "
+                + "Elas também veem as restrições da casa (o que alguém não come e as alergias), sem o nome de quem tem "
+                + "cada uma.\n"
+                + "Ficam só com você: seu peso, sua meta, seu objetivo, seu progresso, seus treinos, a sua porção de cada "
+                + "refeição e os cardápios do seu café da manhã e dos seus lanches.\n"
+                + "Numa casa com poucas pessoas, dá para deduzir de quem é uma restrição e, pela lista da casa, o que e "
+                + "quanto cada um come.\n"
+                + "Sair da casa, a qualquer momento, desfaz esta autorização.")
         }
     };
 

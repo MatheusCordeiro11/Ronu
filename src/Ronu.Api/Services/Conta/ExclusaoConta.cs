@@ -1,12 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Ronu.Api.Data;
+using Ronu.Api.Services.PlanoFamilia;
 
 namespace Ronu.Api.Services.Conta;
 
 /// <summary>
 /// Apaga uma conta e tudo dela (LGPD, art. 18, VI): usada pelo "Apagar minha conta" e pela limpeza de conta sem
-/// aceite (LimpezaRetencao). Cada tabela é apagada explicitamente, e num SaveChanges só, que o EF faz numa transação:
-/// ou sai tudo, ou nada. A cascata do PostgreSQL fica como segunda garantia, e o banco em memória dos testes, que não
+/// aceite (LimpezaRetencao). Cada tabela é apagada explicitamente, numa transação: ou sai tudo, ou nada (um SaveChanges
+/// só, exceto quando o dono de uma casa com membros a passa adiante, que pede um a mais antes). A cascata do PostgreSQL fica como segunda garantia, e o banco em memória dos testes, que não
 /// tem cascata, prova que a lista daqui está completa (ExclusaoContaTests confere toda entidade com UsuarioId).
 ///
 /// Tabela nova com UsuarioId entra aqui. O teste por reflexão falha enquanto ela não entrar.
@@ -22,6 +23,21 @@ public static class ExclusaoConta
             return false;
         }
 
+        // Plano família: a casa antes do resto, porque o dono com membros passa a casa adiante num SaveChanges próprio
+        // (OperacoesCasa). A transação mantém o "ou sai tudo, ou nada" com os dois SaveChanges.
+        await using var transacao = await OperacoesCasa.IniciarTransacaoAsync(contexto);
+        try
+        {
+            await OperacoesCasa.SairParaExclusaoAsync(contexto, usuarioId);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            // Outra aba apagando a mesma conta já tirou o dono da casa.
+            return false;
+        }
+
+        contexto.MembrosCasa.RemoveRange(await contexto.MembrosCasa.Where(m => m.UsuarioId == usuarioId).ToListAsync());
+        contexto.ConvitesCasa.RemoveRange(await contexto.ConvitesCasa.Where(c => c.UsuarioId == usuarioId).ToListAsync());
         contexto.ListaComprasMarcacoes.RemoveRange(await contexto.ListaComprasMarcacoes.Where(m => m.UsuarioId == usuarioId).ToListAsync());
         contexto.PedidosRedefinicaoSenha.RemoveRange(await contexto.PedidosRedefinicaoSenha.Where(p => p.UsuarioId == usuarioId).ToListAsync());
         contexto.MetasDieta.RemoveRange(await contexto.MetasDieta.Where(m => m.UsuarioId == usuarioId).ToListAsync());
@@ -36,6 +52,10 @@ public static class ExclusaoConta
         try
         {
             await contexto.SaveChangesAsync();
+            if (transacao is not null)
+            {
+                await transacao.CommitAsync();
+            }
         }
         catch (DbUpdateConcurrencyException)
         {

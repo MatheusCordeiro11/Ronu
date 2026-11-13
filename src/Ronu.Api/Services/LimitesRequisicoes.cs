@@ -17,6 +17,7 @@ public static class LimitesRequisicoes
         LimitesConsentimento.Configurar(opcoes);
         LimitesConta.Configurar(opcoes);
         LimitesAlergias.Configurar(opcoes);
+        LimitesCasa.Configurar(opcoes);
 
         opcoes.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         opcoes.OnRejected = (contexto, cancelamento) =>
@@ -35,6 +36,9 @@ public static class LimitesRequisicoes
         LimitesConta.PoliticaExclusao => LimitesConta.MensagemExclusao,
         LimitesConta.PoliticaExportacao => LimitesConta.MensagemExportacao,
         LimitesAlergias.PoliticaAlergias => LimitesAlergias.MensagemLimite,
+        LimitesCasa.PoliticaConvite => LimitesCasa.MensagemConvite,
+        LimitesCasa.PoliticaConviteVerificar => LimitesCasa.MensagemConviteVerificar,
+        LimitesCasa.PoliticaEscrita => LimitesCasa.MensagemEscrita,
         _ => LimitesRedefinicaoSenha.MensagemLimite
     };
 }

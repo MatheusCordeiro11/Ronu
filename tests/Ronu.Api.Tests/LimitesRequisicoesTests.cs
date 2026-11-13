@@ -103,6 +103,36 @@ public class LimitesRequisicoesTests
         Assert.Equal(LimitesAlergias.PoliticaAlergias, atributo?.PolicyName);
     }
 
+    [Theory]
+    [InlineData(LimitesCasa.PoliticaConvite, LimitesCasa.MensagemConvite)]
+    [InlineData(LimitesCasa.PoliticaConviteVerificar, LimitesCasa.MensagemConviteVerificar)]
+    [InlineData(LimitesCasa.PoliticaEscrita, LimitesCasa.MensagemEscrita)]
+    public async Task Casa_Tem_As_Proprias_Mensagens(string politica, string mensagem)
+    {
+        Assert.Equal((429, mensagem), await Recusar(politica));
+    }
+
+    // Plano família: cada rota da casa com o seu limite. O GET fica sem, como as outras leituras.
+    [Theory]
+    [InlineData(nameof(Ronu.Api.Controllers.CasaController.Criar), LimitesCasa.PoliticaEscrita)]
+    [InlineData(nameof(Ronu.Api.Controllers.CasaController.AtualizarOrcamento), LimitesCasa.PoliticaEscrita)]
+    [InlineData(nameof(Ronu.Api.Controllers.CasaController.CriarConvite), LimitesCasa.PoliticaConvite)]
+    [InlineData(nameof(Ronu.Api.Controllers.CasaController.RevogarConvite), LimitesCasa.PoliticaEscrita)]
+    [InlineData(nameof(Ronu.Api.Controllers.CasaController.VerificarConvite), LimitesCasa.PoliticaConviteVerificar)]
+    [InlineData(nameof(Ronu.Api.Controllers.CasaController.AceitarConvite), LimitesCasa.PoliticaConviteVerificar)]
+    [InlineData(nameof(Ronu.Api.Controllers.CasaController.RemoverMembro), LimitesCasa.PoliticaEscrita)]
+    [InlineData(nameof(Ronu.Api.Controllers.CasaController.Sair), LimitesCasa.PoliticaEscrita)]
+    [InlineData(nameof(Ronu.Api.Controllers.CasaController.OferecerTransferencia), LimitesCasa.PoliticaEscrita)]
+    [InlineData(nameof(Ronu.Api.Controllers.CasaController.AceitarTransferencia), LimitesCasa.PoliticaEscrita)]
+    [InlineData(nameof(Ronu.Api.Controllers.CasaController.CancelarTransferencia), LimitesCasa.PoliticaEscrita)]
+    public void Rotas_Da_Casa_Tem_Limite(string metodo, string politica)
+    {
+        var atributo = System.Reflection.CustomAttributeExtensions.GetCustomAttribute<EnableRateLimitingAttribute>(
+            typeof(Ronu.Api.Controllers.CasaController).GetMethod(metodo)!);
+
+        Assert.Equal(politica, atributo?.PolicyName);
+    }
+
     [Fact]
     public void Mensagens_Sao_Diferentes()
     {
@@ -111,7 +141,8 @@ public class LimitesRequisicoesTests
             LimitesRedefinicaoSenha.MensagemLimite, LimitesTroca.MensagemLimite,
             LimitesAutenticacao.MensagemEntrada, LimitesAutenticacao.MensagemCadastro,
             LimitesConsentimento.MensagemLimite, LimitesConta.MensagemExclusao, LimitesConta.MensagemExportacao,
-            LimitesAlergias.MensagemLimite
+            LimitesAlergias.MensagemLimite,
+            LimitesCasa.MensagemConvite, LimitesCasa.MensagemConviteVerificar, LimitesCasa.MensagemEscrita
         ];
         Assert.Equal(mensagens.Length, mensagens.Distinct().Count());
     }
