@@ -161,7 +161,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           altura: atual.altura,
           sexo: atual.sexo,
           dataNascimento: atual.dataNascimento,
-          rotinaDiaria: atual.rotinaDiaria ?? null,
           orcamentoSemanal: atual.orcamentoSemanal ?? null,
           nivelAtividade: valor
         })
@@ -330,9 +329,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     return Number(perfil.altura) === dados.altura && perfil.sexo === dados.sexo && perfil.dataNascimento === dados.dataNascimento;
   }
 
-  // PUT /perfil grava todos os campos juntos: rotina e orçamento (editados
-  // na Alimentação) vêm de um GET feito na hora, para não apagar o que outra
-  // aba salvou (solução definitiva em docs/lacunas-conhecidas.md).
+  // PUT /perfil grava todos os campos juntos: o orçamento (editado na
+  // Alimentação) vem de um GET feito na hora, para não apagar o que outra
+  // aba salvou (solução definitiva em docs/lacunas-conhecidas.md). A rotina
+  // em texto não vai: a API ignora o campo desde os horários estruturados.
   const salvarDados = ronuComGravacao(async () => {
     clearTimeout(salvarPendente);
     salvarPendente = null;
@@ -351,7 +351,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...dados,
-          rotinaDiaria: atual.rotinaDiaria ?? null,
           orcamentoSemanal: atual.orcamentoSemanal ?? null
         })
       });
@@ -767,6 +766,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (location.hash === '#seu-dia') {
         $('seu-dia').scrollIntoView({ block: 'center' });
         elNivel.querySelector('[role="radio"][tabindex="0"]')?.focus({ preventScroll: true });
+      }
+      // Vindo do aviso da rotina antiga na Alimentação (perfil.html#seus-dados): o "Baixar meus dados".
+      if (location.hash === '#seus-dados') {
+        $('seus-dados').scrollIntoView({ block: 'center' });
       }
       // O sol/lua e as opções de tema foram desenhados agora: acerta as marcas.
       if (window.RonuTema) window.RonuTema.atualizar();

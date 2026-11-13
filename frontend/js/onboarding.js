@@ -389,14 +389,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    // O PUT grava tudo junto: rotina e orçamento já salvos vão de volta como
-    // estavam, para não serem apagados (lacuna "Duas abas abertas…").
+    // O PUT grava tudo junto: o orçamento já salvo vai de volta como estava,
+    // para não ser apagado (lacuna "Duas abas abertas…"). A rotina em texto
+    // não vai: a API ignora o campo desde os horários estruturados.
     await enviar('/perfil', 'PUT', {
       altura,
       sexo: estado.sexo,
       dataNascimento: nascimento,
       nivelAtividade: estado.nivelAtividade,
-      rotinaDiaria: estado.perfilSalvo?.rotinaDiaria ?? null,
       orcamentoSemanal: estado.perfilSalvo?.orcamentoSemanal ?? null
     });
     mostrarPasso(1);

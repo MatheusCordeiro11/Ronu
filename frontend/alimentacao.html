@@ -84,6 +84,25 @@
         <p class="apoio al-alergia">Tem alergia? Coloque aqui também, mas confira sempre os rótulos<span class="al-so-largo">: o cardápio é gerado por IA e não substitui orientação médica</span>.</p>
       </section>
 
+      <!-- Sua rotina antiga (LGPD base, etapa 3 dos horários): só existe enquanto a API devolver texto em
+           rotinaDiaria. O texto da pessoa entra só por textContent (js/alimentacao.js). Some quando ela apaga
+           (DELETE /perfil/rotina) ou quando a limpeza dos 60 dias apaga; nada no navegador guarda se já foi visto. -->
+      <section class="cartao al-rotina" id="al-rotina" aria-labelledby="al-rotina-titulo" hidden>
+        <div class="al-cabeca">
+          <h2 id="al-rotina-titulo">Sua rotina antiga</h2>
+          <span class="apoio al-so-largo">Não é mais usada</span>
+        </div>
+        <blockquote class="al-rotina-texto" id="al-rotina-texto"></blockquote>
+        <p class="campo-dica" id="al-rotina-explica">Este texto não é mais usado: os horários abaixo ficaram no lugar dele. Ele sai sozinho em 60 dias; se quiser guardar, baixe seus dados no Perfil.</p>
+        <div class="al-rotina-acoes">
+          <button type="button" class="botao botao-fantasma" id="al-rotina-apagar" aria-describedby="al-rotina-explica"><span class="btn-label">Apagar agora</span></button>
+          <a class="al-rotina-link" href="perfil.html#seus-dados">Baixar meus dados</a>
+        </div>
+        <p class="al-aviso" id="al-rotina-erro" role="alert"></p>
+      </section>
+      <!-- Fora do cartão: ele some ao apagar, e o "Rotina apagada" precisa continuar na tela. -->
+      <p class="al-salvo al-rotina-status" id="al-rotina-status" role="status" tabindex="-1"></p>
+
       <!-- Seus horários: acordar e dormir, no lugar da rotina em texto livre (que não vai mais para a IA).
            O horário de cada treino fica na tela de Treino. Salva ao sair do campo ou pouco depois de mudar. -->
       <section class="cartao al-horarios" aria-labelledby="al-horarios-titulo">

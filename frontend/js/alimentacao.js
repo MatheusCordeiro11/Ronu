@@ -390,7 +390,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       altura: atual.altura,
       sexo: atual.sexo,
       dataNascimento: atual.dataNascimento,
-      rotinaDiaria: atual.rotinaDiaria ?? null,
+      // Sem rotinaDiaria: a API ignora o campo desde os horários estruturados.
       orcamentoSemanal: atual.orcamentoSemanal ?? null,
       ...alteracoes
     };
@@ -531,6 +531,55 @@ document.addEventListener('DOMContentLoaded', async () => {
     escolherOrcamento(proximo);
   });
 
+  // ----- Sua rotina antiga -----
+  // O texto livre de antes dos horários estruturados não é mais usado (LGPD base, etapa 3). O cartão aparece
+  // sempre que a API devolver texto, sem lembrar no navegador que já foi visto: some quando a pessoa apaga ou
+  // quando a limpeza dos 60 dias apaga. O texto é da pessoa, então entra só por textContent.
+
+  const elRotina = $('al-rotina');
+  const elRotinaErro = $('al-rotina-erro');
+  const elRotinaStatus = $('al-rotina-status');
+  const botaoApagarRotina = $('al-rotina-apagar');
+
+  function renderizarRotina() {
+    const texto = perfil && typeof perfil.rotinaDiaria === 'string' ? perfil.rotinaDiaria.trim() : '';
+    $('al-rotina-texto').textContent = texto;
+    elRotina.hidden = !texto;
+  }
+
+  const apagarRotina = ronuComGravacao(async () => {
+    elRotinaErro.textContent = '';
+    status(elRotinaStatus, '');
+    ronuDefinirCarregando(botaoApagarRotina, true, 'Apagando...');
+    try {
+      let resposta;
+      try {
+        resposta = await ronuFetchAutenticado('/perfil/rotina', { method: 'DELETE' });
+      } catch (erro) {
+        if (erro.message === 'Sessão expirada.') throw erro;
+        throw new Error('Não foi possível apagar. Tente novamente.');
+      }
+      if (!resposta.ok) {
+        const corpo = await resposta.json().catch(() => null);
+        throw new Error(corpo?.mensagem || 'Não foi possível apagar. Tente novamente.');
+      }
+      perfil.rotinaDiaria = null;
+      renderizarRotina();
+      // O botão focado sumiu com o cartão: o foco vai para a confirmação, que fica no lugar dele.
+      status(elRotinaStatus, 'Rotina apagada', 'ok');
+      elRotinaStatus.focus();
+    } catch (erro) {
+      if (erro.message !== 'Sessão expirada.') {
+        elRotinaErro.textContent = erro.message;
+        elRotinaErro.dataset.tipo = 'erro';
+      }
+    } finally {
+      ronuDefinirCarregando(botaoApagarRotina, false);
+    }
+  });
+
+  botaoApagarRotina.addEventListener('click', apagarRotina);
+
   // ----- Nomes regionais -----
 
   function renderizarNomes() {
@@ -584,6 +633,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       renderizarAvisos();
       renderizarOrcamento(perfil.orcamentoSemanal);
       renderizarNomes();
+      renderizarRotina();
       if (perfilIncompleto()) mostrarPerfilIncompleto();
     } catch (erro) {
       if (erro.message === 'Sessão expirada.') return;

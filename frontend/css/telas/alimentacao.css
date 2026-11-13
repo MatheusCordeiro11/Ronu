@@ -347,6 +347,48 @@
   line-height: 1.5;
 }
 
+/* ---------- Sua rotina antiga ----------
+   Aviso de dado parado, não alerta: sem acento, no mesmo cartão dos vizinhos. O texto da pessoa fica numa
+   citação discreta (superfície um tom acima, sem itálico), com as quebras de linha que ela digitou. */
+.al-rotina {
+  padding: 24px 26px;
+}
+
+.al-rotina-texto {
+  margin: 0;
+  padding: 12px 14px;
+  background: var(--superficie-2);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-2);
+  font-size: var(--t-corpo);
+  line-height: 1.55;
+  color: var(--texto);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  max-width: 70ch;
+}
+
+.al-rotina-acoes {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--e-2) var(--e-5);
+}
+
+.al-rotina-link {
+  font-size: var(--t-apoio);
+  color: var(--texto);
+  text-underline-offset: 3px;
+}
+
+.al-rotina-link:hover {
+  color: var(--texto-2);
+}
+
+.al-rotina-status:focus {
+  outline: none;
+}
+
 /* ---------- Rotina ---------- */
 .al-horarios {
   gap: var(--e-4);
@@ -531,7 +573,8 @@
   }
 
   .al-lista,
-  .al-horarios {
+  .al-horarios,
+  .al-rotina {
     padding: 18px;
     gap: 14px;
   }
