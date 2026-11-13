@@ -78,3 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// O script do Google carrega com async: o botão só é desenhado no load. Fica
+// aqui, e não num <script> inline no HTML, porque a CSP não libera script
+// inline. No load o js/base/google.js (carregado depois deste) já rodou.
+window.addEventListener('load', () => ronuIniciarBotaoGoogle('signup_with'));

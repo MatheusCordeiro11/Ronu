@@ -35,6 +35,11 @@ artes marciais e esportes de combate, a partir do gasto calórico real de cada m
    não escuta na rede e o CORS não libera essa origem. Para testar mobile contra a API local, usar o
    modo responsivo do navegador no próprio PC.
 5. Testes do backend: `dotnet test tests/Ronu.Api.Tests` (não há solution na raiz, então `dotnet test` sozinho falha).
+6. Para testar com os cabeçalhos de produção (CSP e os outros do `frontend/vercel.json`), que o Live Server não envia:
+   parar o Live Server e rodar `node tools/servidor-teste.mjs` (porta 5500, só em `127.0.0.1`), abrindo
+   `http://127.0.0.1:5500/`. Ele lê os cabeçalhos e redirecionamentos do próprio `vercel.json` e só acrescenta
+   `http://localhost:5011` ao `connect-src`. Violação de CSP aparece no console do DevTools. Testes do próprio
+   servidor: `node --test tools/servidor-teste.test.mjs`.
 
 Verificação automática com jsdom e screenshots headless (desktop e mobile 390 px) é bem-vinda
 como complemento, mas nunca substitui o teste manual do usuário.

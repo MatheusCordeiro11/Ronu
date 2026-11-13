@@ -9,12 +9,9 @@
   <!-- Antes do CSS: aplica o modo escuro/claro antes da primeira pintura. -->
   <script src="../../js/base/tema.js"></script>
   <!-- Liga a rolagem guiada antes da primeira pintura (sem pulo de layout);
-       com movimento reduzido, as seções ficam como blocos comuns. -->
-  <script>
-    if (!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
-      document.documentElement.classList.add('rolagem-guiada');
-    }
-  </script>
+       com movimento reduzido, as seções ficam como blocos comuns. Sem defer:
+       precisa rodar aqui, antes do CSS. -->
+  <script src="rolagem-guiada.js"></script>
 
   <link rel="stylesheet" href="../../css/base/fontes.css">
 

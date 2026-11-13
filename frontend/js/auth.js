@@ -11,6 +11,8 @@
 // celular em 192.168.x.x) cai em produção de propósito — a API local não
 // escuta na rede nem libera essa origem no CORS.
 const RONU_API_LOCAL = 'http://localhost:5011/api';
+// Se este endereço mudar, mude também a origem no connect-src da CSP em
+// frontend/vercel.json: sem isso, a página em produção não consegue chamar a API.
 const RONU_API_PRODUCAO = 'https://ronu-api-dwcbcwgqgzgdhhag.chilecentral-01.azurewebsites.net/api';
 const RONU_CONFIG = {
   API_BASE: ['localhost', '127.0.0.1'].includes(window.location.hostname)
