@@ -121,6 +121,12 @@ public class TrocasControllerTests
         return valor.GetType().GetProperty("mensagem")?.GetValue(valor) as string;
     }
 
+    private static string? Motivo(IActionResult resultado)
+    {
+        var valor = ((ObjectResult)resultado).Value!;
+        return valor.GetType().GetProperty("motivo")?.GetValue(valor) as string;
+    }
+
     private static T Valor<T>(IActionResult r) => (T)((OkObjectResult)r).Value!;
 
     // ---------- Opções ----------
@@ -740,6 +746,7 @@ public class TrocasControllerTests
         Assert.Equal((422, 422), (Status(desfazer), Status(voltar)));
         Assert.Contains("Leite e derivados", Mensagem(desfazer));
         Assert.Contains("Leite integral", Mensagem(voltar));
+        Assert.Equal(("alergia", "alergia"), (Motivo(desfazer), Motivo(voltar)));
         Assert.Equal((json, troca.Revisao), (banco.DietasIA.AsNoTracking().Single().ConteudoJson, banco.DietasIA.AsNoTracking().Single().Revisao));
     }
 

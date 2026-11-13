@@ -68,6 +68,19 @@
     <div class="db-grade" id="dashboard-content" hidden>
       <div class="db-coluna">
 
+        <!-- TACO 2c: a dieta atual tem alimento de uma alergia marcada depois de ela ser gerada (alergiasNaDieta,
+             do GET /dietas/atual). Fica no topo, no tom de erro; não tem fechar: some quando não sobra nenhum. -->
+        <aside class="aviso aviso-erro db-alergia" id="db-aviso-alergia" aria-labelledby="db-alergia-titulo" hidden>
+          <h2 class="rotulo rotulo-acento" id="db-alergia-titulo">Alergia na dieta atual</h2>
+          <p class="db-alergia-texto" id="db-alergia-texto"></p>
+          <ul class="chips db-alergia-lista" id="db-alergia-lista" aria-label="Alimentos com alergia na dieta atual"></ul>
+          <div class="db-alergia-acoes">
+            <button type="button" class="botao botao-fantasma botao-pequeno" id="db-alergia-trocar">Trocar</button>
+            <button type="button" class="botao botao-primario botao-pequeno" id="db-alergia-gerar"><span class="btn-label">Gerar de novo</span></button>
+          </div>
+        </aside>
+        <p class="oculto-visual" id="db-alergia-status" role="status"></p>
+
         <!-- Quem ainda não contou como é o dia fora do treino (nível de
              atividade): convite discreto, some quando responde no Perfil. -->
         <aside class="db-nivel" id="db-aviso-nivel" aria-label="Nível de atividade" hidden>

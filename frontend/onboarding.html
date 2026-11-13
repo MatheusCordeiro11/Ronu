@@ -180,7 +180,7 @@
             <div class="ob-outro">
               <div class="campo ob-outro-campo">
                 <label class="campo-rotulo" for="ob-outro">Outro alimento</label>
-                <input class="entrada" type="text" id="ob-outro" maxlength="60" autocomplete="off" placeholder="Ex.: camarão, leite, fígado" aria-describedby="ob-outro-aviso">
+                <input class="entrada" type="text" id="ob-outro" maxlength="60" autocomplete="off" placeholder="Ex.: fígado, jiló, berinjela" aria-describedby="ob-outro-aviso">
               </div>
               <div class="segmentado ob-outro-tipo" role="radiogroup" aria-label="Tipo do alimento" id="ob-outro-tipo">
                 <button type="button" role="radio" aria-checked="true" data-valor="gosto">Gosto</button>
@@ -190,7 +190,34 @@
             </div>
             <!-- LGPD: o texto digitado aqui vai para a IA como foi escrito. -->
             <p class="nota" id="ob-outro-aviso">Escreva só o alimento. Não escreva doenças, remédios ou diagnósticos: este texto vai para a IA.</p>
-            <p class="apoio">Tem alergia? Marque como “prefiro evitar”, mas confira sempre os rótulos: o cardápio é gerado por IA e não substitui orientação médica.</p>
+
+            <!-- Alergias (TACO 2c): ficam só na tela até o Continuar, como o resto do passo. Com chip novo e sem
+                 autorização, o passo não avança. A primeira dieta já sai filtrada (o Continuar grava antes do gerar). -->
+            <section class="ob-alg" id="ob-alg" aria-labelledby="ob-alg-titulo">
+              <div class="alg-bloco">
+                <h2 id="ob-alg-titulo">Alguma alergia?</h2>
+                <p class="alg-intro">Marque só se tiver. Esses alimentos saem do cardápio, das trocas e da lista de compras, sem exceção.</p>
+              </div>
+              <div class="chips alg-chips" id="ob-alg-chips" role="group" aria-labelledby="ob-alg-titulo"></div>
+              <div class="aviso aviso-erro alg-erro" id="ob-alg-carregar-erro" role="alert" hidden>
+                <span>Não foi possível carregar suas alergias. Nada foi mudado; os chips voltam quando carregar.</span>
+                <button type="button" class="botao botao-fantasma botao-pequeno" id="ob-alg-carregar-tentar">Tentar de novo</button>
+              </div>
+              <p class="campo-dica" id="ob-alg-cruzada">Amendoim e Castanhas tiram os dois grupos: um costuma vir junto do outro na fábrica, e quem reage a um pode reagir ao outro.</p>
+              <div class="aceite alg-aceite" id="ob-alg-aceite" data-aceite data-aceite-tipo="alergias" aria-busy="true" hidden>
+                <label class="aceite-marcar">
+                  <input type="checkbox" id="ob-alg-marcar" aria-describedby="ob-alg-aceite-texto ob-alg-aceite-erro" disabled>
+                  <span data-aceite-titulo>Carregando o texto da autorização...</span>
+                </label>
+                <div class="aceite-texto" id="ob-alg-aceite-texto" data-aceite-texto></div>
+                <span class="campo-erro" id="ob-alg-aceite-erro" data-aceite-erro role="alert" hidden></span>
+                <div class="alg-aceite-acoes">
+                  <button type="button" class="botao-texto" id="ob-alg-recusar">Não autorizar e desmarcar</button>
+                </div>
+              </div>
+              <p class="alg-autorizado" id="ob-alg-autorizado" hidden></p>
+              <p class="campo-dica alg-rotulos">Outra alergia? Escreva acima, como “Evitar”. Confira sempre os rótulos: o cardápio é gerado por IA e não substitui orientação médica.</p>
+            </section>
           </section>
 
           <!-- ---------- Fim: gerar a primeira dieta ---------- -->
@@ -242,6 +269,8 @@
   </div>
 
   <script src="js/auth.js"></script>
+  <script src="js/base/aceite.js"></script>
+  <script src="js/base/alergias.js"></script>
   <script src="js/onboarding.js"></script>
 </body>
 </html>

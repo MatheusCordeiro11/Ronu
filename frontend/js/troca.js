@@ -93,8 +93,14 @@ window.RonuTroca = (function () {
     ctx.recarregar(r && r.status !== 409 && r.corpo?.mensagem ? r.corpo.mensagem : MSG_MUDOU);
   }
 
+  // 422 com motivo "alergia" (TACO 2c): o desfazer ou o voltar traria de volta um alimento com alergia
+  // marcada. A dieta não mudou, então a tela não recarrega: mostra a mensagem da API no lugar.
+  function recusaPorAlergia(r) {
+    return r.status === 422 && r.corpo?.motivo === 'alergia';
+  }
+
   function mudouPorFora(r) {
-    return r.status === 409 || r.status === 422 || r.status === 404;
+    return r.status === 409 || (r.status === 422 && !recusaPorAlergia(r)) || r.status === 404;
   }
 
   function mensagemDeErro(r, padrao) {
@@ -301,11 +307,13 @@ window.RonuTroca = (function () {
       `opcao-${opcao.alimentoId}`, [texto, numeros], aoEscolher);
   }
 
-  function textoFora(fora, foraPeloEvitar) {
+  // foraPelaAlergia (TACO 2c): conta à parte do "evitar" na API, mesmo que o item esteja nos dois.
+  function textoFora(fora, foraPeloEvitar, foraPelaAlergia) {
     const partes = [];
     const parte = (n, um, varios) => { if (n > 0) partes.push(n === 1 ? `1 ${um}` : `${n} ${varios}`); };
     parte(fora.porcaoMaxima || 0, 'passaria da porção máxima', 'passariam da porção máxima');
     parte(fora.foraDaMeta || 0, 'deixaria o dia mais de 5% fora da meta', 'deixariam o dia mais de 5% fora da meta');
+    parte(foraPelaAlergia || 0, 'tem uma das suas alergias', 'têm uma das suas alergias');
     parte(foraPeloEvitar, 'está no que você marcou para evitar', 'estão no que você marcou para evitar');
     parte(fora.jaNaRefeicao || 0, 'já está nesta refeição', 'já estão nesta refeição');
     parte((fora.refogadoComOleo || 0) + (fora.usoDiferente || 0), 'não combina com esta refeição', 'não combinam com esta refeição');
@@ -400,7 +408,7 @@ window.RonuTroca = (function () {
       corpo.append(ver);
     }
 
-    const fora = textoFora(escopo.fora, dados.foraPeloEvitar);
+    const fora = textoFora(escopo.fora, dados.foraPeloEvitar, dados.foraPelaAlergia);
     if (fora) {
       const detalhes = criar('details', 'troca-fora');
       const resumo = criar('summary', null, 'Por que outras opções não aparecem');
@@ -623,7 +631,9 @@ window.RonuTroca = (function () {
       recarregar(r);
       return;
     }
-    estado.erro = mensagemDeErro(r, 'Não foi possível voltar ao original agora. Tente de novo.');
+    estado.erro = recusaPorAlergia(r) && r.corpo.mensagem
+      ? r.corpo.mensagem
+      : mensagemDeErro(r, 'Não foi possível voltar ao original agora. Tente de novo.');
     desenharOriginal(estado);
   }
 
@@ -721,6 +731,12 @@ window.RonuTroca = (function () {
     }
     botaoDesfazer?.removeAttribute('aria-busy');
     const texto = elAviso.querySelector('.troca-aviso-textos p')?.textContent || '';
+    if (recusaPorAlergia(r)) {
+      // Desfazer não tem como dar certo depois: o botão sai, e a mensagem diz o caminho (Trocar).
+      mostrarAviso({ texto, desfazer: false, erro: r.corpo.mensagem || 'Não dá para desfazer: o alimento tem uma das suas alergias.' });
+      elAviso.querySelector('.folha-fechar')?.focus();
+      return;
+    }
     mostrarAviso({ texto, desfazer: true, erro: mensagemDeErro(r, 'Não foi possível desfazer agora. Tente de novo.') });
     elAviso.querySelector('[data-foco="desfazer"]')?.focus();
   }

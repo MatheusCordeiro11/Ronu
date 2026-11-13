@@ -7,6 +7,9 @@
 // - Horários (acordar e dormir) e orçamento vivem no perfil (PUT /perfil grava
 //   todos os campos juntos). Os horários salvam ao sair do campo ou pouco
 //   depois de mudar, nunca no meio da digitação; o orçamento, no clique.
+// - Alergias (TACO 2c): rotas próprias, um chip por pedido (PUT/DELETE
+//   /perfil/alergias/{codigo}). O primeiro chip pede a autorização do tipo
+//   "alergias" na caixa logo abaixo; marcar a caixa já salva (decisão D4).
 
 document.addEventListener('DOMContentLoaded', async () => {
   const usuario = ronuUsuarioLogado();
@@ -104,7 +107,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ---------- Gosto / evitar ----------
 
   const secoes = {};
-  document.querySelectorAll('.al-lista').forEach((secao) => {
+  // Só os cartões de gosto/evitar (o de Alergias também usa .al-lista, para o mesmo respiro, mas não tem tipo).
+  document.querySelectorAll('.al-lista[data-tipo]').forEach((secao) => {
     const tipo = secao.dataset.tipo;
     secoes[tipo] = {
       secao,
@@ -196,6 +200,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     daLista.filter(([, c]) => c.casou && c.lidoComo.length).forEach(([p, c]) => {
       linhas.push(criar('p', 'al-conferencia-linha', `“${p.alimento}” foi lido como ${c.lidoComo.join(' e ')}.`));
+    });
+    if (tipo === 'evitar') daLista.forEach(([p, c]) => {
+      const linha = criarSugestaoAlergia(p, c);
+      if (linha) linhas.push(linha);
     });
     secoes[tipo].conferencia.replaceChildren(...linhas);
   }
@@ -598,6 +606,374 @@ document.addEventListener('DOMContentLoaded', async () => {
     texto.append(criar('span', 'al-so-celular', ` ${mandioca}, ${feijao}.`));
   }
 
+  // ---------- Alergias (TACO 2c) ----------
+  // Três conjuntos: o que a API confirmou (marcados), o que a pessoa tocou e falta autorizar (pendentes) e o
+  // que está indo agora (salvando). Toda resposta da API traz o estado inteiro, e a tela redesenha com ele,
+  // não com o que achava: com duas abas abertas, vale o que está gravado.
+
+  const RA = window.RonuAlergias;
+  const alg = {
+    carregado: false,
+    marcados: new Set(),
+    pendentes: new Set(),
+    salvando: new Set(),
+    aceiteVigente: false,
+    aceitoEm: null,
+    salvandoCaixa: false,
+    // "Não é alergia": só até recarregar a página (D6); nada fica guardado.
+    dispensadas: new Set(),
+    // "Marcar alergia": o "evitar" que sai da lista quando todos os chips dele estiverem gravados
+    // (id da preferência → códigos). Com chip só pendente, o texto fica até a autorização.
+    evitarACobrir: new Map(),
+    // O último pedido que falhou, para o "Tentar de novo".
+    repetir: null
+  };
+  const elAlg = {
+    cartao: $('al-alergias'),
+    chips: $('al-alg-chips'),
+    pendente: $('al-alg-pendente'),
+    caixa: $('al-alg-aceite'),
+    marcar: $('al-alg-marcar'),
+    status: $('al-alg-status'),
+    erro: $('al-alg-erro'),
+    erroTexto: $('al-alg-erro-texto'),
+    carregarErro: $('al-alg-carregar-erro'),
+    autorizado: $('al-alg-autorizado')
+  };
+  let caixaCarregada = false;
+
+  const botoesAlergia = RA.criar(elAlg.chips, { aoTocar: (codigo) => tocarAlergia(codigo), cruzadaId: 'al-alg-cruzada' });
+  RonuAceite.iniciar(elAlg.caixa);
+
+  function renderizarAlergias() {
+    RA.pintar(botoesAlergia, {
+      marcados: alg.marcados,
+      pendentes: alg.pendentes,
+      salvando: alg.salvando,
+      desabilitado: !alg.carregado,
+      pendenteId: 'al-alg-pendente'
+    });
+
+    const pedeCaixa = alg.carregado && alg.pendentes.size > 0 && !alg.aceiteVigente;
+    elAlg.pendente.hidden = !pedeCaixa;
+    elAlg.pendente.textContent = pedeCaixa ? RA.fraseFaltaAutorizar(alg.pendentes) : '';
+    elAlg.caixa.hidden = !pedeCaixa;
+    if (pedeCaixa && !caixaCarregada) {
+      caixaCarregada = true;
+      RonuAceite.carregar(elAlg.caixa).then((corpo) => { if (!corpo) caixaCarregada = false; });
+    }
+    if (!pedeCaixa) elAlg.marcar.checked = false;
+
+    const autorizado = alg.carregado && alg.aceiteVigente && alg.marcados.size > 0;
+    elAlg.autorizado.hidden = !autorizado;
+    if (autorizado) RA.preencherAutorizado(elAlg.autorizado, alg.aceitoEm);
+  }
+
+  function aplicarEstadoAlergias(corpo) {
+    alg.marcados = new Set(corpo.alergias || []);
+    alg.aceiteVigente = !!corpo.aceiteVigente;
+    alg.aceitoEm = corpo.aceitoEm || null;
+    // Um chip que outra aba já gravou não fica mais pendente aqui.
+    alg.marcados.forEach((c) => alg.pendentes.delete(c));
+  }
+
+  function mostrarErroAlergia(texto, repetir) {
+    alg.repetir = repetir;
+    elAlg.erroTexto.textContent = texto;
+    elAlg.erro.hidden = false;
+  }
+
+  function limparErroAlergia() {
+    alg.repetir = null;
+    elAlg.erro.hidden = true;
+    elAlg.erroTexto.textContent = '';
+  }
+
+  // Um chip por pedido. versao: só no primeiro chip depois de marcar a caixa (grava o aceite junto).
+  // Devolve 'ok', 'aceite' (a API pediu a caixa: texto novo ou autorização revogada noutra aba) ou 'erro'.
+  async function pedirAlergia(metodo, codigo, versao) {
+    const opcoes = { method: metodo };
+    if (versao != null) {
+      opcoes.headers = { 'Content-Type': 'application/json' };
+      opcoes.body = JSON.stringify({ versaoConsentimento: versao });
+    }
+    let r;
+    try {
+      r = await RA.ler(await ronuFetchAutenticado(`/perfil/alergias/${codigo}`, opcoes));
+    } catch (erro) {
+      if (erro.message === 'Sessão expirada.') throw erro;
+      return { resultado: 'erro', mensagem: null };
+    }
+    if (r.ok && r.corpo) {
+      aplicarEstadoAlergias(r.corpo);
+      return { resultado: 'ok' };
+    }
+    if (RA.ehFaltaDeAceite(r)) return { resultado: 'aceite', comVersao: versao != null };
+    // 429 (60 mudanças por minuto) e afins: vale a frase da API, que diz o que fazer.
+    return { resultado: 'erro', mensagem: r.status === 429 ? r.corpo?.mensagem : null };
+  }
+
+  // O texto mudou (versão nova) ou a autorização caiu noutra aba: o chip volta a pendente e a caixa reabre.
+  async function reabrirCaixa(codigo, comVersao) {
+    alg.aceiteVigente = false;
+    alg.pendentes.add(codigo);
+    renderizarAlergias();
+    caixaCarregada = true;
+    await RonuAceite.textoMudou(elAlg.caixa, comVersao
+      ? 'O texto da autorização mudou. Leia e marque a caixa de novo para salvar.'
+      : 'Para salvar, autorize o uso das alergias marcando a caixa.');
+  }
+
+  const gravarAlergia = ronuComGravacao(async (codigo, versao) => {
+    const nome = RA.rotulo(codigo);
+    alg.salvando.add(codigo);
+    renderizarAlergias();
+    status(elAlg.status, `Salvando ${nome}…`);
+    let r;
+    try {
+      r = await pedirAlergia('PUT', codigo, versao);
+    } catch (erro) {
+      return 'erro';
+    } finally {
+      alg.salvando.delete(codigo);
+    }
+    if (r.resultado === 'ok') {
+      alg.pendentes.delete(codigo);
+      renderizarAlergias();
+      marcarMudanca();
+      tirarEvitarCobertos();
+      return 'ok';
+    }
+    status(elAlg.status, '');
+    if (r.resultado === 'aceite') {
+      await reabrirCaixa(codigo, r.comVersao);
+      return 'aceite';
+    }
+    renderizarAlergias();
+    return { erro: r.mensagem };
+  });
+
+  const tirarAlergia = ronuComGravacao(async (codigo) => {
+    const nome = RA.rotulo(codigo);
+    limparErroAlergia();
+    alg.salvando.add(codigo);
+    renderizarAlergias();
+    status(elAlg.status, `Tirando ${nome}…`);
+    let r;
+    try {
+      r = await pedirAlergia('DELETE', codigo);
+    } catch (erro) {
+      return;
+    } finally {
+      alg.salvando.delete(codigo);
+    }
+    renderizarAlergias();
+    if (r.resultado === 'ok') {
+      status(elAlg.status, alg.marcados.size === 0
+        ? 'Alergias apagadas. Se marcar de novo, o Ronu pede sua autorização outra vez.'
+        : `O chip ${nome} foi tirado. Vale a partir da próxima dieta.`, 'ok');
+      marcarMudanca();
+      conferir();
+      return;
+    }
+    status(elAlg.status, '');
+    mostrarErroAlergia(r.mensagem ? `${r.mensagem} O chip ${nome} continua marcado.` : `Não foi possível tirar ${nome}: o chip continua marcado.`,
+      () => tirarAlergia(codigo));
+  });
+
+  // Com autorização: o toque salva direto.
+  async function salvarAlergiaDireto(codigo) {
+    limparErroAlergia();
+    const r = await gravarAlergia(codigo);
+    if (r === 'ok') {
+      status(elAlg.status, `O chip ${RA.rotulo(codigo)} foi salvo. Vale a partir da próxima dieta.`, 'ok');
+      conferir();
+    } else if (r && r.erro !== undefined) {
+      const nome = RA.rotulo(codigo);
+      mostrarErroAlergia(r.erro ? `${r.erro} O chip ${nome} continua desmarcado.` : `Não foi possível salvar ${nome}: o chip continua desmarcado.`,
+        () => salvarAlergiaDireto(codigo));
+    }
+  }
+
+  // Marcar a caixa = autorizar e salvar os pendentes, um por vez, na ordem dos chips. O primeiro leva a
+  // versão do texto mostrado (grava o aceite junto); os outros já encontram o aceite gravado.
+  async function salvarPendentes() {
+    if (alg.salvandoCaixa) return;
+    const versao = Number(elAlg.caixa.dataset.versao);
+    if (!versao) return;
+    alg.salvandoCaixa = true;
+    elAlg.marcar.disabled = true;
+    limparErroAlergia();
+    let falha = null;
+    for (const codigo of RA.ordenar(alg.pendentes)) {
+      const r = await gravarAlergia(codigo, alg.aceiteVigente ? undefined : versao);
+      if (r !== 'ok') { falha = { codigo, r }; break; }
+    }
+    alg.salvandoCaixa = false;
+    if (elAlg.caixa.dataset.versao) elAlg.marcar.disabled = false;
+
+    if (!falha) {
+      renderizarAlergias();
+      status(elAlg.status, 'Alergias salvas. Valem a partir da próxima dieta.', 'ok');
+      // A caixa sumiu com o foco nela: ele vai para o primeiro chip marcado, no lugar de onde estava.
+      if (elAlg.caixa.contains(document.activeElement) || document.activeElement === document.body) {
+        botoesAlergia.get(RA.ordenar(alg.marcados)[0])?.focus();
+      }
+      conferir();
+      return;
+    }
+    if (falha.r === 'aceite' || falha.r === 'erro') return;
+    const nome = RA.rotulo(falha.codigo);
+    if (alg.aceiteVigente) {
+      // A autorização já foi gravada com um chip anterior: os que faltam voltam a desmarcados (nunca ficam
+      // parecendo salvos) e o "Tentar de novo" grava cada um direto.
+      const restantes = RA.ordenar(alg.pendentes);
+      alg.pendentes.clear();
+      renderizarAlergias();
+      const nomes = RA.juntar(restantes.map(RA.rotulo));
+      const um = restantes.length === 1;
+      mostrarErroAlergia(`${falha.r.erro || `Não foi possível salvar ${nome}.`} ${um ? `O chip ${nomes} continua desmarcado.` : `Os chips ${nomes} continuam desmarcados.`}`,
+        async () => { for (const c of restantes) await salvarAlergiaDireto(c); });
+      return;
+    }
+    // Nada foi gravado: a caixa continua marcada (a pessoa autorizou) e os chips continuam pendentes.
+    mostrarErroAlergia(`${falha.r.erro || `Não foi possível salvar ${nome}.`} Nada foi gravado ainda.`, () => salvarPendentes());
+  }
+
+  function tocarAlergia(codigo) {
+    if (!alg.carregado || alg.salvando.has(codigo) || alg.salvandoCaixa) return;
+    if (alg.marcados.has(codigo)) {
+      tirarAlergia(codigo);
+      return;
+    }
+    if (alg.pendentes.has(codigo)) {
+      alg.pendentes.delete(codigo);
+      status(elAlg.status, '');
+      renderizarAlergias();
+      return;
+    }
+    if (alg.aceiteVigente) {
+      salvarAlergiaDireto(codigo);
+      return;
+    }
+    // Sem autorização: o chip fica pendente e a caixa abre logo abaixo, sem roubar o foco do chip.
+    limparErroAlergia();
+    status(elAlg.status, '');
+    alg.pendentes.add(codigo);
+    renderizarAlergias();
+  }
+
+  elAlg.marcar.addEventListener('change', () => {
+    if (elAlg.marcar.checked) salvarPendentes();
+  });
+
+  $('al-alg-recusar').addEventListener('click', () => {
+    const primeiro = RA.ordenar(alg.pendentes)[0];
+    alg.pendentes.clear();
+    alg.evitarACobrir.clear();
+    renderizarAlergias();
+    status(elAlg.status, 'Nada foi salvo.');
+    // O botão sumiu com a caixa: o foco volta ao primeiro chip que estava pendente.
+    botoesAlergia.get(primeiro)?.focus();
+  });
+
+  $('al-alg-erro-tentar').addEventListener('click', () => {
+    const repetir = alg.repetir;
+    limparErroAlergia();
+    repetir?.();
+  });
+
+  async function carregarAlergias() {
+    elAlg.cartao.setAttribute('aria-busy', 'true');
+    elAlg.carregarErro.hidden = true;
+    elAlg.chips.hidden = false;
+    renderizarAlergias();
+    try {
+      const resposta = await ronuFetchAutenticado('/perfil/alergias');
+      if (!resposta.ok) throw new Error();
+      aplicarEstadoAlergias(await resposta.json());
+      alg.carregado = true;
+    } catch (erro) {
+      if (erro.message === 'Sessão expirada.') return;
+      // Sem saber o que está marcado, os chips não aparecem (nunca "nenhuma alergia" por engano).
+      elAlg.chips.hidden = true;
+      elAlg.carregarErro.hidden = false;
+    } finally {
+      elAlg.cartao.removeAttribute('aria-busy');
+    }
+    renderizarAlergias();
+    // As sugestões do "evitar" só aparecem com as alergias carregadas (para não sugerir o que já está marcado).
+    renderizarListas();
+  }
+
+  $('al-alg-carregar-tentar').addEventListener('click', carregarAlergias);
+
+  // "Isso parece alergia": um "evitar" que a conferência ligou a chips (sugereAlergias, lista). A tela
+  // pergunta por todos os chips sugeridos que ainda não estão marcados nem pendentes.
+  function criarSugestaoAlergia(preferencia, conferida) {
+    if (!alg.carregado || alg.dispensadas.has(preferencia.id)) return null;
+    const codigos = (conferida.sugereAlergias || [])
+      .filter((c) => RA.CODIGOS.includes(c) && !alg.marcados.has(c) && !alg.pendentes.has(c));
+    if (!codigos.length) return null;
+
+    const nomes = RA.juntar(codigos.map(RA.rotulo));
+    const linha = criar('div', 'al-conferencia-linha alg-sugere nota nota-forte');
+    const texto = criar('p', 'alg-sugere-texto');
+    texto.append(criar('strong', null, `“${preferencia.alimento}”`),
+      codigos.length === 1 ? ': isso parece alergia. Quer marcar o chip?' : ': isso parece alergia. Quer marcar os chips?');
+    const acoes = criar('div', 'alg-sugere-acoes');
+    const marcar = criar('button', 'botao botao-fantasma botao-pequeno', 'Marcar alergia');
+    marcar.type = 'button';
+    marcar.setAttribute('aria-label', `Marcar alergia: ${nomes}`);
+    marcar.addEventListener('click', () => marcarSugestao(preferencia, codigos));
+    const nao = criar('button', 'botao-texto', 'Não é alergia');
+    nao.type = 'button';
+    nao.setAttribute('aria-label', `“${preferencia.alimento}” não é alergia`);
+    nao.addEventListener('click', () => {
+      alg.dispensadas.add(preferencia.id);
+      renderizarConferencia('evitar');
+      secoes.evitar.campo.focus();
+    });
+    acoes.append(marcar, nao);
+    linha.append(texto, acoes);
+    return linha;
+  }
+
+  // Leva até o cartão e segue o caminho normal de cada chip: pendente + caixa, ou salva direto.
+  async function marcarSugestao(preferencia, codigos) {
+    alg.evitarACobrir.set(preferencia.id, codigos);
+    elAlg.cartao.scrollIntoView({ behavior: RA.semMovimento() ? 'auto' : 'smooth', block: 'start' });
+    botoesAlergia.get(codigos[0])?.focus({ preventScroll: true });
+    for (const codigo of codigos) {
+      if (alg.marcados.has(codigo) || alg.pendentes.has(codigo)) continue;
+      if (alg.aceiteVigente) await salvarAlergiaDireto(codigo);
+      else tocarAlergia(codigo);
+    }
+    renderizarConferencia('evitar');
+  }
+
+  // O chip cobre o "evitar" que deu origem à sugestão: com todos os chips dele gravados, o texto sai da lista
+  // (o mesmo DELETE do ×). Se falhar, o texto só continua lá, como estava; nada a desfazer.
+  async function tirarEvitarCobertos() {
+    for (const [id, codigos] of [...alg.evitarACobrir]) {
+      if (!codigos.every((c) => alg.marcados.has(c))) continue;
+      alg.evitarACobrir.delete(id);
+      const preferencia = preferencias.find((p) => p.id === id);
+      if (!preferencia) continue;
+      try {
+        const resposta = await ronuFetchAutenticado(`/preferencias-alimentares/${id}`, { method: 'DELETE' });
+        if (!resposta.ok && resposta.status !== 404) continue;
+      } catch (erro) {
+        continue;
+      }
+      preferencias = preferencias.filter((p) => p.id !== id);
+      renderizarListas();
+      avisar('evitar', `“${preferencia.alimento}” saiu do “Prefiro evitar”: o chip de alergia já cobre.`);
+      marcarMudanca();
+      conferir();
+    }
+  }
+
   // ---------- Gerar dieta ----------
 
   $('al-gerar').addEventListener('click', () => {
@@ -661,5 +1037,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   renderizarSugestoes();
   // Seções independentes: uma falha numa não impede a outra de carregar.
-  await Promise.all([carregarPreferencias(), carregarModalidades().then(carregarPerfil)]);
+  await Promise.all([carregarPreferencias(), carregarAlergias(), carregarModalidades().then(carregarPerfil)]);
 });

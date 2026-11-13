@@ -244,6 +244,39 @@
   color: var(--acento-texto);
 }
 
+/* "Isso parece alergia" (TACO 2c): a nota com o traço, e as duas ações alinhadas ao texto, embaixo. */
+.al-conferencia-linha.alg-sugere {
+  flex-wrap: wrap;
+  gap: var(--e-1) var(--e-3);
+  color: var(--texto);
+}
+
+.alg-sugere-texto {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+}
+
+.alg-sugere-acoes {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2) var(--e-4);
+  align-items: center;
+  padding-left: calc(14px + var(--e-3));
+}
+
+.alg-sugere-acoes .botao-texto {
+  min-height: 40px;
+  padding: 0;
+  font-size: var(--t-apoio);
+}
+
+/* O cartão recebe o foco pela âncora do "evitar" e pela sugestão: sem contorno no cartão inteiro. */
+.al-alergias:focus {
+  outline: none;
+}
+
 /* O que um "evitar" tira: bloco no fluxo (empurra o resto), não janela por cima. */
 .al-painel {
   display: grid;

@@ -57,6 +57,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   let itensDestacados = new Set();
   let animarRefeicoes = true;
 
+  // TACO 2c: alergiasNaDieta só vem no GET /dietas/atual (e nas respostas da troca), não no histórico. A
+  // dieta [0] do histórico é trocada pela do /atual, e a última lista vista fica aqui para o aviso dizer
+  // quando ela esvaziou (depois de uma troca), sem anunciar nada ao trocar de versão.
+  const NOMES_ALERGIA = {
+    leite: 'Leite e derivados', gluten: 'Glúten', ovo: 'Ovo', amendoim: 'Amendoim', castanhas: 'Castanhas',
+    soja: 'Soja', peixe: 'Peixe', crustaceos: 'Crustáceos e frutos do mar'
+  };
+  const ORDEM_ALERGIAS = Object.keys(NOMES_ALERGIA);
+  let alergiasVistas = { dietaId: null, quantas: 0 };
+
   // ---------- Formatação ----------
 
   function formatarNumero(valor) {
@@ -490,6 +500,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const qtd = criar('span', 'db-alimento-qtd num', `${formatarNumero(alimento.quantidade)} ${alimento.unidade}`);
     const nome = criar('span', 'db-alimento-nome-linha');
     nome.append(criar('span', null, alimento.nome));
+    // Alergia marcada depois da geração: a etiqueta com o nome do chip, só na dieta atual.
+    const alergias = atual ? alergiasDoAlimento(dietaResponse, alimento) : [];
+    if (alergias.length) {
+      const etiqueta = criar('span', 'db-tem-alergia', alergias.join(', '));
+      etiqueta.prepend(criar('span', 'oculto-visual', 'tem alergia: '));
+      nome.append(etiqueta);
+    }
 
     if (emTroca) {
       if (alimento.original) nome.append(criarMarcaTrocado(alimento, posicao, false));
@@ -685,10 +702,95 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  // ---------- Render: alergia na dieta atual (TACO 2c) ----------
+
+  function alergiasDoAlimento(dietaResponse, alimento) {
+    const achado = (dietaResponse.alergiasNaDieta || []).find((a) => a.alimentoId && a.alimentoId === alimento.alimentoId);
+    return achado ? ordenarAlergias(achado.alergias).map((c) => NOMES_ALERGIA[c] || c) : [];
+  }
+
+  function ordenarAlergias(codigos) {
+    return ORDEM_ALERGIAS.filter((c) => codigos.includes(c));
+  }
+
+  function juntarNomes(nomes) {
+    return nomes.length <= 1 ? (nomes[0] || '') : `${nomes.slice(0, -1).join(', ')} e ${nomes[nomes.length - 1]}`;
+  }
+
+  function renderizarAlergiaNaDieta() {
+    const aviso = $('db-aviso-alergia');
+    const atual = historico[0];
+    const lista = versaoSelecionada === 0 && atual ? (atual.alergiasNaDieta || []) : [];
+
+    // Sumiu depois de uma troca na mesma dieta: diz que acabou (o aviso some, sem botão de fechar).
+    if (atual && alergiasVistas.dietaId === atual.dietaId && alergiasVistas.quantas > 0 && (atual.alergiasNaDieta || []).length === 0) {
+      $('db-alergia-status').textContent = 'A dieta atual não tem mais alimentos com as suas alergias.';
+    }
+    if (atual) alergiasVistas = { dietaId: atual.dietaId, quantas: (atual.alergiasNaDieta || []).length };
+
+    aviso.hidden = lista.length === 0;
+    if (!lista.length) return;
+
+    const codigos = ordenarAlergias([...new Set(lista.flatMap((a) => a.alergias))]);
+    const texto = $('db-alergia-texto');
+    texto.replaceChildren(
+      'Esta dieta foi gerada antes de você marcar ',
+      criar('strong', null, juntarNomes(codigos.map((c) => NOMES_ALERGIA[c] || c))),
+      lista.length === 1 ? '. Este alimento ainda está nela:' : '. Estes alimentos ainda estão nela:'
+    );
+    $('db-alergia-lista').replaceChildren(...lista.map((a) => {
+      const chip = criar('li', 'chip chip-pequeno', a.nome);
+      // "· 5×" é para os olhos; o leitor de tela ouve "5 vezes na semana".
+      const vezes = criar('span', 'num texto-2', ` · ${a.vezes}×`);
+      vezes.setAttribute('aria-hidden', 'true');
+      chip.append(vezes, criar('span', 'oculto-visual', `, ${a.vezes} ${a.vezes === 1 ? 'vez' : 'vezes'} na semana`));
+      return chip;
+    }));
+  }
+
+  // A primeira posição do primeiro alimento afetado, a partir do dia aberto (só muda de dia se precisar).
+  function posicaoDaPrimeiraAlergia(dietaResponse) {
+    const alvo = (dietaResponse.alergiasNaDieta || [])[0];
+    if (!alvo) return null;
+    const dias = dietaResponse.dieta.dias;
+    for (let k = 0; k < dias.length; k++) {
+      const d = (diaSelecionado + k) % dias.length;
+      for (let r = 0; r < dias[d].refeicoes.length; r++) {
+        const i = dias[d].refeicoes[r].alimentos.findIndex((a) => a.alimentoId === alvo.alimentoId);
+        if (i >= 0) return { dia: d, refeicao: r, item: i };
+      }
+    }
+    return null;
+  }
+
+  // "Trocar": abre a troca do primeiro alimento afetado (D9). As opções já vêm sem o alérgeno (API).
+  $('db-alergia-trocar').addEventListener('click', () => {
+    const atual = historico[0];
+    const botao = $('db-alergia-trocar');
+    if (!atual || versaoSelecionada !== 0) return;
+    if (atual.semTroca) {
+      RonuTroca.abrirSemTroca(atual.semTroca, botao);
+      return;
+    }
+    const posicao = posicaoDaPrimeiraAlergia(atual);
+    if (!posicao) return;
+    if (posicao.dia !== diaSelecionado) selecionarDia(atual, posicao.dia, false);
+    const dia = atual.dieta.dias[posicao.dia];
+    const refeicao = dia.refeicoes[posicao.refeicao];
+    RonuTroca.abrirOpcoes({
+      ...posicao, alimento: refeicao.alimentos[posicao.item], nomeRefeicao: refeicao.nome,
+      diaSemana: dia.diaSemana, origem: botao
+    });
+  });
+
+  // "Gerar de novo": o mesmo fluxo do "Gerar nova dieta".
+  $('db-alergia-gerar').addEventListener('click', () => gerarDieta($('db-alergia-gerar')));
+
   function renderizarVersaoSelecionada() {
     const dietaResponse = historico[versaoSelecionada];
     // A lista de compras é sempre da dieta atual (índice 0 do histórico).
     $('db-compras').hidden = versaoSelecionada !== 0;
+    renderizarAlergiaNaDieta();
     renderizarListaPobre(dietaResponse);
     renderizarAjuste(dietaResponse);
     renderizarVersionSwitch();
@@ -731,6 +833,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     const resposta = await ronuFetchAutenticado('/dietas/historico');
     if (!resposta.ok) throw new Error('Não foi possível carregar suas dietas.');
     historico = await resposta.json();
+    await carregarAlergiasDaAtual();
+  }
+
+  // O histórico não traz alergiasNaDieta; o /atual traz (é a mesma dieta [0], com o aviso calculado com as
+  // alergias de agora). Se falhar, o painel abre igual e sem o aviso: nunca acusar sem certeza.
+  async function carregarAlergiasDaAtual() {
+    if (!historico.length) return;
+    try {
+      const resposta = await ronuFetchAutenticado('/dietas/atual');
+      if (!resposta.ok) return;
+      const atual = await resposta.json();
+      if (atual.dietaId != null && atual.dietaId === historico[0].dietaId) historico[0] = atual;
+    } catch (erro) {
+      if (erro.message === 'Sessão expirada.') throw erro;
+    }
   }
 
   // ---------- Lateral: objetivo, progresso, treino, alimentação ----------
@@ -967,6 +1084,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       historico[0] = resposta;
       refeicaoEmTroca = null;
       elTrocaErro.hidden = true;
+      // A resposta da troca traz alergiasNaDieta recalculado: o aviso e as etiquetas acompanham.
+      renderizarAlergiaNaDieta();
       if (versaoSelecionada !== 0) return;
       itensDestacados = new Set(mudadas);
       animarRefeicoes = false;
@@ -1007,7 +1126,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Enter/Espaço com o botão em foco disparariam outra geração no meio da
     // atual, por isso a ativação é ignorada aqui enquanto ele carrega.
     // Há dois "Gerar" na tela com dieta (topo e fim): um carregando já basta.
-    if ([btnGerar, btnGerarFim, btnGerarVazio].some((b) => b.dataset.loading === 'true')) return;
+    if ([btnGerar, btnGerarFim, btnGerarVazio, $('db-alergia-gerar')].some((b) => b.dataset.loading === 'true')) return;
 
     ronuOcultarErroFormulario(elGerarError);
     ronuDefinirCarregando(botao, true, 'Montando sua dieta da semana...');

@@ -260,12 +260,12 @@ Regras do substituto: mesmo grupo de troca, na lista de alimentos da pessoa com 
 ### `DELETE /api/dietas/atual/trocas/ultima?dietaId=&revisao=`
 "Desfazer": volta exatamente ao que estava antes da última gravação (troca ou volta ao original), se ela ainda é a última.
 **Devolve:** a `DietaResponse` com a revisão nova, `alergiasNaDieta` e `marcacoesRemovidas`
-**Erros:** **409** `"Não há troca para desfazer."` ou a mensagem de dieta mudada; **422** quando desfazer traria de volta um alimento com um chip de alergia marcado depois da troca: `"Não dá para voltar a \"Leite integral\": ele tem uma das suas alergias (Leite e derivados). Escolha outro substituto em Trocar."` (nada é gravado)
+**Erros:** **409** `"Não há troca para desfazer."` ou a mensagem de dieta mudada; **422** `{ mensagem, motivo: "alergia" }` quando desfazer traria de volta um alimento com um chip de alergia marcado depois da troca: `"Não dá para voltar a \"Leite integral\": ele tem uma das suas alergias (Leite e derivados). Escolha outro substituto em Trocar."` (nada é gravado; pelo `motivo`, a tela mostra a mensagem sem recarregar a dieta)
 
 ### `DELETE /api/dietas/atual/trocas?dietaId=&revisao=&dia=&refeicao=&item=&escopo=`
 "Voltar ao original": o item volta ao primeiro original, só ele (`escopo=refeicao`) ou, na semana, todos os itens com o mesmo alimento que vieram do mesmo original (`escopo=semana`).
 **Devolve:** a `DietaResponse` com a revisão nova, `alergiasNaDieta` e `marcacoesRemovidas`. Pode ser desfeito como uma troca.
-**Erros:** **400** `"Escopo inválido."`; **400** `"Este alimento não foi trocado."`; **409** a mensagem de dieta mudada; **422** a mesma mensagem do "Desfazer" quando o original tem um chip de alergia marcado (nada é gravado)
+**Erros:** **400** `"Escopo inválido."`; **400** `"Este alimento não foi trocado."`; **409** a mensagem de dieta mudada; **422** a mesma mensagem do "Desfazer", com `motivo: "alergia"`, quando o original tem um chip de alergia marcado (nada é gravado)
 
 ---
 

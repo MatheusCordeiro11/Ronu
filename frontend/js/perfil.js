@@ -617,6 +617,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // GET /consentimentos/geral: o texto e a data do aceite. Se falhar, o resto
   // do Perfil abre igual e o item diz que não carregou.
   let consentimento = null;
+  // GET /consentimentos/alergias (TACO 2c): null se não carregou; com aceito null, a pessoa nunca deu ou já
+  // revogou (tirou o último chip).
+  let consentimentoAlergias = null;
 
   async function carregarConsentimento() {
     try {
@@ -626,6 +629,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (erro.message === 'Sessão expirada.') throw erro;
       consentimento = null;
     }
+  }
+
+  async function carregarConsentimentoAlergias() {
+    try {
+      const resposta = await ronuFetchAutenticado('/consentimentos/alergias');
+      consentimentoAlergias = resposta.ok ? await resposta.json() : null;
+    } catch (erro) {
+      if (erro.message === 'Sessão expirada.') throw erro;
+      consentimentoAlergias = null;
+    }
+  }
+
+  function dataLonga(iso) {
+    return new Date(iso).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
   }
 
   function seta() {
@@ -691,6 +708,51 @@ document.addEventListener('DOMContentLoaded', async () => {
     return li;
   }
 
+  // A autorização das alergias (dado de saúde à parte da geral). Revogar não apaga a conta: é tirar todos os
+  // chips em Alimentação, e a autorização cai junto (a API grava a revogação no último chip).
+  function itemAutorizacaoAlergias() {
+    const li = criar('li');
+    const titulo = 'Autorização das alergias';
+
+    if (!consentimentoAlergias || !consentimentoAlergias.aceito) {
+      const info = criar('div', 'pf-conta-item pf-conta-info');
+      info.append(textosItem(titulo, !consentimentoAlergias
+        ? 'Não foi possível carregar agora. Recarregue a página para tentar de novo.'
+        : 'Não dada. O Ronu só pede quando você marca uma alergia em Alimentação.'));
+      li.append(info);
+      return li;
+    }
+
+    const aceito = consentimentoAlergias.aceito;
+    const data = dataLonga(aceito.aceitoEm);
+    const botao = criar('button', 'pf-conta-item pf-conta-abre');
+    botao.type = 'button';
+    botao.setAttribute('aria-expanded', 'false');
+    botao.setAttribute('aria-controls', 'pf-autorizacao-alergias');
+    botao.append(textosItem(titulo, `Aceita em ${data}`), seta());
+
+    const painel = criar('div', 'pf-autorizacao');
+    painel.id = 'pf-autorizacao-alergias';
+    painel.hidden = true;
+    const ir = criar('a', 'botao botao-fantasma botao-pequeno','Ver alergias em Alimentação');
+    ir.href = 'alimentacao.html#al-alergias';
+    painel.append(
+      criar('p', 'pf-autorizacao-titulo', consentimentoAlergias.titulo),
+      textoAceito(consentimentoAlergias.texto),
+      criar('p', 'apoio', `Você aceitou em ${data} (versão ${aceito.versao}). Para revogar, tire todos os chips de alergia em Alimentação: as alergias são apagadas e a autorização cai junto. A conta continua.`),
+      ir
+    );
+
+    botao.addEventListener('click', () => {
+      const abrir = painel.hidden;
+      painel.hidden = !abrir;
+      botao.setAttribute('aria-expanded', String(abrir));
+    });
+
+    li.append(botao, painel);
+    return li;
+  }
+
   function itemBaixar() {
     const li = criar('li');
     const botao = criar('button', 'pf-conta-item');
@@ -719,6 +781,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function renderizarSeusDados() {
     $('pf-seus-dados-lista').replaceChildren(
       itemAutorizacao(),
+      itemAutorizacaoAlergias(),
       itemBaixar(),
       itemLink('Política de privacidade', 'Que dados o Ronu usa, para quê e por quanto tempo', 'privacidade.html'),
       itemLink('Termos de uso', 'As regras do Ronu, em poucas linhas', 'termos.html'),
@@ -745,7 +808,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         ronuFetchAutenticado('/perfil'),
         ronuFetchAutenticado('/objetivos/atual'),
         carregarTendencia(),
-        carregarConsentimento()
+        carregarConsentimento(),
+        carregarConsentimentoAlergias()
       ]);
       if (!respostaPerfil.ok) throw new Error('Falha ao carregar.');
       perfil = await respostaPerfil.json();

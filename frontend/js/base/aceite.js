@@ -1,20 +1,24 @@
-// Ronu — Caixa do consentimento geral (cadastro.html e consentimento.html)
+// Ronu — Caixa de consentimento: a geral (cadastro.html e consentimento.html) e a das alergias
+// (alimentacao.html e onboarding.html, TACO 2c), escolhida por data-aceite-tipo na caixa.
 // O título, o texto e a versão vêm sempre da API: escritos no HTML, o texto
 // da tela e o que a API cobra só ficariam iguais por sorte. O cadastro lê a
 // rota pública (ainda não há conta); o consentimento.html lê a rota logada,
 // que também diz se a pessoa já aceitou. A tela envia a versão que mostrou.
 //
 // A caixa no HTML:
-//   <div class="aceite" data-aceite aria-busy="true">
+//   <div class="aceite" data-aceite [data-aceite-tipo="alergias"] aria-busy="true">
 //     <label class="aceite-marcar"><input type="checkbox" disabled ...><span data-aceite-titulo></span></label>
 //     <div class="aceite-texto" data-aceite-texto></div>
 //     <span class="campo-erro" data-aceite-erro hidden></span>
 //   </div>
 
 window.RonuAceite = (function () {
-  const TIPO = 'geral';
+  // Cada tipo tem o próprio texto na API; o título reserva só aparece se o texto não carregar.
+  const TITULO_RESERVA = { geral: 'Autorização dos dados de saúde', alergias: 'Autorização das alergias' };
   const MSG_CARREGAR = 'Não foi possível carregar o texto da autorização.';
   const MSG_SEM_MARCAR = 'Para continuar, autorize o uso dos seus dados de saúde.';
+
+  const tipoDa = (caixa) => caixa.dataset.aceiteTipo || 'geral';
 
   function partes(caixa) {
     return {
@@ -60,6 +64,7 @@ window.RonuAceite = (function () {
   // carregou (a caixa já mostra o erro com "Tentar de novo").
   async function carregar(caixa, { logado = false } = {}) {
     const p = partes(caixa);
+    const tipo = tipoDa(caixa);
     limparErro(p);
     caixa.setAttribute('aria-busy', 'true');
     p.marcar.disabled = true;
@@ -69,8 +74,8 @@ window.RonuAceite = (function () {
     let corpo = null;
     try {
       const resposta = logado
-        ? await ronuFetchAutenticado(`/consentimentos/${TIPO}`)
-        : await fetch(`${RONU_CONFIG.API_BASE}/consentimentos/vigente/${TIPO}`);
+        ? await ronuFetchAutenticado(`/consentimentos/${tipo}`)
+        : await fetch(`${RONU_CONFIG.API_BASE}/consentimentos/vigente/${tipo}`);
       corpo = resposta.ok ? await resposta.json().catch(() => null) : null;
     } catch (erro) {
       if (erro.message === 'Sessão expirada.') return null;
@@ -78,7 +83,7 @@ window.RonuAceite = (function () {
 
     const versao = corpo?.versaoVigente ?? corpo?.versao;
     if (!corpo || !versao || !corpo.titulo || !corpo.texto) {
-      p.titulo.textContent = 'Autorização dos dados de saúde';
+      p.titulo.textContent = TITULO_RESERVA[tipo] || TITULO_RESERVA.geral;
       p.texto.replaceChildren();
       mostrarErro(p, MSG_CARREGAR, { comTentar: () => carregar(caixa, { logado }) });
       caixa.removeAttribute('aria-busy');
@@ -95,8 +100,9 @@ window.RonuAceite = (function () {
   }
 
   // Confere antes de enviar. Devolve a versão marcada, ou null (e mostra o
-  // erro e leva o foco à caixa).
-  function versaoMarcada(caixa) {
+  // erro e leva o foco à caixa). mensagem: o erro da caixa desmarcada, quando
+  // a tela tem outra saída além de marcar (as alergias: desmarcar os chips).
+  function versaoMarcada(caixa, { mensagem = MSG_SEM_MARCAR } = {}) {
     const p = partes(caixa);
     if (!caixa.dataset.versao) {
       mostrarErro(p, MSG_CARREGAR, { comTentar: () => carregar(caixa, { logado: caixa.dataset.logado === 'true' }) });
@@ -105,7 +111,7 @@ window.RonuAceite = (function () {
     }
     if (!p.marcar.checked) {
       caixa.setAttribute('aria-invalid', 'true');
-      mostrarErro(p, MSG_SEM_MARCAR);
+      mostrarErro(p, mensagem);
       p.marcar.focus();
       return null;
     }

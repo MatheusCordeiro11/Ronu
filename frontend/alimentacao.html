@@ -70,7 +70,7 @@
         </div>
         <form class="al-adicionar" novalidate>
           <label class="oculto-visual" for="al-evitar-campo">Adicionar alimento para evitar</label>
-          <input class="entrada entrada-no-card" id="al-evitar-campo" type="text" maxlength="100" autocomplete="off" placeholder="Ex.: camarão, leite, fígado" aria-describedby="al-evitar-aviso">
+          <input class="entrada entrada-no-card" id="al-evitar-campo" type="text" maxlength="100" autocomplete="off" placeholder="Ex.: fígado, jiló, berinjela" aria-describedby="al-evitar-aviso">
           <button type="submit" class="botao botao-fantasma al-adicionar-botao" aria-label="Adicionar aos que você prefere evitar"><span class="btn-label"><span class="al-so-largo">Adicionar</span><span class="al-so-celular" aria-hidden="true">+</span></span></button>
         </form>
         <!-- LGPD: o texto do "evitar" vai para a IA como foi digitado. -->
@@ -81,7 +81,45 @@
         <div class="al-painel" id="al-painel" hidden></div>
         <div class="al-conferencia" aria-live="polite"></div>
         <div class="al-lista-pobre" id="al-lista-pobre" aria-live="polite" hidden></div>
-        <p class="apoio al-alergia">Tem alergia? Coloque aqui também, mas confira sempre os rótulos<span class="al-so-largo">: o cardápio é gerado por IA e não substitui orientação médica</span>.</p>
+        <!-- TACO 2c: alergia tem cartão próprio (filtro duro); o aviso dos rótulos mora no rodapé dele. -->
+        <p class="apoio al-alergia">Tem alergia? Marque em <a href="#al-alergias">Alergias</a>, logo abaixo: lá o alimento sai de tudo, sem exceção.</p>
+      </section>
+
+      <!-- Alergias (TACO 2c): 8 chips, cada um salvo na hora (PUT/DELETE /perfil/alergias). Alergia é dado de
+           saúde: o primeiro chip pede a autorização do tipo "alergias", com o texto vindo da API. Sem carregar,
+           os chips não aparecem vazios (nunca dizer "nenhuma alergia" por engano). js/alimentacao.js. -->
+      <section class="cartao al-lista al-alergias" id="al-alergias" aria-labelledby="al-alg-titulo" aria-busy="true" tabindex="-1">
+        <div class="al-cabeca">
+          <h2 id="al-alg-titulo">Alergias</h2>
+          <span class="apoio al-so-largo">Saem de tudo, sem exceção</span>
+        </div>
+        <p class="alg-intro">Marque o que você não pode comer. Esses alimentos saem do cardápio, das trocas e da lista de compras, mesmo que a lista fique curta.</p>
+        <div class="chips alg-chips" id="al-alg-chips" role="group" aria-labelledby="al-alg-titulo"></div>
+        <div class="aviso aviso-erro alg-erro" id="al-alg-carregar-erro" role="alert" hidden>
+          <span>Não foi possível carregar suas alergias. Nada foi mudado; os chips voltam quando carregar.</span>
+          <button type="button" class="botao botao-fantasma botao-pequeno" id="al-alg-carregar-tentar">Tentar de novo</button>
+        </div>
+        <p class="nota nota-forte" id="al-alg-pendente" role="status" hidden></p>
+        <!-- Desmarcada sempre; marcar já autoriza e salva os chips pendentes. -->
+        <div class="aceite alg-aceite" id="al-alg-aceite" data-aceite data-aceite-tipo="alergias" aria-busy="true" hidden>
+          <label class="aceite-marcar">
+            <input type="checkbox" id="al-alg-marcar" aria-describedby="al-alg-aceite-texto al-alg-aceite-erro" disabled>
+            <span data-aceite-titulo>Carregando o texto da autorização...</span>
+          </label>
+          <div class="aceite-texto" id="al-alg-aceite-texto" data-aceite-texto></div>
+          <span class="campo-erro" id="al-alg-aceite-erro" data-aceite-erro role="alert" hidden></span>
+          <div class="alg-aceite-acoes">
+            <button type="button" class="botao-texto" id="al-alg-recusar">Não autorizar e desmarcar</button>
+          </div>
+        </div>
+        <p class="al-salvo" id="al-alg-status" role="status"></p>
+        <div class="aviso aviso-erro alg-erro" id="al-alg-erro" role="alert" hidden>
+          <span id="al-alg-erro-texto"></span>
+          <button type="button" class="botao botao-fantasma botao-pequeno" id="al-alg-erro-tentar">Tentar de novo</button>
+        </div>
+        <p class="campo-dica" id="al-alg-cruzada">Amendoim e Castanhas tiram os dois grupos: um costuma vir junto do outro na fábrica, e quem reage a um pode reagir ao outro.</p>
+        <p class="alg-autorizado" id="al-alg-autorizado" hidden></p>
+        <p class="campo-dica alg-rotulos">Outra alergia? Escreva em Prefiro evitar. Confira sempre os rótulos: o cardápio é gerado por IA e não substitui orientação médica.</p>
       </section>
 
       <!-- Sua rotina antiga (LGPD base, etapa 3 dos horários): só existe enquanto a API devolver texto em
@@ -180,6 +218,8 @@
   <script src="js/auth.js"></script>
   <script src="js/base/cabecalho.js"></script>
   <script src="js/base/horarios.js"></script>
+  <script src="js/base/aceite.js"></script>
+  <script src="js/base/alergias.js"></script>
   <script src="js/alimentacao.js"></script>
 </body>
 </html>

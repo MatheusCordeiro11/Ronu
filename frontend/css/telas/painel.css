@@ -194,6 +194,40 @@
   color: var(--texto-2);
 }
 
+/* ---------- Alergia na dieta atual (TACO 2c) ----------
+   No tom de erro (não no acento): é um problema da dieta salva, não uma ação principal. */
+.db-alergia {
+  display: grid;
+  gap: var(--e-3);
+  padding: 16px 18px;
+}
+
+.db-alergia-texto {
+  margin: 0;
+}
+
+.db-alergia-lista .chip {
+  border-color: var(--erro-campo);
+}
+
+.db-alergia-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+}
+
+/* Etiqueta no alimento afetado, na lista de refeições: contorno de erro, texto no acento de texto. */
+.db-tem-alergia {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border: 1px solid var(--erro-campo);
+  border-radius: var(--raio-pilula);
+  color: var(--acento-texto);
+  font-size: var(--t-pequeno);
+  line-height: 1.4;
+}
+
 .db-nivel-traco {
   flex: none;
   width: 14px;

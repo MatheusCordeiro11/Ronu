@@ -222,7 +222,8 @@ public class TrocasController : ControllerBase
 
     // TACO 2c: o "Desfazer" e o "Voltar ao original" não trazem de volta um alimento com alergia marcada depois da
     // troca. 422, e não 409: a dieta não mudou, o pedido é que não pode ser atendido. Nada é gravado (a mudança só
-    // existia no objeto em memória).
+    // existia no objeto em memória). O motivo "alergia" diz à tela que a dieta não mudou por fora: ela mostra a
+    // mensagem no lugar, sem recarregar (os outros 422 da troca são dieta antiga ou base nova).
     private UnprocessableEntityObjectResult? VoltaComAlergia(DietaSemanalDto antes, DietaSemanalDto depois, IReadOnlyList<string> alergias)
     {
         if (AlergiasNaDieta.QueVolta(antes, depois, alergias) is not { } volta)
@@ -232,7 +233,8 @@ public class TrocasController : ControllerBase
 
         return UnprocessableEntity(new
         {
-            mensagem = $"Não dá para voltar a \"{volta.Alimento.Nome}\": ele tem uma das suas alergias ({volta.Chip.Rotulo}). Escolha outro substituto em Trocar."
+            mensagem = $"Não dá para voltar a \"{volta.Alimento.Nome}\": ele tem uma das suas alergias ({volta.Chip.Rotulo}). Escolha outro substituto em Trocar.",
+            motivo = "alergia"
         });
     }
 

@@ -1025,6 +1025,105 @@ button.chip:hover {
   cursor: progress;
 }
 
+/* ---------- Chips de alergia (TACO 2c: Alimentação e onboarding, js/base/alergias.js) ----------
+   Três intensidades de "não", três desenhos: "prefiro evitar" é tracejado; a alergia é o chip
+   cheio com visto (o .chip[aria-pressed="true"] de sempre). Pendente (falta autorizar) não é
+   cheio: só fica cheio o que a API confirmou. */
+.alg-chip {
+  gap: 6px;
+}
+
+.alg-chip .alg-visto {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  display: none;
+}
+
+.alg-chip[aria-pressed="true"] .alg-visto {
+  display: block;
+}
+
+.alg-chip[data-estado="pendente"] {
+  background: var(--superficie-3);
+  border-color: var(--acento);
+  color: var(--texto);
+}
+
+.alg-chip[data-estado="pendente"] .alg-visto {
+  color: var(--acento-texto);
+}
+
+.alg-chip[aria-busy="true"] {
+  opacity: 0.72;
+  cursor: progress;
+}
+
+/* Carregando: os 8 aparecem, mas não dá para tocar até a API dizer o que está marcado. */
+.alg-chip:disabled:not([aria-busy="true"]) {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+/* Coberto: não marcado, mas já sai junto com o par (Amendoim e Castanhas). */
+.alg-chip[data-coberto] {
+  background: var(--superficie-3);
+}
+
+.alg-chip-com {
+  font-size: var(--t-pequeno);
+  font-weight: 400;
+  color: var(--texto-2-ativo);
+}
+
+.alg-chip-com::before {
+  content: '· ';
+}
+
+.alg-intro {
+  font-size: var(--t-apoio);
+  line-height: 1.55;
+  color: var(--texto-2);
+}
+
+/* "Uso autorizado em ...": discreta, no lugar da caixa. */
+.alg-autorizado {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--e-2);
+  font-size: var(--t-pequeno);
+  color: var(--texto-2);
+}
+
+.alg-aceite-acoes {
+  padding-left: calc(22px + var(--e-3));
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+  align-items: center;
+}
+
+.alg-aceite-acoes .botao-texto {
+  min-height: 40px;
+  padding: 0;
+  font-size: var(--t-apoio);
+}
+
+.alg-erro {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--t-apoio);
+}
+
+/* Rodapé do bloco: rótulos e orientação médica, separado por uma linha interna. */
+.alg-rotulos {
+  border-top: 1px solid var(--divisor);
+  padding-top: var(--e-4);
+}
+
 /* ---------- Ação que apaga: tom de erro, nunca o vermelho do botão principal ---------- */
 .botao-perigo {
   background: var(--erro-fundo);
