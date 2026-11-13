@@ -202,13 +202,26 @@ public class BaseNutricionalTests
         AssertMarcados(ComNome("ovo", "clara", "gema"), Alergenos.Ovo);
     }
 
-    // Castanhas e nozes passam pelo mesmo beneficiamento do amendoim
-    // ("pode conter amendoim"): na dúvida, marca.
+    // Fase 2c: castanhas têm marca própria e o amendoim fica só no amendoim. O cruzamento entre as duas famílias é
+    // regra do filtro (RegrasAlergias), não marca da base.
     [Fact]
-    public void Amendoim_E_Oleaginosas_Tem_A_Marca_De_Amendoim()
+    public void Amendoim_E_Castanhas_Tem_Marcas_Proprias()
     {
         AssertMarcados(ComNome("amendoim"), Alergenos.Amendoim);
-        AssertMarcados(ComNome("castanha", "noz", "amendoa", "avela", "pistache"), Alergenos.Amendoim);
+        AssertMarcados(ComNome("castanha", "noz", "amendoa", "avela", "pistache", "macadamia", "peca"), Alergenos.Castanhas);
+        Assert.DoesNotContain(ComNome("castanha", "noz", "amendoa"), i => i.Alergenos.HasFlag(Alergenos.Amendoim));
+        Assert.DoesNotContain(ComNome("amendoim"), i => i.Alergenos.HasFlag(Alergenos.Castanhas));
+    }
+
+    // Tabela da soja aprovada em 2026-11-13: exatamente estes itens, cada um com o motivo na Observacao.
+    [Fact]
+    public void Soja_Marca_Exatamente_Os_Itens_Aprovados()
+    {
+        var comSoja = Itens.Where(i => i.Alergenos.HasFlag(Alergenos.Soja)).Select(i => i.Id).Order();
+
+        Assert.Equal(["aveia-em-flocos", "oleo-de-soja", "pao-de-forma-integral", "pao-de-queijo-assado", "pao-frances"], comSoja);
+        AssertMarcados(ComNome("soja", "tofu", "edamame"), Alergenos.Soja);
+        Assert.All(Itens.Where(i => i.Alergenos.HasFlag(Alergenos.Soja)), i => Assert.Contains("Soja", i.Observacao));
     }
 
     // Composição incerta (varia muito entre marcas e receitas) fica fora da

@@ -108,16 +108,28 @@ public class CasamentoPreferenciasTests
     public void Ovo_Tira_Tudo_Que_Tem_Ovo() =>
         Tira(ComAlergeno(Alergenos.Ovo), "ovo", "Ovos", "ovo de galinha", "clara de ovo");
 
+    private static IEnumerable<string> AmendoimECastanhas() =>
+        Onde(i => i.Alergenos.HasFlag(Alergenos.Amendoim) || i.Alergenos.HasFlag(Alergenos.Castanhas));
+
     [Fact]
-    public void Amendoim_E_Castanhas_Tiram_A_Mesma_Familia() =>
-        Tira(ComAlergeno(Alergenos.Amendoim), "amendoim", "castanhas", "nozes", "noz", "oleaginosas", "amêndoa", "Castanha-de-caju",
+    public void Amendoim_E_Castanhas_Tiram_A_Mesma_Familia()
+    {
+        Tira(AmendoimECastanhas(), "amendoim", "castanhas", "nozes", "noz", "oleaginosas", "amêndoa", "Castanha-de-caju",
             "castanha-do-pará", "pasta de amendoim", "caju");
+        Assert.Equal(6, AmendoimECastanhas().Count());
+    }
 
     [Fact]
     public void Semente_Tira_A_Linhaca() => Tira(["linhaca"], "semente", "Sementes");
 
+    // Desde a 2c a soja é família de alérgeno: "óleo de soja" também tira os pães e a aveia, como "leite integral" tira
+    // tudo o que tem lactose.
     [Fact]
-    public void Soja_Tira_O_Oleo_De_Soja() => Tira(["oleo-de-soja"], "soja", "óleo de soja");
+    public void Soja_Tira_Tudo_Que_Tem_Soja()
+    {
+        Tira(ComAlergeno(Alergenos.Soja), "soja", "óleo de soja", "alergia a soja");
+        Assert.Equal(5, ComAlergeno(Alergenos.Soja).Count());
+    }
 
     [Fact]
     public void Milho_Tira_Cuscuz_E_Milho_Verde() => Tira(["cuscuz-de-milho-cozido", "milho-verde-em-conserva"], "milho");
@@ -277,10 +289,10 @@ public class CasamentoPreferenciasTests
     public void Gluetn_Casa_Com_Gluten() => Tira(ComAlergeno(Alergenos.Gluten), "gluetn");
 
     [Fact]
-    public void Amendoin_Casa_Com_Amendoim() => Tira(ComAlergeno(Alergenos.Amendoim), "amendoin");
+    public void Amendoin_Casa_Com_Amendoim() => Tira(AmendoimECastanhas(), "amendoin");
 
     [Fact]
-    public void Castanah_Casa_Com_Castanha() => Tira(ComAlergeno(Alergenos.Amendoim), "castanah");
+    public void Castanah_Casa_Com_Castanha() => Tira(AmendoimECastanhas(), "castanah");
 
     [Theory]
     [InlineData("lactosse", "lactose")]  // uma letra a mais

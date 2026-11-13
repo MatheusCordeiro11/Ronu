@@ -24,7 +24,7 @@ namespace Ronu.Api.Services.IA;
 /// porque é segurança: "carne" sozinha tira também aves e peixes, "leite" tira
 /// tudo o que tem lactose. Um nome composto da base que contém uma palavra da
 /// tabela ganha linha própria quando a linha da palavra não tem a ver com ele
-/// ("batata doce" e "doce"); nos alérgenos (leite, ovo, amendoim e castanhas),
+/// ("batata doce" e "doce"); nos alérgenos (leite, ovo, amendoim, castanhas e soja),
 /// o nome composto continua tirando a família inteira, por segurança.
 /// </summary>
 public static class CasamentoPreferencias
@@ -68,13 +68,13 @@ public static class CasamentoPreferencias
         new(["glúten", "celíaco", "celíaca", "trigo", "cevada", "centeio"], i => Tem(i, Alergenos.Gluten)),
         // "Ovo de galinha" é nome composto da base: sem esta linha, "galinha" tiraria também as aves.
         new(["ovo", "ovo de galinha"], i => Tem(i, Alergenos.Ovo)),
-        // As castanhas estão marcadas como amendoim na base (falta marca própria, fase 2c); por segurança, nos
-        // dois sentidos, e a amêndoa vai junto com as castanhas.
+        // Amendoim e castanhas têm marcas separadas desde a 2c, mas saem juntos nos dois sentidos, pela mesma regra
+        // dos chips (RegrasAlergias); a amêndoa vai junto com as castanhas.
         new(["amendoim", "castanha", "noz", "oleaginosa", "amêndoa", "caju", "castanha de caju", "castanha do pará", "castanha do brasil"],
-            i => Tem(i, Alergenos.Amendoim)),
+            i => RegrasAlergias.Tira(i, Alergenos.Amendoim)),
         new(["semente"], Ids("linhaca")),
-        // O óleo refinado quase não tem a proteína alergênica da soja, mas na dúvida sai.
-        new(["soja"], Ids("oleo-de-soja")),
+        // Desde a 2c, a soja tira tudo o que tem a marca (óleo, pães e aveia), não só o óleo.
+        new(["soja"], i => Tem(i, Alergenos.Soja)),
         new(["milho"], Ids("cuscuz-de-milho-cozido", "milho-verde-em-conserva")),
         // Quem evita açúcar pode ter diabetes; frutas e suco natural ficam.
         new(["açúcar", "doce"], Ids(Acucares)),

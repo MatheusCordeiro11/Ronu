@@ -81,8 +81,8 @@ public static partial class BaseNutricional
             Observacao: "Arroz tipo 1. A TACO cozinha sem sal e sem óleo: o óleo do preparo caseiro não está incluído."),
         new("arroz-integral-cozido", "Arroz integral cozido", CategoriaAlimento.CereaisEMassas, "g", FonteNutricional.Taco, "1", "Arroz, integral, cozido", 124m, 2.6m, 25.8m, 1m, true, 400m, Alergenos.Nenhum,
             Observacao: "A TACO cozinha sem sal e sem óleo."),
-        new("aveia-em-flocos", "Aveia em flocos", CategoriaAlimento.CereaisEMassas, "g", FonteNutricional.Taco, "7", "Aveia, flocos, crua", 394m, 13.9m, 66.6m, 8.5m, true, 80m, Alergenos.Gluten,
-            Observacao: "Glúten marcado por precaução: contaminação cruzada (a aveia comum no Brasil não é certificada sem glúten)."),
+        new("aveia-em-flocos", "Aveia em flocos", CategoriaAlimento.CereaisEMassas, "g", FonteNutricional.Taco, "7", "Aveia, flocos, crua", 394m, 13.9m, 66.6m, 8.5m, true, 80m, Alergenos.Gluten | Alergenos.Soja,
+            Observacao: "Glúten marcado por precaução: contaminação cruzada (a aveia comum no Brasil não é certificada sem glúten). Soja marcada por precaução (2c, aprovada em 2026-11-13): há rótulo de aveia em flocos com \"pode conter soja\", embora não em todas as marcas."),
         new("macarrao-cozido", "Macarrão cozido", CategoriaAlimento.CereaisEMassas, "g", FonteNutricional.Usda, "169737", "Pasta, cooked, enriched, without added salt", 158m, 5.8m, 30.9m, 0.93m, true, 400m, Alergenos.Gluten | Alergenos.Ovo,
             Observacao: "A TACO só tem o macarrão cru. Ovo marcado por precaução: macarrão com ovos é comum no Brasil."),
         new("cuscuz-de-milho-cozido", "Cuscuz de milho cozido", CategoriaAlimento.CereaisEMassas, "g", FonteNutricional.Taco, "533", "Cuscuz, de milho, cozido com sal", 113m, 2.2m, 25.3m, 0.7m, true, 300m, Alergenos.Gluten,
@@ -92,11 +92,12 @@ public static partial class BaseNutricional
         new("tapioca", "Tapioca", CategoriaAlimento.CereaisEMassas, "g", FonteNutricional.Derivado, "124", "Fécula, de mandioca", 297m, 0.4m, 72.7m, 0.3m, true, 150m, Alergenos.Nenhum,
             Observacao: "DERIVADO: tapioca pronta, sem recheio, da fécula de mandioca da TACO (124) hidratada. A hidratação vem da tapioca medida pela própria TACO (551, \"Tapioca, com manteiga\", 24,9% de umidade): tirada a manteiga (10,9 g de gordura em 100 g = 13,2% de manteiga), a tapioca tem 73,7% de matéria seca, contra 82,2% da fécula. Logo, 100 g de tapioca = 89,7 g de fécula + 10,3 g de água (11,5 g de água para cada 100 g de fécula). Tirar a manteiga direto do 551 dá 290 kcal e 73,3 g de carboidrato, perto deste valor."),
         new("farinha-de-mandioca-torrada", "Farinha de mandioca torrada", CategoriaAlimento.CereaisEMassas, "g", FonteNutricional.Taco, "122", "Farinha, de mandioca, torrada", 365m, 1.2m, 89.2m, 0.3m, false, 50m, Alergenos.Nenhum),
-        new("pao-frances", "Pão francês", CategoriaAlimento.Paes, "g", FonteNutricional.Taco, "53", "Pão, trigo, francês", 300m, 8m, 58.6m, 3.1m, false, 150m, Alergenos.Gluten),
-        new("pao-de-forma-integral", "Pão de forma integral", CategoriaAlimento.Paes, "g", FonteNutricional.Taco, "52", "Pão, trigo, forma, integral", 253m, 9.4m, 49.9m, 3.7m, false, 100m, Alergenos.Gluten | Alergenos.Lactose,
-            Observacao: "Lactose marcada por precaução: pães de forma industrializados costumam ter leite ou soro de leite."),
-        new("pao-de-queijo-assado", "Pão de queijo assado", CategoriaAlimento.Paes, "g", FonteNutricional.Taco, "140", "Pão, de queijo, assado", 363m, 5.1m, 34.2m, 24.6m, false, 120m, Alergenos.Lactose | Alergenos.Ovo | Alergenos.Gluten,
-            Observacao: "Glúten marcado por precaução: versões industrializadas podem conter ou ter contaminação cruzada."),
+        new("pao-frances", "Pão francês", CategoriaAlimento.Paes, "g", FonteNutricional.Taco, "53", "Pão, trigo, francês", 300m, 8m, 58.6m, 3.1m, false, 150m, Alergenos.Gluten | Alergenos.Soja,
+            Observacao: "Soja marcada por precaução (2c, 2026-11-13): os melhoradores de farinha usados nas padarias declaram \"contém derivados de trigo e soja\", e o pão de padaria é vendido sem rótulo."),
+        new("pao-de-forma-integral", "Pão de forma integral", CategoriaAlimento.Paes, "g", FonteNutricional.Taco, "52", "Pão, trigo, forma, integral", 253m, 9.4m, 49.9m, 3.7m, false, 100m, Alergenos.Gluten | Alergenos.Lactose | Alergenos.Soja,
+            Observacao: "Lactose marcada por precaução: pães de forma industrializados costumam ter leite ou soro de leite. Soja marcada por precaução (2c, 2026-11-13): óleo ou grão de soja nos rótulos das marcas comuns (Wickbold, Seven Boys, Visconti)."),
+        new("pao-de-queijo-assado", "Pão de queijo assado", CategoriaAlimento.Paes, "g", FonteNutricional.Taco, "140", "Pão, de queijo, assado", 363m, 5.1m, 34.2m, 24.6m, false, 120m, Alergenos.Lactose | Alergenos.Ovo | Alergenos.Gluten | Alergenos.Soja,
+            Observacao: "Glúten marcado por precaução: versões industrializadas podem conter ou ter contaminação cruzada. Soja marcada por precaução (2c, 2026-11-13): óleo de soja e \"pode conter soja\" no rótulo de marca comum (Forno de Minas)."),
         new("feijao-cozido", "Feijão cozido", CategoriaAlimento.Leguminosas, "g", FonteNutricional.Taco, "561", "Feijão, carioca, cozido", 76m, 4.8m, 13.6m, 0.5m, true, 300m, Alergenos.Nenhum,
             Observacao: "Feijão carioca. A TACO cozinha só com água (sem tempero nem óleo)."),
         new("feijao-preto-cozido", "Feijão preto cozido", CategoriaAlimento.Leguminosas, "g", FonteNutricional.Taco, "567", "Feijão, preto, cozido", 77m, 4.5m, 14m, 0.5m, true, 300m, Alergenos.Nenhum,
@@ -228,22 +229,22 @@ public static partial class BaseNutricional
             Observacao: "100% amendoim, sem açúcar nem sal."),
         new("amendoim-torrado", "Amendoim torrado", CategoriaAlimento.OleaginosasESementes, "g", FonteNutricional.Taco, "558", "Amendoim, torrado, salgado", 606m, 22.5m, 18.7m, 54m, false, 50m, Alergenos.Amendoim,
             Observacao: "Torrado e salgado."),
-        new("castanha-de-caju", "Castanha-de-caju", CategoriaAlimento.OleaginosasESementes, "g", FonteNutricional.Taco, "588", "Castanha-de-caju, torrada, salgada", 570m, 18.5m, 29.1m, 46.3m, false, 50m, Alergenos.Amendoim,
-            Observacao: "Torrada e salgada. Amendoim marcado por precaução: beneficiamento comum (\"pode conter amendoim\")."),
-        new("castanha-do-para", "Castanha-do-pará", CategoriaAlimento.OleaginosasESementes, "g", FonteNutricional.Taco, "589", "Castanha-do-Brasil, crua", 643m, 14.5m, 15.1m, 63.5m, false, 40m, Alergenos.Amendoim,
-            Observacao: "Amendoim marcado por precaução: beneficiamento comum."),
-        new("amendoa-torrada", "Amêndoa torrada", CategoriaAlimento.OleaginosasESementes, "g", FonteNutricional.Taco, "587", "Amêndoa, torrada, salgada", 581m, 18.6m, 29.5m, 47.3m, false, 50m, Alergenos.Amendoim,
-            Observacao: "Torrada e salgada. Amendoim marcado por precaução: beneficiamento comum."),
-        new("noz", "Noz", CategoriaAlimento.OleaginosasESementes, "g", FonteNutricional.Taco, "597", "Noz, crua", 620m, 14m, 18.4m, 59.4m, false, 40m, Alergenos.Amendoim,
-            Observacao: "Amendoim marcado por precaução: beneficiamento comum."),
+        new("castanha-de-caju", "Castanha-de-caju", CategoriaAlimento.OleaginosasESementes, "g", FonteNutricional.Taco, "588", "Castanha-de-caju, torrada, salgada", 570m, 18.5m, 29.1m, 46.3m, false, 50m, Alergenos.Castanhas,
+            Observacao: "Torrada e salgada. Castanhas: item da lista de alergênicos da ANVISA (RDC 26/2015). O chip de amendoim também a tira (RegrasAlergias)."),
+        new("castanha-do-para", "Castanha-do-pará", CategoriaAlimento.OleaginosasESementes, "g", FonteNutricional.Taco, "589", "Castanha-do-Brasil, crua", 643m, 14.5m, 15.1m, 63.5m, false, 40m, Alergenos.Castanhas,
+            Observacao: "Castanhas: item da lista de alergênicos da ANVISA (RDC 26/2015). O chip de amendoim também a tira (RegrasAlergias)."),
+        new("amendoa-torrada", "Amêndoa torrada", CategoriaAlimento.OleaginosasESementes, "g", FonteNutricional.Taco, "587", "Amêndoa, torrada, salgada", 581m, 18.6m, 29.5m, 47.3m, false, 50m, Alergenos.Castanhas,
+            Observacao: "Torrada e salgada. Castanhas: item da lista de alergênicos da ANVISA (RDC 26/2015). O chip de amendoim também a tira (RegrasAlergias)."),
+        new("noz", "Noz", CategoriaAlimento.OleaginosasESementes, "g", FonteNutricional.Taco, "597", "Noz, crua", 620m, 14m, 18.4m, 59.4m, false, 40m, Alergenos.Castanhas,
+            Observacao: "Castanhas: item da lista de alergênicos da ANVISA (RDC 26/2015). O chip de amendoim também a tira (RegrasAlergias)."),
         new("linhaca", "Linhaça", CategoriaAlimento.OleaginosasESementes, "g", FonteNutricional.Taco, "594", "Linhaça, semente", 495m, 14.1m, 43.3m, 32.3m, false, 30m, Alergenos.Nenhum,
             Observacao: "Semente."),
         // Azeite, óleo de soja e manteiga ajustáveis desde a fase 4 (2026-10-26): são o que o ajuste de quantidades
         // mexe para fechar a gordura do dia (na simulação do g9a, de 23 para 33 dias com P, C e G a até 10%).
         new("azeite-de-oliva-extra-virgem", "Azeite de oliva extra virgem", CategoriaAlimento.OleosEGorduras, "g", FonteNutricional.Taco, "260", "Azeite, de oliva, extra virgem", 884m, 0m, 0m, 100m, true, 20m, Alergenos.Nenhum,
             Observacao: "Proteína e carboidrato \"NA\" (não se aplica) na TACO, contados como 0."),
-        new("oleo-de-soja", "Óleo de soja", CategoriaAlimento.OleosEGorduras, "g", FonteNutricional.Taco, "272", "Óleo, de soja", 884m, 0m, 0m, 100m, true, 15m, Alergenos.Nenhum,
-            Observacao: "Proteína e carboidrato \"NA\" (não se aplica) na TACO, contados como 0."),
+        new("oleo-de-soja", "Óleo de soja", CategoriaAlimento.OleosEGorduras, "g", FonteNutricional.Taco, "272", "Óleo, de soja", 884m, 0m, 0m, 100m, true, 15m, Alergenos.Soja,
+            Observacao: "Proteína e carboidrato \"NA\" (não se aplica) na TACO, contados como 0. Soja: é o próprio alimento (ANVISA, RDC 26/2015); o óleo refinado quase não tem a proteína alergênica, mas na dúvida a marca fica."),
         new("manteiga", "Manteiga", CategoriaAlimento.OleosEGorduras, "g", FonteNutricional.Taco, "261", "Manteiga, com sal", 726m, 0.4m, 0.1m, 82.4m, true, 20m, Alergenos.Lactose,
             Observacao: "Com sal."),
         new("acucar-refinado", "Açúcar refinado", CategoriaAlimento.AcucaresEMel, "g", FonteNutricional.Taco, "494", "Açúcar, refinado", 387m, 0.3m, 99.5m, 0m, false, 20m, Alergenos.Nenhum),
@@ -311,7 +312,13 @@ public enum Alergenos
     Amendoim = 4,
     Peixe = 8,
     Crustaceo = 16,
-    Ovo = 32
+    Ovo = 32,
+
+    // Fase 2c (2026-11-13): castanhas e soja ganham marca própria, como na lista de alergênicos da ANVISA. O chip de
+    // amendoim e o de castanhas tiram as duas famílias (RegrasAlergias), mas as marcas ficam separadas para a regra
+    // poder mudar num lugar só se um nutricionista orientar diferente.
+    Castanhas = 64,
+    Soja = 128
 }
 
 /// <summary>Nome do item usado nas UFs listadas (ex.: "Aipim cozido" no RJ).</summary>

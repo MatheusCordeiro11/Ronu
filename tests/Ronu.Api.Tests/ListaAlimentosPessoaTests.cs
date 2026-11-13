@@ -104,6 +104,52 @@ public class ListaAlimentosPessoaTests
         Assert.NotEmpty(lista.Itens);
     }
 
+    // Regra cruzada (2c): qualquer um dos dois chips tira amendoim e castanhas; os outros alérgenos não cruzam.
+    [Theory]
+    [InlineData(Alergenos.Amendoim)]
+    [InlineData(Alergenos.Castanhas)]
+    public void Amendoim_E_Castanhas_Tiram_As_Duas_Familias(Alergenos alergia)
+    {
+        var lista = Montar(alergias: alergia);
+
+        Assert.DoesNotContain(lista.Itens, i => i.Item.Alergenos.HasFlag(Alergenos.Amendoim) || i.Item.Alergenos.HasFlag(Alergenos.Castanhas));
+        Assert.Contains("linhaca", Ids(lista));
+        Assert.Equal(Alergenos.Amendoim | Alergenos.Castanhas, RegrasAlergias.MarcasQueTira(alergia));
+    }
+
+    [Theory]
+    [InlineData(Alergenos.Soja)]
+    [InlineData(Alergenos.Lactose)]
+    [InlineData(Alergenos.Gluten | Alergenos.Ovo)]
+    public void Outros_Alergenos_Nao_Cruzam(Alergenos alergias) =>
+        Assert.Equal(alergias, RegrasAlergias.MarcasQueTira(alergias));
+
+    // Soja tira o óleo, os três pães e a aveia; o azeite e a manteiga continuam como gordura ajustável.
+    [Fact]
+    public void Soja_Tira_Os_Cinco_Itens_Marcados_E_Os_Minimos_Continuam()
+    {
+        var ids = Ids(Montar("SP", Alergenos.Soja));
+
+        Assert.Equal(Ids(Montar("SP")).Count - 5, ids.Count);
+        foreach (var fora in new[] { "oleo-de-soja", "pao-frances", "pao-de-forma-integral", "pao-de-queijo-assado", "aveia-em-flocos" })
+        {
+            Assert.DoesNotContain(fora, ids);
+        }
+
+        Assert.Contains("azeite-de-oliva-extra-virgem", ids);
+        Assert.True(Montar("SP", Alergenos.Soja).Minimos.Atende);
+    }
+
+    // Nenhuma combinação dos chips esvazia um papel do prato (só pode ficar abaixo do mínimo, com o aviso de lista pobre).
+    [Fact]
+    public void Todos_Os_Chips_Juntos_Nao_Esvaziam_Nenhum_Papel()
+    {
+        const Alergenos todos = Alergenos.Lactose | Alergenos.Gluten | Alergenos.Amendoim | Alergenos.Castanhas
+            | Alergenos.Soja | Alergenos.Peixe | Alergenos.Crustaceo | Alergenos.Ovo;
+
+        Assert.Empty(Montar("SP", todos).Minimos.Vazios);
+    }
+
     [Fact]
     public void Preferencias_Dizem_Se_Casaram()
     {

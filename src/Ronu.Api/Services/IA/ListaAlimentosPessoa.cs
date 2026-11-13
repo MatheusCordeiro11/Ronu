@@ -37,7 +37,7 @@ public static class ListaAlimentosPessoa
 
         var itens = base_
             .Where(i => !evitados.Contains(i.Id))
-            .Where(i => (i.Alergenos & alergias) == Alergenos.Nenhum)
+            .Where(i => !RegrasAlergias.Tira(i, alergias))
             .Where(i => i.Categoria != CategoriaAlimento.BebidasAlcoolicas || cervejaPermitida)
             .Select(i => new ItemDaLista(i, NomeNaUf(i, uf)))
             .ToList();
