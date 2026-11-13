@@ -22,7 +22,7 @@ existir".
 | UF | `Usuario.Estado` | nomes regionais, fuso do "hoje", regra do feijão | consentimento (art. 11, I), junto do perfil | Azure | Gemini | enquanto a conta existir |
 | `CriadoEm`, `UltimoLoginEm` | `Usuario` | prazos de guarda | legítimo interesse (art. 7º, IX) | Azure | ninguém | enquanto a conta existir |
 | Altura, sexo, nascimento, nível de atividade | `Usuario` | meta da fórmula | consentimento (art. 11, I) | Azure | Gemini, só de forma derivada: não vão crus, mas a meta diária (kcal e macros) é calculada a partir deles | enquanto a conta existir |
-| Rotina (texto livre) | `Usuario.RotinaDiaria` | antes, horários do cardápio; hoje sem uso (ver pendência 6) | consentimento | Azure | ninguém (saiu do prompt em 2026-11-02) | enquanto a conta existir |
+| Rotina (texto livre, antiga) | `Usuario.RotinaDiaria` | antes, horários do cardápio; hoje sem uso: só mostrada para a pessoa apagar (seção 3) | consentimento | Azure | ninguém (saiu do prompt em 2026-11-02) | até a pessoa apagar, ou 60 dias depois da publicação (`LimpezaRetencao`, data em `Retencao:RotinaForaDaTelaEm`) |
 | Orçamento (uma de três opções) | `Usuario.OrcamentoSemanal` | custo do cardápio | consentimento | Azure | Gemini | enquanto a conta existir |
 | Horários: acordar, dormir, início de cada treino | `Usuario.HorarioAcordar`, `Usuario.HorarioDormir`, `UsuarioModalidade.HorarioInicio` | horários das refeições | consentimento | Azure | Gemini | enquanto a conta existir |
 | Pesagens: peso, objetivo, aderência, data | `ObjetivoUsuario` | meta, progresso, meta adaptativa | consentimento | Azure | Gemini, só de forma derivada: peso e objetivo não vão crus, mas a meta diária e a marca de déficit, manutenção ou superávit de cada dia são calculadas a partir deles | enquanto a conta existir |
@@ -105,8 +105,14 @@ Se algo der errado entre os passos 3 e 5, o interruptor desligado mantém o app 
 Decisão de 2026-11-02, em dois tempos e nunca no mesmo deploy:
 
 1. Durante 60 dias a partir da publicação, quem tem texto antigo o vê uma vez na Alimentação (mostrado só com
-   `textContent`) e pode apagá-lo; a exportação dos dados continua levando o texto. No fim do prazo, a limpeza
-   automática apaga todos os textos que sobraram.
+   `textContent`) e pode apagá-lo (`DELETE /api/perfil/rotina`); a exportação dos dados continua levando o texto. O
+   `PUT /api/perfil` ignora o campo, para um frontend antigo em cache não dar erro. No fim do prazo, a limpeza
+   automática (`LimpezaRetencao`) apaga todos os textos que sobraram. **Como o prazo começa:** no dia do passo 4
+   acima (push do frontend), criar no App Service a variável `Retencao__RotinaForaDaTelaEm` com a data desse dia, no
+   formato `AAAA-MM-DD`. **É a mesma data da `[DATA_VIGENCIA]` da política** (a do push do frontend): a política
+   promete apagar "até 60 dias depois de [DATA_VIGENCIA]", então as duas não podem divergir. Sem ela, a limpeza da rotina não roda (o log da limpeza diz "não configurado"); com uma data
+   em outro formato, a API não sobe. A limpeza apaga a partir de 60 dias depois dessa data (meia-noite UTC), na
+   primeira rodada depois disso (uma por subida e a cada 24 h).
 2. Só depois disso, e com o backend em produção já sem ler nem gravar a coluna (um deploy antes), uma **migration
    separada** remove a coluna `RotinaDiaria`, pelo roteiro do `CLAUDE.md`. A ordem importa: se a coluna sair antes
    do backend que ainda a lê, a API quebra.
@@ -119,7 +125,9 @@ Decisão de 2026-11-02, em dois tempos e nunca no mesmo deploy:
    projeto. A política e a caixa do consentimento dizem isso. Os mesmos termos pedem que não se envie informação
    sensível, confidencial ou pessoal ao plano gratuito: desde 2026-11-02 o prompt não leva sexo, idade, peso, altura,
    objetivo, nome das modalidades nem texto livre (medido do g10a ao g10d, sem perda de qualidade; `docs/medicoes/`).
-   Falta a política e a caixa dizerem a lista nova do que vai para a IA.
+   **Resolvido:** a política (linha "Montar o cardápio" e "O que a IA recebe") e a caixa do consentimento (ainda v1,
+   nunca publicada) dizem a lista nova do que vai e do que não vai para a IA. A caixa não cita o objetivo entre o que
+   não vai, de propósito (2026-11-13): a marca de déficit, manutenção ou superávit de cada dia já mostra a direção.
 2. **Advogado.** Os pontos "⚖️" deste documento e dos rascunhos em `docs/textos-legais/`.
 3. **"Enviados" do Gmail: tarefa mensal.** Os e-mails de "esqueci a senha" ficam na caixa de enviados da conta do
    Ronu, e apagar a conta não os apaga. Decidido em 2026-11-01: o Matheus apaga os enviados uma vez por mês (lembrete
@@ -144,9 +152,12 @@ Decisão de 2026-11-02, em dois tempos e nunca no mesmo deploy:
    `AppRequests`: retenção 30, total 30. A política diz "até 30 dias". **Resolvido.** Cuidado: um recurso novo de
    Application Insights nessa região grava no mesmo workspace, e uma tabela `App*` nova pode nascer com outro prazo.
 6. **Menos texto livre no Gemini.** Feito no prompt em 2026-11-02: do "evitar" vão só os termos que não casaram com a
-   base, e a rotina em texto deu lugar aos horários estruturados. Falta a tela dos horários (Perfil, onboarding e
-   treino) e decidir o que fazer com o campo "Sua rotina" e com o texto já gravado, que não é mais usado: guardar dado
-   sem uso vai contra a necessidade (art. 6º, III). A tela precisa estar pronta antes de publicar.
+   base, e a rotina em texto deu lugar aos horários estruturados. As telas dos horários estão feitas (Alimentação e
+   Treino). O texto antigo da rotina, que não é mais usado (guardar dado sem uso vai contra a necessidade, art. 6º,
+   III), segue a decisão de 2026-11-02 ("opção A", seção 3): a API ignora o campo no `PUT /perfil`, a pessoa apaga
+   pelo `DELETE /api/perfil/rotina` (sem exigir o consentimento, como apagar a conta), e a limpeza apaga o que sobrar
+   60 dias depois da publicação. **Falta, antes de publicar:** o aviso na Alimentação que mostra o texto antigo e
+   oferece apagar (mudança visual, depende do shape aprovado).
 7. **Regra de firewall "todos os serviços da Azure".** A única regra do `ronu-db` é
    `AllowAllAzureServicesAndResourcesWithinAzureIps_2026-9-22_18-31-2` (0.0.0.0): libera conexão de qualquer recurso
    dentro da Azure, inclusive de outros clientes, não só do `ronu-api`. A senha continua exigida, mas a superfície é

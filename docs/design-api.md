@@ -65,12 +65,16 @@ O email sai em segundo plano (a resposta não espera o SMTP). Limite por conta: 
 **Devolve:** `altura` (cm), `sexo`, `dataNascimento`, `rotinaDiaria`, `orcamentoSemanal`, `nivelAtividade`, `horarioAcordar` e `horarioDormir` ("HH:mm") — todos podem vir nulos enquanto o onboarding não os preencheu — e os dados da conta: `nome`, `email`, `estado` (UF, `null` se ainda não informado), `temSenha` e `temGoogle` (se a conta tem senha própria e se tem login com Google vinculado; a senha e o hash nunca vêm)
 
 ### `PUT /api/perfil`
-**Recebe:** `altura` (cm, de 100 a 250), `sexo` (`Masculino` ou `Feminino`), `dataNascimento` (idade de 18 a 100 anos) (obrigatórios); `rotinaDiaria`, `orcamentoSemanal`, `nivelAtividade`, `horarioAcordar` e `horarioDormir` (opcionais; `orcamentoSemanal` aceita `economico`, `moderado` ou `sem_restricao`; `nivelAtividade` aceita `sentado`, `em_pe`, `andando` ou `bracal`; os horários vão em "HH:mm", de 00:00 a 23:59, exatamente nesse formato)
+**Recebe:** `altura` (cm, de 100 a 250), `sexo` (`Masculino` ou `Feminino`), `dataNascimento` (idade de 18 a 100 anos) (obrigatórios); `orcamentoSemanal`, `nivelAtividade`, `horarioAcordar` e `horarioDormir` (opcionais; `orcamentoSemanal` aceita `economico`, `moderado` ou `sem_restricao`; `nivelAtividade` aceita `sentado`, `em_pe`, `andando` ou `bracal`; os horários vão em "HH:mm", de 00:00 a 23:59, exatamente nesse formato)
 **Atenção, comportamento diferente dos outros campos:** `nivelAtividade` **ausente, nulo ou vazio NÃO apaga** o valor salvo, ele é mantido. Os horários seguem quase a mesma regra (`Validacao/RegrasHorario.cs`): ausente ou nulo mantém o salvo, mas **texto vazio (`""`) apaga**. Os outros campos opcionais são sobrescritos (ausente = apagado). A razão: não existe opção de voltar a "sem resposta" na tela, e as telas que reenviam o perfil sem o campo (Alimentação, por exemplo) não podem zerar a resposta sem querer. Não há como limpar o nível pela API
 **Devolve:** o mesmo formato do `GET /api/perfil`
 *(sobrescreve os valores atuais; não é histórico)*
-A `rotinaDiaria` continua gravada, mas **não vai mais para o Gemini** desde o prompt sem dado pessoal: no lugar dela vão os horários (seção Dietas).
+A `rotinaDiaria` (texto livre antigo) **não é mais gravada pelo PUT**: se um frontend antigo a mandar, ela é ignorada, sem erro e sem apagar o texto já salvo. Ela também não vai mais para o Gemini desde o prompt sem dado pessoal: no lugar dela vão os horários (seção Dietas). O texto já salvo continua no `GET` e na exportação até a pessoa apagá-lo (`DELETE /api/perfil/rotina`) ou até a limpeza dos prazos de guarda, 60 dias depois da publicação (`docs/privacidade.md`, seção 3).
 **Erros:** 400 `{ mensagem }` se um horário não estiver em "HH:mm" ("Horário inválido. Use o formato HH:mm, de 00:00 a 23:59."), se o `orcamentoSemanal` não for um dos valores aceitos, se o `nivelAtividade` não for um dos quatro ("Nível de atividade inválido."), se o `sexo` não for um dos dois, se a altura estiver fora da faixa, ou se a data de nascimento for no futuro, der menos de 18 anos ("O Ronu é para maiores de 18 anos.") ou mais de 100. As regras ficam em `Validacao/RegrasDadosCorporais.cs`, as mesmas do `POST /objetivos` e da simulação.
+
+### `DELETE /api/perfil/rotina`
+Apaga a rotina em texto livre antiga (`rotinaDiaria`), que não é mais usada.
+**Devolve:** 204, com ou sem texto salvo (repetir não é erro).
 
 ### `PUT /api/perfil/estado`
 **Recebe:** `estado` (UF; a API ignora espaços e maiúsculas/minúsculas)

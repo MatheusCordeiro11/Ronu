@@ -40,7 +40,8 @@ Contato para qualquer assunto de privacidade: **[EMAIL_PRIVACIDADE]**.
 - como é o seu dia fora do treino (sentado, em pé, andando, braçal);
 - as modalidades que você treina, os dias e a duração;
 - os alimentos que você gosta e os que prefere evitar;
-- sua rotina, se você escrever (horários de acordar, treinar, comer);
+- seus horários de acordar e dormir e o horário em que começa cada treino, se você informar;
+- o texto de rotina que você escreveu antes, se houver: não é mais usado e será apagado até 60 dias depois de [DATA_VIGENCIA], ou antes, se você apagar no app;
 - seu orçamento para alimentação, se você informar;
 - as dietas geradas e as metas de calorias de cada uma.
 
@@ -49,9 +50,9 @@ Contato para qualquer assunto de privacidade: **[EMAIL_PRIVACIDADE]**.
 - seus aceites de consentimento (qual texto, qual versão e quando);
 - pedidos de "esqueci minha senha" (quando foram feitos e se foram usados).
 
-**O que o Ronu não pede:** CPF, endereço, telefone, documentos, cartão ou dado bancário. Nos campos de texto livre
-("prefiro evitar" e rotina), escreva só o alimento ou o horário: **não escreva doenças, remédios ou diagnósticos**,
-porque esse texto vai para a IA.
+**O que o Ronu não pede:** CPF, endereço, telefone, documentos, cartão ou dado bancário. No campo "prefiro evitar",
+escreva só o alimento: **não escreva doenças, remédios ou diagnósticos**, porque o que não for reconhecido como um
+alimento da nossa lista vai para a IA do jeito que você escreveu.
 
 ## Para que esses dados servem, e com que base
 
@@ -110,6 +111,7 @@ as garantias contratuais que essas empresas oferecem.
 | Dado | Quanto tempo |
 |---|---|
 | Conta, perfil, pesagens, treinos, preferências, metas | enquanto a conta existir |
+| Texto de rotina escrito antes de [DATA_VIGENCIA] | até 60 dias depois de [DATA_VIGENCIA], ou antes, se você apagar no app |
 | Dietas | as 3 mais recentes (a mais antiga sai quando você gera uma nova) |
 | Marcações "já tenho" da lista de compras | enquanto a dieta delas estiver entre as 3 |
 | Pedidos de "esqueci minha senha" | 30 dias |
