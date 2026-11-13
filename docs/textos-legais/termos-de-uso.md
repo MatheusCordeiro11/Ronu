@@ -3,7 +3,7 @@
 > **Rascunho para aprovação (LGPD base, etapa 3, 2026-11-01).** Ainda não está publicado. Na etapa 5 este texto vira a
 > página `/termos`; as notas "⚖️ Advogado" e os marcadores saem antes disso.
 
-Vigente desde [DATA_VIGENCIA].
+Vigente desde 13 de novembro de 2026.
 
 Ao criar uma conta no Ronu, você concorda com estes termos. Eles são curtos de propósito: leia até o fim.
 

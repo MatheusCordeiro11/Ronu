@@ -2,13 +2,13 @@
 
 > **Rascunho para aprovação (LGPD base, etapa 3, 2026-11-01).** Ainda não está publicado. Na etapa 5 este texto vira a
 > página `/privacidade`; as notas "⚖️ Advogado" e os marcadores entre colchetes saem antes disso.
-> Marcador: `[DATA_VIGENCIA]` (dia da publicação). Contato de privacidade: a conta Gmail do Ronu, decidido em 2026-11-13.
+> Vigência preenchida em 2026-11-13, dia da publicação. Contato de privacidade: a conta Gmail do Ronu, decidido em 2026-11-13.
 > O Ronu usa o plano gratuito do Gemini (decisão de 2026-11-02): os trechos sobre o Gemini dizem o que esse plano permite
 > ao Google (termos da Gemini API, "Unpaid Services", vigentes desde 2026-03-23).
 > Conferidos na Azure em 2026-11-01: backup de 7 dias e região Chile Central; logs HTTP do App Service, 7 dias;
 > Application Insights, 30 dias no total.
 
-Vigente desde [DATA_VIGENCIA].
+Vigente desde 13 de novembro de 2026.
 
 O Ronu monta uma dieta semanal a partir do seu treino, do seu corpo e do que você gosta de comer. Para isso, ele
 precisa de dados seus, alguns deles de saúde. Esta página explica, sem rodeios, quais dados são esses, para que servem,
@@ -41,7 +41,7 @@ Contato para qualquer assunto de privacidade: **ronu.appdono@gmail.com**.
 - as modalidades que você treina, os dias e a duração;
 - os alimentos que você gosta e os que prefere evitar;
 - seus horários de acordar e dormir e o horário em que começa cada treino, se você informar;
-- o texto de rotina que você escreveu antes, se houver: não é mais usado e será apagado até 60 dias depois de [DATA_VIGENCIA], ou antes, se você apagar no app;
+- o texto de rotina que você escreveu antes, se houver: não é mais usado e será apagado até 60 dias depois de 13 de novembro de 2026, ou antes, se você apagar no app;
 - seu orçamento para alimentação, se você informar;
 - as dietas geradas e as metas de calorias de cada uma.
 
@@ -111,7 +111,7 @@ as garantias contratuais que essas empresas oferecem.
 | Dado | Quanto tempo |
 |---|---|
 | Conta, perfil, pesagens, treinos, preferências, metas | enquanto a conta existir |
-| Texto de rotina escrito antes de [DATA_VIGENCIA] | até 60 dias depois de [DATA_VIGENCIA], ou antes, se você apagar no app |
+| Texto de rotina escrito antes de 13 de novembro de 2026 | até 60 dias depois de 13 de novembro de 2026, ou antes, se você apagar no app |
 | Dietas | as 3 mais recentes (a mais antiga sai quando você gera uma nova) |
 | Marcações "já tenho" da lista de compras | enquanto a dieta delas estiver entre as 3 |
 | Pedidos de "esqueci minha senha" | 30 dias |
