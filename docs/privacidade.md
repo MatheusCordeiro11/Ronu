@@ -3,7 +3,7 @@
 Documento interno, para quem mantém o Ronu. Os textos para o usuário ficam em `docs/textos-legais/` (rascunhos da
 política de privacidade e dos termos) e viram as páginas `/privacidade` e `/termos`.
 
-Controlador e encarregado: Matheus Cordeiro Berto. Contato de privacidade: `[EMAIL_PRIVACIDADE]` (a criar).
+Controlador e encarregado: Matheus Cordeiro Berto. Contato de privacidade: `ronu.appdono@gmail.com` (a conta Gmail do Ronu, a mesma do "esqueci a senha"; decidido em 2026-11-13).
 
 > Rascunho da LGPD base, etapa 3 (2026-11-01). Os marcadores entre colchetes dependem de leitura de configuração da
 > Azure ou de decisão do Matheus. Nada desta etapa está publicado.
@@ -72,7 +72,7 @@ real num commit; bug que mostra dado de uma conta para outra.
 4. **Comunicar, se houver risco relevante.** À ANPD (formulário no site da ANPD) e às pessoas afetadas (por e-mail),
    em **3 dias úteis** da ciência, prazo que dobra para agente de pequeno porte (**6 dias úteis**). A comunicação diz:
    o que aconteceu, que dados, riscos, o que foi feito e o que a pessoa pode fazer (trocar senha, por exemplo), e o
-   contato `[EMAIL_PRIVACIDADE]`.
+   contato `ronu.appdono@gmail.com`.
 5. **Corrigir a causa** e anotar no registro. Se a conta Gmail do Ronu estiver envolvida, apagar na hora os
    "Enviados" (os e-mails de recuperação de senha), sem esperar a limpeza do mês.
 6. **Guardar o registro de todo incidente por 5 anos**, mesmo os que não foram comunicados (com o porquê).

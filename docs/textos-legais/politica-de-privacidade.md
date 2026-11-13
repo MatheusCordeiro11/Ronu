@@ -2,7 +2,7 @@
 
 > **Rascunho para aprovação (LGPD base, etapa 3, 2026-11-01).** Ainda não está publicado. Na etapa 5 este texto vira a
 > página `/privacidade`; as notas "⚖️ Advogado" e os marcadores entre colchetes saem antes disso.
-> Marcadores: `[EMAIL_PRIVACIDADE]` (o e-mail que o Matheus vai criar) e `[DATA_VIGENCIA]` (dia da publicação).
+> Marcador: `[DATA_VIGENCIA]` (dia da publicação). Contato de privacidade: a conta Gmail do Ronu, decidido em 2026-11-13.
 > O Ronu usa o plano gratuito do Gemini (decisão de 2026-11-02): os trechos sobre o Gemini dizem o que esse plano permite
 > ao Google (termos da Gemini API, "Unpaid Services", vigentes desde 2026-03-23).
 > Conferidos na Azure em 2026-11-01: backup de 7 dias e região Chile Central; logs HTTP do App Service, 7 dias;
@@ -19,7 +19,7 @@ onde ficam, com quem são compartilhados, por quanto tempo e como você controla
 O Ronu é um projeto pessoal de **Matheus Cordeiro Berto**, que é o controlador dos dados (quem decide como eles são
 usados) e também o encarregado (a pessoa com quem você fala sobre seus dados).
 
-Contato para qualquer assunto de privacidade: **[EMAIL_PRIVACIDADE]**.
+Contato para qualquer assunto de privacidade: **ronu.appdono@gmail.com**.
 
 > ⚖️ Advogado: confirmar se pessoa física pode figurar como controlador de um app público e se o projeto se enquadra
 > como agente de pequeno porte (Res. CD/ANPD 2/2022), que dispensa indicar encarregado, mesmo tratando dado sensível.
@@ -66,7 +66,7 @@ alimento da nossa lista vai para a IA do jeito que você escreveu.
 
 A meta é calculada por fórmulas publicadas (Mifflin-St Jeor e o Compêndio de Atividades Físicas) e ajustada pelas
 pesagens que você registra. Se quiser entender
-como chegamos no seu número, escreva para [EMAIL_PRIVACIDADE].
+como chegamos no seu número, escreva para ronu.appdono@gmail.com.
 
 O consentimento é pedido numa caixa própria, desmarcada, antes de qualquer dado de saúde. Sem ele, o Ronu não
 funciona, porque não dá para montar a dieta sem esses dados.
@@ -146,7 +146,7 @@ A maioria você faz sozinho, no app:
 - **Revogar o consentimento:** como o Ronu não funciona sem esses dados, revogar é apagar a conta. Antes, você pode
   baixar seus dados.
 
-Para qualquer outro pedido, escreva para **[EMAIL_PRIVACIDADE]**. Respondemos em até 15 dias.
+Para qualquer outro pedido, escreva para **ronu.appdono@gmail.com**. Respondemos em até 15 dias.
 
 > ⚖️ Advogado: conferir o prazo de 15 dias (art. 19, II) e se é preciso confirmar a identidade de quem escreve antes
 > de atender (por exemplo, pedir que escreva do e-mail da conta).

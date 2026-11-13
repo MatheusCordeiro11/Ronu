@@ -65,7 +65,7 @@ Se os termos mudarem, a data no topo muda. Mudanças importantes são avisadas n
 
 ## Lei e contato
 
-Estes termos seguem a lei brasileira. Dúvidas: **[EMAIL_PRIVACIDADE]**.
+Estes termos seguem a lei brasileira. Dúvidas: **ronu.appdono@gmail.com**.
 
 > ⚖️ Advogado: foro. Pelo CDC, o consumidor pode acionar no próprio domicílio; ver se vale citar isso ou deixar
 > sem cláusula de foro.
