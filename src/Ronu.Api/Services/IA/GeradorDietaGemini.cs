@@ -102,7 +102,9 @@ public class GeradorDietaGemini : IGeradorDietaIA
 
         // Lista fechada da fase 2b: vai no prompt e no enum do schema, então o Gemini só escolhe itens
         // da base (com valor por 100 g, para a fase 3 calcular de verdade).
-        var lista = contexto.Lista ?? ListaAlimentosPessoa.Montar(contexto.Estado, contexto.Preferencias);
+        // Sem fallback desde a 2c: montar a lista aqui, só com UF e preferências, deixaria passar as alergias.
+        var lista = contexto.Lista
+            ?? throw new InvalidOperationException("O contexto chegou sem a lista da pessoa: ela vem do ContextoDietaBuilder (ListaDaPessoa).");
         var prompt = MontarPrompt(contexto, metasPorDia, lista);
         var schema = MontarSchema(lista);
 

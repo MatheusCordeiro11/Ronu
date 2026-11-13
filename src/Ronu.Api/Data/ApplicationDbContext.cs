@@ -23,6 +23,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<PedidoRedefinicaoSenha> PedidosRedefinicaoSenha { get; set; }
     public DbSet<ListaComprasMarcacao> ListaComprasMarcacoes { get; set; }
     public DbSet<Consentimento> Consentimentos { get; set; }
+    public DbSet<AlergiaUsuario> AlergiasUsuario { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -61,5 +62,9 @@ public class ApplicationDbContext : DbContext
                 .IsUnique()
                 .HasFilter("\"RevogadoEm\" IS NULL");
         });
+
+        // Apagar a conta apaga as alergias (o índice único por pessoa e código está no modelo).
+        modelBuilder.Entity<AlergiaUsuario>()
+            .HasOne(a => a.Usuario).WithMany().HasForeignKey(a => a.UsuarioId).OnDelete(DeleteBehavior.Cascade);
     }
 }

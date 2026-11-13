@@ -94,13 +94,20 @@ public static class CalculadoraTroca
         var evitados = lista.Preferencias.Where(p => p.Tipo == "evitar").SelectMany(p => p.ItensIds).ToHashSet();
         var candidatos = lista.Itens.Where(i => i.Item.Grupo == baseOriginal.Grupo && i.Item.Id != baseOriginal.Id).ToList();
         var naLista = candidatos.Select(c => c.Item.Id).ToHashSet();
+        // TACO 2c: o que saiu por alergia conta só como alergia, mesmo que também esteja no "evitar". A alergia é o
+        // motivo mais forte, e a mensagem não pode mandar a pessoa rever o "evitar" por um item que nunca voltaria.
+        bool DoGrupo(AlimentoBase i) => i.Grupo == baseOriginal.Grupo && i.Id != baseOriginal.Id;
+        var foraPelaAlergia = BaseNutricional.Itens.Count(i => DoGrupo(i) && RegrasAlergias.Tira(i, lista.Alergias));
         var foraPeloEvitar = BaseNutricional.Itens.Count(i =>
-            i.Grupo == baseOriginal.Grupo && i.Id != baseOriginal.Id && evitados.Contains(i.Id) && !naLista.Contains(i.Id));
+            DoGrupo(i) && evitados.Contains(i.Id) && !naLista.Contains(i.Id) && !RegrasAlergias.Tira(i, lista.Alergias));
 
         return new ResultadoOpcoesTroca(
             original, baseOriginal, naSemana.Count, foraPeloEvitar,
             Escopo(dias, [posicao], baseOriginal, candidatos, preferidos),
-            Escopo(dias, naSemana, baseOriginal, candidatos, preferidos));
+            Escopo(dias, naSemana, baseOriginal, candidatos, preferidos))
+        {
+            ForaPelaAlergia = foraPelaAlergia
+        };
     }
 
     /// <summary>
@@ -365,4 +372,8 @@ public record ResultadoOpcoesTroca(
     int OcorrenciasNaSemana,
     int ForaPeloEvitar,
     OpcoesDoEscopo Refeicao,
-    OpcoesDoEscopo Semana);
+    OpcoesDoEscopo Semana)
+{
+    /// <summary>Quantos do grupo saíram pelas alergias da pessoa (TACO 2c); não entram no ForaPeloEvitar.</summary>
+    public int ForaPelaAlergia { get; init; }
+}

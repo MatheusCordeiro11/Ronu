@@ -28,10 +28,11 @@ existir".
 | Pesagens: peso, objetivo, aderência, data | `ObjetivoUsuario` | meta, progresso, meta adaptativa | consentimento | Azure | Gemini, só de forma derivada: peso e objetivo não vão crus, mas a meta diária e a marca de déficit, manutenção ou superávit de cada dia são calculadas a partir deles | enquanto a conta existir |
 | Modalidades, dias, duração | `UsuarioModalidade` | gasto do treino | consentimento | Azure | Gemini (só quais dias são de treino e o horário, sem o nome da modalidade) | enquanto a conta existir |
 | "Gosto" e "prefiro evitar" | `PreferenciaAlimentar` | lista de alimentos e cardápio | consentimento | Azure | Gemini ("gosto": só itens da base que casaram; "evitar": só os termos que não casaram com nenhum item, como foram digitados) | enquanto a conta existir |
+| Alergias (8 chips: leite, glúten, ovo, amendoim, castanhas, soja, peixe, crustáceos) | `AlergiaUsuario` (tabela `AlergiasUsuario`) | tirar os alimentos do cardápio e das trocas; marcar na lista de compras e no aviso do painel (TACO 2c) | consentimento específico (art. 11, I), tipo `alergias`, à parte do geral | Azure | ninguém: o Gemini recebe só a lista de alimentos já sem esses itens (nem os códigos, nem a contagem vão ao prompt ou ao log) | até a pessoa desmarcar: sem nenhuma marcada, as linhas saem e o aceite fica revogado; ou enquanto a conta existir |
 | Dietas geradas | `DietaIA` | mostrar o cardápio, troca, lista de compras | consentimento | Azure | ninguém | as 3 mais recentes |
 | Metas de cada dieta | `MetaDieta` | meta adaptativa | consentimento | Azure | ninguém | enquanto a conta existir (todas) |
 | Marcações "já tenho" | `ListaComprasMarcacao` | lista de compras | consentimento | Azure | ninguém | enquanto a dieta estiver entre as 3 |
-| Aceites de consentimento | `Consentimento` | prova do consentimento | obrigação legal / exercício de direitos (art. 7º, II e VI; art. 8º, §2º) | Azure | ninguém | enquanto a conta existir (decidido em 2026-11-01: sem conta, não há o que provar) |
+| Aceites de consentimento (tipos `geral` e `alergias`) | `Consentimento` | prova do consentimento | obrigação legal / exercício de direitos (art. 7º, II e VI; art. 8º, §2º) | Azure | ninguém | enquanto a conta existir (decidido em 2026-11-01: sem conta, não há o que provar). O de alergias revogado continua, com `RevogadoEm` |
 | Pedidos de redefinição (tipo, datas, SHA-256 do token) | `PedidoRedefinicaoSenha` | link de uso único, limite por conta | contrato | Azure | Gmail (o e-mail com o link) | 30 dias (`LimpezaRetencao`) |
 | Conta sem aceite e sem nenhum dado além de nome e e-mail | `Usuario` | — | — | Azure | — | 30 dias após `CriadoEm` (`LimpezaRetencao`) |
 | IP do cliente | memória da API (limites) | limite de tentativas | legítimo interesse | memória do App Service | ninguém | até a janela do limite (15 min a 1 h) ou o reinício |
@@ -50,7 +51,10 @@ O que vai para o Gemini, exatamente (`GeradorDietaGemini.MontarPrompt`, desde 20
 quem treina, de treino (com o horário) ou de descanso; os horários de acordar e dormir; a UF; a faixa de orçamento; a
 lista fechada de alimentos (itens da base), os "gostos" que casaram com a base e os termos do "evitar" que não casaram,
 como foram digitados.
-Não vão: nome, e-mail, id da conta, nome das modalidades, a rotina em texto e o "evitar" inteiro como foi digitado. Não
+Não vão: nome, e-mail, id da conta, nome das modalidades, a rotina em texto, o "evitar" inteiro como foi digitado e as
+alergias marcadas (TACO 2c: a lista fechada já chega sem os alimentos que as contêm; risco residual: quem lê a lista
+pode deduzir a alergia pela falta de um grupo de itens, como todos os laticínios). Uma alergia fora dos 8 chips, escrita
+no "evitar" e sem casamento com a base (gergelim, por exemplo), continua indo como termo do "evitar". Não
 vão crus: sexo, idade, peso, altura e objetivo. A meta diária e a marca de cada dia são calculadas a partir de altura, peso, sexo,
 nascimento, nível de atividade, treino e objetivo: não dizem o peso nem a idade e não identificam a pessoa, mas a marca
 mostra a direção do objetivo (perder, manter ou ganhar peso). Detalhes e as checagens da resposta em `docs/design-api.md`, seção Dietas.
@@ -165,3 +169,7 @@ Decisão de 2026-11-02, em dois tempos e nunca no mesmo deploy:
    `AllowAllAzureServicesAndResourcesWithinAzureIps_2026-9-22_18-31-2` (0.0.0.0): libera conexão de qualquer recurso
    dentro da Azure, inclusive de outros clientes, não só do `ronu-api`. A senha continua exigida, mas a superfície é
    maior que o necessário. Alternativa: VNet ou só os IPs de saída do App Service. Sinalizado, não mexido.
+8. **Alergias e versão nova do texto (TACO 2c).** Se o texto do tipo `alergias` ganhar uma versão 2, os chips já
+   gravados continuam filtrando a lista (o filtro é segurança e nunca é relaxado), mas o aceite deixa de ser o vigente:
+   marcar um chip novo pede a caixa de novo. Decidir, antes de publicar uma v2, se os chips antigos esperam o novo
+   aceite ou continuam valendo até lá. Sinalizado, não decidido.

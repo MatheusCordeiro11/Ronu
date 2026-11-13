@@ -653,4 +653,156 @@ public class TrocasControllerTests
 
         Assert.Equal(politica, atributo?.PolicyName);
     }
+
+    // ---------- Alergias (TACO 2c) ----------
+
+    // Os chips gravados direto no banco, com o aceite, como o PUT /api/perfil/alergias deixaria.
+    private static void MarcarAlergias(ApplicationDbContext banco, Usuario usuario, params string[] codigos)
+    {
+        banco.Consentimentos.Add(new Consentimento { UsuarioId = usuario.Id, Tipo = "alergias", Versao = 1, AceitoEm = DateTime.UtcNow });
+        foreach (var codigo in codigos)
+        {
+            banco.AlergiasUsuario.Add(new AlergiaUsuario { UsuarioId = usuario.Id, Codigo = codigo, MarcadoEm = DateTime.UtcNow });
+        }
+
+        banco.SaveChanges();
+    }
+
+    private static IEnumerable<OpcaoTrocaDto> Todas(EscopoTrocaDto e) => e.DasPreferencias.Concat(e.Parecidos).Concat(e.VerMais);
+
+    private static bool TemSoja(string alimentoId) => BaseNutricional.Itens.Single(i => i.Id == alimentoId).Alergenos.HasFlag(Alergenos.Soja);
+
+    // No lugar do pão francês, nenhuma opção tem soja, e o pão de forma integral (evitado e com soja) conta só como
+    // alergia: o ForaPeloEvitar não manda rever o "evitar" por um item que a alergia tiraria de qualquer jeito.
+    [Fact]
+    public async Task Opcoes_Nao_Trazem_Alergeno_E_O_Que_Saiu_Por_Alergia_Nao_Conta_Como_Evitar()
+    {
+        using var banco = BancoEmMemoria.NovoContexto();
+        var semChip = NovoUsuario(banco, "troca-alergia1@exemplo.test", ("evitar", "pão de forma integral"));
+        var comChip = NovoUsuario(banco, "troca-alergia2@exemplo.test", ("evitar", "pão de forma integral"));
+        NovaDieta(banco, semChip);
+        NovaDieta(banco, comChip);
+        MarcarAlergias(banco, comChip, "soja");
+
+        var sem = Valor<OpcoesTrocaResponse>(await Controller(banco, semChip.Id).Opcoes(0, 0, 0));
+        var com = Valor<OpcoesTrocaResponse>(await Controller(banco, comChip.Id).Opcoes(0, 0, 0));
+
+        Assert.True(sem.ForaPeloEvitar >= 1);
+        Assert.Equal(0, sem.ForaPelaAlergia);
+        Assert.Equal(0, com.ForaPeloEvitar);
+        Assert.True(com.ForaPelaAlergia >= 1);
+        Assert.DoesNotContain(Todas(com.Refeicao).Concat(Todas(com.Semana)), o => TemSoja(o.AlimentoId));
+    }
+
+    [Fact]
+    public void Mensagem_Sem_Opcoes_Cita_As_Alergias()
+    {
+        Assert.Equal("Nenhum substituto serve aqui: 1 está no que você marcou para evitar e 3 têm uma das suas alergias.",
+            TrocasController.MensagemSemOpcoes(new Dictionary<MotivoForaDaTroca, int>(), 1, 3));
+        Assert.Equal("Nenhum substituto serve aqui: 1 tem uma das suas alergias.",
+            TrocasController.MensagemSemOpcoes(new Dictionary<MotivoForaDaTroca, int>(), 0, 1));
+    }
+
+    // Sem chip, o pão de forma integral é opção do pão francês; com Soja marcada, o cliente não consegue forçá-lo.
+    [Fact]
+    public async Task Substituto_Com_Alergia_Marcada_Da_400_E_Nao_Grava()
+    {
+        using var banco = BancoEmMemoria.NovoContexto();
+        var usuario = NovoUsuario(banco, "troca-alergia3@exemplo.test");
+        var dietaIA = NovaDieta(banco, usuario);
+        Assert.Contains(Todas(Valor<OpcoesTrocaResponse>(await Controller(banco, usuario.Id).Opcoes(0, 0, 0)).Refeicao), o => o.AlimentoId == "pao-de-forma-integral");
+        MarcarAlergias(banco, usuario, "soja");
+        var json = dietaIA.ConteudoJson;
+
+        var r = await Controller(banco, usuario.Id).Trocar(Pedido(dietaIA, "pao-de-forma-integral", refeicao: 0, item: 0, atual: "pao-frances"));
+
+        Assert.Equal(400, Status(r));
+        Assert.Equal((json, 0), (banco.DietasIA.AsNoTracking().Single().ConteudoJson, banco.DietasIA.AsNoTracking().Single().Revisao));
+    }
+
+    // O leite integral do jantar foi trocado; depois a pessoa marcou Leite. Desfazer e voltar ao original trariam o
+    // leite de volta: 422, com a mensagem, e nada é gravado.
+    [Fact]
+    public async Task Desfazer_E_Voltar_Ao_Original_Que_Trariam_Alergeno_Dao_422()
+    {
+        using var banco = BancoEmMemoria.NovoContexto();
+        var usuario = NovoUsuario(banco, "troca-alergia4@exemplo.test");
+        var dietaIA = NovaDieta(banco, usuario);
+        var controller = Controller(banco, usuario.Id);
+        var opcao = Todas(Valor<OpcoesTrocaResponse>(await controller.Opcoes(0, 2, 3)).Refeicao).First();
+        var troca = Valor<TrocaResponse>(await controller.Trocar(Pedido(dietaIA, opcao.AlimentoId, refeicao: 2, item: 3, atual: "leite-integral")));
+        MarcarAlergias(banco, usuario, "leite");
+        var json = banco.DietasIA.AsNoTracking().Single().ConteudoJson;
+
+        var desfazer = await controller.Desfazer(dietaIA.Id, troca.Revisao!.Value);
+        var voltar = await controller.VoltarAoOriginal(dietaIA.Id, troca.Revisao!.Value, 0, 2, 3, "refeicao");
+
+        Assert.Equal((422, 422), (Status(desfazer), Status(voltar)));
+        Assert.Contains("Leite e derivados", Mensagem(desfazer));
+        Assert.Contains("Leite integral", Mensagem(voltar));
+        Assert.Equal((json, troca.Revisao), (banco.DietasIA.AsNoTracking().Single().ConteudoJson, banco.DietasIA.AsNoTracking().Single().Revisao));
+    }
+
+    // Sem alergia no caminho, o desfazer continua funcionando como antes.
+    [Fact]
+    public async Task Desfazer_Sem_Alergeno_Continua_Valendo_Com_Chip_Marcado()
+    {
+        using var banco = BancoEmMemoria.NovoContexto();
+        var usuario = NovoUsuario(banco, "troca-alergia5@exemplo.test");
+        var dietaIA = NovaDieta(banco, usuario);
+        MarcarAlergias(banco, usuario, "soja");
+        var controller = Controller(banco, usuario.Id);
+        var troca = Valor<TrocaResponse>(await controller.Trocar(Pedido(dietaIA, "file-de-tilapia-grelhado")));
+
+        Assert.IsType<OkObjectResult>(await controller.Desfazer(dietaIA.Id, troca.Revisao!.Value));
+        Assert.Equal("peito-de-frango-sem-pele-grelhado", Item(Salva(banco, dietaIA.Id)).AlimentoId);
+    }
+
+    // O aviso do painel: os alimentos da dieta atual com alergia marcada, com o chip e as vezes na semana. Marcar o chip
+    // não muda a dieta salva.
+    [Fact]
+    public async Task Get_Atual_Traz_Os_Alimentos_Com_Alergia_Sem_Mudar_A_Dieta()
+    {
+        using var banco = BancoEmMemoria.NovoContexto();
+        var usuario = NovoUsuario(banco, "troca-alergia6@exemplo.test");
+        var outro = NovoUsuario(banco, "troca-alergia7@exemplo.test");
+        var dietaIA = NovaDieta(banco, usuario);
+        var json = dietaIA.ConteudoJson;
+        MarcarAlergias(banco, outro, "ovo");
+        DietasController Dietas() => new(banco, null!, null!, null!, NullLogger<DietasController>.Instance)
+        {
+            ControllerContext = Controller(banco, usuario.Id).ControllerContext
+        };
+
+        Assert.Empty(Valor<DietaResponse>(await Dietas().ObterAtual()).AlergiasNaDieta!);
+
+        MarcarAlergias(banco, usuario, "leite", "gluten");
+        var aviso = Valor<DietaResponse>(await Dietas().ObterAtual()).AlergiasNaDieta!.ToDictionary(a => a.AlimentoId);
+
+        Assert.Equal(["leite-integral", "macarrao-cozido", "pao-frances"], aviso.Keys.Order());
+        Assert.Equal(["leite"], aviso["leite-integral"].Alergias);
+        Assert.Equal((7, "Leite integral"), (aviso["leite-integral"].Vezes, aviso["leite-integral"].Nome));
+        Assert.Equal(["gluten"], aviso["pao-frances"].Alergias);
+        Assert.Equal(json, banco.DietasIA.AsNoTracking().Single(d => d.Id == dietaIA.Id).ConteudoJson);
+        // A alergia de outra pessoa (ovo) não entra.
+        Assert.DoesNotContain("ovo-de-galinha-cozido", aviso.Keys);
+    }
+
+    // A resposta da troca traz o aviso recalculado, e o log da troca não cita alergias.
+    [Fact]
+    public async Task Troca_Devolve_O_Aviso_Recalculado_E_O_Log_Nao_Cita_Alergias()
+    {
+        using var banco = BancoEmMemoria.NovoContexto();
+        var usuario = NovoUsuario(banco, "troca-alergia8@exemplo.test");
+        var dietaIA = NovaDieta(banco, usuario);
+        MarcarAlergias(banco, usuario, "leite", "soja", "amendoim", "castanhas", "crustaceos");
+        var logger = new LoggerQueGuarda<TrocasController>();
+        var controller = new TrocasController(banco, logger) { ControllerContext = Controller(banco, usuario.Id).ControllerContext };
+
+        var r = Valor<TrocaResponse>(await controller.Trocar(Pedido(dietaIA, "file-de-tilapia-grelhado")));
+
+        Assert.Contains(r.AlergiasNaDieta!, a => a.AlimentoId == "leite-integral");
+        Assert.NotEmpty(logger.Mensagens);
+        Assert.All(logger.Mensagens, m => Assert.DoesNotMatch(@"(?i)\b(leite|soja|amendoim|castanhas?|crustaceos|alergias?)\b", m));
+    }
 }

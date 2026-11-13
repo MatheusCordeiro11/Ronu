@@ -67,6 +67,12 @@ public static class ExportacaoConta
             .Select(m => new { DietaId = m.DietaIAId, m.Chave, m.MarcadoEm })
             .ToListAsync();
 
+        // TACO 2c: os chips de alergia (o aceite do tipo "alergias" já sai junto com os outros, em Consentimentos).
+        var alergias = await contexto.AlergiasUsuario.AsNoTracking()
+            .Where(a => a.UsuarioId == usuarioId).OrderBy(a => a.MarcadoEm)
+            .Select(a => new { a.Codigo, a.MarcadoEm })
+            .ToListAsync();
+
         var consentimentos = await contexto.Consentimentos.AsNoTracking()
             .Where(c => c.UsuarioId == usuarioId).OrderBy(c => c.AceitoEm)
             .Select(c => new { c.Tipo, c.Versao, c.AceitoEm, c.RevogadoEm })
@@ -97,6 +103,7 @@ public static class ExportacaoConta
             Pesagens = pesagens,
             Modalidades = modalidades,
             PreferenciasAlimentares = preferencias,
+            Alergias = alergias,
             Dietas = dietas,
             MetasDieta = metas,
             ListaComprasMarcacoes = marcacoes,

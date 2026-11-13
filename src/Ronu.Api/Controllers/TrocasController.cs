@@ -62,7 +62,7 @@ public class TrocasController : ControllerBase
             return BadRequest(new { mensagem = "Alimento não encontrado na dieta." });
         }
 
-        var (lista, _) = await ListaDaPessoa();
+        var lista = (await DaPessoa()).Lista;
         var r = CalculadoraTroca.Calcular(dieta.Dias, posicao, lista);
         var nutriente = r.Base.Nutriente;
 
@@ -88,8 +88,9 @@ public class TrocasController : ControllerBase
             },
             OcorrenciasNaSemana = r.OcorrenciasNaSemana,
             ForaPeloEvitar = r.ForaPeloEvitar,
-            Refeicao = Escopo(r.Refeicao, r.ForaPeloEvitar),
-            Semana = Escopo(r.Semana, r.ForaPeloEvitar)
+            ForaPelaAlergia = r.ForaPelaAlergia,
+            Refeicao = Escopo(r.Refeicao, r.ForaPeloEvitar, r.ForaPelaAlergia),
+            Semana = Escopo(r.Semana, r.ForaPeloEvitar, r.ForaPelaAlergia)
         });
     }
 
@@ -121,24 +122,25 @@ public class TrocasController : ControllerBase
             return Conflict(new { mensagem = MensagemMudou });
         }
 
-        var (lista, uf) = await ListaDaPessoa();
+        // O substituto vem da lista da pessoa, já sem os alérgenos: um id com alergia nunca está entre as opções.
+        var daPessoa = await DaPessoa();
         var antes = Ler(dietaIA!);
-        var opcao = AplicadorTroca.Trocar(dieta, posicao, request.AlimentoIdNovo!, escopo, lista, dietaIA!.Revisao + 1);
+        var opcao = AplicadorTroca.Trocar(dieta, posicao, request.AlimentoIdNovo!, escopo, daPessoa.Lista, dietaIA!.Revisao + 1);
         if (opcao is null)
         {
-            return BadRequest(new { mensagem = "Este substituto não serve aqui (porção, meta do dia ou o que você marcou para evitar). Atualize as opções e escolha outro." });
+            return BadRequest(new { mensagem = "Este substituto não serve aqui (porção, meta do dia, o que você marcou para evitar ou suas alergias). Atualize as opções e escolha outro." });
         }
 
-        var (conflito, removidas) = await Gravar(dietaIA, antes, dieta, uf);
+        var (conflito, removidas) = await Gravar(dietaIA, antes, dieta, daPessoa.Uf);
         if (conflito is not null)
         {
             return conflito;
         }
 
-        // Só ids e escopo: nenhum dado de saúde no log.
+        // Só ids e escopo: nenhum dado de saúde no log (nem as alergias, nem quantas são).
         _logger.LogInformation("Troca de alimento do usuário {UsuarioId}: '{De}' por '{Para}', {Escopo}, {Itens} itens",
             UsuarioIdLogado, atual.AlimentoId, opcao.AlimentoId, escopo, opcao.Ocorrencias.Count);
-        return Ok(Resposta(dietaIA, removidas));
+        return Ok(Resposta(dietaIA, removidas, daPessoa.Alergias));
     }
 
     /// <summary>"Desfazer": volta exatamente ao que estava antes da última troca ou volta ao original.</summary>
@@ -158,14 +160,19 @@ public class TrocasController : ControllerBase
             return Conflict(new { mensagem = "Não há troca para desfazer." });
         }
 
-        var (_, uf) = await ListaDaPessoa();
-        var (conflito, removidas) = await Gravar(dietaIA, antes, dieta!, uf);
+        var daPessoa = await DaPessoa();
+        if (VoltaComAlergia(antes, dieta!, daPessoa.Alergias) is { } recusa)
+        {
+            return recusa;
+        }
+
+        var (conflito, removidas) = await Gravar(dietaIA, antes, dieta!, daPessoa.Uf);
         if (conflito is not null)
         {
             return conflito;
         }
 
-        return Ok(Resposta(dietaIA, removidas));
+        return Ok(Resposta(dietaIA, removidas, daPessoa.Alergias));
     }
 
     /// <summary>"Voltar ao original": o item (ou, na semana, todos os trocados do mesmo jeito) volta ao primeiro original.</summary>
@@ -198,14 +205,35 @@ public class TrocasController : ControllerBase
             return BadRequest(new { mensagem = "Este alimento não foi trocado." });
         }
 
-        var (_, uf) = await ListaDaPessoa();
-        var (conflito, removidas) = await Gravar(dietaIA, antes, dieta, uf);
+        var daPessoa = await DaPessoa();
+        if (VoltaComAlergia(antes, dieta, daPessoa.Alergias) is { } recusa)
+        {
+            return recusa;
+        }
+
+        var (conflito, removidas) = await Gravar(dietaIA, antes, dieta, daPessoa.Uf);
         if (conflito is not null)
         {
             return conflito;
         }
 
-        return Ok(Resposta(dietaIA, removidas));
+        return Ok(Resposta(dietaIA, removidas, daPessoa.Alergias));
+    }
+
+    // TACO 2c: o "Desfazer" e o "Voltar ao original" não trazem de volta um alimento com alergia marcada depois da
+    // troca. 422, e não 409: a dieta não mudou, o pedido é que não pode ser atendido. Nada é gravado (a mudança só
+    // existia no objeto em memória).
+    private UnprocessableEntityObjectResult? VoltaComAlergia(DietaSemanalDto antes, DietaSemanalDto depois, IReadOnlyList<string> alergias)
+    {
+        if (AlergiasNaDieta.QueVolta(antes, depois, alergias) is not { } volta)
+        {
+            return null;
+        }
+
+        return UnprocessableEntity(new
+        {
+            mensagem = $"Não dá para voltar a \"{volta.Alimento.Nome}\": ele tem uma das suas alergias ({volta.Chip.Rotulo}). Escolha outro substituto em Trocar."
+        });
     }
 
     // A mesma regra do GET /api/dietas/atual: a mais recente do usuário do token.
@@ -247,17 +275,9 @@ public class TrocasController : ControllerBase
         _ => null
     };
 
-    // As preferências ATUAIS da pessoa (um "evitar" novo vale já na troca) e a UF, para o nome regional.
-    private async Task<(ListaAlimentos Lista, string? Uf)> ListaDaPessoa()
-    {
-        var uf = await _context.Usuarios.Where(u => u.Id == UsuarioIdLogado).Select(u => u.Estado).FirstOrDefaultAsync();
-        var preferencias = await _context.PreferenciasAlimentares
-            .Where(p => p.UsuarioId == UsuarioIdLogado)
-            .OrderBy(p => p.Id)
-            .Select(p => new PreferenciaContextoDto { Alimento = p.Alimento, Tipo = p.Tipo })
-            .ToListAsync();
-        return (ListaAlimentosPessoa.Montar(uf, preferencias), uf);
-    }
+    // As preferências e alergias ATUAIS da pessoa (um "evitar" ou um chip novo vale já na troca) e a UF, para o nome
+    // regional. Pelo ponto único, que lê as alergias.
+    private Task<ListaDaPessoa.Resultado> DaPessoa() => ListaDaPessoa.MontarAsync(_context, UsuarioIdLogado);
 
     // Grava a dieta com a revisão nova e tira as marcações "já tenho" que deixaram de valer, numa gravação só.
     // A revisão é token de concorrência: se outra aba gravou no meio, o UPDATE não passa e nada é gravado.
@@ -285,12 +305,14 @@ public class TrocasController : ControllerBase
         return (null, marcacoes.Count);
     }
 
-    private static TrocaResponse Resposta(DietaIA dietaIA, int marcacoesRemovidas)
+    // Com o aviso das alergias recalculado: depois da troca, o painel mostra o que ainda sobrou (ou some).
+    private static TrocaResponse Resposta(DietaIA dietaIA, int marcacoesRemovidas, IReadOnlyList<string> alergias)
     {
         var r = DietasController.Resposta(dietaIA);
         return new TrocaResponse
         {
             DataGeracao = r.DataGeracao, Dieta = r.Dieta, DietaId = r.DietaId, Revisao = r.Revisao, SemTroca = r.SemTroca,
+            AlergiasNaDieta = AlergiasNaDieta.Calcular(r.Dieta, alergias),
             MarcacoesRemovidas = marcacoesRemovidas
         };
     }
@@ -309,13 +331,13 @@ public class TrocasController : ControllerBase
         _ => item.GorduraG
     } * quantidade / 100;
 
-    private static EscopoTrocaDto Escopo(OpcoesDoEscopo e, int foraPeloEvitar) => new()
+    private static EscopoTrocaDto Escopo(OpcoesDoEscopo e, int foraPeloEvitar, int foraPelaAlergia) => new()
     {
         DasPreferencias = e.DasPreferencias.Select(Opcao).ToList(),
         Parecidos = e.Parecidos.Select(Opcao).ToList(),
         VerMais = e.VerMais.Select(Opcao).ToList(),
         Fora = e.Fora.ToDictionary(f => Motivo(f.Key), f => f.Value),
-        MensagemSemOpcoes = e.Nenhuma ? MensagemSemOpcoes(e.Fora, foraPeloEvitar) : null
+        MensagemSemOpcoes = e.Nenhuma ? MensagemSemOpcoes(e.Fora, foraPeloEvitar, foraPelaAlergia) : null
     };
 
     private static OpcaoTrocaDto Opcao(OpcaoTroca o)
@@ -352,7 +374,7 @@ public class TrocasController : ControllerBase
     };
 
     /// <summary>Por que nenhum substituto passou, em uma frase, para a tela dizer em vez de mostrar uma lista vazia.</summary>
-    public static string MensagemSemOpcoes(IReadOnlyDictionary<MotivoForaDaTroca, int> fora, int foraPeloEvitar)
+    public static string MensagemSemOpcoes(IReadOnlyDictionary<MotivoForaDaTroca, int> fora, int foraPeloEvitar, int foraPelaAlergia = 0)
     {
         var partes = new List<string>();
         void Parte(int n, string um, string varios)
@@ -363,6 +385,7 @@ public class TrocasController : ControllerBase
         Parte(fora.GetValueOrDefault(MotivoForaDaTroca.PorcaoMaxima), "1 passaria da porção máxima", "passariam da porção máxima");
         Parte(fora.GetValueOrDefault(MotivoForaDaTroca.ForaDaMeta), "1 deixaria o dia mais de 5% fora da meta", "deixariam o dia mais de 5% fora da meta");
         Parte(foraPeloEvitar, "1 está no que você marcou para evitar", "estão no que você marcou para evitar");
+        Parte(foraPelaAlergia, "1 tem uma das suas alergias", "têm uma das suas alergias");
         Parte(fora.GetValueOrDefault(MotivoForaDaTroca.JaNaRefeicao), "1 já está nesta refeição", "já estão nesta refeição");
         Parte(fora.GetValueOrDefault(MotivoForaDaTroca.RefogadoComOleo) + fora.GetValueOrDefault(MotivoForaDaTroca.UsoDiferente),
             "1 não combina com esta refeição", "não combinam com esta refeição");

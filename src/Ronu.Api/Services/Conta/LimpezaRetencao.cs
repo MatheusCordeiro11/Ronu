@@ -71,7 +71,10 @@ public static class LimpezaRetencao
                 && !contexto.PreferenciasAlimentares.Any(x => x.UsuarioId == u.Id)
                 && !contexto.DietasIA.Any(x => x.UsuarioId == u.Id)
                 && !contexto.MetasDieta.Any(x => x.UsuarioId == u.Id)
-                && !contexto.ListaComprasMarcacoes.Any(x => x.UsuarioId == u.Id))
+                && !contexto.ListaComprasMarcacoes.Any(x => x.UsuarioId == u.Id)
+                // Na prática, quem tem alergia já tem o aceite "alergias" e nem chega aqui; fica pela regra de "nenhuma
+                // linha em outra tabela", para não depender disso.
+                && !contexto.AlergiasUsuario.Any(x => x.UsuarioId == u.Id))
             .Select(u => u.Id)
             .ToListAsync();
 

@@ -36,7 +36,9 @@ public class ContextoDietaDto
     public List<MetaDietaRegistroDto> HistoricoMetas { get; set; } = new();
 
     // Lista fechada de alimentos da pessoa (fase 2b), montada pelo
-    // ContextoDietaBuilder a partir da UF e das preferências. O DietasController
-    // confere os mínimos antes de chamar o Gemini; nula = o gerador monta.
+    // ContextoDietaBuilder no ponto único (ListaDaPessoa), com UF, preferências e
+    // alergias. O DietasController confere os mínimos antes de chamar o Gemini.
+    // Nula só nos contextos das contas da meta, que não geram dieta: o gerador
+    // recusa um contexto sem lista em vez de montar uma sem as alergias (2c).
     public Ronu.Api.Services.IA.ListaAlimentos? Lista { get; set; }
 }

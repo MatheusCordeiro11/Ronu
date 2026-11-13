@@ -357,6 +357,30 @@ public class ListaComprasTests
         Assert.Empty(resposta.Secoes);
     }
 
+    // TACO 2c: o item com alergia marcada continua na lista, marcado com o chip, para a tela dizer "tem soja: troque no
+    // painel". As alergias de outra pessoa não marcam nada.
+    [Fact]
+    public async Task Item_Com_Alergia_Marcada_Fica_Na_Lista_Com_O_Chip()
+    {
+        using var banco = BancoEmMemoria.NovoContexto();
+        var usuario = NovoUsuario(banco, "lista-alergia@exemplo.test", "SP");
+        var outro = NovoUsuario(banco, "lista-alergia-outro@exemplo.test", "SP");
+        NovaDieta(banco, usuario, DateTime.UtcNow, Dieta(SeteDias(Alimento("pao-frances", 50), Alimento("arroz-branco-cozido", 200))));
+        banco.AlergiasUsuario.Add(new AlergiaUsuario { UsuarioId = usuario.Id, Codigo = "soja", MarcadoEm = DateTime.UtcNow });
+        banco.AlergiasUsuario.Add(new AlergiaUsuario { UsuarioId = outro.Id, Codigo = "gluten", MarcadoEm = DateTime.UtcNow });
+        banco.SaveChanges();
+
+        var resposta = (ListaComprasResponse)((OkObjectResult)await Controller(banco, usuario.Id).Obter()).Value!;
+        var itens = resposta.Secoes.SelectMany(s => s.Itens).ToList();
+
+        var pao = itens.Single(i => i.Detalhe.Origens.Any(o => o.AlimentoId == "pao-frances"));
+        Assert.True(pao.TemAlergeno);
+        Assert.Equal(["soja"], pao.Alergias);
+        var arroz = itens.Single(i => i.Detalhe.Origens.Any(o => o.AlimentoId == "arroz-branco-cozido"));
+        Assert.False(arroz.TemAlergeno);
+        Assert.Empty(arroz.Alergias);
+    }
+
     // A resposta vai para o "Compartilhar": nada de calorias, macros, meta ou objetivo.
     [Fact]
     public async Task Resposta_Nao_Leva_Dado_De_Saude()

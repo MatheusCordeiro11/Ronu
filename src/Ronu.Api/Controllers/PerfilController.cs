@@ -1,9 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Ronu.Api.Data;
 using Ronu.Api.DTOs;
+using Ronu.Api.Models;
+using Ronu.Api.Services;
 using Ronu.Api.Services.Consentimentos;
+using Ronu.Api.Services.IA;
 using Ronu.Api.Validacao;
 using System.Security.Claims;
 
@@ -155,6 +160,150 @@ public class PerfilController : ControllerBase
         }
 
         return NoContent();
+    }
+
+    // ---------- Alergias (TACO 2c) ----------
+    // Rotas próprias, fora do PUT /api/perfil: com duas abas, o PUT do perfil inteiro de uma sobrescreveria os chips
+    // da outra. Cada chip é uma linha (AlergiaUsuario), gravada ou apagada sozinha. Nada daqui vai para o log.
+
+    /// <summary>Os chips marcados e se o uso das alergias está autorizado (aceite vigente do tipo "alergias").</summary>
+    [HttpGet("alergias")]
+    [EnableRateLimiting(LimitesAlergias.PoliticaAlergias)]
+    public async Task<IActionResult> ObterAlergias() => Ok(await EstadoAlergias());
+
+    /// <summary>
+    /// Marca um chip. Sem aceite vigente, só grava se o corpo trouxer a versão vigente do texto (a pessoa acabou de
+    /// marcar a caixa): aí o aceite e o chip são gravados juntos, num SaveChanges só. Sem aceite e sem versão: 409
+    /// com motivo "consentimento_alergias", para a tela abrir a caixa. Versão diferente da vigente: 409 como no
+    /// aceite geral. Marcar de novo o mesmo chip não duplica.
+    /// </summary>
+    [HttpPut("alergias/{codigo}")]
+    [EnableRateLimiting(LimitesAlergias.PoliticaAlergias)]
+    public async Task<IActionResult> MarcarAlergia(
+        string codigo, [FromBody(EmptyBodyBehavior = Microsoft.AspNetCore.Mvc.ModelBinding.EmptyBodyBehavior.Allow)] AlergiaRequest? request)
+    {
+        if (!CodigosAlergia.Valido(codigo))
+        {
+            return BadRequest(new { mensagem = MensagemAlergiaInvalida });
+        }
+
+        var tipo = TextosConsentimento.TipoAlergias;
+        var vigente = TextosConsentimento.VersaoVigente(tipo);
+        var temAceite = await RegrasConsentimento.TemAceiteVigenteAsync(_context, UsuarioIdLogado, tipo);
+
+        if (request?.VersaoConsentimento is { } versao)
+        {
+            if (versao != vigente)
+            {
+                return Conflict(new { mensagem = RegrasConsentimento.MensagemVersaoMudou, motivo = RegrasConsentimento.MotivoSemAceiteAlergias, versaoVigente = vigente });
+            }
+
+            if (!temAceite)
+            {
+                _context.Consentimentos.Add(new Consentimento
+                {
+                    UsuarioId = UsuarioIdLogado, Tipo = tipo, Versao = vigente, AceitoEm = DateTime.UtcNow
+                });
+            }
+        }
+        else if (!temAceite)
+        {
+            return Conflict(new { mensagem = RegrasConsentimento.MensagemSemAceiteAlergias, motivo = RegrasConsentimento.MotivoSemAceiteAlergias, versaoVigente = vigente });
+        }
+
+        if (!await _context.AlergiasUsuario.AnyAsync(a => a.UsuarioId == UsuarioIdLogado && a.Codigo == codigo))
+        {
+            _context.AlergiasUsuario.Add(new AlergiaUsuario { UsuarioId = UsuarioIdLogado, Codigo = codigo, MarcadoEm = DateTime.UtcNow });
+        }
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex) when (EhChaveDuplicada(ex))
+        {
+            // Dois pedidos ao mesmo tempo (duas abas, ou a tela mandando vários chips logo depois da caixa): um dos
+            // índices únicos barrou este. Se foi o do aceite, o aceite já está gravado pelo outro pedido, mas o chip
+            // deste não entrou junto: grava só o chip, uma vez. Se foi o do chip, ele já está lá.
+            _context.ChangeTracker.Clear();
+            if (await RegrasConsentimento.TemAceiteVigenteAsync(_context, UsuarioIdLogado, tipo)
+                && !await _context.AlergiasUsuario.AnyAsync(a => a.UsuarioId == UsuarioIdLogado && a.Codigo == codigo))
+            {
+                _context.AlergiasUsuario.Add(new AlergiaUsuario { UsuarioId = UsuarioIdLogado, Codigo = codigo, MarcadoEm = DateTime.UtcNow });
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateException de) when (EhChaveDuplicada(de))
+                {
+                    _context.ChangeTracker.Clear();
+                }
+            }
+        }
+
+        return Ok(await EstadoAlergias());
+    }
+
+    private static bool EhChaveDuplicada(DbUpdateException ex) =>
+        ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation };
+
+    /// <summary>
+    /// Desmarca um chip. Quando não sobra nenhum, o aceite do tipo "alergias" é revogado (RevogadoEm), e a linha fica
+    /// para o histórico: marcar de novo pede a caixa outra vez. Desmarcar o que não está marcado responde igual.
+    ///
+    /// Dispensa o consentimento geral, como apagar a rotina: apagar o próprio dado é direito (art. 18, VI) e não pode
+    /// depender de aceitar o tratamento antes. O usuário vem sempre do token.
+    /// </summary>
+    [HttpDelete("alergias/{codigo}")]
+    [DispensaConsentimento]
+    [EnableRateLimiting(LimitesAlergias.PoliticaAlergias)]
+    public async Task<IActionResult> DesmarcarAlergia(string codigo)
+    {
+        if (!CodigosAlergia.Valido(codigo))
+        {
+            return BadRequest(new { mensagem = MensagemAlergiaInvalida });
+        }
+
+        _context.AlergiasUsuario.RemoveRange(
+            await _context.AlergiasUsuario.Where(a => a.UsuarioId == UsuarioIdLogado && a.Codigo == codigo).ToListAsync());
+        await _context.SaveChangesAsync();
+
+        // Conferido depois de gravar, e não antes: duas abas tirando os dois últimos chips ao mesmo tempo veriam, cada
+        // uma, o outro chip ainda lá, e nenhuma revogaria. Depois de gravar, a última a terminar vê zero.
+        if (!await _context.AlergiasUsuario.AnyAsync(a => a.UsuarioId == UsuarioIdLogado))
+        {
+            var aceites = await _context.Consentimentos
+                .Where(c => c.UsuarioId == UsuarioIdLogado && c.Tipo == TextosConsentimento.TipoAlergias && c.RevogadoEm == null)
+                .ToListAsync();
+            var agora = DateTime.UtcNow;
+            foreach (var aceite in aceites)
+            {
+                aceite.RevogadoEm = agora;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        return Ok(await EstadoAlergias());
+    }
+
+    private const string MensagemAlergiaInvalida = "Alergia inválida.";
+
+    private async Task<AlergiasResponse> EstadoAlergias()
+    {
+        var vigente = TextosConsentimento.VersaoVigente(TextosConsentimento.TipoAlergias);
+        var aceitoEm = await _context.Consentimentos.AsNoTracking()
+            .Where(c => c.UsuarioId == UsuarioIdLogado && c.Tipo == TextosConsentimento.TipoAlergias && c.Versao == vigente && c.RevogadoEm == null)
+            .OrderByDescending(c => c.AceitoEm)
+            .Select(c => (DateTime?)c.AceitoEm)
+            .FirstOrDefaultAsync();
+
+        return new AlergiasResponse
+        {
+            Alergias = (await ListaDaPessoa.AlergiasAsync(_context, UsuarioIdLogado)).ToList(),
+            AceiteVigente = aceitoEm is not null,
+            AceitoEm = aceitoEm
+        };
     }
 
     private static readonly HashSet<string> SiglasUf = new()

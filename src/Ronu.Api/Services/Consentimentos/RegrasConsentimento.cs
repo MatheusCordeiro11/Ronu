@@ -15,6 +15,11 @@ public static class RegrasConsentimento
     public const string MensagemVersaoMudou = "O texto da autorização mudou. Leia de novo e aceite a versão nova.";
     public const string MensagemCadastroSemAceite = "Para criar a conta, autorize o uso dos seus dados de saúde.";
 
+    // TACO 2c: o chip de alergia sem o aceite do tipo "alergias". 409 (e não 403, como o geral): a pessoa pode usar o
+    // Ronu, só este dado pede a caixa, e a tela a reabre pelo motivo.
+    public const string MotivoSemAceiteAlergias = "consentimento_alergias";
+    public const string MensagemSemAceiteAlergias = "Para salvar suas alergias, autorize o uso delas para montar o cardápio.";
+
     // Ligado quando a chave falta: esquecer a configuração não pode desligar o consentimento. Só se desliga com
     // "false" explícito no App Service, durante a publicação (passo a passo em docs/privacidade.md).
     public static bool Exigir(IConfiguration configuracao) => configuracao.GetValue<bool?>(ChaveExigir) ?? true;

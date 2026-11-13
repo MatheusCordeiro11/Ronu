@@ -175,7 +175,10 @@ public class DietasController : ControllerBase
             return NotFound(new { mensagem = "Nenhuma dieta gerada ainda." });
         }
 
-        return Ok(Resposta(dietaIA));
+        // TACO 2c: o aviso do painel. Só leitura: a dieta salva não muda quando a pessoa marca um chip.
+        var resposta = Resposta(dietaIA);
+        resposta.AlergiasNaDieta = AlergiasNaDieta.Calcular(resposta.Dieta, await ListaDaPessoa.AlergiasAsync(_context, UsuarioIdLogado));
+        return Ok(resposta);
     }
 
     /// <summary>

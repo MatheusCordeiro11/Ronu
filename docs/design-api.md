@@ -4,7 +4,7 @@ Lista de endpoints da API, definidos a partir das user stories (`docs/user-stori
 
 **Convenção geral:** todas as rotas exigem autenticação via token JWT (header `Authorization: Bearer <token>`), exceto `POST /api/auth/cadastro`, `POST /api/auth/login`, `POST /api/auth/google`, as três rotas de redefinição de senha (`POST /api/auth/esqueci-senha`, `POST /api/auth/redefinir-senha/verificar` e `POST /api/auth/redefinir-senha`), `GET /api/modalidades` e `GET /api/consentimentos/vigente/{tipo}`. O `usuarioId` nunca é enviado pelo cliente — é sempre extraído do token, para evitar que um usuário manipule dados de outra conta. Sem token (ou com token expirado), a resposta é **401** — também quando o token foi emitido antes da última troca de senha da conta (claim `iat` contra `Usuario.SenhaAlteradaEm`; tokens sem `iat`, anteriores a essa regra, valem até expirar) ou quando a conta não existe mais.
 
-**Consentimento:** toda rota com login exige que a conta tenha aceitado a versão vigente do consentimento geral (dados de saúde; LGPD, art. 11, I). Sem esse aceite, a resposta é **403** `{ "mensagem": "Para continuar, autorize o uso dos seus dados de saúde.", "motivo": "consentimento" }`, e o frontend leva a pessoa à tela de consentimento pelo `motivo`. Ficam de fora as rotas de `/api/consentimentos` (é por elas que se aceita) e as de `/api/conta` (apagar a conta e baixar os dados são direitos de quem nunca aceitou ou quer revogar). Quem decide é o `FiltroConsentimento`, global; uma rota se dispensa com `[DispensaConsentimento]`. A regra fica ligada pela configuração `Consentimento:Exigir`, que vale `true` quando falta: só um `false` explícito a desliga, durante a publicação (passo a passo em `docs/privacidade.md`).
+**Consentimento:** toda rota com login exige que a conta tenha aceitado a versão vigente do consentimento geral (dados de saúde; LGPD, art. 11, I). Sem esse aceite, a resposta é **403** `{ "mensagem": "Para continuar, autorize o uso dos seus dados de saúde.", "motivo": "consentimento" }`, e o frontend leva a pessoa à tela de consentimento pelo `motivo`. Ficam de fora as rotas de `/api/consentimentos` (é por elas que se aceita) e as de `/api/conta` (apagar a conta e baixar os dados são direitos de quem nunca aceitou ou quer revogar), além de `DELETE /api/perfil/rotina` e `DELETE /api/perfil/alergias/{codigo}` (apagar o próprio dado). Quem decide é o `FiltroConsentimento`, global; uma rota se dispensa com `[DispensaConsentimento]`. A regra fica ligada pela configuração `Consentimento:Exigir`, que vale `true` quando falta: só um `false` explícito a desliga, durante a publicação (passo a passo em `docs/privacidade.md`).
 
 **Erros:** todos os erros vêm com corpo `{ "mensagem": "<texto para o usuário>" }`, em português. Isso vale também para os da validação automática do modelo (**400**): campo obrigatório vazio ou nulo, `[MinLength]`, `[Range]` devolvem a **primeira** mensagem de erro, escrita no atributo do DTO (ex.: `{ "mensagem": "A senha deve ter pelo menos 8 caracteres." }`). Erros que não vêm de um atributo — JSON malformado ou com tipo errado, campo obrigatório ausente do JSON, corpo vazio, parâmetro de rota inválido — devolvem a genérica `{ "mensagem": "Requisição inválida. Confira os dados enviados." }`. Nenhuma mensagem padrão do ASP.NET (em inglês) chega ao cliente (`Validacao/RespostaValidacao.cs`). Exceções não tratadas viram **500** com `{ "mensagem" }` genérica em produção.
 
@@ -76,6 +76,23 @@ A `rotinaDiaria` (texto livre antigo) **não é mais gravada pelo PUT**: se um f
 Apaga a rotina em texto livre antiga (`rotinaDiaria`), que não é mais usada.
 **Devolve:** 204, com ou sem texto salvo (repetir não é erro).
 
+### Alergias (TACO 2c)
+
+Os 8 chips, cada um um código fixo: `leite`, `gluten`, `ovo`, `amendoim`, `castanhas`, `soja`, `peixe` e `crustaceos` (`Services/IA/CodigosAlergia.cs`; o Anexo III da RDC ANVISA 727/2022 no que existe na base). Cada chip é uma linha da tabela `AlergiasUsuario`, gravada ou apagada sozinha: rotas próprias, fora do `PUT /api/perfil`, para duas abas não sobrescreverem os chips uma da outra. Alergia é dado de saúde (LGPD, art. 11, I) com consentimento próprio, o tipo `alergias` (seção Consentimento). Os chips são filtro duro na geração, na troca e na conferência das preferências (pelo ponto único `ListaDaPessoa`), marcam os itens da lista de compras e o aviso da dieta atual, e nunca vão para o Gemini nem para o log. Amendoim e Castanhas tiram as duas famílias (`RegrasAlergias`). Marcar um chip não muda a dieta já gerada. As três rotas têm limite por usuário (do token, em memória): 60 pedidos por minuto, somados. Acima disso, **429** `{ "mensagem": "Muitas mudanças nas alergias em pouco tempo. Espere um minuto e tente de novo." }`.
+
+#### `GET /api/perfil/alergias`
+**Devolve:** `alergias` (os códigos marcados, na ordem dos chips), `aceiteVigente` (há aceite da versão vigente do tipo `alergias`, não revogado) e `aceitoEm` (a data desse aceite; nulo sem ele)
+
+#### `PUT /api/perfil/alergias/{codigo}`
+Marca um chip. **Recebe** (corpo opcional): `versaoConsentimento`, a versão do texto que a caixa mostrou, só quando a pessoa acabou de marcar a caixa. Com a versão vigente e sem aceite, o aceite e o chip são gravados juntos; com aceite vigente, o corpo pode ir vazio. Marcar de novo o mesmo chip não duplica.
+**Devolve:** 200 com o mesmo formato do `GET` (a tela redesenha com o que está gravado)
+**Erros:** **400** `"Alergia inválida."` (código fora dos 8, sem normalizar maiúsculas nem espaços); **409** `{ mensagem: "Para salvar suas alergias, autorize o uso delas para montar o cardápio.", motivo: "consentimento_alergias", versaoVigente }` sem aceite vigente e sem versão no corpo (a tela abre a caixa); **409** `{ mensagem: "O texto da autorização mudou. Leia de novo e aceite a versão nova.", motivo: "consentimento_alergias", versaoVigente }` se a versão do corpo não é a vigente. Nada é gravado nos 409.
+
+#### `DELETE /api/perfil/alergias/{codigo}`
+Desmarca um chip. Quando não sobra nenhum, as linhas já saíram e o aceite do tipo `alergias` ganha `RevogadoEm` (a linha fica, para o histórico): marcar de novo pede a caixa outra vez. Funciona sem o consentimento geral, como o `DELETE /api/perfil/rotina`. Desmarcar o que não está marcado responde igual.
+**Devolve:** 200 com o mesmo formato do `GET`
+**Erros:** **400** `"Alergia inválida."`
+
 ### `PUT /api/perfil/estado`
 **Recebe:** `estado` (UF; a API ignora espaços e maiúsculas/minúsculas)
 **Devolve:** `estado` (a sigla normalizada)
@@ -136,6 +153,10 @@ Apaga a rotina em texto livre antiga (`rotinaDiaria`), que não é mais usada.
 ### `GET /api/preferencias-alimentares`
 **Devolve:** lista de preferências alimentares do usuário logado
 
+### `GET /api/preferencias-alimentares/conferencia`
+Confere as preferências do usuário logado contra a base nutricional, pela mesma lista da geração (`ListaDaPessoa`, com os chips de alergia).
+**Devolve:** `preferencias`, cada uma com `id`, `alimento`, `tipo`, `casou`, `alimentos [{ nome, grupo }]` (os itens que ela casa; no "evitar", os que saem), `semCasamento`, `lidoComo` e `sugereAlergias` (TACO 2c: os códigos dos chips que um "evitar" parece ser, quando casa com linhas de alérgeno da tabela do `CasamentoPreferencias`, como `["crustaceos"]` para "camarão" e `["ovo", "soja"]` para "soja e ovo", na ordem dos chips; vazia no "gosto" e quando o texto fala de lactose ou intolerância, que não são alergia; nunca traz um chip já marcado); e `lista` (`atende`, `vazios`, `abaixoDoMinimo`, `itensPorPapel`, `gruposDeProteina`), que conta também os chips.
+
 ### `DELETE /api/preferencias-alimentares/{id}`
 **Devolve:** 204 sem corpo
 **Erros:** 404 se a preferência não existe ou é de outro usuário.
@@ -149,6 +170,7 @@ As três rotas devolvem a dieta no mesmo formato, `DietaResponse`:
 - `dataGeracao`
 - `dietaId` e `revisao`: o id da dieta e quantas gravações ela já teve (começa em 0 e sobe a cada troca, desfazer ou volta ao original). A troca de alimento manda os dois de volta, e uma revisão velha dá 409. Nulos na resposta do `POST /api/dietas/gerar`
 - `semTroca`: por que a dieta não tem troca de alimento, `"dieta-anterior"` (algum alimento sem `alimentoId`, gerada antes da lista fechada) ou `"outra-versao-da-base"` (`versaoBase` diferente da atual); nulo quando tem. Só a dieta atual tem troca: no histórico, a tela não oferece mesmo com `semTroca` nulo
+- `alergiasNaDieta` (TACO 2c; só no `GET /api/dietas/atual` e nas respostas da troca, nulo no histórico e no `POST /gerar`): os alimentos da dieta que têm um chip de alergia marcado pela pessoa, `[{ alimentoId, nome, alergias, vezes }]` (`alergias`: os códigos dos chips que o tiram; `vezes`: quantas vezes aparece na semana). Lista vazia quando não há nenhum. Itens sem `alimentoId` (dietas antigas) ficam de fora
 - `dieta`
   - `dias`: os 7 dias da semana, cada um com `diaSemana`, `refeicoes` (cada refeição com `nome`, `horario` opcional, `alimentos` e `macros`), `totalDoDia`, `metaCalculada`, `metaElevadaPeloPiso` e `composicaoMeta`
   - cada alimento: `nome` (com a contagem nos contáveis, ex.: "Pão francês (2 unidades)"), `quantidade`, `unidade`, `alimentoId` (o item da base nutricional; nulo nas dietas anteriores à lista fechada), `macros` (calculados pela base; nulos nas dietas antigas) e, só nos itens trocados, `original`: o alimento como veio na dieta antes da primeira troca (mesmo formato, sem `original`), para a marca "trocado" e o "Voltar ao original"
@@ -168,9 +190,9 @@ As três rotas devolvem a dieta no mesmo formato, `DietaResponse`:
 - as metas de cada dia (kcal e gramas de proteína, carboidrato e gordura), cada uma marcada como dia de déficit, de manutenção ou de superávit e, para quem treina, de treino (com o horário de início e de fim, se informado) ou de descanso, sem o nome da modalidade;
 - os horários de acordar e de dormir, se informados;
 - a UF (os nomes regionais e o feijão preto no Sul) e a faixa de orçamento;
-- a lista fechada de alimentos (itens da base, sem o que a pessoa evita), o peso de uma unidade dos contáveis, os "gostos" que casaram com a base e, do "evitar", só os termos que não casaram com nenhum item, como foram digitados.
+- a lista fechada de alimentos (itens da base, sem o que a pessoa evita e sem o que os chips de alergia tiram), o peso de uma unidade dos contáveis, os "gostos" que casaram com a base e, do "evitar", só os termos que não casaram com nenhum item, como foram digitados.
 
-Não vão: nome, e-mail, id da conta, sexo, idade, peso, altura, objetivo, nome das modalidades, a rotina em texto e o "evitar" como foi digitado.
+Não vão: nome, e-mail, id da conta, sexo, idade, peso, altura, objetivo, nome das modalidades, a rotina em texto, o "evitar" como foi digitado e as alergias (nem os códigos, nem quantas são: a lista já chega sem os itens). A lista sai sempre do `ListaDaPessoa` (UF, preferências e alergias): o gerador recusa um contexto sem ela, e um teste varre o código para o `ListaAlimentosPessoa.Montar` não ser chamado de outro lugar.
 
 **Checagens da resposta**, antes de salvar. Em todas, a 1ª resposta com o problema é recusada e o Gemini é chamado de novo; o que muda é a última tentativa:
 - estrutura (JSON, 7 dias únicos com os nomes certos, alimentos da lista): na última, vira 503;
@@ -188,13 +210,15 @@ O que foi trocado, tirado ou aceito na última tentativa vai para o log: o dia, 
     `{ "mensagem": "Complete seu perfil (altura, sexo e data de nascimento) antes de gerar uma dieta." }`
   - nenhum objetivo registrado:
     `{ "mensagem": "Registre um objetivo antes de gerar uma dieta." }`
+  - algum papel do prato ficou sem nenhum item depois do "evitar" e dos chips de alergia (abaixo do mínimo, sem ficar vazio, a dieta sai com o `avisoListaPobre`; o filtro nunca é relaxado):
+    `{ "mensagem": "Com o que você marcou para evitar e as suas alergias, não sobrou nenhuma fonte de proteína entre os alimentos do Ronu. Revise a lista de Evitar em Alimentação." }`
 - **429 Too Many Requests** — limite de 3 gerações por usuário numa janela móvel de 1 hora (contado nas dietas salvas; nenhuma chamada à IA é feita). É a primeira checagem, antes das de 400. A mensagem diz quando a próxima vaga libera:
   `{ "mensagem": "Você já gerou 3 dietas na última hora, o limite por hora. Tente novamente em 12 minutos." }`
 - **503 Service Unavailable** — a IA não gerou uma dieta utilizável: falha de comunicação com o Gemini (rede, status de erro, timeout) ou resposta inválida mesmo depois de uma nova tentativa (bloqueada, cortada, JSON inválido, semana sem exatamente 7 dias únicos com os nomes esperados). Nada é salvo e o detalhe vai só para o log do servidor:
   `{ "mensagem": "Não foi possível gerar sua dieta agora. Tente novamente em alguns instantes." }`
 
 ### `GET /api/dietas/atual`
-**Devolve:** a dieta mais recente do usuário logado (`dataGeracao`, `dietaId`, `revisao`, `semTroca`, `dieta`)
+**Devolve:** a dieta mais recente do usuário logado (`dataGeracao`, `dietaId`, `revisao`, `semTroca`, `alergiasNaDieta`, `dieta`)
 **Erros:** 404 se o usuário ainda não gerou nenhuma dieta.
 
 ### `GET /api/dietas/historico`
@@ -206,7 +230,7 @@ O que foi trocado, tirado ou aceito na última tentativa vai para o log: o dia, 
 
 Troca um alimento da dieta atual por um substituto da base nutricional, só na refeição tocada ou na semana toda (cada vez em que o mesmo alimento aparece). Tudo é calculado em C# pela base (`CalculadoraTroca`), sem chamar a IA. A dieta é sempre a atual do usuário do token: o `dietaId` do cliente só é comparado com ela, então o id da dieta de outra pessoa cai no 409, sem saber se ela existe. Toda gravação confere a `revisao` (token de concorrência no banco): duas abas trocando ao mesmo tempo não sobrescrevem uma à outra.
 
-Regras do substituto: mesmo grupo de troca, na lista de alimentos da pessoa com as preferências **atuais** (um "evitar" novo vale já), quantidade que mantém o nutriente principal do original (o peso ou o volume nos itens sem nutriente principal), até a porção máxima da troca (`PorcaoMaximaTroca`, calibração do projeto). Fica de fora o que deixaria algum dia afetado mais de 5% fora da meta (um dia que já estava fora aceita o que não piora), o que já está na refeição, o refogado numa refeição com azeite ou óleo (e vice-versa) e, nas gorduras, o item de outro uso. Só o item trocado muda: os outros alimentos não são reajustados, e a meta do dia não muda. As marcações "já tenho" da lista de compras dos itens que saíram, ou que passaram a pedir mais, caem na mesma gravação.
+Regras do substituto: mesmo grupo de troca, na lista de alimentos da pessoa com as preferências e os chips de alergia **atuais** (um "evitar" ou um chip novo vale já; o substituto nunca tem alergia marcada), quantidade que mantém o nutriente principal do original (o peso ou o volume nos itens sem nutriente principal), até a porção máxima da troca (`PorcaoMaximaTroca`, calibração do projeto). Fica de fora o que deixaria algum dia afetado mais de 5% fora da meta (um dia que já estava fora aceita o que não piora), o que já está na refeição, o refogado numa refeição com azeite ou óleo (e vice-versa) e, nas gorduras, o item de outro uso. Só o item trocado muda: os outros alimentos não são reajustados, e a meta do dia não muda. As marcações "já tenho" da lista de compras dos itens que saíram, ou que passaram a pedir mais, caem na mesma gravação.
 
 **Limites por usuário** (do token, em memória), contados à parte: 120 leituras e 30 gravações por minuto. Acima disso, **429** `{ "mensagem": "Muitos pedidos de troca em pouco tempo. Espere um minuto e tente de novo." }` (a mensagem do 429 é escolhida pela política da rota; a redefinição de senha tem a dela).
 
@@ -221,32 +245,33 @@ Regras do substituto: mesmo grupo de troca, na lista de alimentos da pessoa com 
 - `original`: `alimentoId`, `nome`, `quantidade`, `unidade`, `kcal` e `nutrienteG` (gramas do nutriente principal; nulo sem nutriente principal)
 - `nutriente`: `proteina`, `carboidrato`, `gordura` ou `livre` (sem nutriente a manter: fica o peso)
 - `ocorrenciasNaSemana`: quantas vezes o mesmo alimento aparece na semana
-- `foraPeloEvitar`: quantos itens do grupo saíram pelo que a pessoa marcou para evitar
+- `foraPeloEvitar`: quantos itens do grupo saíram pelo que a pessoa marcou para evitar (sem contar os que saíram por alergia)
+- `foraPelaAlergia`: quantos itens do grupo saíram pelos chips de alergia (TACO 2c), mesmo que também estejam no "evitar"
 - `refeicao` e `semana`, os dois escopos, cada um com:
   - `dasPreferencias` (até 3, no máximo um por gosto), `parecidos` (até 3) e `verMais` (o resto que passa nas regras). Primeiro o mesmo uso, depois o que menos muda as kcal. Cada opção: `alimentoId`, `nome` (regional pela UF, com a contagem nos contáveis), `quantidade`, `unidade`, `contagem` (nos contáveis), `kcal` e `nutrienteG` do item tocado, `difKcal` (a soma das diferenças de todas as vezes do escopo), `outroUso` (substituto de outro uso, como macarrão no lugar do pão do café), `ocorrencias` e `dias [{ dia, diaSemana, totalAntes, totalDepois, meta, desvioPct }]` (a prévia de cada dia afetado; `desvioPct` com 2 casas)
   - `fora`: quantas opções ficaram de fora por motivo (`porcaoMaxima`, `foraDaMeta`, `jaNaRefeicao`, `refogadoComOleo`, `usoDiferente`)
-  - `mensagemSemOpcoes`: só quando nenhuma opção passou, o porquê em uma frase (ex.: `"Nenhum substituto serve aqui: 2 passariam da porção máxima e 1 já está nesta refeição."`)
+  - `mensagemSemOpcoes`: só quando nenhuma opção passou, o porquê em uma frase (ex.: `"Nenhum substituto serve aqui: 2 passariam da porção máxima e 1 já está nesta refeição."`; os de alergia entram como `"3 têm uma das suas alergias"`)
 
 ### `POST /api/dietas/atual/trocas`
 **Recebe:** `dietaId`, `revisao`, `dia`, `refeicao`, `item`, `alimentoIdAtual` (o alimento que a tela mostrava na posição), `alimentoIdNovo` e `escopo` (`refeicao` ou `semana`). Sem quantidade nem kcal: o servidor recalcula tudo e confere as regras de novo.
-**Devolve:** a `DietaResponse` com a revisão nova e `marcacoesRemovidas` (quantas marcações "já tenho" caíram nesta gravação; só a contagem). Trocar de novo um item já trocado mantém o primeiro `original`.
-**Erros:** **400** `"Escopo inválido."`; **400** `"Este substituto não serve aqui (porção, meta do dia ou o que você marcou para evitar). Atualize as opções e escolha outro."` (por exemplo, as preferências mudaram em outra aba); **409** `"Sua dieta mudou desde que a tela foi aberta. Atualize e tente de novo."` (revisão velha, outra dieta gerada ou outro alimento na posição)
+**Devolve:** a `DietaResponse` com a revisão nova, `alergiasNaDieta` recalculado e `marcacoesRemovidas` (quantas marcações "já tenho" caíram nesta gravação; só a contagem). Trocar de novo um item já trocado mantém o primeiro `original`.
+**Erros:** **400** `"Escopo inválido."`; **400** `"Este substituto não serve aqui (porção, meta do dia, o que você marcou para evitar ou suas alergias). Atualize as opções e escolha outro."` (por exemplo, as preferências mudaram em outra aba); **409** `"Sua dieta mudou desde que a tela foi aberta. Atualize e tente de novo."` (revisão velha, outra dieta gerada ou outro alimento na posição)
 
 ### `DELETE /api/dietas/atual/trocas/ultima?dietaId=&revisao=`
 "Desfazer": volta exatamente ao que estava antes da última gravação (troca ou volta ao original), se ela ainda é a última.
-**Devolve:** a `DietaResponse` com a revisão nova e `marcacoesRemovidas`
-**Erros:** **409** `"Não há troca para desfazer."` ou a mensagem de dieta mudada
+**Devolve:** a `DietaResponse` com a revisão nova, `alergiasNaDieta` e `marcacoesRemovidas`
+**Erros:** **409** `"Não há troca para desfazer."` ou a mensagem de dieta mudada; **422** quando desfazer traria de volta um alimento com um chip de alergia marcado depois da troca: `"Não dá para voltar a \"Leite integral\": ele tem uma das suas alergias (Leite e derivados). Escolha outro substituto em Trocar."` (nada é gravado)
 
 ### `DELETE /api/dietas/atual/trocas?dietaId=&revisao=&dia=&refeicao=&item=&escopo=`
 "Voltar ao original": o item volta ao primeiro original, só ele (`escopo=refeicao`) ou, na semana, todos os itens com o mesmo alimento que vieram do mesmo original (`escopo=semana`).
-**Devolve:** a `DietaResponse` com a revisão nova e `marcacoesRemovidas`. Pode ser desfeito como uma troca.
-**Erros:** **400** `"Escopo inválido."`; **400** `"Este alimento não foi trocado."`; **409** a mensagem de dieta mudada
+**Devolve:** a `DietaResponse` com a revisão nova, `alergiasNaDieta` e `marcacoesRemovidas`. Pode ser desfeito como uma troca.
+**Erros:** **400** `"Escopo inválido."`; **400** `"Este alimento não foi trocado."`; **409** a mensagem de dieta mudada; **422** a mesma mensagem do "Desfazer" quando o original tem um chip de alergia marcado (nada é gravado)
 
 ---
 
 ## Lista de compras
 
-A lista é sempre da dieta atual (a mais recente do usuário do token, a mesma regra do `GET /api/dietas/atual`). Ela é calculada na hora a partir da dieta salva e da conversão de `Data/ConversaoCompras.cs` (fontes e método em `docs/compras/README.md` e em `docs/fontes-nutricionais.md`). Só as marcações "já tenho" são gravadas. Nenhuma das duas rotas recebe nem devolve dado de saúde (peso, meta, kcal, macros, objetivo): é o que a tela mostra e o que o "Compartilhar" manda.
+A lista é sempre da dieta atual (a mais recente do usuário do token, a mesma regra do `GET /api/dietas/atual`). Ela é calculada na hora a partir da dieta salva e da conversão de `Data/ConversaoCompras.cs` (fontes e método em `docs/compras/README.md` e em `docs/fontes-nutricionais.md`). Só as marcações "já tenho" são gravadas. Nenhuma das duas rotas recebe nem devolve peso, meta, kcal, macros ou objetivo: é o que a tela mostra e o que o "Compartilhar" manda. A exceção, desde a TACO 2c, é a marca de alergia de cada item (`temAlergeno`, `alergias`), que é só para a tela e não deve ir no "Compartilhar".
 
 ### `GET /api/dietas/atual/lista-compras`
 **Recebe:** nada
@@ -259,6 +284,7 @@ A lista é sempre da dieta atual (a mais recente do usuário do token, a mesma r
   - `quantidade` e `unidade` (`g`, `ml`, `unidades`, `fatias` ou `saches`), já arredondadas **para cima**: contáveis na próxima unidade inteira; gramas e mililitros em passos de 10 até 100 e de 50 acima disso, nunca zero
   - `texto`: a quantidade pronta para mostrar ("7 bananas", "550 g", "1,25 kg", "1,05 L", "14 sachês")
   - `pronto` (a quantidade é do prato pronto, sem fonte para converter: refogados e suco de laranja), `nota` (aviso que vai na própria linha, ex.: "de carne, sem osso e sem pele · compre um pouco mais"), `tenho` (marcado como "já tenho" nesta dieta)
+  - `temAlergeno` e `alergias` (TACO 2c): algum item da dieta que entra na linha tem um chip de alergia marcado pela pessoa, e quais (códigos, na ordem dos chips). O item não some da lista: a tela diz "tem soja: troque no painel"
   - `detalhe`: `quantidadeExata` (antes do arredondamento, 2 casas), `origens` (cada item da dieta que entra na linha: ovo cozido, ovo frito e clara entram em "Ovos"), com `alimentoId`, `nome`, `quantidadeNaDieta` (soma da semana), `medida`, `fator`, `convertido` e `passos [{ tipo, descricao, fator }]` (`tipo` = `par-cru-cozido`, `descarte`, `unidade`, `receita`, `calibracao` ou `derivacao`; a `descricao` traz o código e a página da fonte), e `observacoes` (ex.: "Sobram as gemas.")
 **Erros:** 404 `{ "mensagem": "Nenhuma dieta gerada ainda." }` sem dieta. Dieta antiga não é erro: 200 com `disponivel: false`.
 
@@ -289,7 +315,7 @@ Calcula a meta da fórmula sem gravar nada e sem chamar a IA, com as mesmas clas
 
 ## Consentimento
 
-O texto de cada tipo de consentimento fica no código, por versão (`Services/Consentimentos/TextosConsentimento.cs`); a vigente é a maior versão do tipo, e o histórico do git guarda o que cada versão dizia. Hoje só existe o tipo `geral`. Mudar o que um texto publicado diz pede uma versão nova, e aí todo mundo aceita de novo no próximo acesso (o aceite vale só se é da versão vigente e não foi revogado). A tela sempre mostra o texto que vem da API e manda de volta a versão que mostrou: o texto lido e a versão gravada não têm como divergir.
+O texto de cada tipo de consentimento fica no código, por versão (`Services/Consentimentos/TextosConsentimento.cs`); a vigente é a maior versão do tipo, e o histórico do git guarda o que cada versão dizia. Existem dois tipos: `geral` (dados de saúde, obrigatório para usar o Ronu) e `alergias` (TACO 2c, v1: só para gravar chips de alergia; o aceite é gravado pelo `PUT /api/perfil/alergias/{codigo}` junto com o chip, ou por aqui). Mudar o que um texto publicado diz pede uma versão nova, e aí todo mundo aceita de novo no próximo acesso (o aceite vale só se é da versão vigente e não foi revogado). A tela sempre mostra o texto que vem da API e manda de volta a versão que mostrou: o texto lido e a versão gravada não têm como divergir.
 
 ### `GET /api/consentimentos/vigente/{tipo}`
 Sem login: é o que a caixa do cadastro mostra, antes de a conta existir.
@@ -303,9 +329,9 @@ Sem login: é o que a caixa do cadastro mostra, antes de a conta existir.
 ### `POST /api/consentimentos`
 **Recebe:** `tipo`, `versao` (a que a tela mostrou)
 **Devolve:** 204 sem corpo. A data é a do servidor e o usuário vem do token. Aceitar de novo a versão já aceita não duplica (e duas abas ao mesmo tempo esbarram no índice único parcial, tratado como já aceito)
-**Erros:** 400 "Tipo de autorização inválido." ou campo faltando; **409** `{ mensagem: "O texto da autorização mudou. Leia de novo e aceite a versão nova.", versaoVigente }` se a versão não é a vigente; **429** acima de 10 aceites por minuto do mesmo usuário.
+**Erros:** 400 "Tipo de autorização inválido." ou campo faltando; 400 "A autorização das alergias é dada ao marcar a primeira alergia." com `tipo` = `alergias` (esse aceite só nasce junto com o primeiro chip, no `PUT /api/perfil/alergias/{codigo}`; por aqui ficaria um aceite de dado de saúde sem alergia nenhuma, que nada revogaria); **409** `{ mensagem: "O texto da autorização mudou. Leia de novo e aceite a versão nova.", versaoVigente }` se a versão não é a vigente; **429** acima de 10 aceites por minuto do mesmo usuário.
 
-Não há rota para revogar: revogar o consentimento geral é apagar a conta (`DELETE /api/conta`), porque sem ele o Ronu não funciona.
+Não há rota para revogar: revogar o consentimento geral é apagar a conta (`DELETE /api/conta`), porque sem ele o Ronu não funciona. O de `alergias` é revogado quando a pessoa tira o último chip (`DELETE /api/perfil/alergias/{codigo}`): as alergias saem e o aceite ganha `RevogadoEm`.
 
 ---
 
@@ -319,7 +345,7 @@ As três rotas exigem login, mas não o consentimento: valem também para quem n
 
 ### `GET /api/conta/exportacao`
 "Baixar meus dados" (art. 18, II e V).
-**Devolve:** um arquivo JSON (`application/json`, anexo `ronu-dados-AAAA-MM-DD.json`, com `Cache-Control: no-store`), formato `ronu-exportacao-v1`: `geradoEm`, `conta` (nome, email, UF, datas, se tem senha e se tem Google vinculado, com o `googleId`), `perfil` (com os horários de acordar e dormir), `pesagens`, `modalidades` (com a hora de início), `preferenciasAlimentares`, `dietas` (com o cardápio como JSON), `metasDieta`, `listaComprasMarcacoes`, `consentimentos` e `pedidosRedefinicaoSenha`. Montado campo a campo, nunca serializando as entidades: ficam de fora o hash da senha e o hash do token de redefinição, e um campo novo no modelo só entra se alguém o escrever em `ExportacaoConta`
+**Devolve:** um arquivo JSON (`application/json`, anexo `ronu-dados-AAAA-MM-DD.json`, com `Cache-Control: no-store`), formato `ronu-exportacao-v1`: `geradoEm`, `conta` (nome, email, UF, datas, se tem senha e se tem Google vinculado, com o `googleId`), `perfil` (com os horários de acordar e dormir), `pesagens`, `modalidades` (com a hora de início), `preferenciasAlimentares`, `alergias` (`codigo`, `marcadoEm`), `dietas` (com o cardápio como JSON), `metasDieta`, `listaComprasMarcacoes`, `consentimentos` (os dois tipos, com `revogadoEm`) e `pedidosRedefinicaoSenha`. Montado campo a campo, nunca serializando as entidades: ficam de fora o hash da senha e o hash do token de redefinição, e um campo novo no modelo só entra se alguém o escrever em `ExportacaoConta`
 **Erros:** 404 "Conta não encontrada."; **429** acima de 5 exportações por hora do mesmo usuário.
 
 ### `DELETE /api/conta`

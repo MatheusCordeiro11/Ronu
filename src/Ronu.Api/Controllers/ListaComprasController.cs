@@ -7,6 +7,7 @@ using Ronu.Api.Data;
 using Ronu.Api.DTOs;
 using Ronu.Api.Models;
 using Ronu.Api.Models.IA;
+using Ronu.Api.Services.IA;
 using Ronu.Api.Services.ListaCompras;
 using System.Security.Claims;
 using System.Text.Json;
@@ -70,9 +71,18 @@ public partial class ListaComprasController : ControllerBase
             .Where(m => m.DietaIAId == dietaIA.Id && m.UsuarioId == UsuarioIdLogado)
             .Select(m => m.Chave)
             .ToListAsync();
+        // TACO 2c: o item com alergia marcada (marcada depois de a dieta ser gerada) fica na lista, marcado, para a
+        // tela dizer "tem soja: troque no painel". Esconder deixaria a lista diferente da dieta.
+        var alergias = await ListaDaPessoa.AlergiasAsync(_context, UsuarioIdLogado);
         foreach (var item in lista.Secoes.SelectMany(s => s.Itens))
         {
             item.Tenho = marcadas.Contains(item.Chave);
+            item.Alergias = item.Detalhe.Origens
+                .SelectMany(o => CodigosAlergia.ChipsQueTiram(BaseNutricional.Itens.Single(i => i.Id == o.AlimentoId), alergias))
+                .Select(c => c.Codigo)
+                .Distinct()
+                .ToList();
+            item.TemAlergeno = item.Alergias.Count > 0;
         }
 
         return Ok(new ListaComprasResponse

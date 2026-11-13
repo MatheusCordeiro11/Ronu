@@ -28,6 +28,12 @@ public class PreferenciaConferidaResponse
 
     // Como foi lido, quando casou só pela tolerância a 1 letra ("lactoze" -> "lactose").
     public required List<string> LidoComo { get; set; }
+
+    // TACO 2c: os códigos dos chips de alergia que este "evitar" parece ser ("crustaceos" para "camarão"; "ovo" e "soja"
+    // para "soja e ovo"), na ordem dos chips, para a tela perguntar "Isso parece alergia. Quer marcar o chip?". Vazia no
+    // "gosto", quando nada casa com uma linha de alérgeno, quando o texto fala de lactose ou intolerância (não sugere
+    // Leite) e sem os chips já marcados.
+    public List<string> SugereAlergias { get; set; } = [];
 }
 
 public class AlimentoCasadoResponse

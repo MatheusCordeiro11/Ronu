@@ -2,6 +2,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging.Abstractions;
+using Ronu.Api.Data;
 using Ronu.Api.Models.IA;
 using Ronu.Api.Services;
 using Ronu.Api.Services.IA;
@@ -34,7 +35,7 @@ public class ValidacaoRespostaGeminiTests
         var nomes = Enumerable.Range(0, quantidade).Select(i => Semana[i % 7]);
         var gemini = new GeminiRoteirizado(Envelope(TextoDieta(nomes)), Envelope(TextoDieta(nomes)));
 
-        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarDietaAsync(Contexto()));
+        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarComListaAsync(Contexto()));
 
         Assert.Contains($"{quantidade} dias", ex.Message);
         Assert.Equal(2, gemini.Chamadas);
@@ -47,7 +48,7 @@ public class ValidacaoRespostaGeminiTests
         var nomes = Semana.Take(6).Append("Segunda-feira");
         var gemini = new GeminiRoteirizado(Envelope(TextoDieta(nomes)), Envelope(TextoDieta(nomes)));
 
-        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarDietaAsync(Contexto()));
+        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarComListaAsync(Contexto()));
 
         Assert.Contains("repetido", ex.Message);
         Assert.Equal(2, gemini.Chamadas);
@@ -59,7 +60,7 @@ public class ValidacaoRespostaGeminiTests
         var nomes = Semana.Take(6).Append("Domingo de manhã");
         var gemini = new GeminiRoteirizado(Envelope(TextoDieta(nomes)), Envelope(TextoDieta(nomes)));
 
-        await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarDietaAsync(Contexto()));
+        await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarComListaAsync(Contexto()));
 
         Assert.Equal(2, gemini.Chamadas);
     }
@@ -74,7 +75,7 @@ public class ValidacaoRespostaGeminiTests
         var cortada = Envelope(texto[..(texto.Length / 2)], finishReason: "MAX_TOKENS");
         var gemini = new GeminiRoteirizado(cortada, cortada);
 
-        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarDietaAsync(Contexto()));
+        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarComListaAsync(Contexto()));
 
         Assert.Contains("MAX_TOKENS", ex.Message);
         Assert.Equal(2, gemini.Chamadas);
@@ -87,7 +88,7 @@ public class ValidacaoRespostaGeminiTests
         var bloqueada = JsonSerializer.Serialize(new { promptFeedback = new { blockReason = "SAFETY" } });
         var gemini = new GeminiRoteirizado(bloqueada, bloqueada);
 
-        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarDietaAsync(Contexto()));
+        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarComListaAsync(Contexto()));
 
         Assert.Contains("SAFETY", ex.Message);
         Assert.Equal(2, gemini.Chamadas);
@@ -102,7 +103,7 @@ public class ValidacaoRespostaGeminiTests
     {
         var gemini = new GeminiRoteirizado(Envelope(texto), Envelope(texto));
 
-        await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarDietaAsync(Contexto()));
+        await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarComListaAsync(Contexto()));
 
         Assert.Equal(2, gemini.Chamadas);
     }
@@ -117,7 +118,7 @@ public class ValidacaoRespostaGeminiTests
             Envelope(texto[..(texto.Length / 2)], finishReason: "MAX_TOKENS"),
             Envelope(texto));
 
-        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+        var dieta = await NovoGerador(gemini).GerarComListaAsync(Contexto());
 
         Assert.Equal(Semana, dieta.Dias.Select(d => d.DiaSemana));
         Assert.Equal(2, gemini.Chamadas);
@@ -128,7 +129,7 @@ public class ValidacaoRespostaGeminiTests
     {
         var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana)));
 
-        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+        var dieta = await NovoGerador(gemini).GerarComListaAsync(Contexto());
 
         Assert.Equal(7, dieta.Dias.Count);
         Assert.Equal(1, gemini.Chamadas);
@@ -139,7 +140,7 @@ public class ValidacaoRespostaGeminiTests
     {
         var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana)));
 
-        await NovoGerador(gemini).GerarDietaAsync(Contexto());
+        await NovoGerador(gemini).GerarComListaAsync(Contexto());
 
         Assert.Equal("gemini-3.5-flash-lite", GeradorDietaGemini.Modelo);
         // Pior caso: cold start (~45 s) + 2 × 60 s = ~165 s, abaixo dos 230 s do Azure.
@@ -155,7 +156,7 @@ public class ValidacaoRespostaGeminiTests
     {
         var gemini = new GeminiRoteirizado(GeminiRoteirizado.SemResposta, Envelope(TextoDieta(Semana)));
 
-        var dieta = await NovoGerador(gemini, TimeoutCurto).GerarDietaAsync(Contexto());
+        var dieta = await NovoGerador(gemini, TimeoutCurto).GerarComListaAsync(Contexto());
 
         Assert.Equal(7, dieta.Dias.Count);
         Assert.Equal(2, gemini.Chamadas);
@@ -168,7 +169,7 @@ public class ValidacaoRespostaGeminiTests
     {
         var gemini = new GeminiRoteirizado(GeminiRoteirizado.SemResposta, GeminiRoteirizado.SemResposta);
 
-        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini, TimeoutCurto).GerarDietaAsync(Contexto()));
+        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini, TimeoutCurto).GerarComListaAsync(Contexto()));
 
         Assert.Contains("não respondeu", ex.Message);
         Assert.IsAssignableFrom<OperationCanceledException>(ex.InnerException);
@@ -185,7 +186,7 @@ public class ValidacaoRespostaGeminiTests
             GeminiRoteirizado.SemResposta,
             Envelope(texto[..(texto.Length / 2)], finishReason: "MAX_TOKENS"));
 
-        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini, TimeoutCurto).GerarDietaAsync(Contexto()));
+        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini, TimeoutCurto).GerarComListaAsync(Contexto()));
 
         Assert.Contains("MAX_TOKENS", ex.Message);
         Assert.Equal(2, gemini.Chamadas);
@@ -198,7 +199,7 @@ public class ValidacaoRespostaGeminiTests
     {
         var gemini = new GeminiRoteirizado(HttpStatusCode.ServiceUnavailable);
 
-        await Assert.ThrowsAsync<HttpRequestException>(() => NovoGerador(gemini).GerarDietaAsync(Contexto()));
+        await Assert.ThrowsAsync<HttpRequestException>(() => NovoGerador(gemini).GerarComListaAsync(Contexto()));
 
         Assert.Equal(1, gemini.Chamadas);
     }
@@ -212,7 +213,7 @@ public class ValidacaoRespostaGeminiTests
     {
         var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true)));
 
-        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+        var dieta = await NovoGerador(gemini).GerarComListaAsync(Contexto());
 
         foreach (var dia in dieta.Dias)
         {
@@ -239,7 +240,7 @@ public class ValidacaoRespostaGeminiTests
     {
         var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true, unidade: unidade)));
 
-        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+        var dieta = await NovoGerador(gemini).GerarComListaAsync(Contexto());
 
         Assert.All(dieta.Dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos), a => Assert.Equal("g", a.Unidade));
         Assert.Equal(1, gemini.Chamadas);
@@ -253,7 +254,7 @@ public class ValidacaoRespostaGeminiTests
         var texto = TextoDieta(Semana, comRefeicoes: true, alimento: "Arroz");
         var gemini = new GeminiRoteirizado(Envelope(texto), Envelope(texto));
 
-        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarDietaAsync(Contexto()));
+        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarComListaAsync(Contexto()));
 
         Assert.Contains("fora da lista", ex.Message);
         Assert.Equal(2, gemini.Chamadas);
@@ -264,7 +265,7 @@ public class ValidacaoRespostaGeminiTests
     {
         var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true)));
 
-        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+        var dieta = await NovoGerador(gemini).GerarComListaAsync(Contexto());
 
         Assert.All(dieta.Dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos), a => Assert.Equal("arroz-branco-cozido", a.AlimentoId));
         Assert.Equal(Ronu.Api.Data.BaseNutricional.VersaoBase, dieta.VersaoBase);
@@ -282,7 +283,7 @@ public class ValidacaoRespostaGeminiTests
     {
         var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true, alimento: "Ovo de galinha cozido", quantidade: gramas)));
 
-        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+        var dieta = await NovoGerador(gemini).GerarComListaAsync(Contexto());
 
         Assert.All(dieta.Dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos), a =>
         {
@@ -296,7 +297,7 @@ public class ValidacaoRespostaGeminiTests
     {
         var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true, alimento: "Pão de forma integral", quantidade: 50)));
 
-        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+        var dieta = await NovoGerador(gemini).GerarComListaAsync(Contexto());
 
         Assert.All(dieta.Dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos), a => Assert.Equal("Pão de forma integral (2 fatias)", a.Nome));
     }
@@ -312,7 +313,7 @@ public class ValidacaoRespostaGeminiTests
         var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true, alimento: refogado,
             bebidaNoJantar: oleo, unidadeBebida: "g", quantidadeBebida: 12)));
 
-        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+        var dieta = await NovoGerador(gemini).GerarComListaAsync(Contexto());
 
         foreach (var dia in dieta.Dias)
         {
@@ -331,7 +332,7 @@ public class ValidacaoRespostaGeminiTests
         var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true, alimento: "Abobrinha cozida",
             bebidaNoJantar: "Azeite de oliva extra virgem", unidadeBebida: "g", quantidadeBebida: 12)));
 
-        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+        var dieta = await NovoGerador(gemini).GerarComListaAsync(Contexto());
 
         // Abobrinha cozida (TACO 73: 15 kcal por 100 g) nas duas refeições + 12 g de azeite (TACO 260:
         // 884 kcal por 100 g = 106,08 kcal), que fica.
@@ -349,7 +350,7 @@ public class ValidacaoRespostaGeminiTests
         var contexto = Contexto();
         contexto.Estado = "RJ";
 
-        var dieta = await NovoGerador(gemini).GerarDietaAsync(contexto);
+        var dieta = await NovoGerador(gemini).GerarComListaAsync(contexto);
 
         Assert.All(dieta.Dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos), a => Assert.Equal("mandioca-cozida", a.AlimentoId));
     }
@@ -361,7 +362,7 @@ public class ValidacaoRespostaGeminiTests
         var contexto = Contexto();
         contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "vegano", Tipo = "evitar" });
 
-        var dieta = await NovoGerador(gemini).GerarDietaAsync(contexto);
+        var dieta = await NovoGerador(gemini).GerarComListaAsync(contexto);
 
         Assert.NotNull(dieta.AvisoListaPobre);
         Assert.Equal(["Proteina"], dieta.AvisoListaPobre.Papeis);
@@ -397,13 +398,13 @@ public class ValidacaoRespostaGeminiTests
         var contexto = Contexto();
         contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "peixe", Tipo = "evitar" });
 
-        await NovoGerador(gemini).GerarDietaAsync(contexto);
+        await NovoGerador(gemini).GerarComListaAsync(contexto);
 
         var alimento = JsonDocument.Parse(gemini.UltimoCorpo!).RootElement.GetProperty("generationConfig").GetProperty("responseSchema")
             .GetProperty("properties").GetProperty("dias").GetProperty("items").GetProperty("properties").GetProperty("refeicoes")
             .GetProperty("items").GetProperty("properties").GetProperty("alimentos").GetProperty("items").GetProperty("properties");
         var nomes = alimento.GetProperty("nome").GetProperty("enum").EnumerateArray().Select(e => e.GetString()).ToList();
-        var lista = ListaAlimentosPessoa.Montar(null, contexto.Preferencias);
+        var lista = ListaAlimentosPessoa.Montar(null, contexto.Preferencias, Alergenos.Nenhum);
 
         Assert.Equal(lista.Itens.Select(i => i.Nome), nomes);
         Assert.DoesNotContain("Salmão grelhado", nomes);
@@ -418,7 +419,7 @@ public class ValidacaoRespostaGeminiTests
         contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "Whey protein", Tipo = "preferido" });
         contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "Batata doce", Tipo = "preferido" });
 
-        await NovoGerador(gemini).GerarDietaAsync(contexto);
+        await NovoGerador(gemini).GerarComListaAsync(contexto);
 
         var prompt = PromptEnviado(gemini);
         Assert.Contains("- Carnes, aves e peixes: Patinho bovino grelhado;", prompt);
@@ -439,7 +440,7 @@ public class ValidacaoRespostaGeminiTests
         var contexto = Contexto();
         contexto.Estado = uf;
 
-        await NovoGerador(gemini).GerarDietaAsync(contexto);
+        await NovoGerador(gemini).GerarComListaAsync(contexto);
 
         Assert.Equal(fala, PromptEnviado(gemini).Contains("prefira \"Feijão preto cozido\""));
     }
@@ -453,7 +454,7 @@ public class ValidacaoRespostaGeminiTests
         var texto = TextoDieta(Semana, comRefeicoes: true, alimento: "Cereais cerveja lata (Cerveja pilsen)");
         var gemini = new GeminiRoteirizado(Envelope(texto), Envelope(texto));
 
-        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarDietaAsync(Contexto()));
+        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarComListaAsync(Contexto()));
 
         Assert.Contains("sem nenhuma refeição", ex.Message);
         Assert.Equal(2, gemini.Chamadas);
@@ -468,7 +469,7 @@ public class ValidacaoRespostaGeminiTests
         var texto = TextoDieta(Semana, comRefeicoes: true, bebidaNoJantar: "Cerveja pilsen (1 lata)");
         var gemini = new GeminiRoteirizado(Envelope(texto), Envelope(texto));
 
-        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+        var dieta = await NovoGerador(gemini).GerarComListaAsync(Contexto());
 
         Assert.Equal(2, gemini.Chamadas);
         Assert.Equal(7, dieta.BebidasRemovidas.Count);
@@ -496,7 +497,7 @@ public class ValidacaoRespostaGeminiTests
         var texto = TextoDieta(Semana, comRefeicoes: true, ceiaSoComBebida: "Cerveja pilsen");
         var gemini = new GeminiRoteirizado(Envelope(texto), Envelope(texto));
 
-        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+        var dieta = await NovoGerador(gemini).GerarComListaAsync(Contexto());
 
         Assert.All(dieta.Dias, d =>
         {
@@ -536,7 +537,7 @@ public class ValidacaoRespostaGeminiTests
         var texto = TextoDieta(Semana, comRefeicoes: true, bebidaNoJantar: bebida, unidadeBebida: unidade);
         var gemini = new GeminiRoteirizado(Envelope(texto), Envelope(texto));
 
-        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarDietaAsync(Contexto()));
+        var ex = await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarComListaAsync(Contexto()));
 
         Assert.Contains("sem valor na base", ex.Message);
         Assert.Equal(2, gemini.Chamadas);
@@ -552,7 +553,7 @@ public class ValidacaoRespostaGeminiTests
         var contexto = Contexto();
         contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "Cerveja", Tipo = "preferido" });
 
-        var dieta = await NovoGerador(gemini).GerarDietaAsync(contexto);
+        var dieta = await NovoGerador(gemini).GerarComListaAsync(contexto);
 
         Assert.Empty(dieta.BebidasRemovidas);
         Assert.All(dieta.Dias, d => Assert.Contains(d.Refeicoes.Single(r => r.Nome == "Jantar").Alimentos, a => a.Nome == "Cerveja pilsen"));
@@ -568,7 +569,7 @@ public class ValidacaoRespostaGeminiTests
         contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "Banana", Tipo = "preferido" });
         contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "Cerveja", Tipo = "evitar" });
 
-        await NovoGerador(gemini).GerarDietaAsync(contexto);
+        await NovoGerador(gemini).GerarComListaAsync(contexto);
 
         var prompt = PromptEnviado(gemini);
         Assert.Contains("8. Não inclua nenhuma bebida alcoólica", prompt);
@@ -582,7 +583,7 @@ public class ValidacaoRespostaGeminiTests
         var contexto = Contexto();
         contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "Cerveja", Tipo = "preferido" });
 
-        await NovoGerador(gemini).GerarDietaAsync(contexto);
+        await NovoGerador(gemini).GerarComListaAsync(contexto);
 
         var prompt = PromptEnviado(gemini);
         Assert.Contains("8. Bebida alcoólica só pode aparecer se a mesma bebida estiver entre os alimentos preferidos", prompt);
@@ -600,7 +601,7 @@ public class ValidacaoRespostaGeminiTests
             Envelope(TextoDieta(Semana, comRefeicoes: true, alimento: "Cerveja pilsen")),
             Envelope(TextoDieta(Semana, comRefeicoes: true)));
 
-        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+        var dieta = await NovoGerador(gemini).GerarComListaAsync(Contexto());
 
         Assert.Equal(7, dieta.Dias.Count);
         Assert.Equal(2, gemini.Chamadas);
@@ -613,7 +614,7 @@ public class ValidacaoRespostaGeminiTests
         var contexto = Contexto();
         contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "Cerveja", Tipo = "preferido" });
 
-        var dieta = await NovoGerador(gemini).GerarDietaAsync(contexto);
+        var dieta = await NovoGerador(gemini).GerarComListaAsync(contexto);
 
         Assert.Equal(7, dieta.Dias.Count);
         Assert.Equal(1, gemini.Chamadas);
@@ -627,7 +628,7 @@ public class ValidacaoRespostaGeminiTests
         var contexto = Contexto();
         contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "Cerveja", Tipo = "evitar" });
 
-        await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarDietaAsync(contexto));
+        await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarComListaAsync(contexto));
 
         Assert.Equal(2, gemini.Chamadas);
     }
@@ -658,7 +659,7 @@ public class ValidacaoRespostaGeminiTests
     {
         var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true)));
 
-        var dieta = await NovoGerador(gemini, ajustar: true).GerarDietaAsync(Contexto());
+        var dieta = await NovoGerador(gemini, ajustar: true).GerarComListaAsync(Contexto());
 
         Assert.All(dieta.Dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos), a => Assert.Equal(150m, a.Quantidade));
         Assert.All(dieta.Dias, d => Assert.Equal(2 * 192m, d.TotalDoDia.Calorias));
@@ -683,7 +684,7 @@ public class ValidacaoRespostaGeminiTests
             Envelope(TextoDieta(Semana, comRefeicoes: true)),
             Envelope(TextoDieta(Semana, comRefeicoes: true, lanchesExtras: 3)));
 
-        var dieta = await GeradorComMinimo(gemini).GerarDietaAsync(Contexto());
+        var dieta = await GeradorComMinimo(gemini).GerarComListaAsync(Contexto());
 
         Assert.Equal(2, gemini.Chamadas);
         Assert.All(dieta.Dias, d => Assert.Equal(5, d.Refeicoes.Count));
@@ -697,7 +698,7 @@ public class ValidacaoRespostaGeminiTests
             Envelope(TextoDieta(Semana, comRefeicoes: true)),
             Envelope(TextoDieta(Semana, comRefeicoes: true, lanchesExtras: 1)));
 
-        var dieta = await GeradorComMinimo(gemini).GerarDietaAsync(Contexto());
+        var dieta = await GeradorComMinimo(gemini).GerarComListaAsync(Contexto());
 
         Assert.Equal(2, gemini.Chamadas);
         Assert.All(dieta.Dias, d => Assert.Equal(3, d.Refeicoes.Count));
@@ -708,7 +709,7 @@ public class ValidacaoRespostaGeminiTests
     {
         var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true, lanchesExtras: 3)));
 
-        await GeradorComMinimo(gemini).GerarDietaAsync(Contexto());
+        await GeradorComMinimo(gemini).GerarComListaAsync(Contexto());
 
         Assert.Equal(1, gemini.Chamadas);
     }
@@ -722,7 +723,7 @@ public class ValidacaoRespostaGeminiTests
             Envelope(TextoDieta(Semana, comRefeicoes: true, bebidaNoJantar: "Chá mate", quantidadeBebida: 200)),
             Envelope(TextoDieta(Semana, comRefeicoes: true)));
 
-        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+        var dieta = await NovoGerador(gemini).GerarComListaAsync(Contexto());
 
         Assert.Equal(2, gemini.Chamadas);
         Assert.DoesNotContain(dieta.Dias.SelectMany(d => d.Refeicoes).SelectMany(r => r.Alimentos), a => a.AlimentoId == "cha-mate");
@@ -735,7 +736,7 @@ public class ValidacaoRespostaGeminiTests
         var comMate = Envelope(TextoDieta(Semana, comRefeicoes: true, bebidaNoJantar: "Chá mate", quantidadeBebida: 200));
         var gemini = new GeminiRoteirizado(comMate, comMate);
 
-        var dieta = await NovoGerador(gemini).GerarDietaAsync(Contexto());
+        var dieta = await NovoGerador(gemini).GerarComListaAsync(Contexto());
 
         Assert.Equal(2, gemini.Chamadas);
         Assert.All(dieta.Dias, d =>
@@ -757,7 +758,7 @@ public class ValidacaoRespostaGeminiTests
             Envelope(TextoDieta(Semana, comRefeicoes: true)),
             Envelope(TextoDieta(Semana, comRefeicoes: true, bebidaNoJantar: "Azeite de oliva extra virgem", unidadeBebida: "g", quantidadeBebida: 10)));
 
-        var dieta = await GeradorComGordura(gemini).GerarDietaAsync(Contexto());
+        var dieta = await GeradorComGordura(gemini).GerarComListaAsync(Contexto());
 
         Assert.Equal(2, gemini.Chamadas);
         Assert.All(dieta.Dias, d => Assert.Contains(d.Refeicoes.Single(r => r.Nome == "Jantar").Alimentos, a => a.AlimentoId == "azeite-de-oliva-extra-virgem"));
@@ -770,7 +771,7 @@ public class ValidacaoRespostaGeminiTests
             Envelope(TextoDieta(Semana, comRefeicoes: true)),
             Envelope(TextoDieta(Semana, comRefeicoes: true)));
 
-        var dieta = await GeradorComGordura(gemini).GerarDietaAsync(Contexto());
+        var dieta = await GeradorComGordura(gemini).GerarComListaAsync(Contexto());
 
         Assert.Equal(2, gemini.Chamadas);
         Assert.Equal(7, dieta.Dias.Count);
@@ -782,7 +783,7 @@ public class ValidacaoRespostaGeminiTests
         var gemini = new GeminiRoteirizado(
             Envelope(TextoDieta(Semana, comRefeicoes: true, bebidaNoJantar: "Azeite de oliva extra virgem", unidadeBebida: "g", quantidadeBebida: 10)));
 
-        await GeradorComGordura(gemini).GerarDietaAsync(Contexto());
+        await GeradorComGordura(gemini).GerarComListaAsync(Contexto());
 
         Assert.Equal(1, gemini.Chamadas);
         Assert.Contains("16. Use as fontes de gordura da lista", PromptEnviado(gemini));

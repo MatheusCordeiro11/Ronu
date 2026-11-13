@@ -111,14 +111,16 @@ public class ContextoDietaBuilder : IContextoDietaBuilder
             })
             .ToListAsync();
 
-        var preferencias = await _context.PreferenciasAlimentares
-            .Where(p => p.UsuarioId == usuarioId)
+        // A lista fechada (com as alergias) sai do ponto único. As alergias ficam só nela: o contexto não as carrega,
+        // e o prompt recebe a lista já sem os alérgenos.
+        var daPessoa = await ListaDaPessoa.MontarAsync(_context, usuarioId);
+        var preferencias = daPessoa.Preferencias
             .Select(p => new PreferenciaContextoDto
             {
                 Alimento = p.Alimento,
                 Tipo = p.Tipo
             })
-            .ToListAsync();
+            .ToList();
 
         var idade = Idade(usuario.DataNascimento!.Value, DateOnly.FromDateTime(DateTime.UtcNow));
 
@@ -139,8 +141,7 @@ public class ContextoDietaBuilder : IContextoDietaBuilder
             HorarioDormir = usuario.HorarioDormir,
             HistoricoPeso = historicoPeso,
             HistoricoMetas = historicoMetas,
-            // Sem alérgenos por enquanto: a pessoa só passa a declará-los na fase 2c.
-            Lista = ListaAlimentosPessoa.Montar(usuario.Estado, preferencias)
+            Lista = daPessoa.Lista
         };
     }
 }

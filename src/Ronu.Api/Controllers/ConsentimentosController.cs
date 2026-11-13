@@ -23,6 +23,7 @@ namespace Ronu.Api.Controllers;
 public class ConsentimentosController : ControllerBase
 {
     private const string MensagemTipoInvalido = "Tipo de autorização inválido.";
+    private const string MensagemAlergiasPeloChip = "A autorização das alergias é dada ao marcar a primeira alergia.";
 
     private readonly ApplicationDbContext _context;
 
@@ -99,6 +100,13 @@ public class ConsentimentosController : ControllerBase
         if (!TextosConsentimento.TipoValido(request.Tipo))
         {
             return BadRequest(new { mensagem = MensagemTipoInvalido });
+        }
+
+        // O aceite das alergias só nasce junto com o primeiro chip (PUT /api/perfil/alergias/{codigo}): por aqui ficaria
+        // um aceite de dado de saúde sem nenhuma alergia, que o DELETE do último chip nunca revogaria.
+        if (request.Tipo == TextosConsentimento.TipoAlergias)
+        {
+            return BadRequest(new { mensagem = MensagemAlergiasPeloChip });
         }
 
         var vigente = TextosConsentimento.VersaoVigente(request.Tipo);

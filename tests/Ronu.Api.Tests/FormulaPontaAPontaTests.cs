@@ -42,7 +42,7 @@ public class FormulaPontaAPontaTests
             new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia()),
             new GeminiOptions { ApiKey = "teste" }, NullLogger<GeradorDietaGemini>.Instance);
 
-        var dieta = await gerador.GerarDietaAsync(PerfilA());
+        var dieta = await gerador.GerarComListaAsync(PerfilA());
 
         var metas = dieta.Dias.ToDictionary(d => d.DiaSemana, d => d.MetaCalculada.Calorias);
         Assert.Equal(3290.5m, metas["Segunda-feira"]);
@@ -107,7 +107,7 @@ public class FormulaPontaAPontaTests
             new() { Alimento = "Kiwano dourado", Tipo = "evitar" }
         };
 
-        await gerador.GerarDietaAsync(contexto);
+        await gerador.GerarComListaAsync(contexto);
         var prompt = gemini.Prompt.Replace("\r\n", "\n");
 
         foreach (var proibido in new[] { "Sexo", "Masculino", "Idade", "30 anos", "80 kg", "178", "Altura", "manter peso", "Objetivo:", "Jiu-jitsu", "Rotina em texto livre", "Leite, " })
@@ -138,7 +138,7 @@ public class FormulaPontaAPontaTests
             new() { Alimento = "sou diabético", Tipo = "evitar" }
         };
 
-        await gerador.GerarDietaAsync(contexto);
+        await gerador.GerarComListaAsync(contexto);
         var prompt = gemini.Prompt.Replace("\r\n", "\n");
 
         Assert.Contains("nem como ingrediente de outro prato): gergelim", prompt);
@@ -163,7 +163,7 @@ public class FormulaPontaAPontaTests
         contexto.HorarioAcordar = new TimeOnly(hA, mA);
         contexto.HorarioDormir = new TimeOnly(hD, mD);
 
-        await gerador.GerarDietaAsync(contexto);
+        await gerador.GerarComListaAsync(contexto);
 
         Assert.Contains("Horários da pessoa: " + esperado, gemini.Prompt);
     }
@@ -181,7 +181,7 @@ public class FormulaPontaAPontaTests
         var contexto = PerfilA();
         contexto.Modalidades = new();
 
-        var dieta = await gerador.GerarDietaAsync(contexto);
+        var dieta = await gerador.GerarComListaAsync(contexto);
 
         Assert.All(dieta.Dias, d => Assert.Equal(2474.5m, d.MetaCalculada.Calorias));
         Assert.All(dieta.ManutencaoPorDia!, m => Assert.Equal(2474.5m, m));

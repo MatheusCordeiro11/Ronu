@@ -50,6 +50,8 @@ public class ContaTests
         banco.MetasDieta.Add(new MetaDieta { UsuarioId = usuario.Id, DietaIAId = dieta.Id, DataGeracao = dieta.DataGeracao, VersaoFormula = 3, MetasPorDia = [2000, 2000, 2000, 2000, 2000, 2000, 2000] });
         banco.ListaComprasMarcacoes.Add(new ListaComprasMarcacao { UsuarioId = usuario.Id, DietaIAId = dieta.Id, Chave = "arroz-branco", MarcadoEm = DateTime.UtcNow });
         banco.Consentimentos.Add(new Consentimento { UsuarioId = usuario.Id, Tipo = "geral", Versao = 1, AceitoEm = DateTime.UtcNow });
+        banco.Consentimentos.Add(new Consentimento { UsuarioId = usuario.Id, Tipo = "alergias", Versao = 1, AceitoEm = DateTime.UtcNow });
+        banco.AlergiasUsuario.Add(new AlergiaUsuario { UsuarioId = usuario.Id, Codigo = "soja", MarcadoEm = DateTime.UtcNow });
         banco.PedidosRedefinicaoSenha.Add(new PedidoRedefinicaoSenha { UsuarioId = usuario.Id, Tipo = PedidoRedefinicaoSenha.TipoLink, TokenHash = tokenHash, CriadoEm = DateTime.UtcNow, ExpiraEm = DateTime.UtcNow.AddMinutes(30) });
         await banco.SaveChangesAsync();
 
@@ -125,8 +127,9 @@ public class ContaTests
         var resultado = await Controller(banco, apagar.Id).Apagar(new ExclusaoContaRequest { Senha = Senha });
 
         Assert.IsType<NoContentResult>(resultado);
-        // A conferência viu as 9 tabelas (8 com UsuarioId e a conta), e a conta tinha linha em todas.
-        Assert.Equal(9, antes.Count);
+        // A conferência viu as 10 tabelas (9 com UsuarioId, AlergiasUsuario incluída desde a 2c, e a conta), e a conta
+        // tinha linha em todas.
+        Assert.Equal(10, antes.Count);
         Assert.All(antes, t => Assert.True(t.Value > 0, $"a conta de teste deveria ter linha em {t.Key}"));
         Assert.All(LinhasDe(banco, apagar.Id), t => Assert.True(t.Value == 0, $"sobrou {t.Value} linha(s) em {t.Key}"));
         Assert.Equal(outroAntes, LinhasDe(banco, outro.Id));
@@ -218,6 +221,9 @@ public class ContaTests
         Assert.Equal(7, raiz.GetProperty("metasDieta")[0].GetProperty("metasPorDia").GetArrayLength());
         Assert.Equal("arroz-branco", raiz.GetProperty("listaComprasMarcacoes")[0].GetProperty("chave").GetString());
         Assert.Equal("geral", raiz.GetProperty("consentimentos")[0].GetProperty("tipo").GetString());
+        // TACO 2c: os chips e o aceite do tipo "alergias".
+        Assert.Equal("soja", raiz.GetProperty("alergias")[0].GetProperty("codigo").GetString());
+        Assert.Contains(raiz.GetProperty("consentimentos").EnumerateArray(), c => c.GetProperty("tipo").GetString() == "alergias");
         Assert.Equal("link", raiz.GetProperty("pedidosRedefinicaoSenha")[0].GetProperty("tipo").GetString());
 
         // Sem hash nem token: nem o campo, nem o valor.
@@ -316,6 +322,7 @@ public class ContaTests
     [InlineData("preferencia")]
     [InlineData("dieta")]
     [InlineData("meta")]
+    [InlineData("alergia")]
     public async Task Conta_Nova_Com_Qualquer_Dado_Ou_Aceite_Nao_E_Apagada(string dado)
     {
         using var banco = BancoEmMemoria.NovoContexto();
@@ -338,6 +345,7 @@ public class ContaTests
             case "preferencia": banco.PreferenciasAlimentares.Add(new PreferenciaAlimentar { UsuarioId = conta.Id, Alimento = "banana", Tipo = "preferido" }); break;
             case "dieta": banco.DietasIA.Add(new DietaIA { UsuarioId = conta.Id, DataGeracao = Agora.AddDays(-89), ConteudoJson = "{}" }); break;
             case "meta": banco.MetasDieta.Add(new MetaDieta { UsuarioId = conta.Id, DataGeracao = Agora.AddDays(-89), VersaoFormula = 3 }); break;
+            case "alergia": banco.AlergiasUsuario.Add(new AlergiaUsuario { UsuarioId = conta.Id, Codigo = "ovo", MarcadoEm = Agora.AddDays(-89) }); break;
         }
         await banco.SaveChangesAsync();
 

@@ -201,7 +201,7 @@ public class AjusteAdaptativoTests
             new HttpClient(new GeminiFalso()), new CalculadoraGastoCalorico(),
             new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia()), new GeminiOptions { ApiKey = "teste" }, NullLogger<GeradorDietaGemini>.Instance);
 
-        var dieta = await gerador.GerarDietaAsync(contexto);
+        var dieta = await gerador.GerarComListaAsync(contexto);
 
         Assert.Equal(7, dieta.Dias.Count);
         foreach (var dia in dieta.Dias)
@@ -227,7 +227,7 @@ public class AjusteAdaptativoTests
             new HttpClient(new GeminiFalso()), new CalculadoraGastoCalorico(),
             new AjusteFixo(-0.05m), new GeminiOptions { ApiKey = "teste" }, NullLogger<GeradorDietaGemini>.Instance);
 
-        var dieta = await gerador.GerarDietaAsync(ContextoBase(historico: new(), altura: 185));
+        var dieta = await gerador.GerarComListaAsync(ContextoBase(historico: new(), altura: 185));
 
         foreach (var dia in dieta.Dias)
         {

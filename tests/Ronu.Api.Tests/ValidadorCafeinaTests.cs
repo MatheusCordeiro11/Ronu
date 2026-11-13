@@ -1,3 +1,4 @@
+using Ronu.Api.Data;
 using Ronu.Api.Models.IA;
 using Ronu.Api.Services.IA;
 
@@ -58,7 +59,7 @@ public class ValidadorCafeinaTests
     [Fact]
     public void Corrigir_Troca_Cha_Pelo_Sem_Cafeina_Tira_Refrigerante_E_A_Refeicao_Vazia()
     {
-        var lista = ListaAlimentosPessoa.Montar("SP", new List<PreferenciaContextoDto>());
+        var lista = ListaAlimentosPessoa.Montar("SP", new List<PreferenciaContextoDto>(), Alergenos.Nenhum);
         var dias = Dias(
             Refeicao("Café da manhã", "07:00", ("cafe-coado", "Café coado")),
             Refeicao("Ceia", "21:30", ("cha-mate", "Chá mate")),
@@ -78,7 +79,7 @@ public class ValidadorCafeinaTests
     [Fact]
     public void Sem_O_Cha_Sem_Cafeina_Na_Lista_O_Item_Sai()
     {
-        var lista = ListaAlimentosPessoa.Montar("SP", new List<PreferenciaContextoDto>());
+        var lista = ListaAlimentosPessoa.Montar("SP", new List<PreferenciaContextoDto>(), Alergenos.Nenhum);
         var semErvaDoce = lista with { Itens = lista.Itens.Where(i => i.Item.Id != ValidadorCafeina.SemCafeina).ToList() };
         var dias = Dias(Refeicao("Jantar", "20:00", ("cafe-coado", "Café coado"), ("arroz-branco-cozido", "Arroz branco cozido")));
 

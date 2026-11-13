@@ -27,6 +27,7 @@ public class Consentimento
 
     public DateTime AceitoEm { get; set; }
 
-    // Nulo enquanto vale. O "geral" não é revogado por aqui: revogá-lo é apagar a conta (decisão de 2026-11-01).
+    // Nulo enquanto vale. O "geral" não é revogado por aqui: revogá-lo é apagar a conta (decisão de 2026-11-01). O de
+    // "alergias" é revogado quando a pessoa tira o último chip (TACO 2c): a linha fica, para o histórico.
     public DateTime? RevogadoEm { get; set; }
 }

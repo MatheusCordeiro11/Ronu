@@ -85,13 +85,33 @@ public class LimitesRequisicoesTests
     }
 
     [Fact]
+    public async Task Alergias_Tem_A_Propria_Mensagem()
+    {
+        Assert.Equal((429, LimitesAlergias.MensagemLimite), await Recusar(LimitesAlergias.PoliticaAlergias));
+    }
+
+    // As três rotas de alergias têm o limite por usuário.
+    [Theory]
+    [InlineData(nameof(Ronu.Api.Controllers.PerfilController.ObterAlergias))]
+    [InlineData(nameof(Ronu.Api.Controllers.PerfilController.MarcarAlergia))]
+    [InlineData(nameof(Ronu.Api.Controllers.PerfilController.DesmarcarAlergia))]
+    public void Rotas_De_Alergias_Tem_Limite(string metodo)
+    {
+        var atributo = System.Reflection.CustomAttributeExtensions.GetCustomAttribute<EnableRateLimitingAttribute>(
+            typeof(Ronu.Api.Controllers.PerfilController).GetMethod(metodo)!);
+
+        Assert.Equal(LimitesAlergias.PoliticaAlergias, atributo?.PolicyName);
+    }
+
+    [Fact]
     public void Mensagens_Sao_Diferentes()
     {
         string[] mensagens =
         [
             LimitesRedefinicaoSenha.MensagemLimite, LimitesTroca.MensagemLimite,
             LimitesAutenticacao.MensagemEntrada, LimitesAutenticacao.MensagemCadastro,
-            LimitesConsentimento.MensagemLimite, LimitesConta.MensagemExclusao, LimitesConta.MensagemExportacao
+            LimitesConsentimento.MensagemLimite, LimitesConta.MensagemExclusao, LimitesConta.MensagemExportacao,
+            LimitesAlergias.MensagemLimite
         ];
         Assert.Equal(mensagens.Length, mensagens.Distinct().Count());
     }

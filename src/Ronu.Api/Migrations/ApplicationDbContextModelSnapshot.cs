@@ -22,6 +22,33 @@ namespace Ronu.Api.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Ronu.Api.Models.AlergiaUsuario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Codigo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("MarcadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId", "Codigo")
+                        .IsUnique();
+
+                    b.ToTable("AlergiasUsuario");
+                });
+
             modelBuilder.Entity("Ronu.Api.Models.Consentimento", b =>
                 {
                     b.Property<int>("Id")
@@ -384,6 +411,17 @@ namespace Ronu.Api.Migrations
                     b.HasIndex("UsuarioId");
 
                     b.ToTable("UsuarioModalidades");
+                });
+
+            modelBuilder.Entity("Ronu.Api.Models.AlergiaUsuario", b =>
+                {
+                    b.HasOne("Ronu.Api.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("Ronu.Api.Models.Consentimento", b =>

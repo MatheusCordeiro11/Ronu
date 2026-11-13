@@ -2,8 +2,9 @@ namespace Ronu.Api.DTOs;
 
 /// <summary>
 /// A lista de compras da dieta atual (GET /api/dietas/atual/lista-compras), calculada na hora a partir da
-/// dieta e da ConversaoCompras. Não leva nenhum dado de saúde (peso, meta, kcal, objetivo): é o que a tela
-/// mostra e o que o "Compartilhar" manda.
+/// dieta e da ConversaoCompras. Não leva peso, meta, kcal nem objetivo: é o que a tela mostra e o que o
+/// "Compartilhar" manda. A exceção, desde a TACO 2c, é a marca de alergia de cada item (TemAlergeno e Alergias),
+/// que é só para a tela e fica fora do "Compartilhar".
 /// </summary>
 public class ListaComprasResponse
 {
@@ -55,6 +56,12 @@ public class ItemListaComprasDto
 
     // Marcado como "já tenho" nesta dieta (tabela ListaComprasMarcacoes). Preenchido pelo controller.
     public bool Tenho { get; set; }
+
+    // TACO 2c: algum item da dieta que entra nesta linha tem uma alergia marcada pela pessoa; Alergias traz os
+    // códigos dos chips ("soja"), na ordem da tela. Preenchidos pelo controller. São dado de saúde: a tela mostra
+    // o aviso, mas o "Compartilhar" não deve levá-los.
+    public bool TemAlergeno { get; set; }
+    public List<string> Alergias { get; set; } = [];
 
     public required DetalheItemListaComprasDto Detalhe { get; set; }
 }

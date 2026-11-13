@@ -12,6 +12,10 @@ public static class TextosConsentimento
 {
     public const string TipoGeral = "geral";
 
+    // TACO 2c: as alergias são dado de saúde à parte (art. 11, I): a pessoa autoriza na primeira vez que marca um
+    // chip, numa caixa própria, e o geral não cobre esse uso.
+    public const string TipoAlergias = "alergias";
+
     public record Texto(string Titulo, string Corpo);
 
     // Tipo → versão → texto. A vigente é a maior versão do tipo.
@@ -38,6 +42,16 @@ public static class TextosConsentimento
                 + "revisores humanos podem ler esse conteúdo. O Ronu não envia nada que identifique você.\n"
                 + "Seus dados ficam guardados no Chile (Microsoft Azure); o que vai para a IA passa pelos EUA (Google). Você "
                 + "pode apagar tudo a qualquer momento no Perfil. Antes de apagar, você pode baixar seus dados no Perfil.")
+        },
+        [TipoAlergias] = new()
+        {
+            // Texto aprovado em 2026-11-13 (shape da TACO 2c, seção 9): dois parágrafos, separados por \n como no geral.
+            // Diz que a alergia não vai para a IA, porque é por isso que a pessoa pode confiar, e como revogar.
+            [1] = new Texto(
+                "Autorizo o Ronu a usar minhas alergias para montar o cardápio.",
+                "As alergias marcadas tiram do cardápio os alimentos que as contêm. Elas ficam guardadas na sua conta e "
+                + "não vão para a IA: ela recebe a lista de alimentos já sem esses itens.\n"
+                + "Desmarque a qualquer momento: sem nenhuma marcada, o Ronu apaga suas alergias.")
         }
     };
 

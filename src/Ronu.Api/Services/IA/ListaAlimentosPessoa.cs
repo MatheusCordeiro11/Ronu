@@ -7,7 +7,10 @@ namespace Ronu.Api.Services.IA;
 /// A lista fechada de alimentos de uma pessoa (fase 2b, 2026-10-25): a base
 /// nutricional com o nome regional da UF, sem o que ela marcou para evitar, sem
 /// os alérgenos dela e sem bebida alcoólica que ela não pediu. É a lista que vai
-/// para o prompt e para o enum do Gemini (2b-2); por enquanto nada a usa.
+/// para o prompt e para o enum do Gemini (2b-2), e de onde saem os substitutos da troca.
+///
+/// Desde a 2c, só o ListaDaPessoa chama o Montar (um teste varre o código): é ele que
+/// lê as alergias do banco, e assim nenhum lugar novo esquece de passá-las.
 /// </summary>
 public static class ListaAlimentosPessoa
 {
@@ -19,8 +22,12 @@ public static class ListaAlimentosPessoa
     private static readonly AlimentoDto CervejaDaBase = new() { Nome = "Cerveja pilsen", Quantidade = 0, Unidade = "ml" };
 
     /// <param name="uf">Sigla da UF, para o nome regional (aipim, macaxeira); vazia usa o nome padrão.</param>
-    /// <param name="alergias">Alérgenos declarados pela pessoa (a declaração vem na fase 2c).</param>
-    public static ListaAlimentos Montar(string? uf, IEnumerable<PreferenciaContextoDto> preferencias, Alergenos alergias = Alergenos.Nenhum)
+    /// <param name="alergias">
+    /// As marcas dos chips da pessoa (CodigosAlergia.Marcas). Obrigatório, sem valor padrão: esquecer as alergias
+    /// tem de ser erro de compilação, não uma lista que volta a ter o alérgeno. O filtro é duro: a lista pobre gera
+    /// o aviso de sempre, nunca devolve um item com alérgeno.
+    /// </param>
+    public static ListaAlimentos Montar(string? uf, IEnumerable<PreferenciaContextoDto> preferencias, Alergenos alergias)
     {
         var prefs = preferencias.ToList();
         var base_ = BaseNutricional.Itens.Where(i => !ForaDaLista.Contains(i.Id)).ToList();
@@ -52,7 +59,7 @@ public static class ListaAlimentosPessoa
                 c.Resultado.ItensIds.Count, c.Resultado.TrechosSemCasamento) { ItensIds = c.Resultado.ItensIds, LidoComo = c.Resultado.LidoComo })
             .ToList();
 
-        return new ListaAlimentos(itens, resumo, MinimosPorPapel.Conferir(itens.Select(i => i.Item)));
+        return new ListaAlimentos(itens, resumo, MinimosPorPapel.Conferir(itens.Select(i => i.Item))) { Alergias = alergias };
     }
 
     private static string NomeNaUf(AlimentoBase item, string? uf)
@@ -80,7 +87,14 @@ public record PreferenciaCasada(string Alimento, string Tipo, bool Casou, int It
     public IReadOnlyList<string> LidoComo { get; init; } = [];
 }
 
-public record ListaAlimentos(IReadOnlyList<ItemDaLista> Itens, IReadOnlyList<PreferenciaCasada> Preferencias, ResultadoMinimos Minimos);
+public record ListaAlimentos(IReadOnlyList<ItemDaLista> Itens, IReadOnlyList<PreferenciaCasada> Preferencias, ResultadoMinimos Minimos)
+{
+    /// <summary>
+    /// As marcas que a lista tirou por alergia: a troca usa para não contar como "evitar" o que saiu por alergia.
+    /// Nunca vai para o prompt nem para o log (o gerador só lê Itens e Preferencias).
+    /// </summary>
+    public Alergenos Alergias { get; init; }
+}
 
 public enum PapelNoPrato
 {
@@ -148,7 +162,8 @@ public static class MinimosPorPapel
             _ => "nenhuma hortaliça"
         }).ToList();
         var lista = faltas.Count == 1 ? faltas[0] : string.Join(", ", faltas.SkipLast(1)) + " e " + faltas[^1];
-        return $"Com o que você marcou para evitar, não sobrou {lista} entre os alimentos do Ronu. Revise a lista de Evitar em Alimentação.";
+        // Desde a 2c, as alergias também tiram itens. A mensagem continua sem dizer quais a pessoa marcou.
+        return $"Com o que você marcou para evitar e as suas alergias, não sobrou {lista} entre os alimentos do Ronu. Revise a lista de Evitar em Alimentação.";
     }
 }
 

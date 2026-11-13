@@ -161,7 +161,7 @@ public static class CasamentoPreferencias
         foreach (var trecho in Trechos(texto))
         {
             var palavras = Palavras(trecho);
-            var (linhas, sobra, lidos) = LinhasDaTabela(palavras);
+            var (linhas, sobra, lidos, _) = LinhasDaTabela(palavras);
             lidoComo.AddRange(lidos);
             casados.UnionWith(lista.Where(i => linhas.Any(l => l.Tira(i))).Select(i => i.Id));
 
@@ -268,12 +268,14 @@ public static class CasamentoPreferencias
 
     // Percorre as palavras procurando, em cada posição, a expressão mais longa que casa ali. Devolve as
     // linhas casadas, as palavras que não fizeram parte de nenhuma expressão e as expressões que só casaram
-    // pela tolerância a 1 letra ("lactoze" -> "lactose"), para a tela mostrar como foi lido.
-    private static (List<LinhaDaTabela> Linhas, List<string> Sobra, List<string> LidoComo) LinhasDaTabela(string[] palavras)
+    // pela tolerância a 1 letra ("lactoze" -> "lactose"), para a tela mostrar como foi lido, e todas as expressões
+    // casadas, como estão na tabela (para a sugestão de chip de alergia).
+    private static (List<LinhaDaTabela> Linhas, List<string> Sobra, List<string> LidoComo, List<string> Expressoes) LinhasDaTabela(string[] palavras)
     {
         var linhas = new List<LinhaDaTabela>();
         var sobra = new List<string>();
         var lidoComo = new List<string>();
+        var expressoes = new List<string>();
         for (var i = 0; i < palavras.Length;)
         {
             var achada = Expressoes.FirstOrDefault(e =>
@@ -286,6 +288,7 @@ public static class CasamentoPreferencias
             }
 
             linhas.Add(achada.Linha);
+            expressoes.Add(achada.Texto);
             if (achada.Palavras.Where((p, k) => palavras[i + k] != p).Any())
             {
                 lidoComo.Add(achada.Texto);
@@ -294,7 +297,47 @@ public static class CasamentoPreferencias
             i += achada.Palavras.Length;
         }
 
-        return (linhas, sobra, lidoComo);
+        return (linhas, sobra, lidoComo, expressoes);
+    }
+
+    // As expressões das linhas de alérgeno da tabela e o chip que cada uma sugere (TACO 2c). "lactose" fica de fora:
+    // intolerância à lactose não é alergia, e o chip Leite tira também o que quem é só intolerante tolera.
+    private static readonly Dictionary<string, string> ChipPorExpressao = new(StringComparer.Ordinal)
+    {
+        ["leite"] = "leite", ["laticínio"] = "leite", ["lácteo"] = "leite", ["derivados do leite"] = "leite", ["derivados de leite"] = "leite",
+        ["glúten"] = "gluten", ["celíaco"] = "gluten", ["celíaca"] = "gluten", ["trigo"] = "gluten", ["cevada"] = "gluten", ["centeio"] = "gluten",
+        ["ovo"] = "ovo", ["ovo de galinha"] = "ovo",
+        ["amendoim"] = "amendoim",
+        ["castanha"] = "castanhas", ["noz"] = "castanhas", ["oleaginosa"] = "castanhas", ["amêndoa"] = "castanhas", ["caju"] = "castanhas",
+        ["castanha de caju"] = "castanhas", ["castanha do pará"] = "castanhas", ["castanha do brasil"] = "castanhas",
+        ["soja"] = "soja",
+        ["peixe"] = "peixe", ["pescado"] = "peixe",
+        ["frutos do mar"] = "crustaceos", ["fruto do mar"] = "crustaceos", ["marisco"] = "crustaceos", ["camarão"] = "crustaceos", ["crustáceo"] = "crustaceos",
+    };
+
+    /// <summary>
+    /// Os chips de alergia que um texto do "evitar" sugere, na ordem da tela: os das linhas de alérgeno da tabela que
+    /// o texto casou. Leite não é sugerido quando o texto fala de lactose ou de intolerância ("intolerância a leite"),
+    /// porque intolerância não é alergia. Só sugere: nada é marcado sem a pessoa aceitar e autorizar.
+    /// </summary>
+    public static IReadOnlyList<string> SugerirAlergias(string texto)
+    {
+        var palavras = Palavras(texto);
+        var falaDeIntolerancia = palavras.Any(p => PalavraCasa(p, "lactose") || p is "intolerancia" or "intolerante");
+
+        var codigos = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var trecho in Trechos(texto))
+        {
+            foreach (var expressao in LinhasDaTabela(Palavras(trecho)).Expressoes)
+            {
+                if (ChipPorExpressao.TryGetValue(expressao, out var codigo) && !(codigo == "leite" && falaDeIntolerancia))
+                {
+                    codigos.Add(codigo);
+                }
+            }
+        }
+
+        return CodigosAlergia.Chips.Select(c => c.Codigo).Where(codigos.Contains).ToList();
     }
 
     private static IEnumerable<HashSet<string>> NomesDoItem(AlimentoBase item) =>

@@ -114,26 +114,17 @@ public class PreferenciasAlimentaresController : ControllerBase
     /// 2b-3): o que cada uma casa, o que não casou, como foi lida pela tolerância
     /// a 1 letra e se a lista que sobra atende aos mínimos por papel no prato.
     /// Só as preferências de quem está logado (o id vem do token), como as outras
-    /// rotas daqui.
+    /// rotas daqui. Desde a 2c, os mínimos contam também os chips de alergia, e
+    /// cada "evitar" que parece alergia traz o chip sugerido (sugereAlergia).
     /// </summary>
     [HttpGet("conferencia")]
     public async Task<IActionResult> Conferir()
     {
-        var estado = await _context.Usuarios
-            .Where(u => u.Id == UsuarioIdLogado)
-            .Select(u => u.Estado)
-            .FirstOrDefaultAsync();
-
-        var salvas = await _context.PreferenciasAlimentares
-            .Where(p => p.UsuarioId == UsuarioIdLogado)
-            .OrderBy(p => p.Id)
-            .ToListAsync();
-
-        var lista = ListaAlimentosPessoa.Montar(estado, salvas.Select(p => new PreferenciaContextoDto { Alimento = p.Alimento, Tipo = p.Tipo }));
-        var base_ = BaseNutricional.Itens.ToDictionary(i => i.Id);
+        var daPessoa = await ListaDaPessoa.MontarAsync(_context, UsuarioIdLogado);
+        var lista = daPessoa.Lista;
 
         // ListaAlimentosPessoa devolve uma conferência por preferência, na mesma ordem em que recebeu.
-        var preferencias = salvas.Zip(lista.Preferencias, (salva, conferida) => new PreferenciaConferidaResponse
+        var preferencias = daPessoa.Preferencias.Zip(lista.Preferencias, (salva, conferida) => new PreferenciaConferidaResponse
         {
             Id = salva.Id,
             Alimento = salva.Alimento,
@@ -144,7 +135,12 @@ public class PreferenciasAlimentaresController : ControllerBase
                 .Select(i => new AlimentoCasadoResponse { Nome = i.Nome, Grupo = i.Grupo.ToString() })
                 .ToList(),
             SemCasamento = conferida.TrechosSemCasamento.ToList(),
-            LidoComo = conferida.LidoComo.ToList()
+            LidoComo = conferida.LidoComo.ToList(),
+            // Só no "evitar", e nunca um chip que a pessoa já marcou. Todos os que casarem: em "soja e ovo", sugerir só
+            // um deixaria o outro alérgeno no cardápio sem a pessoa perceber.
+            SugereAlergias = salva.Tipo == "evitar"
+                ? CasamentoPreferencias.SugerirAlergias(salva.Alimento).Where(c => !daPessoa.Alergias.Contains(c)).ToList()
+                : []
         }).ToList();
 
         var minimos = lista.Minimos;

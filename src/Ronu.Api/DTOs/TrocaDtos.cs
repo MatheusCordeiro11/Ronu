@@ -63,6 +63,10 @@ public class OpcoesTrocaResponse
     // Quantos itens do grupo saíram pelo que a pessoa marcou para evitar.
     public required int ForaPeloEvitar { get; set; }
 
+    // Quantos itens do grupo saíram pelas alergias da pessoa (TACO 2c). Não entram no ForaPeloEvitar, mesmo que
+    // também estejam no "evitar".
+    public required int ForaPelaAlergia { get; set; }
+
     public required EscopoTrocaDto Refeicao { get; set; }
     public required EscopoTrocaDto Semana { get; set; }
 }

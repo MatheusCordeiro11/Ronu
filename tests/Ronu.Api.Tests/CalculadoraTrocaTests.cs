@@ -37,7 +37,7 @@ public class CalculadoraTrocaTests
     private static PreferenciaContextoDto Gosto(string alimento) => new() { Alimento = alimento, Tipo = "preferido" };
     private static PreferenciaContextoDto Evitar(string alimento) => new() { Alimento = alimento, Tipo = "evitar" };
 
-    private static ListaAlimentos Lista(string? uf = null, params PreferenciaContextoDto[] prefs) => ListaAlimentosPessoa.Montar(uf, prefs);
+    private static ListaAlimentos Lista(string? uf = null, params PreferenciaContextoDto[] prefs) => ListaAlimentosPessoa.Montar(uf, prefs, Alergenos.Nenhum);
 
     private static ResultadoOpcoesTroca Calcular(List<DiaDietaDto> dias, PosicaoItem posicao, ListaAlimentos? lista = null) =>
         CalculadoraTroca.Calcular(dias, posicao, lista ?? Lista());

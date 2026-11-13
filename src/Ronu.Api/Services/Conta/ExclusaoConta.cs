@@ -30,6 +30,7 @@ public static class ExclusaoConta
         contexto.UsuarioModalidades.RemoveRange(await contexto.UsuarioModalidades.Where(m => m.UsuarioId == usuarioId).ToListAsync());
         contexto.ObjetivosUsuario.RemoveRange(await contexto.ObjetivosUsuario.Where(o => o.UsuarioId == usuarioId).ToListAsync());
         contexto.Consentimentos.RemoveRange(await contexto.Consentimentos.Where(c => c.UsuarioId == usuarioId).ToListAsync());
+        contexto.AlergiasUsuario.RemoveRange(await contexto.AlergiasUsuario.Where(a => a.UsuarioId == usuarioId).ToListAsync());
         contexto.Usuarios.Remove(usuario);
 
         try
