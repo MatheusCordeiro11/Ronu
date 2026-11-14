@@ -59,15 +59,16 @@ public static class TextosConsentimento
         },
         [TipoCasa] = new()
         {
-            // Plano família, etapa 1 (2026-11-13), ainda não aprovado na tela: o shape da etapa 2 revisa a forma. Diz o
+            // Plano família, etapa 1 (2026-11-13). O "prefere evitar" entrou em 2026-11-14, antes de qualquer publicação,
+            // e por isso continua v1 (ninguém aceitou o texto anterior). Diz o
             // que os outros veem, o que fica só com a pessoa e o que dá para deduzir numa casa pequena, porque a lista
             // da casa soma o que cada um come, inclusive no café e nos lanches.
             [1] = new Texto(
                 "Autorizo o Ronu a dividir com as pessoas da minha casa o que a casa precisa para montar o cardápio.",
                 "As pessoas da casa veem seu primeiro nome, o cardápio do almoço e do jantar da semana e a lista de "
                 + "compras da casa, com os itens de todos somados, inclusive os do seu café da manhã e dos seus lanches. "
-                + "Elas também veem as restrições da casa (o que alguém não come e as alergias), sem o nome de quem tem "
-                + "cada uma.\n"
+                + "Elas também veem as restrições da casa (o que alguém não come, o que alguém prefere evitar e as "
+                + "alergias), sem o nome de quem tem cada uma e sem dizer o que é alergia.\n"
                 + "Ficam só com você: seu peso, sua meta, seu objetivo, seu progresso, seus treinos, a sua porção de cada "
                 + "refeição e os cardápios do seu café da manhã e dos seus lanches.\n"
                 + "Numa casa com poucas pessoas, dá para deduzir de quem é uma restrição e, pela lista da casa, o que e "
