@@ -57,6 +57,9 @@ public class CasaResponse
     // contador da aba Casa). O membro não vê nem a contagem: ela diria a ele que outra pessoa pediu algo.
     public List<PedidoCasaResponse>? Pedidos { get; set; }
     public int? PedidosAbertos { get; set; }
+
+    // Para todos os membros, igual para todos (RestricoesDaCasa).
+    public required RestricoesCasaResponse Restricoes { get; set; }
 }
 
 public class MembroCasaResponse
@@ -89,5 +92,23 @@ public class ConviteVerificadoResponse
     // A contagem, não os nomes: quem ainda não entrou não vê quem está na casa.
     public int Membros { get; set; }
 
+    // Só o dia (no fuso da UF de quem abriu), para a nota "válido até dd/mm". A hora não vai: com ela, dava para saber
+    // o minuto em que o dono gerou o link (a validade é sempre de 7 dias), e a tela não precisa disso.
+    public DateOnly ExpiraEm { get; set; }
+
     public required ConsentimentoTextoResponse Consentimento { get; set; }
+}
+
+/// <summary>
+/// As restrições da casa (shape S2), iguais para todos os membros. Só nomes da base nutricional (o nome do item, ou o
+/// nome da categoria quando ela sai inteira), em ordem alfabética: nunca o texto que alguém escreveu, nunca o nome de
+/// um chip de alergia, nunca de quem é cada uma, e sem separar o que é alergia do que é "não como".
+/// </summary>
+public class RestricoesCasaResponse
+{
+    // O "não como" e as alergias de todos, juntos.
+    public required List<string> NaoEntra { get; set; }
+
+    // O "prefiro evitar" de todos, sem o que já está em NaoEntra.
+    public required List<string> EvitamosQuandoDa { get; set; }
 }

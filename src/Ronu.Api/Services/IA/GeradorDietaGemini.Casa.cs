@@ -169,6 +169,26 @@ public partial class GeradorDietaGemini : IGeradorSemanaCasa
                 }
 
                 var oleosTirados = TirarOleoDosRefogados(dias);
+
+                // Selênio: o mesmo teto da geração individual (até 8 g por dia, em até 2 dias), no mesmo ponto (depois
+                // das conferências, antes das contas pela base). Na referência; a porção de cada um nunca passa da
+                // referência (PorcoesCasa.Ajustar não escala a castanha para cima), então o teto vale para todos.
+                var castanha = LimiteCastanhaDoPara.Aplicar(dias);
+                if (castanha.Count > 0)
+                {
+                    _logger.LogWarning("Castanha-do-pará limitada pelo selênio na semana da casa (até {Gramas} g por dia, em até {Dias} dias na semana): {Mudancas}",
+                        LimiteCastanhaDoPara.GramasPorDia, LimiteCastanhaDoPara.DiasPorSemana, string.Join("; ", castanha));
+                }
+
+                // O corte tira a refeição que ficou vazia (só com castanha): a casa precisa do almoço e do jantar de
+                // todo dia. Improvável (a regra 12 pede proteína, carboidrato e hortaliça), mas vira nova tentativa, e
+                // na última, 503, em vez de uma semana sem uma refeição.
+                var semRefeicao = dias.Where(d => d.Refeicoes.Count != 2).Select(d => d.DiaSemana).ToList();
+                if (semRefeicao.Count > 0)
+                {
+                    throw new RespostaIaInvalidaException($"Refeição da casa vazia depois do teto da castanha-do-pará: {string.Join(", ", semRefeicao)}.");
+                }
+
                 CalculoPelaBase.Calcular(dias);
                 // A referência não tem meta de ninguém: a meta de cada dia é o próprio total, só para a regra dos 5%
                 // da troca dos leves (CalculadoraTroca), que compara o dia antes e depois.

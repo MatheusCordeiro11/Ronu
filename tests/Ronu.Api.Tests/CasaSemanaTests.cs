@@ -620,6 +620,114 @@ public class CasaSemanaTests
         Assert.Equal(0, await banco.DietasIA.CountAsync());
     }
 
+    // ---------- Castanha-do-pará (selênio) ----------
+
+    private static decimal Castanha(DiaDietaDto dia) =>
+        dia.Refeicoes.SelectMany(r => r.Alimentos).Where(a => a.AlimentoId == LimiteCastanhaDoPara.Id).Sum(a => a.Quantidade);
+
+    // Nenhum dia da pessoa passa de 8 g, somando as refeições da casa e as dela, e no máximo 2 dias têm castanha.
+    private static void DentroDoLimite(DietaSemanalDto dieta)
+    {
+        Assert.All(dieta.Dias, d => Assert.True(Castanha(d) <= LimiteCastanhaDoPara.GramasPorDia, $"{d.DiaSemana}: {Castanha(d)} g"));
+        Assert.True(dieta.Dias.Count(d => Castanha(d) > 0) <= LimiteCastanhaDoPara.DiasPorSemana);
+    }
+
+    private static readonly object[] AlmocoComCastanha = Itens(
+        ("arroz-branco-cozido", 150), ("feijao-cozido", 100), ("peito-de-frango-sem-pele-grelhado", 120),
+        ("alface-crua", 30), ("castanha-do-para", 4));
+
+    private static readonly object[] JantarComCastanha = Itens(
+        ("macarrao-cozido", 180), ("ovo-de-galinha-cozido", 100), ("brocolis-cozido", 80), ("castanha-do-para", 4));
+
+    [Fact]
+    public async Task Semana_Da_Casa_Limita_A_Castanha_Na_Referencia_E_Na_Porcao_De_Cada_Um()
+    {
+        using var banco = Banco();
+        var (a, b, c) = await CasaDeTres(banco);
+        // 4 g no almoço e 4 g no jantar de todo dia: 8 g por dia, em 7 dias.
+        var gemini = new GeminiFalso { Almoco = _ => AlmocoComCastanha, Jantar = _ => JantarComCastanha };
+
+        await GerarSemana(banco, a, gemini);
+
+        // A referência fica com 8 g em 2 dias (os primeiros), sem perder nenhuma refeição.
+        var semana = JsonSerializer.Deserialize<SemanaCasaDto>(banco.SemanasCasa.Single().ConteudoJson)!;
+        Assert.Equal(new[] { 8m, 8m, 0m, 0m, 0m, 0m, 0m }, semana.Dias.Select(Castanha));
+        Assert.All(semana.Dias, d => Assert.Equal(2, d.Refeicoes.Count));
+
+        // A porção de cada um nunca passa da referência: quem tem meta mais alta recebe mais arroz, não mais castanha.
+        var referencia = semana.Dias.SelectMany(d => d.Refeicoes).ToDictionary(r => r.ChaveCasa!);
+        foreach (var pessoa in new[] { a, b, c })
+        {
+            var dieta = DietaAtual(banco, pessoa);
+            DentroDoLimite(dieta);
+            foreach (var r in dieta.Dias.SelectMany(d => d.Refeicoes).Where(r => r.DaCasa))
+            {
+                var naReferencia = referencia[r.ChaveCasa!].Alimentos.Where(x => x.AlimentoId == LimiteCastanhaDoPara.Id).Sum(x => x.Quantidade);
+                Assert.True(r.Alimentos.Where(x => x.AlimentoId == LimiteCastanhaDoPara.Id).Sum(x => x.Quantidade) <= naReferencia);
+            }
+        }
+        // O caso que importa: alguém com a porção acima da referência (o arroz subiu) e a castanha parada nos 4 g.
+        var almocoMaior = new[] { a, b, c }.Select(p => DietaAtual(banco, p).Dias[0].Refeicoes.Single(r => r.ChaveCasa == "seg-almoco"))
+            .MaxBy(r => r.Alimentos.Single(x => x.AlimentoId == "arroz-branco-cozido").Quantidade)!;
+        Assert.True(almocoMaior.Alimentos.Single(x => x.AlimentoId == "arroz-branco-cozido").Quantidade > 150m);
+        Assert.Equal(4m, almocoMaior.Alimentos.Single(x => x.AlimentoId == LimiteCastanhaDoPara.Id).Quantidade);
+    }
+
+    [Fact]
+    public void Porcao_De_Meta_Alta_Escala_O_Prato_Mas_Nao_A_Castanha()
+    {
+        var referencia = Refeicao("seg-almoco", ("arroz-branco-cozido", 150), ("peito-de-frango-sem-pele-grelhado", 120), ("castanha-do-para", 4));
+        var metaAlta = new MacrosDto { Calorias = 4500, ProteinasG = 250, CarboidratosG = 550, GordurasG = 140 };
+        var metaBaixa = new MacrosDto { Calorias = 1300, ProteinasG = 80, CarboidratosG = 150, GordurasG = 40 };
+
+        var alta = PorcoesCasa.Porcao(referencia, metaAlta);
+        var baixa = PorcoesCasa.Porcao(referencia, metaBaixa);
+
+        Assert.True(alta.Alimentos.Single(x => x.AlimentoId == "arroz-branco-cozido").Quantidade > 150m);
+        Assert.Equal(4m, alta.Alimentos.Single(x => x.AlimentoId == LimiteCastanhaDoPara.Id).Quantidade);
+        // Para baixo, ela desce com o prato.
+        Assert.True(baixa.Alimentos.Single(x => x.AlimentoId == LimiteCastanhaDoPara.Id).Quantidade <= 4m);
+        // A referência não muda.
+        Assert.Equal(4m, referencia.Alimentos.Single(x => x.AlimentoId == LimiteCastanhaDoPara.Id).Quantidade);
+    }
+
+    [Fact]
+    public async Task Castanha_Do_Lanche_De_Quem_Esta_Na_Casa_Soma_Com_A_Da_Casa()
+    {
+        using var banco = Banco();
+        var (a, b, _) = await CasaDeTres(banco);
+        await GerarSemana(banco, a, new GeminiFalso { Almoco = _ => AlmocoComCastanha, Jantar = _ => JantarComCastanha });
+        // O Gemini põe 8 g no lanche de todo dia: sozinho, a geração individual deixaria 8 g na segunda e na terça.
+        var gemini = new GeminiFalso { CastanhaNoLanche = 8 };
+
+        Assert.IsType<OkObjectResult>(await Dietas(banco, b.Id, gemini).Gerar());
+
+        var dieta = DietaAtual(banco, b);
+        DentroDoLimite(dieta);
+        // Os dias com castanha são os da casa (segunda e terça); nos outros, o lanche ficou sem ela.
+        Assert.Equal(new[] { true, true, false, false, false, false, false }, dieta.Dias.Select(d => Castanha(d) > 0));
+    }
+
+    [Fact]
+    public async Task Semana_Nova_Corta_A_Castanha_Do_Lanche_Mantido()
+    {
+        using var banco = Banco();
+        var (a, b, _) = await CasaDeTres(banco);
+        await GerarSemana(banco, a, new GeminiFalso());
+        // A Bia fica com 8 g no lanche da segunda e da terça (os 2 dias da semana).
+        Assert.IsType<OkObjectResult>(await Dietas(banco, b.Id, new GeminiFalso { CastanhaNoLanche = 8 }).Gerar());
+        Assert.Equal(2, DietaAtual(banco, b).Dias.Count(d => Castanha(d) > 0));
+
+        // A semana nova põe castanha no almoço de quarta e quinta: os lanches mantidos da segunda e da terça seriam o
+        // 3º e o 4º dia.
+        var comCastanha = new[] { "Quarta-feira", "Quinta-feira" };
+        await GerarSemana(banco, a, new GeminiFalso { Almoco = dia => comCastanha.Contains(dia) ? AlmocoComCastanha : AlmocoPadrao });
+
+        var dieta = DietaAtual(banco, b);
+        DentroDoLimite(dieta);
+        Assert.Equal(new[] { false, false, true, true, false, false, false }, dieta.Dias.Select(d => Castanha(d) > 0));
+    }
+
     // ---------- Gemini falso ----------
 
     private static object[] Itens(params (string Id, decimal Q)[] itens) =>
@@ -662,6 +770,9 @@ public class CasaSemanaTests
         public Func<string, object[]> Jantar { get; init; } = _ => JantarPadrao;
         public bool AlmocoNaIndividual { get; init; }
 
+        // Gramas de castanha-do-pará no lanche da tarde de todo dia da semana individual (0: sem castanha).
+        public decimal CastanhaNoLanche { get; init; }
+
         public List<string> Prompts { get; } = [];
         public List<string> Corpos { get; } = [];
         public int Chamadas => Prompts.Count;
@@ -696,7 +807,9 @@ public class CasaSemanaTests
                 var lista = new List<object>
                 {
                     Refeicao("Café da manhã", Itens(("iogurte-natural", 170), ("banana-nanica", 100), ("aveia-em-flocos", 30)), "07:30"),
-                    Refeicao("Lanche da tarde", Itens(("pao-frances", 50), ("queijo-minas-frescal", 30)), "16:00")
+                    Refeicao("Lanche da tarde", CastanhaNoLanche > 0
+                        ? Itens(("pao-frances", 50), ("queijo-minas-frescal", 30), ("castanha-do-para", CastanhaNoLanche))
+                        : Itens(("pao-frances", 50), ("queijo-minas-frescal", 30)), "16:00")
                 };
                 if (AlmocoNaIndividual)
                 {

@@ -18,7 +18,8 @@ public static class ListaAlimentosPessoa
     // Decisão da 2b (2026-10-25): os refogados e frituras da TACO já incluem o óleo do preparo, e o Gemini
     // costuma pôr azeite junto, o que contaria a gordura duas vezes. Saem os que têm versão sem óleo na base
     // (abobrinha cozida, ovo cozido). Couve e espinafre refogados ficam, porque não há versão sem óleo comum.
-    private static readonly HashSet<string> ForaDaLista = ["abobrinha-refogada", "ovo-de-galinha-frito"];
+    // Interno para as restrições da casa (RestricoesDaCasa) não listarem o que nunca entra em lista nenhuma.
+    internal static readonly HashSet<string> ForaDaLista = ["abobrinha-refogada", "ovo-de-galinha-frito"];
 
     private static readonly AlimentoDto CervejaDaBase = new() { Nome = "Cerveja pilsen", Quantidade = 0, Unidade = "ml" };
 
@@ -65,7 +66,8 @@ public static class ListaAlimentosPessoa
         return new ListaAlimentos(itens, resumo, MinimosPorPapel.Conferir(itens.Select(i => i.Item))) { Alergias = alergias };
     }
 
-    private static string NomeNaUf(AlimentoBase item, string? uf)
+    // Interno para as restrições da casa (RestricoesDaCasa) usarem o mesmo nome regional do cardápio da casa.
+    internal static string NomeNaUf(AlimentoBase item, string? uf)
     {
         if (string.IsNullOrWhiteSpace(uf))
         {

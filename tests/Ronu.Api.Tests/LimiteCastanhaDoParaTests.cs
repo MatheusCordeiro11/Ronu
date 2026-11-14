@@ -93,6 +93,51 @@ public class LimiteCastanhaDoParaTests
         }, mudancas);
     }
 
+    // Plano família: a castanha das refeições da casa (fora da lista, que só tem o café e os lanches) conta no teto do
+    // dia e nos dias da semana, e o corte cai só nas refeições individuais.
+    [Fact]
+    public void Castanha_Da_Casa_Conta_No_Teto_Do_Dia_E_Nos_Dias_Da_Semana()
+    {
+        var dias = new List<DiaDietaDto>
+        {
+            Dia("Segunda-feira", R("Lanche da tarde", A("castanha-do-para", 8), A("banana-prata", 75))),
+            Dia("Terça-feira", R("Lanche da tarde", A("castanha-do-para", 8), A("banana-prata", 75))),
+            Dia("Quarta-feira", R("Lanche da tarde", A("castanha-do-para", 8), A("banana-prata", 75))),
+            Dia("Quinta-feira", R("Ceia", A("castanha-do-para", 8))),
+        };
+        // A casa tem 5 g na terça e 8 g na quinta: os 2 dias da semana já são dela.
+        var daCasa = new Dictionary<string, decimal> { ["Terça-feira"] = 5m, ["Quinta-feira"] = 8m };
+
+        var mudancas = LimiteCastanhaDoPara.Aplicar(dias, daCasa);
+
+        // Segunda e quarta seriam o 3º e o 4º dia; na terça cabem 3 g; na quinta, nada (a ceia só tinha a castanha).
+        Assert.Equal(new[] { 0m, 3m, 0m, 0m }, dias.Select(Castanha));
+        Assert.Empty(dias[3].Refeicoes);
+        Assert.Equal(new[]
+        {
+            "Segunda-feira: 8 g -> 0 g (passou de 2 dias na semana)",
+            "Terça-feira: 8 g -> 3 g (teto do dia, com 5 g na casa)",
+            "Quarta-feira: 8 g -> 0 g (passou de 2 dias na semana)",
+            "Quinta-feira: 8 g -> 0 g (teto do dia, com 8 g na casa; refeição sem outro item saiu: Ceia)",
+        }, mudancas);
+    }
+
+    // Com um dia só de castanha na casa, sobra uma vaga: o primeiro dia individual com castanha fica com ela.
+    [Fact]
+    public void Dia_Da_Casa_Deixa_Uma_Vaga_Para_O_Primeiro_Dia_Individual()
+    {
+        var dias = new List<DiaDietaDto>
+        {
+            Dia("Segunda-feira", R("Lanche da tarde", A("castanha-do-para", 8), A("banana-prata", 75))),
+            Dia("Terça-feira", R("Lanche da tarde", A("castanha-do-para", 8), A("banana-prata", 75))),
+            Dia("Sábado", R("Café da manhã", A("banana-prata", 75))),
+        };
+
+        LimiteCastanhaDoPara.Aplicar(dias, new Dictionary<string, decimal> { ["Sábado"] = 4m });
+
+        Assert.Equal(new[] { 8m, 0m, 0m }, dias.Select(Castanha));
+    }
+
     // A base: porção máxima (a da troca também) igual ao teto do dia, não ajustável e não contável, então o ajuste
     // de quantidades nunca a aumenta.
     [Fact]

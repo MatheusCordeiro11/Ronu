@@ -110,9 +110,12 @@ public class ConsentimentosController : ControllerBase
             return BadRequest(new { mensagem = MensagemAlergiasPeloChip });
         }
 
-        // O da casa só nasce junto com criar a casa ou aceitar o convite: por aqui ficaria um aceite sem casa, que sair
-        // da casa nunca revogaria.
-        if (request.Tipo == TextosConsentimento.TipoCasa)
+        // O primeiro aceite da casa só nasce junto com criar a casa ou aceitar o convite: sem casa, um aceite por aqui
+        // ficaria solto, e sair da casa (que o revoga) nunca o alcançaria. Quem já está numa casa aceita por aqui a
+        // versão nova do texto, como no geral: a casa fica fechada para ela (409 consentimento_casa) até aceitar, e
+        // sair continua possível sem aceitar.
+        var ehCasa = request.Tipo == TextosConsentimento.TipoCasa;
+        if (ehCasa && !await NumaCasaAsync())
         {
             return BadRequest(new { mensagem = MensagemCasaPeloConvite });
         }
@@ -120,7 +123,10 @@ public class ConsentimentosController : ControllerBase
         var vigente = TextosConsentimento.VersaoVigente(request.Tipo);
         if (request.Versao != vigente)
         {
-            return Conflict(new { mensagem = RegrasConsentimento.MensagemVersaoMudou, versaoVigente = vigente });
+            // O da casa leva o motivo, como o 409 das rotas da casa: a tela recarrega a caixa pelo mesmo caminho.
+            return ehCasa
+                ? Conflict(new { mensagem = RegrasConsentimento.MensagemVersaoMudou, motivo = RegrasConsentimento.MotivoSemAceiteCasa, versaoVigente = vigente })
+                : Conflict(new { mensagem = RegrasConsentimento.MensagemVersaoMudou, versaoVigente = vigente });
         }
 
         if (await RegrasConsentimento.TemAceiteVigenteAsync(_context, UsuarioIdLogado, request.Tipo))
@@ -143,8 +149,26 @@ public class ConsentimentosController : ControllerBase
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
         {
             // Duas abas aceitando ao mesmo tempo: o índice único parcial barrou a segunda, e o aceite já está gravado.
+            _context.ChangeTracker.Clear();
+        }
+
+        // A pessoa pode ter saído da casa (outra aba) entre a conferência e a gravação: o SairAsync já revogou o que
+        // havia, e este aceite ficaria solto. Revogado aqui, para não valer na próxima casa sem a caixa.
+        if (ehCasa && !await NumaCasaAsync())
+        {
+            foreach (var solto in await _context.Consentimentos
+                .Where(c => c.UsuarioId == UsuarioIdLogado && c.Tipo == TextosConsentimento.TipoCasa && c.RevogadoEm == null)
+                .ToListAsync())
+            {
+                solto.RevogadoEm = DateTime.UtcNow;
+            }
+
+            await _context.SaveChangesAsync();
+            return BadRequest(new { mensagem = MensagemCasaPeloConvite });
         }
 
         return NoContent();
     }
+
+    private Task<bool> NumaCasaAsync() => _context.MembrosCasa.AnyAsync(m => m.UsuarioId == UsuarioIdLogado);
 }

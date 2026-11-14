@@ -17,8 +17,9 @@ namespace Ronu.Api.Services.PlanoFamilia;
 public static class ListaDaCasa
 {
     // Almoço e jantar não levam bebida alcoólica (a regra 8 individual depende do gosto de cada um, e na casa ninguém
-    // é perguntado) nem bebida com cafeína (o jantar é à noite, e a regra 7 vale para todos).
-    private static bool ForaDaCasa(AlimentoBase item) =>
+    // é perguntado) nem bebida com cafeína (o jantar é à noite, e a regra 7 vale para todos). Interno para as restrições
+    // da casa (RestricoesDaCasa): o "não como" de um item que a casa nunca usa não é restrição da casa.
+    internal static bool ForaDaCasa(AlimentoBase item) =>
         item.Grupo is GrupoDeTroca.BebidasAlcoolicas or GrupoDeTroca.CafesEChas
         || ValidadorCafeina.ComCafeina.Contains(item.Id);
 

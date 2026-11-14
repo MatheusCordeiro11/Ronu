@@ -107,7 +107,13 @@ public static class PorcoesCasa
             foreach (var a in alimentos)
             {
                 // Pelo menos 1 g: nenhum item some do prato da casa, mesmo na porção pequena.
-                a.Quantidade = Math.Clamp(Math.Round(a.Quantidade * fator), 1m, Math.Max(1m, PorId[a.AlimentoId!].PorcaoMaxima));
+                var escalada = Math.Clamp(Math.Round(a.Quantidade * fator), 1m, Math.Max(1m, PorId[a.AlimentoId!].PorcaoMaxima));
+
+                // A castanha-do-pará (selênio) só desce com a escala, nunca sobe: a quantidade de antes já passou pelo
+                // teto do dia (LimiteCastanhaDoPara, na referência da casa e na geração individual). Sem isto, quem
+                // tem meta alta receberia almoço 4 g + jantar 4 g dobrados, 16 g no dia; a porção máxima (8 g) só
+                // segura cada item, não a soma do dia. O AjusteQuantidades não mexe nela (não é ajustável).
+                a.Quantidade = a.AlimentoId == LimiteCastanhaDoPara.Id ? Math.Min(escalada, a.Quantidade) : escalada;
             }
         }
 
@@ -153,6 +159,15 @@ public static class PorcoesCasa
 
         return new CasaDaPessoa(porDia, restantes, individuais);
     }
+
+    /// <summary>
+    /// Os gramas de castanha-do-pará nas porções da casa de uma pessoa, por dia: o que o teto do dia
+    /// (LimiteCastanhaDoPara.Aplicar, parâmetro jaNoDia) desconta das refeições individuais dela.
+    /// </summary>
+    public static Dictionary<string, decimal> CastanhaPorDia(CasaDaPessoa casa) => casa.RefeicoesPorDia.ToDictionary(
+        d => d.Key,
+        d => d.Value.SelectMany(r => r.Alimentos).Where(a => a.AlimentoId == LimiteCastanhaDoPara.Id).Sum(a => a.Quantidade),
+        StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// O dia completo: as refeições individuais e as da casa, na ordem do horário (as sem horário no fim), com a meta

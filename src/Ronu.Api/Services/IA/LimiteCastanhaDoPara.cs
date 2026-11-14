@@ -39,10 +39,21 @@ public static class LimiteCastanhaDoPara
     /// na ordem da semana (ficam os primeiros dias em que ela aparece). Uma refeição que fica vazia sai do dia, como na
     /// correção da cafeína e da cerveja. Devolve o que mudou, para o log; as kcal saem do cálculo pela base, depois.
     /// </summary>
-    public static List<string> Aplicar(List<DiaDietaDto> dias)
+    /// <param name="jaNoDia">
+    /// Plano família: os gramas de castanha-do-pará que as refeições da casa já põem em cada dia da pessoa (pelo nome do
+    /// dia), fora de <paramref name="dias"/>. Essas não mudam (são a mesma panela de todos): contam no teto do dia e
+    /// na contagem de dias, e o corte cai só nas refeições de <paramref name="dias"/>. Nulo ou vazio: como antes.
+    /// </param>
+    public static List<string> Aplicar(List<DiaDietaDto> dias, IReadOnlyDictionary<string, decimal>? jaNoDia = null)
     {
         var mudancas = new List<string>();
-        var diasComCastanha = 0;
+        decimal JaNoDia(DiaDietaDto dia) =>
+            jaNoDia is not null && jaNoDia.TryGetValue(dia.DiaSemana.Trim(), out var g) ? g : 0m;
+
+        // Os dias com castanha na casa contam primeiro, porque não podem ser cortados; os outros dias com castanha
+        // ficam com as vagas que sobram, na ordem da semana.
+        var diasFixos = dias.Count(d => JaNoDia(d) > 0);
+        var vagas = DiasPorSemana - diasFixos;
 
         foreach (var dia in dias)
         {
@@ -52,9 +63,21 @@ public static class LimiteCastanhaDoPara
                 continue;
             }
 
-            diasComCastanha++;
+            var daCasa = JaNoDia(dia);
+            bool dentroDosDias;
+            if (daCasa > 0)
+            {
+                dentroDosDias = true;
+            }
+            else
+            {
+                dentroDosDias = vagas > 0;
+                vagas--;
+            }
+
             var antes = ocorrencias.Sum(o => o.Alimento.Quantidade);
-            var restante = diasComCastanha <= DiasPorSemana ? GramasPorDia : 0m;
+            var teto = dentroDosDias ? Math.Max(GramasPorDia - daCasa, 0m) : 0m;
+            var restante = teto;
             var refeicoesVazias = new List<string>();
 
             foreach (var (refeicao, alimento) in ocorrencias)
@@ -77,10 +100,12 @@ public static class LimiteCastanhaDoPara
 
             dia.Refeicoes.RemoveAll(r => r.Alimentos.Count == 0);
 
-            var depois = Math.Min(antes, diasComCastanha <= DiasPorSemana ? GramasPorDia : 0m);
+            var depois = Math.Min(antes, teto);
             if (depois != antes)
             {
-                var motivo = diasComCastanha <= DiasPorSemana ? "teto do dia" : $"passou de {DiasPorSemana} dias na semana";
+                var motivo = !dentroDosDias ? $"passou de {DiasPorSemana} dias na semana"
+                    : daCasa > 0 ? string.Create(CultureInfo.InvariantCulture, $"teto do dia, com {daCasa:0.#} g na casa")
+                    : "teto do dia";
                 var vazias = refeicoesVazias.Count == 0 ? "" : $"; refeição sem outro item saiu: {string.Join(", ", refeicoesVazias)}";
                 mudancas.Add(string.Create(CultureInfo.InvariantCulture, $"{dia.DiaSemana}: {antes:0.#} g -> {depois:0.#} g ({motivo}{vazias})"));
             }

@@ -24,7 +24,8 @@ namespace Ronu.Api.Controllers;
 /// - As rotas que mostram a casa exigem também o aceite "casa" vigente (409 consentimento_casa). Sair e recusar a
 ///   transferência não: deixar de dividir os dados não pode depender de aceitar dividir.
 /// - Sobre os outros, a resposta leva só o primeiro nome e o papel (CasaResponse). Nenhuma porção, meta, restrição
-///   com dono ou dado de saúde de outro membro sai daqui; os pedidos não dizem quem pediu.
+///   com dono ou dado de saúde de outro membro sai daqui; os pedidos não dizem quem pediu. As restrições da casa saem
+///   juntas, sem dono e sem separar o que é alergia (RestricoesDaCasa).
 /// </summary>
 [ApiController]
 [Route("api/casa")]
@@ -231,7 +232,7 @@ public partial class CasaController : ControllerBase
     /// <summary>
     /// Confere o convite antes de mostrar a caixa do aceite. Na ordem: invalido, usado, expirado (400); ja_em_casa
     /// (409); cadastro_incompleto (409); menor_de_18 (403); casa_cheia (409). Quem ainda não entrou vê só o primeiro
-    /// nome do dono e quantas pessoas a casa tem.
+    /// nome do dono, quantas pessoas a casa tem e o dia em que o link vence.
     /// </summary>
     [HttpPost("convites/verificar")]
     [EnableRateLimiting(LimitesCasa.PoliticaConviteVerificar)]
@@ -245,10 +246,13 @@ public partial class CasaController : ControllerBase
 
         var tipo = TextosConsentimento.TipoCasa;
         var texto = TextosConsentimento.TextoVigente(tipo);
+        // O dia no fuso de quem abriu (a UF da própria conta), como o "hoje" do resto do Ronu.
+        var uf = await _context.Usuarios.AsNoTracking().Where(u => u.Id == UsuarioIdLogado).Select(u => u.Estado).FirstOrDefaultAsync();
         return Ok(new ConviteVerificadoResponse
         {
             PrimeiroNomeDono = conferencia.PrimeiroNomeDono!,
             Membros = conferencia.Membros,
+            ExpiraEm = FusoHorarioEstado.Hoje(uf, conferencia.Convite!.ExpiraEm),
             Consentimento = new ConsentimentoTextoResponse
             {
                 Tipo = tipo,
@@ -947,10 +951,15 @@ public partial class CasaController : ControllerBase
                 .ToListAsync();
         }
 
+        // Todos os membros, na ordem de entrada só para ler; a resposta sai em ordem alfabética (RestricoesDaCasa).
+        var restricoes = await RestricoesDaCasa.MontarAsync(_context, membros.Select(m => m.UsuarioId).ToList(),
+            membros.FirstOrDefault(m => m.Papel == MembroCasa.PapelDono)?.UsuarioId);
+
         return new CasaResponse
         {
             SouDono = souDono,
             Orcamento = casa.OrcamentoSemanal,
+            Restricoes = restricoes,
             ConvitesAbertos = convites,
             Pedidos = pedidos,
             PedidosAbertos = pedidos?.Count,

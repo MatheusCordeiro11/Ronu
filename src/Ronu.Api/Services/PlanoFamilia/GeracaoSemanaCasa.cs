@@ -134,26 +134,31 @@ public class GeracaoSemanaCasa
         IReadOnlyDictionary<string, List<RefeicaoDto>>? individuaisPorDia)
     {
         var casa = PorcoesCasa.Montar(semana, metas.MetasPorDia, listaDaPessoa);
-        var dias = GeradorDietaGemini.NomesDias.Select(nome =>
+        var dias = GeradorDietaGemini.NomesDias.Select(nome => new DiaDietaDto
         {
-            var individuais = individuaisPorDia is not null && individuaisPorDia.TryGetValue(nome, out var mantidas) ? mantidas : [];
-            if (individuais.Count > 0)
+            DiaSemana = nome,
+            Refeicoes = individuaisPorDia is not null && individuaisPorDia.TryGetValue(nome, out var mantidas) ? mantidas : [],
+            TotalDoDia = new MacrosDto { Calorias = 0, ProteinasG = 0, CarboidratosG = 0, GordurasG = 0 },
+            MetaCalculada = metas.MetasPorDia[nome].Macros,
+            ComposicaoMeta = metas.ComposicaoPorDia[nome]
+        }).ToList();
+
+        // Selênio: o café e os lanches mantidos passaram pelo teto quando foram gerados, mas sem a castanha desta semana
+        // da casa (que pode cair no mesmo dia, ou num 3º dia). O corte cai neles, antes do reajuste, para ele
+        // compensar as kcal com os outros itens, como na geração individual.
+        LimiteCastanhaDoPara.Aplicar(dias, PorcoesCasa.CastanhaPorDia(casa));
+
+        foreach (var dia in dias)
+        {
+            var nome = dia.DiaSemana;
+            if (dia.Refeicoes.Count > 0)
             {
-                PorcoesCasa.Ajustar(individuais, casa.MetasRestantes[nome].Macros);
-                PorcoesCasa.RotularDeNovo(individuais);
+                PorcoesCasa.Ajustar(dia.Refeicoes, casa.MetasRestantes[nome].Macros);
+                PorcoesCasa.RotularDeNovo(dia.Refeicoes);
             }
 
-            var dia = new DiaDietaDto
-            {
-                DiaSemana = nome,
-                Refeicoes = individuais,
-                TotalDoDia = new MacrosDto { Calorias = 0, ProteinasG = 0, CarboidratosG = 0, GordurasG = 0 },
-                MetaCalculada = metas.MetasPorDia[nome].Macros,
-                ComposicaoMeta = metas.ComposicaoPorDia[nome]
-            };
             PorcoesCasa.Juntar(dia, casa.RefeicoesPorDia.TryGetValue(nome, out var daCasa) ? daCasa : [], metas.MetasPorDia[nome]);
-            return dia;
-        }).ToList();
+        }
 
         return new DietaSemanalDto
         {
