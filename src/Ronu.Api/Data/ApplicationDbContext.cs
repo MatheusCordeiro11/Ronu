@@ -29,6 +29,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<ConviteCasa> ConvitesCasa { get; set; }
     public DbSet<SemanaCasa> SemanasCasa { get; set; }
     public DbSet<PedidoCasa> PedidosCasa { get; set; }
+    public DbSet<ListaCasaMarcacao> ListaCasaMarcacoes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -107,6 +108,15 @@ public class ApplicationDbContext : DbContext
         {
             pedido.HasIndex(p => new { p.CasaId, p.CriadoEm });
             pedido.HasOne(p => p.Casa).WithMany().HasForeignKey(p => p.CasaId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // O "já tenho" da lista da casa (etapa 6). Sem UsuarioId de propósito (não guarda quem marcou). Vive com a semana:
+        // sai quando a semana sai (a casa guarda só 2) ou quando a casa acaba. O PostgreSQL aceita os dois caminhos de
+        // cascata, como na ListaComprasMarcacao.
+        modelBuilder.Entity<ListaCasaMarcacao>(marcacao =>
+        {
+            marcacao.HasOne(m => m.Casa).WithMany().HasForeignKey(m => m.CasaId).OnDelete(DeleteBehavior.Cascade);
+            marcacao.HasOne(m => m.SemanaCasa).WithMany().HasForeignKey(m => m.SemanaCasaId).OnDelete(DeleteBehavior.Cascade);
         });
 
         // As dietas que existem antes da casa são todas de geração individual.

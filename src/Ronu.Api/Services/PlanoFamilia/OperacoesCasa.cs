@@ -180,6 +180,8 @@ public static class OperacoesCasa
     {
         contexto.ConvitesCasa.RemoveRange(await contexto.ConvitesCasa.Where(c => c.CasaId == casaId).ToListAsync());
         contexto.PedidosCasa.RemoveRange(await contexto.PedidosCasa.Where(p => p.CasaId == casaId).ToListAsync());
+        // O "já tenho" da casa (etapa 6), antes das semanas de que ele depende.
+        contexto.ListaCasaMarcacoes.RemoveRange(await contexto.ListaCasaMarcacoes.Where(m => m.CasaId == casaId).ToListAsync());
         // As dietas dos membros guardam o SemanaCasaId sem chave estrangeira: continuam com as refeições como estão.
         contexto.SemanasCasa.RemoveRange(await contexto.SemanasCasa.Where(s => s.CasaId == casaId).ToListAsync());
         contexto.MembrosCasa.RemoveRange(await contexto.MembrosCasa.Where(m => m.CasaId == casaId).ToListAsync());

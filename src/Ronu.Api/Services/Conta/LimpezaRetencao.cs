@@ -38,6 +38,9 @@ public static class LimpezaRetencao
     // rede de segurança para a casa que fica parada: depois de 30 dias, o pedido já não diz nada da semana de agora.
     public static readonly TimeSpan PrazoPedidosCasa = TimeSpan.FromDays(30);
 
+    // Etapa 6: o "já tenho" da casa (ListaCasaMarcacoes) não tem prazo próprio. Vale para uma semana e sai com ela (a
+    // casa guarda só 2), e as semanas saem com a casa; não guarda quem marcou nem nenhum dado de pessoa.
+
     public record Resultado(int PedidosApagados, int ContasApagadas, int RotinasApagadas = 0, int ConvitesCasaApagados = 0, int PedidosCasaApagados = 0);
 
     /// <summary>

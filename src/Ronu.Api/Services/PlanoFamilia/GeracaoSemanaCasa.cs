@@ -236,6 +236,10 @@ public class GeracaoSemanaCasa
             .OrderByDescending(s => s.GeradaEm).ThenByDescending(s => s.Id)
             .Skip(SemanasGuardadas - 1)
             .ToListAsync();
+        // O "já tenho" da casa (etapa 6) vale para uma semana só e sai com ela. Explícito, e não só pela cascata: o banco
+        // em memória dos testes não tem cascata.
+        var idsAntigas = antigas.Select(s => s.Id).ToList();
+        _context.ListaCasaMarcacoes.RemoveRange(await _context.ListaCasaMarcacoes.Where(m => idsAntigas.Contains(m.SemanaCasaId)).ToListAsync());
         _context.SemanasCasa.RemoveRange(antigas);
 
         // Etapa 5: a semana nova atende todos os pedidos e avisos abertos (eram sobre a semana que saiu). Apagados, não

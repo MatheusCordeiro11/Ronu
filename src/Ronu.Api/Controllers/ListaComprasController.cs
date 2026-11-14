@@ -71,25 +71,13 @@ public partial class ListaComprasController : ControllerBase
             .Where(m => m.DietaIAId == dietaIA.Id && m.UsuarioId == UsuarioIdLogado)
             .Select(m => m.Chave)
             .ToListAsync();
-        // TACO 2c: o item com alergia marcada (marcada depois de a dieta ser gerada) fica na lista, marcado, para a
-        // tela dizer "tem soja: troque no painel". Esconder deixaria a lista diferente da dieta.
-        var alergias = await ListaDaPessoa.AlergiasAsync(_context, UsuarioIdLogado);
         foreach (var item in lista.Secoes.SelectMany(s => s.Itens))
         {
             item.Tenho = marcadas.Contains(item.Chave);
-            foreach (var origem in item.Detalhe.Origens)
-            {
-                origem.Alergias = CodigosAlergia.ChipsQueTiram(BaseNutricional.Itens.Single(i => i.Id == origem.AlimentoId), alergias)
-                    .Select(c => c.Codigo)
-                    .ToList();
-            }
-            // Na ordem dos chips (a mesma da tela), sem repetir.
-            item.Alergias = CodigosAlergia.Chips
-                .Select(c => c.Codigo)
-                .Where(c => item.Detalhe.Origens.Any(o => o.Alergias.Contains(c)))
-                .ToList();
-            item.TemAlergeno = item.Alergias.Count > 0;
         }
+        // TACO 2c: o item com alergia marcada (marcada depois de a dieta ser gerada) fica na lista, marcado, para a
+        // tela dizer "tem soja: troque no painel". Esconder deixaria a lista diferente da dieta.
+        AlergiasNaLista.Marcar(lista.Secoes, await ListaDaPessoa.AlergiasAsync(_context, UsuarioIdLogado));
 
         return Ok(new ListaComprasResponse
         {

@@ -187,6 +187,41 @@ namespace Ronu.Api.Migrations
                     b.ToTable("DietasIA");
                 });
 
+            modelBuilder.Entity("Ronu.Api.Models.ListaCasaMarcacao", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CasaId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Chave")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTime>("MarcadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("Quantidade")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("SemanaCasaId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CasaId");
+
+                    b.HasIndex("SemanaCasaId", "Chave")
+                        .IsUnique();
+
+                    b.ToTable("ListaCasaMarcacoes");
+                });
+
             modelBuilder.Entity("Ronu.Api.Models.ListaComprasMarcacao", b =>
                 {
                     b.Property<int>("Id")
@@ -648,6 +683,25 @@ namespace Ronu.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("Ronu.Api.Models.ListaCasaMarcacao", b =>
+                {
+                    b.HasOne("Ronu.Api.Models.Casa", "Casa")
+                        .WithMany()
+                        .HasForeignKey("CasaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Ronu.Api.Models.SemanaCasa", "SemanaCasa")
+                        .WithMany()
+                        .HasForeignKey("SemanaCasaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Casa");
+
+                    b.Navigation("SemanaCasa");
                 });
 
             modelBuilder.Entity("Ronu.Api.Models.ListaComprasMarcacao", b =>

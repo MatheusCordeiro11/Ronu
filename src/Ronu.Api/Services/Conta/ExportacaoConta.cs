@@ -86,7 +86,8 @@ public static class ExportacaoConta
             .ToListAsync();
 
         // Plano família: o papel da pessoa na casa e os convites que ela gerou, sem o TokenHash (como o da redefinição).
-        // Nada dos outros membros: nem nomes, nem quantos são.
+        // Nada dos outros membros: nem nomes, nem quantos são. O "já tenho" da lista da casa (ListaCasaMarcacoes, etapa 6)
+        // não entra, como os pedidos da casa: é da casa e não guarda quem marcou, então não é dado desta pessoa.
         var casa = await contexto.MembrosCasa.AsNoTracking()
             .Where(m => m.UsuarioId == usuarioId)
             .Select(m => new { m.Papel, m.EntrouEm, m.TransferenciaOferecidaEm })

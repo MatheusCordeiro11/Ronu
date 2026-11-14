@@ -16,7 +16,8 @@ namespace Ronu.Api.Controllers;
 
 /// <summary>
 /// Plano família: a casa, os convites, os membros e a transferência (etapa 1), a semana da casa (etapa 4) e os pedidos,
-/// a troca na casa e a entrada e a saída no meio da semana (etapa 5). A lista da casa vem na etapa 6.
+/// a troca na casa e a entrada e a saída no meio da semana (etapa 5). A lista de compras da casa (etapa 6) fica em
+/// CasaController.ListaCompras.cs.
 ///
 /// - Quem não está numa casa recebe 404 em toda rota de membro, até numa casa que existe: a resposta não revela casa
 ///   nenhuma. Membro em rota de dono recebe 403.
@@ -28,7 +29,7 @@ namespace Ronu.Api.Controllers;
 [ApiController]
 [Route("api/casa")]
 [Authorize]
-public class CasaController : ControllerBase
+public partial class CasaController : ControllerBase
 {
     private const string MensagemSemCasa = "Você não está em nenhuma casa.";
     private const string MensagemSoDono = "Só quem cuida da casa pode fazer isso.";
@@ -132,6 +133,11 @@ public class CasaController : ControllerBase
         return Created("/api/casa", await MontarRespostaAsync(eu, agora));
     }
 
+    /// <summary>
+    /// O orçamento da casa vale só para o almoço e o jantar da casa: vai ao prompt da semana da casa (e à regra do custo
+    /// dela). O café e os lanches de cada um seguem o orçamento do perfil da pessoa (Usuario.OrcamentoSemanal), na
+    /// geração individual. Só o dono muda; todos veem, só para ler, no CasaResponse.
+    /// </summary>
     [HttpPut("orcamento")]
     [EnableRateLimiting(LimitesCasa.PoliticaEscrita)]
     public async Task<IActionResult> AtualizarOrcamento(OrcamentoCasaRequest request)

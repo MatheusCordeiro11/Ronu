@@ -374,7 +374,7 @@ O `ServicoLimpezaRetencao` roda a `LimpezaRetencao` 1 minuto depois de a API sub
 
 ## Casa (plano família)
 
-Etapa 1: formar a casa (até 6 pessoas, um dono). Etapa 4: a semana da casa. Etapa 5: os pedidos, a troca na casa e a entrada e a saída no meio da semana (abaixo). A lista da casa vem na etapa 6. Todas as rotas exigem login e o consentimento geral (como as outras). Regras comuns:
+Etapa 1: formar a casa (até 6 pessoas, um dono). Etapa 4: a semana da casa. Etapa 5: os pedidos, a troca na casa e a entrada e a saída no meio da semana. Etapa 6: a lista de compras da casa e o "já tenho" da casa (abaixo). Todas as rotas exigem login e o consentimento geral (como as outras). Regras comuns:
 - `usuarioId` sempre do token. Quem não está numa casa recebe **404** `"Você não está em nenhuma casa."` em toda rota de membro, mesmo passando o id de algo de outra casa: a resposta não revela casa nenhuma. Membro em rota de dono recebe **403** `"Só quem cuida da casa pode fazer isso."`.
 - As rotas que mostram ou mudam a casa exigem também o aceite `casa` vigente: sem ele, **409** `{ mensagem, motivo: "consentimento_casa", versaoVigente }`. Sair (`DELETE /api/casa/eu`) e recusar ou cancelar a transferência não exigem: deixar de dividir os dados não pode depender de aceitar dividir. Sair dispensa até o consentimento geral.
 - Sair ou ser removido apaga a linha em `MembrosCasa`, preenche o `RevogadoEm` do aceite `casa` e solta as dietas da pessoa da casa (etapa 5, abaixo).
@@ -394,6 +394,7 @@ Cria a casa com a pessoa como dono e grava o aceite `casa` junto (não há outro
 **Erros:** 400 "Orçamento semanal inválido."; 409 `ja_em_casa` (também quando duas abas criam ao mesmo tempo: o índice único em `MembrosCasa.UsuarioId` barra a segunda); 409 `consentimento_casa` com `versaoVigente` se a versão falta ou não é a vigente.
 
 ### `PUT /api/casa/orcamento` (dono)
+O orçamento da casa vale **só para o almoço e o jantar da casa**: vai ao prompt da semana da casa ("Orçamento semanal da casa para alimentação", com a mesma regra de custo da geração individual). O café e os lanches de cada um seguem o orçamento do perfil da pessoa (`orcamentoSemanal` do `PUT /api/perfil`), na geração individual. Só o dono muda; todos da casa leem no `CasaResponse.orcamento`. Mudar o orçamento não muda a semana atual: vale para a próxima semana gerada.
 **Recebe:** `orcamento` (nulo ou vazio = sem orçamento)
 **Devolve:** `CasaResponse`
 **Erros:** 400 "Orçamento semanal inválido."
@@ -422,7 +423,7 @@ Tira alguém da casa, com as mesmas regras de sair (as refeições da casa ficam
 **Erros:** 400 se for o próprio dono ("Para sair da casa, use a opção Sair."); 404 se não é desta casa.
 
 ### `DELETE /api/casa/eu`
-Sair. **Devolve:** 204. O dono sozinho leva a casa (e os convites, as semanas e os pedidos) junto.
+Sair. **Devolve:** 204. O dono sozinho leva a casa (e os convites, as semanas, os pedidos e o "já tenho" da lista da casa) junto.
 **Quem sai ou é removido (etapa 5):** fica com o almoço e o jantar da casa na própria dieta, com as mesmas comidas e a porção dele, até gerar outra. Em todas as dietas da pessoa, as refeições perdem `daCasa` e `chaveCasa`, a dieta perde o `SemanaCasaId` e a `revisao` sobe (uma tela aberta recarrega). A troca individual volta a valer nelas. A lista da casa, as opções de troca e o que mais depender da casa passam a ser calculados sem ela
 **Erros:** 409 `{ mensagem: "Passe a casa para outra pessoa antes de sair.", motivo: "transferir_antes" }` para o dono com membros.
 
@@ -501,6 +502,24 @@ Erros comuns: 403 para membro; 404 sem semana; 422 `"A base de alimentos do Ronu
 ### `DELETE /api/casa/semana/trocas?semanaId=&revisao=&chaveCasa=&item=&escopo=` (dono)
 "Voltar ao original" (o item, ou na semana todos os trocados do mesmo jeito). **Devolve:** `SemanaCasaResponse`
 **Erros:** 400 `"Escopo inválido."`; 400 `"Este alimento não foi trocado."`; 409 de semana mudada; 422 `restricao_da_casa` como no "Desfazer".
+
+### Lista de compras da casa (etapa 6)
+
+Para quem está numa casa, a página de compras tem duas visões: **a lista da casa** (padrão, rotas abaixo) e **"Só a minha parte"**, que é a lista individual de sempre (`GET /api/dietas/atual/lista-compras`, com as marcações individuais em `ListaComprasMarcacoes`; nada muda nela).
+
+A lista da casa é a **semana inteira de todos os membros**, somada por alimento para uma compra só (decisão de 2026-10-26): o almoço e o jantar da casa com a porção de **cada** membro e o café e os lanches de cada um. É calculada na hora, com o mesmo montador da lista individual (`MontadorListaCompras`: soma por `AlimentoId`, cozido para cru, seções do mercado, nome regional), recebendo as dietas de todos como uma só; o arredondamento para a compra é feito uma vez, sobre o total da casa. Entra a dieta atual de cada membro que seja da semana atual da casa (`SemanaCasaId`); quem entra no meio da semana passa a contar assim que recebe as porções, e quem sai deixa de contar na hora. A dieta de quem ainda não tem a semana atual (por exemplo, um perfil incompleto, que fica sem dieta nova) fica de fora, e a resposta diz só `completa: false`, sem dizer de quem.
+
+**Privacidade:** cada número é o total da casa; nada diz de quem é um item, e nenhuma porção ou item de um membro aparece separado (nem no "Ver detalhe": `quantidadeNaDieta` de cada origem é a soma de todos). Numa casa pequena, dá para deduzir a parte do outro subtraindo a própria, e o consentimento `casa` avisa disso. A **marca de alergia** de cada item (`temAlergeno`, `alergias`, também nas origens) usa **só as alergias de quem está vendo**: o item do café de outra pessoa com um alérgeno de um terceiro fica sem marca, porque marcar, mesmo sem dizer qual, contaria à casa que alguém tem aquela alergia (dado de saúde). O nome regional e o fuso da data são os da UF de quem vê.
+
+### `GET /api/casa/lista-compras` (membro)
+**Devolve:** `semanaId` (a semana atual da casa, que o `PUT` manda de volta), `geradaEm` (UTC), `tituloCompartilhar` (`"Lista de compras da casa · semana de 26/10"`, a data da semana no fuso da UF de quem vê: o "Compartilhar" leva só isto e os itens, sem alergia nem nomes), `versaoConversao`, `disponivel` e `motivo` (`"dieta-antiga"` quando alguma dieta somada é anterior à lista fechada), `avisoOleo`, `completa` e `secoes`, no **mesmo formato da lista individual** (`chave`, `nome`, `quantidade`, `unidade`, `texto`, `pronto`, `nota`, `tenho`, `temAlergeno`, `alergias`, `detalhe`). `tenho` é o "já tenho" **da casa**. Não leva `dietaId`, peso, meta, kcal, macros, objetivo, nome nem e-mail de ninguém
+**Erros:** 404 sem casa (mesmo de quem não é da casa); 404 "A casa ainda não tem uma semana gerada."; 409 `consentimento_casa`.
+
+### `PUT /api/casa/lista-compras/itens/{chave}` (membro)
+Marca (`tenho: true`) ou desmarca (`tenho: false`) um item como "já tenho" **para a casa toda** (decisão D4). Qualquer membro marca e desmarca, e todos veem a mesma marca. A tabela `ListaCasaMarcacoes` (`CasaId`, `SemanaCasaId`, `Chave`, `Quantidade`, `MarcadoEm`) **não tem `UsuarioId`, de propósito: não guarda quem marcou**. Vale para uma semana: semana nova começa sem marcações, e as marcações saem com a semana (a casa guarda 2) ou com a casa. A lista muda sem a semana mudar (alguém gera o café e os lanches, troca, entra ou sai): a marcação guarda a quantidade da lista quando foi marcada, e **cai quando a quantidade de agora passa dela** (a mesma regra da troca individual); se a quantidade voltar a caber (quem entrou saiu), a marca volta. Remarcar renova a quantidade. Idempotente (204 do mesmo jeito); dois toques ao mesmo tempo no mesmo item são barrados pelo índice único (`SemanaCasaId`, `Chave`) e tratados como "já marcado".
+**Recebe:** `semanaId`, `tenho` e, para marcar, `quantidade` (a que a tela mostrava)
+**Devolve:** 204
+**Erros:** 400 `"Item inválido."` (formato da chave); 400 `"Informe a quantidade do item."` (marcar sem `quantidade`); 400 `"Este item não está na lista da casa."`; 400 os de corpo (`"Informe a semana da lista."`, `"Informe se a casa já tem o item."`); 404 sem casa ou sem semana; 409 `consentimento_casa`; 409 `"A semana da casa mudou desde que a lista foi aberta. Atualize a lista e tente de novo."` (outra semana, inclusive a de outra casa, e nada é gravado); 409 `"A lista da casa mudou desde que foi aberta. Atualize a lista e tente de novo."` (a lista pede agora mais do que a `quantidade` que a tela mostrava). Sem limite de requisições próprio, como o "já tenho" individual.
 
 ---
 
