@@ -25,8 +25,9 @@ Só **maiores de 18 anos**. Ao criar a conta, você confirma que tem 18 anos ou 
 - **O Ronu não substitui nutricionista nem médico.** Ele não faz diagnóstico, não trata doença e não é indicado para
   quem tem condição de saúde que exige dieta acompanhada (diabetes, doença renal, transtorno alimentar, gestação,
   entre outras). Nesses casos, procure um profissional.
-- **Alergia:** marcar um alimento em "prefiro evitar" tira ele da lista, mas a IA pode errar e os produtos podem ter
-  traços. Confira sempre os rótulos. Se a alergia for grave, não confie só no cardápio.
+- **Alergia:** marque a alergia em "Alergias", ou o alimento em "Não como", para tirar ele da lista. "Prefiro evitar"
+  não tira: o alimento ainda pode aparecer, poucas vezes na semana. Mesmo assim, a IA pode errar e os produtos podem
+  ter traços. Confira sempre os rótulos. Se a alergia for grave, não confie só no cardápio.
 - Mudanças grandes de peso ou de alimentação devem ser acompanhadas por um profissional.
 - Não use o Ronu para corte de peso de pesagem de competição. Isso exige acompanhamento profissional.
 

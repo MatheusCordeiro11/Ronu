@@ -39,7 +39,8 @@ Contato para qualquer assunto de privacidade: **ronu.appdono@gmail.com**.
 - altura, sexo e data de nascimento;
 - como é o seu dia fora do treino (sentado, em pé, andando, braçal);
 - as modalidades que você treina, os dias e a duração;
-- os alimentos que você gosta e os que prefere evitar;
+- os alimentos que você gosta, os que não come e os que prefere evitar;
+- as alergias que você marcar (leite, glúten, ovo, amendoim, castanhas, soja, peixe e crustáceos), com uma autorização própria;
 - seus horários de acordar e dormir e o horário em que começa cada treino, se você informar;
 - o texto de rotina que você escreveu antes, se houver: não é mais usado e será apagado até 60 dias depois de 13 de novembro de 2026, ou antes, se você apagar no app;
 - seu orçamento para alimentação, se você informar;
@@ -50,8 +51,8 @@ Contato para qualquer assunto de privacidade: **ronu.appdono@gmail.com**.
 - seus aceites de consentimento (qual texto, qual versão e quando);
 - pedidos de "esqueci minha senha" (quando foram feitos e se foram usados).
 
-**O que o Ronu não pede:** CPF, endereço, telefone, documentos, cartão ou dado bancário. No campo "prefiro evitar",
-escreva só o alimento: **não escreva doenças, remédios ou diagnósticos**, porque o que não for reconhecido como um
+**O que o Ronu não pede:** CPF, endereço, telefone, documentos, cartão ou dado bancário. Nos campos "Não como" e
+"Prefiro evitar", escreva só o alimento: **não escreva doenças, remédios ou diagnósticos**, porque o que não for reconhecido como um
 alimento da nossa lista vai para a IA do jeito que você escreveu.
 
 ## Para que esses dados servem, e com que base
@@ -60,7 +61,8 @@ alimento da nossa lista vai para a IA do jeito que você escreveu.
 |---|---|---|
 | Criar e manter sua conta, deixar você entrar e recuperar a senha | conta | execução do contrato (art. 7º, V) |
 | Calcular sua meta de calorias e macros | saúde e corpo | seu consentimento (art. 11, I) |
-| Montar o cardápio com a IA do Google (Gemini) | a meta de cada dia (calculada com seus dados de saúde e do corpo), se o dia é de déficit, manutenção ou superávit, os dias e horários de treino, seus horários de acordar e dormir, o estado (UF), o orçamento e os alimentos que você gosta ou evita | seu consentimento (art. 11, I) |
+| Montar o cardápio com a IA do Google (Gemini) | a meta de cada dia (calculada com seus dados de saúde e do corpo), se o dia é de déficit, manutenção ou superávit, os dias e horários de treino, seus horários de acordar e dormir, o estado (UF), o orçamento e os alimentos que você gosta, não come ou prefere evitar | seu consentimento (art. 11, I) |
+| Tirar do cardápio e das trocas os alimentos com as suas alergias, e marcá-los na lista de compras | as alergias marcadas | seu consentimento específico, dado à parte (art. 11, I) |
 | Mostrar seu progresso e ajustar a meta pelo que aconteceu de verdade | pesagens, metas, dietas | seu consentimento (art. 11, I) |
 | Proteger o app contra abuso (limite de tentativas, registros técnicos) | endereço IP, identificador da conta | legítimo interesse (art. 7º, IX) |
 
@@ -69,9 +71,10 @@ pesagens que você registra. Se quiser entender
 como chegamos no seu número, escreva para ronu.appdono@gmail.com.
 
 O consentimento é pedido numa caixa própria, desmarcada, antes de qualquer dado de saúde. Sem ele, o Ronu não
-funciona, porque não dá para montar a dieta sem esses dados.
+funciona, porque não dá para montar a dieta sem esses dados. As alergias têm uma autorização à parte, também numa caixa
+própria e desmarcada, pedida na primeira vez que você marca uma.
 
-**O que a IA recebe.** O Gemini recebe só o que está na linha "Montar o cardápio" da tabela acima. Seu nome, seu e-mail, o número da sua conta, seu peso, sua altura, sua idade, seu sexo e o nome das modalidades que você treina não vão para a IA: ela recebe a meta de cada dia já calculada, sem os dados usados no cálculo. Dos alimentos que você evita, os que estão na nossa lista são tirados antes, e só os que não estão vão como você escreveu. O Ronu usa o plano gratuito do Gemini. Nesse plano, o Google pode usar o que recebe para melhorar os produtos dele, e revisores humanos podem ler esse conteúdo. O Ronu não envia nada que identifique você.
+**O que a IA recebe.** O Gemini recebe só o que está na linha "Montar o cardápio" da tabela acima. Seu nome, seu e-mail, o número da sua conta, seu peso, sua altura, sua idade, seu sexo e o nome das modalidades que você treina não vão para a IA: ela recebe a meta de cada dia já calculada, sem os dados usados no cálculo. Dos alimentos que você não come, os que estão na nossa lista são tirados antes, e só os que não estão vão como você escreveu. Dos que você prefere evitar, os que estão na nossa lista continuam nela e vão para a IA pelo nome da lista, com o pedido de usar pouco; os que não estão vão como você escreveu. As alergias marcadas não vão para a IA: ela recebe a lista de alimentos já sem esses itens. O Ronu usa o plano gratuito do Gemini. Nesse plano, o Google pode usar o que recebe para melhorar os produtos dele, e revisores humanos podem ler esse conteúdo. O Ronu não envia nada que identifique você.
 
 O Ronu não vende seus dados, não mostra anúncios e não usa seus dados para nada além do que está nesta página.
 
@@ -111,6 +114,7 @@ as garantias contratuais que essas empresas oferecem.
 | Dado | Quanto tempo |
 |---|---|
 | Conta, perfil, pesagens, treinos, preferências, metas | enquanto a conta existir |
+| Alergias marcadas | até você desmarcar todas (aí o Ronu apaga suas alergias), ou enquanto a conta existir |
 | Texto de rotina escrito antes de 13 de novembro de 2026 | até 60 dias depois de 13 de novembro de 2026, ou antes, se você apagar no app |
 | Dietas | as 3 mais recentes (a mais antiga sai quando você gera uma nova) |
 | Marcações "já tenho" da lista de compras | enquanto a dieta delas estiver entre as 3 |
@@ -144,7 +148,8 @@ A maioria você faz sozinho, no app:
 - **Apagar a conta:** no Perfil, em "Apagar minha conta". Pedimos sua senha (ou, se você só usa o Google, que digite
   uma frase) e apagamos tudo na hora.
 - **Revogar o consentimento:** como o Ronu não funciona sem esses dados, revogar é apagar a conta. Antes, você pode
-  baixar seus dados.
+  baixar seus dados. A autorização das alergias é à parte: desmarque todas em Alimentação e o Ronu apaga suas
+  alergias, sem mexer no resto da conta.
 
 Para qualquer outro pedido, escreva para **ronu.appdono@gmail.com**. Respondemos em até 15 dias.
 
@@ -177,3 +182,8 @@ O Ronu é só para maiores de 18 anos.
 
 Se esta política mudar, a data no topo muda. Se a mudança afetar o que você autorizou, pedimos seu consentimento de
 novo antes de continuar.
+
+Última mudança (13 de novembro de 2026): o antigo "prefiro evitar" virou dois campos. "Não como" tira o alimento do
+cardápio, como o "prefiro evitar" fazia antes. "Prefiro evitar" deixa o alimento aparecer poucas vezes na semana, e os
+que estão na nossa lista passam a ir para a IA pelo nome. Esta política também passou a descrever as alergias
+marcadas.

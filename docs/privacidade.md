@@ -27,7 +27,7 @@ existir".
 | Horários: acordar, dormir, início de cada treino | `Usuario.HorarioAcordar`, `Usuario.HorarioDormir`, `UsuarioModalidade.HorarioInicio` | horários das refeições | consentimento | Azure | Gemini | enquanto a conta existir |
 | Pesagens: peso, objetivo, aderência, data | `ObjetivoUsuario` | meta, progresso, meta adaptativa | consentimento | Azure | Gemini, só de forma derivada: peso e objetivo não vão crus, mas a meta diária e a marca de déficit, manutenção ou superávit de cada dia são calculadas a partir deles | enquanto a conta existir |
 | Modalidades, dias, duração | `UsuarioModalidade` | gasto do treino | consentimento | Azure | Gemini (só quais dias são de treino e o horário, sem o nome da modalidade) | enquanto a conta existir |
-| "Gosto" e "prefiro evitar" | `PreferenciaAlimentar` | lista de alimentos e cardápio | consentimento | Azure | Gemini ("gosto": só itens da base que casaram; "evitar": só os termos que não casaram com nenhum item, como foram digitados) | enquanto a conta existir |
+| "Gosto", "não como" e "prefiro evitar" (etapa 3 do plano família: `preferido`, `nao_como`, `evitar`) | `PreferenciaAlimentar` | lista de alimentos e cardápio | consentimento | Azure | Gemini ("gosto": só itens da base que casaram; "não como": só os termos que não casaram com nenhum item, sem as palavras sobre a pessoa ou a saúde dela (`TermoParaIA`); "evitar" leve: os itens da base que casaram, pelo nome da lista, agrupados por chip e sem o texto digitado, e os termos que não casaram, também pelo `TermoParaIA`) | enquanto a conta existir |
 | Alergias (8 chips: leite, glúten, ovo, amendoim, castanhas, soja, peixe, crustáceos) | `AlergiaUsuario` (tabela `AlergiasUsuario`) | tirar os alimentos do cardápio e das trocas; marcar na lista de compras e no aviso do painel (TACO 2c) | consentimento específico (art. 11, I), tipo `alergias`, à parte do geral | Azure | ninguém: o Gemini recebe só a lista de alimentos já sem esses itens (nem os códigos, nem a contagem vão ao prompt ou ao log) | até a pessoa desmarcar: sem nenhuma marcada, as linhas saem e o aceite fica revogado; ou enquanto a conta existir |
 | Dietas geradas | `DietaIA` | mostrar o cardápio, troca, lista de compras | consentimento | Azure | ninguém | as 3 mais recentes |
 | Metas de cada dieta | `MetaDieta` | meta adaptativa | consentimento | Azure | ninguém | enquanto a conta existir (todas) |
@@ -49,12 +49,15 @@ existir".
 O que vai para o Gemini, exatamente (`GeradorDietaGemini.MontarPrompt`, desde 2026-11-02): as metas de cada dia
 (kcal e gramas de proteína, carboidrato e gordura), cada dia marcado como de déficit, manutenção ou superávit e, para
 quem treina, de treino (com o horário) ou de descanso; os horários de acordar e dormir; a UF; a faixa de orçamento; a
-lista fechada de alimentos (itens da base), os "gostos" que casaram com a base e os termos do "evitar" que não casaram,
-como foram digitados.
-Não vão: nome, e-mail, id da conta, nome das modalidades, a rotina em texto, o "evitar" inteiro como foi digitado e as
+lista fechada de alimentos (itens da base), os "gostos" que casaram com a base, os termos do "não como" que não casaram (pelo `TermoParaIA`) e, do "evitar"
+leve (etapa 3), os itens que casaram, pelo nome da lista e agrupados por chip (o limite de 2 vezes na semana vale por
+grupo), e os termos que não casaram, também pelo `TermoParaIA`. Risco residual do leve: um grupo pode sugerir uma
+condição de saúde ("prefere evitar: açúcar refinado; mel; refrigerante de cola"); antes da etapa 3, o item só sumia da
+lista. Por isso a política diz que os itens leves vão pelo nome (linha datada de 2026-11-13 em "Mudanças nesta política").
+Não vão: nome, e-mail, id da conta, nome das modalidades, a rotina em texto, o "não como" e o "evitar" inteiros como foram digitados e as
 alergias marcadas (TACO 2c: a lista fechada já chega sem os alimentos que as contêm; risco residual: quem lê a lista
 pode deduzir a alergia pela falta de um grupo de itens, como todos os laticínios). Uma alergia fora dos 8 chips, escrita
-no "evitar" e sem casamento com a base (gergelim, por exemplo), continua indo como termo do "evitar". Não
+no "não como" e sem casamento com a base (gergelim, por exemplo), continua indo como termo do "não como". Não
 vão crus: sexo, idade, peso, altura e objetivo. A meta diária e a marca de cada dia são calculadas a partir de altura, peso, sexo,
 nascimento, nível de atividade, treino e objetivo: não dizem o peso nem a idade e não identificam a pessoa, mas a marca
 mostra a direção do objetivo (perder, manter ou ganhar peso). Detalhes e as checagens da resposta em `docs/design-api.md`, seção Dietas.
