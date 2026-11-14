@@ -32,7 +32,14 @@ existir".
 | Dietas geradas | `DietaIA` | mostrar o cardápio, troca, lista de compras | consentimento | Azure | ninguém | as 3 mais recentes |
 | Metas de cada dieta | `MetaDieta` | meta adaptativa | consentimento | Azure | ninguém | enquanto a conta existir (todas) |
 | Marcações "já tenho" | `ListaComprasMarcacao` | lista de compras | consentimento | Azure | ninguém | enquanto a dieta estiver entre as 3 |
-| Aceites de consentimento (tipos `geral` e `alergias`) | `Consentimento` | prova do consentimento | obrigação legal / exercício de direitos (art. 7º, II e VI; art. 8º, §2º) | Azure | ninguém | enquanto a conta existir (decidido em 2026-11-01: sem conta, não há o que provar). O de alergias revogado continua, com `RevogadoEm` |
+| Aceites de consentimento (tipos `geral`, `alergias` e `casa`) | `Consentimento` | prova do consentimento | obrigação legal / exercício de direitos (art. 7º, II e VI; art. 8º, §2º) | Azure | ninguém | enquanto a conta existir (decidido em 2026-11-01: sem conta, não há o que provar). O de alergias revogado e o da casa revogado ao sair (`OperacoesCasa.RevogarConsentimentoAsync`) continuam, com `RevogadoEm` |
+| Casa: orçamento, `CriadaEm` (plano família) | `Casa` (tabela `Casas`) | o almoço e o jantar da casa; o orçamento vale só para eles | consentimento específico (art. 11, I), tipo `casa`, à parte do geral | Azure | membros da casa (o orçamento, só leitura); Gemini (o orçamento, no prompt da casa) | enquanto houver membro; sai com o último (`OperacoesCasa.ApagarCasaAsync`) |
+| Participação: papel (`dono`/`membro`), `EntrouEm`, `TransferenciaOferecidaEm` | `MembroCasa` (`MembrosCasa`; índice único em `UsuarioId`: uma casa por pessoa) | permissões, ordem da passagem automática (D3) | consentimento `casa` | Azure | membros da casa: só o primeiro nome (`OperacoesCasa.PrimeiroNome`), quem é dono e a transferência pendente (`CasaResponse`) | até sair, ser removido (`OperacoesCasa.SairAsync`) ou apagar a conta (`ExclusaoConta`, `OperacoesCasa.SairParaExclusaoAsync`) |
+| Convites: SHA-256 do token (`TokenHash`), `CriadoEm`, `ExpiraEm`, `UsadoEm`, `RevogadoEm`, quem gerou (`UsuarioId`) | `ConviteCasa` (`ConvitesCasa`) | link de uso único (7 dias, `OperacoesCasa.ValidadeConvite`) | consentimento `casa` de quem gerou | Azure | quem abre o link: o primeiro nome do dono, quantos membros a casa tem e o dia em que vence (`POST /api/casa/convites/verificar`); o dono vê os abertos | 30 dias depois de usado, revogado ou vencido (`LimpezaRetencao.PrazoConvitesCasa`); sai antes com a conta de quem gerou e com a casa |
+| Semana da casa: almoço e jantar na porção de referência (sem dado de membro), `Revisao`, `VersaoBase`, `RefeicaoIndividualEm` | `SemanaCasa` (`SemanasCasa`, sem `UsuarioId`) | cardápio da casa, troca na casa, lista da casa | consentimento `casa` | Azure | membros (só os nomes dos alimentos, `SemanaCasaResponse`); só o dono: aviso de lista pobre e "refeição individual", sem dizer de quem | a atual e a anterior (`GeracaoSemanaCasa.SemanasGuardadas`); sai com a casa |
+| Pedidos e avisos: tipo, semana, refeição, item, alimento, `CriadoEm`; **sem `UsuarioId` nem marcador do autor** | `PedidoCasa` (`PedidosCasa`) | "Pedir nova semana", "Pedir troca", aviso de entrada no meio da semana | consentimento `casa` | Azure | o dono, como "Alguém pediu…", sem data nem hora (`RegrasPedidosCasa.AbertosAsync`) | até ser dispensado, atendido (troca daquele alimento, `TrocaNaCasa`) ou a semana nova (`GeracaoSemanaCasa`); no máximo 30 dias (`LimpezaRetencao.PrazoPedidosCasa`); sai com a casa |
+| "Já tenho" da casa: chave do item, quantidade, `MarcadoEm`; **sem `UsuarioId`** | `ListaCasaMarcacao` (`ListaCasaMarcacoes`) | lista de compras da casa | consentimento `casa` | Azure | membros da casa | enquanto a semana for a atual ou a anterior (sai com a semana em `GeracaoSemanaCasa`); sai com a casa |
+| Origem e semana da casa da dieta: `Origem` (`pessoa`/`casa`), `SemanaCasaId` (sem chave estrangeira); no JSON, `daCasa` e `chaveCasa` das refeições | `DietaIA` (colunas novas em `DietasIA`) | porções da casa, limite de 3 gerações por hora, lista da casa | consentimento (geral) e `casa` | Azure | ninguém vê a porção; a dieta entra somada na lista da casa (`ListaComprasCasa`) | as 3 mais recentes; ao sair ou ser removido, `OperacoesCasa.SoltarDietasAsync` tira `SemanaCasaId`, `daCasa` e `chaveCasa` de todas |
 | Pedidos de redefinição (tipo, datas, SHA-256 do token) | `PedidoRedefinicaoSenha` | link de uso único, limite por conta | contrato | Azure | Gmail (o e-mail com o link) | 30 dias (`LimpezaRetencao`) |
 | Conta sem aceite e sem nenhum dado além de nome e e-mail | `Usuario` | — | — | Azure | — | 30 dias após `CriadoEm` (`LimpezaRetencao`) |
 | IP do cliente | memória da API (limites) | limite de tentativas | legítimo interesse | memória do App Service | ninguém | até a janela do limite (15 min a 1 h) ou o reinício |
@@ -61,6 +68,42 @@ no "não como" e sem casamento com a base (gergelim, por exemplo), continua indo
 vão crus: sexo, idade, peso, altura e objetivo. A meta diária e a marca de cada dia são calculadas a partir de altura, peso, sexo,
 nascimento, nível de atividade, treino e objetivo: não dizem o peso nem a idade e não identificam a pessoa, mas a marca
 mostra a direção do objetivo (perder, manter ou ganhar peso). Detalhes e as checagens da resposta em `docs/design-api.md`, seção Dietas.
+
+**Na semana da casa** (plano família, `GeradorDietaGemini.MontarPromptCasa`), o Gemini recebe só: a lista da casa
+(`ListaDaCasa`: a interseção das listas de todos os membros, já sem o "não como" que casou com a base e sem as alergias
+de todos, com os nomes regionais da UF do dono), o peso de uma unidade dos contáveis, os grupos do "evitar" leve de
+qualquer membro pelo nome da lista ("alguém da casa prefere evitar", sem o texto digitado e sem os termos sem
+casamento), as regras do cardápio (a do feijão escolhida pela UF do dono, sem escrevê-la), o orçamento da casa e a porção
+de referência fixa (650 kcal no almoço e 550 no jantar, `PorcoesCasa`). Não vai nada de nenhum membro: meta, peso,
+idade, sexo, altura, objetivo, treino, UF, nome, e-mail, id ou o texto das preferências (um teste inspeciona o prompt).
+A porção de cada um é calculada em C# (`PorcoesCasa`), também na entrada no meio da semana
+(`GeracaoSemanaCasa.EntrarNaSemanaAsync`). O café e os lanches de quem está numa casa vão pelo prompt individual, com a
+meta do dia já sem as porções da casa. Risco residual: a falta de um grupo de itens na lista da casa pode sugerir que
+alguém da casa tem uma alergia, e um grupo leve pode sugerir uma condição, como no prompt individual; e os nomes
+regionais sugerem a região do dono. Nada disso identifica uma pessoa.
+
+**A casa e os membros, por consentimento à parte.** Dividir dados com a casa é um uso que o geral não cobre: tem o tipo
+`casa` (`TextosConsentimento`, v1, nunca publicado), gravado só ao criar a casa ou aceitar o convite (e, numa versão
+nova, pelo `POST /api/consentimentos` de quem já está numa casa), e revogado ao sair ou ser removido. Sem o aceite
+vigente, as rotas da casa dão 409 `consentimento_casa`; sair não exige aceite nenhum. O que os outros membros veem:
+primeiro nome, papel, transferência pendente, orçamento, a semana (só nomes), a lista da casa somada (inclusive café e
+lanches de cada um, sem origem), o "já tenho" da casa e as restrições da casa (`RestricoesDaCasa`: "não como" e alergias
+numa lista só, "evitar" na outra, só nomes da base, sem dono, sem o texto digitado, sem dizer o que é alergia, em ordem
+alfabética). Só o dono: convites abertos, pedidos e avisos sem autor, aviso de lista pobre e o "refeição individual". A
+marca de alergia na lista da casa usa só as alergias de quem vê. Os logs da casa levam só ids da casa, ids de alimento e
+contagens.
+
+**Riscos residuais da casa** (aceitos, e avisados na caixa do consentimento `casa` e no cartão "O que a casa vê"):
+1. **Casa pequena.** Com 2 pessoas, a restrição, o pedido e o aviso "sem autor" têm um autor óbvio, e a lista da casa
+   menos a própria parte dá o que e quanto o outro come (inclusive o café e os lanches).
+2. **Aviso de entrada.** Quando alguém entra no meio da semana e uma refeição vira individual, o dono sabe que quem
+   acabou de entrar não come algo daquela refeição (não o quê, nem se é alergia).
+3. **Dedução pela lista da casa.** A falta de um grupo inteiro nas restrições ou na lista pode sugerir uma alergia de
+   alguém; as restrições não separam alergia de "não como" (para leite, ovo, soja, glúten, amendoim e castanhas, o
+   casamento do texto e o chip tiram os mesmos itens), mas uma categoria inteira fora ("Laticínios") ainda sugere algo.
+4. **Aparelho compartilhado.** O "Pedido enviado" fica no `localStorage` (`ronu:casa:pedidos:<id da conta>`) enquanto a
+   conta está logada; o "Sair" apaga essas chaves (`ronuLimparSessao`, 2026-11-14), para quem usar o aparelho depois
+   não ver que aquela conta pediu algo.
 
 ## 2. Plano de resposta a incidente (art. 48; Res. CD/ANPD 15/2024)
 
@@ -176,3 +219,10 @@ Decisão de 2026-11-02, em dois tempos e nunca no mesmo deploy:
    gravados continuam filtrando a lista (o filtro é segurança e nunca é relaxado), mas o aceite deixa de ser o vigente:
    marcar um chip novo pede a caixa de novo. Decidir, antes de publicar uma v2, se os chips antigos esperam o novo
    aceite ou continuam valendo até lá. Sinalizado, não decidido.
+9. **Casa (plano família, etapa 8, 2026-11-14).** A política e os termos descrevem a casa (seção "A Casa", tabelas e
+   linha datada), conferidos com o código da branch `casa-commits`; o consentimento geral continua v1 (o texto dele segue
+   verdadeiro: a casa tem o tipo `casa` à parte). Pontos abertos, só sinalizados: (a) resolvido: o "Pedido enviado" sai no "Sair" da conta (risco 4 acima); (b) a decisão D3 dizia que o membro que recebe a casa
+   na exclusão de conta do dono "recebe um aviso", mas o código só muda o papel (`SairParaExclusaoAsync`), sem aviso;
+   (c) o dono de uma casa com membros só desfaz o aceite `casa` sozinho tirando os membros um a um, ou com a
+   transferência aceita por outra pessoa (apagar a conta não depende disso); (d) ⚖️ Advogado: a base do
+   compartilhamento entre membros e se o aviso de dedução basta.

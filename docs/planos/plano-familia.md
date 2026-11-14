@@ -2,8 +2,59 @@
 
 # Plano família: decisões de produto
 
-Status: **planejamento** (nada implementado). Decisões tomadas pelo Matheus em out/2026.
+Status: **etapas 1 a 8 feitas** (2026-11-14). A etapa 3 está em produção; as outras estão commitadas na branch
+`casa-commits`, aguardando publicação (seção "Status por etapa", abaixo). Decisões tomadas pelo Matheus em out/2026; o
+passo 0 (decisões D1 a D7) foi aprovado em 2026-11-13.
 Ordem no roadmap: depois de TACO 2b → lista de compras → troca de alimentos → TACO 3 e 4.
+
+## Status por etapa (2026-11-14)
+
+| # | Etapa | Status | Commits |
+|---|---|---|---|
+| 1 | Modelo, migration `CriaCasa`, casa, convite por link, consentimento `casa`, membros, transferência, exclusão, exportação e limpeza | commitada na `casa-commits`, testada pelo usuário | `3cfd37f` |
+| 2 | Shape das telas (S1 a S6) | aprovado em 2026-11-13 (sem código próprio) | — |
+| 3 | Restrições em dois níveis ("Não como" e "Prefiro evitar") | **em produção desde 2026-11-14** (main `076b787`) | `0f65978`, `3212cf4`, `5cf9530` (na main) |
+| 4 | Semana da casa e porções, migration `CasaGeracao` | commitada, testada pelo usuário | `bb8ecd6` |
+| 5 | Pedidos sem autor, troca na casa, entrada e saída no meio da semana, transferência conferida com trava; migration `CasaPedidos` | commitada, testada pelo usuário | `96c0f44` |
+| 6 | Lista de compras e orçamento da casa, "já tenho" da casa; migration `CasaListaCompras` | commitada, testada pelo usuário | `cc64731` |
+| 7 | Telas (`casa.html`, `casa-convite.html`, painel, compras, nav) e complementos (restrições da casa, validade do convite, versão nova do texto `casa`, castanha-do-pará na casa) | commitada, testada pelo usuário | `530056f`, `5bd3102`, `7fc1067` |
+| 8 | Docs: política de privacidade, termos de uso, `docs/privacidade.md`, `design-api.md`, `lacunas-conhecidas.md`, este status | feita, sem commit (aguarda revisão do usuário) | — |
+
+`git log --oneline main..casa-commits` em 2026-11-14: `7fc1067`, `5bd3102`, `530056f`, `cc64731`, `96c0f44`, `bb8ecd6`,
+`3cfd37f`.
+
+**Publicação (ainda não feita):** migrations `CriaCasa`, `CasaGeracao`, `CasaPedidos` e `CasaListaCompras` → backend no
+Azure → push do frontend. A `CriaCasa` tem id (`20261113180423`) anterior ao da `PreferenciasEmDoisNiveis`
+(`20261113191309`), que já está em produção: no `dotnet ef migrations list` ela aparece pendente no meio da lista, e
+isso é o esperado. Na publicação, a data de "Vigente desde" e a da "Última mudança" da política e dos termos
+(2026-11-14) mudam para o dia do push do frontend.
+
+**Divergências entre o código e este plano** (o código é o que vale; os textos legais descrevem o código):
+- "Convite por e-mail" (formato, acima) virou link, na decisão de 2026-10-26.
+- A tabela "compartilhado e individual" foi mudada pela decisão de 2026-10-26: a lista da casa soma também o café e os
+  lanches de cada um.
+- "Até ~6 membros" é exatamente 6 (`OperacoesCasa.MaximoMembros`).
+- D3 dizia que o membro que recebe a casa na exclusão de conta do dono "recebe um aviso": o código só passa a casa ao
+  membro mais antigo (`OperacoesCasa.SairParaExclusaoAsync`), sem aviso. Sinalizado, não resolvido.
+- Os convites usados, vencidos ou revogados são apagados 30 dias depois (`LimpezaRetencao.PrazoConvitesCasa`), e os
+  pedidos, no máximo 30 dias depois (`PrazoPedidosCasa`); o plano não falava em prazo.
+
+**Ficou de fora ou pendente** (cada uma com item próprio em `docs/lacunas-conhecidas.md`):
+- A troca (individual e na casa) não conta os dias nem a soma do dia da castanha-do-pará.
+- O `GET /api/casa` monta as restrições da casa lendo a lista de cada membro (3 consultas por membro, mais o casamento
+  das preferências) a cada chamada, e o contador da nav o chama em toda página.
+- Na aba Casa, o subtítulo "Evitamos quando dá" fica colado nos chips (detalhe visual).
+- A gordura das porções da casa fica 25% a 31% abaixo do alvo, e um perfil de meta alta pode ficar ~9% abaixo no almoço.
+- O aviso ao membro que recebe a casa na exclusão de conta do dono (D3), acima: aceito como está por enquanto
+  (decisão de 2026-11-14), porque o novo dono vê a aba Casa.
+- O `CasaController` recebe serviços opcionais só para os testes da etapa 1.
+
+**Decisões da etapa 8 (aprovadas pelo usuário em 2026-11-14):** a frase dos termos "Use o que a casa mostra só para
+cozinhar e fazer as compras juntos." fica; a política diz que quem cuida de uma casa com outras pessoas passa a casa
+adiante ou tira as outras pessoas antes de sair; não há tela de aviso de mudança dos termos, e a frase que prometia o
+aviso no app passou a dizer que a mudança aparece em "Mudanças nestes termos", com a data; a base legal do
+compartilhamento entre membros e o aviso da casa pequena ficam como ponto para revisão de um advogado (nota no `.md` da
+política). O "Pedido enviado" passou a sair do aparelho no "Sair" da conta (`ronuLimparSessao`).
 
 ## A ideia
 
