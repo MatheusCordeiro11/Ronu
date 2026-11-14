@@ -43,6 +43,14 @@ function ronuLimparSessao() {
   localStorage.removeItem(RONU_PRECISA_ESTADO_KEY);
   localStorage.removeItem(RONU_CADASTRO_COMPLETO_KEY);
   localStorage.removeItem(RONU_PRECISA_CONSENTIMENTO_KEY);
+  // O "Pedido enviado" da Casa (casa-comum.js) fica por conta: num aparelho compartilhado, deixá-lo depois do Sair
+  // mostraria a quem usar o navegador depois que aquela conta pediu algo à casa, e o pedido é sem autor de propósito.
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const chave = localStorage.key(i);
+      if (chave && chave.startsWith('ronu:casa:pedidos:')) localStorage.removeItem(chave);
+    }
+  } catch { /* sem acesso ao localStorage: não há o que limpar */ }
 }
 
 // O que todo login (email ou Google) guarda além da sessão.
