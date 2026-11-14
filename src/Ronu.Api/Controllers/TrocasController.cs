@@ -128,7 +128,7 @@ public class TrocasController : ControllerBase
         var opcao = AplicadorTroca.Trocar(dieta, posicao, request.AlimentoIdNovo!, escopo, daPessoa.Lista, dietaIA!.Revisao + 1);
         if (opcao is null)
         {
-            return BadRequest(new { mensagem = "Este substituto não serve aqui (porção, meta do dia, o que você marcou para evitar ou suas alergias). Atualize as opções e escolha outro." });
+            return BadRequest(new { mensagem = "Este substituto não serve aqui (porção, meta do dia, o que você marcou em Não como ou suas alergias). Atualize as opções e escolha outro." });
         }
 
         var (conflito, removidas) = await Gravar(dietaIA, antes, dieta, daPessoa.Uf);
@@ -277,7 +277,7 @@ public class TrocasController : ControllerBase
         _ => null
     };
 
-    // As preferências e alergias ATUAIS da pessoa (um "evitar" ou um chip novo vale já na troca) e a UF, para o nome
+    // As preferências e alergias ATUAIS da pessoa (um "não como" ou um chip novo vale já na troca) e a UF, para o nome
     // regional. Pelo ponto único, que lê as alergias.
     private Task<ListaDaPessoa.Resultado> DaPessoa() => ListaDaPessoa.MontarAsync(_context, UsuarioIdLogado);
 
@@ -386,7 +386,8 @@ public class TrocasController : ControllerBase
 
         Parte(fora.GetValueOrDefault(MotivoForaDaTroca.PorcaoMaxima), "1 passaria da porção máxima", "passariam da porção máxima");
         Parte(fora.GetValueOrDefault(MotivoForaDaTroca.ForaDaMeta), "1 deixaria o dia mais de 5% fora da meta", "deixariam o dia mais de 5% fora da meta");
-        Parte(foraPeloEvitar, "1 está no que você marcou para evitar", "estão no que você marcou para evitar");
+        // Etapa 3: o bloqueio se chama "Não como" na tela (o "evitar" leve não tira item da troca).
+        Parte(foraPeloEvitar, "1 está no que você marcou em Não como", "estão no que você marcou em Não como");
         Parte(foraPelaAlergia, "1 tem uma das suas alergias", "têm uma das suas alergias");
         Parte(fora.GetValueOrDefault(MotivoForaDaTroca.JaNaRefeicao), "1 já está nesta refeição", "já estão nesta refeição");
         Parte(fora.GetValueOrDefault(MotivoForaDaTroca.RefogadoComOleo) + fora.GetValueOrDefault(MotivoForaDaTroca.UsoDiferente),

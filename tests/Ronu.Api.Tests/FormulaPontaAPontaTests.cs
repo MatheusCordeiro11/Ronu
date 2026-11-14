@@ -103,8 +103,8 @@ public class FormulaPontaAPontaTests
         contexto.Modalidades[0].HorarioInicio = new TimeOnly(19, 30);
         contexto.Preferencias = new()
         {
-            new() { Alimento = "Leite", Tipo = "evitar" },
-            new() { Alimento = "Kiwano dourado", Tipo = "evitar" }
+            new() { Alimento = "Leite", Tipo = "nao_como" },
+            new() { Alimento = "Kiwano dourado", Tipo = "nao_como" }
         };
 
         await gerador.GerarComListaAsync(contexto);
@@ -134,8 +134,8 @@ public class FormulaPontaAPontaTests
         var contexto = PerfilA();
         contexto.Preferencias = new()
         {
-            new() { Alimento = "Tenho alergia a gergelim", Tipo = "evitar" },
-            new() { Alimento = "sou diabético", Tipo = "evitar" }
+            new() { Alimento = "Tenho alergia a gergelim", Tipo = "nao_como" },
+            new() { Alimento = "sou diabético", Tipo = "nao_como" }
         };
 
         await gerador.GerarComListaAsync(contexto);

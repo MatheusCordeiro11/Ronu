@@ -6,13 +6,13 @@ namespace Ronu.Api.Tests;
 
 /// <summary>
 /// Lista fechada de alimentos por pessoa (fase 2b-1): nome regional da UF,
-/// "evitar", alérgenos, cerveja só para quem pediu, itens que saem da lista e
+/// "não como", alérgenos, cerveja só para quem pediu, itens que saem da lista e
 /// mínimos por papel no prato.
 /// </summary>
 public class ListaAlimentosPessoaTests
 {
     private static PreferenciaContextoDto Gosto(string alimento) => new() { Alimento = alimento, Tipo = "preferido" };
-    private static PreferenciaContextoDto Evitar(string alimento) => new() { Alimento = alimento, Tipo = "evitar" };
+    private static PreferenciaContextoDto NaoComo(string alimento) => new() { Alimento = alimento, Tipo = "nao_como" };
 
     private static ListaAlimentos Montar(string? uf = null, Alergenos alergias = Alergenos.Nenhum, params PreferenciaContextoDto[] prefs) =>
         ListaAlimentosPessoa.Montar(uf, prefs, alergias);
@@ -75,15 +75,15 @@ public class ListaAlimentosPessoaTests
         Assert.DoesNotContain("cerveja-pilsen", Ids(Montar()));
         Assert.DoesNotContain("cerveja-pilsen", Ids(Montar(prefs: Gosto("Vinho"))));
         Assert.Contains("cerveja-pilsen", Ids(Montar(prefs: Gosto("Cerveja"))));
-        // O "evitar" vence o "gosto".
-        Assert.DoesNotContain("cerveja-pilsen", Ids(Montar(prefs: [Gosto("Cerveja"), Evitar("álcool")])));
+        // O "não como" vence o "gosto".
+        Assert.DoesNotContain("cerveja-pilsen", Ids(Montar(prefs: [Gosto("Cerveja"), NaoComo("álcool")])));
     }
 
-    // O perfil B do g8c recebeu patinho bovino e lombo suíno com "Carne vermelha" no "evitar".
+    // O perfil B do g8c recebeu patinho bovino e lombo suíno com "Carne vermelha" no "evitar" (hoje "não como").
     [Fact]
     public void Evitar_Carne_Vermelha_Tira_Bovinos_E_Suinos_Da_Lista()
     {
-        var lista = Montar(prefs: Evitar("Carne vermelha"));
+        var lista = Montar(prefs: NaoComo("Carne vermelha"));
 
         Assert.DoesNotContain(lista.Itens, i => i.Item.Categoria is CategoriaAlimento.CarneBovina or CategoriaAlimento.CarneSuina);
         Assert.Contains(lista.Itens, i => i.Item.Categoria == CategoriaAlimento.Aves);
@@ -153,7 +153,7 @@ public class ListaAlimentosPessoaTests
     [Fact]
     public void Preferencias_Dizem_Se_Casaram()
     {
-        var lista = Montar(prefs: [Gosto("Whey protein"), Gosto("Banana"), Evitar("cordeiro"), Evitar("Peixe")]);
+        var lista = Montar(prefs: [Gosto("Whey protein"), Gosto("Banana"), NaoComo("cordeiro"), NaoComo("Peixe")]);
         var porNome = lista.Preferencias.ToDictionary(p => p.Alimento);
 
         Assert.False(porNome["Whey protein"].Casou);
@@ -169,7 +169,7 @@ public class ListaAlimentosPessoaTests
     [Fact]
     public void Vegano_Fica_Abaixo_Do_Minimo_De_Proteina_Sem_Ficar_Vazio()
     {
-        var minimos = Montar(prefs: Evitar("vegano")).Minimos;
+        var minimos = Montar(prefs: NaoComo("vegano")).Minimos;
 
         Assert.Equal(4, minimos.ItensPorPapel[PapelNoPrato.Proteina]);
         Assert.Equal(1, minimos.GruposDeProteina);
@@ -181,7 +181,7 @@ public class ListaAlimentosPessoaTests
     [Fact]
     public void Varios_Evitar_Deixam_A_Proteina_Vazia()
     {
-        var minimos = Montar(prefs: [Evitar("carne"), Evitar("ovo"), Evitar("leite"), Evitar("feijão"), Evitar("lentilha")]).Minimos;
+        var minimos = Montar(prefs: [NaoComo("carne"), NaoComo("ovo"), NaoComo("leite"), NaoComo("feijão"), NaoComo("lentilha")]).Minimos;
 
         Assert.Equal([PapelNoPrato.Proteina], minimos.Vazios);
         Assert.False(minimos.Atende);
@@ -193,7 +193,7 @@ public class ListaAlimentosPessoaTests
     public void Mensagem_Do_400_Diz_O_Que_Faltou()
     {
         Assert.Equal(
-            "Com o que você marcou para evitar e as suas alergias, não sobrou nenhuma fonte de proteína entre os alimentos do Ronu. Revise a lista de Evitar em Alimentação.",
+            "Com o que você marcou em Não como e as suas alergias, não sobrou nenhuma fonte de proteína entre os alimentos do Ronu. Revise a lista de Não como em Alimentação.",
             MinimosPorPapel.MensagemPapeisVazios([PapelNoPrato.Proteina]));
         Assert.Contains("nenhuma fonte de proteína e nenhuma fruta",
             MinimosPorPapel.MensagemPapeisVazios([PapelNoPrato.Proteina, PapelNoPrato.Fruta]));
@@ -202,7 +202,7 @@ public class ListaAlimentosPessoaTests
     [Fact]
     public void Frutas_Abaixo_Do_Minimo()
     {
-        var evitar = BaseNutricional.Itens.Where(i => i.Grupo == GrupoDeTroca.Frutas).Skip(2).Select(i => Evitar(i.Nome)).ToArray();
+        var evitar = BaseNutricional.Itens.Where(i => i.Grupo == GrupoDeTroca.Frutas).Skip(2).Select(i => NaoComo(i.Nome)).ToArray();
 
         var minimos = Montar(prefs: evitar).Minimos;
 

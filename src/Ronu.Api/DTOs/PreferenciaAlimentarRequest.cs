@@ -11,7 +11,7 @@ public class PreferenciaAlimentarRequest
     [Required(ErrorMessage = "Informe o alimento.")]
     public required string Alimento { get; set; }
 
-    // "preferido" ou "evitar" — conferido no controller.
+    // "preferido", "nao_como" ou "evitar" (TiposPreferencia) — conferido no controller.
     [Required(ErrorMessage = "Informe o tipo da preferência.")]
     public required string Tipo { get; set; }
 }

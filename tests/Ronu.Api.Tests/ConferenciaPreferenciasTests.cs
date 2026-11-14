@@ -26,11 +26,11 @@ public class ConferenciaPreferenciasTests
         banco.Usuarios.AddRange(ana, bia);
         banco.SaveChanges();
         banco.PreferenciasAlimentares.AddRange(
-            new PreferenciaAlimentar { UsuarioId = ana.Id, Alimento = "leite", Tipo = "evitar" },
+            new PreferenciaAlimentar { UsuarioId = ana.Id, Alimento = "leite", Tipo = "nao_como" },
             new PreferenciaAlimentar { UsuarioId = ana.Id, Alimento = "whey", Tipo = "preferido" },
-            new PreferenciaAlimentar { UsuarioId = ana.Id, Alimento = "lactoze", Tipo = "evitar" },
-            new PreferenciaAlimentar { UsuarioId = ana.Id, Alimento = "cordeiro", Tipo = "evitar" },
-            new PreferenciaAlimentar { UsuarioId = bia.Id, Alimento = "peixe", Tipo = "evitar" });
+            new PreferenciaAlimentar { UsuarioId = ana.Id, Alimento = "lactoze", Tipo = "nao_como" },
+            new PreferenciaAlimentar { UsuarioId = ana.Id, Alimento = "cordeiro", Tipo = "nao_como" },
+            new PreferenciaAlimentar { UsuarioId = bia.Id, Alimento = "peixe", Tipo = "nao_como" });
         banco.SaveChanges();
         return (banco, ana, bia);
     }
@@ -104,7 +104,7 @@ public class ConferenciaPreferenciasTests
         var usuario = new Usuario { Nome = "Caio", Email = "caio@exemplo.test" };
         banco.Usuarios.Add(usuario);
         banco.SaveChanges();
-        banco.PreferenciasAlimentares.Add(new PreferenciaAlimentar { UsuarioId = usuario.Id, Alimento = "sou vegano", Tipo = "evitar" });
+        banco.PreferenciasAlimentares.Add(new PreferenciaAlimentar { UsuarioId = usuario.Id, Alimento = "sou vegano", Tipo = "nao_como" });
         banco.SaveChanges();
 
         var lista = (await Conferir(banco, usuario.Id)).Lista;

@@ -1,4 +1,5 @@
 using Ronu.Api.Data;
+using Ronu.Api.Models;
 using Ronu.Api.Models.IA;
 using Ronu.Api.Services.IA;
 
@@ -9,9 +10,10 @@ namespace Ronu.Api.Services.Troca;
 /// sem chamar o Gemini. Regras aprovadas no passo 0 (2026-10-26):
 ///
 /// - Quem pode: itens do mesmo GrupoDeTroca que estão na lista fechada da pessoa (ListaAlimentosPessoa, com as
-///   preferências ATUAIS: um "evitar" novo vale já na troca), menos o que já está na mesma refeição, o refogado
+///   preferências ATUAIS: um "não como" novo vale já na troca), menos o que já está na mesma refeição, o refogado
 ///   numa refeição com azeite ou óleo (e vice-versa: a TACO já conta o óleo do refogado) e, nas gorduras, o item
-///   de outro uso (azeite não substitui manteiga).
+///   de outro uso (azeite não substitui manteiga). O "evitar" leve (etapa 3) não tira o item: ele pode ser
+///   oferecido, mas vem depois dos outros na ordem.
 /// - Quantidade: a que mantém o nutriente principal do original, com as regras de arredondamento da fase 4
 ///   (contáveis em unidade inteira, gramas em múltiplos legíveis). Por isso o nutriente fica quase igual, e o
 ///   valor real vai na resposta. Itens sem nutriente principal (hortaliças, café, chás) mantêm o peso ou o volume,
@@ -87,27 +89,42 @@ public static class CalculadoraTroca
         // De cada item preferido, os gostos (índices em lista.Preferencias) que o casaram.
         var preferidos = lista.Preferencias
             .Select((p, indice) => (p, indice))
-            .Where(x => x.p.Tipo == "preferido")
+            .Where(x => x.p.Tipo == TiposPreferencia.Preferido)
             .SelectMany(x => x.p.ItensIds.Select(id => (id, x.indice)))
             .GroupBy(x => x.id)
             .ToDictionary(g => g.Key, g => g.Select(x => x.indice).ToList());
-        var evitados = lista.Preferencias.Where(p => p.Tipo == "evitar").SelectMany(p => p.ItensIds).ToHashSet();
+        // Só o "nao_como" saiu da lista; o "evitar" leve continua nela e só muda a ordem (Escopo).
+        var naoComo = lista.Preferencias.Where(p => p.Tipo == TiposPreferencia.NaoComo).SelectMany(p => p.ItensIds).ToHashSet();
+        var leves = lista.ItensLeves;
         var candidatos = lista.Itens.Where(i => i.Item.Grupo == baseOriginal.Grupo && i.Item.Id != baseOriginal.Id).ToList();
         var naLista = candidatos.Select(c => c.Item.Id).ToHashSet();
-        // TACO 2c: o que saiu por alergia conta só como alergia, mesmo que também esteja no "evitar". A alergia é o
-        // motivo mais forte, e a mensagem não pode mandar a pessoa rever o "evitar" por um item que nunca voltaria.
+        // TACO 2c: o que saiu por alergia conta só como alergia, mesmo que também esteja no "não como". A alergia é o
+        // motivo mais forte, e a mensagem não pode mandar a pessoa rever o "não como" por um item que nunca voltaria.
         bool DoGrupo(AlimentoBase i) => i.Grupo == baseOriginal.Grupo && i.Id != baseOriginal.Id;
         var foraPelaAlergia = BaseNutricional.Itens.Count(i => DoGrupo(i) && RegrasAlergias.Tira(i, lista.Alergias));
         var foraPeloEvitar = BaseNutricional.Itens.Count(i =>
-            DoGrupo(i) && evitados.Contains(i.Id) && !naLista.Contains(i.Id) && !RegrasAlergias.Tira(i, lista.Alergias));
+            DoGrupo(i) && naoComo.Contains(i.Id) && !naLista.Contains(i.Id) && !RegrasAlergias.Tira(i, lista.Alergias));
 
         return new ResultadoOpcoesTroca(
             original, baseOriginal, naSemana.Count, foraPeloEvitar,
-            Escopo(dias, [posicao], baseOriginal, candidatos, preferidos),
-            Escopo(dias, naSemana, baseOriginal, candidatos, preferidos))
+            Escopo(dias, [posicao], baseOriginal, candidatos, preferidos, leves),
+            Escopo(dias, naSemana, baseOriginal, candidatos, preferidos, leves))
         {
             ForaPelaAlergia = foraPelaAlergia
         };
+    }
+
+    /// <summary>
+    /// O melhor substituto para um item da dieta, na ordem da tela da troca (das preferências, parecidos, ver mais),
+    /// só na refeição, sem os itens de "excluir". Nulo quando nenhum passa nas regras. Usado pelo gerador para trocar
+    /// as ocorrências de um item leve acima do limite da semana (etapa 3): ali "excluir" são os itens leves, para a
+    /// troca não pôr outro item que a pessoa prefere evitar no lugar.
+    /// </summary>
+    public static OpcaoTroca? MelhorSubstituto(IReadOnlyList<DiaDietaDto> dias, PosicaoItem posicao, ListaAlimentos lista, IReadOnlySet<string> excluir)
+    {
+        var escopo = Calcular(dias, posicao, lista).Refeicao;
+        return escopo.DasPreferencias.Concat(escopo.Parecidos).Concat(escopo.VerMais)
+            .FirstOrDefault(o => !excluir.Contains(o.AlimentoId));
     }
 
     /// <summary>
@@ -152,7 +169,7 @@ public static class CalculadoraTroca
 
     private static OpcoesDoEscopo Escopo(
         IReadOnlyList<DiaDietaDto> dias, List<PosicaoItem> posicoes, AlimentoBase baseOriginal,
-        List<ItemDaLista> candidatos, Dictionary<string, List<int>> preferidos)
+        List<ItemDaLista> candidatos, Dictionary<string, List<int>> preferidos, IReadOnlySet<string> leves)
     {
         var opcoes = candidatos
             .Select(c => Opcao(dias, posicoes, baseOriginal, c, preferidos.ContainsKey(c.Item.Id)))
@@ -160,10 +177,12 @@ public static class CalculadoraTroca
             .ToList();
 
         // Primeiro o mesmo uso (só muda a ordem nos carboidratos: nas gorduras, o outro uso já ficou de fora),
+        // depois o que a pessoa não marcou em "Prefiro evitar" (etapa 3: o leve pode ser oferecido, mas por último),
         // depois o que menos muda as kcal.
         var disponiveis = opcoes
             .Where(o => o.Disponivel)
             .OrderByDescending(o => o.MesmoUso)
+            .ThenBy(o => leves.Contains(o.AlimentoId))
             .ThenBy(o => Math.Abs(o.DifKcal))
             .ThenBy(o => o.Nome, StringComparer.Ordinal)
             .ToList();
@@ -364,7 +383,8 @@ public record OpcoesDoEscopo(
 
 /// <summary>
 /// O resultado para um item: o original, quantas vezes ele aparece na semana, quantos do grupo saíram pelo
-/// "evitar" (não entram em nenhum escopo) e as opções de cada escopo.
+/// "não como" (não entram em nenhum escopo) e as opções de cada escopo. O nome ForaPeloEvitar ficou de antes da
+/// etapa 3, quando o bloqueio se chamava "evitar": a API mantém o campo foraPeloEvitar para não quebrar a tela.
 /// </summary>
 public record ResultadoOpcoesTroca(
     AlimentoDto Original,

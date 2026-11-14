@@ -360,7 +360,7 @@ public class ValidacaoRespostaGeminiTests
     {
         var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true)));
         var contexto = Contexto();
-        contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "vegano", Tipo = "evitar" });
+        contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "vegano", Tipo = "nao_como" });
 
         var dieta = await NovoGerador(gemini).GerarComListaAsync(contexto);
 
@@ -396,7 +396,7 @@ public class ValidacaoRespostaGeminiTests
     {
         var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana)));
         var contexto = Contexto();
-        contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "peixe", Tipo = "evitar" });
+        contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "peixe", Tipo = "nao_como" });
 
         await NovoGerador(gemini).GerarComListaAsync(contexto);
 
@@ -567,7 +567,7 @@ public class ValidacaoRespostaGeminiTests
         var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana)));
         var contexto = Contexto();
         contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "Banana", Tipo = "preferido" });
-        contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "Cerveja", Tipo = "evitar" });
+        contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "Cerveja", Tipo = "nao_como" });
 
         await NovoGerador(gemini).GerarComListaAsync(contexto);
 
@@ -626,7 +626,7 @@ public class ValidacaoRespostaGeminiTests
         var texto = TextoDieta(Semana, comRefeicoes: true, alimento: "Cerveja pilsen");
         var gemini = new GeminiRoteirizado(Envelope(texto), Envelope(texto));
         var contexto = Contexto();
-        contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "Cerveja", Tipo = "evitar" });
+        contexto.Preferencias.Add(new PreferenciaContextoDto { Alimento = "Cerveja", Tipo = "nao_como" });
 
         await Assert.ThrowsAsync<RespostaIaInvalidaException>(() => NovoGerador(gemini).GerarComListaAsync(contexto));
 

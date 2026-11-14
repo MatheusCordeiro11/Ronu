@@ -3,7 +3,7 @@ namespace Ronu.Api.DTOs;
 /// <summary>
 /// Como as preferências do usuário logado casaram com a base nutricional e se a
 /// lista que sobra atende aos mínimos por papel no prato (fase 2b-3). É o que a
-/// tela de Alimentação mostra: o chip sem casamento, o "tira 13" do evitar e o
+/// tela de Alimentação mostra: o chip sem casamento, o "tira 13" do "não como" e o
 /// aviso de lista pobre. Calculado no servidor (CasamentoPreferencias e
 /// ListaAlimentosPessoa), para a tela nunca repetir a regra.
 /// </summary>
@@ -20,7 +20,8 @@ public class PreferenciaConferidaResponse
     public required string Tipo { get; set; }
     public bool Casou { get; set; }
 
-    // Os itens da base que a preferência casa: no "evitar", os que saem do cardápio.
+    // Os itens da base que a preferência casa: no "nao_como", os que saem do cardápio; no "evitar" leve, os que o
+    // Ronu usa pouco.
     public required List<AlimentoCasadoResponse> Alimentos { get; set; }
 
     // Trechos do texto que não casaram com nenhum alimento (o aviso da tela usa o nome).
@@ -29,9 +30,9 @@ public class PreferenciaConferidaResponse
     // Como foi lido, quando casou só pela tolerância a 1 letra ("lactoze" -> "lactose").
     public required List<string> LidoComo { get; set; }
 
-    // TACO 2c: os códigos dos chips de alergia que este "evitar" parece ser ("crustaceos" para "camarão"; "ovo" e "soja"
+    // TACO 2c: os códigos dos chips de alergia que este "nao_como" parece ser ("crustaceos" para "camarão"; "ovo" e "soja"
     // para "soja e ovo"), na ordem dos chips, para a tela perguntar "Isso parece alergia. Quer marcar o chip?". Vazia no
-    // "gosto", quando nada casa com uma linha de alérgeno, quando o texto fala de lactose ou intolerância (não sugere
+    // "gosto" e no "evitar" leve, quando nada casa com uma linha de alérgeno, quando o texto fala de lactose ou intolerância (não sugere
     // Leite) e sem os chips já marcados.
     public List<string> SugereAlergias { get; set; } = [];
 }

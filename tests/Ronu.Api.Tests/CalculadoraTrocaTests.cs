@@ -35,7 +35,7 @@ public class CalculadoraTrocaTests
     }
 
     private static PreferenciaContextoDto Gosto(string alimento) => new() { Alimento = alimento, Tipo = "preferido" };
-    private static PreferenciaContextoDto Evitar(string alimento) => new() { Alimento = alimento, Tipo = "evitar" };
+    private static PreferenciaContextoDto NaoComo(string alimento) => new() { Alimento = alimento, Tipo = "nao_como" };
 
     private static ListaAlimentos Lista(string? uf = null, params PreferenciaContextoDto[] prefs) => ListaAlimentosPessoa.Montar(uf, prefs, Alergenos.Nenhum);
 
@@ -201,7 +201,7 @@ public class CalculadoraTrocaTests
     [Fact]
     public void Evitar_Tira_O_Item_E_E_Contado()
     {
-        var r = Calcular(AlmocoComFrango(), Frango, Lista(null, Evitar("peixe")));
+        var r = Calcular(AlmocoComFrango(), Frango, Lista(null, NaoComo("peixe")));
 
         Assert.DoesNotContain(Disponiveis(r.Refeicao), o => Base(o.AlimentoId).Categoria == CategoriaAlimento.Peixes);
         Assert.True(r.ForaPeloEvitar >= 6);

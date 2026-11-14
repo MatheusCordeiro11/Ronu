@@ -3,7 +3,9 @@ using System.Globalization;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Ronu.Api.Data;
+using Ronu.Api.Models;
 using Ronu.Api.Models.IA;
+using Ronu.Api.Services.Troca;
 using Ronu.Api.Validacao;
 
 namespace Ronu.Api.Services.IA;
@@ -44,6 +46,13 @@ public class GeradorDietaGemini : IGeradorDietaIA
     private const int MaximoTentativas = 2;
 
     public static readonly TimeSpan TimeoutPadraoPorTentativa = TimeSpan.FromSeconds(60);
+
+    /// <summary>
+    /// Quantas vezes na semana cada item do "Prefiro evitar" (o "evitar" leve da etapa 3) pode aparecer. Calibração
+    /// do projeto, não valor de tabela: "usa pouco, mas pode aparecer" (plano família, D2), e 2 deixa o item
+    /// disponível para fechar a meta sem virar presença diária. Vai no prompt e é conferido depois da resposta.
+    /// </summary>
+    public const int MaximoPorSemanaEvitar = 2;
 
     /// <summary>
     /// Limite de cada chamada ao Gemini (envio e leitura da resposta). Só os
@@ -151,6 +160,15 @@ public class GeradorDietaGemini : IGeradorDietaIA
                     : TirarBebidaAlcoolica(dias, contexto);
                 // Depois da regra 8: a rede de segurança da cerveja continua valendo antes da lista.
                 AplicarLista(dias, lista);
+                // "Prefiro evitar" (etapa 3): acima do limite da semana, a primeira resposta é recusada, como as outras
+                // regras; na última, as ocorrências excedentes são trocadas depois do cálculo pela base (abaixo).
+                var levesAcima = LevesAcimaDoLimite(dias, lista);
+                if (levesAcima.Count > 0 && tentativa < MaximoTentativas)
+                {
+                    // Só os ids da base: o texto que a pessoa escreveu no "evitar" não vai para a exceção nem para o log.
+                    throw new RespostaIaInvalidaException(
+                        $"Grupos do \"prefiro evitar\" acima de {MaximoPorSemanaEvitar} vezes na semana: {string.Join("; ", levesAcima.Select(g => $"[{string.Join(", ", g.Grupo.Order(StringComparer.Ordinal))}] x{g.Posicoes.Count}"))}.");
+                }
                 // Regra 7: cafeína à noite recusa a primeira resposta; na última, o item é trocado ou tirado.
                 var cafeinaANoite = ValidadorCafeina.Encontrar(dias);
                 if (cafeinaANoite.Count > 0)
@@ -179,6 +197,12 @@ public class GeradorDietaGemini : IGeradorDietaIA
                 var contaveis = RotularContaveis(dias);
                 // Fase 3: kcal e macros calculados pela base no lugar dos declarados, que ficam só no log.
                 CalculoPelaBase.Calcular(dias);
+                // Na última tentativa: depois do cálculo pela base, porque a troca confere a meta do dia pelos totais
+                // calculados (como numa dieta salva).
+                if (levesAcima.Count > 0)
+                {
+                    TrocarLevesExcedentes(dias, lista);
+                }
 
                 RegistrarGeracao(dias, declarado, uso, versaoModelo, normalizacao, tentativa, cronometro.ElapsedMilliseconds, lista, contaveis, oleosTirados, ajustes);
 
@@ -465,7 +489,92 @@ public class GeradorDietaGemini : IGeradorDietaIA
     internal static readonly string[] OleosDoPreparo = ["azeite-de-oliva-extra-virgem", "oleo-de-soja"];
 
     private static IEnumerable<string> Preferidos(ContextoDietaDto contexto) =>
-        contexto.Preferencias.Where(p => p.Tipo == "preferido").Select(p => p.Alimento);
+        contexto.Preferencias.Where(p => p.Tipo == TiposPreferencia.Preferido).Select(p => p.Alimento);
+
+    // Posição de um item na semana, para achar "as últimas": pelo dia da semana (o Gemini pode devolver os dias fora
+    // de ordem), depois a refeição e o item, na ordem da resposta.
+    private static (int Dia, int Refeicao, int Item) OrdemNaSemana(List<DiaDietaDto> dias, PosicaoItem p) =>
+        (Array.FindIndex(NomesDias, n => string.Equals(n, dias[p.Dia].DiaSemana.Trim(), StringComparison.OrdinalIgnoreCase)), p.Refeicao, p.Item);
+
+    /// <summary>
+    /// As posições na semana, na ordem dos dias, dos itens de um grupo leve (os itens de um chip do "Prefiro evitar").
+    /// </summary>
+    private static List<PosicaoItem> PosicoesDoGrupo(List<DiaDietaDto> dias, IReadOnlySet<string> grupo) => dias
+        .SelectMany((dia, d) => dia.Refeicoes.SelectMany((refeicao, r) =>
+            refeicao.Alimentos.Select((a, i) => (a.AlimentoId, Posicao: new PosicaoItem(d, r, i)))))
+        .Where(x => x.AlimentoId is not null && grupo.Contains(x.AlimentoId))
+        .Select(x => x.Posicao)
+        .OrderBy(p => OrdemNaSemana(dias, p))
+        .ToList();
+
+    /// <summary>
+    /// Os grupos leves ("Prefiro evitar", etapa 3; um grupo por chip, ListaAlimentos.GruposLeves) que aparecem mais de
+    /// MaximoPorSemanaEvitar vezes na semana, somando os itens do grupo, com as posições de cada vez na ordem da
+    /// semana. Por grupo, e não por item, porque um chip como "carne vermelha" casa com muitos cortes: contar por
+    /// item deixaria a soma passar muito do limite que a tela promete ("o Ronu usa pouco").
+    /// </summary>
+    internal static List<GrupoLeveAcima> LevesAcimaDoLimite(List<DiaDietaDto> dias, ListaAlimentos lista) => lista.GruposLeves
+        .Select(grupo => new GrupoLeveAcima(grupo, PosicoesDoGrupo(dias, grupo)))
+        .Where(g => g.Posicoes.Count > MaximoPorSemanaEvitar)
+        .ToList();
+
+    /// <summary>
+    /// Na última tentativa, as vezes de um grupo leve acima do limite (as últimas da semana) viram o melhor substituto
+    /// da troca: mesmo grupo de troca, da lista da pessoa, sem nenhum item leve, dentro da porção e dos 5% do dia
+    /// (CalculadoraTroca). Sem substituto, o item fica como está e o log registra. Depois de CalculoPelaBase, que é
+    /// chamado de novo a cada troca para a próxima conferir a meta do dia com os totais atualizados.
+    ///
+    /// As posições de cada grupo são lidas de novo antes de trocar: um item em dois grupos ("carne vermelha" e
+    /// "lombo") pode já ter saído pela troca do grupo anterior. Como o substituto nunca é leve, uma troca não faz
+    /// outro grupo passar do limite.
+    /// </summary>
+    private void TrocarLevesExcedentes(List<DiaDietaDto> dias, ListaAlimentos lista)
+    {
+        var leves = lista.ItensLeves;
+        var trocas = new List<string>();
+        var semSubstituto = new List<string>();
+        // Uma posição sem substituto num grupo não é tentada de novo no outro grupo do mesmo item (o resultado seria
+        // o mesmo, e o log a contaria duas vezes).
+        var tentadas = new HashSet<PosicaoItem>();
+
+        foreach (var grupo in lista.GruposLeves)
+        {
+            foreach (var posicao in PosicoesDoGrupo(dias, grupo).Skip(MaximoPorSemanaEvitar))
+            {
+                if (!tentadas.Add(posicao))
+                {
+                    continue;
+                }
+
+                var alimentoId = CalculadoraTroca.Encontrar(dias, posicao)!.AlimentoId;
+                var rotulo = $"{dias[posicao.Dia].DiaSemana.Trim()} {dias[posicao.Dia].Refeicoes[posicao.Refeicao].Nome}";
+                var opcao = CalculadoraTroca.MelhorSubstituto(dias, posicao, lista, leves);
+                if (opcao is null)
+                {
+                    semSubstituto.Add($"'{alimentoId}' ({rotulo})");
+                    continue;
+                }
+
+                var ocorrencia = opcao.Ocorrencias[0];
+                var substituto = BaseNutricional.Itens.Single(i => i.Id == opcao.AlimentoId);
+                dias[posicao.Dia].Refeicoes[posicao.Refeicao].Alimentos[posicao.Item] = new AlimentoDto
+                {
+                    Nome = ocorrencia.Nome,
+                    Quantidade = ocorrencia.Quantidade,
+                    Unidade = substituto.Medida,
+                    AlimentoId = substituto.Id
+                };
+                CalculoPelaBase.Calcular(dias);
+                trocas.Add($"'{alimentoId}' -> '{substituto.Id}' ({rotulo})");
+            }
+        }
+
+        // Só ids da base e o dia: o texto que a pessoa escreveu no "evitar" não entra no log.
+        _logger.LogWarning(
+            "Grupos do \"prefiro evitar\" acima de {Maximo} na semana na última tentativa: {Trocadas} trocadas ({Trocas}); {SemSubstituto} sem substituto, ficaram ({FicaramComo})",
+            MaximoPorSemanaEvitar, trocas.Count, trocas.Count == 0 ? "nenhuma" : string.Join("; ", trocas),
+            semSubstituto.Count, semSubstituto.Count == 0 ? "nenhum" : string.Join("; ", semSubstituto));
+    }
 
     private static MacrosDto SomarRefeicoes(List<RefeicaoDto> refeicoes) => new()
     {
@@ -521,17 +630,19 @@ public class GeradorDietaGemini : IGeradorDietaIA
             string.Join("; ", ajustes.Select(a => string.Create(CultureInfo.InvariantCulture,
                 $"{a.Dia} {a.DesvioKcalAntes:+0.0;-0.0}% -> {a.DesvioDepois[0]:+0.0;-0.0}% ({a.ItensMudados}){(a.DentroDaMargem ? "" : " FORA")}"))));
 
-        // Lista fechada (fase 2b): o tamanho, os mínimos, quantos "evitar" não casaram com nada (só a
-        // contagem: o texto da preferência pode revelar uma condição de saúde), os contáveis fora do
-        // múltiplo da unidade e quantas vezes o azeite ou óleo saiu de uma refeição com refogado.
+        // Lista fechada (fase 2b): o tamanho, os mínimos, quantos "não como" e quantos "evitar" leves não casaram
+        // com nada e quantos itens leves ficaram na lista (só as contagens: o texto da preferência pode revelar
+        // uma condição de saúde), os contáveis fora do múltiplo da unidade e quantas vezes o azeite ou óleo saiu
+        // de uma refeição com refogado.
         var refogadoComOleo = oleosTirados.Count;
-        var evitarSemCasamento = lista.Preferencias.Count(p => p.Tipo == "evitar" && p.TrechosSemCasamento.Count > 0);
+        var naoComoSemCasamento = lista.Preferencias.Count(p => p.Tipo == TiposPreferencia.NaoComo && p.TrechosSemCasamento.Count > 0);
+        var levesSemCasamento = lista.Preferencias.Count(p => p.Tipo == TiposPreferencia.Evitar && p.TrechosSemCasamento.Count > 0);
         var minimos = lista.Minimos.Atende
             ? "atende"
             : string.Join(", ", lista.Minimos.Vazios.Select(p => $"{p} vazio").Concat(lista.Minimos.AbaixoDoMinimo.Select(p => $"{p} abaixo")));
         _logger.LogInformation(
-            "Lista de alimentos: {Itens} itens, mínimos: {Minimos}, {EvitarSemCasamento} evitar sem casamento; contáveis fora do múltiplo da unidade: {ForaDoMultiplo} de {Contaveis}; azeite/óleo tirado de refeição com refogado: {RefogadoComOleo}",
-            lista.Itens.Count, minimos, evitarSemCasamento, contaveis.ForaDoMultiplo, contaveis.Contaveis, refogadoComOleo);
+            "Lista de alimentos: {Itens} itens, mínimos: {Minimos}, {NaoComoSemCasamento} não como sem casamento, {LevesSemCasamento} evitar leve sem casamento, {ItensLeves} itens leves na lista em {GruposLeves} grupos; contáveis fora do múltiplo da unidade: {ForaDoMultiplo} de {Contaveis}; azeite/óleo tirado de refeição com refogado: {RefogadoComOleo}",
+            lista.Itens.Count, minimos, naoComoSemCasamento, levesSemCasamento, lista.ItensLeves.Count, lista.GruposLeves.Count, contaveis.ForaDoMultiplo, contaveis.Contaveis, refogadoComOleo);
 
         // Por dia: o calculado pela base contra a meta (kcal e cada macro) e o que o Gemini declarou contra
         // o calculado. O declarado não vai mais para a dieta (fase 3), mas continua medido aqui: no g9a ele
@@ -625,13 +736,17 @@ public class GeradorDietaGemini : IGeradorDietaIA
         // "Gosto" vai como os itens da lista que ele casou (CasamentoPreferencias): o que não está na base
         // (whey, granola) não pode aparecer, e a tela avisa a pessoa (fase 2b-3).
         var nomePorId = lista.Itens.ToDictionary(i => i.Item.Id, i => i.Nome);
+        // Um item que casou com um gosto e também com um "evitar" leve ("frango" e "peito de frango") não vai como
+        // base do plano: pedir "use como base" e "use pouco" para o mesmo item confundiria o Gemini.
+        var leves = lista.ItensLeves;
         var preferidosTexto = string.Join(", ", lista.Preferencias
-            .Where(p => p.Tipo == "preferido")
+            .Where(p => p.Tipo == TiposPreferencia.Preferido)
             .SelectMany(p => p.ItensIds)
             .Where(nomePorId.ContainsKey)
+            .Where(id => !leves.Contains(id))
             .Distinct()
             .Select(id => nomePorId[id]));
-        var temGosto = contexto.Preferencias.Any(p => p.Tipo == "preferido");
+        var temGosto = contexto.Preferencias.Any(p => p.Tipo == TiposPreferencia.Preferido);
 
         var listaTexto = string.Join("\n", GruposNoPrompt
             .Select(g => (g.Rotulo, Nomes: lista.Itens.Where(i => i.Item.Grupo == g.Grupo).Select(i => i.Nome).ToList()))
@@ -655,15 +770,26 @@ public class GeradorDietaGemini : IGeradorDietaIA
             ? string.Empty
             : $" {string.Join(" e ", refogadosNaLista)} já incluem o óleo do preparo: na refeição em que um deles aparecer, não coloque azeite nem óleo.";
 
-        // Do "evitar" vão só os trechos que não casaram com a base ("carne de caça"): o que casou já saiu da lista,
+        // Do "não como" vão só os trechos que não casaram com a base ("carne de caça"): o que casou já saiu da lista,
         // e o enum do nome não deixa o Gemini escolher fora dela. E vão sem as palavras sobre a pessoa ou a saúde
         // dela: "tenho alergia a gergelim" chega como "gergelim" (TermoParaIA).
-        var evitarTexto = string.Join(", ", lista.Preferencias
-            .Where(p => p.Tipo == "evitar")
-            .SelectMany(p => p.TrechosSemCasamento)
-            .Select(CasamentoPreferencias.TermoParaIA)
-            .Where(t => t.Length > 0)
-            .Distinct(StringComparer.OrdinalIgnoreCase));
+        var evitarTexto = TermosSemCasamento(lista, TiposPreferencia.NaoComo);
+
+        // "Prefiro evitar" (etapa 3): os itens que casaram ficam na lista e vão aqui pelo nome da lista, um grupo por
+        // chip, com o limite da semana somando o grupo (o mesmo que o C# confere depois, LevesAcimaDoLimite). O grupo
+        // vai só com os nomes da lista, nunca com o texto que a pessoa digitou ("carne vermelha" chega como os cortes).
+        // Os trechos sem casamento vão como "evite quando possível", pelo TermoParaIA. Sem nenhum dos dois, o
+        // parágrafo some: o prompt de quem não usa o nível leve fica igual ao de antes.
+        var levesGrupos = lista.GruposLeves
+            .Select(grupo => string.Join("; ", lista.Itens.Where(i => grupo.Contains(i.Item.Id)).Select(i => i.Nome)))
+            .ToList();
+        var levesSemCasamento = TermosSemCasamento(lista, TiposPreferencia.Evitar);
+        var levesTexto = (levesGrupos.Count > 0
+                ? $"\n\nAlimentos da lista que a pessoa prefere evitar, em grupos (um por linha): use pouco, no máximo {MaximoPorSemanaEvitar} vezes na semana em cada grupo, somando todos os alimentos do grupo, e só quando ajudarem a chegar na meta:{string.Concat(levesGrupos.Select(g => $"\n- {g}"))}"
+                : string.Empty)
+            + (levesSemCasamento.Length > 0
+                ? $"\n\nOutras coisas que a pessoa prefere evitar (evite quando possível, sem proibir): {levesSemCasamento}"
+                : string.Empty);
 
         // Regra 8 só explica quando a bebida pode aparecer para quem marcou uma
         // como preferida. Para os outros, a versão que explicava (com o exemplo
@@ -751,7 +877,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
 
             Alimentos da lista que a pessoa gosta (use como base do plano, mas NÃO se limite a eles: complete com outros alimentos da lista adequados ao objetivo, variando as opções ao longo da semana): {(string.IsNullOrEmpty(preferidosTexto) ? (temGosto ? "nenhum dos que ela gosta está na lista" : "nenhuma preferência informada") : preferidosTexto)}
 
-            O que a pessoa pediu para evitar já foi tirado da lista. Restrições que não correspondem a um item específico da lista (respeite o sentido delas: NUNCA inclua alimento que se encaixe nelas, nem em pequena quantidade, nem como ingrediente de outro prato): {(string.IsNullOrEmpty(evitarTexto) ? "nenhuma" : evitarTexto)}{orcamentoTexto}
+            O que a pessoa pediu para evitar já foi tirado da lista. Restrições que não correspondem a um item específico da lista (respeite o sentido delas: NUNCA inclua alimento que se encaixe nelas, nem em pequena quantidade, nem como ingrediente de outro prato): {(string.IsNullOrEmpty(evitarTexto) ? "nenhuma" : evitarTexto)}{levesTexto}{orcamentoTexto}
 
             Regras obrigatórias:
             1. A soma de calorias de cada dia deve ficar dentro de uma margem de 5% (para mais ou para menos) da meta ESPECÍFICA daquele dia, listada acima — cada dia tem uma meta diferente, não use um valor único para todos os 7.
@@ -771,6 +897,15 @@ public class GeradorDietaGemini : IGeradorDietaIA
             15. Monte pelo menos {RefeicoesMinimas} refeições em cada dia e, nos dias com meta a partir de {MetaComMaisRefeicoes} kcal, pelo menos {RefeicoesMinimasMetaAlta}.{(semTreino ? "" : " O lanche antes e o depois do treino contam como refeições a mais, sem tirar as outras do dia.")}{(ListaTemFonteDeGordura(lista) ? RegraGordura : "")}
             """;
     }
+
+    // Os trechos de um tipo de preferência que não casaram com a base, já sem as palavras sobre a pessoa ou a saúde
+    // dela (TermoParaIA), sem repetir.
+    private static string TermosSemCasamento(ListaAlimentos lista, string tipo) => string.Join(", ", lista.Preferencias
+        .Where(p => p.Tipo == tipo)
+        .SelectMany(p => p.TrechosSemCasamento)
+        .Select(CasamentoPreferencias.TermoParaIA)
+        .Where(t => t.Length > 0)
+        .Distinct(StringComparer.OrdinalIgnoreCase));
 
     // "dia de déficit", "dia de manutenção" ou "dia de superávit": a direção do objetivo, sem dizer o objetivo da
     // pessoa nem o tamanho do déficit (que já está na meta). Objetivo desconhecido conta como manutenção, como na fórmula.
@@ -938,3 +1073,9 @@ public class GeradorDietaGemini : IGeradorDietaIA
     // usageMetadata da chamada que deu certo (só para o log).
     private record UsoTokens(int? Entrada, int? Resposta, int? Raciocinio, int? Total);
 }
+
+/// <summary>
+/// Um grupo leve (os itens de um chip do "Prefiro evitar") que passou do limite da semana, com as posições de cada
+/// vez em que um item dele aparece, na ordem da semana.
+/// </summary>
+internal record GrupoLeveAcima(IReadOnlySet<string> Grupo, IReadOnlyList<PosicaoItem> Posicoes);

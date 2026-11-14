@@ -10,7 +10,7 @@ namespace Ronu.Api.Services.Troca;
 /// alimentos não são reajustados, e a meta do dia não muda.
 ///
 /// A troca é recalculada aqui pela CalculadoraTroca, com a lista fechada atual da pessoa: o cliente só diz qual
-/// substituto quer, e um que não passa nas regras (porção, 5%, evitar) é recusado, mesmo que a tela o tenha
+/// substituto quer, e um que não passa nas regras (porção, 5%, não como) é recusado, mesmo que a tela o tenha
 /// mostrado antes de uma mudança nas preferências.
 /// </summary>
 public static class AplicadorTroca

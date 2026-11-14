@@ -5,7 +5,7 @@ using Ronu.Api.Data;
 namespace Ronu.Api.Services.IA;
 
 /// <summary>
-/// Casa o texto livre de uma preferência ("gosto" ou "evitar") com os itens da
+/// Casa o texto livre de uma preferência ("gosto", "não como" ou "evitar") com os itens da
 /// base nutricional (fase 2b, 2026-10-25). Serve para tirar da lista do Gemini o
 /// que a pessoa quer evitar e para saber se um "gosto" existe na base.
 ///

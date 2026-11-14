@@ -144,18 +144,23 @@ Desmarca um chip. Quando não sobra nenhum, as linhas já saíram e o aceite do 
 
 ## Preferências alimentares
 
+**Tipos** (`TiposPreferencia`; restrições em dois níveis, plano família etapa 3, decisão D2):
+- `preferido` ("Gosto de comer"): peso a favor no prompt.
+- `nao_como` ("Não como"): bloqueio. O item sai da lista fechada e do enum do Gemini, da troca, conta no aviso de lista pobre e pode sugerir chip de alergia. É o comportamento do `evitar` de antes da etapa 3: a migration `PreferenciasEmDoisNiveis` (só dados) trocou todo `evitar` que existia por `nao_como`, e assim nenhuma dieta mudou.
+- `evitar` ("Prefiro evitar", leve): o item **continua** na lista e no enum; o prompt pede para usar pouco, no máximo `GeradorDietaGemini.MaximoPorSemanaEvitar` = 2 vezes na semana por chip, somando os itens que ele casa (calibração do projeto; "carne vermelha" conta todos os cortes juntos), e o C# confere depois da resposta (seção Dietas). Na troca, o item leve pode ser oferecido, mas vem depois dos outros.
+
 ### `POST /api/preferencias-alimentares`
-**Recebe:** `alimento`, `tipo` (`preferido` ou `evitar`)
+**Recebe:** `alimento`, `tipo` (`preferido`, `nao_como` ou `evitar`)
 **Devolve:** `id`, `alimento`, `tipo`
-*(se o usuário já tem uma preferência para o mesmo alimento, sem diferenciar maiúsculas/minúsculas, atualiza o `tipo` em vez de duplicar)*
-**Erros:** 400 com `{ "mensagem": "Tipo de preferência inválido." }` se o `tipo` não for exatamente `preferido` ou `evitar` (sem normalizar maiúsculas nem espaços: `Evitar` é recusado).
+*(se o usuário já tem uma preferência para o mesmo alimento, sem diferenciar maiúsculas/minúsculas, atualiza o `tipo` em vez de duplicar: mudar de nível move o item, com o mesmo `id`)*
+**Erros:** 400 com `{ "mensagem": "Tipo de preferência inválido." }` se o `tipo` não for exatamente um dos três (sem normalizar maiúsculas nem espaços: `Evitar` e `Nao_Como` são recusados).
 
 ### `GET /api/preferencias-alimentares`
 **Devolve:** lista de preferências alimentares do usuário logado
 
 ### `GET /api/preferencias-alimentares/conferencia`
 Confere as preferências do usuário logado contra a base nutricional, pela mesma lista da geração (`ListaDaPessoa`, com os chips de alergia).
-**Devolve:** `preferencias`, cada uma com `id`, `alimento`, `tipo`, `casou`, `alimentos [{ nome, grupo }]` (os itens que ela casa; no "evitar", os que saem), `semCasamento`, `lidoComo` e `sugereAlergias` (TACO 2c: os códigos dos chips que um "evitar" parece ser, quando casa com linhas de alérgeno da tabela do `CasamentoPreferencias`, como `["crustaceos"]` para "camarão" e `["ovo", "soja"]` para "soja e ovo", na ordem dos chips; vazia no "gosto" e quando o texto fala de lactose ou intolerância, que não são alergia; nunca traz um chip já marcado); e `lista` (`atende`, `vazios`, `abaixoDoMinimo`, `itensPorPapel`, `gruposDeProteina`), que conta também os chips.
+**Devolve:** `preferencias`, cada uma com `id`, `alimento`, `tipo`, `casou`, `alimentos [{ nome, grupo }]` (os itens que ela casa; no `nao_como`, os que saem; no `evitar` leve, os que o Ronu usa pouco), `semCasamento`, `lidoComo` e `sugereAlergias` (TACO 2c: os códigos dos chips que um `nao_como` parece ser, quando casa com linhas de alérgeno da tabela do `CasamentoPreferencias`, como `["crustaceos"]` para "camarão" e `["ovo", "soja"]` para "soja e ovo", na ordem dos chips; vazia no "gosto", no `evitar` leve e quando o texto fala de lactose ou intolerância, que não são alergia; nunca traz um chip já marcado); e `lista` (`atende`, `vazios`, `abaixoDoMinimo`, `itensPorPapel`, `gruposDeProteina`), que conta também os chips.
 
 ### `DELETE /api/preferencias-alimentares/{id}`
 **Devolve:** 204 sem corpo
@@ -190,13 +195,15 @@ As três rotas devolvem a dieta no mesmo formato, `DietaResponse`:
 - as metas de cada dia (kcal e gramas de proteína, carboidrato e gordura), cada uma marcada como dia de déficit, de manutenção ou de superávit e, para quem treina, de treino (com o horário de início e de fim, se informado) ou de descanso, sem o nome da modalidade;
 - os horários de acordar e de dormir, se informados;
 - a UF (os nomes regionais e o feijão preto no Sul) e a faixa de orçamento;
-- a lista fechada de alimentos (itens da base, sem o que a pessoa evita e sem o que os chips de alergia tiram), o peso de uma unidade dos contáveis, os "gostos" que casaram com a base e, do "evitar", só os termos que não casaram com nenhum item, como foram digitados.
+- a lista fechada de alimentos (itens da base, sem o `nao_como` e sem o que os chips de alergia tiram), o peso de uma unidade dos contáveis, os "gostos" que casaram com a base (menos os que também são leves) e, do `nao_como`, só os termos que não casaram com nenhum item, sem as palavras sobre a pessoa ou a saúde dela (`TermoParaIA`: "tenho alergia a gergelim" vai como "gergelim"), como restrição dura;
+- desde a etapa 3, só para quem tem `evitar` leve, um parágrafo a mais: "Alimentos da lista que a pessoa prefere evitar, em grupos (um por linha): use pouco, no máximo 2 vezes na semana em cada grupo, somando todos os alimentos do grupo, e só quando ajudarem a chegar na meta:" e uma linha "- …" por chip (os itens leves dele, pelo nome da lista; o texto digitado não vai) e "Outras coisas que a pessoa prefere evitar (evite quando possível, sem proibir): …" (os trechos leves sem casamento, também pelo `TermoParaIA`). Sem nenhum leve, o parágrafo some e o prompt fica como antes.
 
-Não vão: nome, e-mail, id da conta, sexo, idade, peso, altura, objetivo, nome das modalidades, a rotina em texto, o "evitar" como foi digitado e as alergias (nem os códigos, nem quantas são: a lista já chega sem os itens). A lista sai sempre do `ListaDaPessoa` (UF, preferências e alergias): o gerador recusa um contexto sem ela, e um teste varre o código para o `ListaAlimentosPessoa.Montar` não ser chamado de outro lugar.
+Não vão: nome, e-mail, id da conta, sexo, idade, peso, altura, objetivo, nome das modalidades, a rotina em texto, o `nao_como` e o `evitar` como foram digitados e as alergias (nem os códigos, nem quantas são: a lista já chega sem os itens). A lista sai sempre do `ListaDaPessoa` (UF, preferências e alergias): o gerador recusa um contexto sem ela, e um teste varre o código para o `ListaAlimentosPessoa.Montar` não ser chamado de outro lugar.
 
 **Checagens da resposta**, antes de salvar. Em todas, a 1ª resposta com o problema é recusada e o Gemini é chamado de novo; o que muda é a última tentativa:
 - estrutura (JSON, 7 dias únicos com os nomes certos, alimentos da lista): na última, vira 503;
 - regra 8, bebida alcoólica fora dos "gostos" (`ValidadorBebidaAlcoolica`): na última, a bebida sai;
+- "Prefiro evitar" (etapa 3): um chip leve com mais de `MaximoPorSemanaEvitar` (2) vezes na semana, somando os itens que ele casa (`ListaAlimentos.GruposLeves`, um grupo por chip; um item em dois chips conta nos dois). Na última, as vezes excedentes de cada grupo (as últimas da semana, pela ordem dos dias) viram o melhor substituto da troca (`CalculadoraTroca.MelhorSubstituto`: mesmo grupo, da lista da pessoa, sem outro item leve, dentro da porção e dos 5% do dia), depois do cálculo pela base; sem substituto, o item fica como está. O log registra as trocas e as que ficaram, só com os ids da base e o dia (nunca o texto digitado);
 - regra 7, café coado, chá mate, chá preto ou refrigerante de cola no jantar, na ceia ou a partir das 18:00 (`ValidadorCafeina`; lista e fontes em `docs/fontes-nutricionais.md`): na última, o café e o chá viram chá de erva-doce (se ele está na lista da pessoa) e o refrigerante sai;
 - regra 15, menos de 5 refeições num dia (6 a partir de 3500 kcal): na última, a dieta é aceita assim;
 - regra 16, almoço e jantar sem nenhuma fonte de gordura (óleos e gorduras, oleaginosas e sementes, refogados) e o dia abaixo de 85% da gordura da meta: na última, a dieta é aceita assim.
@@ -210,8 +217,8 @@ O que foi trocado, tirado ou aceito na última tentativa vai para o log: o dia, 
     `{ "mensagem": "Complete seu perfil (altura, sexo e data de nascimento) antes de gerar uma dieta." }`
   - nenhum objetivo registrado:
     `{ "mensagem": "Registre um objetivo antes de gerar uma dieta." }`
-  - algum papel do prato ficou sem nenhum item depois do "evitar" e dos chips de alergia (abaixo do mínimo, sem ficar vazio, a dieta sai com o `avisoListaPobre`; o filtro nunca é relaxado):
-    `{ "mensagem": "Com o que você marcou para evitar e as suas alergias, não sobrou nenhuma fonte de proteína entre os alimentos do Ronu. Revise a lista de Evitar em Alimentação." }`
+  - algum papel do prato ficou sem nenhum item depois do `nao_como` e dos chips de alergia (o `evitar` leve não tira item) (abaixo do mínimo, sem ficar vazio, a dieta sai com o `avisoListaPobre`; o filtro nunca é relaxado):
+    `{ "mensagem": "Com o que você marcou em Não como e as suas alergias, não sobrou nenhuma fonte de proteína entre os alimentos do Ronu. Revise a lista de Não como em Alimentação." }`
 - **429 Too Many Requests** — limite de 3 gerações por usuário numa janela móvel de 1 hora (contado nas dietas salvas; nenhuma chamada à IA é feita). É a primeira checagem, antes das de 400. A mensagem diz quando a próxima vaga libera:
   `{ "mensagem": "Você já gerou 3 dietas na última hora, o limite por hora. Tente novamente em 12 minutos." }`
 - **503 Service Unavailable** — a IA não gerou uma dieta utilizável: falha de comunicação com o Gemini (rede, status de erro, timeout) ou resposta inválida mesmo depois de uma nova tentativa (bloqueada, cortada, JSON inválido, semana sem exatamente 7 dias únicos com os nomes esperados). Nada é salvo e o detalhe vai só para o log do servidor:
@@ -230,7 +237,7 @@ O que foi trocado, tirado ou aceito na última tentativa vai para o log: o dia, 
 
 Troca um alimento da dieta atual por um substituto da base nutricional, só na refeição tocada ou na semana toda (cada vez em que o mesmo alimento aparece). Tudo é calculado em C# pela base (`CalculadoraTroca`), sem chamar a IA. A dieta é sempre a atual do usuário do token: o `dietaId` do cliente só é comparado com ela, então o id da dieta de outra pessoa cai no 409, sem saber se ela existe. Toda gravação confere a `revisao` (token de concorrência no banco): duas abas trocando ao mesmo tempo não sobrescrevem uma à outra.
 
-Regras do substituto: mesmo grupo de troca, na lista de alimentos da pessoa com as preferências e os chips de alergia **atuais** (um "evitar" ou um chip novo vale já; o substituto nunca tem alergia marcada), quantidade que mantém o nutriente principal do original (o peso ou o volume nos itens sem nutriente principal), até a porção máxima da troca (`PorcaoMaximaTroca`, calibração do projeto). Fica de fora o que deixaria algum dia afetado mais de 5% fora da meta (um dia que já estava fora aceita o que não piora), o que já está na refeição, o refogado numa refeição com azeite ou óleo (e vice-versa) e, nas gorduras, o item de outro uso. Só o item trocado muda: os outros alimentos não são reajustados, e a meta do dia não muda. As marcações "já tenho" da lista de compras dos itens que saíram, ou que passaram a pedir mais, caem na mesma gravação.
+Regras do substituto: mesmo grupo de troca, na lista de alimentos da pessoa com as preferências e os chips de alergia **atuais** (um `nao_como` ou um chip novo vale já; o substituto nunca tem alergia marcada; um item do `evitar` leve pode ser oferecido, mas vem depois dos outros), quantidade que mantém o nutriente principal do original (o peso ou o volume nos itens sem nutriente principal), até a porção máxima da troca (`PorcaoMaximaTroca`, calibração do projeto). Fica de fora o que deixaria algum dia afetado mais de 5% fora da meta (um dia que já estava fora aceita o que não piora), o que já está na refeição, o refogado numa refeição com azeite ou óleo (e vice-versa) e, nas gorduras, o item de outro uso. Só o item trocado muda: os outros alimentos não são reajustados, e a meta do dia não muda. As marcações "já tenho" da lista de compras dos itens que saíram, ou que passaram a pedir mais, caem na mesma gravação.
 
 **Limites por usuário** (do token, em memória), contados à parte: 120 leituras e 30 gravações por minuto. Acima disso, **429** `{ "mensagem": "Muitos pedidos de troca em pouco tempo. Espere um minuto e tente de novo." }` (a mensagem do 429 é escolhida pela política da rota; a redefinição de senha tem a dela).
 
@@ -245,8 +252,8 @@ Regras do substituto: mesmo grupo de troca, na lista de alimentos da pessoa com 
 - `original`: `alimentoId`, `nome`, `quantidade`, `unidade`, `kcal` e `nutrienteG` (gramas do nutriente principal; nulo sem nutriente principal)
 - `nutriente`: `proteina`, `carboidrato`, `gordura` ou `livre` (sem nutriente a manter: fica o peso)
 - `ocorrenciasNaSemana`: quantas vezes o mesmo alimento aparece na semana
-- `foraPeloEvitar`: quantos itens do grupo saíram pelo que a pessoa marcou para evitar (sem contar os que saíram por alergia)
-- `foraPelaAlergia`: quantos itens do grupo saíram pelos chips de alergia (TACO 2c), mesmo que também estejam no "evitar"
+- `foraPeloEvitar`: quantos itens do grupo saíram pelo que a pessoa marcou em "Não como" (`nao_como`; sem contar os que saíram por alergia). O nome do campo é de antes da etapa 3 e ficou, para não quebrar a tela; o `evitar` leve não tira item
+- `foraPelaAlergia`: quantos itens do grupo saíram pelos chips de alergia (TACO 2c), mesmo que também estejam no `nao_como`
 - `refeicao` e `semana`, os dois escopos, cada um com:
   - `dasPreferencias` (até 3, no máximo um por gosto), `parecidos` (até 3) e `verMais` (o resto que passa nas regras). Primeiro o mesmo uso, depois o que menos muda as kcal. Cada opção: `alimentoId`, `nome` (regional pela UF, com a contagem nos contáveis), `quantidade`, `unidade`, `contagem` (nos contáveis), `kcal` e `nutrienteG` do item tocado, `difKcal` (a soma das diferenças de todas as vezes do escopo), `outroUso` (substituto de outro uso, como macarrão no lugar do pão do café), `ocorrencias` e `dias [{ dia, diaSemana, totalAntes, totalDepois, meta, desvioPct }]` (a prévia de cada dia afetado; `desvioPct` com 2 casas)
   - `fora`: quantas opções ficaram de fora por motivo (`porcaoMaxima`, `foraDaMeta`, `jaNaRefeicao`, `refogadoComOleo`, `usoDiferente`)
@@ -255,7 +262,7 @@ Regras do substituto: mesmo grupo de troca, na lista de alimentos da pessoa com 
 ### `POST /api/dietas/atual/trocas`
 **Recebe:** `dietaId`, `revisao`, `dia`, `refeicao`, `item`, `alimentoIdAtual` (o alimento que a tela mostrava na posição), `alimentoIdNovo` e `escopo` (`refeicao` ou `semana`). Sem quantidade nem kcal: o servidor recalcula tudo e confere as regras de novo.
 **Devolve:** a `DietaResponse` com a revisão nova, `alergiasNaDieta` recalculado e `marcacoesRemovidas` (quantas marcações "já tenho" caíram nesta gravação; só a contagem). Trocar de novo um item já trocado mantém o primeiro `original`.
-**Erros:** **400** `"Escopo inválido."`; **400** `"Este substituto não serve aqui (porção, meta do dia, o que você marcou para evitar ou suas alergias). Atualize as opções e escolha outro."` (por exemplo, as preferências mudaram em outra aba); **409** `"Sua dieta mudou desde que a tela foi aberta. Atualize e tente de novo."` (revisão velha, outra dieta gerada ou outro alimento na posição)
+**Erros:** **400** `"Escopo inválido."`; **400** `"Este substituto não serve aqui (porção, meta do dia, o que você marcou em Não como ou suas alergias). Atualize as opções e escolha outro."` (por exemplo, as preferências mudaram em outra aba); **409** `"Sua dieta mudou desde que a tela foi aberta. Atualize e tente de novo."` (revisão velha, outra dieta gerada ou outro alimento na posição)
 
 ### `DELETE /api/dietas/atual/trocas/ultima?dietaId=&revisao=`
 "Desfazer": volta exatamente ao que estava antes da última gravação (troca ou volta ao original), se ela ainda é a última.

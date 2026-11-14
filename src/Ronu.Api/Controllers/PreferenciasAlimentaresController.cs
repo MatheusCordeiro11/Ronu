@@ -32,24 +32,19 @@ public class PreferenciasAlimentaresController : ControllerBase
     private int UsuarioIdLogado =>
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-    // Os únicos tipos que o GeradorDietaGemini reconhece ao montar o prompt.
-    // Sem normalização (como a aderência): vêm de opções fixas na tela, e
-    // qualquer outra grafia ("Evitar") ficaria salva mas seria ignorada na dieta.
-    private static readonly HashSet<string> TiposPreferencia = new()
-    {
-        "preferido", "evitar"
-    };
-
     /// <summary>
     /// Registra uma preferência alimentar para o usuário logado. Se o usuário já
     /// tem uma preferência para o mesmo alimento (comparação sem diferenciar
     /// maiúsculas/minúsculas), atualiza o tipo em vez de duplicar (upsert) — o
-    /// onboarding pode reenviar o mesmo alimento se o usuário voltar uma etapa.
+    /// onboarding pode reenviar o mesmo alimento se o usuário voltar uma etapa, e
+    /// mudar de nível ("Não como" para "Prefiro evitar") move o item, sem deixar
+    /// o mesmo alimento em dois níveis.
+    /// Tipos aceitos: os de TiposPreferencia (preferido, nao_como, evitar).
     /// </summary>
     [HttpPost]
     public async Task<IActionResult> Criar(PreferenciaAlimentarRequest request)
     {
-        if (!TiposPreferencia.Contains(request.Tipo))
+        if (!TiposPreferencia.Todos.Contains(request.Tipo))
         {
             return BadRequest(new { mensagem = "Tipo de preferência inválido." });
         }
@@ -115,7 +110,7 @@ public class PreferenciasAlimentaresController : ControllerBase
     /// a 1 letra e se a lista que sobra atende aos mínimos por papel no prato.
     /// Só as preferências de quem está logado (o id vem do token), como as outras
     /// rotas daqui. Desde a 2c, os mínimos contam também os chips de alergia, e
-    /// cada "evitar" que parece alergia traz o chip sugerido (sugereAlergia).
+    /// cada "nao_como" que parece alergia traz o chip sugerido (sugereAlergia).
     /// </summary>
     [HttpGet("conferencia")]
     public async Task<IActionResult> Conferir()
@@ -136,9 +131,11 @@ public class PreferenciasAlimentaresController : ControllerBase
                 .ToList(),
             SemCasamento = conferida.TrechosSemCasamento.ToList(),
             LidoComo = conferida.LidoComo.ToList(),
-            // Só no "evitar", e nunca um chip que a pessoa já marcou. Todos os que casarem: em "soja e ovo", sugerir só
-            // um deixaria o outro alérgeno no cardápio sem a pessoa perceber.
-            SugereAlergias = salva.Tipo == "evitar"
+            // Só no "nao_como" (o bloqueio, que era o "evitar" antes da etapa 3), e nunca um chip que a pessoa já
+            // marcou. O "evitar" leve não sugere: ele deixa o item no cardápio, e a tela já leva quem tem alergia às
+            // Alergias. Todos os que casarem: em "soja e ovo", sugerir só um deixaria o outro alérgeno no cardápio
+            // sem a pessoa perceber.
+            SugereAlergias = salva.Tipo == TiposPreferencia.NaoComo
                 ? CasamentoPreferencias.SugerirAlergias(salva.Alimento).Where(c => !daPessoa.Alergias.Contains(c)).ToList()
                 : []
         }).ToList();

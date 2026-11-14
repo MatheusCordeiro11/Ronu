@@ -9,7 +9,7 @@ public class PreferenciaAlimentar
     public int Id { get; set; }
     public required string Alimento { get; set; }
 
-    // Tipo indica se é uma preferência positiva (gosta) ou negativa (evita/restrição).
+    // "preferido", "nao_como" (bloqueio) ou "evitar" (leve): ver TiposPreferencia.
     public required string Tipo { get; set; }
 
     public int UsuarioId { get; set; }

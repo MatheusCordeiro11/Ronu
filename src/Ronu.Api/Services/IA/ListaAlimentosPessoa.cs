@@ -1,11 +1,12 @@
 using Ronu.Api.Data;
+using Ronu.Api.Models;
 using Ronu.Api.Models.IA;
 
 namespace Ronu.Api.Services.IA;
 
 /// <summary>
 /// A lista fechada de alimentos de uma pessoa (fase 2b, 2026-10-25): a base
-/// nutricional com o nome regional da UF, sem o que ela marcou para evitar, sem
+/// nutricional com o nome regional da UF, sem o que ela marcou em "Não como", sem
 /// os alérgenos dela e sem bebida alcoólica que ela não pediu. É a lista que vai
 /// para o prompt e para o enum do Gemini (2b-2), e de onde saem os substitutos da troca.
 ///
@@ -35,15 +36,17 @@ public static class ListaAlimentosPessoa
         var casadas = prefs
             .Select(p => (Preferencia: p, Resultado: CasamentoPreferencias.Casar(p.Alimento, base_)))
             .ToList();
-        var evitados = casadas.Where(c => c.Preferencia.Tipo == "evitar").SelectMany(c => c.Resultado.ItensIds).ToHashSet();
+        // Só o "nao_como" tira da lista (e do enum). O "evitar" leve fica: o prompt pede para usar pouco, e o
+        // GeradorDietaGemini confere o limite por semana.
+        var naoComo = casadas.Where(c => c.Preferencia.Tipo == TiposPreferencia.NaoComo).SelectMany(c => c.Resultado.ItensIds).ToHashSet();
 
         // A cerveja só entra para quem a marcou como "gosto", pela mesma regra que o
         // ValidadorBebidaAlcoolica confere na resposta (regra 8).
-        var preferidos = prefs.Where(p => p.Tipo == "preferido").Select(p => p.Alimento).ToList();
+        var preferidos = prefs.Where(p => p.Tipo == TiposPreferencia.Preferido).Select(p => p.Alimento).ToList();
         var cervejaPermitida = ValidadorBebidaAlcoolica.EncontrarNaoPermitida([CervejaDaBase], preferidos) is null;
 
         var itens = base_
-            .Where(i => !evitados.Contains(i.Id))
+            .Where(i => !naoComo.Contains(i.Id))
             .Where(i => !RegrasAlergias.Tira(i, alergias))
             .Where(i => i.Categoria != CategoriaAlimento.BebidasAlcoolicas || cervejaPermitida)
             .Select(i => new ItemDaLista(i, NomeNaUf(i, uf)))
@@ -90,10 +93,54 @@ public record PreferenciaCasada(string Alimento, string Tipo, bool Casou, int It
 public record ListaAlimentos(IReadOnlyList<ItemDaLista> Itens, IReadOnlyList<PreferenciaCasada> Preferencias, ResultadoMinimos Minimos)
 {
     /// <summary>
-    /// As marcas que a lista tirou por alergia: a troca usa para não contar como "evitar" o que saiu por alergia.
+    /// As marcas que a lista tirou por alergia: a troca usa para não contar como "não como" o que saiu por alergia.
     /// Nunca vai para o prompt nem para o log (o gerador só lê Itens e Preferencias).
     /// </summary>
     public Alergenos Alergias { get; init; }
+
+    /// <summary>
+    /// Os itens da lista que casaram com um "evitar" leve (etapa 3): continuam na lista e no enum, mas o prompt pede
+    /// para usar pouco, o gerador confere o limite por semana e a troca os oferece depois dos outros. Um item que
+    /// também está no "nao_como" já saiu da lista, então não aparece aqui.
+    /// </summary>
+    public IReadOnlySet<string> ItensLeves
+    {
+        get
+        {
+            var naLista = Itens.Select(i => i.Item.Id).ToHashSet();
+            return Preferencias
+                .Where(p => p.Tipo == TiposPreferencia.Evitar)
+                .SelectMany(p => p.ItensIds)
+                .Where(naLista.Contains)
+                .ToHashSet();
+        }
+    }
+
+    /// <summary>
+    /// Os itens leves agrupados por preferência (um grupo por chip do "Prefiro evitar"), só com os que estão na lista.
+    /// O limite da semana vale por grupo, somando os itens: "prefiro evitar carne vermelha" casa com todos os cortes
+    /// bovinos e suínos, e contar por item deixaria cada corte aparecer até o limite, com a soma bem acima dele.
+    /// Um item pode estar em mais de um grupo ("carne vermelha" e "lombo") e conta nos dois. Grupos com os mesmos
+    /// itens aparecem uma vez só (dois chips que casam igual não pedem duas linhas no prompt).
+    /// </summary>
+    public IReadOnlyList<IReadOnlySet<string>> GruposLeves
+    {
+        get
+        {
+            var naLista = Itens.Select(i => i.Item.Id).ToHashSet();
+            var grupos = new List<IReadOnlySet<string>>();
+            foreach (var preferencia in Preferencias.Where(p => p.Tipo == TiposPreferencia.Evitar))
+            {
+                var grupo = preferencia.ItensIds.Where(naLista.Contains).ToHashSet();
+                if (grupo.Count > 0 && !grupos.Any(g => g.SetEquals(grupo)))
+                {
+                    grupos.Add(grupo);
+                }
+            }
+
+            return grupos;
+        }
+    }
 }
 
 public enum PapelNoPrato
@@ -109,7 +156,7 @@ public enum PapelNoPrato
 /// mínimos são calibração do projeto, não valor de tabela: proteína com pelo
 /// menos 4 itens de pelo menos 2 grupos (a regra 3 do prompt pede proteína
 /// diferente em dias seguidos, impossível com uma fonte só) e 3 itens nos outros
-/// papéis. O filtro nunca devolve um item evitado para cumprir o mínimo: o que
+/// papéis. O filtro nunca devolve um item do "não como" para cumprir o mínimo: o que
 /// fazer com o resultado (gerar com aviso, ou recusar quando um papel fica
 /// vazio) é decidido na 2b-2.
 /// </summary>
@@ -163,7 +210,8 @@ public static class MinimosPorPapel
         }).ToList();
         var lista = faltas.Count == 1 ? faltas[0] : string.Join(", ", faltas.SkipLast(1)) + " e " + faltas[^1];
         // Desde a 2c, as alergias também tiram itens. A mensagem continua sem dizer quais a pessoa marcou.
-        return $"Com o que você marcou para evitar e as suas alergias, não sobrou {lista} entre os alimentos do Ronu. Revise a lista de Evitar em Alimentação.";
+        // Etapa 3: o bloqueio se chama "Não como" na tela (o "Prefiro evitar" leve não tira nada da lista).
+        return $"Com o que você marcou em Não como e as suas alergias, não sobrou {lista} entre os alimentos do Ronu. Revise a lista de Não como em Alimentação.";
     }
 }
 

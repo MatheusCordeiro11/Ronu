@@ -60,11 +60,12 @@ public class OpcoesTrocaResponse
     // Quantas vezes o mesmo alimento aparece na semana (o "Na semana toda").
     public required int OcorrenciasNaSemana { get; set; }
 
-    // Quantos itens do grupo saíram pelo que a pessoa marcou para evitar.
+    // Quantos itens do grupo saíram pelo que a pessoa marcou em "Não como" (tipo nao_como). O nome do campo é de antes
+    // da etapa 3, quando o bloqueio se chamava "evitar": mantido para não quebrar a tela (o "evitar" leve não tira item).
     public required int ForaPeloEvitar { get; set; }
 
     // Quantos itens do grupo saíram pelas alergias da pessoa (TACO 2c). Não entram no ForaPeloEvitar, mesmo que
-    // também estejam no "evitar".
+    // também estejam no "não como".
     public required int ForaPelaAlergia { get; set; }
 
     public required EscopoTrocaDto Refeicao { get; set; }

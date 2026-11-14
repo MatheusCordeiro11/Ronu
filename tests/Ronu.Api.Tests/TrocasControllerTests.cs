@@ -206,7 +206,7 @@ public class TrocasControllerTests
     {
         var fora = new Dictionary<MotivoForaDaTroca, int> { [MotivoForaDaTroca.PorcaoMaxima] = 3, [MotivoForaDaTroca.ForaDaMeta] = 1 };
 
-        Assert.Equal("Nenhum substituto serve aqui: 3 passariam da porção máxima, 1 deixaria o dia mais de 5% fora da meta e 2 estão no que você marcou para evitar.",
+        Assert.Equal("Nenhum substituto serve aqui: 3 passariam da porção máxima, 1 deixaria o dia mais de 5% fora da meta e 2 estão no que você marcou em Não como.",
             TrocasController.MensagemSemOpcoes(fora, 2));
         Assert.Equal("Este alimento não tem substituto entre os alimentos do Ronu.", TrocasController.MensagemSemOpcoes(new Dictionary<MotivoForaDaTroca, int>(), 0));
     }
@@ -342,12 +342,12 @@ public class TrocasControllerTests
         Assert.Equal((json, 0), (banco.DietasIA.AsNoTracking().Single().ConteudoJson, banco.DietasIA.AsNoTracking().Single().Revisao));
     }
 
-    // As preferências de agora valem: a tilápia marcada para evitar depois da geração não é aceita.
+    // As preferências de agora valem: a tilápia marcada em "não como" depois da geração não é aceita.
     [Fact]
     public async Task Evitar_Atual_Vale_Na_Troca()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "troca11@exemplo.test", ("evitar", "peixe"));
+        var usuario = NovoUsuario(banco, "troca11@exemplo.test", ("nao_como", "peixe"));
         var dietaIA = NovaDieta(banco, usuario);
 
         var r = await Controller(banco, usuario.Id).Trocar(Pedido(dietaIA, "file-de-tilapia-grelhado"));
@@ -684,8 +684,8 @@ public class TrocasControllerTests
     public async Task Opcoes_Nao_Trazem_Alergeno_E_O_Que_Saiu_Por_Alergia_Nao_Conta_Como_Evitar()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var semChip = NovoUsuario(banco, "troca-alergia1@exemplo.test", ("evitar", "pão de forma integral"));
-        var comChip = NovoUsuario(banco, "troca-alergia2@exemplo.test", ("evitar", "pão de forma integral"));
+        var semChip = NovoUsuario(banco, "troca-alergia1@exemplo.test", ("nao_como", "pão de forma integral"));
+        var comChip = NovoUsuario(banco, "troca-alergia2@exemplo.test", ("nao_como", "pão de forma integral"));
         NovaDieta(banco, semChip);
         NovaDieta(banco, comChip);
         MarcarAlergias(banco, comChip, "soja");
@@ -703,7 +703,7 @@ public class TrocasControllerTests
     [Fact]
     public void Mensagem_Sem_Opcoes_Cita_As_Alergias()
     {
-        Assert.Equal("Nenhum substituto serve aqui: 1 está no que você marcou para evitar e 3 têm uma das suas alergias.",
+        Assert.Equal("Nenhum substituto serve aqui: 1 está no que você marcou em Não como e 3 têm uma das suas alergias.",
             TrocasController.MensagemSemOpcoes(new Dictionary<MotivoForaDaTroca, int>(), 1, 3));
         Assert.Equal("Nenhum substituto serve aqui: 1 tem uma das suas alergias.",
             TrocasController.MensagemSemOpcoes(new Dictionary<MotivoForaDaTroca, int>(), 0, 1));

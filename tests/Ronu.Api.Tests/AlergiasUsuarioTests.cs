@@ -411,7 +411,7 @@ public class AlergiasUsuarioTests
     public async Task Contexto_Da_Geracao_Leva_A_Lista_Sem_Os_Alergenos()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "contexto-alergia@exemplo.test", ("evitar", "fígado"));
+        var usuario = NovoUsuario(banco, "contexto-alergia@exemplo.test", ("nao_como", "fígado"));
         banco.ObjetivosUsuario.Add(new ObjetivoUsuario { UsuarioId = usuario.Id, Peso = 80, Objetivo = "manter peso", DataRegistro = DateTime.UtcNow });
         banco.SaveChanges();
         Marcar(banco, usuario.Id, "soja", "gluten");
@@ -441,7 +441,7 @@ public class AlergiasUsuarioTests
     public async Task Lista_Pobre_Nao_Devolve_Alergeno()
     {
         using var banco = BancoEmMemoria.NovoContexto();
-        var usuario = NovoUsuario(banco, "pobre@exemplo.test", ("evitar", "carne"));
+        var usuario = NovoUsuario(banco, "pobre@exemplo.test", ("nao_como", "carne"));
         Marcar(banco, usuario.Id, CodigosAlergia.Chips.Select(c => c.Codigo).ToArray());
 
         var lista = (await ListaDaPessoa.MontarAsync(banco, usuario.Id)).Lista;
@@ -498,8 +498,8 @@ public class AlergiasUsuarioTests
     {
         using var banco = BancoEmMemoria.NovoContexto();
         var usuario = NovoUsuario(banco, "sugere@exemplo.test",
-            ("evitar", "camarão"), ("evitar", "soja"), ("preferido", "peixe"), ("evitar", "intolerância à lactose"), ("evitar", "jiló"),
-            ("evitar", "ovo e soja"), ("evitar", "glúten e ovo"));
+            ("nao_como", "camarão"), ("nao_como", "soja"), ("preferido", "peixe"), ("nao_como", "intolerância à lactose"), ("nao_como", "jiló"),
+            ("nao_como", "ovo e soja"), ("nao_como", "glúten e ovo"));
         Marcar(banco, usuario.Id, "soja");
 
         var conferencia = Assert.IsType<ConferenciaPreferenciasResponse>(

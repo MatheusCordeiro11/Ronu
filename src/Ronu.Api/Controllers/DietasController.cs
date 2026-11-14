@@ -104,7 +104,7 @@ public class DietasController : ControllerBase
         var contexto = await _contextoBuilder.ConstruirAsync(UsuarioIdLogado);
 
         // Lista fechada sem nenhum item em algum papel no prato (ex.: nenhuma
-        // proteína depois do "evitar"): não dá para montar uma semana, então nem
+        // proteína depois do "não como"): não dá para montar uma semana, então nem
         // chama o Gemini. Abaixo do mínimo, mas sem papel vazio, a dieta é gerada
         // com o aviso gravado (GeradorDietaGemini).
         var vazios = contexto.Lista?.Minimos.Vazios ?? [];

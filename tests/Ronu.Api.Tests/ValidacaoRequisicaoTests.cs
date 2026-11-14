@@ -182,8 +182,11 @@ public class ValidacaoRequisicaoTests
     [InlineData("PREFERIDO")]
     [InlineData("evitar ")]
     [InlineData("gosto")]
+    [InlineData("Nao_Como")]
+    [InlineData("nao como")]
+    [InlineData("naocomo")]
     [InlineData("")]
-    public async Task Tipo_Fora_Dos_Dois_Valores_Recusa_Com_400(string tipo)
+    public async Task Tipo_Fora_Dos_Tres_Valores_Recusa_Com_400(string tipo)
     {
         var resultado = await Controller().Criar(new PreferenciaAlimentarRequest { Alimento = "Arroz", Tipo = tipo });
 
