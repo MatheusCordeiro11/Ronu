@@ -156,15 +156,64 @@ public class ServicoRedefinicaoSenha
             return motivo;
         }
 
+        // A conferência acima não basta para o uso único: dois pedidos ao mesmo
+        // tempo com o mesmo token passariam os dois por ela antes de algum
+        // gravar. Quem decide é o UPDATE condicional de UsarLinkAsync, na mesma
+        // transação da troca da senha e da invalidação dos outros links.
+        await using var transacao = _context.Database.IsRelational()
+            ? await _context.Database.BeginTransactionAsync()
+            : null;
+
+        if (!await UsarLinkAsync(pedido.Id, agora))
+        {
+            return MotivoLinkInvalido.Usado;
+        }
+
         var usuario = await _context.Usuarios.FirstAsync(u => u.Id == pedido.UsuarioId);
         usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(novaSenha);
         usuario.SenhaAlteradaEm = agora;
-        pedido.UsadoEm = agora;
         await InvalidarLinksAtivosAsync(usuario.Id, agora, excetoPedidoId: pedido.Id);
 
         await _context.SaveChangesAsync();
+        if (transacao is not null)
+        {
+            await transacao.CommitAsync();
+        }
+
         _logger.LogInformation("Senha redefinida pelo link, usuário {UsuarioId}", usuario.Id);
         return null;
+    }
+
+    /// <summary>
+    /// Grava o UsadoEm só se o link ainda serve, e diz se foi este pedido que o
+    /// usou. No PostgreSQL é um UPDATE com a condição no WHERE: de dois pedidos
+    /// ao mesmo tempo, o segundo espera a trava da linha e, depois do commit do
+    /// primeiro, não acha mais a linha na condição (0 linhas mudadas).
+    ///
+    /// O banco em memória dos testes não tem ExecuteUpdate nem transação: lá o
+    /// link é carregado e marcado, e o SaveChanges de quem chamou grava. Não há
+    /// concorrência real nos testes, então o resultado em sequência é o mesmo.
+    /// </summary>
+    private async Task<bool> UsarLinkAsync(int pedidoId, DateTime agora)
+    {
+        var aindaServe = _context.PedidosRedefinicaoSenha.Where(p => p.Id == pedidoId
+            && p.UsadoEm == null
+            && p.InvalidadoEm == null
+            && p.ExpiraEm > agora);
+
+        if (_context.Database.IsRelational())
+        {
+            return await aindaServe.ExecuteUpdateAsync(s => s.SetProperty(p => p.UsadoEm, agora)) == 1;
+        }
+
+        var pedido = await aindaServe.FirstOrDefaultAsync();
+        if (pedido is null)
+        {
+            return false;
+        }
+
+        pedido.UsadoEm = agora;
+        return true;
     }
 
     private async Task<(PedidoRedefinicaoSenha? Pedido, MotivoLinkInvalido? Motivo)> BuscarPedidoValidoAsync(string token, DateTime agora)

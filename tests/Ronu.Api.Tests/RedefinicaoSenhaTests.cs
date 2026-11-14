@@ -238,6 +238,36 @@ public class RedefinicaoSenhaTests
     }
 
     [Fact]
+    public async Task Mesmo_Link_Em_Dois_Pedidos_Seguidos_So_O_Primeiro_Troca_A_Senha()
+    {
+        // Dois contextos no mesmo banco, como duas requisições. A corrida de
+        // verdade (os dois ao mesmo tempo) depende do UPDATE condicional no
+        // PostgreSQL; em memória dá para conferir só a sequência.
+        var banco = Guid.NewGuid().ToString();
+        var contexto = BancoEmMemoria.NovoContexto(banco);
+        var fila = new FilaFalsa();
+        var usuario = await NovoUsuario(contexto, "fulano@exemplo.test", senha: "senha-antiga");
+        await NovoServico(contexto, fila).SolicitarAsync("fulano@exemplo.test", Agora);
+        var token = TokenDoEmail(Assert.Single(fila.Mensagens));
+
+        var primeiro = await NovoServico(BancoEmMemoria.NovoContexto(banco), fila)
+            .RedefinirAsync(token, "senha-do-primeiro", Agora.AddMinutes(5));
+        var segundo = await NovoServico(BancoEmMemoria.NovoContexto(banco), fila)
+            .RedefinirAsync(token, "senha-do-segundo", Agora.AddMinutes(6));
+
+        Assert.Null(primeiro);
+        Assert.Equal(MotivoLinkInvalido.Usado, segundo);
+        var salvo = await BancoEmMemoria.NovoContexto(banco).Usuarios.SingleAsync(u => u.Id == usuario.Id);
+        Assert.True(BCrypt.Net.BCrypt.Verify("senha-do-primeiro", salvo.SenhaHash));
+        Assert.Equal(Agora.AddMinutes(5), salvo.SenhaAlteradaEm);
+        var pedido = await BancoEmMemoria.NovoContexto(banco).PedidosRedefinicaoSenha.SingleAsync();
+        Assert.Equal(Agora.AddMinutes(5), pedido.UsadoEm);
+    }
+
+    private static ServicoRedefinicaoSenha NovoServico(ApplicationDbContext contexto, FilaFalsa fila) =>
+        new(contexto, fila, BancoEmMemoria.Configuracao(), NullLogger<ServicoRedefinicaoSenha>.Instance);
+
+    [Fact]
     public async Task Login_Funciona_Com_A_Senha_Nova_E_Nao_Com_A_Antiga()
     {
         var (contexto, fila, servico) = Cenario();
