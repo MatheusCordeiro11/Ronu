@@ -352,6 +352,46 @@ namespace Ronu.Api.Migrations
                     b.ToTable("ObjetivosUsuario");
                 });
 
+            modelBuilder.Entity("Ronu.Api.Models.PedidoCasa", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AlimentoId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("CasaId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ChavesCasa")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("Item")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("SemanaCasaId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CasaId", "CriadoEm");
+
+                    b.ToTable("PedidosCasa");
+                });
+
             modelBuilder.Entity("Ronu.Api.Models.PedidoRedefinicaoSenha", b =>
                 {
                     b.Property<int>("Id")
@@ -668,6 +708,17 @@ namespace Ronu.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("Ronu.Api.Models.PedidoCasa", b =>
+                {
+                    b.HasOne("Ronu.Api.Models.Casa", "Casa")
+                        .WithMany()
+                        .HasForeignKey("CasaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Casa");
                 });
 
             modelBuilder.Entity("Ronu.Api.Models.PedidoRedefinicaoSenha", b =>

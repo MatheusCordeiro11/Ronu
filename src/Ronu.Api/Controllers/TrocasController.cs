@@ -62,6 +62,11 @@ public class TrocasController : ControllerBase
             return BadRequest(new { mensagem = "Alimento não encontrado na dieta." });
         }
 
+        if (await RecusaDaCasa(dieta, posicao) is { } daCasa)
+        {
+            return daCasa;
+        }
+
         var lista = (await DaPessoa()).Lista;
         var r = CalculadoraTroca.Calcular(dieta.Dias, posicao, lista);
         var nutriente = r.Base.Nutriente;
@@ -120,6 +125,11 @@ public class TrocasController : ControllerBase
         if (atual.AlimentoId != request.AlimentoIdAtual)
         {
             return Conflict(new { mensagem = MensagemMudou });
+        }
+
+        if (await RecusaDaCasa(dieta, posicao) is { } daCasa)
+        {
+            return daCasa;
         }
 
         // O substituto vem da lista da pessoa, já sem os alérgenos: um id com alergia nunca está entre as opções.
@@ -237,6 +247,29 @@ public class TrocasController : ControllerBase
             motivo = "alergia"
         });
     }
+
+    // Plano família (etapa 5): um item do almoço ou do jantar da casa não se troca aqui. A troca na casa é só do dono e
+    // vale para todos (POST /api/casa/semana/trocas); o membro tem "Pedir troca" (POST /api/casa/pedidos). Até a
+    // etapa 4, esta rota deixava um membro trocar o item só no prato dele. Quem saiu da casa tem DaCasa = false e
+    // troca normalmente. 409 com o motivo, para a tela levar cada um ao caminho certo.
+    private async Task<IActionResult?> RecusaDaCasa(DietaSemanalDto dieta, PosicaoItem posicao)
+    {
+        if (!dieta.Dias[posicao.Dia].Refeicoes[posicao.Refeicao].DaCasa)
+        {
+            return null;
+        }
+
+        var souDono = await _context.MembrosCasa.AnyAsync(m => m.UsuarioId == UsuarioIdLogado && m.Papel == MembroCasa.PapelDono);
+        return Conflict(new
+        {
+            mensagem = souDono
+                ? "Este alimento é da refeição da casa. Troque pela semana da casa: a troca vale para todos."
+                : "Este alimento é da refeição da casa: só quem cuida da casa troca. Use Pedir troca.",
+            motivo = MotivoRefeicaoDaCasa
+        });
+    }
+
+    public const string MotivoRefeicaoDaCasa = "refeicao_da_casa";
 
     // A mesma regra do GET /api/dietas/atual: a mais recente do usuário do token.
     private Task<DietaIA?> DietaAtual() => _context.DietasIA

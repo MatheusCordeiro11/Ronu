@@ -1,11 +1,13 @@
 using System.Buffers.Text;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Npgsql;
 using Ronu.Api.Data;
 using Ronu.Api.Models;
+using Ronu.Api.Models.IA;
 using Ronu.Api.Services.Consentimentos;
 
 namespace Ronu.Api.Services.PlanoFamilia;
@@ -89,13 +91,14 @@ public static class OperacoesCasa
     }
 
     /// <summary>
-    /// Tira a pessoa da casa (sair ou ser removida) e revoga o aceite dela. Se era o dono sozinho, a casa acaba, com os
-    /// convites. Quem chama já conferiu que o dono está sozinho. Não grava: o SaveChanges é de quem chamou.
+    /// Tira a pessoa da casa (sair ou ser removida), revoga o aceite dela e solta as dietas dela da casa
+    /// (SoltarDietasAsync). Se era o dono sozinho, a casa acaba, com os convites, as semanas e os pedidos. Quem chama já conferiu que o dono está sozinho. Não grava: o SaveChanges é de quem chamou.
     /// </summary>
     public static async Task SairAsync(ApplicationDbContext contexto, MembroCasa membro, DateTime agora)
     {
         contexto.MembrosCasa.Remove(membro);
         await RevogarConsentimentoAsync(contexto, membro.UsuarioId, agora);
+        await SoltarDietasAsync(contexto, membro.UsuarioId);
 
         if (membro.Papel == MembroCasa.PapelDono)
         {
@@ -141,10 +144,42 @@ public static class OperacoesCasa
         proximo.Papel = MembroCasa.PapelDono;
     }
 
+    /// <summary>
+    /// Etapa 5 (decisão de 2026-10-26): quem sai ou é removido fica com o almoço e o jantar da casa na própria dieta,
+    /// com as mesmas comidas e a porção dele, até gerar outra. As refeições só perdem a marca da casa (DaCasa e
+    /// ChaveCasa) e a dieta perde o SemanaCasaId: não sobra vínculo nenhum com a casa, e a troca individual volta a
+    /// valer nelas. A revisão sobe, para uma tela aberta com a dieta antiga recarregar antes de trocar. Todas as dietas
+    /// da pessoa (as 3 do histórico), não só a atual: o histórico também não pode apontar para a casa. Não grava.
+    /// </summary>
+    public static async Task SoltarDietasAsync(ApplicationDbContext contexto, int usuarioId)
+    {
+        var dietas = await contexto.DietasIA.Where(d => d.UsuarioId == usuarioId).ToListAsync();
+        foreach (var dietaIA in dietas)
+        {
+            var dieta = JsonSerializer.Deserialize<DietaSemanalDto>(dietaIA.ConteudoJson)!;
+            var refeicoesDaCasa = dieta.Dias.SelectMany(d => d.Refeicoes).Where(r => r.DaCasa || r.ChaveCasa is not null).ToList();
+            if (refeicoesDaCasa.Count == 0 && dietaIA.SemanaCasaId is null)
+            {
+                continue;
+            }
+
+            foreach (var refeicao in refeicoesDaCasa)
+            {
+                refeicao.DaCasa = false;
+                refeicao.ChaveCasa = null;
+            }
+
+            dietaIA.ConteudoJson = JsonSerializer.Serialize(dieta);
+            dietaIA.SemanaCasaId = null;
+            dietaIA.Revisao++;
+        }
+    }
+
     // Explícito, e não só pela cascata: o banco em memória dos testes não tem cascata.
     private static async Task ApagarCasaAsync(ApplicationDbContext contexto, int casaId)
     {
         contexto.ConvitesCasa.RemoveRange(await contexto.ConvitesCasa.Where(c => c.CasaId == casaId).ToListAsync());
+        contexto.PedidosCasa.RemoveRange(await contexto.PedidosCasa.Where(p => p.CasaId == casaId).ToListAsync());
         // As dietas dos membros guardam o SemanaCasaId sem chave estrangeira: continuam com as refeições como estão.
         contexto.SemanasCasa.RemoveRange(await contexto.SemanasCasa.Where(s => s.CasaId == casaId).ToListAsync());
         contexto.MembrosCasa.RemoveRange(await contexto.MembrosCasa.Where(m => m.CasaId == casaId).ToListAsync());

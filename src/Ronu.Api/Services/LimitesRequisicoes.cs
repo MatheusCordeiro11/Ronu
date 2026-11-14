@@ -39,6 +39,7 @@ public static class LimitesRequisicoes
         LimitesCasa.PoliticaConvite => LimitesCasa.MensagemConvite,
         LimitesCasa.PoliticaConviteVerificar => LimitesCasa.MensagemConviteVerificar,
         LimitesCasa.PoliticaEscrita => LimitesCasa.MensagemEscrita,
+        LimitesCasa.PoliticaPedido => LimitesCasa.MensagemPedido,
         _ => LimitesRedefinicaoSenha.MensagemLimite
     };
 }

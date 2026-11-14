@@ -173,7 +173,12 @@ public class GeracaoSemanaCasa
     /// só os itens que ainda estão na lista dela (o "não como" ou uma alergia marcada depois tira o item), sem a marca
     /// da troca. Vazio sem dieta, ou com uma dieta de outra versão da base (os ids podem não existir mais).
     /// </summary>
-    public async Task<Dictionary<string, List<RefeicaoDto>>> CafeELanchesAtuaisAsync(int usuarioId, ListaAlimentos listaDaPessoa)
+    /// <param name="almocoJantarNoLugar">
+    /// Etapa 5, entrada no meio da semana: as refeições da casa que não servem para a pessoa ("qui-jantar"). Nelas, o
+    /// almoço ou o jantar que ela já tinha naquele dia fica, como refeição individual, no lugar do da casa.
+    /// </param>
+    public async Task<Dictionary<string, List<RefeicaoDto>>> CafeELanchesAtuaisAsync(int usuarioId, ListaAlimentos listaDaPessoa,
+        IReadOnlyCollection<string>? almocoJantarNoLugar = null)
     {
         var atual = await _context.DietasIA.AsNoTracking()
             .Where(d => d.UsuarioId == usuarioId)
@@ -195,8 +200,11 @@ public class GeracaoSemanaCasa
         var naLista = listaDaPessoa.Itens.Select(i => i.Item.Id).ToHashSet();
         foreach (var dia in dieta.Dias)
         {
+            var indiceDia = Array.FindIndex(GeradorDietaGemini.NomesDias, n => string.Equals(n, dia.DiaSemana.Trim(), StringComparison.OrdinalIgnoreCase));
+            bool FicaNoLugar(RefeicaoDto r) => almocoJantarNoLugar is not null && indiceDia >= 0
+                && almocoJantarNoLugar.Contains(PorcoesCasa.Chave(indiceDia, r.Nome.Contains("almo", StringComparison.OrdinalIgnoreCase)));
             var refeicoes = dia.Refeicoes
-                .Where(r => !r.DaCasa && !PorcoesCasa.EAlmocoOuJantar(r))
+                .Where(r => !r.DaCasa && (!PorcoesCasa.EAlmocoOuJantar(r) || FicaNoLugar(r)))
                 .Select(r => new RefeicaoDto
                 {
                     Nome = r.Nome,
@@ -230,6 +238,10 @@ public class GeracaoSemanaCasa
             .ToListAsync();
         _context.SemanasCasa.RemoveRange(antigas);
 
+        // Etapa 5: a semana nova atende todos os pedidos e avisos abertos (eram sobre a semana que saiu). Apagados, não
+        // marcados: o pedido não guarda histórico. Assim o "Pedido enviado" do membro também volta a valer.
+        _context.PedidosCasa.RemoveRange(await _context.PedidosCasa.Where(p => p.CasaId == casaId).ToListAsync());
+
         var linha = new SemanaCasa
         {
             CasaId = casaId,
@@ -252,6 +264,54 @@ public class GeracaoSemanaCasa
         }
 
         return linha;
+    }
+
+    /// <summary>
+    /// Etapa 5, entrada no meio da semana (decisão de 2026-10-26): quem acabou de aceitar o convite recebe na hora as
+    /// porções do almoço e do jantar da semana atual da casa, calculadas aqui, sem chamar o Gemini (a semana da casa
+    /// não muda). É o mesmo cálculo que a semana nova faz para cada membro (MontarDieta): a meta do dia da pessoa, as
+    /// porções da casa e o café e os lanches que ela já tinha, reajustados para o que sobra da meta.
+    ///
+    /// Uma refeição da casa com algo que a pessoa não come ou tem alergia vira individual só para ela: fica o almoço ou
+    /// o jantar que ela já tinha naquele dia (sem os itens que ela não come), ou nada, até ela gerar o café e os
+    /// lanches (o POST /api/dietas/gerar monta essa refeição junto). O dono recebe um aviso sem nome
+    /// (PedidoCasa.TipoAvisoEntrada) e a semana marca o RefeicaoIndividualEm.
+    ///
+    /// Sem semana, ou com uma de outra versão da base (os AlimentoId podem não existir), não faz nada: a pessoa gera a
+    /// dieta como hoje. Devolve as refeições da casa que viraram individuais (vazia quando todas servem).
+    /// </summary>
+    public async Task<IReadOnlyList<string>> EntrarNaSemanaAsync(int casaId, int usuarioId)
+    {
+        var linha = await AtualAsync(_context, casaId, rastrear: true);
+        if (linha is null || linha.VersaoBase != BaseNutricional.VersaoBase)
+        {
+            return [];
+        }
+
+        var semana = JsonSerializer.Deserialize<SemanaCasaDto>(linha.ConteudoJson)!;
+        var contexto = await _contextoBuilder.ConstruirAsync(usuarioId);
+        var lista = contexto.Lista!;
+        var naoServem = PorcoesCasa.RefeicoesQueNaoServem(semana, lista);
+        var mantidas = await CafeELanchesAtuaisAsync(usuarioId, lista, naoServem);
+        var dieta = MontarDieta(semana, _gerador.CalcularMetas(contexto), lista, mantidas);
+        var agora = DateTime.UtcNow;
+
+        await using var transacao = await OperacoesCasa.IniciarTransacaoAsync(_context);
+        if (naoServem.Count > 0)
+        {
+            linha.RefeicaoIndividualEm = agora;
+            RegrasPedidosCasa.AvisarEntrada(_context, casaId, linha.Id, naoServem, agora);
+        }
+
+        await RepositorioDietaIA.AbrirEspacoAsync(_context, usuarioId);
+        // Origem = casa: como a dieta que a semana da casa cria para cada membro, não gasta a cota de gerações da pessoa.
+        await RepositorioDietaIA.GravarAsync(_context, usuarioId, dieta, agora, DietaIA.OrigemCasa, linha.Id);
+        if (transacao is not null)
+        {
+            await transacao.CommitAsync();
+        }
+
+        return naoServem;
     }
 
     /// <summary>A semana atual da casa (a mais recente), ou nula.</summary>

@@ -52,6 +52,11 @@ public class CasaResponse
 
     // Só para o dono; nulo para os membros.
     public List<ConviteAbertoResponse>? ConvitesAbertos { get; set; }
+
+    // Etapa 5, só para o dono (nulos para os membros): os pedidos e avisos abertos, sem quem pediu, e quantos são (o
+    // contador da aba Casa). O membro não vê nem a contagem: ela diria a ele que outra pessoa pediu algo.
+    public List<PedidoCasaResponse>? Pedidos { get; set; }
+    public int? PedidosAbertos { get; set; }
 }
 
 public class MembroCasaResponse

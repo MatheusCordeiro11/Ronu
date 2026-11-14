@@ -28,6 +28,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<MembroCasa> MembrosCasa { get; set; }
     public DbSet<ConviteCasa> ConvitesCasa { get; set; }
     public DbSet<SemanaCasa> SemanasCasa { get; set; }
+    public DbSet<PedidoCasa> PedidosCasa { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -98,6 +99,14 @@ public class ApplicationDbContext : DbContext
         {
             semana.HasIndex(s => new { s.CasaId, s.GeradaEm });
             semana.HasOne(s => s.Casa).WithMany().HasForeignKey(s => s.CasaId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Os pedidos e avisos abertos da casa (etapa 5), lidos pela casa. Sem UsuarioId de propósito (o pedido não
+        // diz quem pediu). Acabam com a casa.
+        modelBuilder.Entity<PedidoCasa>(pedido =>
+        {
+            pedido.HasIndex(p => new { p.CasaId, p.CriadoEm });
+            pedido.HasOne(p => p.Casa).WithMany().HasForeignKey(p => p.CasaId).OnDelete(DeleteBehavior.Cascade);
         });
 
         // As dietas que existem antes da casa são todas de geração individual.

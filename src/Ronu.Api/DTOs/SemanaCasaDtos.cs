@@ -21,6 +21,10 @@ public class SemanaCasaResponse
     public AvisoListaPobreDto? AvisoListaPobre { get; set; }
     public bool? RefeicaoIndividual { get; set; }
 
+    // Etapa 5, só para o dono e só quando há o que desfazer: a última troca na casa ainda é a última gravação.
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? PodeDesfazer { get; set; }
+
     public static SemanaCasaResponse Montar(SemanaCasa semana, bool souDono)
     {
         var conteudo = JsonSerializer.Deserialize<SemanaCasaDto>(semana.ConteudoJson)!;
@@ -32,22 +36,25 @@ public class SemanaCasaResponse
             Dias = conteudo.Dias.Select(d => new DiaSemanaCasaResponse
             {
                 DiaSemana = d.DiaSemana,
-                Almoco = Refeicao(d, almoco: true),
-                Jantar = Refeicao(d, almoco: false)
+                Almoco = Refeicao(d, almoco: true, souDono),
+                Jantar = Refeicao(d, almoco: false, souDono)
             }).ToList(),
             AvisoListaPobre = souDono ? conteudo.AvisoListaPobre : null,
-            RefeicaoIndividual = souDono ? semana.RefeicaoIndividualEm is not null : null
+            RefeicaoIndividual = souDono ? semana.RefeicaoIndividualEm is not null : null,
+            PodeDesfazer = souDono && conteudo.UltimaTroca is { } ultima && ultima.Revisao == semana.Revisao ? true : null
         };
     }
 
-    private static RefeicaoSemanaCasaResponse Refeicao(DiaDietaDto dia, bool almoco)
+    private static RefeicaoSemanaCasaResponse Refeicao(DiaDietaDto dia, bool almoco, bool souDono)
     {
         var refeicao = dia.Refeicoes.First(r => r.ChaveCasa!.EndsWith(almoco ? "-almoco" : "-jantar", StringComparison.Ordinal));
+        var trocados = refeicao.Alimentos.Select((a, i) => (a, i)).Where(x => x.a.Original is not null).Select(x => x.i).ToList();
         return new RefeicaoSemanaCasaResponse
         {
             ChaveCasa = refeicao.ChaveCasa!,
             Horario = refeicao.Horario,
-            Alimentos = refeicao.Alimentos.Select(a => a.Nome).ToList()
+            Alimentos = refeicao.Alimentos.Select(a => a.Nome).ToList(),
+            Trocados = souDono && trocados.Count > 0 ? trocados : null
         };
     }
 }
@@ -67,4 +74,9 @@ public class RefeicaoSemanaCasaResponse
 
     // Os nomes da lista, sem a contagem dos contáveis (a contagem é da porção de cada um).
     public required List<string> Alimentos { get; set; }
+
+    // Etapa 5, só para o dono: as posições dos itens trocados na casa (para a marca "trocado" e o "Voltar ao
+    // original"). Fora do JSON quando nada foi trocado e para os membros.
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public List<int>? Trocados { get; set; }
 }

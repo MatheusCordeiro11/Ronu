@@ -15,4 +15,9 @@ public class SemanaCasaDto
 
     // A lista da casa ficou abaixo do mínimo em algum papel do prato (sem contar fruta). Só o dono vê.
     public AvisoListaPobreDto? AvisoListaPobre { get; set; }
+
+    // Etapa 5: a última troca na casa (do dono), com os itens da referência como estavam antes, para o "Desfazer",
+    // como na DietaSemanalDto. A revisão é a da SemanaCasa. Fora do JSON quando nulo.
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public UltimaTrocaDto? UltimaTroca { get; set; }
 }

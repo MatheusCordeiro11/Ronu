@@ -84,7 +84,13 @@ public static class CalculadoraTroca
             throw new InvalidOperationException("Item sem AlimentoId da base: a dieta não tem troca.");
         }
 
-        var naSemana = Posicoes(dias).Where(p => Encontrar(dias, p)!.AlimentoId == baseOriginal.Id).ToList();
+        // Plano família (etapa 5): o "na semana toda" não cruza a fronteira da casa. Na dieta de quem está numa casa,
+        // trocar o arroz do café não pode mudar o arroz do almoço da casa (só o dono troca ali, para todos); na semana
+        // da casa, todas as refeições são da casa, então vale para todas.
+        var daCasa = dias[posicao.Dia].Refeicoes[posicao.Refeicao].DaCasa;
+        var naSemana = Posicoes(dias)
+            .Where(p => Encontrar(dias, p)!.AlimentoId == baseOriginal.Id && dias[p.Dia].Refeicoes[p.Refeicao].DaCasa == daCasa)
+            .ToList();
 
         // De cada item preferido, os gostos (índices em lista.Preferencias) que o casaram.
         var preferidos = lista.Preferencias

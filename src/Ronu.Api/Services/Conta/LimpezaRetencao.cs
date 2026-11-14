@@ -34,7 +34,11 @@ public static class LimpezaRetencao
     // que aconteceu com ele e investigar abuso recente.
     public static readonly TimeSpan PrazoConvitesCasa = TimeSpan.FromDays(30);
 
-    public record Resultado(int PedidosApagados, int ContasApagadas, int RotinasApagadas = 0, int ConvitesCasaApagados = 0);
+    // Etapa 5: um pedido ou aviso da casa sai quando é dispensado, atendido ou quando chega uma semana nova. Esta é só a
+    // rede de segurança para a casa que fica parada: depois de 30 dias, o pedido já não diz nada da semana de agora.
+    public static readonly TimeSpan PrazoPedidosCasa = TimeSpan.FromDays(30);
+
+    public record Resultado(int PedidosApagados, int ContasApagadas, int RotinasApagadas = 0, int ConvitesCasaApagados = 0, int PedidosCasaApagados = 0);
 
     /// <summary>
     /// Lê a data de ChaveRotinaForaDaTelaEm como o início do dia em UTC. Nulo se ausente ou vazia; exceção se o
@@ -70,6 +74,11 @@ public static class LimpezaRetencao
             .Where(c => c.UsadoEm < limiteConvites || c.RevogadoEm < limiteConvites || c.ExpiraEm < limiteConvites)
             .ToListAsync();
         contexto.ConvitesCasa.RemoveRange(convites);
+        await contexto.SaveChangesAsync();
+
+        var limitePedidosCasa = agora - PrazoPedidosCasa;
+        var pedidosCasa = await contexto.PedidosCasa.Where(p => p.CriadoEm < limitePedidosCasa).ToListAsync();
+        contexto.PedidosCasa.RemoveRange(pedidosCasa);
         await contexto.SaveChangesAsync();
 
         var limiteContas = agora - PrazoContaSemAceite;
@@ -116,6 +125,6 @@ public static class LimpezaRetencao
             rotinasApagadas = comRotina.Count;
         }
 
-        return new Resultado(pedidos.Count, apagadas, rotinasApagadas, convites.Count);
+        return new Resultado(pedidos.Count, apagadas, rotinasApagadas, convites.Count, pedidosCasa.Count);
     }
 }

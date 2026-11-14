@@ -245,6 +245,8 @@ Regras do substituto: mesmo grupo de troca, na lista de alimentos da pessoa com 
 - **404** `"Nenhuma dieta gerada ainda."`
 - **422** quando a dieta não tem troca: `"Esta dieta foi gerada antes da troca de alimentos existir. Gere uma dieta nova para trocar alimentos."` ou `"A base de alimentos do Ronu mudou desde que esta dieta foi gerada. Gere uma dieta nova para trocar alimentos."`
 - **400** `"Alimento não encontrado na dieta."`: a posição (`dia`, `refeicao`, `item`, índices a partir de 0, na ordem da dieta salva) não existe
+- **409** `{ mensagem, motivo: "refeicao_da_casa" }` (plano família, etapa 5; só nas opções e na troca): o item é do almoço ou do jantar da casa (`daCasa: true`). Para o membro, `"Este alimento é da refeição da casa: só quem cuida da casa troca. Use Pedir troca."`; para o dono, `"Este alimento é da refeição da casa. Troque pela semana da casa: a troca vale para todos."` (a troca na casa é `POST /api/casa/semana/trocas`). Nada é gravado. Quem saiu da casa tem as refeições com `daCasa` falso e troca normalmente
+- Na dieta de quem está numa casa, o escopo `semana` não cruza a fronteira da casa: trocar um item do café na semana toda não muda o mesmo item no almoço ou no jantar da casa
 
 ### `GET /api/dietas/atual/trocas/opcoes?dia=&refeicao=&item=`
 **Devolve:**
@@ -365,20 +367,21 @@ Apaga a conta e tudo dela (art. 18, VI), também usado para revogar o consentime
 O `ServicoLimpezaRetencao` roda a `LimpezaRetencao` 1 minuto depois de a API subir e a cada 24 horas (no App Service F1 a API dorme sem uso, então roda pelo menos a cada subida). Ela apaga:
 - pedidos de redefinição de senha com mais de 30 dias;
 - convites da casa usados, vencidos ou revogados há mais de 30 dias;
+- pedidos e avisos da casa com mais de 30 dias (rede de segurança: eles já saem ao ser dispensados, atendidos ou quando chega uma semana nova);
 - contas com mais de 30 dias que nunca aceitaram nenhuma versão do consentimento e não têm nenhum dado além de nome e email (estar numa casa conta como dado). Contas com `CriadoEm` nulo (anteriores ao campo) nunca entram.
 
 ---
 
 ## Casa (plano família)
 
-Etapa 1: formar a casa (até 6 pessoas, um dono). Etapa 4: a semana da casa (abaixo). Os pedidos, a troca na casa, a entrada e a saída no meio da semana e a lista da casa vêm nas próximas etapas. Todas as rotas exigem login e o consentimento geral (como as outras). Regras comuns:
+Etapa 1: formar a casa (até 6 pessoas, um dono). Etapa 4: a semana da casa. Etapa 5: os pedidos, a troca na casa e a entrada e a saída no meio da semana (abaixo). A lista da casa vem na etapa 6. Todas as rotas exigem login e o consentimento geral (como as outras). Regras comuns:
 - `usuarioId` sempre do token. Quem não está numa casa recebe **404** `"Você não está em nenhuma casa."` em toda rota de membro, mesmo passando o id de algo de outra casa: a resposta não revela casa nenhuma. Membro em rota de dono recebe **403** `"Só quem cuida da casa pode fazer isso."`.
 - As rotas que mostram ou mudam a casa exigem também o aceite `casa` vigente: sem ele, **409** `{ mensagem, motivo: "consentimento_casa", versaoVigente }`. Sair (`DELETE /api/casa/eu`) e recusar ou cancelar a transferência não exigem: deixar de dividir os dados não pode depender de aceitar dividir. Sair dispensa até o consentimento geral.
-- Sair ou ser removido apaga a linha em `MembrosCasa` e preenche o `RevogadoEm` do aceite `casa`.
-- Sobre os outros, nenhuma resposta leva e-mail, sobrenome, idade, peso, altura, sexo, objetivo, meta ou treino.
-- **429** `{ mensagem }`: gerar convite acima de 10 por hora do mesmo usuário; verificar e aceitar convite (contagem única) acima de 20 por hora do mesmo IP; as demais escritas acima de 30 por minuto do mesmo usuário.
+- Sair ou ser removido apaga a linha em `MembrosCasa`, preenche o `RevogadoEm` do aceite `casa` e solta as dietas da pessoa da casa (etapa 5, abaixo).
+- Sobre os outros, nenhuma resposta leva e-mail, sobrenome, idade, peso, altura, sexo, objetivo, meta, treino, porção, restrição com dono ou dado de saúde. Os pedidos não dizem quem pediu.
+- **429** `{ mensagem }`: gerar convite acima de 10 por hora do mesmo usuário; verificar e aceitar convite (contagem única) acima de 20 por hora do mesmo IP; pedidos acima de 10 por hora do mesmo usuário (`"Você já fez muitos pedidos na última hora. Tente de novo mais tarde."`); as demais escritas acima de 30 por minuto do mesmo usuário. A troca na casa usa os limites da troca individual (120 leituras e 30 gravações por minuto).
 
-**`CasaResponse`:** `souDono`, `membros [{ membroId, primeiroNome, dono, souEu, transferenciaPendente }]` (ordem de entrada; `primeiroNome` é só a primeira palavra do nome), `orcamento` (`economico`, `moderado`, `sem_restricao` ou nulo) e, só para o dono, `convitesAbertos [{ id, expiraEm }]` (nulo para os membros).
+**`CasaResponse`:** `souDono`, `membros [{ membroId, primeiroNome, dono, souEu, transferenciaPendente }]` (ordem de entrada; `primeiroNome` é só a primeira palavra do nome), `orcamento` (`economico`, `moderado`, `sem_restricao` ou nulo) e, só para o dono (nulos para os membros): `convitesAbertos [{ id, expiraEm }]`, `pedidos` (os pedidos e avisos abertos, abaixo) e `pedidosAbertos` (a contagem, para o contador da aba Casa). O membro não vê nem a contagem: ela diria a ele que outra pessoa pediu algo. A transferência pendente aparece na linha do escolhido (`transferenciaPendente`): o dono mostra "Aguardando Bruno aceitar", e o escolhido, a faixa de aceitar ou recusar.
 
 ### `GET /api/casa`
 **Devolve:** `CasaResponse`
@@ -412,13 +415,15 @@ Revoga (`RevogadoEm`). **Devolve:** 204, também se já estava revogado ou usado
 **Recebe:** `token`, `versaoConsentimento`
 **Devolve:** `CasaResponse`. As checagens da verificação são refeitas com a casa travada (`SELECT ... FOR UPDATE`), e o aceite `casa`, a linha em `MembrosCasa` e o `UsadoEm` são gravados numa transação. O uso único é um `UPDATE ... WHERE UsadoEm IS NULL AND RevogadoEm IS NULL AND ExpiraEm > agora` que precisa mudar 1 linha: de dois aceites ao mesmo tempo, só um passa
 **Erros:** os da verificação; 409 `consentimento_casa` com `versaoVigente` (versão ausente ou velha; o convite não é usado).
+**Entrada no meio da semana (etapa 5):** depois do aceite gravado, se a casa tem uma semana da versão da base atual, a pessoa recebe na hora uma `DietaIA` nova (`Origem = casa`, `SemanaCasaId`), sem chamar o Gemini: as porções dela no almoço e no jantar da casa (`PorcoesCasa`, a mesma conta da semana nova) e o café e os lanches que ela já tinha, reajustados para o que sobra da meta. Uma refeição da casa com algo que ela não come ou tem alergia vira individual só para ela: fica o almoço ou o jantar que ela já tinha naquele dia (sem os itens que ela não come), ou nada até ela gerar o café e os lanches. O dono recebe um aviso sem nome (`aviso_entrada`, abaixo), e a semana marca o `refeicaoIndividual`. Se o cálculo falhar, a entrada vale do mesmo jeito (o erro vai só para o log, com o id da casa).
 
 ### `DELETE /api/casa/membros/{membroId}` (dono)
-Tira alguém da casa. **Devolve:** 204
+Tira alguém da casa, com as mesmas regras de sair (as refeições da casa ficam na dieta da pessoa, abaixo). **Devolve:** 204
 **Erros:** 400 se for o próprio dono ("Para sair da casa, use a opção Sair."); 404 se não é desta casa.
 
 ### `DELETE /api/casa/eu`
-Sair. **Devolve:** 204. O dono sozinho leva a casa (e os convites) junto
+Sair. **Devolve:** 204. O dono sozinho leva a casa (e os convites, as semanas e os pedidos) junto.
+**Quem sai ou é removido (etapa 5):** fica com o almoço e o jantar da casa na própria dieta, com as mesmas comidas e a porção dele, até gerar outra. Em todas as dietas da pessoa, as refeições perdem `daCasa` e `chaveCasa`, a dieta perde o `SemanaCasaId` e a `revisao` sobe (uma tela aberta recarrega). A troca individual volta a valer nelas. A lista da casa, as opções de troca e o que mais depender da casa passam a ser calculados sem ela
 **Erros:** 409 `{ mensagem: "Passe a casa para outra pessoa antes de sair.", motivo: "transferir_antes" }` para o dono com membros.
 
 ### `POST /api/casa/transferencia` (dono)
@@ -426,7 +431,7 @@ Sair. **Devolve:** 204. O dono sozinho leva a casa (e os convites) junto
 **Erros:** 400 se for o próprio dono; 404 se não é desta casa.
 
 ### `POST /api/casa/transferencia/aceitar`
-O membro escolhido vira dono, e o antigo dono vira membro. **Devolve:** `CasaResponse`
+O membro escolhido vira dono, e o antigo dono vira membro. A oferta é conferida de novo com a casa travada (um cancelamento no meio vence). Os pedidos abertos passam a aparecer para o novo dono; o antigo passa a pedir. **Devolve:** `CasaResponse`
 **Erros:** 409 "Não há nenhuma casa sendo passada para você."
 
 ### `DELETE /api/casa/transferencia`
@@ -442,7 +447,7 @@ Uma chamada ao Gemini por semana da casa, só com: a lista da casa, o peso de um
 - **Uma `DietaIA` nova para cada membro** (`Origem = casa`, `SemanaCasaId`): as porções dele nas refeições da casa (`daCasa: true`, `chaveCasa: "seg-almoco"`), e o café e os lanches que ele já tinha (da dieta atual, só os itens que ainda estão na lista dele), reajustados em C# para o que sobra da meta (decisão D6). Cada uma grava a sua `MetaDieta`, com a meta cheia do dia, como uma geração individual: a regra das 3 dietas e a meta adaptativa continuam valendo. O aviso de lista pobre da casa não vai para a dieta de ninguém.
 - A casa guarda a semana atual e a anterior (`SemanasCasa`). Apagar a casa apaga as semanas; as dietas dos membros ficam como estão.
 
-**`SemanaCasaResponse`:** `semanaId`, `revisao`, `geradaEm`, `dias [{ diaSemana, almoco, jantar }]`, cada refeição com `chaveCasa`, `horario` e `alimentos` (**só os nomes**, sem quantidade, sem kcal e sem a contagem dos contáveis: a porção de cada um está só na dieta dele). Só para o dono: `avisoListaPobre` (como o da dieta) e `refeicaoIndividual` (verdadeiro quando alguém teve uma refeição da casa trocada por uma individual, sem dizer quem nem qual); nulos para os membros.
+**`SemanaCasaResponse`:** `semanaId`, `revisao`, `geradaEm`, `dias [{ diaSemana, almoco, jantar }]`, cada refeição com `chaveCasa`, `horario` e `alimentos` (**só os nomes**, sem quantidade, sem kcal e sem a contagem dos contáveis: a porção de cada um está só na dieta dele). Só para o dono: `avisoListaPobre` (como o da dieta) e `refeicaoIndividual` (verdadeiro quando alguém teve uma refeição da casa trocada por uma individual, sem dizer quem nem qual); nulos para os membros. Etapa 5, só para o dono e fora do JSON quando não há: `trocados` em cada refeição (as posições dos itens trocados na casa, para a marca "trocado" e o "Voltar ao original") e `podeDesfazer` (verdadeiro quando a última troca na casa ainda é a última gravação).
 
 ### `POST /api/casa/semana` (dono)
 **Devolve:** `SemanaCasaResponse`
@@ -457,6 +462,45 @@ Uma chamada ao Gemini por semana da casa, só com: a lista da casa, o peso de um
 - Uma refeição da casa com algo que a pessoa marcou depois (não come ou tem alergia) vira individual só para ela ("monte: café da manhã, lanches e almoço"), e a semana da casa ganha o `refeicaoIndividual` para o dono.
 - Sem semana da casa (ou de outra versão da base), a geração é a de sempre.
 - **Limite de 3 por hora:** a dieta que a semana da casa cria para um membro não gasta a cota dele. Para o dono, contam todas (as dele e as que a casa criou para ele), e a semana da casa e a geração individual dividem a mesma cota.
+
+### Pedidos e avisos (etapa 5)
+
+Os membros têm "Pedir nova semana" e "Pedir troca" (de um item de uma refeição da casa). Só aviso na aba Casa, com o contador para o dono: sem e-mail, sem notificação. **O pedido não guarda nem devolve quem pediu**: a tabela `PedidosCasa` não tem `UsuarioId` nem nenhum marcador derivado da pessoa (decisão do plano). Sem o autor, o abuso fica contido por: o limite de 10 pedidos por hora por usuário (em memória, nunca no banco); um pedido igual a um já aberto (mesma semana, tipo, refeição e alimento) não vira linha nova, e a resposta é a mesma, para quem pede não descobrir que outra pessoa já pediu; e um teto de 20 pedidos abertos por casa. O "Pedido enviado" (desabilitado até a semana mudar) fica na tela do membro, guardado pela `semanaId` da resposta: guardar no servidor "quem já pediu" seria guardar o autor.
+
+O pedido sai (apagado, sem histórico) quando o dono o dispensa, quando uma semana nova é gerada (todos) e, na troca, quando o dono troca aquele alimento naquela refeição. A limpeza automática apaga os que sobrarem depois de 30 dias.
+
+**`PedidoCasaResponse`** (em `CasaResponse.pedidos`, só para o dono, na ordem de chegada): `id`, `tipo` (`nova_semana`, `troca` ou `aviso_entrada`), `semanaId` (nula se a casa não tinha semana), `chavesCasa` (na troca, a refeição do item; no aviso, as refeições que viraram individuais), `item`, `alimentoId` e `alimento` (só na troca, para o "Ver substitutos") e `texto`, a frase pronta, sempre com "Alguém": `"Alguém pediu uma semana nova."`, `"Alguém pediu trocar ovo de galinha cozido no jantar de quarta."`, `"Alguém que entrou esta semana não come um item do jantar de quinta. Essa refeição ficou individual para essa pessoa; uma semana nova resolve."` (com várias: `"... não come um item de 3 refeições da casa (almoço de segunda, almoço de terça e jantar de quinta). Essas refeições ficaram individuais ..."`). **Sem data nem hora**: o horário exato ajudaria a adivinhar quem pediu. O aviso de entrada não diz qual item nem por quê (alergia é dado de saúde).
+
+### `POST /api/casa/pedidos` (membro)
+**Recebe:** `tipo` (`nova_semana` ou `troca`), `semanaId` (a que a tela mostrava; obrigatória na troca), `chaveCasa` e `item` (só na troca: a refeição da casa e a posição do item nela, a mesma na semana da casa e na porção de cada um) e `alimentoId?` (o alimento que a tela mostrava; quando vem, precisa ser o que está lá)
+**Devolve:** **202** `{ semanaId }`, também quando um pedido igual já estava aberto (nada muda)
+**Erros:** 400 `"Você cuida da casa: gere a semana nova ou troque o alimento direto."` para o dono; 400 `"Tipo de pedido inválido."`; 400 `"Alimento não encontrado na refeição da casa."`; 404 sem semana (só na troca); 409 `"A semana da casa mudou desde que a tela foi aberta. Atualize e veja de novo."` (outra semana, ou outro alimento na posição); 409 `"A casa já tem muitos pedidos abertos. Espere quem cuida da casa responder."`; 429 acima de 10 por hora.
+
+### `DELETE /api/casa/pedidos/{id}` (dono)
+Dispensa um pedido ou aviso (apaga). **Devolve:** 204
+**Erros:** 404 se não é desta casa (ou já saiu).
+
+### Troca na casa (etapa 5, só o dono)
+
+Só o dono troca um item de uma refeição da casa, e a troca vale para todos (decisão de 2026-10-26). Usa a mesma `CalculadoraTroca` e o mesmo `AplicadorTroca` da troca individual, sobre a semana de referência da casa e com a **lista da casa** de agora (o `nao_como` e as alergias de todos ficam de fora; o `evitar` leve de qualquer um pode ser oferecido, mas por último). A regra dos 5% da referência compara o total do dia da referência. Depois, a porção de cada membro nas refeições afetadas é refeita (`PorcoesCasa`, a mesma conta da semana nova), e o substituto precisa **servir para todos**: a porção refeita de cada um fica a até 5% do alvo da refeição dele (ou não piora o que já estava). O que não serve para alguém sai das opções na contagem `naoServeParaACasa`, sem dizer para quem nem por quê. A semana (`revisao` sobe) e as dietas de todos (a `revisao` de cada uma sobe) são gravadas num SaveChanges só; as marcações "já tenho" que deixaram de valer na lista de cada um caem junto. A refeição que já virou individual para alguém não muda. O item é a posição na refeição da casa: `chaveCasa` + `item`.
+
+Erros comuns: 403 para membro; 404 sem semana; 422 `"A base de alimentos do Ronu mudou desde que esta semana foi gerada. Gere uma semana nova para trocar alimentos."`; 400 `"Alimento não encontrado na refeição da casa."`.
+
+### `GET /api/casa/semana/trocas/opcoes?chaveCasa=&item=` (dono)
+**Devolve:** `semanaId`, `revisao`, `chaveCasa`, `item`, `original`, `nutriente`, `ocorrenciasNaSemana`, `foraPelasRestricoesDaCasa` (quantos do grupo a lista da casa tirou, o "não como" e as alergias de todos numa contagem só, sem separar alergia) e `refeicao` e `semana`, no formato da troca individual (`dasPreferencias` sempre vazia: a casa não usa os gostos de ninguém; `parecidos`, `verMais`, `fora` com o motivo a mais `naoServeParaACasa`, `mensagemSemOpcoes`, como `"Nenhum substituto serve para a casa: 2 não servem para a porção de alguém da casa e 3 estão no que a casa não come."`). **Quantidades, kcal, `difKcal` e a prévia dos dias são só as do dono** (a porção e o dia dele): nada da porção de outro membro.
+
+### `POST /api/casa/semana/trocas` (dono)
+**Recebe:** `semanaId`, `revisao`, `chaveCasa`, `item`, `alimentoIdAtual`, `alimentoIdNovo`, `escopo` (`refeicao` ou `semana`: todas as vezes em que o item aparece no almoço e no jantar da casa)
+**Devolve:** `SemanaCasaResponse` (do dono, com `trocados` e `podeDesfazer`). Os pedidos de troca daquele alimento nas refeições trocadas saem.
+**Erros:** 400 `"Escopo inválido."`; 400 `"Este substituto não serve para a casa (a porção de alguém, a meta do dia ou o que alguém não come). Atualize as opções e escolha outro."` (nada é gravado); 409 `"A semana da casa mudou desde que a tela foi aberta. Atualize e tente de novo."` (outra semana, revisão velha, outro alimento na posição, ou uma dieta de membro gravada no meio).
+
+### `DELETE /api/casa/semana/trocas/ultima?semanaId=&revisao=` (dono)
+"Desfazer", no padrão da troca individual (`UltimaTroca` na referência): volta a referência e refaz a porção de cada um. **Devolve:** `SemanaCasaResponse`
+**Erros:** 409 `"Não há troca para desfazer."` ou a de semana mudada; **422** `{ mensagem: "Não dá para voltar a esse alimento: ele não serve mais para todos da casa. Escolha outro substituto em Trocar.", motivo: "restricao_da_casa" }` quando o que volta foi marcado depois em "não como" ou nas alergias de alguém (sem dizer quem; nada é gravado).
+
+### `DELETE /api/casa/semana/trocas?semanaId=&revisao=&chaveCasa=&item=&escopo=` (dono)
+"Voltar ao original" (o item, ou na semana todos os trocados do mesmo jeito). **Devolve:** `SemanaCasaResponse`
+**Erros:** 400 `"Escopo inválido."`; 400 `"Este alimento não foi trocado."`; 409 de semana mudada; 422 `restricao_da_casa` como no "Desfazer".
 
 ---
 

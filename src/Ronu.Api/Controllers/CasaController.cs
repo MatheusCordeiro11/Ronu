@@ -9,19 +9,21 @@ using Ronu.Api.Models;
 using Ronu.Api.Services;
 using Ronu.Api.Services.Consentimentos;
 using Ronu.Api.Services.PlanoFamilia;
+using Ronu.Api.Services.Troca;
 using Ronu.Api.Validacao;
 
 namespace Ronu.Api.Controllers;
 
 /// <summary>
-/// Plano família: a casa, os convites, os membros e a transferência (etapa 1) e a semana da casa (etapa 4). Os pedidos,
-/// a troca na casa e a lista da casa vêm nas próximas etapas.
+/// Plano família: a casa, os convites, os membros e a transferência (etapa 1), a semana da casa (etapa 4) e os pedidos,
+/// a troca na casa e a entrada e a saída no meio da semana (etapa 5). A lista da casa vem na etapa 6.
 ///
 /// - Quem não está numa casa recebe 404 em toda rota de membro, até numa casa que existe: a resposta não revela casa
 ///   nenhuma. Membro em rota de dono recebe 403.
 /// - As rotas que mostram a casa exigem também o aceite "casa" vigente (409 consentimento_casa). Sair e recusar a
 ///   transferência não: deixar de dividir os dados não pode depender de aceitar dividir.
-/// - Sobre os outros, a resposta leva só o primeiro nome e o papel (CasaResponse).
+/// - Sobre os outros, a resposta leva só o primeiro nome e o papel (CasaResponse). Nenhuma porção, meta, restrição
+///   com dono ou dado de saúde de outro membro sai daqui; os pedidos não dizem quem pediu.
 /// </summary>
 [ApiController]
 [Route("api/casa")]
@@ -55,10 +57,13 @@ public class CasaController : ControllerBase
 
     private readonly ApplicationDbContext _context;
     private readonly string _urlBaseFrontend;
+    private readonly ILogger<CasaController>? _logger;
 
-    public CasaController(ApplicationDbContext context, IConfiguration configuration)
+    // O logger é opcional só para os testes, que montam o controller sem ele.
+    public CasaController(ApplicationDbContext context, IConfiguration configuration, ILogger<CasaController>? logger = null)
     {
         _context = context;
+        _logger = logger;
         // Da configuração, nunca dos cabeçalhos da requisição: um Host forjado mandaria o link para outro site.
         _urlBaseFrontend = (configuration["Frontend:UrlBase"]
             ?? throw new InvalidOperationException("Frontend:UrlBase não configurado.")).TrimEnd('/');
@@ -253,9 +258,14 @@ public class CasaController : ControllerBase
     /// gravados numa transação. O uso único é um UPDATE condicional (OperacoesCasa.UsarConviteAsync): de dois aceites
     /// ao mesmo tempo, só um passa.
     /// </summary>
+    /// <remarks>
+    /// Etapa 5: depois do aceite gravado, a pessoa recebe na hora as porções da semana atual da casa, sem chamar o Gemini
+    /// (GeracaoSemanaCasa.EntrarNaSemanaAsync). O parâmetro é opcional só para os testes da etapa 1, que montam o
+    /// controller sem os serviços; na API ele sempre vem.
+    /// </remarks>
     [HttpPost("convites/aceitar")]
     [EnableRateLimiting(LimitesCasa.PoliticaConviteVerificar)]
-    public async Task<IActionResult> AceitarConvite(AceitarConviteRequest request)
+    public async Task<IActionResult> AceitarConvite(AceitarConviteRequest request, [FromServices] GeracaoSemanaCasa? geracao = null)
     {
         var agora = DateTime.UtcNow;
 
@@ -308,6 +318,20 @@ public class CasaController : ControllerBase
         }
 
         var eu = await _context.MembrosCasa.AsNoTracking().FirstAsync(m => m.UsuarioId == UsuarioIdLogado);
+        if (geracao is not null)
+        {
+            try
+            {
+                await geracao.EntrarNaSemanaAsync(eu.CasaId, UsuarioIdLogado);
+            }
+            catch (Exception ex) when (ex is InvalidOperationException or DbUpdateException or KeyNotFoundException)
+            {
+                // A entrada na casa já está gravada e vale; só as porções desta semana não saíram. A pessoa gera o café e
+                // os lanches (que trazem o almoço e o jantar da casa) pelo painel, como sempre. Só o id da casa no log.
+                _logger?.LogWarning(ex, "Porções da semana da casa {CasaId} não calculadas na entrada de um membro", eu.CasaId);
+            }
+        }
+
         return Ok(await MontarRespostaAsync(eu, agora));
     }
 
@@ -433,6 +457,18 @@ public class CasaController : ControllerBase
         await using var transacao = await OperacoesCasa.IniciarTransacaoAsync(_context);
         await OperacoesCasa.TravarAsync(_context, eu.CasaId);
 
+        // De novo, com a casa travada: o dono pode ter cancelado a oferta (ou oferecido a outro) entre a primeira leitura
+        // e a trava. Sem isto, um aceite atrasado passaria por cima do cancelamento. Só no PostgreSQL: no banco em
+        // memória dos testes não há trava nem leitura concorrente.
+        if (_context.Database.IsRelational())
+        {
+            await _context.Entry(eu).ReloadAsync();
+            if (eu.TransferenciaOferecidaEm is null)
+            {
+                return Conflict(new { mensagem = MensagemSemTransferencia });
+            }
+        }
+
         var dono = await _context.MembrosCasa.FirstOrDefaultAsync(m => m.CasaId == eu.CasaId && m.Papel == MembroCasa.PapelDono);
         if (dono is not null)
         {
@@ -525,6 +561,230 @@ public class CasaController : ControllerBase
 
         return Ok(SemanaCasaResponse.Montar(semana, souDono: eu.Papel == MembroCasa.PapelDono));
     }
+
+    // ---------- Pedidos (etapa 5) ----------
+
+    /// <summary>
+    /// Um membro pede uma semana nova ou a troca de um item de uma refeição da casa. O pedido não guarda nem devolve
+    /// quem pediu. 202 também quando um pedido igual já estava aberto (nada muda): quem pede não descobre se outra
+    /// pessoa já pediu. O dono não pede (ele gera ou troca direto).
+    /// </summary>
+    [HttpPost("pedidos")]
+    [EnableRateLimiting(LimitesCasa.PoliticaPedido)]
+    public async Task<IActionResult> Pedir(PedidoCasaRequest request)
+    {
+        var (eu, erro) = await MembroLogadoAsync(exigirDono: false, exigirConsentimento: true);
+        if (erro is not null)
+        {
+            return erro;
+        }
+
+        if (eu!.Papel == MembroCasa.PapelDono)
+        {
+            return BadRequest(new { mensagem = RegrasPedidosCasa.MensagemDono });
+        }
+
+        if (await RegrasPedidosCasa.PedirAsync(_context, eu.CasaId, request, DateTime.UtcNow) is { } falha)
+        {
+            return StatusCode(falha.Status, new { mensagem = falha.Mensagem });
+        }
+
+        await _context.SaveChangesAsync();
+        var semana = await GeracaoSemanaCasa.AtualAsync(_context, eu.CasaId);
+        return Accepted(new PedidoEnviadoResponse { SemanaId = semana?.Id });
+    }
+
+    /// <summary>O dono dispensa um pedido ou aviso. Apagado, sem histórico. O id de outra casa dá 404.</summary>
+    [HttpDelete("pedidos/{id:int}")]
+    [EnableRateLimiting(LimitesCasa.PoliticaEscrita)]
+    public async Task<IActionResult> DispensarPedido(int id)
+    {
+        var (eu, erro) = await MembroLogadoAsync(exigirDono: true, exigirConsentimento: true);
+        if (erro is not null)
+        {
+            return erro;
+        }
+
+        var pedido = await _context.PedidosCasa.FirstOrDefaultAsync(p => p.Id == id && p.CasaId == eu!.CasaId);
+        if (pedido is null)
+        {
+            return NotFound(new { mensagem = RegrasPedidosCasa.MensagemNaoEncontrado });
+        }
+
+        _context.PedidosCasa.Remove(pedido);
+        await _context.SaveChangesAsync();
+        return NoContent();
+    }
+
+    // ---------- Troca na casa (etapa 5) ----------
+
+    /// <summary>
+    /// Os substitutos de um item da casa, só para o dono, com as quantidades da porção dele. Um substituto que não
+    /// serve para a porção de alguém aparece só na contagem "naoServeParaACasa".
+    /// </summary>
+    [HttpGet("semana/trocas/opcoes")]
+    [EnableRateLimiting(LimitesTroca.PoliticaLeitura)]
+    public async Task<IActionResult> OpcoesTroca([FromQuery] string? chaveCasa, [FromQuery] int item)
+    {
+        var (eu, erro) = await MembroLogadoAsync(exigirDono: true, exigirConsentimento: true);
+        if (erro is not null)
+        {
+            return erro;
+        }
+
+        var (carga, falha) = await TrocaNaCasa.CarregarAsync(_context, eu!.CasaId, UsuarioIdLogado, rastrear: false);
+        if (falha is not null)
+        {
+            return Falha(falha);
+        }
+
+        if (TrocaNaCasa.Posicao(carga!.Referencia, chaveCasa, item) is not { } posicao)
+        {
+            return BadRequest(new { mensagem = TrocaNaCasa.MensagemItem });
+        }
+
+        return Ok(TrocaNaCasa.Opcoes(carga, posicao));
+    }
+
+    /// <summary>O dono troca um item da casa: vale para todos, e a porção de cada um é refeita.</summary>
+    [HttpPost("semana/trocas")]
+    [EnableRateLimiting(LimitesTroca.PoliticaEscrita)]
+    public async Task<IActionResult> TrocarNaCasa(TrocaCasaRequest request)
+    {
+        if (LerEscopo(request.Escopo) is not { } escopo)
+        {
+            return BadRequest(new { mensagem = "Escopo inválido." });
+        }
+
+        var (carga, posicao, erro) = await CarregarTrocaAsync(request.SemanaId!.Value, request.Revisao!.Value, request.ChaveCasa, request.Item!.Value);
+        if (erro is not null)
+        {
+            return erro;
+        }
+
+        // A posição pode ter outro alimento se a tela estava desatualizada: confere o item, não só o índice.
+        var atual = CalculadoraTroca.Encontrar(carga!.Referencia.Dias, posicao!)!;
+        if (atual.AlimentoId != request.AlimentoIdAtual)
+        {
+            return Conflict(new { mensagem = TrocaNaCasa.MensagemSemanaMudou });
+        }
+
+        if (TrocaNaCasa.Trocar(carga, posicao!, request.AlimentoIdNovo!, escopo, out var chaves) is { } recusa)
+        {
+            return Falha(recusa);
+        }
+
+        if (await TrocaNaCasa.GravarAsync(_context, carga, chaves, atual.AlimentoId) is { } conflito)
+        {
+            return Falha(conflito);
+        }
+
+        // Só ids e contagens: nada de nenhum membro no log.
+        _logger?.LogInformation("Troca na casa {CasaId}: '{De}' por '{Para}', {Escopo}, {Refeicoes} refeições, {Dietas} dietas refeitas",
+            carga.Linha.CasaId, atual.AlimentoId, request.AlimentoIdNovo, escopo, chaves.Count, carga.Membros.Count);
+        return Ok(SemanaCasaResponse.Montar(carga.Linha, souDono: true));
+    }
+
+    /// <summary>"Desfazer" da casa: volta ao que estava antes da última troca ou volta ao original.</summary>
+    [HttpDelete("semana/trocas/ultima")]
+    [EnableRateLimiting(LimitesTroca.PoliticaEscrita)]
+    public async Task<IActionResult> DesfazerNaCasa([FromQuery] int semanaId, [FromQuery] int revisao)
+    {
+        var (carga, _, erro) = await CarregarTrocaAsync(semanaId, revisao, chaveCasa: null, item: 0);
+        if (erro is not null)
+        {
+            return erro;
+        }
+
+        if (TrocaNaCasa.Desfazer(carga!) is { } recusa)
+        {
+            return Falha(recusa);
+        }
+
+        if (await TrocaNaCasa.GravarAsync(_context, carga!, [], null) is { } conflito)
+        {
+            return Falha(conflito);
+        }
+
+        return Ok(SemanaCasaResponse.Montar(carga!.Linha, souDono: true));
+    }
+
+    /// <summary>"Voltar ao original" da casa: o item (ou, na semana, todos os trocados do mesmo jeito) volta ao primeiro original.</summary>
+    [HttpDelete("semana/trocas")]
+    [EnableRateLimiting(LimitesTroca.PoliticaEscrita)]
+    public async Task<IActionResult> VoltarAoOriginalNaCasa(
+        [FromQuery] int semanaId, [FromQuery] int revisao, [FromQuery] string? chaveCasa, [FromQuery] int item, [FromQuery] string? escopo)
+    {
+        if (LerEscopo(escopo) is not { } escopoTroca)
+        {
+            return BadRequest(new { mensagem = "Escopo inválido." });
+        }
+
+        if (string.IsNullOrEmpty(chaveCasa))
+        {
+            return BadRequest(new { mensagem = TrocaNaCasa.MensagemItem });
+        }
+
+        var (carga, posicao, erro) = await CarregarTrocaAsync(semanaId, revisao, chaveCasa, item);
+        if (erro is not null)
+        {
+            return erro;
+        }
+
+        if (TrocaNaCasa.VoltarAoOriginal(carga!, posicao!, escopoTroca) is { } recusa)
+        {
+            return Falha(recusa);
+        }
+
+        if (await TrocaNaCasa.GravarAsync(_context, carga!, [], null) is { } conflito)
+        {
+            return Falha(conflito);
+        }
+
+        return Ok(SemanaCasaResponse.Montar(carga!.Linha, souDono: true));
+    }
+
+    // Dono, aceite "casa", a semana atual com a revisão que a tela viu e, com chaveCasa, a posição do item.
+    private async Task<(TrocaNaCasa.Carga? Carga, PosicaoItem? Posicao, IActionResult? Erro)> CarregarTrocaAsync(
+        int semanaId, int revisao, string? chaveCasa, int item)
+    {
+        var (eu, erro) = await MembroLogadoAsync(exigirDono: true, exigirConsentimento: true);
+        if (erro is not null)
+        {
+            return (null, null, erro);
+        }
+
+        var (carga, falha) = await TrocaNaCasa.CarregarAsync(_context, eu!.CasaId, UsuarioIdLogado, rastrear: true);
+        if (falha is not null)
+        {
+            return (null, null, Falha(falha));
+        }
+
+        if (carga!.Linha.Id != semanaId || carga.Linha.Revisao != revisao)
+        {
+            return (null, null, Conflict(new { mensagem = TrocaNaCasa.MensagemSemanaMudou }));
+        }
+
+        if (chaveCasa is null)
+        {
+            return (carga, null, null);
+        }
+
+        return TrocaNaCasa.Posicao(carga.Referencia, chaveCasa, item) is { } posicao
+            ? (carga, posicao, null)
+            : (null, null, BadRequest(new { mensagem = TrocaNaCasa.MensagemItem }));
+    }
+
+    private ObjectResult Falha(TrocaNaCasa.Erro erro) => StatusCode(erro.Status, erro.Motivo is null
+        ? new { mensagem = erro.Mensagem }
+        : (object)new { mensagem = erro.Mensagem, motivo = erro.Motivo });
+
+    private static EscopoTroca? LerEscopo(string? escopo) => escopo switch
+    {
+        "refeicao" => EscopoTroca.Refeicao,
+        "semana" => EscopoTroca.Semana,
+        _ => null
+    };
 
     // ---------- Apoio ----------
 
@@ -670,8 +930,10 @@ public class CasaController : ControllerBase
         var souDono = membros.Any(m => m.UsuarioId == UsuarioIdLogado && m.Papel == MembroCasa.PapelDono);
 
         List<ConviteAbertoResponse>? convites = null;
+        List<PedidoCasaResponse>? pedidos = null;
         if (souDono)
         {
+            pedidos = await RegrasPedidosCasa.AbertosAsync(_context, eu.CasaId);
             convites = await _context.ConvitesCasa.AsNoTracking()
                 .Where(c => c.CasaId == eu.CasaId && c.UsadoEm == null && c.RevogadoEm == null && c.ExpiraEm > agora)
                 .OrderBy(c => c.CriadoEm)
@@ -684,6 +946,8 @@ public class CasaController : ControllerBase
             SouDono = souDono,
             Orcamento = casa.OrcamentoSemanal,
             ConvitesAbertos = convites,
+            Pedidos = pedidos,
+            PedidosAbertos = pedidos?.Count,
             Membros = membros.Select(m => new MembroCasaResponse
             {
                 MembroId = m.Id,
