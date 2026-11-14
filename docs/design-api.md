@@ -371,7 +371,7 @@ O `ServicoLimpezaRetencao` roda a `LimpezaRetencao` 1 minuto depois de a API sub
 
 ## Casa (plano família)
 
-Etapa 1: formar a casa (até 6 pessoas, um dono). O cardápio da casa, os pedidos e a lista da casa vêm nas próximas etapas. Todas as rotas exigem login e o consentimento geral (como as outras). Regras comuns:
+Etapa 1: formar a casa (até 6 pessoas, um dono). Etapa 4: a semana da casa (abaixo). Os pedidos, a troca na casa, a entrada e a saída no meio da semana e a lista da casa vêm nas próximas etapas. Todas as rotas exigem login e o consentimento geral (como as outras). Regras comuns:
 - `usuarioId` sempre do token. Quem não está numa casa recebe **404** `"Você não está em nenhuma casa."` em toda rota de membro, mesmo passando o id de algo de outra casa: a resposta não revela casa nenhuma. Membro em rota de dono recebe **403** `"Só quem cuida da casa pode fazer isso."`.
 - As rotas que mostram ou mudam a casa exigem também o aceite `casa` vigente: sem ele, **409** `{ mensagem, motivo: "consentimento_casa", versaoVigente }`. Sair (`DELETE /api/casa/eu`) e recusar ou cancelar a transferência não exigem: deixar de dividir os dados não pode depender de aceitar dividir. Sair dispensa até o consentimento geral.
 - Sair ou ser removido apaga a linha em `MembrosCasa` e preenche o `RevogadoEm` do aceite `casa`.
@@ -432,6 +432,31 @@ O membro escolhido vira dono, e o antigo dono vira membro. **Devolve:** `CasaRes
 ### `DELETE /api/casa/transferencia`
 O dono cancela a oferta, ou o escolhido recusa. **Devolve:** 204 (sem oferta, não muda nada)
 **Erros:** 403 para um membro que não é o escolhido.
+
+### Semana da casa (etapa 4)
+
+Uma chamada ao Gemini por semana da casa, só com: a lista da casa, o peso de uma unidade dos contáveis, os itens leves pelo nome da lista ("alguém da casa prefere evitar", sem dizer quem), as regras do cardápio, o orçamento da casa e uma **porção de referência fixa** de 650 kcal no almoço e 550 no jantar (calibração do projeto, decisão D5). **Não vão:** meta, peso, idade, sexo, altura, objetivo, treino, UF, nome ou e-mail de ninguém, nem o texto das preferências (nem os trechos sem casamento: o enum só deixa escolher itens da lista).
+- **Lista da casa** (`ListaDaCasa`): a interseção, por `AlimentoId`, das listas de todos os membros, cada uma pelo `ListaDaPessoa`. O `nao_como` e as alergias de qualquer um tiram o item para todos (com a regra cruzada amendoim/castanhas); o `evitar` de qualquer um fica como leve (no máximo 2 vezes na semana). Sem bebida alcoólica nem bebida com cafeína. Os nomes regionais são os da UF do dono. Os mínimos por papel valem sem a fruta (proteína, carboidrato e hortaliça).
+- **Checagens da resposta:** 7 dias, cada um com exatamente um `Almoço` e um `Jantar` (o nome também vai em enum); alimentos da lista; nenhum item com alérgeno da casa (mesmo na última tentativa, vira 503: a alergia nunca é relaxada); no máximo 2 **misturas** por refeição (carnes, aves, peixes e ovos; feijão e leguminosas não contam, decisão D1): na última tentativa, ficam as 2 de maior quantidade; leves acima de 2 na semana: na última, trocados pelo melhor substituto; azeite tirado de refeição com refogado.
+- **Porções** (`PorcoesCasa`, sem IA): o alvo de cada pessoa é a meta do dia dela × 30,7% no almoço e × 23,2% no jantar (calibração do projeto, medida no g9c). O prato da referência é escalado para as kcal do alvo, na mesma proporção, até a porção máxima da base, e depois passa pelo `AjusteQuantidades` só nessa refeição. Só o ajuste (50% a 150%) não alcança porções muito diferentes.
+- **Uma `DietaIA` nova para cada membro** (`Origem = casa`, `SemanaCasaId`): as porções dele nas refeições da casa (`daCasa: true`, `chaveCasa: "seg-almoco"`), e o café e os lanches que ele já tinha (da dieta atual, só os itens que ainda estão na lista dele), reajustados em C# para o que sobra da meta (decisão D6). Cada uma grava a sua `MetaDieta`, com a meta cheia do dia, como uma geração individual: a regra das 3 dietas e a meta adaptativa continuam valendo. O aviso de lista pobre da casa não vai para a dieta de ninguém.
+- A casa guarda a semana atual e a anterior (`SemanasCasa`). Apagar a casa apaga as semanas; as dietas dos membros ficam como estão.
+
+**`SemanaCasaResponse`:** `semanaId`, `revisao`, `geradaEm`, `dias [{ diaSemana, almoco, jantar }]`, cada refeição com `chaveCasa`, `horario` e `alimentos` (**só os nomes**, sem quantidade, sem kcal e sem a contagem dos contáveis: a porção de cada um está só na dieta dele). Só para o dono: `avisoListaPobre` (como o da dieta) e `refeicaoIndividual` (verdadeiro quando alguém teve uma refeição da casa trocada por uma individual, sem dizer quem nem qual); nulos para os membros.
+
+### `POST /api/casa/semana` (dono)
+**Devolve:** `SemanaCasaResponse`
+**Erros:** 400 "Complete seu perfil (altura, sexo e data de nascimento) e registre um objetivo antes de gerar a semana da casa."; 400 quando a casa fica sem um papel do prato ("Com o Não como e as alergias de todos da casa juntos, não sobrou nenhuma hortaliça para o almoço e o jantar da casa. …", sem dizer de quem; nenhuma chamada ao Gemini); 429 no limite de 3 por hora do dono (abaixo); 503 "Não foi possível gerar a semana da casa agora. …" (nada é gravado).
+
+### `GET /api/casa/semana`
+**Devolve:** `SemanaCasaResponse` da semana atual
+**Erros:** 404 "A casa ainda não tem uma semana gerada."
+
+### Quem está numa casa e o `POST /api/dietas/gerar`
+- Com uma semana da casa da versão da base atual, a pessoa (dono ou membro) gera **só as refeições individuais**: o prompt leva a meta de cada dia já sem as porções da casa ("monte: café da manhã e lanches") e a regra de pelo menos 3 refeições por dia; as regras 15 (5 refeições) e 16 (gordura no almoço e no jantar) não valem. Um almoço ou jantar na resposta num dia em que a refeição é da casa recusa a 1ª resposta; na última, sai. O ajuste de quantidades mexe só nas individuais; as porções da casa entram prontas. A dieta é salva com `Origem = pessoa` e o `SemanaCasaId`.
+- Uma refeição da casa com algo que a pessoa marcou depois (não come ou tem alergia) vira individual só para ela ("monte: café da manhã, lanches e almoço"), e a semana da casa ganha o `refeicaoIndividual` para o dono.
+- Sem semana da casa (ou de outra versão da base), a geração é a de sempre.
+- **Limite de 3 por hora:** a dieta que a semana da casa cria para um membro não gasta a cota dele. Para o dono, contam todas (as dele e as que a casa criou para ele), e a semana da casa e a geração individual dividem a mesma cota.
 
 ---
 

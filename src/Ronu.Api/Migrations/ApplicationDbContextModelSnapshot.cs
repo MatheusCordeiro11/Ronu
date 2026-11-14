@@ -163,8 +163,18 @@ namespace Ronu.Api.Migrations
                     b.Property<DateTime>("DataGeracao")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Origem")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasDefaultValue("pessoa");
+
                     b.Property<int>("Revisao")
                         .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("SemanaCasaId")
                         .HasColumnType("integer");
 
                     b.Property<int>("UsuarioId")
@@ -410,6 +420,41 @@ namespace Ronu.Api.Migrations
                     b.ToTable("PreferenciasAlimentares");
                 });
 
+            modelBuilder.Entity("Ronu.Api.Models.SemanaCasa", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CasaId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ConteudoJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("GeradaEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("RefeicaoIndividualEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Revisao")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<int>("VersaoBase")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CasaId", "GeradaEm");
+
+                    b.ToTable("SemanasCasa");
+                });
+
             modelBuilder.Entity("Ronu.Api.Models.Usuario", b =>
                 {
                     b.Property<int>("Id")
@@ -645,6 +690,17 @@ namespace Ronu.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("Ronu.Api.Models.SemanaCasa", b =>
+                {
+                    b.HasOne("Ronu.Api.Models.Casa", "Casa")
+                        .WithMany()
+                        .HasForeignKey("CasaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Casa");
                 });
 
             modelBuilder.Entity("Ronu.Api.Models.UsuarioModalidade", b =>

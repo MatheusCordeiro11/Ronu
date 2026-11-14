@@ -145,6 +145,8 @@ public static class OperacoesCasa
     private static async Task ApagarCasaAsync(ApplicationDbContext contexto, int casaId)
     {
         contexto.ConvitesCasa.RemoveRange(await contexto.ConvitesCasa.Where(c => c.CasaId == casaId).ToListAsync());
+        // As dietas dos membros guardam o SemanaCasaId sem chave estrangeira: continuam com as refeições como estão.
+        contexto.SemanasCasa.RemoveRange(await contexto.SemanasCasa.Where(s => s.CasaId == casaId).ToListAsync());
         contexto.MembrosCasa.RemoveRange(await contexto.MembrosCasa.Where(m => m.CasaId == casaId).ToListAsync());
         var casa = await contexto.Casas.FirstOrDefaultAsync(c => c.Id == casaId);
         if (casa is not null)

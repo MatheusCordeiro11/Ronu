@@ -11,5 +11,6 @@ namespace Ronu.Api.Services.IA;
 /// </summary>
 public interface IRepositorioDietaIA
 {
-    Task SalvarAsync(int usuarioId, DietaSemanalDto dieta);
+    // semanaCasaId: a semana da casa de onde vieram o almoço e o jantar (quem está numa casa gera só o resto do dia).
+    Task SalvarAsync(int usuarioId, DietaSemanalDto dieta, int? semanaCasaId = null);
 }

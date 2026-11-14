@@ -31,4 +31,18 @@ public class RefeicaoDto
     /// esta mesma classe e quebrariam se o campo fosse obrigatório.
     /// </summary>
     public string? Horario { get; set; }
+
+    /// <summary>
+    /// Plano família: a refeição é o almoço ou o jantar da casa (a mesma panela, com a porção desta pessoa). Fora do
+    /// JSON quando falso, para as dietas de fora da casa continuarem iguais.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+    public bool DaCasa { get; set; }
+
+    /// <summary>
+    /// O vínculo estável com a refeição da semana da casa ("seg-almoco", "dom-jantar"): o nome é texto livre e a posição
+    /// muda entre as dietas. Fora do JSON quando nulo.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? ChaveCasa { get; set; }
 }

@@ -48,12 +48,13 @@ public static class ExportacaoConta
 
         var dietasGravadas = await contexto.DietasIA.AsNoTracking()
             .Where(d => d.UsuarioId == usuarioId).OrderBy(d => d.DataGeracao)
-            .Select(d => new { d.Id, d.DataGeracao, d.Revisao, d.ConteudoJson })
+            .Select(d => new { d.Id, d.DataGeracao, d.Revisao, d.ConteudoJson, d.Origem })
             .ToListAsync();
-        // O cardápio vai como JSON de verdade, não como texto com aspas escapadas.
+        // O cardápio vai como JSON de verdade, não como texto com aspas escapadas. A origem diz se a dieta veio da
+        // semana da casa (o almoço e o jantar com a porção da pessoa); a semana em si é da casa, não da pessoa.
         var dietas = dietasGravadas.Select(d => new
         {
-            DietaId = d.Id, d.DataGeracao, d.Revisao,
+            DietaId = d.Id, d.DataGeracao, d.Revisao, d.Origem,
             Cardapio = JsonSerializer.Deserialize<JsonElement>(d.ConteudoJson)
         }).ToList();
 

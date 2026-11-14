@@ -1,0 +1,263 @@
+using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using Ronu.Api.Data;
+using Ronu.Api.Models;
+using Ronu.Api.Models.IA;
+using Ronu.Api.Services.IA;
+
+namespace Ronu.Api.Services.PlanoFamilia;
+
+/// <summary>
+/// O dono gera a semana da casa (plano família, etapa 4). Na ordem, do mais barato ao mais caro:
+/// 1. limite de 3 gerações por hora do dono e o perfil completo dele (a porção sai da meta);
+/// 2. a lista da casa (ListaDaCasa): papel do prato vazio dá 400 sem chamar o Gemini;
+/// 3. UMA chamada ao Gemini, só com a lista, as regras e o orçamento da casa;
+/// 4. para cada membro, sem IA: as metas do dia (a mesma conta da geração individual), as porções da casa e o café e os
+///    lanches que ele já tinha, reajustados em C# para o que sobra da meta (decisão D6);
+/// 5. numa transação: a SemanaCasa e uma DietaIA nova para cada membro (Origem = casa), com a MetaDieta de cada uma.
+///    Assim a regra das 3 dietas e a meta adaptativa continuam valendo para quem está na casa, sem mudança nenhuma.
+/// </summary>
+public class GeracaoSemanaCasa
+{
+    // A atual e a anterior: a anterior fica para o "Desfazer" da troca e o aviso de entrada (etapa 5).
+    public const int SemanasGuardadas = 2;
+
+    public const string MensagemPerfilIncompleto = "Complete seu perfil (altura, sexo e data de nascimento) e registre um objetivo antes de gerar a semana da casa.";
+    public const string MensagemIndisponivel = "Não foi possível gerar a semana da casa agora. Tente novamente em alguns instantes.";
+
+    private readonly ApplicationDbContext _context;
+    private readonly IContextoDietaBuilder _contextoBuilder;
+    private readonly IGeradorSemanaCasa _gerador;
+    private readonly ILogger<GeracaoSemanaCasa> _logger;
+
+    public GeracaoSemanaCasa(ApplicationDbContext context, IContextoDietaBuilder contextoBuilder, IGeradorSemanaCasa gerador, ILogger<GeracaoSemanaCasa> logger)
+    {
+        _context = context;
+        _contextoBuilder = contextoBuilder;
+        _gerador = gerador;
+        _logger = logger;
+    }
+
+    public record Erro(int Status, string Mensagem);
+
+    public record Resultado(SemanaCasa? Semana, SemanaCasaDto? Conteudo, Erro? Falha);
+
+    public async Task<Resultado> GerarAsync(int casaId, int donoId)
+    {
+        var agora = DateTime.UtcNow;
+        if (await LimiteGeracoes.ConferirAsync(_context, donoId, ehDonoDeCasa: true, agora, "semanas ou dietas") is { } limite)
+        {
+            return Falhou(429, limite);
+        }
+
+        var membros = await _context.MembrosCasa.AsNoTracking()
+            .Where(m => m.CasaId == casaId)
+            .OrderBy(m => m.EntrouEm).ThenBy(m => m.Id)
+            .Select(m => m.UsuarioId)
+            .ToListAsync();
+        var completos = await PerfisCompletosAsync(membros);
+        if (!completos.Contains(donoId))
+        {
+            return Falhou(400, MensagemPerfilIncompleto);
+        }
+
+        // Todos entram na lista da casa, inclusive quem está com o perfil incompleto: as alergias e o "não como" dessa
+        // pessoa valem do mesmo jeito.
+        var listaDaCasa = await ListaDaCasa.MontarAsync(_context, membros, donoId);
+        if (listaDaCasa.Minimos.Vazios.Count > 0)
+        {
+            return Falhou(400, ListaDaCasa.MensagemPapeisVazios(listaDaCasa.Minimos.Vazios));
+        }
+
+        var casa = await _context.Casas.AsNoTracking().FirstAsync(c => c.Id == casaId);
+        var ufDoDono = await _context.Usuarios.AsNoTracking().Where(u => u.Id == donoId).Select(u => u.Estado).FirstOrDefaultAsync();
+
+        // Os contextos antes do Gemini: um erro aqui não deve gastar a chamada.
+        var contextos = new List<(int UsuarioId, ContextoDietaDto Contexto)>();
+        foreach (var id in membros.Where(completos.Contains))
+        {
+            contextos.Add((id, await _contextoBuilder.ConstruirAsync(id)));
+        }
+
+        SemanaCasaDto semana;
+        try
+        {
+            semana = await _gerador.GerarSemanaCasaAsync(listaDaCasa, casa.OrcamentoSemanal, ufDoDono);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or RespostaIaInvalidaException)
+        {
+            _logger.LogWarning(ex, "Falha ao gerar a semana da casa {CasaId}", casaId);
+            return Falhou(503, MensagemIndisponivel);
+        }
+
+        // O café e os lanches de cada um vêm da dieta atual dele (decisão D6), lidos antes de gravar a nova.
+        var dietas = new List<(int UsuarioId, DietaSemanalDto Dieta)>();
+        foreach (var (id, contexto) in contextos)
+        {
+            var mantidas = await CafeELanchesAtuaisAsync(id, contexto.Lista!);
+            dietas.Add((id, MontarDieta(semana, _gerador.CalcularMetas(contexto), contexto.Lista!, mantidas)));
+        }
+
+        if (membros.Count != completos.Count)
+        {
+            // Não deveria acontecer (o convite exige o perfil completo), mas um membro sem perfil fica sem dieta nova
+            // em vez de travar a casa. Só a contagem: nenhum id de membro no log da casa.
+            _logger.LogWarning("Semana da casa {CasaId}: {SemPerfil} membro(s) sem perfil completo ficaram sem a dieta nova", casaId, membros.Count - completos.Count);
+        }
+
+        var linha = await GravarAsync(casaId, semana, dietas, agora);
+        return new Resultado(linha, semana, null);
+    }
+
+    private static Resultado Falhou(int status, string mensagem) => new(null, null, new Erro(status, mensagem));
+
+    private async Task<HashSet<int>> PerfisCompletosAsync(List<int> usuarioIds)
+    {
+        var comDados = await _context.Usuarios.AsNoTracking()
+            .Where(u => usuarioIds.Contains(u.Id) && u.Altura != null && u.Sexo != null && u.DataNascimento != null)
+            .Select(u => u.Id)
+            .ToListAsync();
+        var comObjetivo = await _context.ObjetivosUsuario.AsNoTracking()
+            .Where(o => usuarioIds.Contains(o.UsuarioId))
+            .Select(o => o.UsuarioId)
+            .Distinct()
+            .ToListAsync();
+        return comDados.Intersect(comObjetivo).ToHashSet();
+    }
+
+    /// <summary>
+    /// A dieta da semana de um membro: em cada dia, as porções dele nas refeições da casa e as refeições individuais
+    /// (o café e os lanches que ele já tinha, reajustados para o que sobra da meta; sem eles, só as da casa, até ele
+    /// gerar os seus). A meta de cada dia é a cheia, e a MetaDieta grava a mesma de uma geração individual.
+    /// </summary>
+    public static DietaSemanalDto MontarDieta(SemanaCasaDto semana, MetasDaSemana metas, ListaAlimentos listaDaPessoa,
+        IReadOnlyDictionary<string, List<RefeicaoDto>>? individuaisPorDia)
+    {
+        var casa = PorcoesCasa.Montar(semana, metas.MetasPorDia, listaDaPessoa);
+        var dias = GeradorDietaGemini.NomesDias.Select(nome =>
+        {
+            var individuais = individuaisPorDia is not null && individuaisPorDia.TryGetValue(nome, out var mantidas) ? mantidas : [];
+            if (individuais.Count > 0)
+            {
+                PorcoesCasa.Ajustar(individuais, casa.MetasRestantes[nome].Macros);
+                PorcoesCasa.RotularDeNovo(individuais);
+            }
+
+            var dia = new DiaDietaDto
+            {
+                DiaSemana = nome,
+                Refeicoes = individuais,
+                TotalDoDia = new MacrosDto { Calorias = 0, ProteinasG = 0, CarboidratosG = 0, GordurasG = 0 },
+                MetaCalculada = metas.MetasPorDia[nome].Macros,
+                ComposicaoMeta = metas.ComposicaoPorDia[nome]
+            };
+            PorcoesCasa.Juntar(dia, casa.RefeicoesPorDia.TryGetValue(nome, out var daCasa) ? daCasa : [], metas.MetasPorDia[nome]);
+            return dia;
+        }).ToList();
+
+        return new DietaSemanalDto
+        {
+            Dias = dias,
+            AjusteAdaptativo = metas.Ajuste,
+            VersaoBase = BaseNutricional.VersaoBase,
+            // O aviso de lista pobre da casa fica na SemanaCasa, só para o dono: na dieta de cada um, ele diria algo das
+            // restrições dos outros.
+            AvisoListaPobre = null,
+            ManutencaoPorDia = metas.ManutencaoPorDia,
+            FatorAtividade = metas.FatorAtividade
+        };
+    }
+
+    /// <summary>
+    /// O café e os lanches da dieta atual da pessoa, por dia: as refeições que não são da casa nem almoço ou jantar,
+    /// só os itens que ainda estão na lista dela (o "não como" ou uma alergia marcada depois tira o item), sem a marca
+    /// da troca. Vazio sem dieta, ou com uma dieta de outra versão da base (os ids podem não existir mais).
+    /// </summary>
+    public async Task<Dictionary<string, List<RefeicaoDto>>> CafeELanchesAtuaisAsync(int usuarioId, ListaAlimentos listaDaPessoa)
+    {
+        var atual = await _context.DietasIA.AsNoTracking()
+            .Where(d => d.UsuarioId == usuarioId)
+            .OrderByDescending(d => d.DataGeracao)
+            .Select(d => d.ConteudoJson)
+            .FirstOrDefaultAsync();
+        var resultado = new Dictionary<string, List<RefeicaoDto>>(StringComparer.OrdinalIgnoreCase);
+        if (atual is null)
+        {
+            return resultado;
+        }
+
+        var dieta = JsonSerializer.Deserialize<DietaSemanalDto>(atual)!;
+        if (dieta.VersaoBase != BaseNutricional.VersaoBase)
+        {
+            return resultado;
+        }
+
+        var naLista = listaDaPessoa.Itens.Select(i => i.Item.Id).ToHashSet();
+        foreach (var dia in dieta.Dias)
+        {
+            var refeicoes = dia.Refeicoes
+                .Where(r => !r.DaCasa && !PorcoesCasa.EAlmocoOuJantar(r))
+                .Select(r => new RefeicaoDto
+                {
+                    Nome = r.Nome,
+                    Horario = r.Horario,
+                    Macros = r.Macros,
+                    Alimentos = r.Alimentos
+                        .Where(a => a.AlimentoId is not null && naLista.Contains(a.AlimentoId))
+                        .Select(a => new AlimentoDto { Nome = PorcoesCasa.NomeSemContagem(a), Quantidade = a.Quantidade, Unidade = a.Unidade, AlimentoId = a.AlimentoId })
+                        .ToList()
+                })
+                .Where(r => r.Alimentos.Count > 0)
+                .ToList();
+            if (refeicoes.Count > 0)
+            {
+                resultado[dia.DiaSemana.Trim()] = refeicoes;
+            }
+        }
+
+        return resultado;
+    }
+
+    private async Task<SemanaCasa> GravarAsync(int casaId, SemanaCasaDto semana, List<(int UsuarioId, DietaSemanalDto Dieta)> dietas, DateTime agora)
+    {
+        await using var transacao = await OperacoesCasa.IniciarTransacaoAsync(_context);
+
+        // Abre espaço antes de gravar: a casa guarda a atual e a anterior.
+        var antigas = await _context.SemanasCasa
+            .Where(s => s.CasaId == casaId)
+            .OrderByDescending(s => s.GeradaEm).ThenByDescending(s => s.Id)
+            .Skip(SemanasGuardadas - 1)
+            .ToListAsync();
+        _context.SemanasCasa.RemoveRange(antigas);
+
+        var linha = new SemanaCasa
+        {
+            CasaId = casaId,
+            GeradaEm = agora,
+            ConteudoJson = JsonSerializer.Serialize(semana),
+            VersaoBase = semana.VersaoBase
+        };
+        _context.SemanasCasa.Add(linha);
+        await _context.SaveChangesAsync();
+
+        foreach (var (usuarioId, dieta) in dietas)
+        {
+            await RepositorioDietaIA.AbrirEspacoAsync(_context, usuarioId);
+            await RepositorioDietaIA.GravarAsync(_context, usuarioId, dieta, agora, DietaIA.OrigemCasa, linha.Id);
+        }
+
+        if (transacao is not null)
+        {
+            await transacao.CommitAsync();
+        }
+
+        return linha;
+    }
+
+    /// <summary>A semana atual da casa (a mais recente), ou nula.</summary>
+    public static Task<SemanaCasa?> AtualAsync(ApplicationDbContext contexto, int casaId, bool rastrear = false) =>
+        (rastrear ? contexto.SemanasCasa : contexto.SemanasCasa.AsNoTracking())
+            .Where(s => s.CasaId == casaId)
+            .OrderByDescending(s => s.GeradaEm).ThenByDescending(s => s.Id)
+            .FirstOrDefaultAsync();
+}

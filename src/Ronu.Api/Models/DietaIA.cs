@@ -9,6 +9,12 @@ namespace Ronu.Api.Models;
 /// </summary>
 public class DietaIA
 {
+    // "pessoa": gerada pelo próprio usuário (POST /api/dietas/gerar). "casa": criada para cada membro quando o dono
+    // gera a semana da casa (plano família, etapa 4). A diferença importa no limite de 3 gerações por hora: a dieta
+    // que a casa cria para um membro não gasta a cota dele, só a do dono, que pediu.
+    public const string OrigemPessoa = "pessoa";
+    public const string OrigemCasa = "casa";
+
     public int Id { get; set; }
     public DateTime DataGeracao { get; set; }
     public required string ConteudoJson { get; set; }
@@ -24,4 +30,11 @@ public class DietaIA
     // "= null!" em vez de "required": o EF Core só precisa do UsuarioId (FK) para
     // salvar o registro. O objeto Usuario só vem preenchido quando a consulta usa .Include().
     public Usuario Usuario { get; set; } = null!;
+
+    [MaxLength(10)]
+    public string Origem { get; set; } = OrigemPessoa;
+
+    // A semana da casa de onde vieram o almoço e o jantar desta dieta; nulo fora da casa. Sem chave estrangeira, como
+    // a MetaDieta.DietaIAId: a casa guarda só as 2 semanas mais recentes, e a dieta continua depois que a semana sai.
+    public int? SemanaCasaId { get; set; }
 }

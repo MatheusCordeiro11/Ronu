@@ -14,8 +14,8 @@ using Ronu.Api.Validacao;
 namespace Ronu.Api.Controllers;
 
 /// <summary>
-/// Plano família, etapa 1: a casa, os convites, os membros e a transferência. Só o necessário para formar a casa; o
-/// cardápio da casa vem nas próximas etapas.
+/// Plano família: a casa, os convites, os membros e a transferência (etapa 1) e a semana da casa (etapa 4). Os pedidos,
+/// a troca na casa e a lista da casa vêm nas próximas etapas.
 ///
 /// - Quem não está numa casa recebe 404 em toda rota de membro, até numa casa que existe: a resposta não revela casa
 ///   nenhuma. Membro em rota de dono recebe 403.
@@ -42,6 +42,7 @@ public class CasaController : ControllerBase
     private const string MensagemSemTransferencia = "Não há nenhuma casa sendo passada para você.";
     private const string MensagemMembroNaoEncontrado = "Pessoa não encontrada na casa.";
     private const string MensagemConviteNaoEncontrado = "Convite não encontrado.";
+    public const string MensagemSemSemana = "A casa ainda não tem uma semana gerada.";
 
     public const string MotivoInvalido = "invalido";
     public const string MotivoUsado = "usado";
@@ -479,6 +480,50 @@ public class CasaController : ControllerBase
 
         await _context.SaveChangesAsync();
         return NoContent();
+    }
+
+    // ---------- Semana da casa (etapa 4) ----------
+
+    /// <summary>
+    /// Só o dono gera a semana da casa: uma chamada ao Gemini para o almoço e o jantar dos 7 dias, e uma dieta nova para
+    /// cada membro, com a porção dele. 400 com papel do prato vazio (sem chamar o Gemini) ou perfil do dono incompleto;
+    /// 429 no limite de 3 por hora do dono; 503 se o Gemini falhar.
+    /// </summary>
+    [HttpPost("semana")]
+    public async Task<IActionResult> GerarSemana([FromServices] GeracaoSemanaCasa geracao)
+    {
+        var (eu, erro) = await MembroLogadoAsync(exigirDono: true, exigirConsentimento: true);
+        if (erro is not null)
+        {
+            return erro;
+        }
+
+        var resultado = await geracao.GerarAsync(eu!.CasaId, UsuarioIdLogado);
+        if (resultado.Falha is { } falha)
+        {
+            return StatusCode(falha.Status, new { mensagem = falha.Mensagem });
+        }
+
+        return Ok(SemanaCasaResponse.Montar(resultado.Semana!, souDono: true));
+    }
+
+    /// <summary>A semana atual da casa, para qualquer membro: só os nomes dos alimentos (a porção está na dieta de cada um).</summary>
+    [HttpGet("semana")]
+    public async Task<IActionResult> ObterSemana()
+    {
+        var (eu, erro) = await MembroLogadoAsync(exigirDono: false, exigirConsentimento: true);
+        if (erro is not null)
+        {
+            return erro;
+        }
+
+        var semana = await GeracaoSemanaCasa.AtualAsync(_context, eu!.CasaId);
+        if (semana is null)
+        {
+            return NotFound(new { mensagem = MensagemSemSemana });
+        }
+
+        return Ok(SemanaCasaResponse.Montar(semana, souDono: eu.Papel == MembroCasa.PapelDono));
     }
 
     // ---------- Apoio ----------

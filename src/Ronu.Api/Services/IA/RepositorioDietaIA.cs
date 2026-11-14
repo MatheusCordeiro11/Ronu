@@ -20,9 +20,24 @@ public class RepositorioDietaIA : IRepositorioDietaIA
         _context = context;
     }
 
-    public async Task SalvarAsync(int usuarioId, DietaSemanalDto dieta)
+    public async Task SalvarAsync(int usuarioId, DietaSemanalDto dieta, int? semanaCasaId = null)
     {
-        var dietasExistentes = await _context.DietasIA
+        await AbrirEspacoAsync(_context, usuarioId);
+
+        // A dieta e as metas dela vão juntas (ou nenhuma das duas): a MetaDieta
+        // precisa do Id da DietaIA, que só existe depois do primeiro SaveChanges.
+        await using var transacao = await _context.Database.BeginTransactionAsync();
+        await GravarAsync(_context, usuarioId, dieta, DateTime.UtcNow, DietaIA.OrigemPessoa, semanaCasaId);
+        await transacao.CommitAsync();
+    }
+
+    /// <summary>
+    /// Marca para remoção as dietas mais antigas, até sobrar espaço para uma nova (sem gravar: vai no próximo
+    /// SaveChanges). Compartilhado com a semana da casa, que cria uma dieta para cada membro.
+    /// </summary>
+    public static async Task AbrirEspacoAsync(ApplicationDbContext contexto, int usuarioId)
+    {
+        var dietasExistentes = await contexto.DietasIA
             .Where(d => d.UsuarioId == usuarioId)
             .OrderBy(d => d.DataGeracao)
             .ToListAsync();
@@ -34,36 +49,37 @@ public class RepositorioDietaIA : IRepositorioDietaIA
         {
             var quantidadeParaRemover = dietasExistentes.Count - LimiteDietasPorUsuario + 1;
             var maisAntigas = dietasExistentes.Take(quantidadeParaRemover).ToList();
-            _context.DietasIA.RemoveRange(maisAntigas);
+            contexto.DietasIA.RemoveRange(maisAntigas);
 
             // As marcações "já tenho" dessas dietas saem junto. O banco já apaga em cascata; apagar aqui
             // também deixa a regra explícita e vale no banco em memória dos testes, que não tem cascata.
             var idsRemovidos = maisAntigas.Select(d => d.Id).ToList();
-            _context.ListaComprasMarcacoes.RemoveRange(
-                _context.ListaComprasMarcacoes.Where(m => idsRemovidos.Contains(m.DietaIAId)));
+            contexto.ListaComprasMarcacoes.RemoveRange(
+                contexto.ListaComprasMarcacoes.Where(m => idsRemovidos.Contains(m.DietaIAId)));
         }
+    }
 
-        // A dieta e as metas dela vão juntas (ou nenhuma das duas): a MetaDieta
-        // precisa do Id da DietaIA, que só existe depois do primeiro SaveChanges.
-        await using var transacao = await _context.Database.BeginTransactionAsync();
-
-        var dataGeracao = DateTime.UtcNow;
+    /// <summary>A dieta e a MetaDieta dela, em dois SaveChanges (a meta precisa do Id da dieta). A transação é de quem chama.</summary>
+    public static async Task<DietaIA> GravarAsync(
+        ApplicationDbContext contexto, int usuarioId, DietaSemanalDto dieta, DateTime dataGeracao, string origem, int? semanaCasaId)
+    {
         var novaDieta = new DietaIA
         {
             UsuarioId = usuarioId,
             DataGeracao = dataGeracao,
-            ConteudoJson = JsonSerializer.Serialize(dieta)
+            ConteudoJson = JsonSerializer.Serialize(dieta),
+            Origem = origem,
+            SemanaCasaId = semanaCasaId
         };
 
-        _context.DietasIA.Add(novaDieta);
-        await _context.SaveChangesAsync();
+        contexto.DietasIA.Add(novaDieta);
+        await contexto.SaveChangesAsync();
 
         var meta = MontarMetaDieta(usuarioId, dataGeracao, dieta);
         meta.DietaIAId = novaDieta.Id;
-        _context.MetasDieta.Add(meta);
-        await _context.SaveChangesAsync();
-
-        await transacao.CommitAsync();
+        contexto.MetasDieta.Add(meta);
+        await contexto.SaveChangesAsync();
+        return novaDieta;
     }
 
     /// <summary>

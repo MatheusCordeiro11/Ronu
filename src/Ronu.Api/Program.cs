@@ -10,6 +10,7 @@ using Ronu.Api.Services.Consentimentos;
 using Ronu.Api.Services.Conta;
 using Ronu.Api.Services.Email;
 using Ronu.Api.Services.IA;
+using Ronu.Api.Services.PlanoFamilia;
 using Ronu.Api.Validacao;
 using System.Text;
 
@@ -66,6 +67,9 @@ builder.Services.AddScoped<ICalculadoraPesoTendencia, CalculadoraPesoTendencia>(
 builder.Services.AddScoped<ICalculadoraAjusteAdaptativo, CalculadoraAjusteAdaptativo>();
 builder.Services.AddScoped<IContextoDietaBuilder, ContextoDietaBuilder>();
 builder.Services.AddScoped<IRepositorioDietaIA, RepositorioDietaIA>();
+// Plano família, etapa 4: a semana da casa usa o mesmo gerador (a mesma chamada ao Gemini e as mesmas conferências).
+builder.Services.AddHttpClient<IGeradorSemanaCasa, GeradorDietaGemini>();
+builder.Services.AddScoped<GeracaoSemanaCasa>();
 
 // Envio de email em segundo plano (FilaEmail + ServicoEnvioEmail). Com
 // credencial (User Secrets ou Application settings), SMTP do Gmail; sem ela,

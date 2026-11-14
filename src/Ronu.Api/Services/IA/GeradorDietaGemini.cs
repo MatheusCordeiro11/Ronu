@@ -5,6 +5,7 @@ using System.Text.Json;
 using Ronu.Api.Data;
 using Ronu.Api.Models;
 using Ronu.Api.Models.IA;
+using Ronu.Api.Services.PlanoFamilia;
 using Ronu.Api.Services.Troca;
 using Ronu.Api.Validacao;
 
@@ -15,7 +16,7 @@ namespace Ronu.Api.Services.IA;
 /// usando saída estruturada (JSON Schema) para garantir que a resposta sempre
 /// venha no formato esperado, sem parsing frágil de texto livre.
 /// </summary>
-public class GeradorDietaGemini : IGeradorDietaIA
+public partial class GeradorDietaGemini : IGeradorDietaIA
 {
     // Índice 0 = segunda: a mesma ordem de MetaDieta.MetasPorDia.
     public static readonly string[] NomesDias =
@@ -98,23 +99,21 @@ public class GeradorDietaGemini : IGeradorDietaIA
         // do histórico real de peso e das metas das dietas anteriores -> metas
         // finais, que vão para o prompt e para a MetaCalculada de cada dia.
         // Ajuste 0% = metas idênticas às da fórmula.
-        var caloriasBasePorDia = CalcularCaloriasBasePorDia(contexto, _calculadora);
-        var manutencaoPorDia = CalculadoraManutencao.ManutencaoPorDia(contexto, _calculadora);
-        var metaBaseMedia = caloriasBasePorDia.Values.Average();
-        var fatorAtividade = CalculadoraManutencao.FatorDoNivel(contexto.NivelAtividade);
-        var ajuste = _calculadoraAjuste.Calcular(
-            contexto.HistoricoPeso, contexto.HistoricoMetas, contexto.Objetivo, metaBaseMedia, manutencaoPorDia,
-            DateTime.UtcNow, fatorAtividade);
-        RegistrarAjusteAdaptativo(ajuste, metaBaseMedia);
-        var metasPorDia = MontarMetasPorDia(caloriasBasePorDia, ajuste.Percentual, contexto.Peso, contexto.Altura);
-        var composicaoPorDia = MontarComposicaoPorDia(contexto, _calculadora, ajuste.Percentual, metasPorDia);
+        var (metasPorDia, composicaoPorDia, ajuste, manutencaoPorDia, fatorAtividade) = CalcularMetas(contexto);
 
         // Lista fechada da fase 2b: vai no prompt e no enum do schema, então o Gemini só escolhe itens
         // da base (com valor por 100 g, para a fase 3 calcular de verdade).
         // Sem fallback desde a 2c: montar a lista aqui, só com UF e preferências, deixaria passar as alergias.
         var lista = contexto.Lista
             ?? throw new InvalidOperationException("O contexto chegou sem a lista da pessoa: ela vem do ContextoDietaBuilder (ListaDaPessoa).");
-        var prompt = MontarPrompt(contexto, metasPorDia, lista);
+
+        // Plano família: quem está numa casa com semana recebe o almoço e o jantar da casa na porção dele (C#, sem IA),
+        // e o Gemini monta só o resto do dia, com a meta que sobra. Fora da casa, as metas do cardápio são as do dia.
+        var casa = contexto.SemanaCasa is null ? null : PorcoesCasa.Montar(contexto.SemanaCasa, metasPorDia, lista);
+        var metasDoCardapio = casa is null
+            ? metasPorDia
+            : new Dictionary<string, ResultadoMacros>(casa.MetasRestantes, StringComparer.OrdinalIgnoreCase);
+        var prompt = MontarPrompt(contexto, metasDoCardapio, lista, casa);
         var schema = MontarSchema(lista);
 
         var corpoRequisicao = new
@@ -137,8 +136,14 @@ public class GeradorDietaGemini : IGeradorDietaIA
             try
             {
                 var (respostaIa, uso, versaoModelo) = await ChamarGeminiAsync(corpoRequisicao);
-                var dias = MontarDias(respostaIa, metasPorDia, composicaoPorDia);
-                var abaixoDoMinimo = ExigirMinimoDeRefeicoes ? DiasAbaixoDoMinimo(dias) : [];
+                var dias = MontarDias(respostaIa, metasDoCardapio, composicaoPorDia);
+                if (casa is not null)
+                {
+                    ConferirRefeicoesDaCasa(dias, casa, ultimaTentativa: tentativa >= MaximoTentativas);
+                }
+                // Na casa, o dia já tem o almoço e o jantar fora da resposta: o mínimo de refeições é o das individuais
+                // (regra 15 da casa no prompt), sem a recusa.
+                var abaixoDoMinimo = ExigirMinimoDeRefeicoes && casa is null ? DiasAbaixoDoMinimo(dias) : [];
                 if (abaixoDoMinimo.Count > 0)
                 {
                     if (tentativa < MaximoTentativas)
@@ -180,7 +185,8 @@ public class GeradorDietaGemini : IGeradorDietaIA
                     _logger.LogWarning("Cafeína à noite corrigida na última tentativa: {Mudancas}",
                         string.Join("; ", ValidadorCafeina.Corrigir(dias, lista)));
                 }
-                var semGordura = ExigirFonteDeGordura && ListaTemFonteDeGordura(lista) ? DiasSemFonteDeGordura(dias) : [];
+                // A regra 16 olha o almoço e o jantar, que na casa não vêm do Gemini.
+                var semGordura = ExigirFonteDeGordura && casa is null && ListaTemFonteDeGordura(lista) ? DiasSemFonteDeGordura(dias) : [];
                 if (semGordura.Count > 0)
                 {
                     if (tentativa < MaximoTentativas)
@@ -211,6 +217,13 @@ public class GeradorDietaGemini : IGeradorDietaIA
                 if (levesAcima.Count > 0)
                 {
                     TrocarLevesExcedentes(dias, lista);
+                }
+
+                // Por último: o ajuste, os rótulos e a troca dos leves mexeram só nas refeições individuais, e a porção
+                // da casa entra pronta, com a meta cheia do dia.
+                if (casa is not null)
+                {
+                    JuntarRefeicoesDaCasa(dias, casa, metasPorDia);
                 }
 
                 RegistrarGeracao(dias, declarado, uso, versaoModelo, normalizacao, tentativa, cronometro.ElapsedMilliseconds, lista, contaveis, oleosTirados, ajustes);
@@ -735,7 +748,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
 
     private static readonly string[] UfsFeijaoPreto = ["RS", "SC", "PR"];
 
-    private static string MontarPrompt(ContextoDietaDto contexto, Dictionary<string, ResultadoMacros> metasPorDia, ListaAlimentos lista)
+    private static string MontarPrompt(ContextoDietaDto contexto, Dictionary<string, ResultadoMacros> metasPorDia, ListaAlimentos lista, CasaDaPessoa? casa = null)
     {
         // Plano gratuito do Gemini (decisão de 2026-11-02): os termos pedem para não mandar dado pessoal, e o Google
         // usa o conteúdo. Por isso o prompt não leva sexo, idade, peso, altura, objetivo, nome das modalidades nem
@@ -824,7 +837,8 @@ public class GeradorDietaGemini : IGeradorDietaIA
         {
             var meta = metasPorDia[nome].Macros;
             var linha = $"- {nome}: {meta.Calorias:F0} kcal (proteína {meta.ProteinasG:F0} g, carboidrato {meta.CarboidratosG:F0} g, gordura {meta.GordurasG:F0} g) — {marcaObjetivo}";
-            return semTreino ? linha : $"{linha}; {MarcaDoTreino(contexto.Modalidades, i + 1)}";
+            linha = semTreino ? linha : $"{linha}; {MarcaDoTreino(contexto.Modalidades, i + 1)}";
+            return casa is null ? linha : $"{linha}; monte: {RefeicoesAMontar(casa, nome)}";
         }));
 
         // Contas via Google ou anteriores ao campo podem estar sem estado —
@@ -873,8 +887,24 @@ public class GeradorDietaGemini : IGeradorDietaIA
               dias de descanso. Cada dia diz se é de déficit, de manutenção ou de superávit, e se é de treino ou de descanso:
               """;
 
+        // Plano família: o almoço e o jantar da casa já estão prontos (porção da pessoa, em C#), e o Gemini monta só o
+        // resto do dia. As regras 7, 15 e 16 mudam por isso; as outras valem como estão.
+        var pedido = casa is null
+            ? "Monte um plano alimentar semanal (7 dias) para uma pessoa."
+            : "Monte as refeições individuais de um plano alimentar semanal (7 dias) para uma pessoa. O almoço e o jantar dela já estão definidos à parte e NÃO entram na sua resposta, exceto quando a linha do dia pedir.";
+        if (casa is not null)
+        {
+            metasIntro += " As metas já descontam o almoço e o jantar definidos à parte: valem só para as refeições que você vai montar. Cada dia diz quais refeições montar:";
+        }
+        var regra7 = casa is null
+            ? "Adeque o plano ao hábito alimentar brasileiro: use as refeições típicas (café da manhã, lanche da manhã, almoço, lanche da tarde, jantar e, se fizer sentido, ceia leve) e combinações que um brasileiro realmente consome."
+            : "Adeque o plano ao hábito alimentar brasileiro: use as refeições típicas fora do almoço e do jantar (café da manhã, lanche da manhã, lanche da tarde e, se fizer sentido, ceia leve), e o almoço ou o jantar só no dia em que a linha pedir, com os nomes \"Almoço\" e \"Jantar\".";
+        var regra15 = casa is null
+            ? $"Monte pelo menos {RefeicoesMinimas} refeições em cada dia e, nos dias com meta a partir de {MetaComMaisRefeicoes} kcal, pelo menos {RefeicoesMinimasMetaAlta}.{(semTreino ? "" : " O lanche antes e o depois do treino contam como refeições a mais, sem tirar as outras do dia.")}{(ListaTemFonteDeGordura(lista) ? RegraGordura : "")}"
+            : $"Monte pelo menos {RefeicoesMinimasCasa} refeições em cada dia.{(semTreino ? "" : " O lanche antes e o depois do treino contam como refeições a mais, sem tirar as outras do dia.")}";
+
         return $"""
-            Você é um {papel}. Monte um plano alimentar semanal (7 dias) para uma pessoa.{estadoTexto}{horariosTexto}
+            Você é um {papel}. {pedido}{estadoTexto}{horariosTexto}
 
             {metasIntro}
             {metasTexto}
@@ -895,7 +925,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
             4. Não repita a mesma refeição (mesmos alimentos) em dois dias seguidos.
             5. Retorne quantidades realistas e mensuráveis para cada alimento. A quantidade é o peso do alimento PRONTO PARA COMER (ex.: arroz já cozido, frango já grelhado), nunca o peso cru antes do preparo.
             6. Use EXATAMENTE os nomes dos dias como escritos acima (ex: "Segunda-feira") no campo diaSemana de cada dia — precisa corresponder exatamente a um dos 7 nomes listados.
-            7. Adeque o plano ao hábito alimentar brasileiro: use as refeições típicas (café da manhã, lanche da manhã, almoço, lanche da tarde, jantar e, se fizer sentido, ceia leve) e combinações que um brasileiro realmente consome. Bebidas com cafeína (café, chá preto, chá mate, energéticos) apenas de manhã e no início da tarde, nunca no jantar nem na ceia.
+            7. {regra7} Bebidas com cafeína (café, chá preto, chá mate, energéticos) apenas de manhã e no início da tarde, nunca no jantar nem na ceia.
             8. {regra8}
             9. {regra9}
             10. A quantidade é sempre em gramas ("g") ou, para as bebidas (leite, café, chá, suco, refrigerante, água de coco), em mililitros ("ml"), nunca em unidades, fatias ou colheres. Para os itens contáveis, use múltiplos exatos do peso de uma unidade listado acima (ex.: duas unidades de um item de 50 g = 100 g).
@@ -903,7 +933,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
             12. Se o orçamento semanal informado for "economico", priorize proteínas e ingredientes de menor custo (ex: ovo, frango, peixes populares como tilápia, feijão), evitando itens caros como salmão, camarão ou carnes nobres, sem comprometer a qualidade nutricional. Se for "moderado" ou não informado, use bom senso de custo-benefício. Se for "sem_restricao", não considere custo na escolha dos alimentos.
             13. A soma de proteína, carboidrato e gordura de cada dia deve ficar dentro de uma margem de 10% (para mais ou para menos) dos gramas da meta ESPECÍFICA daquele dia, listados acima. Se não for possível cumprir tudo ao mesmo tempo, priorize nesta ordem: (1) calorias dentro da margem de 5% da regra 1; (2) proteína; (3) carboidrato e gordura.
             14. Cada item é um alimento da lista, e preparações com mais de um ingrediente viram itens separados na mesma refeição: uma salada vira um item por ingrediente; café adoçado vira o café e o açúcar; uma vitamina vira a fruta e o leite.{regraRefogado}
-            15. Monte pelo menos {RefeicoesMinimas} refeições em cada dia e, nos dias com meta a partir de {MetaComMaisRefeicoes} kcal, pelo menos {RefeicoesMinimasMetaAlta}.{(semTreino ? "" : " O lanche antes e o depois do treino contam como refeições a mais, sem tirar as outras do dia.")}{(ListaTemFonteDeGordura(lista) ? RegraGordura : "")}
+            15. {regra15}
             """;
     }
 
@@ -999,7 +1029,8 @@ public class GeradorDietaGemini : IGeradorDietaIA
     // O enum do nome é a lista da pessoa (no máximo BaseNutricional.TetoDeNomes nomes: a fase 0, em
     // 2026-10-07, passou com até 180 em gemini-3.5-flash-lite). A unidade também vai em enum, mas o C#
     // a sobrescreve pela da base (AplicarLista).
-    private static object MontarSchema(ListaAlimentos lista)
+    // nomesRefeicao: na semana da casa, o nome da refeição também vai em enum ("Almoço" e "Jantar"); na individual, livre.
+    private static object MontarSchema(ListaAlimentos lista, string[]? nomesRefeicao = null)
     {
         var macros = new
         {
@@ -1031,7 +1062,7 @@ public class GeradorDietaGemini : IGeradorDietaIA
             type = "OBJECT",
             properties = new
             {
-                nome = new { type = "STRING" },
+                nome = nomesRefeicao is null ? (object)new { type = "STRING" } : new { type = "STRING", format = "enum", @enum = nomesRefeicao },
                 alimentos = new { type = "ARRAY", items = alimento },
                 macros,
                 horario = new { type = "STRING" }

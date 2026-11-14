@@ -27,6 +27,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Casa> Casas { get; set; }
     public DbSet<MembroCasa> MembrosCasa { get; set; }
     public DbSet<ConviteCasa> ConvitesCasa { get; set; }
+    public DbSet<SemanaCasa> SemanasCasa { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -91,5 +92,17 @@ public class ApplicationDbContext : DbContext
             convite.HasOne(c => c.Casa).WithMany().HasForeignKey(c => c.CasaId).OnDelete(DeleteBehavior.Cascade);
             convite.HasOne(c => c.Usuario).WithMany().HasForeignKey(c => c.UsuarioId).OnDelete(DeleteBehavior.Cascade);
         });
+
+        // A semana atual é a mais recente da casa (CasaId, GeradaEm). Acaba com a casa.
+        modelBuilder.Entity<SemanaCasa>(semana =>
+        {
+            semana.HasIndex(s => new { s.CasaId, s.GeradaEm });
+            semana.HasOne(s => s.Casa).WithMany().HasForeignKey(s => s.CasaId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // As dietas que existem antes da casa são todas de geração individual.
+        modelBuilder.Entity<DietaIA>()
+            .Property(d => d.Origem)
+            .HasDefaultValue(DietaIA.OrigemPessoa);
     }
 }

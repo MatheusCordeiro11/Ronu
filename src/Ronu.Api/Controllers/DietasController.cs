@@ -6,6 +6,7 @@ using Ronu.Api.DTOs;
 using Ronu.Api.Models;
 using Ronu.Api.Models.IA;
 using Ronu.Api.Services.IA;
+using Ronu.Api.Services.PlanoFamilia;
 using Ronu.Api.Services.Troca;
 using System.Security.Claims;
 using System.Text.Json;
@@ -45,40 +46,27 @@ public class DietasController : ControllerBase
     private int UsuarioIdLogado =>
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-    // Limite de gerações por usuário numa janela móvel de 1 hora. Contado na
-    // própria tabela DietasIA (nada em memória: o App Service no plano F1
-    // reinicia com frequência e perderia o contador). Não pode passar de
-    // RepositorioDietaIA.LimiteDietasPorUsuario (3): a tabela guarda só as 3
-    // dietas mais recentes, então uma contagem maior nunca seria atingida.
-    private const int LimiteGeracoesPorHora = 3;
-    private static readonly TimeSpan JanelaLimiteGeracoes = TimeSpan.FromHours(1);
-
     /// <summary>
     /// Gera uma nova dieta semanal via IA para o usuário logado, com base no
     /// objetivo, modalidades e preferências já cadastrados. Mantém só as 3
-    /// dietas mais recentes por usuário. Limitado a 3 gerações por hora (429).
+    /// dietas mais recentes por usuário. Limitado a 3 gerações por hora (429,
+    /// LimiteGeracoes).
+    ///
+    /// Plano família: quem está numa casa que já tem semana gera só as refeições
+    /// individuais (café da manhã e lanches), com o que sobra da meta depois das
+    /// porções da casa, que entram na dieta calculadas em C#.
     /// </summary>
     [HttpPost("gerar")]
     public async Task<IActionResult> Gerar()
     {
-        // Primeira checagem: a mais barata, e evita gastar cota do Gemini.
+        // Primeira checagem: a mais barata, e evita gastar cota do Gemini. A dieta que a semana da casa criou para um
+        // membro não gasta a cota dele; a do dono, sim (foi ele quem pediu).
         var agora = DateTime.UtcNow;
-        var inicioJanela = agora - JanelaLimiteGeracoes;
-        var geracoesNaJanela = await _context.DietasIA
-            .Where(d => d.UsuarioId == UsuarioIdLogado && d.DataGeracao >= inicioJanela)
-            .Select(d => d.DataGeracao)
-            .ToListAsync();
-
-        if (geracoesNaJanela.Count >= LimiteGeracoesPorHora)
+        var membroCasa = await _context.MembrosCasa.AsNoTracking().FirstOrDefaultAsync(m => m.UsuarioId == UsuarioIdLogado);
+        var limite = await LimiteGeracoes.ConferirAsync(_context, UsuarioIdLogado, membroCasa?.Papel == MembroCasa.PapelDono, agora);
+        if (limite is not null)
         {
-            // A vaga volta quando a geração mais antiga da janela completa 1 hora.
-            var libera = geracoesNaJanela.Min() + JanelaLimiteGeracoes;
-            var minutos = Math.Max(1, (int)Math.Ceiling((libera - agora).TotalMinutes));
-            var quando = minutos == 1 ? "1 minuto" : $"{minutos} minutos";
-            return StatusCode(429, new
-            {
-                mensagem = $"Você já gerou {LimiteGeracoesPorHora} dietas na última hora, o limite por hora. Tente novamente em {quando}."
-            });
+            return StatusCode(429, new { mensagem = limite });
         }
 
         var usuario = await _context.Usuarios
@@ -102,6 +90,18 @@ public class DietasController : ControllerBase
         }
 
         var contexto = await _contextoBuilder.ConstruirAsync(UsuarioIdLogado);
+
+        // A semana da casa entra só se for da versão da base de hoje (os AlimentoId dela precisam existir). Sem semana,
+        // ou com uma de outra versão, quem está na casa gera a semana inteira, como fora dela.
+        var semanaCasa = membroCasa is null ? null : await GeracaoSemanaCasa.AtualAsync(_context, membroCasa.CasaId, rastrear: true);
+        if (semanaCasa is not null && semanaCasa.VersaoBase == BaseNutricional.VersaoBase)
+        {
+            contexto.SemanaCasa = JsonSerializer.Deserialize<SemanaCasaDto>(semanaCasa.ConteudoJson);
+        }
+        else
+        {
+            semanaCasa = null;
+        }
 
         // Lista fechada sem nenhum item em algum papel no prato (ex.: nenhuma
         // proteína depois do "não como"): não dá para montar uma semana, então nem
@@ -148,7 +148,16 @@ public class DietasController : ControllerBase
                 UsuarioIdLogado, bebida.Alimento, bebida.Quantidade, bebida.Unidade, bebida.KcalDescontadas, bebida.Dia, bebida.Refeicao);
         }
 
-        await _repositorioDieta.SalvarAsync(UsuarioIdLogado, dieta);
+        // Uma refeição da casa com algo que a pessoa marcou depois (não como ou alergia) virou individual só para ela:
+        // o dono vê o aviso na semana da casa, sem dizer quem nem qual.
+        if (semanaCasa is not null && contexto.Lista is not null
+            && PorcoesCasa.RefeicoesQueNaoServem(contexto.SemanaCasa!, contexto.Lista).Count > 0)
+        {
+            semanaCasa.RefeicaoIndividualEm = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+        }
+
+        await _repositorioDieta.SalvarAsync(UsuarioIdLogado, dieta, semanaCasa?.Id);
 
         var response = new DietaResponse
         {

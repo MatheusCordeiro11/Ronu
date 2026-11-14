@@ -41,4 +41,10 @@ public class ContextoDietaDto
     // Nula só nos contextos das contas da meta, que não geram dieta: o gerador
     // recusa um contexto sem lista em vez de montar uma sem as alergias (2c).
     public Ronu.Api.Services.IA.ListaAlimentos? Lista { get; set; }
+
+    // Plano família: a semana da casa de quem está numa casa que já tem semana. Com ela, o gerador monta só as
+    // refeições individuais (café da manhã e lanches) com o que sobra da meta depois das porções da casa, que entram
+    // na dieta calculadas em C#. Nula fora da casa (a geração de sempre). Nunca vai para o prompt: só os nomes das
+    // refeições que faltam montar.
+    public SemanaCasaDto? SemanaCasa { get; set; }
 }
