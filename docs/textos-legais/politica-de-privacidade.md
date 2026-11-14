@@ -8,7 +8,7 @@
 > Conferidos na Azure em 2026-11-01: backup de 7 dias e região Chile Central; logs HTTP do App Service, 7 dias;
 > Application Insights, 30 dias no total.
 
-Vigente desde 13 de novembro de 2026.
+Vigente desde 14 de novembro de 2026.
 
 O Ronu monta uma dieta semanal a partir do seu treino, do seu corpo e do que você gosta de comer. Para isso, ele
 precisa de dados seus, alguns deles de saúde. Esta página explica, sem rodeios, quais dados são esses, para que servem,
@@ -183,7 +183,7 @@ O Ronu é só para maiores de 18 anos.
 Se esta política mudar, a data no topo muda. Se a mudança afetar o que você autorizou, pedimos seu consentimento de
 novo antes de continuar.
 
-Última mudança (13 de novembro de 2026): o antigo "prefiro evitar" virou dois campos. "Não como" tira o alimento do
+Última mudança (14 de novembro de 2026): o antigo "prefiro evitar" virou dois campos. "Não como" tira o alimento do
 cardápio, como o "prefiro evitar" fazia antes. "Prefiro evitar" deixa o alimento aparecer poucas vezes na semana, e os
 que estão na nossa lista passam a ir para a IA pelo nome. Esta política também passou a descrever as alergias
 marcadas.

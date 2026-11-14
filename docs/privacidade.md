@@ -53,7 +53,7 @@ lista fechada de alimentos (itens da base), os "gostos" que casaram com a base, 
 leve (etapa 3), os itens que casaram, pelo nome da lista e agrupados por chip (o limite de 2 vezes na semana vale por
 grupo), e os termos que não casaram, também pelo `TermoParaIA`. Risco residual do leve: um grupo pode sugerir uma
 condição de saúde ("prefere evitar: açúcar refinado; mel; refrigerante de cola"); antes da etapa 3, o item só sumia da
-lista. Por isso a política diz que os itens leves vão pelo nome (linha datada de 2026-11-13 em "Mudanças nesta política").
+lista. Por isso a política diz que os itens leves vão pelo nome (linha datada de 2026-11-14 em "Mudanças nesta política").
 Não vão: nome, e-mail, id da conta, nome das modalidades, a rotina em texto, o "não como" e o "evitar" inteiros como foram digitados e as
 alergias marcadas (TACO 2c: a lista fechada já chega sem os alimentos que as contêm; risco residual: quem lê a lista
 pode deduzir a alergia pela falta de um grupo de itens, como todos os laticínios). Uma alergia fora dos 8 chips, escrita
