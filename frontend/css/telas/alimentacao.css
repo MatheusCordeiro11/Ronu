@@ -2,7 +2,7 @@
   Ronu — Alimentação (tela aprovada: docs/redesign/telas/Alimentacao, ...Mobile, ...Washi)
   Depende de tokens, base e componentes.
 
-  Desktop: gosto, evitar e horários à esquerda; orçamento, nomes regionais e
+  Desktop: gosto, não como, evitar e horários à esquerda; orçamento, nomes regionais e
   "quando muda na dieta" à direita.
   Celular: uma coluna, "Adicionar" vira "+", sugestões rolam na horizontal.
 */
@@ -77,7 +77,7 @@
   flex-wrap: wrap;
 }
 
-/* ---------- Gosto / evitar ---------- */
+/* ---------- Gosto / não como / evitar ---------- */
 .al-lista,
 .al-horarios {
   padding: 24px 26px;
@@ -138,14 +138,28 @@
   font-size: 1.0625rem;
 }
 
-[data-tipo="evitar"] .al-chip {
+/* "Não como" (bloqueio): tracejado no acento, como o "Prefiro evitar" era antes da etapa 3. */
+[data-tipo="nao_como"] .al-chip {
   border-style: dashed;
   border-color: var(--acento);
   color: var(--acento-texto);
 }
 
-[data-tipo="evitar"] .al-chip .chip-remover {
+[data-tipo="nao_como"] .al-chip .chip-remover {
   color: var(--acento-texto);
+}
+
+/* "Prefiro evitar" (leve, etapa 3): o mesmo tracejado, sem o acento. O item ainda pode aparecer, então não
+   leva a cor de "fora". */
+[data-tipo="evitar"] .al-chip {
+  border-style: dashed;
+  border-color: var(--borda-forte);
+  color: var(--texto);
+}
+
+/* Aviso único da migração: no fluxo do cartão, entre o cabeçalho e o campo. */
+.al-migrou[hidden] {
+  display: none;
 }
 
 /* ---------- Conferência com a base (fase 2b-3) ---------- */
@@ -201,7 +215,7 @@
   white-space: nowrap;
 }
 
-[data-tipo="evitar"] .al-chip:has(.al-chip-abrir[aria-expanded="true"]) {
+[data-tipo="nao_como"] .al-chip:has(.al-chip-abrir[aria-expanded="true"]) {
   border-style: solid;
   background: var(--superficie-3);
 }
@@ -211,7 +225,7 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  [data-tipo="evitar"] .al-chip:has(.al-chip-abrir:hover) {
+  [data-tipo="nao_como"] .al-chip:has(.al-chip-abrir:hover) {
     background: var(--superficie-2);
   }
 }
@@ -240,7 +254,7 @@
   transform: translateY(2px);
 }
 
-.al-conferencia-linha[data-tipo="evitar"] {
+.al-conferencia-linha[data-tipo="nao_como"] {
   color: var(--acento-texto);
 }
 
@@ -272,12 +286,12 @@
   font-size: var(--t-apoio);
 }
 
-/* O cartão recebe o foco pela âncora do "evitar" e pela sugestão: sem contorno no cartão inteiro. */
+/* O cartão recebe o foco pela âncora do "não como" e pela sugestão: sem contorno no cartão inteiro. */
 .al-alergias:focus {
   outline: none;
 }
 
-/* O que um "evitar" tira: bloco no fluxo (empurra o resto), não janela por cima. */
+/* O que um "não como" tira: bloco no fluxo (empurra o resto), não janela por cima. */
 .al-painel {
   display: grid;
   gap: var(--e-3);
@@ -614,6 +628,15 @@
 
   .al-cabeca h2 {
     font-size: 1.25rem;
+  }
+
+  /* "Não como" e "Prefiro evitar" só se distinguem pela frase de apoio (o tracejado neutro do leve fica abaixo de
+     3:1): no celular ela desce para baixo do título, em vez de sumir como as outras (al-so-largo). Sem cor nova:
+     é o .apoio de sempre, em --texto-2. */
+  .al-cabeca:has(.al-apoio-nivel) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--e-1);
   }
 
   .al-adicionar {

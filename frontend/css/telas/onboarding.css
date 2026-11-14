@@ -330,7 +330,7 @@
   color: var(--texto);
 }
 
-#ob-comidas .chip[data-estado="evitar"] {
+#ob-comidas .chip[data-estado="nao_como"] {
   border-style: dashed;
   border-color: var(--acento);
   color: var(--acento-texto);
@@ -421,7 +421,7 @@
 }
 
 /* ---------- Alergias (TACO 2c), no fim do passo 4 ----------
-   Separadas do "gosto/evitar" por uma divisória: são outra intensidade de "não". */
+   Separadas do "gosto/não como" por uma divisória: são outra intensidade de "não". */
 .ob-alg {
   display: grid;
   gap: var(--e-4);

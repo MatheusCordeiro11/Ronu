@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     semTreino: false,             // marcou "Não treino no momento" (nenhuma modalidade)
     escolhidas: new Map(),        // modalidadeId → { dias: Set, minutos }
     modalidadesSalvas: new Map(), // modalidadeId → id do vínculo (para o DELETE)
-    comidas: new Map(),           // alimento (minúsculo) → 'gosto' | 'evitar'
+    comidas: new Map(),           // alimento (minúsculo) → 'gosto' | 'nao_como'
     preferenciasSalvas: new Map(), // alimento (minúsculo) → { id, tipo }
     simulacao: null
   };
@@ -128,9 +128,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   if (prefsR.status === 'fulfilled') {
     prefsR.value.forEach((pref) => {
+      // O "Prefiro evitar" leve (etapa 3) não tem lugar neste passo (só gosto e não como): fica de fora daqui, e
+      // assim o Continuar não o apaga nem o transforma em bloqueio. Ele continua na tela de Alimentação.
+      if (pref.tipo === 'evitar') return;
       const chave = pref.alimento.trim().toLowerCase();
       estado.preferenciasSalvas.set(chave, { id: pref.id, tipo: pref.tipo });
-      estado.comidas.set(chave, pref.tipo === 'evitar' ? 'evitar' : 'gosto');
+      estado.comidas.set(chave, pref.tipo === 'nao_como' ? 'nao_como' : 'gosto');
     });
   }
   if (catalogoR.status === 'fulfilled') estado.catalogo = catalogoR.value;
@@ -664,9 +667,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ----- Passo 3: alimentação -----
   const MARCAS = {
     gosto: '<svg class="ob-chip-marca" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 10.5 1.6 6.3A2.6 2.6 0 0 1 6 2.9a2.6 2.6 0 0 1 4.4 3.4z"/></svg>',
-    evitar: '<svg class="ob-chip-marca" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg>'
+    nao_como: '<svg class="ob-chip-marca" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg>'
   };
-  const ROTULO_ESTADO = { gosto: 'gosto', evitar: 'prefiro evitar' };
+  const ROTULO_ESTADO = { gosto: 'gosto', nao_como: 'não como' };
 
   function desenharComidas() {
     const area = $('ob-comidas');
@@ -686,7 +689,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       b.addEventListener('click', () => {
         const atual = estado.comidas.get(nome);
         if (!atual) estado.comidas.set(nome, 'gosto');
-        else if (atual === 'gosto') estado.comidas.set(nome, 'evitar');
+        else if (atual === 'gosto') estado.comidas.set(nome, 'nao_como');
         else estado.comidas.delete(nome);
         pintar();
         contarComidas();
@@ -700,9 +703,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   function contarComidas() {
     const valores = [...estado.comidas.values()];
     const g = valores.filter((v) => v === 'gosto').length;
-    const e = valores.filter((v) => v === 'evitar').length;
+    const e = valores.filter((v) => v === 'nao_como').length;
     $('ob-conta-gosto').textContent = `${g} que você gosta`;
-    $('ob-conta-evitar').textContent = `${e} para evitar`;
+    $('ob-conta-nao-como').textContent = `${e} que você não come`;
   }
 
   let tipoOutro = 'gosto';
@@ -859,7 +862,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const versaoAlergias = versaoDasAlergias();
     const pedidos = [];
     estado.comidas.forEach((valor, nome) => {
-      const tipo = valor === 'evitar' ? 'evitar' : 'preferido';
+      const tipo = valor === 'nao_como' ? 'nao_como' : 'preferido';
       if (estado.preferenciasSalvas.get(nome)?.tipo === tipo) return;
       // O POST atualiza o tipo se o alimento já existe (sem duplicar).
       pedidos.push(enviar('/preferencias-alimentares', 'POST', { alimento: nome, tipo }).then((salvo) => {
@@ -871,6 +874,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       pedidos.push(enviar(`/preferencias-alimentares/${salvo.id}`, 'DELETE').then(() => estado.preferenciasSalvas.delete(nome)));
     });
     await Promise.all(pedidos);
+    // Quem marca "Não como" aqui já conhece o nome novo: a Alimentação não mostra o aviso da migração da etapa 3
+    // (a mesma chave de js/alimentacao.js). Sem armazenamento, o aviso só pode aparecer uma vez.
+    if ([...estado.comidas.values()].includes('nao_como')) {
+      try {
+        localStorage.setItem(`ronu:avisoNaoComo:${ronuUsuarioLogado()?.id}`, '1');
+      } catch {
+        // Sem armazenamento: nada a fazer.
+      }
+    }
     await gravarAlergias(versaoAlergias);
     mostrarPasso(4);
   }

@@ -605,6 +605,7 @@ async function ronuTratarCredencialGoogle(response) {
 // Texto do aviso de lista pobre (fase 2b-3), o mesmo na Alimentação (antes de
 // gerar, pela conferência das preferências) e no dashboard (na dieta que saiu
 // com o aviso gravado, no passado). Os números vêm da API (MinimosPorPapel).
+// Desde a etapa 3, quem tira itens é o "Não como" (o "Prefiro evitar" leve não tira).
 function ronuTextoListaPobre({ papeis, itensPorPapel, gruposDeProteina, vazios = [], passado = false }) {
   const NOMES = {
     Proteina: ['fonte de proteína', 'fontes de proteína'],
@@ -621,7 +622,7 @@ function ronuTextoListaPobre({ papeis, itensPorPapel, gruposDeProteina, vazios =
   const juntar = (lista) => (lista.length <= 1 ? (lista[0] || '') : `${lista.slice(0, -1).join(', ')} e ${lista[lista.length - 1]}`);
 
   if (vazios.length) {
-    return `Com o que está em Evitar, não sobra ${juntar(vazios.map((p) => NENHUM[p]))} entre os alimentos do Ronu: a dieta não pode ser gerada. Tire algum item de Evitar.`;
+    return `Com o que está em Não como, não sobra ${juntar(vazios.map((p) => NENHUM[p]))} entre os alimentos do Ronu: a dieta não pode ser gerada. Tire algum item de Não como.`;
   }
 
   const partes = papeis.map((papel) => {
@@ -632,6 +633,6 @@ function ronuTextoListaPobre({ papeis, itensPorPapel, gruposDeProteina, vazios =
   });
   const meta = papeis.includes('Proteina') ? ' e abaixo da meta de proteína' : '';
   return passado
-    ? `Quando esta dieta foi gerada, com o que estava em Evitar, sobravam ${juntar(partes)}. A semana pode ter ficado repetitiva${meta}.`
-    : `Com o que está em Evitar, sobram ${juntar(partes)}. A semana pode ficar repetitiva${meta}.`;
+    ? `Quando esta dieta foi gerada, com o que estava em Não como, sobravam ${juntar(partes)}. A semana pode ter ficado repetitiva${meta}.`
+    : `Com o que está em Não como, sobram ${juntar(partes)}. A semana pode ficar repetitiva${meta}.`;
 }

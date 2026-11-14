@@ -998,13 +998,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     chips.innerHTML = '';
 
     const lista = preferencias || [];
-    // Primeiro o que a pessoa gosta, depois o que evita; no máximo 8 chips.
-    const ordenadas = [...lista.filter((p) => p.tipo !== 'evitar'), ...lista.filter((p) => p.tipo === 'evitar')];
+    // Primeiro o que a pessoa gosta, depois o que não come, depois o que prefere evitar (etapa 3); no máximo 8 chips.
+    // O "não como" leva o tracejado no acento (bloqueio); o leve, o tracejado neutro.
+    const ORDEM = { preferido: 0, nao_como: 1, evitar: 2 };
+    const ordenadas = [...lista].sort((a, b) => (ORDEM[a.tipo] ?? 0) - (ORDEM[b.tipo] ?? 0));
     const LIMITE = 8;
     ordenadas.slice(0, LIMITE).forEach((p) => {
-      const evitar = p.tipo === 'evitar';
-      chips.appendChild(criar('span', `chip chip-pequeno${evitar ? ' chip-evitar' : ''}`,
-        evitar ? `evitar: ${p.alimento}` : p.alimento));
+      const [classe, texto] = p.tipo === 'nao_como' ? [' chip-evitar', `não como: ${p.alimento}`]
+        : p.tipo === 'evitar' ? [' chip-evitar-leve', `evitar: ${p.alimento}`]
+          : ['', p.alimento];
+      chips.appendChild(criar('span', `chip chip-pequeno${classe}`, texto));
     });
     if (ordenadas.length > LIMITE) {
       chips.appendChild(criar('span', 'chip chip-pequeno db-chip-mais', `+${ordenadas.length - LIMITE}`));

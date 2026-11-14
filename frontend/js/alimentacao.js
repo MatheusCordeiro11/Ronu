@@ -1,9 +1,11 @@
-// Ronu — Alimentação (gosto, evitar, horários, orçamento e nomes regionais)
+// Ronu — Alimentação (gosto, não como, prefiro evitar, horários, orçamento e nomes regionais)
 //
 // Como no canvas aprovado, tudo é salvo na hora, sem botão Salvar:
-// - Gosto / evitar: cada chip é uma PreferenciaAlimentar (POST faz upsert pelo
-//   nome, sem diferenciar maiúsculas; DELETE remove). Mandar para a outra
-//   lista um alimento que já está numa só troca o tipo.
+// - Gosto / não como / prefiro evitar: cada chip é uma PreferenciaAlimentar (POST faz upsert
+//   pelo nome, sem diferenciar maiúsculas; DELETE remove). Mandar para outra lista um
+//   alimento que já está numa só troca o tipo. Restrições em dois níveis (etapa 3):
+//   "nao_como" é o bloqueio (o "evitar" de antes, com o painel do que sai e a sugestão
+//   de alergia); "evitar" é o leve (o item ainda pode aparecer, poucas vezes na semana).
 // - Horários (acordar e dormir) e orçamento vivem no perfil (PUT /perfil grava
 //   todos os campos juntos). Os horários salvam ao sair do campo ou pouco
 //   depois de mudar, nunca no meio da digitação; o orçamento, no clique.
@@ -29,7 +31,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   const PRATOS = ['arroz e feijão', 'cuscuz com ovo', 'tapioca', 'frango grelhado', 'batata-doce', 'pão de queijo',
     'açaí', 'baião de dois', 'mandioca cozida', 'banana com aveia', 'peixe assado', 'omelete'];
 
-  const NOMES_LISTA = { preferido: 'Gosto de comer', evitar: 'Prefiro evitar' };
+  const NOMES_LISTA = { preferido: 'Gosto de comer', nao_como: 'Não como', evitar: 'Prefiro evitar' };
+
+  // Aviso único da etapa 3: o "evitar" de antes virou "nao_como". Guardado por conta neste aparelho; sem
+  // armazenamento (aba privada, dados bloqueados), o aviso só não é lembrado.
+  const CHAVE_AVISO_NAO_COMO = `ronu:avisoNaoComo:${usuario.id}`;
+  function avisoNaoComoVisto() {
+    try {
+      return localStorage.getItem(CHAVE_AVISO_NAO_COMO) === '1';
+    } catch {
+      return false;
+    }
+  }
+  function marcarAvisoNaoComoVisto() {
+    try {
+      localStorage.setItem(CHAVE_AVISO_NAO_COMO, '1');
+    } catch {
+      // Sem armazenamento: o aviso pode voltar numa próxima abertura.
+    }
+  }
 
   // As três faixas da regra 12 do prompt (GeradorDietaGemini). O anel mostra
   // a faixa: um terço, dois terços ou cheio.
@@ -68,7 +88,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // conferência redesenha a lista, e os outros não podem "pular" de novo).
   const chipsVistos = new Set();
 
-  // Rótulos dos grupos de troca da base (GrupoDeTroca), para agrupar o que um "evitar" tira.
+  // Rótulos dos grupos de troca da base (GrupoDeTroca), para agrupar o que um "não como" tira.
   const GRUPOS = {
     CarnesEPeixes: 'Carnes, aves e peixes', Ovos: 'Ovos', Leguminosas: 'Leguminosas', LeiteEIogurte: 'Leite e iogurte',
     Queijos: 'Queijos', Carboidratos: 'Pães, cereais e tubérculos', Frutas: 'Frutas', Hortalicas: 'Hortaliças',
@@ -104,10 +124,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   $('al-pratos').replaceChildren(...[...PRATOS, ...PRATOS].map((prato) => criar('span', null, `${prato}  ·`)));
 
-  // ---------- Gosto / evitar ----------
+  // ---------- Gosto / não como / prefiro evitar ----------
 
   const secoes = {};
-  // Só os cartões de gosto/evitar (o de Alergias também usa .al-lista, para o mesmo respiro, mas não tem tipo).
+  // Só os cartões com tipo (o de Alergias também usa .al-lista, para o mesmo respiro, mas não tem tipo).
   document.querySelectorAll('.al-lista[data-tipo]').forEach((secao) => {
     const tipo = secao.dataset.tipo;
     secoes[tipo] = {
@@ -147,8 +167,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const sinal = criar('span', 'al-chip-sinal');
       sinal.innerHTML = SINAL_SEM_CASAMENTO;
       item.append(sinal, preferencia.alimento, criar('span', 'oculto-visual', ' (não está entre os alimentos do Ronu)'), remover);
-    } else if (conferida && preferencia.tipo === 'evitar') {
-      // "Evitar" que casou: o chip vira o botão que abre o que ele tira do cardápio.
+    } else if (conferida && preferencia.tipo === 'nao_como') {
+      // "Não como" que casou: o chip vira o botão que abre o que ele tira do cardápio. O "evitar" leve não tira
+      // nada, então fica um chip simples.
       const total = conferida.alimentos.length;
       const abrir = criar('button', 'al-chip-abrir');
       abrir.type = 'button';
@@ -159,7 +180,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       abrir.addEventListener('click', () => {
         painelAberto = painelAberto === preferencia.id ? null : preferencia.id;
         renderizarListas();
-        secoes.evitar.chips.querySelector(`[data-id="${preferencia.id}"] .al-chip-abrir`)?.focus();
+        secoes.nao_como.chips.querySelector(`[data-id="${preferencia.id}"] .al-chip-abrir`)?.focus();
       });
       item.append(abrir, remover);
     } else {
@@ -189,9 +210,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       const linha = criar('p', 'al-conferencia-linha');
       const sinal = criar('span', 'al-chip-sinal');
       sinal.innerHTML = SINAL_SEM_CASAMENTO;
-      if (tipo === 'evitar') {
-        // "Evitar" é segurança: no acento, e com o caminho para corrigir.
-        linha.dataset.tipo = 'evitar';
+      if (tipo === 'nao_como' || tipo === 'evitar') {
+        // Os dois "não" sem casamento vão para a IA como texto: o caminho para corrigir é escrever de outro jeito.
+        // "Não como" é segurança, por isso no acento; o leve ("evite quando possível") fica no tom normal.
+        if (tipo === 'nao_como') linha.dataset.tipo = 'nao_como';
         linha.append(sinal, `Não achamos ${nomes} entre os alimentos do Ronu. Se for outro nome de um alimento, escreva de outro jeito.`);
       } else {
         linha.append(sinal, `${nomes} ${um ? 'não está' : 'não estão'} entre os alimentos do Ronu: ${um ? 'não vai' : 'não vão'} aparecer no cardápio.`);
@@ -201,17 +223,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     daLista.filter(([, c]) => c.casou && c.lidoComo.length).forEach(([p, c]) => {
       linhas.push(criar('p', 'al-conferencia-linha', `“${p.alimento}” foi lido como ${c.lidoComo.join(' e ')}.`));
     });
-    if (tipo === 'evitar') daLista.forEach(([p, c]) => {
+    if (tipo === 'nao_como') daLista.forEach(([p, c]) => {
       const linha = criarSugestaoAlergia(p, c);
       if (linha) linhas.push(linha);
     });
     secoes[tipo].conferencia.replaceChildren(...linhas);
   }
 
-  // O que o "evitar" aberto tira do cardápio. Acima de 8 itens, agrupado pelo grupo de troca.
+  // O que o "não como" aberto tira do cardápio. Acima de 8 itens, agrupado pelo grupo de troca.
   function renderizarPainel() {
     const painel = $('al-painel');
-    const preferencia = preferencias.find((p) => p.id === painelAberto && p.tipo === 'evitar');
+    const preferencia = preferencias.find((p) => p.id === painelAberto && p.tipo === 'nao_como');
     const conferida = preferencia && conferidas.get(preferencia.id);
     if (!conferida || !conferida.casou) {
       painelAberto = null;
@@ -240,7 +262,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     painel.hidden = false;
   }
 
-  // Lista pobre, antes de gerar: nota abaixo do "evitar"; papel vazio, no tom de erro (a dieta não sai).
+  // Lista pobre, antes de gerar: nota abaixo do "não como" (o leve não tira itens); papel vazio, no tom de erro (a dieta não sai).
   function renderizarListaPobre() {
     const el = $('al-lista-pobre');
     if (!listaMinimos || listaMinimos.atende) {
@@ -326,6 +348,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (existente) {
         avisar(tipo, `“${nome}” saiu de “${NOMES_LISTA[existente.tipo]}” e veio para cá.`);
       }
+      // Quem marca "Não como" depois da etapa 3 já conhece o nome novo: o aviso da migração não é para ele.
+      if (tipo === 'nao_como') marcarAvisoNaoComoVisto();
       s.campo.value = '';
       marcarMudanca();
       conferir();
@@ -622,7 +646,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     salvandoCaixa: false,
     // "Não é alergia": só até recarregar a página (D6); nada fica guardado.
     dispensadas: new Set(),
-    // "Marcar alergia": o "evitar" que sai da lista quando todos os chips dele estiverem gravados
+    // "Marcar alergia": o "não como" que sai da lista quando todos os chips dele estiverem gravados
     // (id da preferência → códigos). Com chip só pendente, o texto fica até a autorização.
     evitarACobrir: new Map(),
     // O último pedido que falhou, para o "Tentar de novo".
@@ -902,13 +926,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       elAlg.cartao.removeAttribute('aria-busy');
     }
     renderizarAlergias();
-    // As sugestões do "evitar" só aparecem com as alergias carregadas (para não sugerir o que já está marcado).
+    // As sugestões do "não como" só aparecem com as alergias carregadas (para não sugerir o que já está marcado).
     renderizarListas();
   }
 
   $('al-alg-carregar-tentar').addEventListener('click', carregarAlergias);
 
-  // "Isso parece alergia": um "evitar" que a conferência ligou a chips (sugereAlergias, lista). A tela
+  // "Isso parece alergia": um "não como" que a conferência ligou a chips (sugereAlergias, lista). A tela
   // pergunta por todos os chips sugeridos que ainda não estão marcados nem pendentes.
   function criarSugestaoAlergia(preferencia, conferida) {
     if (!alg.carregado || alg.dispensadas.has(preferencia.id)) return null;
@@ -931,8 +955,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     nao.setAttribute('aria-label', `“${preferencia.alimento}” não é alergia`);
     nao.addEventListener('click', () => {
       alg.dispensadas.add(preferencia.id);
-      renderizarConferencia('evitar');
-      secoes.evitar.campo.focus();
+      renderizarConferencia('nao_como');
+      secoes.nao_como.campo.focus();
     });
     acoes.append(marcar, nao);
     linha.append(texto, acoes);
@@ -949,10 +973,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (alg.aceiteVigente) await salvarAlergiaDireto(codigo);
       else tocarAlergia(codigo);
     }
-    renderizarConferencia('evitar');
+    renderizarConferencia('nao_como');
   }
 
-  // O chip cobre o "evitar" que deu origem à sugestão: com todos os chips dele gravados, o texto sai da lista
+  // O chip cobre o "não como" que deu origem à sugestão: com todos os chips dele gravados, o texto sai da lista
   // (o mesmo DELETE do ×). Se falhar, o texto só continua lá, como estava; nada a desfazer.
   async function tirarEvitarCobertos() {
     for (const [id, codigos] of [...alg.evitarACobrir]) {
@@ -968,7 +992,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       preferencias = preferencias.filter((p) => p.id !== id);
       renderizarListas();
-      avisar('evitar', `“${preferencia.alimento}” saiu do “Prefiro evitar”: o chip de alergia já cobre.`);
+      avisar('nao_como', `“${preferencia.alimento}” saiu do “Não como”: o chip de alergia já cobre.`);
       marcarMudanca();
       conferir();
     }
@@ -992,11 +1016,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!resposta.ok) throw new Error();
       preferencias = await resposta.json();
       renderizarListas();
+      mostrarAvisoNaoComo();
       await conferir();
     } catch (erro) {
       if (erro.message === 'Sessão expirada.') return;
       Object.keys(secoes).forEach((tipo) => avisar(tipo, 'Não foi possível carregar suas preferências. Recarregue a página.', true));
     }
+  }
+
+  // Na primeira abertura depois da etapa 3, para quem tem itens em "Não como" (todos vieram do "evitar" de antes,
+  // ou foram marcados depois, e aí a chave já está gravada): uma vez só, e gravado logo ao mostrar.
+  function mostrarAvisoNaoComo() {
+    if (!preferencias.some((p) => p.tipo === 'nao_como') || avisoNaoComoVisto()) return;
+    $('al-migrou').hidden = false;
+    marcarAvisoNaoComoVisto();
   }
 
   async function carregarPerfil() {

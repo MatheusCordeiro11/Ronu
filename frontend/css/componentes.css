@@ -763,11 +763,18 @@ button.chip:hover {
   border-color: var(--acento);
 }
 
-/* "Prefiro evitar": tracejado no acento, para não depender só da cor. */
+/* "Não como": tracejado no acento, para não depender só da cor. A classe guarda o nome de antes da etapa 3,
+   quando o bloqueio se chamava "Prefiro evitar". */
 .chip-evitar {
   border-style: dashed;
   border-color: var(--acento);
   color: var(--acento-texto);
+}
+
+/* "Prefiro evitar" leve (etapa 3): o mesmo tracejado, sem o acento (o item ainda pode aparecer). */
+.chip-evitar-leve {
+  border-style: dashed;
+  border-color: var(--borda-forte);
 }
 
 .chip-sugestao {
@@ -1040,7 +1047,8 @@ button.chip:hover {
 }
 
 /* ---------- Chips de alergia (TACO 2c: Alimentação e onboarding, js/base/alergias.js) ----------
-   Três intensidades de "não", três desenhos: "prefiro evitar" é tracejado; a alergia é o chip
+   Três intensidades de "não", três desenhos: "prefiro evitar" é tracejado neutro, "não como" é tracejado no
+   acento; a alergia é o chip
    cheio com visto (o .chip[aria-pressed="true"] de sempre). Pendente (falta autorizar) não é
    cheio: só fica cheio o que a API confirmou. */
 .alg-chip {

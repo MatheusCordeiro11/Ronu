@@ -307,14 +307,15 @@ window.RonuTroca = (function () {
       `opcao-${opcao.alimentoId}`, [texto, numeros], aoEscolher);
   }
 
-  // foraPelaAlergia (TACO 2c): conta à parte do "evitar" na API, mesmo que o item esteja nos dois.
+  // foraPelaAlergia (TACO 2c): conta à parte do "não como" na API, mesmo que o item esteja nos dois.
+  // foraPeloEvitar guarda o nome de antes da etapa 3: conta só o "Não como" (o "Prefiro evitar" leve não tira item).
   function textoFora(fora, foraPeloEvitar, foraPelaAlergia) {
     const partes = [];
     const parte = (n, um, varios) => { if (n > 0) partes.push(n === 1 ? `1 ${um}` : `${n} ${varios}`); };
     parte(fora.porcaoMaxima || 0, 'passaria da porção máxima', 'passariam da porção máxima');
     parte(fora.foraDaMeta || 0, 'deixaria o dia mais de 5% fora da meta', 'deixariam o dia mais de 5% fora da meta');
     parte(foraPelaAlergia || 0, 'tem uma das suas alergias', 'têm uma das suas alergias');
-    parte(foraPeloEvitar, 'está no que você marcou para evitar', 'estão no que você marcou para evitar');
+    parte(foraPeloEvitar, 'está no que você marcou em Não como', 'estão no que você marcou em Não como');
     parte(fora.jaNaRefeicao || 0, 'já está nesta refeição', 'já estão nesta refeição');
     parte((fora.refogadoComOleo || 0) + (fora.usoDiferente || 0), 'não combina com esta refeição', 'não combinam com esta refeição');
     return partes.length ? `${juntar(partes)}.` : null;
