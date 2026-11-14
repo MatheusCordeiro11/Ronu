@@ -154,7 +154,7 @@ O quimono tem variáveis próprias (`--quimono*`): branco com faixa preta no esc
 
 ## Layout
 
-Contêiner único de 1320px com margem de 40px (16px abaixo de 720px). Cada tela logada tem: cabeçalho (logo, nav, sol/lua, avatar), faixa de título sobre a grade quadriculada e o conteúdo em duas colunas flexíveis (principal ~640px+, lateral ~340px+), que viram uma coluna no celular. No celular, a nav do topo dá lugar a 5 abas fixas embaixo, com ícone (Dieta, Progresso, Treino, Alimentação, Perfil).
+Contêiner único de 1320px com margem de 40px (16px abaixo de 720px). Cada tela logada tem: cabeçalho (logo, nav, sol/lua, avatar), faixa de título sobre a grade quadriculada e o conteúdo em duas colunas flexíveis (principal ~640px+, lateral ~340px+), que viram uma coluna no celular. No celular, a nav do topo dá lugar a 6 abas fixas embaixo, com ícone (Dieta, Progresso, Treino, Comida, Casa, Perfil): desde o plano família, "Alimentação" vira "Comida" só nas abas, para caber em 360 px. A aba Casa leva o contador de pedidos (pílula no acento, só para quem cuida da casa). A pílula "da casa" (contorno neutro, maiúsculas pequenas) marca o almoço e o jantar da casa.
 
 Telas de entrada (login, cadastro, senha, estado, onboarding) dividem a tela: à esquerda, um painel sobre a grade com logo, sol/lua, quimono e carimbo; à direita, o formulário.
 

@@ -67,6 +67,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const ORDEM_ALERGIAS = Object.keys(NOMES_ALERGIA);
   let alergiasVistas = { dietaId: null, quantas: 0 };
 
+  // Plano família (etapa 7): só para quem tem almoço e jantar da casa na dieta atual. souDono decide entre
+  // "Trocar" (com o aviso da panela) e "Pedir troca"; semana dá o semanaId e a revisão que a troca na casa e o
+  // pedido mandam. Nulo enquanto não carregou, ou sem casa (quem saiu fica com as refeições sem a pílula).
+  let casaInfo = null;
+
   // ---------- Formatação ----------
 
   function formatarNumero(valor) {
@@ -471,10 +476,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     elDayPanel.querySelector(`[data-refeicao="${indice}"] .db-trocar`)?.focus();
   }
 
+  // O membro não troca a refeição da casa: pede (S5 e seção 3.3 do shape). Enquanto a casa não carregou, vale
+  // a troca normal, e a API responde com o caminho certo (409 refeicao_da_casa).
+  const ehPedido = (refeicao) => Boolean(refeicao.daCasa && casaInfo && !casaInfo.souDono);
+
   function criarBotaoTroca(dietaResponse, refeicao, indice, emTroca) {
     const botao = criar('button', 'db-trocar');
     botao.type = 'button';
     botao.append(criarIcone(ICONE_TROCA));
+
+    if (ehPedido(refeicao) && !dietaResponse.semTroca) {
+      botao.setAttribute('aria-pressed', String(emTroca));
+      botao.setAttribute('aria-label', `Pedir troca: ${refeicao.nome}`);
+      botao.title = emTroca ? 'Parar de pedir troca' : 'Pedir troca de um alimento';
+      botao.addEventListener('click', () => alternarModoTroca(dietaResponse, indice));
+      return botao;
+    }
 
     if (dietaResponse.semTroca) {
       // Dieta antiga ou de outra versão da base: o botão fica, e tocar explica o porquê.
@@ -508,6 +525,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       nome.append(etiqueta);
     }
 
+    if (emTroca && ehPedido(refeicao)) {
+      item.append(criarPedidoDeTroca(refeicao, alimento, i, nome, qtd));
+      return item;
+    }
+
     if (emTroca) {
       if (alimento.original) nome.append(criarMarcaTrocado(alimento, posicao, false));
       qtd.append(criarIcone(ICONE_TROCA));
@@ -515,9 +537,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       botao.type = 'button';
       botao.prepend(criar('span', 'oculto-visual', 'Trocar '));
       botao.append(nome, qtd);
+      // Dono, na refeição da casa: a troca é a da semana da casa (vale para todos), com o aviso da panela.
+      const semanaCasa = refeicao.daCasa && casaInfo?.souDono ? casaInfo.semana : null;
       botao.addEventListener('click', () => RonuTroca.abrirOpcoes({
         ...posicao, alimento, nomeRefeicao: refeicao.nome,
-        diaSemana: dietaResponse.dieta.dias[diaSelecionado].diaSemana, origem: botao
+        diaSemana: dietaResponse.dieta.dias[diaSelecionado].diaSemana, origem: botao,
+        ...(semanaCasa ? { casa: { semanaId: semanaCasa.semanaId, revisao: semanaCasa.revisao, chaveCasa: refeicao.chaveCasa } } : {})
       }));
       item.append(botao);
       return item;
@@ -526,6 +551,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (alimento.original) nome.append(criarMarcaTrocado(alimento, posicao, atual));
     item.append(nome, qtd);
     return item;
+  }
+
+  // "Pedir troca" do membro: o alimento vira um botão que manda o pedido, sem o nome (POST /casa/pedidos). Depois
+  // de pedir, a linha fica com a marca "pedido" e o botão desabilitado até a semana mudar (RonuCasa guarda isso
+  // só neste aparelho).
+  function criarPedidoDeTroca(refeicao, alimento, i, nome, qtd) {
+    const semanaId = casaInfo?.semana?.semanaId ?? null;
+    const feito = semanaId != null && RonuCasa.jaPediuTroca(semanaId, refeicao.chaveCasa, i);
+    const botao = criar('button', 'db-alimento-botao');
+    botao.type = 'button';
+    if (feito) {
+      nome.append(criar('span', 'db-pedido', 'pedido'));
+      botao.disabled = true;
+      botao.setAttribute('aria-label', `${alimento.nome}: troca pedida`);
+    } else {
+      qtd.append(criarIcone(ICONE_TROCA));
+      botao.prepend(criar('span', 'oculto-visual', 'Pedir troca de '));
+    }
+    botao.append(nome, qtd);
+    botao.addEventListener('click', async () => {
+      if (botao.disabled || botao.getAttribute('aria-busy') === 'true') return;
+      botao.setAttribute('aria-busy', 'true');
+      const r = await RonuCasa.pedir({ tipo: 'troca', semanaId, chaveCasa: refeicao.chaveCasa, item: i, alimentoId: alimento.alimentoId });
+      if (!r) return;
+      botao.removeAttribute('aria-busy');
+      if (!r.ok) {
+        elTrocaErro.textContent = r.mensagem;
+        elTrocaErro.hidden = false;
+        elTrocaErro.focus();
+        return;
+      }
+      elTrocaErro.hidden = true;
+      $('troca-anuncio').textContent = 'Pedido de troca enviado, sem o seu nome.';
+      const indice = refeicaoEmTroca;
+      animarRefeicoes = false;
+      renderizarRefeicoes(historico[0]);
+      animarRefeicoes = true;
+      focarItem({ dia: diaSelecionado, refeicao: indice, item: i });
+    });
+    return botao;
   }
 
   function criarRefeicao(dietaResponse, refeicao, indice) {
@@ -544,9 +609,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       titulo.appendChild(horario);
     }
     titulo.appendChild(criar('h3', 'db-refeicao-nome', refeicao.nome));
+    // Almoço e jantar da casa: a pílula, com texto (não só cor). Quem saiu da casa tem daCasa falso.
+    if (refeicao.daCasa) titulo.appendChild(RonuCasa.pilula());
 
     const caixa = criar('div', 'db-refeicao-lista');
-    if (emTroca) caixa.append(criar('p', 'db-troca-dica', 'Toque no alimento que quer trocar.'));
+    if (emTroca) {
+      let dica = 'Toque no alimento que quer trocar.';
+      if (ehPedido(refeicao)) dica = 'Toque no alimento que quer pedir para trocar. O pedido chega sem o seu nome.';
+      else if (refeicao.daCasa && casaInfo?.souDono) dica = 'Toque no alimento que quer trocar. Trocar aqui muda a panela de todo mundo.';
+      caixa.append(criar('p', 'db-troca-dica', dica));
+    }
     const lista = criar('ul', 'db-alimentos');
     refeicao.alimentos.forEach((alimento, i) => {
       lista.appendChild(criarAlimento(dietaResponse, refeicao, indice, alimento, i, emTroca));
@@ -816,6 +888,50 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     // A dica aparece junto do "Gerar" do topo e do fim (celular).
     document.querySelectorAll('[data-dica-gerar]').forEach((el) => { el.textContent = texto; });
+    renderizarGerarCasa();
+  }
+
+  // Numa casa, gerar a dieta monta só o café e os lanches: o almoço e o jantar vêm da semana da casa (S5). Vale
+  // para o dono também, porque a API faz o mesmo para os dois. Sai pela dieta atual (as refeições daCasa), sem
+  // esperar o GET /casa.
+  function dietaNaCasa() {
+    return Boolean(historico[0]?.dieta.dias.some((d) => d.refeicoes.some((r) => r.daCasa)));
+  }
+
+  function renderizarGerarCasa() {
+    const naCasa = dietaNaCasa();
+    [btnGerar, btnGerarFim].forEach((b) => {
+      if (b.dataset.loading === 'true') return;
+      b.querySelector('.btn-label').textContent = naCasa ? 'Gerar café e lanches' : 'Gerar nova dieta';
+    });
+    document.querySelectorAll('[data-nota-casa]').forEach((el) => { el.hidden = !naCasa; });
+  }
+
+  // A casa só é lida por quem tem refeição da casa na dieta atual. Sem casa (404) ou sem o aceite da casa (409),
+  // o painel segue com a pílula e com a troca normal: a API responde a troca com o caminho certo.
+  async function carregarCasa() {
+    if (!dietaNaCasa()) {
+      casaInfo = null;
+      return;
+    }
+    try {
+      const rCasa = await ronuFetchAutenticado('/casa');
+      if (!rCasa.ok) {
+        casaInfo = null;
+        return;
+      }
+      const casa = await rCasa.json();
+      const rSemana = await ronuFetchAutenticado('/casa/semana');
+      casaInfo = { souDono: casa.souDono, semana: rSemana.ok ? await rSemana.json() : null };
+    } catch (erro) {
+      if (erro.message === 'Sessão expirada.') throw erro;
+      casaInfo = null;
+    }
+    if (versaoSelecionada === 0 && historico.length) {
+      animarRefeicoes = false;
+      renderizarRefeicoes(historico[0]);
+      animarRefeicoes = true;
+    }
   }
 
   function renderizarTudo() {
@@ -1073,7 +1189,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (versaoSelecionada !== 0 || dia !== diaSelecionado) return;
     const linha = elDayPanel.querySelector(`[data-refeicao="${refeicao}"] [data-item="${item}"]`);
     if (!linha) return;
-    const alvo = linha.querySelector('button') || linha;
+    // Um botão desabilitado (o "pedido" do membro) não recebe foco: aí vai a própria linha.
+    const alvo = linha.querySelector('button:not(:disabled)') || linha;
     if (alvo === linha) linha.tabIndex = -1;
     alvo.focus();
   }
@@ -1098,6 +1215,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     },
 
     focarItem,
+
+    // Troca na casa (dono): a resposta é a semana da casa; a própria dieta mudou junto (a porção foi refeita).
+    semanaCasa: () => casaInfo?.semana,
+    async aplicarCasa(semanaNova) {
+      if (casaInfo) casaInfo.semana = semanaNova;
+      refeicaoEmTroca = null;
+      elTrocaErro.hidden = true;
+      try {
+        await carregarHistorico();
+      } catch (erro) {
+        if (erro.message === 'Sessão expirada.') return;
+      }
+      if (versaoSelecionada >= historico.length) versaoSelecionada = 0;
+      animarRefeicoes = false;
+      renderizarTudo();
+      animarRefeicoes = true;
+    },
 
     // 409, 422 e afins: a dieta mudou por fora. Recarrega e diz o porquê.
     async recarregar(mensagem) {
@@ -1132,7 +1266,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if ([btnGerar, btnGerarFim, btnGerarVazio, $('db-alergia-gerar')].some((b) => b.dataset.loading === 'true')) return;
 
     ronuOcultarErroFormulario(elGerarError);
-    ronuDefinirCarregando(botao, true, 'Montando sua dieta da semana...');
+    ronuDefinirCarregando(botao, true, dietaNaCasa() ? 'Montando seu café e lanches...' : 'Montando sua dieta da semana...');
     botao.setAttribute('aria-busy', 'true');
 
     try {
@@ -1151,6 +1285,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       RonuTroca.fecharAviso();
       elTrocaErro.hidden = true;
       renderizarTudo();
+      carregarCasa().catch(() => { /* sem casa: a troca segue o caminho normal */ });
     } catch (erro) {
       ronuMostrarErroFormulario(elGerarError, erro.message);
       elGerarError.scrollIntoView({ block: 'nearest' });
@@ -1189,6 +1324,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
+    // Convite da casa aberto antes do login ou do onboarding (S4): o cadastro está completo, então a pessoa volta
+    // para o convite. O onboarding termina aqui, por isso a volta mora no painel.
+    if (ronuConvitePendente()) {
+      window.location.href = 'casa-convite.html';
+      return;
+    }
+
     try {
       await carregarHistorico();
       renderizarTudo();
@@ -1197,6 +1339,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
+    carregarCasa().catch(() => { /* sem casa: a troca segue o caminho normal */ });
     carregarLateral();
   }
 

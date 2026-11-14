@@ -159,7 +159,31 @@
   background: var(--superficie-3);
 }
 
-/* ---------- Abas do celular (5, com ícone) ---------- */
+.nav-principal a[data-pagina="casa"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Contador de pedidos da casa (só o dono): pílula no acento, com o número. É
+   o único carimbo da nav, e só aparece com pedido aberto. */
+.nav-contador {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--raio-pilula);
+  background: var(--acento);
+  color: var(--sobre-acento);
+  font-family: var(--fonte-corpo);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* ---------- Abas do celular (6, com ícone; decisão S1 do plano família) ---------- */
 .abas {
   display: none;
 }
@@ -192,8 +216,8 @@
     bottom: 0;
     z-index: 20;
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    padding: 6px 2px calc(6px + env(safe-area-inset-bottom));
     background: var(--superficie);
     border-top: 1px solid var(--borda);
   }
@@ -213,6 +237,30 @@
   .abas a svg {
     width: 20px;
     height: 20px;
+  }
+
+  .abas-icone {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .abas .nav-rotulo {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Na aba, a pílula senta no canto do ícone da casa, com a cor das abas como recorte. */
+  .abas .nav-contador {
+    position: absolute;
+    top: -6px;
+    left: 12px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    font-size: 10px;
+    outline: 2px solid var(--superficie);
   }
 
   .abas a[aria-current="page"] {
@@ -832,6 +880,26 @@ button.chip:hover {
   color: var(--acento-texto);
   font-size: var(--t-pequeno);
   line-height: 1.4;
+}
+
+/* ---------- Pílula "da casa" (plano família: almoço e jantar da mesma panela) ----------
+   Contorno sem cor, para não competir com a etiqueta de alergia (contorno de erro) nem com o "trocado"
+   (tracejado no acento). Tem texto: a marca não depende de cor. */
+.pilula-casa {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-pilula);
+  color: var(--texto-2);
+  font-family: var(--fonte-corpo);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 /* ---------- Dias da semana (7 botões) ---------- */

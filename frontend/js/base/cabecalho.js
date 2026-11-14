@@ -1,13 +1,20 @@
 // Ronu — Cabeçalho e abas das telas logadas (Dieta, Progresso, Treino,
-// Alimentação, Perfil)
+// Alimentação, Casa, Perfil)
 //
-// Um lugar só para o cabeçalho que as cinco telas repetem: logo, nav com a
-// página atual marcada, sol/lua e avatar com as iniciais; no celular, as cinco
-// abas com ícone presas no pé da tela (decisão de 2026-10-16).
+// Um lugar só para o cabeçalho que as telas repetem: logo, nav com a página
+// atual marcada, sol/lua e avatar com as iniciais; no celular, as abas com
+// ícone presas no pé da tela (decisão de 2026-10-16).
+//
+// Plano família (etapa 7): a aba Casa entra entre Alimentação e Perfil, com o
+// contador de pedidos abertos (só o dono recebe a contagem da API). No celular
+// são 6 abas, e "Alimentação" vira "Comida" só nelas (decisão S1): com 6
+// colunas em 360 px, a palavra inteira não cabe no rótulo de 11 px.
 //
 // Uso: <header class="cabecalho" data-cabecalho="dieta"></header> e, no <body>,
 // a classe .com-abas (espaço para as abas no celular). Carregar depois do
-// auth.js (usa ronuUsuarioLogado e ronuIniciais).
+// auth.js (usa ronuUsuarioLogado e ronuIniciais). A tela Casa já lê o GET /casa
+// e passa a contagem por RonuCabecalho.pedidos(n), com data-casa-contador="pagina"
+// no <header> para o cabeçalho não pedir de novo.
 (function () {
   var PAGINAS = [
     { chave: 'dieta', rotulo: 'Dieta', href: 'dashboard.html',
@@ -16,8 +23,10 @@
       icone: '<path d="M4 18l5-6 4 3 7-9"/>' },
     { chave: 'treino', rotulo: 'Treino', href: 'treino.html',
       icone: '<path d="M6 8v8M18 8v8M3 10v4M21 10v4M6 12h12"/>' },
-    { chave: 'alimentacao', rotulo: 'Alimentação', href: 'alimentacao.html',
+    { chave: 'alimentacao', rotulo: 'Alimentação', rotuloAba: 'Comida', href: 'alimentacao.html',
       icone: '<path d="M7 3v7M5 3v4a2 2 0 0 0 4 0V3M7 10v11M17 21V3c-2.2 1.4-3 4-3 7v3h3"/>' },
+    { chave: 'casa', rotulo: 'Casa', href: 'casa.html',
+      icone: '<path d="M4 11.5 12 4.5l8 7"/><path d="M6.5 10v10h11V10"/><path d="M10 20v-5h4v5"/>' },
     { chave: 'perfil', rotulo: 'Perfil', href: 'perfil.html',
       icone: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>' }
   ];
@@ -34,7 +43,8 @@
     var iniciais = nome && typeof ronuIniciais === 'function' ? ronuIniciais(nome) : '';
 
     var links = PAGINAS.map(function (p) {
-      return '<a href="' + p.href + '"' + (p.chave === atual ? ' aria-current="page"' : '') + '>' + p.rotulo + '</a>';
+      return '<a href="' + p.href + '" data-pagina="' + p.chave + '"' + (p.chave === atual ? ' aria-current="page"' : '') + '>' +
+        '<span class="nav-rotulo">' + p.rotulo + '</span></a>';
     }).join('');
 
     cabecalho.innerHTML =
@@ -65,12 +75,55 @@
     abas.className = 'abas';
     abas.setAttribute('aria-label', 'Principal');
     abas.innerHTML = PAGINAS.map(function (p) {
-      return '<a href="' + p.href + '"' + (p.chave === atual ? ' aria-current="page"' : '') + '>' +
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p.icone + '</svg>' +
-        p.rotulo + '</a>';
+      return '<a href="' + p.href + '" data-pagina="' + p.chave + '"' + (p.chave === atual ? ' aria-current="page"' : '') + '>' +
+        '<span class="abas-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p.icone + '</svg></span>' +
+        '<span class="nav-rotulo">' + (p.rotuloAba || p.rotulo) + '</span></a>';
     }).join('');
     document.body.appendChild(abas);
+
+    if (usuario && cabecalho.getAttribute('data-casa-contador') !== 'pagina') buscarPedidos();
   }
+
+  // O contador vai no link da Casa da nav do topo e da aba do celular. O número
+  // é texto de verdade (aria-hidden só na pílula), e o link ganha "Casa, 2 pedidos".
+  function pedidos(n) {
+    var quantos = Number(n) || 0;
+    var links = document.querySelectorAll('a[data-pagina="casa"]');
+    for (var i = 0; i < links.length; i++) {
+      var link = links[i];
+      var antigo = link.querySelector('.nav-contador');
+      if (antigo) antigo.remove();
+      if (quantos > 0) {
+        var pilula = document.createElement('span');
+        pilula.className = 'nav-contador num';
+        pilula.setAttribute('aria-hidden', 'true');
+        pilula.textContent = quantos > 9 ? '9+' : String(quantos);
+        // Na aba do celular a pílula fica sobre o ícone; na nav do topo, depois do nome.
+        var icone = link.querySelector('.abas-icone');
+        (icone || link).appendChild(pilula);
+        link.setAttribute('aria-label', 'Casa, ' + quantos + (quantos === 1 ? ' pedido' : ' pedidos'));
+      } else {
+        link.removeAttribute('aria-label');
+      }
+    }
+  }
+
+  // Só o dono recebe pedidosAbertos (o membro vê nulo, de propósito). Sem casa
+  // (404), sem o aceite da casa (409) ou sem rede, o contador só não aparece: o
+  // cabeçalho nunca redireciona nem mostra erro, então usa o fetch direto, e não
+  // o ronuFetchAutenticado (que mandaria ao login ou ao consentimento).
+  function buscarPedidos() {
+    if (typeof RONU_CONFIG === 'undefined' || typeof RONU_TOKEN_KEY === 'undefined') return;
+    var token;
+    try { token = localStorage.getItem(RONU_TOKEN_KEY); } catch (erro) { return; }
+    if (!token) return;
+    fetch(RONU_CONFIG.API_BASE + '/casa', { headers: { Authorization: 'Bearer ' + token } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (casa) { if (casa && casa.souDono) pedidos(casa.pedidosAbertos); })
+      .catch(function () { /* sem contador */ });
+  }
+
+  window.RonuCabecalho = { pedidos: pedidos };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', montar);
   else montar();

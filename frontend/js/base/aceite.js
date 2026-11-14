@@ -14,7 +14,7 @@
 
 window.RonuAceite = (function () {
   // Cada tipo tem o próprio texto na API; o título reserva só aparece se o texto não carregar.
-  const TITULO_RESERVA = { geral: 'Autorização dos dados de saúde', alergias: 'Autorização das alergias' };
+  const TITULO_RESERVA = { geral: 'Autorização dos dados de saúde', alergias: 'Autorização das alergias', casa: 'Autorização da casa' };
   const MSG_CARREGAR = 'Não foi possível carregar o texto da autorização.';
   const MSG_SEM_MARCAR = 'Para continuar, autorize o uso dos seus dados de saúde.';
 
@@ -81,11 +81,23 @@ window.RonuAceite = (function () {
       if (erro.message === 'Sessão expirada.') return null;
     }
 
+    return preencher(caixa, corpo, { tentar: () => carregar(caixa, { logado }) });
+  }
+
+  // Preenche a caixa com um texto que já veio da API por outra rota (o convite da casa traz o texto vigente na
+  // resposta do POST /casa/convites/verificar). tentar: o que o "Tentar de novo" faz se o corpo não servir.
+  function preencher(caixa, corpo, { tentar = null } = {}) {
+    const p = partes(caixa);
+    const tipo = tipoDa(caixa);
+    limparErro(p);
+    p.marcar.checked = false;
     const versao = corpo?.versaoVigente ?? corpo?.versao;
     if (!corpo || !versao || !corpo.titulo || !corpo.texto) {
       p.titulo.textContent = TITULO_RESERVA[tipo] || TITULO_RESERVA.geral;
       p.texto.replaceChildren();
-      mostrarErro(p, MSG_CARREGAR, { comTentar: () => carregar(caixa, { logado }) });
+      p.marcar.disabled = true;
+      delete caixa.dataset.versao;
+      mostrarErro(p, MSG_CARREGAR, tentar ? { comTentar: tentar } : {});
       caixa.removeAttribute('aria-busy');
       return null;
     }
@@ -136,5 +148,5 @@ window.RonuAceite = (function () {
     });
   }
 
-  return { carregar, versaoMarcada, textoMudou, iniciar };
+  return { carregar, preencher, versaoMarcada, textoMudou, iniciar };
 })();

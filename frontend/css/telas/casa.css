@@ -1,0 +1,950 @@
+/*
+  Ronu — Casa (plano família, etapa 7): a aba Casa (casa.html) e o convite
+  (casa-convite.html). Depende de tokens, base, componentes e troca.css.
+  Referência: canvas "Plano família · Casa" (Casa, CasaMobile, CasaMembro,
+  CasaConvite), com os hex trocados pelos tokens.
+
+  Desktop: a semana da casa no centro (pedidos, abas dos dias, almoço e jantar
+  lado a lado) e a coluna lateral com a lista da casa, o orçamento e os
+  membros. Celular: uma coluna, a lateral depois das refeições.
+  O acento fica para a ação principal (gerar, convidar, entrar), o contador de
+  pedidos e o dia escolhido. A pílula "da casa" é contorno, sem cor.
+*/
+
+/* ---------- Faixa de título ---------- */
+.faixa-titulo h1 {
+  font-size: var(--t-h1);
+}
+
+.cs-topo-acao {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  max-width: 340px;
+  text-align: right;
+}
+
+.cs-topo-acao .apoio {
+  font-size: var(--t-rotulo);
+  line-height: 1.5;
+}
+
+/* ---------- Estrutura ---------- */
+.cs-main {
+  padding-top: var(--e-7);
+  padding-bottom: var(--e-10);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-6);
+}
+
+.cs-grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+  gap: var(--e-7);
+  align-items: start;
+}
+
+.cs-coluna,
+.cs-lateral {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cs-coluna {
+  gap: var(--e-7);
+}
+
+.cs-lateral {
+  gap: var(--e-4);
+}
+
+.cs-estado {
+  max-width: 420px;
+  padding: var(--e-9) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.cs-estado-cartao {
+  max-width: 640px;
+  padding: var(--e-8);
+  align-items: flex-start;
+}
+
+.cs-estado-cartao p {
+  max-width: 52ch;
+  line-height: 1.6;
+}
+
+/* Texto novo da casa: a caixa de aceite ocupa a largura do cartão, e as duas saídas ficam lado a lado. */
+.cs-estado-cartao .aceite {
+  align-self: stretch;
+}
+
+.cs-sem-aceite-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+}
+
+.cs-secao-titulo {
+  font-size: var(--t-h2);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.cs-secao-titulo:focus-visible {
+  outline-offset: 4px;
+}
+
+.cs-subtitulo {
+  font-family: var(--fonte-corpo);
+  font-size: var(--t-apoio);
+  font-weight: 600;
+}
+
+/* ---------- Casa vazia e convite: os dois cartões do que é compartilhado ---------- */
+.cs-vazia {
+  max-width: 880px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-6);
+}
+
+.cs-termos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--e-4);
+}
+
+.cs-termo {
+  padding: var(--e-5);
+  gap: var(--e-3);
+}
+
+.cs-termo-titulo {
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.cs-termo-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  font-size: var(--t-apoio);
+  line-height: 1.5;
+}
+
+.cs-termo-lista li {
+  position: relative;
+  padding-left: 28px;
+}
+
+/* Visto no acento ("a casa vê") e cadeado em --texto-2 ("só com você"), desenhados em CSS: a marca não é só cor,
+   a forma muda entre as duas listas. */
+.cs-termo-ve li::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 0.32em;
+  width: 11px;
+  height: 6px;
+  border-left: 2px solid var(--acento);
+  border-bottom: 2px solid var(--acento);
+  transform: rotate(-45deg);
+}
+
+.cs-termo-so li::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 0.62em;
+  width: 12px;
+  height: 9px;
+  border: 1.5px solid var(--texto-2);
+  border-radius: 2px;
+}
+
+.cs-termo-so li::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 0.2em;
+  width: 6px;
+  height: 7px;
+  border: 1.5px solid var(--texto-2);
+  border-bottom: 0;
+  border-radius: 4px 4px 0 0;
+}
+
+.cs-casa-pequena {
+  max-width: 72ch;
+  padding-top: var(--e-4);
+  border-top: 1px solid var(--divisor);
+  font-size: var(--t-apoio);
+  line-height: 1.6;
+  color: var(--texto-2);
+}
+
+.cs-criar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e-3) var(--e-5);
+}
+
+/* ---------- Faixa da transferência pendente ---------- */
+.cs-faixa {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-3) var(--e-5);
+  padding: var(--e-4) var(--e-5);
+  background: var(--superficie-2);
+  border: 1px solid var(--acento);
+  border-radius: var(--raio-card);
+  animation: entra var(--d-media) var(--curva-saida) both;
+}
+
+.cs-faixa p {
+  flex: 1 1 320px;
+  margin: 0;
+  font-size: var(--t-corpo);
+  line-height: 1.55;
+}
+
+.cs-faixa-acoes {
+  display: flex;
+  gap: var(--e-2);
+}
+
+/* ---------- Pedidos (dono) ---------- */
+.cs-pedidos {
+  padding: var(--e-4) var(--e-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  background: var(--superficie-2);
+  border: 1px solid var(--acento);
+  border-radius: var(--raio-card);
+  animation: entra var(--d-media) var(--curva-saida) both;
+}
+
+.cs-pedidos-cabeca {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+}
+
+.cs-pedidos-cabeca h2 {
+  font-family: var(--fonte-corpo);
+  font-size: var(--t-corpo-g);
+  font-weight: 600;
+}
+
+.cs-pedidos-lista {
+  display: flex;
+  flex-direction: column;
+}
+
+.cs-pedido {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-3);
+  padding: var(--e-3) 0;
+  border-top: 1px solid var(--divisor);
+}
+
+.cs-pedido:last-child {
+  padding-bottom: 0;
+}
+
+.cs-pedido-texto {
+  flex: 1 1 280px;
+  margin: 0;
+  display: flex;
+  gap: var(--e-2);
+  font-size: var(--t-apoio);
+  line-height: 1.5;
+}
+
+.cs-pedido-aviso .cs-pedido-texto {
+  color: var(--texto-2);
+}
+
+.cs-icone {
+  flex: none;
+  display: inline-flex;
+  margin-top: 2px;
+}
+
+.cs-icone svg {
+  width: 16px;
+  height: 16px;
+}
+
+.cs-pedido-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+}
+
+.cs-pedido-acoes .botao {
+  min-height: 44px;
+}
+
+/* ---------- Aviso de lista curta (dono) ---------- */
+.cs-nota-linha {
+  display: flex;
+  align-items: baseline;
+  gap: var(--e-3);
+  padding: 12px 16px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  font-size: var(--t-apoio);
+  color: var(--texto-2);
+}
+
+.cs-nota-linha p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.cs-traco {
+  flex: none;
+  width: 14px;
+  height: 1px;
+  background: var(--acento);
+  transform: translateY(-0.3em);
+}
+
+/* ---------- Refeições da casa ---------- */
+.cs-refeicoes-secao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+
+#cs-semana-bloco {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+
+#cs-semana-bloco[hidden] {
+  display: none;
+}
+
+.cs-sem-semana {
+  padding: var(--e-6);
+  border: 1px dashed var(--linha);
+  border-radius: var(--raio-card);
+  color: var(--texto-2);
+  line-height: 1.6;
+}
+
+.cs-sem-semana p {
+  max-width: 60ch;
+  margin: 0;
+}
+
+.cs-dias {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.cs-dia {
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 0;
+  background: transparent;
+  border: 1px solid var(--linha);
+  border-radius: var(--raio);
+  color: var(--texto);
+  font-size: var(--t-pequeno);
+  transition: background-color var(--d-rapida) ease, border-color var(--d-rapida) ease, color var(--d-rapida) ease;
+}
+
+.cs-dia:hover {
+  border-color: var(--borda-forte);
+}
+
+.cs-dia[aria-selected="true"] {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--sobre-acento);
+  font-weight: 600;
+}
+
+.cs-refeicoes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--e-4);
+}
+
+.cs-refeicoes:focus-visible {
+  outline-offset: 4px;
+}
+
+.cs-refeicao {
+  padding: var(--e-4) var(--e-5);
+  gap: var(--e-2);
+}
+
+.cs-refeicao-cabeca {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--e-3);
+  padding-bottom: var(--e-1);
+}
+
+.cs-refeicao-titulo {
+  display: flex;
+  align-items: baseline;
+  gap: var(--e-2);
+}
+
+.cs-refeicao-hora {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 1.125rem;
+  line-height: 1.1;
+}
+
+.cs-refeicao-nome {
+  font-family: var(--fonte-corpo);
+  font-size: var(--t-corpo-g);
+  font-weight: 600;
+}
+
+.cs-refeicao-nota {
+  margin: 0;
+  font-size: var(--t-pequeno);
+  line-height: 1.5;
+  color: var(--texto-2);
+}
+
+.cs-itens {
+  display: flex;
+  flex-direction: column;
+}
+
+.cs-item {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+  padding-top: 6px;
+  border-top: 1px solid var(--divisor);
+}
+
+.cs-item:focus-visible {
+  outline-offset: 2px;
+}
+
+.cs-item-nome {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px var(--e-2);
+  font-size: var(--t-apoio);
+  line-height: 1.4;
+}
+
+.cs-item-qtd {
+  flex: none;
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 1.0625rem;
+  white-space: nowrap;
+}
+
+.cs-item-acao {
+  flex: none;
+  min-height: 44px;
+  padding: 0 var(--e-2);
+  font-size: var(--t-pequeno);
+  white-space: nowrap;
+}
+
+.cs-item-acao:disabled {
+  text-decoration: none;
+  cursor: default;
+}
+
+.cs-item-acao[aria-busy="true"] {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+/* "trocado": a mesma marca do painel, tracejada no acento; a área de toque passa de 44 px. */
+.cs-trocado {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  background: transparent;
+  border: 1px dashed var(--acento);
+  border-radius: var(--raio-pilula);
+  color: var(--acento-texto);
+  font-family: var(--fonte-corpo);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color var(--d-rapida) ease;
+}
+
+.cs-trocado::after {
+  content: '';
+  position: absolute;
+  inset: -12px -6px;
+}
+
+.cs-trocado:hover {
+  background: var(--superficie-3);
+}
+
+.cs-nota-troca {
+  margin: 0;
+  max-width: 72ch;
+  font-size: var(--t-pequeno);
+  line-height: 1.55;
+  color: var(--texto-2);
+}
+
+.cs-nota-troca a {
+  color: var(--texto);
+}
+
+/* ---------- Restrições da casa ---------- */
+.cs-restricoes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+/* ---------- Lateral ---------- */
+.cs-lista-link {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--e-3);
+  padding: var(--e-4);
+  color: var(--texto);
+  text-decoration: none;
+}
+
+.cs-lista-icone {
+  flex: none;
+  width: 24px;
+  height: 24px;
+}
+
+.cs-lista-texto {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cs-lista-titulo {
+  font-size: var(--t-corpo-g);
+  font-weight: 600;
+}
+
+.cs-lista-texto .apoio {
+  line-height: 1.45;
+}
+
+.cs-seta {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--texto-2);
+}
+
+.cs-cartao {
+  padding: var(--e-4);
+  gap: var(--e-3);
+}
+
+.cs-cartao-cabeca {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--e-3);
+}
+
+.cs-cartao-titulo {
+  font-family: var(--fonte-corpo);
+  font-size: var(--t-corpo-g);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.cs-cartao .apoio {
+  line-height: 1.5;
+}
+
+/* Orçamento: o segmentado com a escolha no acento, como no canvas. */
+.cs-orcamento > button {
+  min-height: 44px;
+  padding: 8px 6px;
+  color: var(--texto);
+  font-size: var(--t-pequeno);
+}
+
+.cs-orcamento > button[aria-checked="true"] {
+  background: var(--acento);
+  color: var(--sobre-acento);
+  font-weight: 600;
+}
+
+/* Membro: só leitura. A escolha da casa continua no acento; as outras ficam apagadas. */
+.cs-orcamento[aria-disabled="true"] > button {
+  cursor: default;
+}
+
+.cs-orcamento[aria-disabled="true"] > button:not([aria-checked="true"]) {
+  color: var(--texto-2);
+}
+
+.cs-membros {
+  display: flex;
+  flex-direction: column;
+}
+
+.cs-membro {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  padding: 6px 0;
+  border-top: 1px solid var(--divisor);
+}
+
+.cs-membro-inicial {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--raio-pilula);
+  background: var(--superficie-3);
+  border: 1px solid var(--linha);
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 0.9375rem;
+}
+
+.cs-membro-texto {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.cs-membro-nome {
+  font-size: var(--t-corpo);
+  overflow-wrap: anywhere;
+}
+
+.cs-membro-texto .apoio {
+  font-size: var(--t-rotulo);
+}
+
+.cs-membro-espera {
+  color: var(--acento-texto);
+}
+
+.cs-membro-acao {
+  flex: none;
+  font-size: var(--t-pequeno);
+}
+
+.cs-convidar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  padding-top: var(--e-2);
+}
+
+.cs-convite {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  padding: var(--e-4);
+  background: var(--superficie-2);
+  border: 1px solid var(--acento);
+  border-radius: var(--raio-card);
+  animation: entra var(--d-media) var(--curva-saida) both;
+}
+
+.cs-convite h3 {
+  font-family: var(--fonte-corpo);
+}
+
+.cs-convite-link {
+  margin: 0;
+  padding: var(--e-3);
+  background: var(--fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-2);
+  font-family: var(--fonte-mono);
+  font-size: var(--t-pequeno);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
+.cs-convite .nota,
+.cs-convite .apoio {
+  margin: 0;
+}
+
+.cs-convite-botoes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--e-2);
+}
+
+.cs-convite-botoes .botao {
+  padding-left: var(--e-3);
+  padding-right: var(--e-3);
+}
+
+.cs-convite-botoes .botao[hidden] {
+  display: none;
+}
+
+.cs-convites-abertos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cs-subtitulo-pequeno {
+  font-family: var(--fonte-corpo);
+  font-size: var(--t-pequeno);
+  font-weight: 600;
+  color: var(--texto-2);
+}
+
+.cs-convite-aberto {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-3);
+}
+
+.cs-saidas {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 0 2px;
+}
+
+.cs-saida {
+  padding: 0;
+  color: var(--texto);
+  font-size: var(--t-apoio);
+}
+
+.cs-saida-sair {
+  color: var(--acento-texto);
+}
+
+.cs-saidas .apoio {
+  line-height: 1.5;
+}
+
+/* ---------- Diálogos (sair, remover, passar) ---------- */
+.cs-dialogo-texto {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.cs-dialogo-rodape .botao-texto {
+  align-self: center;
+}
+
+.cs-escolha {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.cs-escolha-opcao {
+  justify-content: flex-start;
+  min-height: 56px;
+  padding: 10px 14px;
+}
+
+.cs-escolha-nome {
+  font-size: var(--t-corpo-g);
+  font-weight: 600;
+}
+
+/* ---------- Convite (casa-convite.html) ---------- */
+.cv-main {
+  max-width: 880px;
+  padding-top: var(--e-9);
+  padding-bottom: var(--e-10);
+}
+
+.cv-estado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-6);
+}
+
+.cv-estado[hidden] {
+  display: none;
+}
+
+.cv-cabeca {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.cv-titulo {
+  font-size: clamp(1.875rem, 1.5rem + 1.6vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.cv-titulo:focus-visible {
+  outline-offset: 6px;
+}
+
+.cv-cabeca p {
+  max-width: 64ch;
+  font-size: var(--t-corpo-g);
+  line-height: 1.55;
+  color: var(--texto-2);
+}
+
+.cv-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e-3);
+}
+
+.cv-acoes .apoio {
+  flex: 1 1 260px;
+  line-height: 1.5;
+}
+
+/* Entrada de cada estado: uma vez, curta (desligada com movimento reduzido no base.css). */
+.cv-estado[data-entrando] {
+  animation: entra var(--d-media) var(--curva-saida) both;
+}
+
+.cv-cabecalho-simples .cabecalho-linha {
+  justify-content: space-between;
+}
+
+/* ---------- Celular e telas médias ---------- */
+@media (max-width: 960px) {
+  .cs-grade {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cs-refeicoes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .cs-topo-acao {
+    width: 100%;
+    max-width: none;
+    align-items: stretch;
+    text-align: left;
+  }
+
+  .cs-topo-acao .botao {
+    width: 100%;
+  }
+
+  .cs-termos {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cs-criar .botao {
+    width: 100%;
+  }
+
+  .cs-estado-cartao {
+    padding: var(--e-6);
+  }
+
+  .cs-estado-cartao .botao {
+    width: 100%;
+  }
+
+  .cs-sem-aceite-acoes {
+    align-self: stretch;
+  }
+
+  .cs-coluna {
+    gap: var(--e-6);
+  }
+
+  .cs-secao-titulo {
+    font-size: 1.375rem;
+  }
+
+  .cs-dias {
+    gap: 4px;
+  }
+
+  .cs-refeicao {
+    padding: var(--e-4);
+  }
+
+  .cs-pedido-acoes {
+    width: 100%;
+  }
+
+  .cs-pedido-acoes .botao {
+    flex: 1 1 auto;
+  }
+
+  .cs-faixa-acoes {
+    width: 100%;
+  }
+
+  .cs-faixa-acoes .botao {
+    flex: 1;
+  }
+
+  .cv-main {
+    padding-top: var(--e-7);
+  }
+
+  .cv-acoes .botao {
+    flex: 1 1 100%;
+  }
+}

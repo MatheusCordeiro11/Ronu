@@ -36,6 +36,21 @@
   flex-wrap: wrap;
 }
 
+/* Plano família: "Da casa | Só a minha parte", logo abaixo da frase do título. */
+.lc-visao {
+  align-self: flex-start;
+  width: min(100%, 360px);
+  margin-top: var(--e-1);
+}
+
+.lc-visao > button {
+  min-height: 44px;
+}
+
+.lc-visao[hidden] {
+  display: none;
+}
+
 .lc-icone {
   width: 16px;
   height: 16px;

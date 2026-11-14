@@ -44,8 +44,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const LIMITE_URL_WHATSAPP = 2000;
   const CHAVE_ESCONDER = 'ronu:compras:esconder';
 
-  let lista = null;        // a resposta do GET
+  let lista = null;        // a lista na tela: a da casa ou a individual (as duas têm o mesmo formato de seções)
   let dataGeracaoTexto = '';
+
+  // Plano família (etapa 7): quem está numa casa com semana vê o segmentado "Da casa | Só a minha parte", com
+  // "Da casa" escolhido. A lista da casa é a semana de todos somada; o "já tenho" dela vale para a casa toda
+  // (PUT /casa/lista-compras/...). "Só a minha parte" é a lista de sempre, com as marcações de sempre.
+  let visao = 'minha';
+  let listaCasa = null;    // ListaCasaResponse, ou null fora de uma casa com semana
+  let respostaMinha = null; // { status, corpo } do GET individual
+  let ufLida = null;
   let esconder = lerEsconder();
   let detalheAberto = null;  // chave do item com o detalhe aberto (um por vez)
   const salvando = new Set(); // chaves com PUT em andamento
@@ -173,6 +181,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!itens.length) return;
     const RA = window.RonuAlergias;
     const codigos = RA.ordenar([...new Set(itens.flatMap((i) => i.alergias))]);
+    // Na lista da casa, a marca usa só as alergias de quem vê (a API não marca as dos outros): o item pode ser
+    // do café de outra pessoa, então o texto não manda trocar no painel.
+    $('lc-alergia-painel').hidden = visao === 'casa';
+    if (visao === 'casa') {
+      $('lc-alergia-texto').replaceChildren(
+        itens.length === 1 ? '1 item da lista da casa tem ' : `${itens.length} itens da lista da casa têm `,
+        criar('strong', null, RA.juntar(codigos.map(RA.rotulo))),
+        ', das suas alergias. Só você vê esta marca: na sua porção, troque no painel o que for seu.'
+      );
+      return;
+    }
     $('lc-alergia-texto').replaceChildren(
       'Esta lista vem da dieta atual, gerada antes de você marcar ',
       criar('strong', null, RA.juntar(codigos.map(RA.rotulo))),
@@ -331,6 +350,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const texto = faltam === 0 ? 'Tudo em casa' : faltam === 1 ? 'Falta 1 item' : `Faltam ${faltam} itens`;
 
     $('lc-faltam').textContent = texto;
+    $('lc-andamento-nota').textContent = visao === 'casa'
+      ? 'O "já tenho" vale para a casa toda.'
+      : 'A marcação fica salva na conta e aparece também no celular.';
+    $('lc-incompleta').hidden = !(visao === 'casa' && lista.completa === false);
     $('lc-feitos').textContent = feitos;
     $('lc-total').textContent = itens.length;
     $('lc-preenche').style.width = `${itens.length ? Math.round((feitos / itens.length) * 100) : 0}%`;
@@ -391,12 +414,21 @@ document.addEventListener('DOMContentLoaded', () => {
     renderizarLista();
     focarCaixa(proximo);
 
+    // Na casa, a marca leva a semana e, para marcar, a quantidade que a tela mostrava: se a lista da casa passou a
+    // pedir mais no meio (alguém gerou o café e os lanches), a API recusa em vez de marcar o que a pessoa não viu.
+    const daCasa = visao === 'casa';
+    const rota = daCasa
+      ? `/casa/lista-compras/itens/${encodeURIComponent(item.chave)}`
+      : `/dietas/atual/lista-compras/itens/${encodeURIComponent(item.chave)}`;
+    const corpo = daCasa
+      ? { semanaId: lista.semanaId, tenho: novo, ...(novo ? { quantidade: item.quantidade } : {}) }
+      : { dietaId: lista.dietaId, tenho: novo };
     let resposta;
     try {
-      resposta = await ronuFetchAutenticado(`/dietas/atual/lista-compras/itens/${encodeURIComponent(item.chave)}`, {
+      resposta = await ronuFetchAutenticado(rota, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dietaId: lista.dietaId, tenho: novo })
+        body: JSON.stringify(corpo)
       });
     } catch (erro) {
       // O fetch só rejeita em falha de rede (ou na sessão expirada, que já saiu da página).
@@ -411,7 +443,11 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     if (resposta.status === 409) {
-      desfazer(item, 'Sua dieta mudou desde que você abriu a lista. Atualize para ver a lista nova.', true);
+      // Na casa, o 409 tem dois motivos (a semana mudou, ou a lista pede mais agora): a mensagem da API diz qual.
+      const mensagemCasa = daCasa ? (await resposta.json().catch(() => null))?.mensagem : null;
+      desfazer(item, mensagemCasa || (daCasa
+        ? 'A lista da casa mudou desde que você abriu. Atualize para ver a lista nova.'
+        : 'Sua dieta mudou desde que você abriu a lista. Atualize para ver a lista nova.'), true);
       return;
     }
     desfazer(item, `Não foi possível salvar ${item.nome}. Tente de novo.`);
@@ -428,7 +464,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Só o que falta, sem dado de saúde (S7).
   function textoParaCompartilhar() {
-    const linhas = [`Lista de compras · dieta de ${dataGeracaoTexto}`];
+    // Na casa, o título vem pronto da API ("Lista de compras da casa · semana de 26/10").
+    const linhas = [visao === 'casa' ? lista.tituloCompartilhar : `Lista de compras · dieta de ${dataGeracaoTexto}`];
     let algum = false;
     lista.secoes.forEach((secao) => {
       const faltam = secao.itens.filter((i) => !i.tenho);
@@ -536,45 +573,112 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // A lista da casa: 404 é "sem casa" ou "a casa ainda não tem semana", 409 é sem o aceite da casa. Nos três, a
+  // tela fica só com a lista individual, sem o segmentado.
+  async function buscarListaCasa() {
+    try {
+      const resposta = await ronuFetchAutenticado('/casa/lista-compras');
+      return resposta.ok ? await resposta.json() : null;
+    } catch (erro) {
+      if (erro.message === 'Sessão expirada.') throw erro;
+      return null;
+    }
+  }
+
+  async function lerMinha() {
+    const resposta = await ronuFetchAutenticado('/dietas/atual/lista-compras');
+    return { status: resposta.status, corpo: resposta.ok ? await resposta.json() : null };
+  }
+
   async function carregar() {
     esconderAviso();
     mostrarSomente(elCarregando);
     elData.hidden = true;
 
-    let resposta;
-    let uf;
     try {
-      [resposta, uf] = await Promise.all([ronuFetchAutenticado('/dietas/atual/lista-compras'), buscarUf()]);
+      [respostaMinha, ufLida, listaCasa] = await Promise.all([lerMinha(), buscarUf(), buscarListaCasa()]);
     } catch {
       mostrarSomente(elErro);
       return;
     }
 
-    if (resposta.status === 404) {
-      mostrarSomente(elSemDieta);
-      return;
-    }
-    if (!resposta.ok) {
-      mostrarSomente(elErro);
-      return;
-    }
+    const temCasa = Boolean(listaCasa);
+    $('lc-visao').hidden = !temCasa;
+    // Ao recarregar (o "Atualizar a lista" depois de um 409), a escolha da pessoa fica.
+    if (!temCasa) visao = 'minha';
+    else if (!carregou) visao = 'casa';
+    carregou = true;
+    aplicarVisao();
+  }
 
-    lista = await resposta.json();
-    dataGeracaoTexto = formatarDia(lista.dataGeracao, uf);
-    elData.textContent = `Dieta gerada em ${dataGeracaoTexto}`;
-    elData.hidden = false;
+  let carregou = false;
+
+  function aplicarVisao() {
+    $('lc-visao').querySelectorAll('[role="tab"]').forEach((aba) => {
+      const escolhida = aba.dataset.visao === visao;
+      aba.setAttribute('aria-selected', String(escolhida));
+      aba.tabIndex = escolhida ? 0 : -1;
+    });
+    detalheAberto = null;
+    fecharCompartilharSemFoco();
+    esconderAviso();
+
+    if (visao === 'casa') {
+      lista = listaCasa;
+      $('lc-descricao').textContent = 'A semana de todos da casa: o almoço e o jantar, com a porção de cada um, e o café e os lanches, somados numa compra só.';
+      $('lc-compartilhar-apoio').textContent = 'Só o que falta comprar, sem nomes, porções nem alergias.';
+      dataGeracaoTexto = formatarDia(lista.geradaEm, ufLida);
+      elData.textContent = `Semana da casa de ${dataGeracaoTexto}`;
+      elData.hidden = false;
+    } else {
+      $('lc-descricao').textContent = listaCasa
+        ? 'Só o que a sua dieta da semana pede, já em peso cru e em unidades de mercado.'
+        : 'Tudo o que a sua dieta da semana pede, já em peso cru e em unidades de mercado.';
+      $('lc-compartilhar-apoio').textContent = 'Só o que falta comprar, sem peso, meta nem nenhum dado seu.';
+      if (respostaMinha.status === 404) {
+        elData.hidden = true;
+        mostrarSomente(elSemDieta);
+        return;
+      }
+      if (!respostaMinha.corpo) {
+        mostrarSomente(elErro);
+        return;
+      }
+      lista = respostaMinha.corpo;
+      dataGeracaoTexto = formatarDia(lista.dataGeracao, ufLida);
+      elData.textContent = `Dieta gerada em ${dataGeracaoTexto}`;
+      elData.hidden = false;
+    }
 
     if (!lista.disponivel) {
       mostrarSomente(elAntiga);
       return;
     }
 
-    detalheAberto = null;
     elAvisoOleo.hidden = !lista.avisoOleo;
     renderizarEsconder();
     renderizarLista();
     mostrarSomente(elConteudo);
   }
+
+  // Segmentado como abas (setas trocam a visão, só a escolhida fica no Tab).
+  function escolherVisao(nova, focar) {
+    if (nova === visao) return;
+    visao = nova;
+    aplicarVisao();
+    if (focar) $(`lc-visao-${nova}`).focus();
+  }
+
+  $('lc-visao').addEventListener('click', (evento) => {
+    const aba = evento.target.closest('[data-visao]');
+    if (aba) escolherVisao(aba.dataset.visao, false);
+  });
+  $('lc-visao').addEventListener('keydown', (evento) => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(evento.key)) return;
+    evento.preventDefault();
+    const nova = { Home: 'casa', End: 'minha' }[evento.key] || (visao === 'casa' ? 'minha' : 'casa');
+    escolherVisao(nova, true);
+  });
 
   $('lc-tentar-novamente').addEventListener('click', carregar);
   btnAtualizar.addEventListener('click', () => {

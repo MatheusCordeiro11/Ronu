@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="css/base/tokens.css">
   <link rel="stylesheet" href="css/base/base.css">
   <link rel="stylesheet" href="css/componentes.css">
+  <link rel="stylesheet" href="css/troca.css">
   <link rel="stylesheet" href="css/telas/painel.css">
 
   <script src="js/base/movimento.js" defer></script>
@@ -39,6 +40,8 @@
         </a>
         <div class="db-gerar">
           <button type="button" class="botao botao-primario" id="btn-gerar"><span class="btn-label">Gerar nova dieta</span></button>
+          <!-- Quem está numa casa gera só o café e os lanches (S5): o almoço e o jantar vêm da semana da casa. -->
+          <span class="apoio sobre-grade" data-nota-casa hidden>O almoço e o jantar vêm da casa.</span>
           <span class="apoio sobre-grade" data-dica-gerar></span>
         </div>
       </div>
@@ -196,6 +199,7 @@
          o do topo some nessa largura. -->
     <div class="db-gerar-fim" id="db-gerar-fim" hidden>
       <button type="button" class="botao botao-primario botao-grande botao-bloco" id="btn-gerar-fim"><span class="btn-label">Gerar nova dieta</span></button>
+      <span class="apoio" data-nota-casa hidden>O almoço e o jantar vêm da casa.</span>
       <span class="apoio" data-dica-gerar></span>
     </div>
   </main>
@@ -216,6 +220,7 @@
 
   <script src="js/auth.js"></script>
   <script src="js/base/cabecalho.js"></script>
+  <script src="js/base/casa-comum.js"></script>
   <script src="js/troca.js"></script>
   <script src="js/dashboard.js"></script>
 </body>

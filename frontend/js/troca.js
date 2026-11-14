@@ -8,6 +8,14 @@
 // O servidor confere tudo de novo e devolve a dieta inteira com a revisão nova;
 // a tela nunca calcula quantidade nem kcal. 409 e 422 querem dizer que a dieta
 // mudou por fora (outra aba, dieta nova, base nova): a tela recarrega e avisa.
+//
+// Troca na casa (plano família, etapa 7, só o dono): o mesmo painel, com
+// alvo.casa = { semanaId, revisao, chaveCasa }. As rotas são as da semana da
+// casa (/casa/semana/trocas...), o item é a posição na refeição da casa, a
+// resposta é a SemanaCasaResponse (sem dieta: quem chama recarrega a própria
+// dieta em ctx.aplicarCasa) e o painel diz que a troca muda a panela de todo
+// mundo. As quantidades e kcal das opções são só as do dono (a API não manda as
+// dos outros).
 
 window.RonuTroca = (function () {
   const MENOS = '−';
@@ -29,6 +37,8 @@ window.RonuTroca = (function () {
   let aoFechar = null;
   // A posição da última troca, para o foco depois do "Desfazer".
   let ultimaPosicao = null;
+  // A última troca foi na casa: o "Desfazer" vai para a rota da casa.
+  let ultimaCasa = false;
   let desfazendo = false;
 
   // ---------- Formatação ----------
@@ -95,12 +105,20 @@ window.RonuTroca = (function () {
 
   // 422 com motivo "alergia" (TACO 2c): o desfazer ou o voltar traria de volta um alimento com alergia
   // marcada. A dieta não mudou, então a tela não recarrega: mostra a mensagem da API no lugar.
+  // Na casa, o mesmo caso tem o motivo "restricao_da_casa": o que voltaria foi marcado depois no "não come" ou nas
+  // alergias de alguém (a API não diz quem). Também nada foi gravado.
   function recusaPorAlergia(r) {
-    return r.status === 422 && r.corpo?.motivo === 'alergia';
+    return r.status === 422 && ['alergia', 'restricao_da_casa'].includes(r.corpo?.motivo);
+  }
+
+  // 409 com motivo "refeicao_da_casa": a troca individual num almoço ou jantar da casa. A dieta não mudou; a
+  // mensagem da API diz o caminho (Pedir troca, ou a troca pela semana da casa).
+  function refeicaoDaCasa(r) {
+    return r.status === 409 && r.corpo?.motivo === 'refeicao_da_casa';
   }
 
   function mudouPorFora(r) {
-    return r.status === 409 || (r.status === 422 && !recusaPorAlergia(r)) || r.status === 404;
+    return (r.status === 409 && !refeicaoDaCasa(r)) || (r.status === 422 && !recusaPorAlergia(r)) || r.status === 404;
   }
 
   function mensagemDeErro(r, padrao) {
@@ -242,13 +260,22 @@ window.RonuTroca = (function () {
   }
 
   async function carregarOpcoes(estado) {
-    const { dia, refeicao, item } = estado.alvo;
+    const { dia, refeicao, item, casa } = estado.alvo;
     estado.carregando = true;
     estado.erro = null;
     desenharOpcoes(estado);
 
-    const r = await pedir(`/dietas/atual/trocas/opcoes?dia=${dia}&refeicao=${refeicao}&item=${item}`);
+    const rota = casa
+      ? `/casa/semana/trocas/opcoes?${new URLSearchParams({ chaveCasa: casa.chaveCasa, item })}`
+      : `/dietas/atual/trocas/opcoes?dia=${dia}&refeicao=${refeicao}&item=${item}`;
+    const r = await pedir(rota);
     if (!r || !dialogo.open) return;
+    if (refeicaoDaCasa(r)) {
+      estado.carregando = false;
+      estado.erro = r.corpo?.mensagem || 'Este alimento é da refeição da casa.';
+      desenharOpcoes(estado);
+      return;
+    }
     // 400 aqui é "alimento não encontrado": a tela estava desatualizada.
     if (mudouPorFora(r) || r.status === 400) {
       recarregar(r);
@@ -309,13 +336,19 @@ window.RonuTroca = (function () {
 
   // foraPelaAlergia (TACO 2c): conta à parte do "não como" na API, mesmo que o item esteja nos dois.
   // foraPeloEvitar guarda o nome de antes da etapa 3: conta só o "Não como" (o "Prefiro evitar" leve não tira item).
-  function textoFora(fora, foraPeloEvitar, foraPelaAlergia) {
+  // Na casa (dados.foraPelasRestricoesDaCasa definido), o "não como" e as alergias de todos vêm numa contagem só,
+  // sem separar alergia, e "naoServeParaACasa" conta o que deixaria a porção de alguém fora da margem, sem dizer quem.
+  function textoFora(fora, foraPeloEvitar, foraPelaAlergia, foraPelaCasa) {
     const partes = [];
     const parte = (n, um, varios) => { if (n > 0) partes.push(n === 1 ? `1 ${um}` : `${n} ${varios}`); };
+    const casa = foraPelaCasa != null;
     parte(fora.porcaoMaxima || 0, 'passaria da porção máxima', 'passariam da porção máxima');
-    parte(fora.foraDaMeta || 0, 'deixaria o dia mais de 5% fora da meta', 'deixariam o dia mais de 5% fora da meta');
+    parte(fora.foraDaMeta || 0, casa ? 'deixaria o seu dia mais de 5% fora da meta' : 'deixaria o dia mais de 5% fora da meta',
+      casa ? 'deixariam o seu dia mais de 5% fora da meta' : 'deixariam o dia mais de 5% fora da meta');
+    parte(fora.naoServeParaACasa || 0, 'não serve para a porção de alguém da casa', 'não servem para a porção de alguém da casa');
+    parte(foraPelaCasa || 0, 'está no que a casa não come', 'estão no que a casa não come');
     parte(foraPelaAlergia || 0, 'tem uma das suas alergias', 'têm uma das suas alergias');
-    parte(foraPeloEvitar, 'está no que você marcou em Não como', 'estão no que você marcou em Não como');
+    parte(foraPeloEvitar || 0, 'está no que você marcou em Não como', 'estão no que você marcou em Não como');
     parte(fora.jaNaRefeicao || 0, 'já está nesta refeição', 'já estão nesta refeição');
     parte((fora.refogadoComOleo || 0) + (fora.usoDiferente || 0), 'não combina com esta refeição', 'não combinam com esta refeição');
     return partes.length ? `${juntar(partes)}.` : null;
@@ -324,6 +357,15 @@ window.RonuTroca = (function () {
   function corpoOpcoes(estado) {
     const corpo = criar('div', 'folha-corpo');
     const { alvo } = estado;
+
+    if (alvo.casa) {
+      const aviso = criar('div', 'troca-casa');
+      aviso.append(
+        criar('p', 'nota nota-forte', 'Trocar aqui muda a panela de todo mundo.'),
+        criar('p', 'troca-casa-apoio', 'O substituto respeita o que cada um não come, e a porção de cada pessoa é recalculada. As quantidades e kcal abaixo são as da sua porção.')
+      );
+      corpo.append(aviso);
+    }
 
     if (alvo.alimento.original) {
       const o = alvo.alimento.original;
@@ -359,10 +401,12 @@ window.RonuTroca = (function () {
     if (dados.ocorrenciasNaSemana > 1) {
       corpo.append(segmentadoEscopo('Onde trocar', [
         ['refeicao', 'Só nesta refeição', `${alvo.nomeRefeicao} de ${minuscula(nomeDia(alvo.diaSemana))}`],
-        ['semana', 'Na semana toda', `${dados.ocorrenciasNaSemana} vezes`]
+        ['semana', 'Na semana toda', alvo.casa ? `${dados.ocorrenciasNaSemana} vezes no almoço e no jantar` : `${dados.ocorrenciasNaSemana} vezes`]
       ], estado.escopo, mudarEscopo));
     } else {
-      corpo.append(criar('p', 'nota', 'Este alimento aparece só nesta refeição na semana.'));
+      corpo.append(criar('p', 'nota', alvo.casa
+        ? 'Este alimento aparece só nesta refeição da casa na semana.'
+        : 'Este alimento aparece só nesta refeição na semana.'));
     }
 
     const escopo = dados[estado.escopo];
@@ -409,7 +453,7 @@ window.RonuTroca = (function () {
       corpo.append(ver);
     }
 
-    const fora = textoFora(escopo.fora, dados.foraPeloEvitar, dados.foraPelaAlergia);
+    const fora = textoFora(escopo.fora, dados.foraPeloEvitar, dados.foraPelaAlergia, dados.foraPelasRestricoesDaCasa);
     if (fora) {
       const detalhes = criar('details', 'troca-fora');
       const resumo = criar('summary', null, 'Por que outras opções não aparecem');
@@ -491,9 +535,11 @@ window.RonuTroca = (function () {
 
   function desenharOpcoes(estado) {
     const { alvo } = estado;
-    const a = alvo.alimento;
-    const linhas = [`${alvo.nomeRefeicao} de ${minuscula(nomeDia(alvo.diaSemana))}`, quantidade(a.quantidade, a.unidade)];
     const original = estado.dados?.original;
+    // Na casa, a refeição pode ter virado individual para o dono: aí a tela não tem a porção dele, e a
+    // quantidade sai das opções (o original é o item da porção do dono, ou o da referência).
+    const a = alvo.alimento.quantidade == null && original ? { ...alvo.alimento, ...original, nome: alvo.alimento.nome } : alvo.alimento;
+    const linhas = [`${alvo.nomeRefeicao} de ${minuscula(nomeDia(alvo.diaSemana))}`, a.quantidade == null ? '' : quantidade(a.quantidade, a.unidade)];
     if (original) {
       linhas[1] += ` · ${inteiro(original.kcal)} kcal`;
       if (original.nutrienteG != null) linhas[1] += ` · ${NOMES_NUTRIENTE[estado.dados.nutriente]} ${decimal(original.nutrienteG)} g`;
@@ -505,6 +551,10 @@ window.RonuTroca = (function () {
   async function trocarAlimento(estado) {
     const opcao = opcaoEscolhida(estado);
     if (!opcao || estado.enviando) return;
+    if (estado.alvo.casa) {
+      trocarNaCasa(estado, opcao);
+      return;
+    }
     const atual = ctx.dietaAtual();
     const { dia, refeicao, item, alimento } = estado.alvo;
     estado.enviando = true;
@@ -549,10 +599,124 @@ window.RonuTroca = (function () {
   // foco no item e o aviso diz o que mudou (e o que caiu da lista de compras).
   function concluir(resposta, mudadas, posicao, texto) {
     ultimaPosicao = posicao;
+    ultimaCasa = false;
     ctx.aplicar(resposta, mudadas);
     aoFechar = () => ctx.focarItem(posicao);
     fecharDialogo();
     mostrarAviso({ texto, marcacoes: resposta.marcacoesRemovidas, desfazer: true });
+  }
+
+  // ---------- Troca na casa (só o dono) ----------
+
+  async function trocarNaCasa(estado, opcao) {
+    const { item, alimento, casa } = estado.alvo;
+    estado.enviando = true;
+    estado.erroEnvio = null;
+    desenharOpcoes(estado);
+
+    const r = await pedir('/casa/semana/trocas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        semanaId: casa.semanaId, revisao: casa.revisao, chaveCasa: casa.chaveCasa, item,
+        alimentoIdAtual: alimento.alimentoId || estado.dados.original.alimentoId,
+        alimentoIdNovo: opcao.alimentoId, escopo: estado.escopo
+      })
+    });
+    if (!r) return;
+    estado.enviando = false;
+
+    if (r.ok) {
+      const onde = estado.escopo === 'semana' ? 'no almoço e no jantar da semana toda' : 'só nesta refeição';
+      await concluirCasa(r.corpo, { chaveCasa: casa.chaveCasa, item, dia: estado.alvo.dia, refeicao: estado.alvo.refeicao },
+        `${alimento.nome} trocado por ${minuscula(opcao.nome)} ${onde}, para toda a casa. A porção de cada um foi recalculada.`);
+      return;
+    }
+    if (mudouPorFora(r)) {
+      recarregar(r);
+      return;
+    }
+    // 400: o substituto deixou de servir para alguém (a casa mudou no meio). As opções vêm de novo.
+    if (r.status === 400) {
+      estado.erroEnvio = r.corpo?.mensagem || 'Este substituto não serve mais para a casa. Escolha outro.';
+      carregarOpcoes(estado);
+      return;
+    }
+    estado.erroEnvio = mensagemDeErro(r, 'Não foi possível trocar agora. Tente de novo.');
+    desenharOpcoes(estado);
+  }
+
+  // A resposta é a semana da casa (só nomes): quem chama guarda a semana nova e recarrega a própria dieta,
+  // que também mudou (a porção do dono foi refeita).
+  async function concluirCasa(semana, posicao, texto) {
+    ultimaPosicao = posicao;
+    ultimaCasa = true;
+    aoFechar = () => ctx.focarItem(posicao);
+    await ctx.aplicarCasa(semana);
+    fecharDialogo();
+    mostrarAviso({ texto, desfazer: Boolean(semana.podeDesfazer) });
+  }
+
+  // "Voltar ao original" na casa: a semana da casa só diz QUAIS posições foram trocadas (trocados), não o que
+  // havia antes, então o diálogo não mostra o "era X": diz que volta o que a semana trouxe.
+  function abrirOriginalCasa(alvo) {
+    const estado = { alvo, escopo: 'refeicao', enviando: false, erro: null, primeiro: true };
+    abrirDialogo('folha-pequena', focarOrigem(alvo.origem));
+    desenharOriginalCasa(estado);
+  }
+
+  function desenharOriginalCasa(estado) {
+    const corpo = criar('div', 'folha-corpo');
+    const texto = criar('div', 'troca-original');
+    const linha = criar('p');
+    linha.append(criar('strong', null, estado.alvo.alimento.nome), ' entrou numa troca na casa.');
+    texto.append(linha, criar('p', 'texto-2', 'Voltar ao original traz de volta o alimento que a semana da casa tinha, e a porção de cada um é recalculada. Muda a panela de todo mundo.'));
+    corpo.append(texto, segmentadoEscopo('Onde voltar', [
+      ['refeicao', 'Só neste item', 'Esta refeição'],
+      ['semana', 'Na semana toda', 'Todos trocados do mesmo jeito']
+    ], estado.escopo, (valor) => { estado.escopo = valor; estado.erro = null; desenharOriginalCasa(estado); }));
+
+    const rodape = criar('footer', 'folha-rodape');
+    if (estado.erro) {
+      const erro = criar('p', 'aviso aviso-erro', estado.erro);
+      erro.setAttribute('role', 'alert');
+      rodape.append(erro);
+    }
+    const voltar = botao('botao botao-primario botao-bloco', estado.enviando ? 'Voltando...' : 'Voltar ao original', 'voltar',
+      () => voltarAoOriginalCasa(estado));
+    if (estado.enviando) voltar.setAttribute('aria-busy', 'true');
+    rodape.append(voltar);
+
+    montar([cabeca('Trocado na casa', [`${estado.alvo.nomeRefeicao} de ${minuscula(nomeDia(estado.alvo.diaSemana))}`]), corpo, rodape], estado.primeiro);
+    estado.primeiro = false;
+  }
+
+  async function voltarAoOriginalCasa(estado) {
+    if (estado.enviando) return;
+    const { item, alimento, casa } = estado.alvo;
+    estado.enviando = true;
+    estado.erro = null;
+    desenharOriginalCasa(estado);
+
+    const consulta = new URLSearchParams({ semanaId: casa.semanaId, revisao: casa.revisao, chaveCasa: casa.chaveCasa, item, escopo: estado.escopo });
+    const r = await pedir(`/casa/semana/trocas?${consulta}`, { method: 'DELETE' });
+    if (!r) return;
+    estado.enviando = false;
+
+    if (r.ok) {
+      const onde = estado.escopo === 'semana' ? 'na semana toda' : 'nesta refeição';
+      await concluirCasa(r.corpo, { chaveCasa: casa.chaveCasa, item, dia: estado.alvo.dia, refeicao: estado.alvo.refeicao },
+        `O original voltou ao lugar de ${minuscula(alimento.nome)} ${onde}, para toda a casa.`);
+      return;
+    }
+    if (mudouPorFora(r) || r.status === 400) {
+      recarregar(r);
+      return;
+    }
+    estado.erro = recusaPorAlergia(r) && r.corpo.mensagem
+      ? r.corpo.mensagem
+      : mensagemDeErro(r, 'Não foi possível voltar ao original agora. Tente de novo.');
+    desenharOriginalCasa(estado);
   }
 
   // ---------- "Era X" e "Voltar ao original" ----------
@@ -710,16 +874,29 @@ window.RonuTroca = (function () {
 
   async function desfazerUltima() {
     if (desfazendo) return;
-    const atual = ctx.dietaAtual();
     const botaoDesfazer = elAviso.querySelector('[data-foco="desfazer"]');
     desfazendo = true;
     botaoDesfazer?.setAttribute('aria-busy', 'true');
 
-    const consulta = new URLSearchParams({ dietaId: atual.dietaId, revisao: atual.revisao });
-    const r = await pedir(`/dietas/atual/trocas/ultima?${consulta}`, { method: 'DELETE' });
+    let r;
+    if (ultimaCasa) {
+      const semana = ctx.semanaCasa();
+      const consulta = new URLSearchParams({ semanaId: semana.semanaId, revisao: semana.revisao });
+      r = await pedir(`/casa/semana/trocas/ultima?${consulta}`, { method: 'DELETE' });
+    } else {
+      const atual = ctx.dietaAtual();
+      const consulta = new URLSearchParams({ dietaId: atual.dietaId, revisao: atual.revisao });
+      r = await pedir(`/dietas/atual/trocas/ultima?${consulta}`, { method: 'DELETE' });
+    }
     desfazendo = false;
     if (!r) return;
 
+    if (r.ok && ultimaCasa) {
+      await ctx.aplicarCasa(r.corpo);
+      mostrarAviso({ texto: 'Troca desfeita para toda a casa.', desfazer: false });
+      if (ultimaPosicao) ctx.focarItem(ultimaPosicao);
+      return;
+    }
     if (r.ok) {
       ctx.aplicar(r.corpo, []);
       mostrarAviso({ texto: 'Troca desfeita.', marcacoes: r.corpo.marcacoesRemovidas, desfazer: false });
@@ -762,5 +939,5 @@ window.RonuTroca = (function () {
     });
   }
 
-  return { configurar, abrirOpcoes, abrirOriginal, abrirSemTroca, fecharAviso };
+  return { configurar, abrirOpcoes, abrirOriginal, abrirOriginalCasa, abrirSemTroca, fecharAviso };
 })();

@@ -31,7 +31,12 @@
         </a>
         <span class="rotulo rotulo-acento" id="lc-data" hidden></span>
         <h1>Lista de compras</h1>
-        <p>Tudo o que a sua dieta da semana pede, já em peso cru e em unidades de mercado.</p>
+        <p id="lc-descricao">Tudo o que a sua dieta da semana pede, já em peso cru e em unidades de mercado.</p>
+        <!-- Plano família (etapa 7): quem está numa casa com semana escolhe entre a lista da casa e a sua parte. -->
+        <div class="segmentado lc-visao" id="lc-visao" role="tablist" aria-label="Qual lista" hidden>
+          <button type="button" role="tab" id="lc-visao-casa" aria-selected="true" aria-controls="conteudo" data-visao="casa">Da casa</button>
+          <button type="button" role="tab" id="lc-visao-minha" aria-selected="false" aria-controls="conteudo" data-visao="minha" tabindex="-1">Só a minha parte</button>
+        </div>
       </div>
       <div class="lc-acoes" id="lc-acoes" hidden>
         <button type="button" class="botao botao-fantasma" id="lc-esconder" aria-pressed="false">Esconder marcados</button>
@@ -79,7 +84,8 @@
           <h2 class="rotulo" id="lc-andamento-titulo">Andamento</h2>
           <span class="numero lc-faltam" id="lc-faltam"></span>
           <div class="trilho" aria-hidden="true"><span class="preenche lc-preenche" id="lc-preenche"></span></div>
-          <p class="apoio"><span class="num" id="lc-feitos"></span> de <span class="num" id="lc-total"></span> itens marcados como "já tenho". A marcação fica salva na conta e aparece também no celular.</p>
+          <p class="apoio"><span class="num" id="lc-feitos"></span> de <span class="num" id="lc-total"></span> itens marcados como "já tenho". <span id="lc-andamento-nota">A marcação fica salva na conta e aparece também no celular.</span></p>
+          <p class="nota" id="lc-incompleta" hidden>A parte de alguém da casa ainda não entrou na lista: falta a dieta dessa pessoa nesta semana.</p>
           <span class="lc-oculto" id="lc-anuncio" aria-live="polite"></span>
         </section>
 
@@ -91,7 +97,7 @@
             </button>
           </div>
           <pre class="lc-texto-compartilhar" id="lc-texto-compartilhar"></pre>
-          <p class="apoio">Só o que falta comprar, sem peso, meta nem nenhum dado seu.</p>
+          <p class="apoio" id="lc-compartilhar-apoio">Só o que falta comprar, sem peso, meta nem nenhum dado seu.</p>
           <p class="nota" id="lc-longo-demais" hidden>A lista é longa demais para abrir direto no WhatsApp. Copie o texto e cole na conversa.</p>
           <div class="lc-compartilhar-botoes">
             <button type="button" class="botao botao-primario" id="lc-enviar" hidden>Enviar</button>
@@ -107,7 +113,7 @@
         <aside class="aviso aviso-erro lc-alergia" id="lc-alergia" aria-labelledby="lc-alergia-titulo" hidden>
           <h2 class="rotulo rotulo-acento" id="lc-alergia-titulo">Alergia na lista</h2>
           <p class="lc-alergia-texto" id="lc-alergia-texto"></p>
-          <a class="botao botao-fantasma botao-pequeno" href="dashboard.html">Ir ao painel</a>
+          <a class="botao botao-fantasma botao-pequeno" id="lc-alergia-painel" href="dashboard.html">Ir ao painel</a>
         </aside>
         <div id="lc-secoes"></div>
         <p class="lc-tudo-marcado" id="lc-tudo-marcado" hidden>Tudo marcado como "já tenho".</p>

@@ -366,7 +366,45 @@ async function ronuRedirecionarPosAuth() {
   }
 
   const completo = await ronuChecarCadastroCompleto();
-  window.location.href = completo ? 'dashboard.html' : 'onboarding.html';
+  if (!completo) {
+    window.location.href = 'onboarding.html';
+    return;
+  }
+  window.location.href = ronuConvitePendente() ? 'casa-convite.html' : 'dashboard.html';
+}
+
+// ---------- Convite da casa (plano família, S4) ----------
+// Quem abre o link de convite sem estar logado (ou sem cadastro completo) passa
+// pelo login, pelo cadastro, pelo consentimento e pelo onboarding antes de ver o
+// convite. O token fica guardado só nesta aba (sessionStorage, como o da
+// redefinição de senha: nunca na URL depois de aberto) e a pessoa volta para
+// casa-convite.html no fim desse caminho: aqui, no pós-login, e no dashboard.js,
+// onde o onboarding termina. Sai quando o convite tem um desfecho (entrou,
+// recusou ou o link não vale mais).
+const RONU_CONVITE_CASA_KEY = 'ronu:conviteCasa';
+
+function ronuGuardarConvite(token) {
+  try {
+    sessionStorage.setItem(RONU_CONVITE_CASA_KEY, token);
+  } catch {
+    // Sem armazenamento: o convite vale só enquanto a página está aberta.
+  }
+}
+
+function ronuConvitePendente() {
+  try {
+    return sessionStorage.getItem(RONU_CONVITE_CASA_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function ronuEsquecerConvite() {
+  try {
+    sessionStorage.removeItem(RONU_CONVITE_CASA_KEY);
+  } catch {
+    // Nada a apagar.
+  }
 }
 
 // PUT /perfil/estado — usado por estado.html. A API normaliza e valida a UF;

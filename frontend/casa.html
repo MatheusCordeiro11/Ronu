@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ronu — Casa</title>
+  <meta name="description" content="Almoço e jantar da mesma panela, cada um com a porção da própria meta.">
+
+  <!-- Antes do CSS: aplica o modo escuro/claro antes da primeira pintura. -->
+  <script src="js/base/tema.js"></script>
+
+  <link rel="stylesheet" href="css/base/fontes.css">
+
+  <link rel="stylesheet" href="css/base/tokens.css">
+  <link rel="stylesheet" href="css/base/base.css">
+  <link rel="stylesheet" href="css/componentes.css">
+  <link rel="stylesheet" href="css/troca.css">
+  <link rel="stylesheet" href="css/telas/casa.css">
+</head>
+<body class="com-abas">
+  <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
+
+  <!-- Montado por js/base/cabecalho.js. O contador de pedidos vem do GET /casa desta tela (casa.js). -->
+  <header class="cabecalho" data-cabecalho="casa" data-casa-contador="pagina"></header>
+
+  <section class="faixa-titulo grade">
+    <div class="conteiner faixa-titulo-conteudo">
+      <div class="faixa-titulo-texto">
+        <span class="rotulo rotulo-acento" id="cs-semana" hidden></span>
+        <h1>Casa</h1>
+        <p id="cs-frase">Almoço e jantar da mesma panela, cada um com a porção da própria meta. Até 6 adultos, cada um com a própria conta.</p>
+      </div>
+
+      <!-- Dono: gera a semana. Membro: pede, sem o nome. -->
+      <div class="cs-topo-acao" id="cs-acao-dono" hidden>
+        <button type="button" class="botao botao-primario" id="cs-gerar"><span class="btn-label">Gerar nova semana da casa</span></button>
+        <span class="apoio">Até 3 gerações por hora, somando as suas dietas.</span>
+      </div>
+      <div class="cs-topo-acao" id="cs-acao-membro" hidden>
+        <button type="button" class="botao botao-fantasma" id="cs-pedir-semana"><span class="btn-label">Pedir nova semana</span></button>
+        <span class="apoio">Só quem criou a casa gera a semana. O pedido chega sem o seu nome.</span>
+      </div>
+    </div>
+  </section>
+
+  <main id="conteudo" class="conteiner cs-main">
+    <!-- Falhas de ações (gerar, orçamento, convite...): a tela continua como estava. -->
+    <div class="aviso aviso-erro" id="cs-erro" role="alert" tabindex="-1" hidden></div>
+    <p class="oculto-visual" id="cs-anuncio" aria-live="polite"></p>
+
+    <div class="cs-estado" id="cs-carregando" aria-live="polite">
+      <span class="texto-2">Carregando a casa...</span>
+      <div class="carregando" aria-hidden="true"></div>
+    </div>
+
+    <section class="cartao cs-estado-cartao" id="cs-falha" hidden>
+      <h2>Não foi possível carregar a casa</h2>
+      <p class="texto-2">Verifique sua conexão e tente novamente.</p>
+      <button type="button" class="botao botao-fantasma" id="cs-tentar">Tentar novamente</button>
+    </section>
+
+    <!-- ===== Sem casa (S3): os termos e a criação na própria aba ===== -->
+    <div class="cs-vazia" id="cs-sem-casa" hidden>
+      <div class="cs-termos">
+        <section class="cartao cs-termo" aria-labelledby="cs-ve-titulo">
+          <h2 class="cs-termo-titulo" id="cs-ve-titulo">O que a casa vê</h2>
+          <ul class="cs-termo-lista cs-termo-ve">
+            <li>O cardápio do almoço e do jantar da semana</li>
+            <li>A lista de compras da casa: tudo o que cada um come na semana, somado e sem nome</li>
+            <li>O que você não come, suas alergias e o que você prefere evitar, como restrições da casa: sem o seu nome e sem dizer o que é alergia</li>
+            <li>Seu primeiro nome na lista de membros</li>
+          </ul>
+        </section>
+        <section class="cartao cs-termo" aria-labelledby="cs-so-titulo">
+          <h2 class="cs-termo-titulo" id="cs-so-titulo">O que fica só com você</h2>
+          <ul class="cs-termo-lista cs-termo-so">
+            <li>Peso, meta, objetivo, progresso e treino</li>
+            <li>A sua porção em cada refeição</li>
+            <li>Seus cardápios de café da manhã e lanches (os itens só entram somados na lista da casa)</li>
+          </ul>
+        </section>
+      </div>
+
+      <p class="cs-casa-pequena">O Ronu não diz de quem é cada restrição. Mas numa casa pequena, como de duas pessoas, dá para deduzir: quem é o outro que não come camarão, ou o que e quanto ele come, olhando a lista da casa. Você pode sair quando quiser, e ao sair o seu vínculo com a casa é apagado.</p>
+
+      <div class="aceite" id="cs-aceite" data-aceite data-aceite-tipo="casa" data-logado="true" aria-busy="true">
+        <label class="aceite-marcar">
+          <input type="checkbox" id="cs-aceite-caixa" name="aceite" aria-describedby="cs-aceite-texto cs-aceite-erro" disabled>
+          <span data-aceite-titulo>Carregando o texto da autorização...</span>
+        </label>
+        <div class="aceite-texto" id="cs-aceite-texto" data-aceite-texto></div>
+        <span class="campo-erro" id="cs-aceite-erro" data-aceite-erro role="alert" hidden></span>
+      </div>
+
+      <div class="cs-criar">
+        <button type="button" class="botao botao-primario botao-grande" id="cs-criar"><span class="btn-label">Criar uma casa</span></button>
+        <p class="apoio">Recebeu um convite? Abra o link que a pessoa mandou.</p>
+      </div>
+    </div>
+
+    <!-- ===== Na casa, mas sem o aceite vigente (texto novo): aceitar a versão nova, ou sair sem aceitar ===== -->
+    <section class="cartao cs-estado-cartao" id="cs-sem-aceite" hidden>
+      <h2 id="cs-sem-aceite-titulo" tabindex="-1">O texto do que a casa compartilha mudou</h2>
+      <p class="texto-2" id="cs-sem-aceite-texto">Enquanto a autorização nova não for aceita, a casa fica fechada para você. Sair da casa continua possível.</p>
+      <div class="aceite" id="cs-aceite-novo" data-aceite data-aceite-tipo="casa" data-logado="true" aria-busy="true">
+        <label class="aceite-marcar">
+          <input type="checkbox" id="cs-aceite-novo-caixa" name="aceite-novo" aria-describedby="cs-aceite-novo-texto cs-aceite-novo-erro" disabled>
+          <span data-aceite-titulo>Carregando o texto da autorização...</span>
+        </label>
+        <div class="aceite-texto" id="cs-aceite-novo-texto" data-aceite-texto></div>
+        <span class="campo-erro" id="cs-aceite-novo-erro" data-aceite-erro role="alert" hidden></span>
+      </div>
+      <div class="cs-sem-aceite-acoes">
+        <button type="button" class="botao botao-primario" id="cs-sem-aceite-aceitar"><span class="btn-label">Aceitar e abrir a casa</span></button>
+        <button type="button" class="botao botao-fantasma" id="cs-sem-aceite-sair">Sair da casa</button>
+      </div>
+    </section>
+
+    <!-- ===== Na casa ===== -->
+    <div class="cs-grade" id="cs-conteudo" hidden>
+      <div class="cs-coluna">
+
+        <!-- A casa está sendo passada para mim. -->
+        <aside class="cs-faixa" id="cs-transferencia" aria-labelledby="cs-transferencia-texto" hidden>
+          <p id="cs-transferencia-texto"></p>
+          <div class="cs-faixa-acoes">
+            <button type="button" class="botao botao-primario botao-pequeno" id="cs-transferencia-aceitar"><span class="btn-label">Aceitar</span></button>
+            <button type="button" class="botao botao-fantasma botao-pequeno" id="cs-transferencia-recusar"><span class="btn-label">Recusar</span></button>
+          </div>
+        </aside>
+
+        <!-- Só o dono, só com pedido ou aviso aberto. Nunca diz quem pediu. -->
+        <section class="cs-pedidos" id="cs-pedidos" aria-labelledby="cs-pedidos-titulo" hidden>
+          <div class="cs-pedidos-cabeca">
+            <span class="nav-contador num" id="cs-pedidos-contador" aria-hidden="true"></span>
+            <h2 id="cs-pedidos-titulo">Pedidos da casa</h2>
+          </div>
+          <ul class="cs-pedidos-lista" id="cs-pedidos-lista"></ul>
+        </section>
+
+        <!-- Lista da casa abaixo do mínimo: só o dono, como o aviso do painel. -->
+        <aside class="cs-nota-linha" id="cs-aviso-lista" aria-label="Lista de alimentos da casa curta" hidden>
+          <span class="cs-traco" aria-hidden="true"></span>
+          <p id="cs-aviso-lista-texto"></p>
+        </aside>
+
+        <section class="cs-refeicoes-secao" aria-labelledby="cs-refeicoes-titulo">
+          <h2 class="cs-secao-titulo" id="cs-refeicoes-titulo">Refeições da casa</h2>
+
+          <div class="cs-sem-semana" id="cs-sem-semana" hidden>
+            <p id="cs-sem-semana-texto"></p>
+          </div>
+
+          <div id="cs-semana-bloco" hidden>
+            <div class="cs-dias" id="cs-dias" role="tablist" aria-label="Dia da semana"></div>
+            <div class="cs-refeicoes" id="cs-refeicoes" role="tabpanel" tabindex="-1"></div>
+            <p class="cs-nota-troca" id="cs-nota-troca"></p>
+          </div>
+        </section>
+
+        <!-- As restrições da casa, sem dono (S2): casa.restricoes, do GET /casa. Escondida quando as duas listas vêm vazias. -->
+        <section class="cs-restricoes" id="cs-restricoes" aria-labelledby="cs-restricoes-titulo" hidden>
+          <h2 class="cs-secao-titulo" id="cs-restricoes-titulo">Nesta casa, não entra</h2>
+          <ul class="chips" id="cs-nao-entra"></ul>
+          <div id="cs-evitamos-bloco" hidden>
+            <h3 class="cs-subtitulo">Evitamos quando dá</h3>
+            <ul class="chips" id="cs-evitamos"></ul>
+          </div>
+          <p class="apoio">Esses nunca entram no almoço e no jantar; os de "Evitamos quando dá" podem aparecer, pouco. A lista não diz de quem é cada item.</p>
+        </section>
+      </div>
+
+      <aside class="cs-lateral" aria-label="Lista, orçamento e membros da casa">
+        <a class="cartao cs-lista-link ergue" href="compras.html" id="cs-lista-link">
+          <svg class="cs-lista-icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 12H6.2L5 8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>
+          <span class="cs-lista-texto">
+            <span class="cs-lista-titulo">Lista de compras da casa</span>
+            <span class="apoio" id="cs-lista-resumo">A semana de todos: almoço, jantar, café e lanches.</span>
+          </span>
+          <svg class="cs-seta" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg>
+        </a>
+
+        <section class="cartao cs-cartao" aria-labelledby="cs-orcamento-titulo">
+          <h2 class="cs-cartao-titulo" id="cs-orcamento-titulo">Orçamento da casa</h2>
+          <div class="segmentado cs-orcamento" id="cs-orcamento" role="radiogroup" aria-labelledby="cs-orcamento-titulo" aria-describedby="cs-orcamento-nota"></div>
+          <p class="apoio" id="cs-orcamento-nota"></p>
+        </section>
+
+        <section class="cartao cs-cartao" aria-labelledby="cs-membros-titulo">
+          <div class="cs-cartao-cabeca">
+            <h2 class="cs-cartao-titulo" id="cs-membros-titulo">Membros</h2>
+            <span class="apoio num" id="cs-membros-conta"></span>
+          </div>
+          <ul class="cs-membros" id="cs-membros"></ul>
+
+          <!-- Só o dono. -->
+          <div class="cs-convidar" id="cs-convidar" hidden>
+            <button type="button" class="botao botao-primario botao-bloco" id="cs-convidar-botao" aria-expanded="false" aria-controls="cs-convite"><span class="btn-label">Convidar pessoa</span></button>
+            <p class="apoio" id="cs-casa-cheia" hidden>A casa está cheia: 6 de 6.</p>
+
+            <div class="cs-convite" id="cs-convite" hidden>
+              <h3 class="rotulo" id="cs-convite-titulo" tabindex="-1">Link de convite</h3>
+              <p class="cs-convite-link" id="cs-convite-link"></p>
+              <p class="apoio" id="cs-convite-nota"></p>
+              <p class="nota" id="cs-convite-longo" hidden>O link é longo demais para abrir direto no WhatsApp. Copie e cole na conversa.</p>
+              <div class="cs-convite-botoes">
+                <button type="button" class="botao botao-primario" id="cs-convite-enviar" hidden>Enviar</button>
+                <a class="botao botao-primario" id="cs-convite-whatsapp" href="#" target="_blank" rel="noopener" hidden>WhatsApp</a>
+                <button type="button" class="botao botao-fantasma" id="cs-convite-copiar">Copiar link</button>
+              </div>
+              <span class="oculto-visual" id="cs-convite-copiado" aria-live="polite"></span>
+            </div>
+
+            <div class="cs-convites-abertos" id="cs-convites-abertos" hidden>
+              <h3 class="cs-subtitulo-pequeno" id="cs-convites-titulo"></h3>
+              <ul id="cs-convites-lista"></ul>
+            </div>
+          </div>
+        </section>
+
+        <div class="cs-saidas">
+          <button type="button" class="botao-texto cs-saida" id="cs-passar" hidden>Passar a casa para outro membro</button>
+          <button type="button" class="botao-texto cs-saida cs-saida-sair" id="cs-sair">Sair da casa</button>
+          <p class="apoio" id="cs-sair-nota"></p>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Troca na casa (js/troca.js, o mesmo diálogo do painel) e o aviso com "Desfazer". -->
+  <dialog class="folha" id="troca-dialogo" aria-labelledby="troca-titulo"></dialog>
+  <div class="troca-aviso" id="troca-aviso" hidden></div>
+  <p class="oculto-visual" id="troca-anuncio" aria-live="polite"></p>
+
+  <!-- Sair, remover e passar a casa: o mesmo componente de folha (foco preso, Esc fecha). -->
+  <dialog class="folha folha-pequena" id="cs-dialogo" aria-labelledby="cs-dialogo-titulo"></dialog>
+
+  <footer class="rodape">
+    <div class="conteiner rodape-linha">
+      <span>Cada um vê só a própria porção. Os pedidos chegam sem o nome de quem pediu.</span>
+      <nav class="links-legais" aria-label="Documentos legais"><a href="privacidade.html">Privacidade</a><span class="links-legais-sep" aria-hidden="true">·</span><a href="termos.html">Termos</a></nav>
+    </div>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/base/cabecalho.js"></script>
+  <script src="js/base/aceite.js"></script>
+  <script src="js/base/casa-comum.js"></script>
+  <script src="js/troca.js"></script>
+  <script src="js/casa.js"></script>
+</body>
+</html>
