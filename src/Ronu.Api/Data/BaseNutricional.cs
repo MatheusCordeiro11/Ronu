@@ -231,7 +231,12 @@ public static partial class BaseNutricional
             Observacao: "Torrado e salgado."),
         new("castanha-de-caju", "Castanha-de-caju", CategoriaAlimento.OleaginosasESementes, "g", FonteNutricional.Taco, "588", "Castanha-de-caju, torrada, salgada", 570m, 18.5m, 29.1m, 46.3m, false, 50m, Alergenos.Castanhas,
             Observacao: "Torrada e salgada. Castanhas: item da lista de alergênicos da ANVISA (RDC 727/2022, Anexo III). O chip de amendoim também a tira (RegrasAlergias)."),
-        new("castanha-do-para", "Castanha-do-pará", CategoriaAlimento.OleaginosasESementes, "g", FonteNutricional.Taco, "589", "Castanha-do-Brasil, crua", 643m, 14.5m, 15.1m, 63.5m, false, 40m, Alergenos.Castanhas,
+        // Porção máxima de 8 g (2 unidades de 4 g da POF), e não 40 g, pelo selênio (2026-11-13): ela é a porção
+        // máxima da troca e é igual ao teto do cardápio gerado (LimiteCastanhaDoPara.GramasPorDia, com as fontes; um
+        // teste confere que os dois andam juntos). Não é
+        // ajustável, de propósito: o ajuste nunca a aumenta. Calibração, não valor de tabela: a VersaoBase não muda
+        // (e mudar desligaria a troca nas dietas já geradas, CalculadoraTroca.OutraVersaoDaBase).
+        new("castanha-do-para", "Castanha-do-pará", CategoriaAlimento.OleaginosasESementes, "g", FonteNutricional.Taco, "589", "Castanha-do-Brasil, crua", 643m, 14.5m, 15.1m, 63.5m, false, 8m, Alergenos.Castanhas,
             Observacao: "Castanhas: item da lista de alergênicos da ANVISA (RDC 727/2022, Anexo III). O chip de amendoim também a tira (RegrasAlergias)."),
         new("amendoa-torrada", "Amêndoa torrada", CategoriaAlimento.OleaginosasESementes, "g", FonteNutricional.Taco, "587", "Amêndoa, torrada, salgada", 581m, 18.6m, 29.5m, 47.3m, false, 50m, Alergenos.Castanhas,
             Observacao: "Torrada e salgada. Castanhas: item da lista de alergênicos da ANVISA (RDC 727/2022, Anexo III). O chip de amendoim também a tira (RegrasAlergias)."),

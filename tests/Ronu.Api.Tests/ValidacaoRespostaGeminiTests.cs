@@ -326,6 +326,26 @@ public class ValidacaoRespostaGeminiTests
         Assert.Equal(1, gemini.Chamadas);
     }
 
+    // Selênio (LimiteCastanhaDoPara): 30 g de castanha-do-pará no jantar dos 7 dias viram 8 g nos 2 primeiros e
+    // saem dos outros; o jantar fica com o arroz. A ceia só com castanha sai do dia a partir do 3º dia.
+    [Fact]
+    public async Task Castanha_Do_Para_Fica_Em_8g_E_Em_2_Dias()
+    {
+        var gemini = new GeminiRoteirizado(Envelope(TextoDieta(Semana, comRefeicoes: true,
+            bebidaNoJantar: "Castanha-do-pará", unidadeBebida: "g", quantidadeBebida: 30, ceiaSoComBebida: "Castanha-do-pará")));
+
+        var dieta = await NovoGerador(gemini).GerarComListaAsync(Contexto());
+
+        decimal Castanha(DiaDietaDto d) => d.Refeicoes.SelectMany(r => r.Alimentos).Where(a => a.AlimentoId == "castanha-do-para").Sum(a => a.Quantidade);
+        Assert.Equal(new[] { 8m, 8m, 0m, 0m, 0m, 0m, 0m }, dieta.Dias.Select(Castanha));
+        Assert.All(dieta.Dias.Skip(2), d =>
+        {
+            Assert.Equal(new[] { "Almoço", "Jantar" }, d.Refeicoes.Select(r => r.Nome));
+            Assert.Equal(new[] { "arroz-branco-cozido" }, d.Refeicoes.Single(r => r.Nome == "Jantar").Alimentos.Select(a => a.AlimentoId));
+        });
+        Assert.Equal(1, gemini.Chamadas);
+    }
+
     [Fact]
     public async Task Azeite_Em_Refeicao_Sem_Refogado_Fica()
     {

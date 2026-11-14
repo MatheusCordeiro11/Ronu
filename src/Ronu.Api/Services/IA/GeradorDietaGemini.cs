@@ -192,6 +192,15 @@ public class GeradorDietaGemini : IGeradorDietaIA
                         string.Join(", ", semGordura));
                 }
                 var oleosTirados = TirarOleoDosRefogados(dias);
+                // Selênio: castanha-do-pará até 8 g por dia e em até 2 dias da semana (LimiteCastanhaDoPara). Antes
+                // do ajuste, para ele compensar as kcal e a gordura com os outros itens. Só dia, gramas e nome da
+                // refeição no log, nada da pessoa.
+                var castanha = LimiteCastanhaDoPara.Aplicar(dias);
+                if (castanha.Count > 0)
+                {
+                    _logger.LogWarning("Castanha-do-pará limitada pelo selênio (até {Gramas} g por dia, em até {Dias} dias na semana): {Mudancas}",
+                        LimiteCastanhaDoPara.GramasPorDia, LimiteCastanhaDoPara.DiasPorSemana, string.Join("; ", castanha));
+                }
                 // Fase 4: quantidades ajustadas para cada dia chegar perto da meta, sem trocar alimento.
                 var ajustes = AjustarQuantidades ? AjusteQuantidades.Ajustar(dias) : [];
                 var contaveis = RotularContaveis(dias);

@@ -96,13 +96,36 @@ public class CalculadoraTrocaTests
     }
 
     // Abaixo de 50 g, passo de 1 g: 15 g de pasta de amendoim (51,4 g de gordura em 100 g) pedem
-    // 15 × 51,4 ÷ 63,5 = 12,14 g de castanha-do-pará.
+    // 15 × 51,4 ÷ 63,5 = 12,14 g de castanha-do-pará. (Só a conta: 12 g passam da porção máxima da troca, 8 g, e a
+    // opção fica de fora; ver Troca_Nao_Oferece_Mais_Que_8g_De_Castanha_Do_Para.)
     [Fact]
     public void Abaixo_De_50g_Arredonda_Para_O_Grama()
     {
         var q = CalculadoraTroca.Quantidade(Base("pasta-de-amendoim-integral"), 15, Base("castanha-do-para"))!.Value;
 
         Assert.Equal(12m, q.Quantidade);
+    }
+
+    // Selênio: a porção máxima da castanha-do-pará na troca é 8 g (LimiteCastanhaDoPara). Os 12 g que 15 g de pasta
+    // de amendoim pedem passam dela, e a opção fica de fora; 5 g de pasta pedem 4 g (5 × 51,4 ÷ 63,5 = 4,05), que entram.
+    [Fact]
+    public void Troca_Nao_Oferece_Mais_Que_8g_De_Castanha_Do_Para()
+    {
+        List<DiaDietaDto> ComPasta(decimal gramas) =>
+        [
+            Dia("Segunda-feira", null,
+                [A("pao-frances", 100), A("pasta-de-amendoim-integral", gramas), A("cafe-coado", 200)],
+                [A("arroz-branco-cozido", 300), A("feijao-cozido", 150), A("peito-de-frango-sem-pele-grelhado", 200)],
+                [A("macarrao-cozido", 400), A("patinho-bovino-grelhado", 200), A("banana-prata", 225), A("leite-integral", 500)])
+        ];
+
+        var grande = Calcular(ComPasta(15), new PosicaoItem(0, 0, 1)).Refeicao;
+        Assert.Null(Opcao(grande, "castanha-do-para"));
+        Assert.True(grande.Fora[MotivoForaDaTroca.PorcaoMaxima] >= 1);
+
+        var pequena = Opcao(Calcular(ComPasta(5), new PosicaoItem(0, 0, 1)).Refeicao, "castanha-do-para");
+        Assert.NotNull(pequena);
+        Assert.All(pequena.Ocorrencias, o => Assert.Equal(4m, o.Quantidade));
     }
 
     // Hortaliça não tem nutriente a manter: fica o peso, até a porção máxima do substituto (rúcula, 100 g).

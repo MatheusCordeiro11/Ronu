@@ -30,7 +30,8 @@ Licença: domínio público (CC0 1.0); o USDA pede a citação do FoodData Centr
 
 Na base, usado só para o que a TACO não tem: tilápia, atum em conserva em água, pasta de amendoim, macarrão
 cozido e leite fluido. O código de cada item é o `fdcId`. A lista de compras usa também o descarte (casca,
-osso, caroço), os pares crus do macarrão e da tilápia e o peso da clara de um ovo (seção abaixo).
+osso, caroço), os pares crus do macarrão e da tilápia e o peso da clara de um ovo (seção abaixo). O selênio da
+castanha-do-pará, que não está na base, vem dele também (seção "Selênio da castanha-do-pará").
 
 ## IBGE: medidas caseiras e peso por unidade
 
@@ -112,13 +113,38 @@ ceia ou a partir das 18:00). A TACO não informa cafeína; os valores vêm de du
 
 Decisão de 2026-11-02. Os outros itens da base não têm cafeína (não há chocolate, cacau nem bebida energética).
 
+## Selênio da castanha-do-pará
+
+A base não guarda micronutrientes, e a **TACO não mede selênio** (os minerais da 4ª edição são cálcio, ferro,
+magnésio, manganês, fósforo, sódio, potássio, cobre e zinco). Por isso, o limite é uma regra em gramas, só para a
+castanha-do-pará, no C# (`Services/IA/LimiteCastanhaDoPara.cs`). Os macros dela continuam vindo da TACO 589.
+
+| O quê | Valor | Fonte |
+|---|---|---|
+| Selênio da castanha-do-pará | 1.917 µg em 100 g (15 amostras, de 136 a 2.740 µg) | USDA FoodData Central, SR Legacy, "Nuts, brazilnuts, dried, unblanched", fdcId 170569 (NDB 12078) |
+| Variação pela origem | mediana por estado de 2,07 mg/kg (MT) a 68,15 mg/kg (AM), ou seja, 207 a 6.815 µg em 100 g | Silva Junior, E. C. et al. "Natural variation of selenium in Brazil nuts and soils from the Amazon region". *Chemosphere* 188 (2017) 650–658, doi:10.1016/j.chemosphere.2017.08.158 |
+| Limite superior tolerável (UL), todas as fontes | 400 µg/dia a partir dos 14 anos | IOM, *Dietary Reference Intakes for Vitamin C, Vitamin E, Selenium, and Carotenoids* (2000), cap. 7 |
+| UL, todas as fontes | 255 µg/dia para adultos (inclusive gestantes e lactantes) | EFSA NDA Panel, *EFSA Journal* 2023;21(1):7704, doi:10.2903/j.efsa.2023.7704 |
+| Peso da unidade | 4 g | POF/IBGE 6600701 (`docs/pof/medidas-por-item.csv`) |
+
+Não há UL brasileiro; a ANVISA dá só o valor diário de referência para rotulagem (60 µg, IN 75/2020, Anexo II).
+
+**Calibração do projeto (não é valor de tabela):** até **8 g por dia** (2 unidades, ~153 µg pela USDA) e em
+**até 2 dias da semana**; nos outros dias ela sai, e uma refeição que fica sem nenhum item sai do dia. A porção
+máxima da troca também é 8 g. Nenhum teto em gramas é seguro para castanha de qualquer origem (8 g do Amazonas dão
+~545 µg), e a base não sabe a origem: o teto reduz a exposição, não a zera. Decisão de 2026-11-13, a partir das
+respostas reais de `docs/medicoes` (g8b a g10d): a castanha-do-pará aparecia em 48% das dietas, com 10 a 30 g por dia
+(mediana 15 g, ~288 µg pela USDA) e em até 3 dias da semana.
+
 ## O que não vem de tabela
 
 - **Itens derivados:** quando a fonte não tem o alimento, mas tem um equivalente próximo (ex.: patinho
   moído, a partir do patinho grelhado da TACO). A observação do item explica a derivação. A tapioca é a
   fécula de mandioca da TACO (124) hidratada na proporção da tapioca medida pela própria TACO (551, com a
   manteiga descontada): 100 g de tapioca pronta = 89,7 g de fécula + 10,3 g de água.
-- **Porção máxima por refeição:** calibração do projeto.
+- **Porção máxima por refeição:** calibração do projeto. Ela só limita o que o ajuste de quantidades sobe (itens
+  ajustáveis) e a troca; o que o Gemini escreve num item não ajustável não tem teto, salvo a castanha-do-pará
+  (seção do selênio).
 - **Marcas de alérgenos** (lactose, glúten, amendoim, castanhas, soja, peixe, crustáceo, ovo): conservadoras, ou
   seja, na dúvida o item é marcado. Servem para tirar itens do cardápio de quem informou a restrição e **não
   substituem orientação de um médico ou nutricionista**. A observação de cada item marcado por precaução diz
