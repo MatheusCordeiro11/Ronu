@@ -2,8 +2,8 @@
 
 # Plano família: decisões de produto
 
-Status: **etapas 1 a 8 feitas** (2026-11-14). A etapa 3 está em produção; as outras estão commitadas na branch
-`casa-commits`, aguardando publicação (seção "Status por etapa", abaixo). Decisões tomadas pelo Matheus em out/2026; o
+Status: **etapas 1 a 8 feitas** (2026-11-14). Todas em produção desde 2026-11-14 (main `f065bf1`; a etapa 3
+saiu antes, no mesmo dia). Detalhes na seção "Status por etapa", abaixo. Decisões tomadas pelo Matheus em out/2026; o
 passo 0 (decisões D1 a D7) foi aprovado em 2026-11-13.
 Ordem no roadmap: depois de TACO 2b → lista de compras → troca de alimentos → TACO 3 e 4.
 
