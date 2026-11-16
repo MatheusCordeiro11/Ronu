@@ -39,6 +39,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Mesmas regras do DietasController: 3 gerações por hora, janela móvel.
   const LIMITE_GERACOES_POR_HORA = 3;
+  // Quanto a carga inicial espera pelas marcações para abrir no dia de hoje (shape da refeição feita).
+  const ESPERA_MARCACOES_MS = 800;
   const JANELA_GERACOES_MS = 60 * 60 * 1000;
 
   let historico = [];
@@ -71,6 +73,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   // "Trocar" (com o aviso da panela) e "Pedir troca"; semana dá o semanaId e a revisão que a troca na casa e o
   // pedido mandam. Nulo enquanto não carregou, ou sem casa (quem saiu fica com as refeições sem a pílula).
   let casaInfo = null;
+
+  // Refeição feita (GET /dietas/atual/refeicoes-feitas): o "hoje" no fuso da UF e, só nos dias que dá para marcar
+  // (ontem e hoje, na dieta atual), as refeições marcadas. Nulo enquanto não carregou, se falhou ou se é de outra
+  // dieta: aí o painel abre como antes (na segunda) e sem os botões. envios guarda, por "data:refeição", o último
+  // estado salvo na API, o pedido pela pessoa e se há um PUT em andamento (o último toque vence).
+  let marcacoes = null;
+  const envios = new Map();
+  // Conta os toques: uma leitura das marcações que saiu antes de um toque volta sem ele e não pode desfazê-lo.
+  let toques = 0;
 
   // ---------- Formatação ----------
 
@@ -154,7 +165,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const meta = dia.metaCalculada;
     const total = dia.totalDoDia;
 
-    $('db-meta-rotulo').textContent = `Meta de ${nomeCurtoDia(dia.diaSemana)}`;
+    $('db-meta-rotulo').textContent = rotuloMeta(dia);
+    renderizarFeitas();
     $('db-meta-kcal').textContent = formatarNumero(meta.calorias);
     $('db-anel-tipo').textContent = diaDeTreino(dieta, diaSelecionado) ? 'Treino' : 'Descanso';
     $('db-anel-dia').textContent = abreviarDia(dia.diaSemana);
@@ -376,8 +388,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       botao.textContent = indice === 0 ? 'Atual' : `Anterior · ${formatarData(dietaResponse.dataGeracao)}`;
 
       botao.addEventListener('click', () => {
+        // A versão aberta fica no mesmo dia da semana (as dietas podem vir com os dias em outra ordem: pelo nome).
+        const nomeAberto = historico[versaoSelecionada]?.dieta.dias[diaSelecionado]?.diaSemana;
         versaoSelecionada = indice;
-        diaSelecionado = 0;
+        diaSelecionado = Math.max(0, indicePorNome(dietaResponse.dieta, nomeAberto));
         refeicaoEmTroca = null;
         renderizarVersaoSelecionada();
       });
@@ -405,9 +419,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const dieta = dietaResponse.dieta;
     elDayRow.innerHTML = '';
     const maior = Math.max(...dieta.dias.map((d) => d.metaCalculada.calorias));
+    const iHoje = indiceDeHoje(dieta);
 
     dieta.dias.forEach((dia, indice) => {
       const treino = diaDeTreino(dieta, indice);
+      const hoje = indice === iHoje;
       const botao = criar('button', 'db-dia');
       botao.type = 'button';
       botao.id = `db-dia-${indice}`;
@@ -417,7 +433,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       botao.tabIndex = indice === diaSelecionado ? 0 : -1;
       botao.dataset.tipo = treino ? 'treino' : 'descanso';
       botao.setAttribute('aria-label',
-        `${dia.diaSemana}, ${treino ? 'dia de treino' : 'descanso'}, meta de ${formatarNumero(dia.metaCalculada.calorias)} kcal`);
+        `${dia.diaSemana}${hoje ? ', hoje' : ''}, ${treino ? 'dia de treino' : 'descanso'}, meta de ${formatarNumero(dia.metaCalculada.calorias)} kcal`);
+
+      // "Hoje" em texto, não só cor. Os outros dias reservam a mesma altura, para a fileira não desalinhar.
+      const marcaHoje = criar('span', 'db-dia-hoje', hoje ? 'Hoje' : '');
+      marcaHoje.setAttribute('aria-hidden', 'true');
 
       const topo = criar('span', 'db-dia-nome');
       topo.append(criar('span', `db-marca${treino ? ' db-marca-treino' : ''}`), abreviarDia(dia.diaSemana));
@@ -431,7 +451,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       barra.style.setProperty('--atraso', `${indice * 90}ms`);
       trilho.appendChild(barra);
 
-      botao.append(topo, kcal, trilho);
+      botao.append(marcaHoje, topo, kcal, trilho);
       botao.addEventListener('click', () => selecionarDia(dietaResponse, indice, false));
       elDayRow.appendChild(botao);
     });
@@ -618,6 +638,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     titulo.appendChild(criar('h3', 'db-refeicao-nome', refeicao.nome));
     // Almoço e jantar da casa: a pílula, com texto (não só cor). Quem saiu da casa tem daCasa falso.
     if (refeicao.daCasa) titulo.appendChild(RonuCasa.pilula());
+    // Refeição feita: só nos dias marcáveis (hoje e ontem) da dieta atual; nos outros, o botão nem aparece.
+    const marcavel = entradaMarcavel(diaSelecionado);
+    if (marcavel) titulo.appendChild(criarBotaoComi(marcavel, refeicao, indice));
 
     const caixa = criar('div', 'db-refeicao-lista');
     if (emTroca) {
@@ -676,6 +699,266 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     elDayPanel.replaceChildren(...cards);
   }
+
+  // ---------- Refeição feita ----------
+  // "Comi esta refeição do plano": um toque no card, só em hoje e ontem da dieta atual. O toque é otimista (muda na
+  // hora e volta se a API recusar) e não redesenha o painel: só o botão e o "3 de 5" mudam, e o foco fica onde está.
+
+  const ICONE_VISTO = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6.2 5 8.5 9.5 3.5"/></svg>';
+  const NOMES_SEMANA = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+  const elRefeicaoErro = $('refeicao-erro');
+
+  // O nome do dia da semana de uma data "AAAA-MM-DD" (com um deslocamento em dias). A data vem da API, no fuso
+  // da UF: o relógio do aparelho não decide o dia.
+  function nomeDaSemana(dataIso, deslocamento = 0) {
+    const data = new Date(`${dataIso}T12:00:00Z`);
+    data.setUTCDate(data.getUTCDate() + deslocamento);
+    return NOMES_SEMANA[data.getUTCDay()];
+  }
+
+  // Posição do dia pelo nome (a lista da IA pode vir em outra ordem); -1 se não achar.
+  function indicePorNome(dieta, nome) {
+    if (!nome) return -1;
+    const alvo = nome.trim().toLowerCase();
+    return dieta.dias.findIndex((d) => d.diaSemana.trim().toLowerCase() === alvo);
+  }
+
+  function indiceDeHoje(dieta) {
+    return marcacoes ? indicePorNome(dieta, nomeDaSemana(marcacoes.hoje)) : -1;
+  }
+
+  // "Meta de hoje", "Meta de ontem" ou "Meta de quarta".
+  function rotuloMeta(dia) {
+    if (marcacoes) {
+      if (indicePorNome({ dias: [dia] }, nomeDaSemana(marcacoes.hoje)) === 0) return 'Meta de hoje';
+      if (indicePorNome({ dias: [dia] }, nomeDaSemana(marcacoes.hoje, -1)) === 0) return 'Meta de ontem';
+    }
+    return `Meta de ${nomeCurtoDia(dia.diaSemana)}`;
+  }
+
+  // O dia marcável (com a data e as marcadas) que corresponde à aba, só na dieta atual; nulo nos outros.
+  function entradaMarcavel(indiceDia) {
+    if (versaoSelecionada !== 0 || !marcacoes) return null;
+    return marcacoes.dias.find((d) => d.indiceDia === indiceDia) || null;
+  }
+
+  async function buscarMarcacoes() {
+    try {
+      const resposta = await ronuFetchAutenticado('/dietas/atual/refeicoes-feitas');
+      if (!resposta.ok) return null;
+      const corpo = await resposta.json();
+      return {
+        dietaId: corpo.dietaId,
+        hoje: corpo.hoje,
+        dias: (corpo.dias || [])
+          .filter((d) => Number.isInteger(d.indiceDia))
+          .map((d) => ({ data: d.data, indiceDia: d.indiceDia, marcadas: new Set(d.marcadas || []) }))
+      };
+    } catch (erro) {
+      if (erro.message === 'Sessão expirada.') throw erro;
+      return null;
+    }
+  }
+
+  // Só vale para a dieta que está na tela: de outra (gerada em outro aparelho), fica sem marcações.
+  function aplicarMarcacoes(novas) {
+    marcacoes = novas && historico[0] && novas.dietaId === historico[0].dietaId ? novas : null;
+    envios.clear();
+  }
+
+  function abrirEmHoje() {
+    const indice = historico[0] ? indiceDeHoje(historico[0].dieta) : -1;
+    if (indice >= 0) diaSelecionado = indice;
+  }
+
+  // Recarrega as marcações (e abre em hoje, se pedido) depois de uma dieta nova ou recarregada.
+  async function recarregarMarcacoes(irParaHoje) {
+    try {
+      aplicarMarcacoes(await buscarMarcacoes());
+    } catch (erro) {
+      if (erro.message === 'Sessão expirada.') throw erro;
+      aplicarMarcacoes(null);
+    }
+    if (irParaHoje) abrirEmHoje();
+  }
+
+  function artigo(nome) {
+    return /^ceia/i.test(nome.trim()) ? 'a' : 'o';
+  }
+
+  function criarBotaoComi(entrada, refeicao, indice) {
+    const botao = criar('button', 'db-comi');
+    botao.type = 'button';
+    botao.setAttribute('aria-pressed', String(entrada.marcadas.has(indice)));
+    // Rótulo estável: o estado vai pelo aria-pressed ("Comi o almoço, botão de alternância, pressionado").
+    const nome = refeicao.nome.charAt(0).toLowerCase() + refeicao.nome.slice(1);
+    botao.setAttribute('aria-label', `Comi ${artigo(refeicao.nome)} ${nome}`);
+    if (envios.get(`${entrada.data}:${indice}`)?.emAndamento) botao.setAttribute('aria-busy', 'true');
+
+    const circulo = criar('span', 'db-comi-circulo');
+    circulo.setAttribute('aria-hidden', 'true');
+    circulo.append(criarIcone(ICONE_VISTO));
+    botao.append(circulo, criar('span', 'db-comi-texto', 'Comi'));
+    botao.addEventListener('click', () => alternarFeita(entrada.data, indice));
+    return botao;
+  }
+
+  function botaoComi(indice) {
+    return elDayPanel.querySelector(`[data-refeicao="${indice}"] .db-comi`);
+  }
+
+  // "3 de 5 refeições feitas", perto do anel. Neutro: o 0 tem a mesma cor; o dia inteiro ganha só o visto.
+  function renderizarFeitas() {
+    const el = $('db-feitas');
+    const dieta = historico[versaoSelecionada]?.dieta;
+    const entrada = entradaMarcavel(diaSelecionado);
+    if (!entrada || !dieta || !dieta.dias[diaSelecionado]) {
+      el.hidden = true;
+      el.replaceChildren();
+      return;
+    }
+    const total = dieta.dias[diaSelecionado].refeicoes.length;
+    const feitas = [...entrada.marcadas].filter((i) => i < total).length;
+    const partes = [];
+    if (total > 0 && feitas === total) {
+      const visto = criar('span', 'db-feitas-visto');
+      visto.setAttribute('aria-hidden', 'true');
+      visto.append(criarIcone(ICONE_VISTO));
+      partes.push(visto);
+    }
+    const texto = criar('span');
+    texto.append(criar('strong', 'num', String(feitas)), ` de ${total} ${total === 1 ? 'refeição feita' : 'refeições feitas'}`);
+    partes.push(texto);
+    el.replaceChildren(...partes);
+    el.hidden = false;
+  }
+
+  function definirMarcada(entrada, indice, feita, salto) {
+    if (feita) entrada.marcadas.add(indice);
+    else entrada.marcadas.delete(indice);
+    if (entradaMarcavel(diaSelecionado) !== entrada) return;
+    const botao = botaoComi(indice);
+    if (botao) {
+      botao.setAttribute('aria-pressed', String(feita));
+      botao.classList.remove('db-comi-salto');
+      if (salto && feita) {
+        void botao.offsetWidth; // recomeça a animação a cada marcação
+        botao.classList.add('db-comi-salto');
+      }
+    }
+    renderizarFeitas();
+  }
+
+  function alternarFeita(data, indice) {
+    const entrada = marcacoes?.dias.find((d) => d.data === data);
+    if (!entrada) return;
+    const chave = `${data}:${indice}`;
+    let envio = envios.get(chave);
+    if (!envio) {
+      envio = { confirmado: entrada.marcadas.has(indice), desejado: entrada.marcadas.has(indice), emAndamento: false };
+      envios.set(chave, envio);
+    }
+    toques++;
+    envio.desejado = !entrada.marcadas.has(indice);
+    definirMarcada(entrada, indice, envio.desejado, true);
+    if (!envio.emAndamento) enviarMarcacao(data, indice, envio);
+  }
+
+  // Manda o estado pedido até ele bater com o salvo (um toque no meio do envio é mandado em seguida). Se a API
+  // recusar, o botão volta ao último estado salvo e a mensagem aparece.
+  async function enviarMarcacao(data, indice, envio) {
+    envio.emAndamento = true;
+    botaoComi(indice)?.setAttribute('aria-busy', 'true');
+    const dietaId = marcacoes?.dietaId;
+    let falha = null;
+
+    while (envio.desejado !== envio.confirmado) {
+      const alvo = envio.desejado;
+      try {
+        const resposta = await ronuFetchAutenticado(`/dietas/atual/refeicoes-feitas/${data}/${indice}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dietaId, feita: alvo })
+        });
+        if (resposta.ok) {
+          envio.confirmado = alvo;
+          continue;
+        }
+        const corpo = await resposta.json().catch(() => null);
+        falha = { status: resposta.status, mensagem: corpo?.mensagem };
+      } catch (erro) {
+        if (erro.message === 'Sessão expirada.') return;
+        falha = { status: 0 };
+      }
+      break;
+    }
+
+    envio.emAndamento = false;
+    botaoComi(indice)?.removeAttribute('aria-busy');
+    if (!falha) {
+      elRefeicaoErro.hidden = true;
+      return;
+    }
+
+    envio.desejado = envio.confirmado;
+    const entrada = marcacoes?.dias.find((d) => d.data === data);
+    if (entrada) definirMarcada(entrada, indice, envio.confirmado, false);
+
+    if (falha.status === 409) {
+      await recarregarDieta(falha.mensagem || 'Sua dieta mudou desde que a tela foi aberta. Atualize e tente de novo.');
+      return;
+    }
+    if (falha.status === 422) {
+      // Virou o dia com a tela aberta: as datas marcáveis mudaram.
+      await recarregarMarcacoes(false);
+      redesenharMarcacoes();
+    }
+    mostrarErroRefeicao(falha.mensagem || 'Não foi possível salvar a marcação. Confira a conexão e tente de novo.');
+  }
+
+  function mostrarErroRefeicao(mensagem) {
+    elRefeicaoErro.textContent = mensagem;
+    elRefeicaoErro.hidden = false;
+  }
+
+  // Marcações novas (chegaram depois do painel, voltaram da aba escondida, virou o dia): redesenha a fileira, os
+  // botões e o "3 de 5" sem trocar o dia aberto e sem animar as refeições; o foco volta ao botão em que estava.
+  function redesenharMarcacoes() {
+    const dietaResponse = historico[versaoSelecionada];
+    if (!dietaResponse || elContent.hidden) return;
+    const cardComFoco = document.activeElement?.closest?.('.db-comi')?.closest('[data-refeicao]');
+    const focoNoComi = cardComFoco ? cardComFoco.dataset.refeicao : null;
+    renderizarDayRow(dietaResponse);
+    animarRefeicoes = false;
+    renderizarRefeicoes(dietaResponse);
+    animarRefeicoes = true;
+    $('db-meta-rotulo').textContent = rotuloMeta(dietaResponse.dieta.dias[diaSelecionado]);
+    renderizarFeitas();
+    if (focoNoComi != null) botaoComi(focoNoComi)?.focus();
+  }
+
+  function assinatura(m) {
+    return m ? JSON.stringify([m.dietaId, m.hoje, m.dias.map((d) => [d.data, d.indiceDia, [...d.marcadas].sort()])]) : '';
+  }
+
+  // Outra aba ou aparelho pode ter marcado, e o dia pode ter virado: relê ao voltar para a aba, sem trocar o dia
+  // aberto. Com um envio em andamento, espera a próxima vez.
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState !== 'visible' || !historico.length || elContent.hidden) return;
+    if ([...envios.values()].some((e) => e.emAndamento)) return;
+    const toquesAntes = toques;
+    let novas;
+    try {
+      novas = await buscarMarcacoes();
+    } catch (erro) {
+      return;
+    }
+    // Tocou enquanto a leitura estava no ar: ela não sabe desse toque. Fica a tela, que já mostra o toque.
+    if (toques !== toquesAntes || [...envios.values()].some((e) => e.emAndamento)) return;
+    if (!novas || assinatura(novas) === assinatura(marcacoes)) return;
+    aplicarMarcacoes(novas);
+    redesenharMarcacoes();
+  });
 
   // ---------- Render: como a meta do dia foi calculada ----------
 
@@ -1212,6 +1495,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     alvo.focus();
   }
 
+  // A dieta mudou por fora (409 da troca ou da marcação): recarrega a dieta e as marcações, fica no mesmo dia e diz
+  // o porquê.
+  async function recarregarDieta(mensagem) {
+    refeicaoEmTroca = null;
+    try {
+      await carregarHistorico();
+      await recarregarMarcacoes(false);
+      if (versaoSelecionada >= historico.length) versaoSelecionada = 0;
+      if (diaSelecionado >= (historico[versaoSelecionada]?.dieta.dias.length ?? 0)) diaSelecionado = 0;
+      renderizarTudo();
+    } catch (erro) {
+      if (erro.message === 'Sessão expirada.') return;
+      mensagem = 'Não foi possível recarregar a sua dieta. Atualize a página.';
+    }
+    elRefeicaoErro.hidden = true;
+    elTrocaErro.textContent = mensagem;
+    elTrocaErro.hidden = false;
+    elTrocaErro.focus();
+  }
+
   RonuTroca.configurar({
     dietaAtual: () => historico[0],
 
@@ -1241,6 +1544,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       elTrocaErro.hidden = true;
       try {
         await carregarHistorico();
+        await recarregarMarcacoes(false);
       } catch (erro) {
         if (erro.message === 'Sessão expirada.') return;
       }
@@ -1251,21 +1555,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     },
 
     // 409, 422 e afins: a dieta mudou por fora. Recarrega e diz o porquê.
-    async recarregar(mensagem) {
-      refeicaoEmTroca = null;
-      try {
-        await carregarHistorico();
-        if (versaoSelecionada >= historico.length) versaoSelecionada = 0;
-        if (diaSelecionado >= (historico[versaoSelecionada]?.dieta.dias.length ?? 0)) diaSelecionado = 0;
-        renderizarTudo();
-      } catch (erro) {
-        if (erro.message === 'Sessão expirada.') return;
-        mensagem = 'Não foi possível recarregar a sua dieta. Atualize a página.';
-      }
-      elTrocaErro.textContent = mensagem;
-      elTrocaErro.hidden = false;
-      elTrocaErro.focus();
-    },
+    recarregar: recarregarDieta,
 
     gerar() {
       const celular = window.matchMedia('(max-width: 720px)').matches;
@@ -1298,6 +1588,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       versaoSelecionada = 0;
       diaSelecionado = 0;
       refeicaoEmTroca = null;
+      // Dieta nova: sem marcações, e abre no dia de hoje.
+      await recarregarMarcacoes(true);
+      elRefeicaoErro.hidden = true;
       // A dieta nova não tem as trocas da anterior: o "Desfazer" não vale mais.
       RonuTroca.fecharAviso();
       elTrocaErro.hidden = true;
@@ -1348,12 +1641,34 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
+    // As marcações vêm junto com a dieta: com elas, o painel abre no dia de hoje. Se demorarem, o painel não espera
+    // mais que ESPERA_MARCACOES_MS: abre na segunda, e os botões aparecem quando elas chegarem, sem trocar de dia.
+    const pedidoMarcacoes = buscarMarcacoes();
+    pedidoMarcacoes.catch(() => { /* sessão expirada: o ronuFetchAutenticado já redirecionou */ });
+    let marcacoesAtrasadas = false;
     try {
       await carregarHistorico();
+      const ATRASOU = {};
+      const chegou = await Promise.race([
+        pedidoMarcacoes.catch(() => null),
+        new Promise((resolver) => { setTimeout(() => resolver(ATRASOU), ESPERA_MARCACOES_MS); })
+      ]);
+      if (chegou === ATRASOU) {
+        marcacoesAtrasadas = true;
+      } else {
+        aplicarMarcacoes(chegou);
+        abrirEmHoje();
+      }
       renderizarTudo();
     } catch (erro) {
       mostrarSomente(elLoadError);
       return;
+    }
+    if (marcacoesAtrasadas) {
+      pedidoMarcacoes.then((tarde) => {
+        aplicarMarcacoes(tarde);
+        redesenharMarcacoes();
+      }).catch(() => { /* sem marcações: o painel segue sem os botões */ });
     }
 
     carregarCasa().catch(() => { /* sem casa: a troca segue o caminho normal */ });

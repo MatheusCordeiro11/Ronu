@@ -1556,3 +1556,180 @@ button.db-trocado:hover {
     min-width: 0;
   }
 }
+
+/* Refeição feita (shape aprovado em 2026-11-16) ---------------------------- */
+
+/* "Hoje" na fileira de dias: texto, não só cor. Os outros dias reservam a mesma altura. */
+.db-dia-hoje {
+  display: block;
+  align-self: stretch;
+  min-height: 13px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 13px;
+  letter-spacing: var(--rastreio-rotulo);
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--acento-texto);
+}
+
+/* "Comi": a pílula com o círculo da cena da entrada, na ponta direita da linha do título. */
+.db-refeicao-titulo .db-comi {
+  margin-left: auto;
+}
+
+.db-comi {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 16px 0 9px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-pilula);
+  background: var(--superficie);
+  color: var(--texto);
+  font-size: var(--t-corpo);
+  font-weight: 700;
+  line-height: 1;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+/* A área de toque passa dos 44 px mesmo com a pílula de 36. */
+.db-comi::before {
+  content: "";
+  position: absolute;
+  inset: -4px -2px;
+}
+
+.db-comi:hover {
+  border-color: var(--borda-hover);
+}
+
+.db-comi:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
+.db-comi[aria-busy="true"] {
+  cursor: progress;
+}
+
+.db-comi-circulo {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--borda-campo);
+  border-radius: 50%;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.db-comi-circulo svg,
+.db-feitas-visto svg {
+  fill: none;
+  stroke: var(--sobre-acento);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.db-comi-circulo svg {
+  width: 11px;
+  height: 11px;
+  stroke-dasharray: 12;
+  stroke-dashoffset: 12;
+  transition: stroke-dashoffset 0.4s var(--curva-saida) 0.12s;
+}
+
+.db-comi[aria-pressed="true"] {
+  border-color: var(--verde);
+  background: color-mix(in srgb, var(--verde) 8%, var(--superficie));
+}
+
+.db-comi[aria-pressed="true"]:hover {
+  border-color: var(--verde);
+}
+
+.db-comi[aria-pressed="true"] .db-comi-circulo {
+  background: var(--verde);
+  border-color: var(--verde);
+}
+
+.db-comi[aria-pressed="true"] .db-comi-circulo svg {
+  stroke-dashoffset: 0;
+}
+
+/* O salto da "Seleção" (seção Motion), só no toque que marca. */
+.db-comi-salto .db-comi-circulo {
+  animation: db-comi-salto 0.45s var(--curva-mola);
+}
+
+@keyframes db-comi-salto {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+/* "3 de 5 refeições feitas", perto do anel. */
+.db-feitas {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--t-apoio);
+  color: var(--texto-2);
+}
+
+.db-feitas[hidden] {
+  display: none;
+}
+
+.db-feitas strong {
+  font-weight: 800;
+  color: var(--texto);
+}
+
+.db-feitas-visto {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--verde);
+}
+
+.db-feitas-visto svg {
+  width: 9px;
+  height: 9px;
+}
+
+/* No toque, a pílula tem os 44 px inteiros. */
+@media (pointer: coarse) {
+  .db-comi {
+    min-height: 44px;
+  }
+
+  .db-comi::before {
+    inset: 0;
+  }
+}
+
+/* Celular: o total da refeição fica no canto de cima (posição absoluta, com 90 px reservados no título). O Comi vai
+   para uma linha própria, alinhado à direita, embaixo do total, e não disputa a linha com o nome. */
+@media (max-width: 720px) {
+  .db-refeicao-titulo:has(.db-comi)::after {
+    content: "";
+    order: 1;
+    flex-basis: 100%;
+    height: 0;
+  }
+
+  .db-refeicao-titulo .db-comi {
+    order: 2;
+    /* O espaço da linha vazia antes dele não soma com o do título. */
+    margin: calc(var(--e-2) * -1) -90px 0 auto;
+  }
+}
