@@ -948,3 +948,92 @@
     flex: 1 1 100%;
   }
 }
+
+/* ==========================================================================
+   Redesign de nov/2026: o "sem casa" do protótipo "Casa": a mesa com os seis
+   lugares girando devagar e a autorização recolhida.
+   ========================================================================== */
+
+.cs-vazia-topo {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 28px;
+  align-items: center;
+  margin-bottom: var(--e-5);
+}
+
+.cs-vazia-topo h2 {
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  letter-spacing: -0.03em;
+}
+
+.cs-vazia-topo p {
+  margin-top: 6px;
+  color: var(--texto-2);
+}
+
+.cs-vazia-mesa {
+  position: relative;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  background: var(--superficie-2);
+}
+
+.cs-vazia-mesa .cs-mesa-tigela {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 70px;
+  height: 70px;
+  translate: -50% -50%;
+}
+
+.cs-cadeira {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 30px;
+  height: 30px;
+  margin: -15px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--borda-campo);
+  background: var(--fundo);
+  transform: rotate(var(--a)) translateY(-72px);
+  animation: cs-girar-mesa 24s linear infinite;
+}
+
+@keyframes cs-girar-mesa {
+  to { transform: rotate(calc(var(--a) + 360deg)) translateY(-72px); }
+}
+
+.cs-aceite .aceite-ler,
+#cs-aceite .aceite-ler {
+  justify-self: start;
+  margin-left: calc(22px + var(--e-3));
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--acento-texto);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.aceite-texto.aceite-recolhido {
+  display: none;
+}
+
+@media (max-width: 560px) {
+  .cs-vazia-topo {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-cadeira {
+    animation: none;
+  }
+}
