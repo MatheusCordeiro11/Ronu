@@ -18,6 +18,7 @@ public static class LimitesRequisicoes
         LimitesConta.Configurar(opcoes);
         LimitesAlergias.Configurar(opcoes);
         LimitesCasa.Configurar(opcoes);
+        LimitesRefeicoesFeitas.Configurar(opcoes);
 
         opcoes.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         opcoes.OnRejected = (contexto, cancelamento) =>
@@ -40,6 +41,7 @@ public static class LimitesRequisicoes
         LimitesCasa.PoliticaConviteVerificar => LimitesCasa.MensagemConviteVerificar,
         LimitesCasa.PoliticaEscrita => LimitesCasa.MensagemEscrita,
         LimitesCasa.PoliticaPedido => LimitesCasa.MensagemPedido,
+        LimitesRefeicoesFeitas.PoliticaLeitura or LimitesRefeicoesFeitas.PoliticaEscrita => LimitesRefeicoesFeitas.MensagemLimite,
         _ => LimitesRedefinicaoSenha.MensagemLimite
     };
 }

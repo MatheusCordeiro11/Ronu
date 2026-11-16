@@ -39,6 +39,14 @@ public class LimitesRequisicoesTests
     }
 
     [Theory]
+    [InlineData(LimitesRefeicoesFeitas.PoliticaLeitura)]
+    [InlineData(LimitesRefeicoesFeitas.PoliticaEscrita)]
+    public async Task Refeicoes_Feitas_Tem_A_Propria_Mensagem(string politica)
+    {
+        Assert.Equal((429, LimitesRefeicoesFeitas.MensagemLimite), await Recusar(politica));
+    }
+
+    [Theory]
     [InlineData(LimitesTroca.PoliticaLeitura)]
     [InlineData(LimitesTroca.PoliticaEscrita)]
     public async Task Troca_Tem_A_Propria_Mensagem(string politica)
