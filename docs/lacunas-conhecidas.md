@@ -112,6 +112,23 @@ Decisões conscientes de escopo do MVP, registradas aqui para não serem esqueci
 - **Exclusão de conta do dono: quem recebe a casa não é avisado.** A decisão D3 do plano família dizia que o membro mais antigo recebe a casa "e um aviso" quando o dono apaga a conta. O `OperacoesCasa.SairParaExclusaoAsync` só muda o papel (e desfaz uma oferta de transferência aberta): o novo dono descobre pela aba Casa. Divergência entre o plano e o código, achada na etapa 8 (2026-11-14); não decidido se o aviso é preciso.
 - **O `CasaController` recebe serviços opcionais só para os testes.** O construtor aceita o `ILogger` nulo, e o `AceitarConvite` recebe o `GeracaoSemanaCasa` como `[FromServices]` opcional, para os testes da etapa 1 do plano família continuarem montando o controller sem eles. Na API eles sempre vêm. Anotado na etapa 5; não decidido se vale ajustar os testes.
 
+## Ideias de produto (avaliadas em 2026-11-16)
+
+Vindas de uma revisão da landing pelo ChatGPT, com a avaliação feita com o usuário em 2026-11-16. A ordem combinada coloca o teste manual e a publicação do redesign antes delas.
+
+**Valem a pena (propostas em preparo desde 2026-11-16):**
+
+- **Intensidade do treino.** Hoje toda aula de luta usa a premissa fixa de 50% técnica e 50% rola/sparring (`Data/MetsCompendio2024.cs`). Ideia: um seletor de três níveis por modalidade ("mais técnica", "normal", "muito sparring") que muda essa proporção, sem inventar MET novo. Mexe na fórmula, então exige subir a `CalculadoraManutencao.VersaoFormula`. Junto, mostrar o gasto do treino como estimativa ("~816 kcal"), não como medida exata.
+- **Marcar refeição feita (versão leve).** Um toque por refeição, sem diário alimentar nem quantidades. Daria à meta adaptativa a ingestão real de cada dia, no lugar (ou ao lado) da aderência resumida a cada pesagem.
+- **Quantidades no tamanho das embalagens na lista de compras.** Arredondar ou sugerir o que se compra de verdade (o caso do frango inteiro, item próprio em Frontend, é o exemplo).
+
+**Valem, mas depois:**
+
+- **Treino diferente numa semana específica** (cancelar ou acrescentar um treino só naquela semana). A dieta já vem gerada para a semana, então recalcular no meio dela é complexo; uma versão simples seria ajustar "esta semana" antes de gerar.
+- **Histórico de consistência** (frequência de treino e aderência ao longo do tempo, não só a balança). Depende do "marcar refeição feita".
+
+**Descartadas na mesma avaliação:** mudar quantidades livremente e trocar ou adicionar refeições (quebra a garantia de o dia ficar na meta; a troca de alimento cobre o caso real), aceitar ou recusar o ajuste da meta adaptativa (anula o modelo; o "Saiba mais" já explica), custo estimado da lista (exigiria base de preços regional, que desatualiza) e hidratação (genérica, não diferencia o Ronu).
+
 ## Documentação
 
 - **O `diagrama-classes.md` está desatualizado em relação aos Models.** Ele ainda mostra o modelo do MVP (última mudança em agosto): falta a classe `MetaDieta` (tabela `MetasDieta`); `UsuarioModalidade` ainda tem `FrequenciaSemanal`, substituída por `DiasSemana` e `DuracaoMediaHoras`; `Usuario` não tem `GoogleId`, `Estado`, `RotinaDiaria` nem `OrcamentoSemanal`, e mostra como obrigatórios `SenhaHash`, `Altura`, `DataNascimento` e `Sexo`, hoje opcionais (login com Google e onboarding em etapas); `ObjetivoUsuario` não tem `Aderencia`; faltam também a tabela `ListaComprasMarcacoes` e a coluna `DietaIA.Revisao` (troca de alimento). Vale conferir também o DER (`der.png`). Correção: alinhar o diagrama aos arquivos de `src/Ronu.Api/Models`.
