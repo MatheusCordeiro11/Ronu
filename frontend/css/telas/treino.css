@@ -862,3 +862,82 @@
     padding: var(--e-6);
   }
 }
+
+/* ==========================================================================
+   Redesign de nov/2026: o visual do protótipo "Treino" sobre as classes do
+   treino.js. Ícone 3D no card e nas cartas do catálogo, no lugar do kanji.
+   ========================================================================== */
+
+.tr-card-cabeca {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
+}
+
+.tr-card-icone {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+  filter: var(--sombra-icone);
+  transition: transform 0.5s var(--curva-mola);
+}
+
+.tr-card-aberto .tr-card-icone {
+  transform: rotate(-6deg) scale(1.08);
+}
+
+.tr-card-nome {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.tr-card-kcal-valor {
+  font-size: 22px;
+}
+
+.tr-card-aberto {
+  border-color: color-mix(in srgb, var(--acento) 45%, var(--borda));
+  box-shadow: var(--sombra-leve);
+}
+
+.tr-carta-arte {
+  height: 110px;
+  border-bottom: 0;
+  background: transparent;
+}
+
+.tr-carta-icone {
+  width: 72px;
+  height: 62px;
+  object-fit: contain;
+  filter: var(--sombra-icone);
+  transition: transform 0.5s var(--curva-mola);
+}
+
+.tr-carta:hover .tr-carta-icone {
+  transform: rotate(-8deg) scale(1.1);
+}
+
+.tr-carta {
+  border-radius: 20px;
+}
+
+.tr-carta-tem {
+  background: var(--superficie-2);
+}
+
+.tr-carta-tem .tr-carta-icone {
+  opacity: 0.55;
+}
+
+@media (max-width: 560px) {
+  .tr-card-cabeca {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding: 14px 16px;
+  }
+
+  .tr-card-icone {
+    width: 44px;
+    height: 44px;
+  }
+}

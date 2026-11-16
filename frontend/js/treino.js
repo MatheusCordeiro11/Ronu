@@ -178,7 +178,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const numeros = criar('span', 'tr-card-kcal');
     const kcal = criar('span', 'numero tr-card-kcal-valor');
     numeros.append(kcal, criar('span', 'apoio', 'kcal por sessão'));
-    cabeca.append(textos, numeros);
+    // Redesign: o ícone 3D da modalidade abre o cabeçalho do card.
+    const iconeCard = document.createElement('img');
+    iconeCard.className = 'tr-card-icone';
+    iconeCard.src = window.RonuIconeModalidade ? window.RonuIconeModalidade(item.modalidade.nome) : '';
+    iconeCard.alt = '';
+    cabeca.append(iconeCard, textos, numeros);
     cabeca.addEventListener('click', () => {
       aberta = aberta === id ? null : id;
       atualizarAberturas();
@@ -724,8 +729,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const arte = criar('span', 'tr-carta-arte');
     arte.setAttribute('aria-hidden', 'true');
-    const zoom = criar('span', 'tr-carta-zoom grade');
-    zoom.appendChild(criar('span', 'tr-carta-kanji', kanjiDe(modalidade.nome)));
+    // Redesign: o ícone 3D da modalidade no lugar do kanji.
+    const zoom = criar('span', 'tr-carta-zoom');
+    const icone = document.createElement('img');
+    icone.className = 'tr-carta-icone';
+    icone.src = window.RonuIconeModalidade ? window.RonuIconeModalidade(modalidade.nome) : '';
+    icone.alt = '';
+    icone.loading = 'lazy';
+    zoom.appendChild(icone);
     arte.appendChild(zoom);
 
     const textos = criar('span', 'tr-carta-textos');
