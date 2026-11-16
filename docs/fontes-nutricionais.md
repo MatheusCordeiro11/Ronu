@@ -91,6 +91,60 @@ de extração, os links e o SHA-256 dos arquivos usados estão em [`docs/compras
   pronto (71,1%). O fator pelo carboidrato (0,320) e pela matéria seca (0,328) concordam, mas é o item menos
   seguro da lista.
 
+### Embalagens
+
+Desde 2026-11-16, a API da lista devolve também o que se compra em embalagens ("1 pacote de 1 kg", "2 latas
+de 350 ml", "3 dúzias", "1 peça de 1 kg ou mais"), e a tela mostra a embalagem como número da linha, com
+"você usa 650 g" embaixo do nome. **A conta continua em gramas** (ou ml, unidades, fatias): a embalagem é só a forma de
+mostrar, calculada sobre a quantidade exata da semana, e o "já tenho" continua comparando pelos gramas.
+
+**Os tamanhos são calibração do projeto com evidência, não valor de tabela.** Não há tabela pública do "tamanho
+mais comum" de cada produto no Brasil. Cada tamanho, com a fonte, a amostra e o motivo, está em
+[`docs/compras/embalagens.csv`](compras/embalagens.csv), uma linha por tamanho, e todo item de compra tem uma
+linha com o seu grupo (embalagem, granel, contável, pronto ou peça). O teste `ConversaoComprasEmbalagensTests`
+confere o código (`Data/ConversaoComprasEmbalagens.cs`) contra esse arquivo. Decisão de 2026-11-16.
+
+- **Fonte principal: Open Food Facts**, base brasileira. Open Food Facts. *Open Food Facts database*.
+  https://openfoodfacts.org, busca pela API `search.openfoodfacts.org` em **2026-11-16**, só produtos com código
+  de barras da GS1 Brasil (789 e 790), filtrados pelo nome; o campo `quantity` normalizado em g ou ml. O script
+  da consulta está em [`docs/compras/scripts/moda_embalagens_off.py`](compras/scripts/moda_embalagens_off.py).
+  **Licença:** a base é da Open Food Facts, sob a Open Database License (ODbL) 1.0
+  (https://opendatacommons.org/licenses/odbl/1-0/), e cada conteúdo sob a Database Contents License (DbCL) 1.0.
+  O projeto guarda **só a contagem** dos tamanhos (quantas embalagens na amostra e quantas de cada tamanho),
+  nunca as linhas dos produtos, e cita a fonte e a licença aqui, no CSV e no texto do "Ver detalhe".
+- **Regra para entrar:** o item precisa de pelo menos **10 embalagens** com tamanho legível na amostra, e cada
+  tamanho registrado tem pelo menos **15%** delas. Assim, "tamanho comum" quer dizer o mesmo para todos os itens.
+  Quem não passa fica na quantidade de sempre, com o motivo no CSV.
+- **Dúzia:** convenção de contagem, sem fonte. As bandejas de 20 e 30 ficaram de fora: o Open Food Facts traz o
+  peso dos ovos, e a contagem aparece em poucos produtos.
+- **Pão de forma:** o pacote é vendido em gramas (400 g e 500 g pelo Open Food Facts), e a lista conta fatias
+  de 25 g (a mesma medida da POF, alimento 8001401, que a base usa): 16 e 20 fatias.
+- **Frango inteiro: peça de 1 kg ou mais.** Calibração do projeto sem fonte pública (o peso de carcaça da
+  Pesquisa Trimestral do Abate do IBGE é agregado e não foi verificado). Abaixo de 1 kg exato na semana, a API
+  devolve a peça (`embalagem.tipo = "peca"`, "1 peça de 1 kg ou mais"), e a tela mostra a peça e, no "Ver
+  detalhe", sugere trocar o alimento no painel; acima, fica em gramas (peça de peso variável).
+- **Até 4 embalagens.** Acima disso a linha volta para a quantidade de sempre ("2,4 kg" é mais claro que
+  "5 pacotes de 500 g"). O tamanho que passaria de 4 sai antes da escolha; entre os que sobram, fica o de menor
+  total e, no empate, o de menos embalagens. Tamanhos diferentes não se combinam.
+
+**Fora da v1, na quantidade de sempre** (motivo de cada um no CSV):
+
+- vendidos também a granel ou no balcão, por peso (decisão de 2026-11-16): queijo muçarela e prato, amendoim,
+  castanha-de-caju, castanha-do-pará, amêndoa e noz;
+- peça de peso variável: queijo minas frescal e ricota;
+- **peso drenado** (atum e milho em conserva): a lista conta o drenado, e o Open Food Facts mistura peso
+  líquido e drenado no mesmo campo. Cadastrar o líquido mandaria comprar de menos;
+- **azeite e óleo de soja:** a lista está em gramas e a garrafa em ml. Falta a densidade do arquivo WEIGHT do
+  USDA SR28, que o script de `docs/compras/` ainda não extrai;
+- **chás:** a lista conta sachês, e o Open Food Facts traz o peso da caixa;
+- **pão de queijo:** a lista conta unidades pelo peso assado, e o pacote é vendido pelo peso da massa crua;
+- **açaí:** a busca mistura polpa, sorvete e creme;
+- amostra abaixo de 10 embalagens: feijão preto, feijão-fradinho, lentilha, flocão, fécula de mandioca, açúcar
+  refinado, iogurte natural e chá preto.
+
+**Revisão:** os tamanhos mudam com os anos (inclusive a redução de conteúdo dos pacotes). Rodar o script de novo
+uma vez por ano e atualizar o CSV, a data da consulta (`DataConsultaOff`) e o código juntos.
+
 ## Cafeína (regra 7 do prompt)
 
 A regra 7 só permite bebida com cafeína de manhã e no início da tarde, e o `ValidadorCafeina` confere em C# (jantar,
