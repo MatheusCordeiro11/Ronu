@@ -1015,7 +1015,7 @@ button.db-trocado:hover {
   }
 
   .db-meta-numero .rotulo {
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.18em;
   }
 
@@ -1489,11 +1489,50 @@ button.db-trocado:hover {
   }
 
   .db-dia-kcal {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .db-dia-trilho {
     width: 18px;
     height: 48px;
+  }
+}
+
+/* Celular (revisão de 2026-11-16) ------------------------------------------ */
+@media (max-width: 720px) {
+  /* A regra de 1080px deixa align-items: start da grade; na coluna do
+     celular isso encolhia os cards da lateral ao tamanho do conteúdo. */
+  .db-lateral {
+    align-items: stretch;
+  }
+
+  /* O anel e o texto de dentro com o mesmo tamanho (o svg passava do
+     quadro e o texto ficava fora do centro). */
+  .db-anel,
+  .db-anel svg {
+    width: 96px;
+    height: 96px;
+  }
+
+  .db-anel-texto .apoio {
+    font-size: 12px;
+  }
+
+  .db-anel-texto .numero {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 560px) {
+  /* Os sete dias cabem na largura: nada escondido do lado. */
+  .db-dias {
+    overflow-x: visible;
+    margin: 0;
+    padding: 2px 0 4px;
+  }
+
+  .db-dia {
+    flex: 1 1 0;
+    min-width: 0;
   }
 }

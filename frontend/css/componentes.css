@@ -228,7 +228,7 @@
     align-items: center;
     gap: 2px;
     padding: 6px 2px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     color: var(--texto-2);
     text-decoration: none;
@@ -1957,4 +1957,31 @@ body:has(.folha[open]) {
 @keyframes folha-sobe {
   from { transform: translateY(40px); opacity: 0; }
   to { transform: none; opacity: 1; }
+}
+
+/* Área de toque (revisão no celular, 2026-11-16) ---------------------------
+   Links de texto (Editar, Alterar, Esqueci minha senha, Privacidade...) têm
+   uns 20px de altura. Em tela de toque, um ::after invisível estende a área
+   clicável para perto dos 44px recomendados, sem mudar o desenho nem o
+   espaço que o link ocupa. */
+@media (pointer: coarse) {
+  .cartao-link,
+  .aceite-ler,
+  #link-esqueci-senha,
+  .entrada-alternar a,
+  .entrada-legal a,
+  .links-legais a {
+    position: relative;
+  }
+
+  .cartao-link::after,
+  .aceite-ler::after,
+  #link-esqueci-senha::after,
+  .entrada-alternar a::after,
+  .entrada-legal a::after,
+  .links-legais a::after {
+    content: '';
+    position: absolute;
+    inset: -12px -6px;
+  }
 }

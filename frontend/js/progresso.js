@@ -262,6 +262,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const direcao = periodo.length < 2 ? 'com uma pesagem só'
       : Math.abs(fim - inicio) < 0.05 ? 'estável'
       : fim < inicio ? 'caindo' : 'subindo';
+    $('pg-grafico-dica').hidden = periodo.length >= 2;
     $('peso-grafico-titulo').textContent = periodo.length < 2
       ? `Peso de tendência de ${formatarKg(fim)} kg, com uma pesagem no período`
       : `Peso de tendência ${direcao}, de ${formatarKg(inicio)} para ${formatarKg(fim)} kg nas últimas ${semanasPeriodo} semanas`;

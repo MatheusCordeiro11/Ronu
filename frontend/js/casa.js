@@ -201,7 +201,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let aceiteCarregado = false;
 
   function mostrarSemCasa() {
-    $('cs-frase').textContent = 'Almoço e jantar da mesma panela, cada um com a porção da própria meta. Até 6 adultos, cada um com a própria conta.';
+    // A frase já está no centro da tela, embaixo da mesa: no topo ela se repetia.
+    $('cs-frase').hidden = true;
     mostrarSomente(elSemCasa);
     if (!aceiteCarregado) {
       aceiteCarregado = true;
@@ -245,6 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function mostrarSemAceite() {
     $('cs-frase').textContent = 'Almoço e jantar da mesma panela, cada um com a porção da própria meta.';
+    $('cs-frase').hidden = false;
     mostrarSomente(elSemAceite);
     if (!aceiteNovoCarregado) {
       aceiteNovoCarregado = true;
@@ -310,6 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderizarTopo() {
     const n = casa.membros.length;
+    $('cs-frase').hidden = false;
     $('cs-frase').textContent = `Almoço e jantar da mesma panela para ${n} ${n === 1 ? 'pessoa' : 'pessoas'}. Você vê só a sua porção.`;
     const rotulo = $('cs-semana');
     rotulo.hidden = !semana;

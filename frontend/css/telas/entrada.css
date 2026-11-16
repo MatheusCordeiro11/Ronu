@@ -1212,3 +1212,17 @@
     animation: none !important;
   }
 }
+
+/* Celular (revisão de 2026-11-16): as cinco etapas não cabiam numa linha e
+   "Comida" descia sozinha, com um tracinho solto no fim. Sem os tracinhos,
+   e com um respiro maior entre as etapas, elas cabem lado a lado. */
+@media (max-width: 480px) {
+  .entrada-etapas {
+    flex-wrap: nowrap;
+    gap: 12px;
+  }
+
+  .entrada-etapas li:not(:last-child)::after {
+    display: none;
+  }
+}

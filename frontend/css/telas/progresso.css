@@ -718,7 +718,7 @@ fieldset.campo legend {
   }
 
   .pg-numero-principal .rotulo {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .pg-tendencia {
@@ -746,7 +746,7 @@ fieldset.campo legend {
   }
 
   .pg-eixo-x {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .pg-legenda {
@@ -803,7 +803,7 @@ fieldset.campo legend {
   }
 
   .pg-ajuste-cabeca .rotulo {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .pg-ajuste-estado {
@@ -872,5 +872,39 @@ fieldset.campo legend {
 
   .pg-estado-cartao {
     padding: var(--e-6);
+  }
+}
+
+/* Revisão no celular (2026-11-16) ------------------------------------------ */
+
+/* Com uma pesagem só, o gráfico fica quase vazio: uma frase no meio diz
+   o que vai aparecer ali. */
+.pg-grafico-desenho {
+  position: relative;
+}
+
+.pg-grafico-dica {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  margin: 0;
+  padding: 28px 24px 0;
+  text-align: center;
+  font-size: var(--t-apoio);
+  color: var(--texto-2);
+  pointer-events: none;
+}
+
+.pg-grafico-dica[hidden] {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  /* .pg-lateral .cartao (22px) vencia o padding 0 do ritmo no celular,
+     e os dois quadros ficavam recuados em relação aos outros cards. */
+  .pg-lateral .pg-ritmo {
+    padding: 0;
   }
 }
