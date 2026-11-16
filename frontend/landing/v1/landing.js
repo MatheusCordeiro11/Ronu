@@ -421,9 +421,9 @@
     };
     var mira = function (x, y) {
       var r = olhosSvg.getBoundingClientRect();
-      /* ponto entre os dois olhos, no desenho de 213 × 300 */
-      var dx = x - (r.left + r.width * 70 / 213), dy = y - (r.top + r.height * 91 / 300);
-      var d = Math.hypot(dx, dy) || 1, k = Math.min(1, d / 220) * 3.4;
+      /* ponto entre os dois olhos, no desenho de 185 × 300 */
+      var dx = x - (r.left + r.width * 67 / 185), dy = y - (r.top + r.height * 78 / 300);
+      var d = Math.hypot(dx, dy) || 1, k = Math.min(1, d / 220) * 2.6;
       olhoQuer = [dx / d * k, dy / d * k];
       if (reduzido) { olhoAtual = olhoQuer.slice(); desenhaOlho(); return; }
       if (!olhoRodando) { olhoRodando = true; requestAnimationFrame(andaOlho); }

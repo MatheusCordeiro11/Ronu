@@ -320,23 +320,26 @@
 </footer>
 <div class="mascote" id="mascote" aria-hidden="true">
   <svg class="mascote-fumaca" viewBox="0 0 140 40" focusable="false">
-    <g class="fumaca-e"><circle cx="46" cy="29" r="8"/><circle cx="36" cy="32" r="6"/><circle cx="55" cy="33" r="5"/></g>
-    <g class="fumaca-d"><circle cx="94" cy="29" r="8"/><circle cx="104" cy="32" r="6"/><circle cx="85" cy="33" r="5"/></g>
+    <defs><pattern id="mascote-reticula" width="3.2" height="3.2" patternUnits="userSpaceOnUse" patternTransform="rotate(30)"><circle class="ponto" cx="1.6" cy="1.6" r="1.25"/></pattern></defs>
+    <g class="fumaca-e"><g class="tinta-2" transform="translate(1.6 1.1)"><circle cx="46" cy="29" r="8"/><circle cx="36" cy="32" r="6"/><circle cx="55" cy="33" r="5"/></g><g class="tinta-1"><circle cx="46" cy="29" r="8"/><circle cx="36" cy="32" r="6"/><circle cx="55" cy="33" r="5"/></g></g>
+    <g class="fumaca-d"><g class="tinta-2" transform="translate(1.6 1.1)"><circle cx="94" cy="29" r="8"/><circle cx="104" cy="32" r="6"/><circle cx="85" cy="33" r="5"/></g><g class="tinta-1"><circle cx="94" cy="29" r="8"/><circle cx="104" cy="32" r="6"/><circle cx="85" cy="33" r="5"/></g></g>
   </svg>
   <div class="mascote-corpo">
    <div class="mascote-salto">
-    <div class="mascote-pernas"><img src="../../img/mascote/ninja.webp" alt="" width="213" height="300"></div>
+    <div class="mascote-pernas"><img src="../../img/mascote/ninja.webp" alt="" width="185" height="300"></div>
     <div class="mascote-tronco">
-    <img src="../../img/mascote/ninja.webp" alt="" width="213" height="300">
-    <svg viewBox="0 0 213 300" focusable="false">
+    <img src="../../img/mascote/ninja.webp" alt="" width="185" height="300">
+    <svg viewBox="0 0 185 300" focusable="false">
       <defs>
-        <radialGradient id="mascote-iris" cx="50%" cy="62%" r="55%"><stop class="iris-1" offset="0"/><stop class="iris-2" offset="1"/></radialGradient>
-        <clipPath id="mascote-esclera-e"><ellipse cx="39.6" cy="90.9" rx="14.5" ry="13.6"/></clipPath>
-        <clipPath id="mascote-esclera-d"><ellipse cx="100" cy="90.9" rx="14.5" ry="13.6"/></clipPath>
-        <clipPath id="mascote-abertura"><rect x="0" y="0" width="213" height="106"/></clipPath>
+        <radialGradient id="mascote-iris" cx="50%" cy="50%" r="50%"><stop class="iris-1" offset=".35"/><stop class="iris-2" offset="1"/></radialGradient>
+        <clipPath id="mascote-esclera-e"><ellipse cx="43.5" cy="78.4" rx="11.2" ry="10.9"/></clipPath>
+        <clipPath id="mascote-esclera-d"><ellipse cx="90.3" cy="78.4" rx="11.2" ry="10.9"/></clipPath>
+        <clipPath id="mascote-palpebra-e"><polygon points="29.5,68.4 57.5,72.8 57.5,92.4 29.5,92.4"/></clipPath>
+        <clipPath id="mascote-palpebra-d"><polygon points="76.3,72.8 104.3,68.4 104.3,92.4 76.3,92.4"/></clipPath>
+        <clipPath id="mascote-abertura"><rect x="0" y="0" width="185" height="89"/></clipPath>
       </defs>
-      <g clip-path="url(#mascote-abertura)"><g class="mascote-olho"><ellipse class="esclera" cx="39.6" cy="90.9" rx="15.2" ry="14.3"/><g clip-path="url(#mascote-esclera-e)"><g class="mascote-iris"><circle cx="39.6" cy="90.9" r="12.6" fill="url(#mascote-iris)"/><circle class="pupila" cx="39.6" cy="90.9" r="6.2"/><circle class="brilho" cx="43.6" cy="86.3" r="3.7"/><circle class="brilho" cx="35.5" cy="94.9" r="1.6"/></g></g><path class="cilio" d="M24.4 90.9A15.2 14.3 0 0 1 54.8 90.9"/></g><g class="mascote-olho"><ellipse class="esclera" cx="100" cy="90.9" rx="15.2" ry="14.3"/><g clip-path="url(#mascote-esclera-d)"><g class="mascote-iris"><circle cx="100" cy="90.9" r="12.6" fill="url(#mascote-iris)"/><circle class="pupila" cx="100" cy="90.9" r="6.2"/><circle class="brilho" cx="104" cy="86.3" r="3.7"/><circle class="brilho" cx="95.9" cy="94.9" r="1.6"/></g></g><path class="cilio" d="M84.8 90.9A15.2 14.3 0 0 1 115.2 90.9"/></g></g>
-      <g class="mascote-feliz"><path class="feliz-traco" d="M28.6 93.9Q39.6 81.9 50.6 93.9"/><path class="feliz-traco" d="M89 93.9Q100 81.9 111 93.9"/></g>
+      <g clip-path="url(#mascote-abertura)"><g class="mascote-olho"><g clip-path="url(#mascote-palpebra-e)"><ellipse class="esclera" cx="43.5" cy="78.4" rx="11.8" ry="11.5"/><g clip-path="url(#mascote-esclera-e)"><g class="mascote-iris"><circle cx="43.5" cy="78.4" r="8.2" fill="url(#mascote-iris)"/><circle class="pupila" cx="43.5" cy="78.4" r="4"/><circle class="brilho" cx="46.1" cy="76" r="1.9"/><circle class="brilho" cx="41.1" cy="81" r=".8"/></g></g></g><path class="cilio" d="M31 68.6L56 72.6"/></g><g class="mascote-olho"><g clip-path="url(#mascote-palpebra-d)"><ellipse class="esclera" cx="90.3" cy="78.4" rx="11.8" ry="11.5"/><g clip-path="url(#mascote-esclera-d)"><g class="mascote-iris"><circle cx="90.3" cy="78.4" r="8.2" fill="url(#mascote-iris)"/><circle class="pupila" cx="90.3" cy="78.4" r="4"/><circle class="brilho" cx="92.9" cy="76" r="1.9"/><circle class="brilho" cx="87.9" cy="81" r=".8"/></g></g></g><path class="cilio" d="M77.8 72.6L102.8 68.6"/></g></g>
+      <g class="mascote-feliz"><path class="feliz-traco" d="M35.0 80.4Q43.5 71.4 52.0 80.4"/><path class="feliz-traco" d="M81.8 80.4Q90.3 71.4 98.8 80.4"/></g>
     </svg>
     </div>
    </div>

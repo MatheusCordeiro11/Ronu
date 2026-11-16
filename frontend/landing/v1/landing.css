@@ -21,10 +21,10 @@
   --sombra-icone: drop-shadow(0 16px 14px rgba(0, 0, 0, .6)) drop-shadow(0 3px 3px rgba(0, 0, 0, .45));
   /* mascote ninja: cores dos olhos (fixas, são do desenho) e o contorno que
      separa a roupa preta do fundo escuro */
-  --mascote-esclera: #F4E8D8; --mascote-traco: #2A140A; --mascote-iris-1: #7A4220;
-  --mascote-iris-2: #1C0C05; --mascote-pupila: #0E0603; --mascote-brilho: #FFFFFF;
+  --mascote-esclera: #F6E4D0; --mascote-traco: #1F2E36; --mascote-iris-1: #2B160D;
+  --mascote-iris-2: #7A4122; --mascote-pupila: #160B07; --mascote-brilho: #F6E3CE;
   --mascote-contorno: drop-shadow(0 0 1.5px rgba(240, 233, 221, .6)) drop-shadow(0 8px 10px rgba(0, 0, 0, .55));
-  --mascote-fumaca: #E9E1D3; --mascote-fumaca-traco: #8A8072;
+  --mascote-fumaca-1: #E9DCC8; --mascote-fumaca-2: #C23B22;
 
   color-scheme: dark;
 }
@@ -42,7 +42,7 @@
   --marca: "Shippori Mincho B1", Georgia, serif;
   --ease: cubic-bezier(.22, .8, .24, 1);
   --mascote-contorno: drop-shadow(0 8px 10px rgba(70, 45, 20, .2));
-  --mascote-fumaca: #FFFFFF; --mascote-fumaca-traco: #BDB09B;
+  --mascote-fumaca-1: #13618A; --mascote-fumaca-2: #C23B22;
   color-scheme: light;
 }
 * { box-sizing: border-box; }
@@ -487,20 +487,25 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
    pulinho com os olhos fechados sorrindo. É enfeite: aria-hidden e sem
    clique. Os olhos são SVG por cima do desenho, que vem sem eles. */
 .mascote { position: fixed; left: max(16px, env(safe-area-inset-left, 0px)); bottom: max(10px, env(safe-area-inset-bottom, 0px)); height: 90px; z-index: 30; pointer-events: none; filter: var(--mascote-contorno); }
-.mascote-corpo { position: relative; height: 100%; aspect-ratio: 213 / 300; transform-origin: 50% 100%; animation: mascote-respira 3.4s ease-in-out infinite; }
+.mascote-corpo { position: relative; height: 100%; aspect-ratio: 185 / 300; transform-origin: 50% 100%; animation: mascote-respira 3.4s ease-in-out infinite; }
 .mascote-corpo img, .mascote-corpo svg, .mascote-salto, .mascote-pernas, .mascote-tronco { position: absolute; inset: 0; width: 100%; height: 100%; }
-/* O pulo dobra as perninhas: o desenho é partido na cintura (linha 232 de 300,
-   abaixo das mãos e das pontas do cinto). As pernas agacham e esticam a partir
-   do chão, e o tronco desce o mesmo tanto (22,67% × quanto a perna encolheu). */
-.mascote-pernas { transform-origin: 33% 100%; }
-.mascote-pernas img { clip-path: inset(77% 0 0 0); }
-.mascote-tronco img { clip-path: inset(0 0 22.33% 0); }
-.mascote-fumaca { position: absolute; left: 33%; bottom: -5px; width: 105%; transform: translateX(-50%); overflow: visible; }
-.mascote-fumaca circle { fill: var(--mascote-fumaca); stroke: var(--mascote-fumaca-traco); stroke-width: 1.2; }
-.mascote-fumaca g { opacity: 0; transform-box: fill-box; transform-origin: 50% 100%; }
+/* O pulo dobra as perninhas: o desenho (riso, 185 × 300) é partido na cintura
+   (linha 226, abaixo das mãos e das pontas do cinto). As pernas agacham e
+   esticam a partir do chão, e o tronco desce o mesmo tanto (24,67% × quanto a
+   perna encolheu). */
+.mascote-pernas { transform-origin: 36% 100%; }
+.mascote-pernas img { clip-path: inset(75.33% 0 0 0); }
+.mascote-tronco img { clip-path: inset(0 0 24.33% 0); }
+.mascote-fumaca { position: absolute; left: 36%; bottom: -5px; width: 105%; transform: translateX(-50%); overflow: visible; }
+/* fumaça no estilo riso: retícula de pontos numa tinta e a outra tinta
+   chapada por baixo, fora de registro, sem contorno */
+.mascote-fumaca .tinta-1 circle { fill: url(#mascote-reticula); }
+.mascote-fumaca .ponto { fill: var(--mascote-fumaca-1); }
+.mascote-fumaca .tinta-2 circle { fill: var(--mascote-fumaca-2); opacity: .5; }
+.mascote-fumaca > g { opacity: 0; transform-box: fill-box; transform-origin: 50% 100%; }
 .mascote-olho { transform-box: fill-box; transform-origin: center; transition: transform .08s ease, opacity .12s ease; }
 .mascote .esclera { fill: var(--mascote-esclera); stroke: var(--mascote-traco); stroke-width: 1.4; }
-.mascote .cilio, .mascote .feliz-traco { fill: none; stroke: var(--mascote-traco); stroke-width: 2.6; stroke-linecap: round; }
+.mascote .cilio, .mascote .feliz-traco { fill: none; stroke: var(--mascote-traco); stroke-width: 2.4; stroke-linecap: round; }
 .mascote .pupila { fill: var(--mascote-pupila); }
 .mascote .brilho { fill: var(--mascote-brilho); }
 .mascote .iris-1 { stop-color: var(--mascote-iris-1); }
@@ -535,12 +540,12 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 }
 @keyframes mascote-tronco {
   0% { transform: translateY(0); animation-timing-function: ease-out; }
-  18% { transform: translateY(7.25%); animation-timing-function: ease-in; }
-  28% { transform: translateY(-1.81%); }
-  46% { transform: translateY(2.27%); }
-  60% { transform: translateY(-.45%); animation-timing-function: ease-out; }
-  70% { transform: translateY(6.35%); animation-timing-function: ease-in-out; }
-  86% { transform: translateY(-.68%); }
+  18% { transform: translateY(7.89%); animation-timing-function: ease-in; }
+  28% { transform: translateY(-1.97%); }
+  46% { transform: translateY(2.47%); }
+  60% { transform: translateY(-.49%); animation-timing-function: ease-out; }
+  70% { transform: translateY(6.91%); animation-timing-function: ease-in-out; }
+  86% { transform: translateY(-.74%); }
   100% { transform: translateY(0); }
 }
 /* fumacinha no chão: uma na saída (22–44%) e outra maior na chegada (60–92%) */

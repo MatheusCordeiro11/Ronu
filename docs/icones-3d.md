@@ -12,12 +12,13 @@ originais em resolução cheia ficam nesse arquivo do Figma; o repositório guar
 | `img/modalidades/` | um ícone por modalidade que não usa um da base |
 | `img/envelope/` | o envelope das telas de senha, em camadas: `aba`, `interior`, `bolso` e a `chave` da carta |
 | `img/landing/` | as ilustrações em gravura da landing: `mao-faixa`, `mao-tigela`, `onda` e uma mão por modalidade da faixa (`mao-muay-thai`, `mao-boxe`, `mao-musculacao`, `mao-corrida`, `mao-futebol`, `mao-natacao`, `mao-ciclismo`, `mao-volei`, `mao-danca`) |
-| `img/mascote/` | o mascote ninja da landing, de frente e **sem os olhos** (`ninja.webp`, 213 × 300): os olhos são SVG no `index.html`, para seguirem o mouse |
+| `img/mascote/` | o mascote ninja da landing, de frente e **sem os olhos** (`ninja.webp`, 185 × 300): os olhos são SVG no `index.html`, para seguirem o mouse |
 
-O ninja foi gerado no Figma (estilo de desenho infantil, contorno marrom-escuro, roupa preta, faixa e cinto no
-vermelho-carimbo, pele negra, rosto coberto até o nariz). Os olhos foram apagados pintando a pele por cima,
-interpolada linha a linha entre os dois lados de cada olho; a máscara não foi tocada. No desenho de 213 × 300,
-os olhos ficam em (39,6; 90,9) e (100; 90,9), com raio de 15,2 × 14,3.
+O ninja foi gerado no Figma no estilo **riso** (impressão em duas tintas, vermelho-carimbo e azul-petróleo, com
+grão e meio-tom; pele negra feita pela sobreposição das duas tintas, rosto coberto até o nariz). Os olhos foram
+apagados pintando a pele por cima, interpolada linha a linha entre os dois lados de cada olho, com ruído para
+imitar o grão; a máscara não foi tocada. No desenho de 185 × 300, os olhos ficam em (43,5; 78,4) e (90,3; 78,4),
+com raio de 11,8 × 11,5, e a cintura (onde o pulo parte o desenho) fica na linha 226.
 
 Cinco modalidades usam um ícone da base: Jiu-jitsu → `quimono`, Muay thai → `bandagem`, Boxe → `luva`,
 Musculação → `halter` e Natação → `oculos`. As outras 21 têm o arquivo com o nome da modalidade, sem acento
