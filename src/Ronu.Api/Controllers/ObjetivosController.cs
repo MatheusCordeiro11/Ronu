@@ -182,6 +182,8 @@ public class ObjetivosController : ControllerBase
             .ToListAsync();
         // O objetivo da janela é o do registro mais recente, como na geração.
         var objetivoMaisRecente = historico.OrderBy(r => r.Data).Last().Objetivo;
+        var registradoHoje = objetivoDeHoje?.Id == objetivo.Id;
+        var refeicoesFeitas = await ContarRefeicoesFeitasDesdePesagemAsync(historico, registradoHoje, usuario?.Estado);
 
         return new ObjetivoAtualResponse
         {
@@ -190,12 +192,34 @@ public class ObjetivosController : ControllerBase
             Objetivo = objetivo.Objetivo,
             DataRegistro = objetivo.DataRegistro,
             Aderencia = objetivo.Aderencia,
-            RegistradoHoje = objetivoDeHoje?.Id == objetivo.Id,
+            RegistradoHoje = registradoHoje,
             TemDieta = temDieta,
+            RefeicoesFeitasDesdePesagem = refeicoesFeitas,
             // No fuso da UF, como a geração (GeradorDietaGemini.CalcularMetas): a tela nunca conta diferente da dieta.
             ProgressoAjuste = CalculadoraAjusteAdaptativo.ResumirJanela(
                 historico, inicioDaJanela, objetivoMaisRecente, DateTime.UtcNow, FusoHorarioEstado.Fuso(usuario?.Estado))
         };
+    }
+
+    /// <summary>
+    /// Quantas refeições a pessoa marcou como feitas desde a pesagem a que a pergunta de aderência se refere: a
+    /// anterior à de hoje, se já há registro hoje; senão, a mais recente (a mesma regra do progresso.js). Conta do dia
+    /// (no fuso da UF) dessa pesagem em diante, inclusive: a pesagem costuma ser de manhã, antes de comer. Só o número:
+    /// a tela mostra "você marcou X refeições como feitas", sem total e sem sugerir resposta (decisão de 2026-11-16).
+    /// Nulo sem pesagem de referência. As marcações duram 35 dias, então uma pesagem mais antiga conta só os últimos 35.
+    /// </summary>
+    private async Task<int?> ContarRefeicoesFeitasDesdePesagemAsync(
+        IReadOnlyList<RegistroPesoAderenciaDto> historico, bool registradoHoje, string? estado)
+    {
+        var ordenado = historico.OrderBy(r => r.Data).ToList();
+        var indice = registradoHoje ? ordenado.Count - 2 : ordenado.Count - 1;
+        if (indice < 0)
+        {
+            return null;
+        }
+
+        var desde = FusoHorarioEstado.Hoje(estado, ordenado[indice].Data);
+        return await _context.RefeicoesFeitas.CountAsync(r => r.UsuarioId == UsuarioIdLogado && r.Data >= desde);
     }
 
     /// <summary>

@@ -19,4 +19,8 @@ public class ObjetivoAtualResponse : ObjetivoResponse
     // Card "Ajuste pelo progresso" do Progresso (redesign de out/2026). Só
     // acrescenta o campo: o frontend antigo ignora.
     public ProgressoAjusteDto? ProgressoAjuste { get; set; }
+
+    // Refeições marcadas como feitas desde a pesagem a que a pergunta de aderência se refere (a anterior à de hoje,
+    // se já há registro hoje). Nulo sem essa pesagem. Só informa: a tela não pré-seleciona resposta com ele.
+    public int? RefeicoesFeitasDesdePesagem { get; set; }
 }
