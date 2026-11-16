@@ -122,7 +122,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   if (minhasR.status === 'fulfilled') {
     minhasR.value.forEach((v) => {
-      estado.escolhidas.set(v.modalidade.id, { dias: new Set(v.diasSemana), minutos: Math.round(v.duracaoMediaHoras * 60) });
+      estado.escolhidas.set(v.modalidade.id, {
+        dias: new Set(v.diasSemana), minutos: Math.round(v.duracaoMediaHoras * 60),
+        intensidade: RonuRitmoAula.valido(v.intensidade)
+      });
       estado.modalidadesSalvas.set(v.modalidade.id, v.id);
     });
   }
@@ -144,7 +147,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   function modalidadesParaApi() {
     return [...estado.escolhidas.entries()]
       .filter(([, m]) => m.dias.size > 0)
-      .map(([id, m]) => ({ modalidadeId: id, diasSemana: [...m.dias].sort(), duracaoMediaHoras: m.minutos / 60 }));
+      .map(([id, m]) => ({
+        modalidadeId: id, diasSemana: [...m.dias].sort(), duracaoMediaHoras: m.minutos / 60,
+        intensidade: m.intensidade || RonuRitmoAula.PADRAO
+      }));
   }
 
   function corpoSimulacao(objetivo) {
@@ -222,7 +228,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const v = referencia.objetivoKcal;
       partes.push([`Objetivo: ${NOMES_OBJETIVO[estado.objetivo]}`, v === 0 ? '± 0 kcal' : `${sinal(v)} kcal`]);
     }
-    if (temTreino) partes.push(['Treino, no dia que tem', `${sinal(diaTreino.treinoKcal)} kcal`]);
+    // "Estimado" no rótulo e não um "~" na parcela: as partes somam o total exato.
+    if (temTreino) partes.push(['Treino (estimado), no dia que tem', `${sinal(diaTreino.treinoKcal)} kcal`]);
 
     // Atualiza no lugar: só a parte que acabou de entrar na conta anima
     // (recriar tudo a cada resposta fazia as linhas piscarem sem parar).
@@ -495,7 +502,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             cartoes.get(mod.id)?.el.remove();
             cartoes.delete(mod.id);
           } else {
-            estado.escolhidas.set(mod.id, { dias: new Set(), minutos: DURACAO_PADRAO });
+            estado.escolhidas.set(mod.id, { dias: new Set(), minutos: DURACAO_PADRAO, intensidade: RonuRitmoAula.PADRAO });
             criarCartao(mod);
           }
           botao.setAttribute('aria-pressed', String(estado.escolhidas.has(mod.id)));
@@ -626,7 +633,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     controle.append(menos, saida, mais);
     linhaDuracao.append(rotuloDuracao, controle);
 
-    el.append(cabeca, dias, linhaDuracao);
+    // Ritmo da aula, já em "Normal": só nas modalidades com os dois blocos (lutas e treino funcional).
+    const ritmo = RonuRitmoAula.temRitmo(mod)
+      ? RonuRitmoAula.criar(mod, escolha.intensidade, (nivel) => { escolha.intensidade = nivel; agendarSimulacao(); })
+      : null;
+
+    el.append(...[cabeca, dias, linhaDuracao, ritmo && ritmo.el].filter(Boolean));
     $('ob-escolhidas').appendChild(el);
     cartoes.set(mod.id, { el, resumo, saida, menos, mais, botoesDia });
     atualizarCartao(mod.id);
