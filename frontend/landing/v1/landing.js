@@ -480,6 +480,7 @@
         return;
       }
       if (lado && !lado.getAttribute('src')) lado.src = lado.dataset.src;
+      mascote.classList.remove('aponta', 'aponta-esq');
       mascote.classList.toggle('esquerda', andarAlvo < andarX);
       mascote.classList.add('andando');
       if (!andando) { andando = true; ultimoQuadro = performance.now(); requestAnimationFrame(passo); }
@@ -523,7 +524,7 @@
     var salta = function (ax, p, depois) {
       saltando = true; andando = false; depoisDeAndar = null;
       clearTimeout(tempoAndar); clearTimeout(tempoFeliz);
-      mascote.classList.remove('andando', 'esquerda', 'pula', 'feliz', 'pousa');
+      mascote.classList.remove('andando', 'esquerda', 'pula', 'feliz', 'pousa', 'aponta', 'aponta-esq');
       mascote.classList.add('salta', 'agacha');
       var l = limiteAndar();
       if (!p) ax = limita(ax, 0, l.max);
@@ -567,20 +568,21 @@
       if (!andando && (andarX < t.min - 1 || andarX > t.max + 1)) { salta(andarX, null); return; }
       requestAnimationFrame(segue);
     };
-    /* decide o caminho até o clique em x, em cima do bloco p ou no chão */
-    var planeja = function (x, p) {
+    /* decide o caminho até o clique em x, em cima do bloco p ou no chão;
+       depois (se houver) roda quando ele chega */
+    var planeja = function (x, p, depois) {
       clearTimeout(tempoAndar);
       var l = limiteAndar(), ax = x - l.base - l.largura / 2;
       if (p) {
         var t = topoDe(p), alvo = limita(ax, t.min, t.max);
-        if (apoio === p) { andaAte(alvo); return; }
-        if (apoio) { salta(alvo, p); return; }
+        if (apoio === p) { andaAte(alvo, depois); return; }
+        if (apoio) { salta(alvo, p, depois); return; }
         /* do chão: chega até uns 140 px do ponto e salta na diagonal */
         var pe = limita(andarX, alvo - 140, alvo + 140);
         pe = limita(pe, 0, l.max);
         andaAte(pe, function () {
-          if (topoDe(p).cabe) salta(limita(ax, topoDe(p).min, topoDe(p).max), p);
-          else olhaParaVoce();
+          if (topoDe(p).cabe) salta(limita(ax, topoDe(p).min, topoDe(p).max), p, depois);
+          else (depois || olhaParaVoce)();
         });
         return;
       }
@@ -590,11 +592,11 @@
         if (ax < b.min || ax > b.max) {
           /* anda até a ponta do bloco e pula de lá */
           var borda = ax < b.min ? b.min : b.max;
-          andaAte(borda, function () { salta(borda + (ax < borda ? -40 : 40), null, function () { andaAte(limita(ax, 0, limiteAndar().max)); }); });
-        } else salta(ax, null);
+          andaAte(borda, function () { salta(borda + (ax < borda ? -40 : 40), null, function () { andaAte(limita(ax, 0, limiteAndar().max), depois); }); });
+        } else salta(ax, null, depois);
         return;
       }
-      andaAte(ax);
+      andaAte(ax, depois);
     };
     var olhaParaVoce = function () {
       clearTimeout(olhandoVoce);
@@ -602,13 +604,77 @@
       if (!olhoRodando) { olhoRodando = true; requestAnimationFrame(andaOlho); }
       olhandoVoce = setTimeout(function () { olhandoVoce = null; }, 1600);
     };
-    addEventListener('pointermove', function (e) { if (e.pointerType === 'mouse' && !olhandoVoce) mira(e.clientX, e.clientY); }, { passive: true });
+    /* etapa 3: com o mouse parado meio segundo num botão, ele vai até o lado
+       do botão (subindo no bloco, se o botão estiver dentro de um) e aponta
+       para ele. Só com mouse: no toque não existe "passar por cima". O menu
+       fica de fora, para ele não correr a cada link do topo. */
+    var BOTOES = 'a.botao, .faixa button, .pergunta > button, .simulador button';
+    var apontaImg = mascote.querySelector('.mascote-aponta img');
+    var botaoSob = null, botaoAlvo = null, tempoBotao = null;
+    var temMouse = matchMedia('(hover: hover) and (pointer: fine)').matches;
+    var desaponta = function () {
+      botaoAlvo = null;
+      mascote.classList.remove('aponta', 'aponta-esq');
+    };
+    var aponta = function (b) {
+      if (botaoSob !== b || saltando || andando) return;
+      var r = b.getBoundingClientRect(), m = mascote.getBoundingClientRect();
+      clearTimeout(olhandoVoce); olhandoVoce = null;
+      mascote.classList.remove('pula', 'feliz');
+      mascote.classList.toggle('aponta-esq', r.left + r.width / 2 < m.left + m.width / 2);
+      mascote.classList.add('aponta');
+    };
+    var vaiAoBotao = function (b) {
+      if (saltando) { tempoBotao = setTimeout(function () { vaiAoBotao(b); }, 300); return; }
+      if (apontaImg && !apontaImg.getAttribute('src')) apontaImg.src = apontaImg.dataset.src;
+      botaoAlvo = b;
+      var r = b.getBoundingClientRect(), l = limiteAndar();
+      var p = b.closest(PLATAFORMAS);
+      if (p && !topoDe(p).cabe) p = null;
+      /* se o botão está longe da altura de onde ele pisaria (bem acima do
+         chão ou do bloco), ele sobe no próprio botão e aponta de uma ponta */
+      var c = chao(), pisoY = p ? p.getBoundingClientRect().top : c.y;
+      var noNivel = r.bottom > pisoY - c.altura * 1.3 && r.top < pisoY;
+      if (!noNivel) {
+        /* botão estreito (os dias, as durações): só fica olhando para ele */
+        if (r.width < l.largura * 2.2 || !topoDe(b).cabe) { botaoAlvo = null; return; }
+        p = b;
+      }
+      var faixa = p ? topoDe(p) : { min: 0, max: l.max }, ax;
+      if (p === b) ax = Math.abs(faixa.min - andarX) <= Math.abs(faixa.max - andarX) ? faixa.min : faixa.max;
+      else {
+        /* de pé ao lado do botão, a quase um corpo dele */
+        var folga = l.largura * 0.9;
+        var esq = r.left - folga - l.base - l.largura / 2, dir = r.right + folga - l.base - l.largura / 2;
+        var perto = Math.abs(esq - andarX) <= Math.abs(dir - andarX) ? [esq, dir] : [dir, esq];
+        ax = perto[0] >= faixa.min && perto[0] <= faixa.max ? perto[0]
+          : perto[1] >= faixa.min && perto[1] <= faixa.max ? perto[1]
+          : limita(perto[0], faixa.min, faixa.max);
+      }
+      planeja(ax + l.base + l.largura / 2, p, function () { if (botaoAlvo === b) aponta(b); else olhaParaVoce(); });
+    };
+    if (temMouse && !reduzido) {
+      if (apontaImg) apontaImg.src = apontaImg.dataset.src;
+      document.addEventListener('pointerover', function (e) {
+        if (e.pointerType !== 'mouse') return;
+        var b = e.target instanceof Element ? e.target.closest(BOTOES) : null;
+        if (b && b.closest('.menu')) b = null;
+        if (b === botaoSob) return;
+        botaoSob = b; clearTimeout(tempoBotao);
+        if (!b) { if (mascote.classList.contains('aponta') || botaoAlvo) desaponta(); return; }
+        if (botaoAlvo && botaoAlvo !== b) desaponta();
+        tempoBotao = setTimeout(function () { vaiAoBotao(b); }, 500);
+      });
+    }
+    addEventListener('pointermove', function (e) { if (e.pointerType === 'mouse' && !olhandoVoce && !mascote.classList.contains('aponta')) mira(e.clientX, e.clientY); }, { passive: true });
     /* no toque, os olhos seguem o dedo já no começo do toque */
     addEventListener('pointerdown', function (e) { if (e.pointerType !== 'mouse' && !olhandoVoce) mira(e.clientX, e.clientY); }, { passive: true });
     /* o clique (que não dispara ao rolar a página no celular) é que faz ele reagir */
     addEventListener('click', function (e) {
       var alvo = e.target instanceof Element ? e.target.closest(INTERATIVOS) : null;
       if (saltando) return;
+      if (alvo && mascote.classList.contains('aponta')) return; /* apontando: só segue apontando */
+      if (!alvo) desaponta();
       var bloco = !alvo && !reduzido && e.target instanceof Element ? e.target.closest(PLATAFORMAS) : null;
       if (bloco && !topoDe(bloco).cabe) bloco = null;
       if (andando) { if (!alvo) { mira(e.clientX, e.clientY); planeja(e.clientX, bloco); } return; }

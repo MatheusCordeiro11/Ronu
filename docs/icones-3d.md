@@ -12,7 +12,7 @@ originais em resolução cheia ficam nesse arquivo do Figma; o repositório guar
 | `img/modalidades/` | um ícone por modalidade que não usa um da base |
 | `img/envelope/` | o envelope das telas de senha, em camadas: `aba`, `interior`, `bolso` e a `chave` da carta |
 | `img/landing/` | as ilustrações em gravura da landing: `mao-faixa`, `mao-tigela`, `onda` e uma mão por modalidade da faixa (`mao-muay-thai`, `mao-boxe`, `mao-musculacao`, `mao-corrida`, `mao-futebol`, `mao-natacao`, `mao-ciclismo`, `mao-volei`, `mao-danca`) |
-| `img/mascote/` | o mascote ninja da landing, de frente e **sem os olhos** (`ninja.webp`, 185 × 300): os olhos são SVG no `index.html`, para seguirem o mouse; e de lado, andando (`ninja-andando.webp`, tira de 4 quadros de 200 × 300, virado para a direita) |
+| `img/mascote/` | o mascote ninja da landing, de frente e **sem os olhos** (`ninja.webp`, 185 × 300): os olhos são SVG no `index.html`, para seguirem o mouse; de lado, andando (`ninja-andando.webp`, tira de 4 quadros de 200 × 300, virado para a direita); e apontando para a direita (`ninja-aponta.webp`, 270 × 300, com os olhos desenhados olhando para a mão) |
 
 O ninja foi gerado no Figma no estilo **riso** (impressão em duas tintas, vermelho-carimbo e azul-petróleo, com
 grão e meio-tom; pele negra feita pela sobreposição das duas tintas, rosto coberto até o nariz). Os olhos foram
@@ -24,6 +24,11 @@ A caminhada foi gerada de uma vez só, como uma tira de 4 quadros no mesmo estil
 passagem), para o personagem sair igual nos quatro. Os quadros foram recortados com a mesma escala, os pés no
 chão e o centro da cabeça alinhado em x = 115, que o CSS casa com o centro da cabeça do desenho de frente (66,9
 de 185). Para a esquerda, o CSS espelha a tira.
+
+O desenho apontando foi gerado à parte, no mesmo estilo, e reduzido para a mesma altura de 300; a cabeça fica em
+x = 129,9, que o CSS casa com a do desenho de frente. As faixas das canelas são vermelhas nos três desenhos: no de
+frente (que vinha sem faixa) e na caminhada (que vinha com faixas brancas), elas foram repintadas com as cores da
+própria faixa da cintura, casando o claro e o escuro de cada pixel, para manter o grão do riso.
 
 Cinco modalidades usam um ícone da base: Jiu-jitsu → `quimono`, Muay thai → `bandagem`, Boxe → `luva`,
 Musculação → `halter` e Natação → `oculos`. As outras 21 têm o arquivo com o nome da modalidade, sem acento

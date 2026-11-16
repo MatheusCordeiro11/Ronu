@@ -529,6 +529,15 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .mascote.andando .mascote-corpo { visibility: hidden; }
 .mascote.esquerda .mascote-lado { transform: scaleX(-1); }
 @keyframes mascote-passo { to { transform: translateX(-100%); } }
+/* etapa 3: apontando para um botão. O desenho (270 × 300, olhos já
+   desenhados olhando para a mão) tem a cabeça em x = 129,9, alinhada com a
+   do desenho de frente (66 de 185). Para a esquerda, espelha na cabeça. */
+.mascote-aponta { position: absolute; bottom: 0; left: -34.54%; width: 145.95%; height: 100%; display: none; transform-origin: 48.1% 100%; }
+.mascote-aponta img { width: 100%; height: 100%; }
+.mascote.aponta .mascote-aponta { display: block; animation: mascote-aponta .22s ease-out; }
+.mascote.aponta .mascote-corpo { visibility: hidden; }
+.mascote.aponta.aponta-esq .mascote-aponta { transform: scaleX(-1); }
+@keyframes mascote-aponta { from { opacity: .4; translate: 0 2px; } }
 /* salto grande até um bloco (o arco é feito no JS): agacha (.2s), voa (o
    tempo vem do JS em --mascote-voo) e amortece na chegada, soltando fumaça.
    A fumaça da saída é uma cópia que fica no chão (.mascote-rastro). */
