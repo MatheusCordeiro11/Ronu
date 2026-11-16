@@ -83,18 +83,31 @@ public class ContextoDietaBuilder : IContextoDietaBuilder
 
         var objetivo = historicoPeso[^1];
 
-        var modalidades = await _context.UsuarioModalidades
+        // O MET da conta é o efetivo, pelo ritmo da aula salvo (IntensidadeTreino), calculado na memória.
+        var modalidades = (await _context.UsuarioModalidades
             .Where(m => m.UsuarioId == usuarioId)
-            .Include(m => m.Modalidade)
+            .Select(m => new
+            {
+                m.Modalidade.Nome,
+                m.Modalidade.MetReferencia,
+                m.Modalidade.MetBlocoLeve,
+                m.Modalidade.MetBlocoIntenso,
+                m.Intensidade,
+                m.DuracaoMediaHoras,
+                m.DiasSemana,
+                m.HorarioInicio
+            })
+            .ToListAsync())
             .Select(m => new ModalidadeContextoDto
             {
-                Nome = m.Modalidade.Nome,
-                MetReferencia = m.Modalidade.MetReferencia,
+                Nome = m.Nome,
+                MetEfetivo = IntensidadeTreino.MetEfetivo(m.MetReferencia, m.MetBlocoLeve, m.MetBlocoIntenso, m.Intensidade),
+                Intensidade = m.Intensidade,
                 DuracaoHoras = m.DuracaoMediaHoras,
                 DiasSemana = m.DiasSemana,
                 HorarioInicio = m.HorarioInicio
             })
-            .ToListAsync();
+            .ToList();
 
         // Metas de todas as dietas já geradas (tabela pequena, ~1 linha por
         // dieta): a meta adaptativa escolhe a dieta ativa de cada dia da janela.

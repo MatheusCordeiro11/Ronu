@@ -65,11 +65,20 @@ public class ModalidadeSimulacaoDto
 {
     public int ModalidadeId { get; set; }
     public required string Nome { get; set; }
+    // MET de catálogo (o do ritmo "normal"), mantido para as telas de antes. A conta usa o MetEfetivo.
     public decimal MetReferencia { get; set; }
+
+    // "Ritmo da aula" usado: o do pedido, o salvo ou "normal".
+    public required string Intensidade { get; set; }
+
+    // MET da conta, pelo ritmo da aula (IntensidadeTreino.MetEfetivo). Igual ao MetReferencia em "normal" e nas
+    // modalidades sem blocos.
+    public decimal MetEfetivo { get; set; }
+
     public decimal DuracaoHoras { get; set; }
     public required int[] DiasSemana { get; set; }
 
-    // (MET − 1) × peso × horas.
+    // (MetEfetivo − 1) × peso × horas.
     public int KcalSessao { get; set; }
 }
 

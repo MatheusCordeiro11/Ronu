@@ -41,5 +41,10 @@ public class TreinoComposicaoDto
 {
     public required string Nome { get; set; }
     public decimal Horas { get; set; }
+
+    // "Ritmo da aula" da sessão ("tecnica", "normal" ou "sparring"); nulo em dietas geradas antes do seletor
+    // (todas eram "normal").
+    public string? Intensidade { get; set; }
+
     public int Kcal { get; set; }
 }

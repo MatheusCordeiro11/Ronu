@@ -17,9 +17,11 @@ public static class CalculadoraManutencao
     /// nesta classe, na CalculadoraGastoCalorico, no RitmoObjetivo ou nos METs
     /// das modalidades exige incrementar (regra no CLAUDE.md).
     /// 1 = até 2026-10-03 (TMB + MET bruto, ±15%); 2 = revisão de 2026-10-03;
-    /// 3 = nível de atividade do dia a dia (fator por resposta, em vez de ×1,4 fixo).
+    /// 3 = nível de atividade do dia a dia (fator por resposta, em vez de ×1,4 fixo);
+    /// 4 = intensidade do treino por modalidade, o "Ritmo da aula" (fração do bloco
+    /// intenso 0,3 / 0,5 / 0,7: IntensidadeTreino). Em "normal" os números são os da 3.
     /// </summary>
-    public const int VersaoFormula = 3;
+    public const int VersaoFormula = 4;
 
     /// <summary>
     /// Mifflin-St Jeor: fórmula de TMB mais precisa e validada
@@ -144,7 +146,8 @@ public static class CalculadoraManutencao
                 .Where(x => x.modalidade.DiasSemana.Contains(dia))
                 .Select(x => new TreinoDoDia(
                     x.indice, x.modalidade.Nome, x.modalidade.DuracaoHoras,
-                    calculadora.CalcularGastoSessao(x.modalidade.MetReferencia, contexto.Peso, x.modalidade.DuracaoHoras)))
+                    calculadora.CalcularGastoSessao(x.modalidade.MetEfetivo, contexto.Peso, x.modalidade.DuracaoHoras),
+                    x.modalidade.Intensidade))
                 .ToList();
 
             var manutencao = Manutencao(tmb, treinos.Sum(t => t.Kcal), fator);
@@ -175,9 +178,9 @@ public static class CalculadoraManutencao
 /// <summary>
 /// Uma sessão de treino de um dia: o índice da modalidade em
 /// ContextoDietaDto.Modalidades (para quem precisa voltar ao Id) e o gasto
-/// líquido da sessão.
+/// líquido da sessão, com o ritmo da aula que deu o MET.
 /// </summary>
-public sealed record TreinoDoDia(int IndiceModalidade, string Nome, decimal Horas, decimal Kcal);
+public sealed record TreinoDoDia(int IndiceModalidade, string Nome, decimal Horas, decimal Kcal, string Intensidade);
 
 /// <summary>
 /// As parcelas da meta da fórmula de um dia (1 = segunda ... 7 = domingo):

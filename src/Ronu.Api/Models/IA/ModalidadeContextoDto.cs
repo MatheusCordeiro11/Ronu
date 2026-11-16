@@ -1,3 +1,5 @@
+using Ronu.Api.Services.IA;
+
 namespace Ronu.Api.Models.IA;
 
 /// <summary>
@@ -7,7 +9,15 @@ namespace Ronu.Api.Models.IA;
 public class ModalidadeContextoDto
 {
     public required string Nome { get; set; }
-    public required decimal MetReferencia { get; set; }
+
+    // MET usado na conta do treino: o de referência da modalidade ajustado pelo ritmo da aula
+    // (IntensidadeTreino.MetEfetivo). Igual ao MetReferencia do catálogo em "normal" e nas modalidades sem blocos.
+    public required decimal MetEfetivo { get; set; }
+
+    // "Ritmo da aula" que deu o MetEfetivo ("tecnica", "normal" ou "sparring"), para rastreio: vai para a
+    // composição salva da meta (TreinoComposicaoDto.Intensidade).
+    public string Intensidade { get; set; } = IntensidadeTreino.Padrao;
+
     public required decimal DuracaoHoras { get; set; }
 
     // 1=Segunda ... 7=Domingo (ISO 8601). Usado para calcular uma meta

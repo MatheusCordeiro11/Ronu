@@ -90,7 +90,7 @@ public class MetaDietaTests
         var contexto = new ContextoDietaDto
         {
             Sexo = "Masculino", Peso = 80, Altura = 178, Idade = 30, Objetivo = "perder peso",
-            Modalidades = new() { new() { Nome = "Jiu-jitsu", MetReferencia = 7.8m, DuracaoHoras = 1.5m, DiasSemana = new[] { 1, 2, 4, 5 } } },
+            Modalidades = new() { new() { Nome = "Jiu-jitsu", MetEfetivo = 7.8m, DuracaoHoras = 1.5m, DiasSemana = new[] { 1, 2, 4, 5 } } },
             Preferencias = new()
         };
         var calc = new CalculadoraGastoCalorico();

@@ -129,13 +129,25 @@ public class MetasController : ControllerBase
         var peso = request.Peso ?? ContextoDietaBuilder.PesoDeTendencia(historicoPeso, _calculadoraPesoTendencia);
         var pesoOrigem = request.Peso is null ? "tendencia" : "informado";
 
-        var modalidades = request.Modalidades is null
-            ? await ModalidadesSalvasAsync()
-            : await ModalidadesDoPedidoAsync(request.Modalidades);
-
-        if (modalidades is null)
+        List<ModalidadeSimulada> modalidades;
+        if (request.Modalidades is null)
         {
-            return NotFound(new { mensagem = "Modalidade não encontrada." });
+            modalidades = await ModalidadesSalvasAsync();
+        }
+        else
+        {
+            var (doPedido, naoEncontrada, erroIntensidade) = await ModalidadesDoPedidoAsync(request.Modalidades);
+            if (naoEncontrada)
+            {
+                return NotFound(new { mensagem = "Modalidade não encontrada." });
+            }
+
+            if (erroIntensidade is not null)
+            {
+                return BadRequest(new { mensagem = erroIntensidade });
+            }
+
+            modalidades = doPedido!;
         }
 
         var idade = ContextoDietaBuilder.Idade(dataNascimento.Value, hoje);
@@ -150,7 +162,8 @@ public class MetasController : ControllerBase
             Modalidades = modalidades.Select(m => new ModalidadeContextoDto
             {
                 Nome = m.Nome,
-                MetReferencia = m.MetReferencia,
+                MetEfetivo = m.MetEfetivo,
+                Intensidade = m.Intensidade,
                 DuracaoHoras = m.DuracaoHoras,
                 DiasSemana = m.DiasSemana
             }).ToList(),
@@ -175,6 +188,12 @@ public class MetasController : ControllerBase
             {
                 return "Não é possível repetir o mesmo dia da semana.";
             }
+
+            // Só o valor aqui; "modalidade sem blocos" depende do catálogo (ModalidadesDoPedidoAsync).
+            if (IntensidadeTreino.Validar(m.Intensidade, temBlocos: true) is { } erroIntensidade)
+            {
+                return erroIntensidade;
+            }
         }
 
         if (modalidades.Select(m => m.ModalidadeId).Distinct().Count() != modalidades.Count)
@@ -186,15 +205,28 @@ public class MetasController : ControllerBase
     }
 
     private async Task<List<ModalidadeSimulada>> ModalidadesSalvasAsync() =>
-        await _context.UsuarioModalidades
+        (await _context.UsuarioModalidades
             .Where(um => um.UsuarioId == UsuarioIdLogado)
             .OrderBy(um => um.Id)
+            .Select(um => new
+            {
+                um.ModalidadeId, um.Modalidade.Nome, um.Modalidade.MetReferencia, um.Modalidade.MetBlocoLeve,
+                um.Modalidade.MetBlocoIntenso, um.Intensidade, um.DuracaoMediaHoras, um.DiasSemana
+            })
+            .ToListAsync())
             .Select(um => new ModalidadeSimulada(
-                um.ModalidadeId, um.Modalidade.Nome, um.Modalidade.MetReferencia, um.DuracaoMediaHoras, um.DiasSemana))
-            .ToListAsync();
+                um.ModalidadeId, um.Nome, um.MetReferencia, um.DuracaoMediaHoras, um.DiasSemana, um.Intensidade,
+                IntensidadeTreino.MetEfetivo(um.MetReferencia, um.MetBlocoLeve, um.MetBlocoIntenso, um.Intensidade)))
+            .ToList();
 
-    // Nulo se algum Id não existe no catálogo.
-    private async Task<List<ModalidadeSimulada>?> ModalidadesDoPedidoAsync(List<UsuarioModalidadeRequest> pedido)
+    /// <summary>
+    /// As modalidades do pedido, com o MET do catálogo. Sem o ritmo da aula no pedido, usa o salvo daquela
+    /// modalidade (o Treino e o onboarding de antes não mandam o campo) e, sem vínculo salvo, "normal".
+    /// NaoEncontrada se algum Id não existe no catálogo; ErroIntensidade se pedir um ritmo diferente de
+    /// "normal" numa modalidade sem blocos.
+    /// </summary>
+    private async Task<(List<ModalidadeSimulada>? Modalidades, bool NaoEncontrada, string? ErroIntensidade)> ModalidadesDoPedidoAsync(
+        List<UsuarioModalidadeRequest> pedido)
     {
         var ids = pedido.Select(m => m.ModalidadeId).ToList();
         var catalogo = await _context.Modalidades
@@ -203,12 +235,35 @@ public class MetasController : ControllerBase
 
         if (catalogo.Count != ids.Count)
         {
-            return null;
+            return (null, true, null);
         }
 
-        return pedido.Select(m => new ModalidadeSimulada(
-            m.ModalidadeId, catalogo[m.ModalidadeId].Nome, catalogo[m.ModalidadeId].MetReferencia,
-            m.DuracaoMediaHoras, m.DiasSemana)).ToList();
+        // Sem índice único em (UsuarioId, ModalidadeId): se um vínculo duplicado existir, vale o mais antigo, sem 500.
+        var salvas = (await _context.UsuarioModalidades
+                .Where(um => um.UsuarioId == UsuarioIdLogado && ids.Contains(um.ModalidadeId))
+                .OrderBy(um => um.Id)
+                .Select(um => new { um.ModalidadeId, um.Intensidade })
+                .ToListAsync())
+            .GroupBy(um => um.ModalidadeId)
+            .ToDictionary(g => g.Key, g => g.First().Intensidade);
+
+        var modalidades = new List<ModalidadeSimulada>();
+        foreach (var m in pedido)
+        {
+            var modalidade = catalogo[m.ModalidadeId];
+            var temBlocos = modalidade.MetBlocoLeve is not null && modalidade.MetBlocoIntenso is not null;
+            if (IntensidadeTreino.Validar(m.Intensidade, temBlocos) is { } erro)
+            {
+                return (null, false, erro);
+            }
+
+            var intensidade = m.Intensidade ?? salvas.GetValueOrDefault(m.ModalidadeId) ?? IntensidadeTreino.Padrao;
+            modalidades.Add(new ModalidadeSimulada(
+                m.ModalidadeId, modalidade.Nome, modalidade.MetReferencia, m.DuracaoMediaHoras, m.DiasSemana, intensidade,
+                IntensidadeTreino.MetEfetivo(modalidade.MetReferencia, modalidade.MetBlocoLeve, modalidade.MetBlocoIntenso, intensidade)));
+        }
+
+        return (modalidades, false, null);
     }
 
     /// <summary>
@@ -234,7 +289,7 @@ public class MetasController : ControllerBase
         var atividade = ArredondamentoPartes.Arredondar(composicao[0].AtividadeForaDoTreino);
 
         var kcalSessao = modalidades
-            .Select(m => ArredondamentoPartes.Arredondar(calculadora.CalcularGastoSessao(m.MetReferencia, contexto.Peso, m.DuracaoHoras)))
+            .Select(m => ArredondamentoPartes.Arredondar(calculadora.CalcularGastoSessao(m.MetEfetivo, contexto.Peso, m.DuracaoHoras)))
             .ToArray();
 
         var dias = composicao.Select(c =>
@@ -287,6 +342,8 @@ public class MetasController : ControllerBase
                 ModalidadeId = m.ModalidadeId,
                 Nome = m.Nome,
                 MetReferencia = m.MetReferencia,
+                Intensidade = m.Intensidade,
+                MetEfetivo = m.MetEfetivo,
                 DuracaoHoras = m.DuracaoHoras,
                 DiasSemana = m.DiasSemana,
                 KcalSessao = kcalSessao[i]
@@ -296,5 +353,10 @@ public class MetasController : ControllerBase
     }
 }
 
-/// <summary>Uma modalidade da simulação, salva ou vinda do pedido.</summary>
-public sealed record ModalidadeSimulada(int ModalidadeId, string Nome, decimal MetReferencia, decimal DuracaoHoras, int[] DiasSemana);
+/// <summary>
+/// Uma modalidade da simulação, salva ou vinda do pedido: o MET de catálogo (MetReferencia, o do ritmo "normal"),
+/// o ritmo da aula usado e o MET da conta (IntensidadeTreino.MetEfetivo).
+/// </summary>
+public sealed record ModalidadeSimulada(
+    int ModalidadeId, string Nome, decimal MetReferencia, decimal DuracaoHoras, int[] DiasSemana, string Intensidade,
+    decimal MetEfetivo);

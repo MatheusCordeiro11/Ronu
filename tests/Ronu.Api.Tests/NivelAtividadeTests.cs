@@ -46,9 +46,9 @@ public class NivelAtividadeTests
     }
 
     [Fact]
-    public void Versao_Da_Formula_E_3()
+    public void Versao_Da_Formula_E_4()
     {
-        Assert.Equal(3, CalculadoraManutencao.VersaoFormula);
+        Assert.Equal(4, CalculadoraManutencao.VersaoFormula);
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public class NivelAtividadeTests
 
         Assert.Equal(1.30m, RepositorioDietaIA.MontarMetaDieta(1, DateTime.UtcNow, Dieta(1.30m)).FatorAtividade);
         Assert.Equal(1.4m, RepositorioDietaIA.MontarMetaDieta(1, DateTime.UtcNow, Dieta(null)).FatorAtividade);
-        Assert.Equal(3, RepositorioDietaIA.MontarMetaDieta(1, DateTime.UtcNow, Dieta(null)).VersaoFormula);
+        Assert.Equal(4, RepositorioDietaIA.MontarMetaDieta(1, DateTime.UtcNow, Dieta(null)).VersaoFormula);
     }
 
     // ---------- Perfil ----------

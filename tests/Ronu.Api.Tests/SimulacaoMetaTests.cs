@@ -30,7 +30,7 @@ public class SimulacaoMetaTests
         ajustar?.Invoke(usuario);
         banco.Usuarios.Add(usuario);
         banco.Modalidades.AddRange(
-            new Modalidade { Id = 1, Nome = "Jiu-jitsu", MetReferencia = 7.8m, Categoria = CategoriasModalidade.Lutas },
+            new Modalidade { Id = 1, Nome = "Jiu-jitsu", MetReferencia = 7.8m, Categoria = CategoriasModalidade.Lutas, MetBlocoLeve = 5.3m, MetBlocoIntenso = 10.3m },
             new Modalidade { Id = 2, Nome = "Musculação", MetReferencia = 3.5m, Categoria = CategoriasModalidade.Condicionamento });
         banco.SaveChanges();
 
@@ -107,8 +107,8 @@ public class SimulacaoMetaTests
             Sexo = "Masculino", Peso = 73.3m, Altura = 171, Idade = 30, Objetivo = "perder peso",
             Modalidades = new()
             {
-                new() { Nome = "Jiu-jitsu", MetReferencia = 7.8m, DuracaoHoras = 1.5m, DiasSemana = new[] { 1, 2, 4, 5 } },
-                new() { Nome = "Musculação", MetReferencia = 3.5m, DuracaoHoras = 1.25m, DiasSemana = new[] { 1, 3 } }
+                new() { Nome = "Jiu-jitsu", MetEfetivo = 7.8m, DuracaoHoras = 1.5m, DiasSemana = new[] { 1, 2, 4, 5 } },
+                new() { Nome = "Musculação", MetEfetivo = 3.5m, DuracaoHoras = 1.25m, DiasSemana = new[] { 1, 3 } }
             },
             Preferencias = new()
         };
@@ -266,6 +266,117 @@ public class SimulacaoMetaTests
 
         Assert.IsType<NotFoundObjectResult>(resultado);
         Assert.Equal("Modalidade não encontrada.", Mensagem(resultado));
+    }
+
+    // ---------- Ritmo da aula (intensidade do treino) ----------
+
+    // Jiu-jitsu 1,5 h a 80 kg: (MET − 1) × 80 × 1,5. Segunda é dia de treino: repouso 1768 + dia a dia 707 + treino.
+    [Theory]
+    [InlineData("tecnica", 6.80, 696)]
+    [InlineData("normal", 7.80, 816)]
+    [InlineData("sparring", 8.80, 936)]
+    public async Task Ritmo_Do_Pedido_Muda_O_Met_Efetivo_E_O_Gasto_Da_Sessao(string intensidade, double metEfetivo, int kcal)
+    {
+        var (_, controller, _) = Montar();
+        var pedido = PedidoCompleto();
+        pedido.Modalidades![0].Intensidade = intensidade;
+
+        var r = Ok(await controller.Simular(pedido));
+
+        var jj = Assert.Single(r.Modalidades);
+        Assert.Equal((intensidade, (decimal)metEfetivo, 7.8m, kcal), (jj.Intensidade, jj.MetEfetivo, jj.MetReferencia, jj.KcalSessao));
+        Assert.Equal((kcal, 1768 + 707 + kcal), (r.Dias[0].TreinoKcal, r.Dias[0].Manutencao));
+        Assert.Equal((0, 2475), (r.Dias[2].TreinoKcal, r.Dias[2].Manutencao)); // quarta, descanso: não muda
+    }
+
+    [Fact]
+    public async Task Sem_O_Ritmo_No_Pedido_Usa_O_Salvo_Da_Modalidade()
+    {
+        var (banco, controller, usuario) = Montar();
+        banco.UsuarioModalidades.Add(new UsuarioModalidade
+        {
+            UsuarioId = usuario.Id, ModalidadeId = 1, DiasSemana = new[] { 1 }, DuracaoMediaHoras = 1, Intensidade = "sparring"
+        });
+        banco.SaveChanges();
+
+        // O Treino de antes manda a lista em edição sem o campo: vale o salvo.
+        var r = Ok(await controller.Simular(PedidoCompleto()));
+
+        var jj = Assert.Single(r.Modalidades);
+        Assert.Equal(("sparring", 8.8m, 936), (jj.Intensidade, jj.MetEfetivo, jj.KcalSessao));
+    }
+
+    [Fact]
+    public async Task Sem_O_Ritmo_No_Pedido_Nem_Salvo_Usa_Normal()
+    {
+        var (_, controller, _) = Montar();
+
+        var r = Ok(await controller.Simular(PedidoCompleto()));
+
+        var jj = Assert.Single(r.Modalidades);
+        Assert.Equal(("normal", 7.8m, 816), (jj.Intensidade, jj.MetEfetivo, jj.KcalSessao));
+    }
+
+    [Fact]
+    public async Task Sem_Modalidades_No_Pedido_Usa_As_Salvas_Com_O_Ritmo_Salvo()
+    {
+        var (banco, controller, usuario) = Montar();
+        banco.UsuarioModalidades.AddRange(
+            new UsuarioModalidade { UsuarioId = usuario.Id, ModalidadeId = 1, DiasSemana = new[] { 1 }, DuracaoMediaHoras = 1.5m, Intensidade = "tecnica" },
+            new UsuarioModalidade { UsuarioId = usuario.Id, ModalidadeId = 2, DiasSemana = new[] { 3 }, DuracaoMediaHoras = 1 });
+        banco.SaveChanges();
+        var pedido = PedidoCompleto();
+        pedido.Modalidades = null;
+
+        var r = Ok(await controller.Simular(pedido));
+
+        Assert.Equal(("tecnica", 6.8m, 696), (r.Modalidades[0].Intensidade, r.Modalidades[0].MetEfetivo, r.Modalidades[0].KcalSessao));
+        // Musculação não tem blocos: "normal" e o MET de catálogo.
+        Assert.Equal(("normal", 3.5m, 3.5m), (r.Modalidades[1].Intensidade, r.Modalidades[1].MetEfetivo, r.Modalidades[1].MetReferencia));
+    }
+
+    [Theory]
+    [InlineData("forte")]
+    [InlineData("")]
+    [InlineData("Sparring")]
+    public async Task Ritmo_Fora_Dos_Tres_Da_400(string intensidade)
+    {
+        var (_, controller, _) = Montar();
+        var pedido = PedidoCompleto();
+        pedido.Modalidades![0].Intensidade = intensidade;
+
+        var resultado = await controller.Simular(pedido);
+
+        Assert.IsType<BadRequestObjectResult>(resultado);
+        Assert.Equal(IntensidadeTreino.MensagemNivelInvalido, Mensagem(resultado));
+    }
+
+    [Fact]
+    public async Task Ritmo_Diferente_De_Normal_Em_Modalidade_Sem_Blocos_Da_400_E_Normal_Passa()
+    {
+        var (_, controller, _) = Montar();
+        var pedido = PedidoCompleto();
+        pedido.Modalidades = new() { new() { ModalidadeId = 2, DiasSemana = new[] { 1 }, DuracaoMediaHoras = 1, Intensidade = "sparring" } };
+
+        var resultado = await controller.Simular(pedido);
+
+        Assert.IsType<BadRequestObjectResult>(resultado);
+        Assert.Equal(IntensidadeTreino.MensagemSemRitmo, Mensagem(resultado));
+
+        pedido.Modalidades[0].Intensidade = "normal";
+        Assert.Equal(3.5m, Assert.Single(Ok(await controller.Simular(pedido)).Modalidades).MetEfetivo);
+    }
+
+    // A modalidade inexistente continua dando 404, mesmo com um ritmo no pedido.
+    [Fact]
+    public async Task Modalidade_Que_Nao_Existe_Com_Ritmo_Continua_Dando_404()
+    {
+        var (_, controller, _) = Montar();
+        var pedido = PedidoCompleto();
+        pedido.Modalidades![0].ModalidadeId = 99;
+        pedido.Modalidades[0].Intensidade = "sparring";
+
+        Assert.IsType<NotFoundObjectResult>(await controller.Simular(pedido));
     }
 
     // Altura e peso fora da faixa: atributos do DTO (validação automática do

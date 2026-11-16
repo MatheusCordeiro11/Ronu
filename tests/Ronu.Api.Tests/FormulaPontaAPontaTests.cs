@@ -28,7 +28,7 @@ public class FormulaPontaAPontaTests
         Sexo = "Masculino", Peso = 80, Altura = 178, Idade = 30, Objetivo = "manter peso",
         Modalidades = new()
         {
-            new() { Nome = "Jiu-jitsu", MetReferencia = 7.8m, DuracaoHoras = 1.5m, DiasSemana = new[] { 1, 2, 4, 5 } }
+            new() { Nome = "Jiu-jitsu", MetEfetivo = 7.8m, DuracaoHoras = 1.5m, DiasSemana = new[] { 1, 2, 4, 5 } }
         },
         Preferencias = new(), HistoricoPeso = new()
     };
@@ -83,6 +83,31 @@ public class FormulaPontaAPontaTests
         Assert.Contains("- Quarta-feira: 2475 kcal (proteína 144 g, carboidrato 320 g, gordura 69 g) — dia de manutenção; descanso", gemini.Prompt);
         Assert.Contains("15. Monte pelo menos 5 refeições em cada dia e, nos dias com meta a partir de 3500 kcal, pelo menos 6. O lanche antes e o depois do treino contam", gemini.Prompt);
         Assert.DoesNotContain("Jiu-jitsu", gemini.Prompt);
+    }
+
+    // O mesmo perfil com o ritmo "muito sparring" (MET efetivo 8,8: 0,3 × 5,3 + 0,7 × 10,3): +120 kcal só nos dias
+    // de treino (7,8 · 80 · 1,5 = 936). A composição salva leva o ritmo, e o prompt continua sem MET nem ritmo.
+    [Fact]
+    public async Task Ritmo_Muito_Sparring_Muda_So_Os_Dias_De_Treino_E_Vai_Para_A_Composicao()
+    {
+        var gemini = new GeminiQueGuardaOPrompt();
+        var gerador = new GeradorDietaGemini(
+            new HttpClient(gemini), new CalculadoraGastoCalorico(),
+            new CalculadoraAjusteAdaptativo(new CalculadoraPesoTendencia()),
+            new GeminiOptions { ApiKey = "teste" }, NullLogger<GeradorDietaGemini>.Instance);
+        var contexto = PerfilA();
+        contexto.Modalidades[0].MetEfetivo = IntensidadeTreino.MetEfetivo(7.8m, 5.3m, 10.3m, IntensidadeTreino.Sparring);
+        contexto.Modalidades[0].Intensidade = IntensidadeTreino.Sparring;
+
+        var dieta = await gerador.GerarComListaAsync(contexto);
+
+        Assert.Equal(new[] { 3410.5m, 3410.5m, 2474.5m, 3410.5m, 3410.5m, 2474.5m, 2474.5m }, dieta.ManutencaoPorDia);
+        var segunda = dieta.Dias.Single(d => d.DiaSemana == "Segunda-feira").ComposicaoMeta!;
+        var treino = Assert.Single(segunda.Treino);
+        Assert.Equal((936, IntensidadeTreino.Sparring), (treino.Kcal, treino.Intensidade));
+        Assert.Equal(2475, dieta.Dias.Single(d => d.DiaSemana == "Quarta-feira").ComposicaoMeta!.Meta);
+        Assert.Contains("- Segunda-feira: 3411 kcal", gemini.Prompt);
+        Assert.DoesNotContain("sparring", gemini.Prompt, StringComparison.OrdinalIgnoreCase);
     }
 
     // O prompt não leva dado pessoal: sexo, idade, peso, altura, objetivo, nome da modalidade, rotina em texto e o

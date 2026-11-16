@@ -14,7 +14,7 @@ public class CalculadoraManutencaoTests
 
     private static ModalidadeContextoDto Modalidade(decimal met, decimal horas, params int[] dias) => new()
     {
-        Nome = "Teste", MetReferencia = met, DuracaoHoras = horas, DiasSemana = dias
+        Nome = "Teste", MetEfetivo = met, DuracaoHoras = horas, DiasSemana = dias
     };
 
     private static ContextoDietaDto Perfil(

@@ -72,7 +72,7 @@ public class ComposicaoMetaTests
     private static ContextoDietaDto PerfilA(string objetivo = "perder peso") => new()
     {
         Sexo = "Masculino", Peso = 80, Altura = 178, Idade = 30, Objetivo = objetivo,
-        Modalidades = new() { new() { Nome = "Jiu-jitsu", MetReferencia = 7.8m, DuracaoHoras = 1.5m, DiasSemana = new[] { 1, 2, 4, 5 } } },
+        Modalidades = new() { new() { Nome = "Jiu-jitsu", MetEfetivo = 7.8m, DuracaoHoras = 1.5m, DiasSemana = new[] { 1, 2, 4, 5 } } },
         Preferencias = new()
     };
 

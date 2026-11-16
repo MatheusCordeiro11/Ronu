@@ -40,6 +40,7 @@ public static class ComposicaoMeta
             {
                 Nome = t.Nome,
                 Horas = t.Horas,
+                Intensidade = t.Intensidade,
                 Kcal = partes[2 + i]
             }).ToList(),
             Objetivo = partes[2 + n],
