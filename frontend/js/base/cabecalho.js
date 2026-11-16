@@ -17,7 +17,7 @@
 // no <header> para o cabeçalho não pedir de novo.
 (function () {
   var PAGINAS = [
-    { chave: 'dieta', rotulo: 'Dieta', href: 'dashboard.html',
+    { chave: 'dieta', rotulo: 'Dieta', href: 'minha-dieta.html',
       icone: '<path d="M4 11h16M5 11a7 7 0 0 0 14 0M12 4v3"/>' },
     { chave: 'progresso', rotulo: 'Progresso', href: 'progresso.html',
       icone: '<path d="M4 18l5-6 4 3 7-9"/>' },
@@ -50,7 +50,7 @@
     cabecalho.innerHTML =
       '<div class="conteiner"><div class="cabecalho-linha">' +
         '<div class="cabecalho-esquerda">' +
-          '<a class="logo" href="dashboard.html" aria-label="Ronu, sua dieta">' +
+          '<a class="logo" href="minha-dieta.html" aria-label="Ronu, sua dieta">' +
             '<svg class="logo-marca" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><defs><clipPath id="logo-recorte"><path d="M2.5 20H37.5C37.5 30.2 29.7 37.5 20 37.5C10.3 37.5 2.5 30.2 2.5 20Z"/></clipPath></defs><path d="M6.2 20.2C5.6 15.6 8.6 12.6 12.2 13.2C13.2 9.4 17.2 7.6 20 8.8C22.8 7.6 26.8 9.4 27.8 13.2C31.4 12.6 34.4 15.6 33.8 20.2Z" fill="var(--logo-arroz)" stroke="var(--texto)" stroke-width="2" stroke-linejoin="round"/><path d="M2.5 20H37.5C37.5 30.2 29.7 37.5 20 37.5C10.3 37.5 2.5 30.2 2.5 20Z" fill="var(--acento)"/><g clip-path="url(#logo-recorte)"><rect x="0" y="24.2" width="40" height="5" fill="var(--logo-faixa)"/><path d="M18 30 L13.6 37.6 L17 38.4 L19.8 30.6Z M22 30 L26.4 37.6 L23 38.4 L20.2 30.6Z" fill="var(--logo-faixa)"/></g><rect x="16.6" y="22.6" width="6.8" height="8.2" rx="1.6" fill="var(--logo-faixa)"/></svg>' +
             '<span class="logo-nome" aria-hidden="true">ronu</span>' +
           '</a>' +

@@ -1,11 +1,11 @@
-// Ronu — Tela "Só mais um passo" (estado.html)
+// Ronu — Tela "Só mais um passo" (seu-estado.html)
 // Aparece depois do login quando a conta ainda não tem estado (UF). Só é
 // mostrada se ronuLogin/ronuLoginComGoogle marcaram RONU_PRECISA_ESTADO_KEY;
 // em qualquer outro caso segue o fluxo normal de pós-login.
 
 document.addEventListener('DOMContentLoaded', () => {
   if (!ronuUsuarioLogado()) {
-    window.location.href = 'login.html';
+    window.location.href = 'entrar.html';
     return;
   }
 
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // novamente" (o 401 já redirecionou pro login sozinho).
     ronuRedirecionarPosAuth().catch((erro) => {
       if (erro.message !== 'Sessão expirada.') {
-        window.location.href = 'dashboard.html';
+        window.location.href = 'minha-dieta.html';
       }
     });
     return;
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   btnSair.addEventListener('click', () => {
     ronuLimparSessao();
-    window.location.href = 'login.html';
+    window.location.href = 'entrar.html';
   });
 
   form.addEventListener('submit', async (evento) => {

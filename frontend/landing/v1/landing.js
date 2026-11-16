@@ -350,7 +350,7 @@
   var maoImg = $('mao-modalidade'), maoPedida = null, maoTempo = null;
   function trocaMao(arquivo) {
     if (!maoImg || !arquivo) return;
-    var src = '../../img/landing/mao-' + arquivo + '.webp';
+    var src = 'img/landing/mao-' + arquivo + '.webp';
     maoPedida = src;
     var nova = new Image();
     nova.onload = function () {

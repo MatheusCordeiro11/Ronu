@@ -187,7 +187,7 @@ public class CasaTests
 
         var criado = Assert.IsType<ConviteCriadoResponse>(Assert.IsType<CreatedResult>(await Controller(banco, ana.Id).CriarConvite()).Value);
 
-        Assert.StartsWith("http://127.0.0.1:5500/frontend/casa-convite.html#convite=", criado.Link);
+        Assert.StartsWith("http://127.0.0.1:5500/frontend/convite.html#convite=", criado.Link);
         var token = criado.Link.Split("#convite=")[1];
         Assert.Equal(43, token.Length);
         var gravado = await banco.ConvitesCasa.SingleAsync();

@@ -16,7 +16,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const usuario = ronuUsuarioLogado();
   if (!usuario) {
-    window.location.href = 'login.html';
+    window.location.href = 'entrar.html';
     return;
   }
 

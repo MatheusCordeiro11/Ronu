@@ -1134,7 +1134,7 @@ button.chip:active {
   font-weight: 600;
 }
 
-/* ---------- Aceite: a caixa do consentimento (cadastro e consentimento.html) ----------
+/* ---------- Aceite: a caixa do consentimento (cadastro e autorizacao.html) ----------
    Uma caixa de marcar de verdade, desmarcada, com o título como rótulo e o
    texto inteiro embaixo: a pessoa lê o que autoriza sem abrir nada. */
 .aceite {

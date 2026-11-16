@@ -1,8 +1,8 @@
-// Ronu — Caixa de consentimento: a geral (cadastro.html e consentimento.html) e a das alergias
-// (alimentacao.html e onboarding.html, TACO 2c), escolhida por data-aceite-tipo na caixa.
+// Ronu — Caixa de consentimento: a geral (criar-conta.html e autorizacao.html) e a das alergias
+// (alimentacao.html e primeiros-passos.html, TACO 2c), escolhida por data-aceite-tipo na caixa.
 // O título, o texto e a versão vêm sempre da API: escritos no HTML, o texto
 // da tela e o que a API cobra só ficariam iguais por sorte. O cadastro lê a
-// rota pública (ainda não há conta); o consentimento.html lê a rota logada,
+// rota pública (ainda não há conta); o autorizacao.html lê a rota logada,
 // que também diz se a pessoa já aceitou. A tela envia a versão que mostrou.
 //
 // A caixa no HTML:

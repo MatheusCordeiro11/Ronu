@@ -40,7 +40,7 @@ Lista de endpoints da API, definidos a partir das user stories (`docs/user-stori
 ### `POST /api/auth/esqueci-senha`
 **Recebe:** `email`
 **Devolve:** **202** `{ mensagem }`, sempre com o mesmo texto — exista ou não a conta, tenha ela senha ou só login com Google, e também acima do limite por conta. Quem decide o que acontece é o `ServicoRedefinicaoSenha`:
-- conta com senha: email com o link `{Frontend:UrlBase}/redefinir-senha.html#token=…`, válido por **30 minutos** e de uso único. O token vai no **fragmento** (`#`), que não chega a servidor nenhum nem vai no cabeçalho Referer; o banco guarda só o SHA-256 dele (tabela `PedidosRedefinicaoSenha`). Um pedido novo invalida os links anteriores;
+- conta com senha: email com o link `{Frontend:UrlBase}/nova-senha.html#token=…`, válido por **30 minutos** e de uso único. O token vai no **fragmento** (`#`), que não chega a servidor nenhum nem vai no cabeçalho Referer; o banco guarda só o SHA-256 dele (tabela `PedidosRedefinicaoSenha`). Um pedido novo invalida os links anteriores;
 - conta só com Google: email avisando que a conta usa o login com Google, sem link;
 - email sem conta: nada é enviado nem gravado.
 
@@ -402,7 +402,7 @@ O orçamento da casa vale **só para o almoço e o jantar da casa**: vai ao prom
 **Erros:** 400 "Orçamento semanal inválido."
 
 ### `POST /api/casa/convites` (dono)
-**Devolve:** 201 `{ link, expiraEm }`. O link é `{Frontend:UrlBase}/casa-convite.html#convite=<token>` (endereço da configuração, nunca dos cabeçalhos; token no fragmento, que não chega a servidor nenhum). Token de 32 bytes aleatórios em Base64Url; o banco guarda só o SHA-256. Vale 7 dias e uma vez. Gerar outro não invalida os anteriores
+**Devolve:** 201 `{ link, expiraEm }`. O link é `{Frontend:UrlBase}/convite.html#convite=<token>` (endereço da configuração, nunca dos cabeçalhos; token no fragmento, que não chega a servidor nenhum). Token de 32 bytes aleatórios em Base64Url; o banco guarda só o SHA-256. Vale 7 dias e uma vez. Gerar outro não invalida os anteriores
 **Erros:** 409 `casa_cheia` com 6 pessoas.
 
 ### `DELETE /api/casa/convites/{id}` (dono)

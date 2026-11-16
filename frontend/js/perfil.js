@@ -7,7 +7,7 @@
 //   objetivo mora; o ajuste pelo progresso recomeça a contar a partir dela.
 // - Sexo salva no clique; altura e nascimento, pouco depois de parar de
 //   digitar (ou ao sair do campo), só quando o valor é válido.
-// - Região: PUT /perfil/estado (ronuSalvarEstado, o mesmo do estado.html).
+// - Região: PUT /perfil/estado (ronuSalvarEstado, o mesmo do seu-estado.html).
 // - Nível de atividade do dia a dia: salva no clique (PUT /perfil com o
 //   nivelAtividade; os outros campos vão de volta como estão salvos).
 // O gasto em repouso vem do POST /metas/simulacao com o que está nos campos
@@ -16,7 +16,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const usuario = ronuUsuarioLogado();
   if (!usuario) {
-    window.location.href = 'login.html';
+    window.location.href = 'entrar.html';
     return;
   }
 
@@ -607,7 +607,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     itens.push(itemConta('Login com Google', perfil.temGoogle ? `Conectado como ${perfil.email}` : 'Não conectado. Você entra com email e senha.'));
     itens.push(itemConta('Sair', 'Encerra a sessão neste aparelho', () => {
       ronuLimparSessao();
-      window.location.href = 'login.html';
+      window.location.href = 'entrar.html';
     }));
     $('pf-conta-lista').replaceChildren(...itens);
   }

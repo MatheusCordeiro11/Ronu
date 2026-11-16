@@ -1,4 +1,4 @@
-// Ronu — Autorização dos dados de saúde (consentimento.html)
+// Ronu — Autorização dos dados de saúde (autorizacao.html)
 // Aparece quando a conta ainda não aceitou a versão vigente: conta Google nova,
 // conta anterior ao consentimento, ou texto novo. Chega aqui pelo login
 // (precisaConsentimento) ou por qualquer 403 com motivo "consentimento"
@@ -8,7 +8,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   if (!ronuUsuarioLogado()) {
-    window.location.href = 'login.html';
+    window.location.href = 'entrar.html';
     return;
   }
 
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function seguir() {
     localStorage.removeItem(RONU_PRECISA_CONSENTIMENTO_KEY);
     ronuRedirecionarPosAuth().catch((erro) => {
-      if (erro.message !== 'Sessão expirada.') window.location.href = 'dashboard.html';
+      if (erro.message !== 'Sessão expirada.') window.location.href = 'minha-dieta.html';
     });
   }
 
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('sair-btn').addEventListener('click', () => {
     ronuLimparSessao();
-    window.location.href = 'login.html';
+    window.location.href = 'entrar.html';
   });
 
   // Como a conta confirma a exclusão (senha ou frase) vem da API: o /perfil

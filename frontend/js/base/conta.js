@@ -1,4 +1,4 @@
-// Ronu — Baixar os dados e apagar a conta (perfil.html e consentimento.html)
+// Ronu — Baixar os dados e apagar a conta (perfil.html e autorizacao.html)
 // As duas rotas (/api/conta) não exigem o consentimento: são direitos de quem
 // nunca aceitou ou quer revogar, e revogar o consentimento geral é apagar a
 // conta. A exclusão abre numa folha (<dialog> com showModal, a mesma da troca
@@ -190,7 +190,7 @@ window.RonuConta = (function () {
 
       if (resposta.status === 204) {
         ronuLimparSessao();
-        window.location.href = 'login.html?conta=apagada';
+        window.location.href = 'entrar.html?conta=apagada';
         return;
       }
 

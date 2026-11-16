@@ -1,4 +1,4 @@
-// Ronu — Lista de compras (compras.html)
+// Ronu — Lista de compras (lista-de-compras.html)
 // Fluxo: guarda de sessão -> GET /dietas/atual/lista-compras e GET /perfil (só
 // para o fuso da UF) em paralelo -> renderiza. Marcar "já tenho" atualiza a tela
 // na hora e manda o PUT; se o PUT falhar, a marcação volta atrás e um aviso
@@ -9,7 +9,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   if (!ronuUsuarioLogado()) {
-    window.location.href = 'login.html';
+    window.location.href = 'entrar.html';
     return;
   }
 

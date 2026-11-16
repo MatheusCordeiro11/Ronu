@@ -11,7 +11,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const usuario = ronuUsuarioLogado();
   if (!usuario) {
-    window.location.href = 'login.html';
+    window.location.href = 'entrar.html';
     return;
   }
 
@@ -1317,7 +1317,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // simples, nunca POST /dietas/gerar, que gastaria cota da Gemini à toa.
     try {
       if (!ronuCadastroJaCompleto() && !(await ronuChecarCadastroCompleto())) {
-        window.location.href = 'onboarding.html';
+        window.location.href = 'primeiros-passos.html';
         return;
       }
     } catch (erro) {
@@ -1334,7 +1334,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Convite da casa aberto antes do login ou do onboarding (S4): o cadastro está completo, então a pessoa volta
     // para o convite. O onboarding termina aqui, por isso a volta mora no painel.
     if (ronuConvitePendente()) {
-      window.location.href = 'casa-convite.html';
+      window.location.href = 'convite.html';
       return;
     }
 

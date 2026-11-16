@@ -1,8 +1,8 @@
 // Ronu — Auth
 // Cliente mínimo para os endpoints públicos de autenticação da API
 // (POST /api/auth/cadastro, POST /api/auth/login, esqueci minha senha) e
-// utilitários de sessão/formulário compartilhados entre cadastro.html,
-// login.html, esqueci-senha.html, redefinir-senha.html e dashboard.html.
+// utilitários de sessão/formulário compartilhados entre criar-conta.html,
+// entrar.html, esqueci-senha.html, nova-senha.html e minha-dieta.html.
 
 // Único ponto de configuração do frontend. Não há build step nem variável de
 // ambiente neste projeto, então o ambiente é deduzido do endereço da página:
@@ -65,7 +65,7 @@ function ronuUsuarioLogado() {
 }
 
 // Duas iniciais (primeiro + último nome) para o avatar do header. Usado por
-// dashboard.html — nome com uma palavra só usa as duas primeiras letras dela.
+// minha-dieta.html — nome com uma palavra só usa as duas primeiras letras dela.
 function ronuIniciais(nome) {
   const partes = nome.trim().split(/\s+/).filter(Boolean);
   if (partes.length === 0) return '';
@@ -138,7 +138,7 @@ async function ronuCadastrar(nome, email, senha, estado, versaoConsentimento) {
 // Email digitado no login, levado para esqueci-senha.html ao clicar em
 // "Esqueci minha senha" (no sessionStorage, nunca na URL).
 const RONU_EMAIL_REDEFINICAO_KEY = 'ronu:emailRedefinicao';
-// Token do link de redefinição, tirado da URL ao abrir redefinir-senha.html.
+// Token do link de redefinição, tirado da URL ao abrir nova-senha.html.
 // Fica no sessionStorage (só desta aba) para a página sobreviver a um
 // recarregamento; sai ao trocar a senha ou quando o link não vale.
 const RONU_TOKEN_REDEFINICAO_KEY = 'ronu:tokenRedefinicao';
@@ -215,7 +215,7 @@ async function ronuFetchAutenticado(caminho, opcoes = {}) {
 
   if (resposta.status === 401) {
     ronuLimparSessao();
-    window.location.href = 'login.html?sessao=expirada';
+    window.location.href = 'entrar.html?sessao=expirada';
     throw new Error('Sessão expirada.');
   }
 
@@ -224,7 +224,7 @@ async function ronuFetchAutenticado(caminho, opcoes = {}) {
   // nunca termina, para nenhuma tela mostrar erro no meio da troca de página.
   if (resposta.status === 403 && await ronuEhFaltaDeConsentimento(resposta)) {
     localStorage.setItem(RONU_PRECISA_CONSENTIMENTO_KEY, 'true');
-    window.location.href = 'consentimento.html';
+    window.location.href = 'autorizacao.html';
     return new Promise(() => {});
   }
 
@@ -364,21 +364,21 @@ function ronuCadastroJaCompleto() {
 async function ronuRedirecionarPosAuth() {
   // O consentimento vem antes do estado: sem ele, a API recusa até o PUT do estado.
   if (localStorage.getItem(RONU_PRECISA_CONSENTIMENTO_KEY) === 'true') {
-    window.location.href = 'consentimento.html';
+    window.location.href = 'autorizacao.html';
     return;
   }
 
   if (localStorage.getItem(RONU_PRECISA_ESTADO_KEY) === 'true') {
-    window.location.href = 'estado.html';
+    window.location.href = 'seu-estado.html';
     return;
   }
 
   const completo = await ronuChecarCadastroCompleto();
   if (!completo) {
-    window.location.href = 'onboarding.html';
+    window.location.href = 'primeiros-passos.html';
     return;
   }
-  window.location.href = ronuConvitePendente() ? 'casa-convite.html' : 'dashboard.html';
+  window.location.href = ronuConvitePendente() ? 'convite.html' : 'minha-dieta.html';
 }
 
 // ---------- Convite da casa (plano família, S4) ----------
@@ -386,7 +386,7 @@ async function ronuRedirecionarPosAuth() {
 // pelo login, pelo cadastro, pelo consentimento e pelo onboarding antes de ver o
 // convite. O token fica guardado só nesta aba (sessionStorage, como o da
 // redefinição de senha: nunca na URL depois de aberto) e a pessoa volta para
-// casa-convite.html no fim desse caminho: aqui, no pós-login, e no dashboard.js,
+// convite.html no fim desse caminho: aqui, no pós-login, e no dashboard.js,
 // onde o onboarding termina. Sai quando o convite tem um desfecho (entrou,
 // recusou ou o link não vale mais).
 const RONU_CONVITE_CASA_KEY = 'ronu:conviteCasa';
@@ -415,7 +415,7 @@ function ronuEsquecerConvite() {
   }
 }
 
-// PUT /perfil/estado — usado por estado.html. A API normaliza e valida a UF;
+// PUT /perfil/estado — usado por seu-estado.html. A API normaliza e valida a UF;
 // em 400 devolve { mensagem }, repassada aqui como Error pra tela exibir.
 async function ronuSalvarEstado(estado) {
   const resposta = await ronuFetchAutenticado('/perfil/estado', {
@@ -591,7 +591,7 @@ async function ronuGerarDietaEIrAoPainel(botao, elErro, { descarregar, travar = 
     window.addEventListener('pageshow', (evento) => {
       if (evento.persisted) destravar();
     }, { once: true });
-    window.location.href = 'dashboard.html';
+    window.location.href = 'minha-dieta.html';
   } catch (erro) {
     if (erro.message === 'Sessão expirada.') return;
     destravar();
@@ -606,8 +606,8 @@ async function ronuGerarDietaEIrAoPainel(botao, elErro, { descarregar, travar = 
 // (ou o login falhar). Uma segunda credencial nesse intervalo é ignorada.
 let ronuLoginGoogleEmAndamento = false;
 
-// Callback do Google Identity Services, compartilhado por login.html e
-// cadastro.html (initialize({ callback: ronuTratarCredencialGoogle })). O botão
+// Callback do Google Identity Services, compartilhado por entrar.html e
+// criar-conta.html (initialize({ callback: ronuTratarCredencialGoogle })). O botão
 // do Google é um iframe deles — não dá pra trocar o texto dele como no botão
 // do formulário —, então o progresso vai numa linha de status logo abaixo
 // (#google-status, role="status", anunciada por leitores de tela). Durante a

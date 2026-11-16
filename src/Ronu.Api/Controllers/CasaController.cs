@@ -197,7 +197,7 @@ public partial class CasaController : ControllerBase
 
         return Created("/api/casa", new ConviteCriadoResponse
         {
-            Link = $"{_urlBaseFrontend}/casa-convite.html#convite={token}",
+            Link = $"{_urlBaseFrontend}/convite.html#convite={token}",
             ExpiraEm = convite.ExpiraEm
         });
     }

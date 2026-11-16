@@ -1,4 +1,4 @@
-// Ronu — Convite para uma casa (casa-convite.html#convite=<token>), plano família, etapa 7
+// Ronu — Convite para uma casa (convite.html#convite=<token>), plano família, etapa 7
 // Fluxo: tira o token da URL (fica só nesta aba, no sessionStorage) -> sem
 // login, mostra "Entrar" e "Criar conta" e volta para cá no fim do caminho
 // (S4, ver ronuConvitePendente em auth.js) -> logado, POST /casa/convites/verificar
@@ -53,7 +53,7 @@ const RONU_CONVITE_PROBLEMAS = {
   cadastro_incompleto: {
     titulo: 'Falta terminar o seu cadastro',
     texto: 'A porção de cada um sai da própria meta, e a meta precisa da sua altura, do sexo, da data de nascimento e do objetivo. Termine o cadastro e você volta para este convite.',
-    acao: { texto: 'Terminar cadastro', href: 'onboarding.html', principal: true },
+    acao: { texto: 'Terminar cadastro', href: 'primeiros-passos.html', principal: true },
     final: false
   },
   menor_de_18: {

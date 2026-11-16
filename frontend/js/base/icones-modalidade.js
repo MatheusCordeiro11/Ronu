@@ -4,8 +4,8 @@
 // pelo nome que a API devolve (sem diferenciar acento nem maiúscula). Cinco
 // modalidades usam um ícone da base; as outras têm o próprio arquivo em
 // img/modalidades/ (docs/icones-3d.md). Modalidade nova sem ícone usa o halter
-// até ganhar o dela. `prefixo` é o caminho até a raiz do frontend ('' nas
-// páginas da raiz, '../../' na landing).
+// até ganhar o dela. `prefixo` é o caminho até a raiz do frontend (hoje ''
+// em todas as páginas, landing inclusive, porque todas ficam na raiz).
 
 window.RonuIconeModalidade = (function () {
   'use strict';

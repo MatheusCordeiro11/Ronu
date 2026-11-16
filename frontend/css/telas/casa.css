@@ -1,6 +1,6 @@
 /*
   Ronu — Casa (plano família, etapa 7): a aba Casa (casa.html) e o convite
-  (casa-convite.html). Depende de tokens, base, componentes e troca.css.
+  (convite.html). Depende de tokens, base, componentes e troca.css.
   Referência: canvas "Plano família · Casa" (Casa, CasaMobile, CasaMembro,
   CasaConvite), com os hex trocados pelos tokens.
 
@@ -803,7 +803,7 @@
   font-weight: 600;
 }
 
-/* ---------- Convite (casa-convite.html) ---------- */
+/* ---------- Convite (convite.html) ---------- */
 .cv-main {
   max-width: 880px;
   padding-top: var(--e-9);

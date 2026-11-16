@@ -50,7 +50,7 @@ existir".
 | Prompt e resposta da geração | Gemini API | montar o cardápio | consentimento | Google, EUA | Google | o do Google: no plano gratuito, ele pode usar para melhorar os produtos dele, e revisores humanos podem ler. O Ronu não envia nada que identifique você (pendência 1) |
 | E-mails enviados | caixa "Enviados" da conta Gmail do Ronu | "esqueci a senha" | contrato | Google, EUA | Google | até 30 dias (apagados à mão todo mês; pendência 3) |
 | IP e páginas abertas | Vercel | servir o site | legítimo interesse | Vercel | Vercel | o da Vercel |
-| IP ao abrir login e cadastro, mesmo sem usar o botão | script `accounts.google.com/gsi/client` em `login.html` e `cadastro.html` | botão "Entrar com Google" | legítimo interesse | Google, EUA | Google | o do Google |
+| IP ao abrir login e cadastro, mesmo sem usar o botão | script `accounts.google.com/gsi/client` em `entrar.html` e `criar-conta.html` | botão "Entrar com Google" | legítimo interesse | Google, EUA | Google | o do Google |
 | Navegador: token, nome, tema, avisos dispensados; na troca de senha, o código do link e o e-mail digitado (`sessionStorage`, só a aba) | `localStorage` / `sessionStorage` | funcionamento | contrato | aparelho da pessoa | ninguém | até sair da conta (token) ou limpar o navegador |
 
 O que vai para o Gemini, exatamente (`GeradorDietaGemini.MontarPrompt`, desde 2026-11-02): as metas de cada dia

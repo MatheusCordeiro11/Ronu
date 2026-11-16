@@ -23,7 +23,7 @@ Apps de dieta genéricos calculam calorias a partir de níveis de atividade fís
 - Fluxo: cadastro/login → dados corporais e objetivo → modalidades praticadas e frequência semanal → preferências alimentares (alimentos preferidos/a evitar) → geração de dieta via IA → histórico de dietas.
 - API .NET (`src/Ronu.Api`) expõe endpoints REST autenticados via JWT; `usuarioId` nunca é enviado pelo cliente, sempre extraído do token.
 - Catálogo de modalidades é público (`GET /api/modalidades`); todo o resto exige autenticação.
-- Frontend estático (`frontend/`) já iniciado com uma landing page (`frontend/landing/v1`).
+- Frontend estático (`frontend/`), com a landing page na raiz (`frontend/index.html`, estilos e script em `frontend/landing/v1/`).
 
 ## Capabilities and Constraints
 

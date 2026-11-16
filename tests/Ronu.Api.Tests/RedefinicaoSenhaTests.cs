@@ -39,7 +39,7 @@ public class RedefinicaoSenhaTests
         var email = Assert.Single(fila.Mensagens);
         Assert.Equal("fulano@gmail.com", email.Para);
         var token = TokenDoEmail(email);
-        Assert.Contains("http://127.0.0.1:5500/frontend/redefinir-senha.html#token=", email.Texto);
+        Assert.Contains("http://127.0.0.1:5500/frontend/nova-senha.html#token=", email.Texto);
         Assert.Contains("30 minutos", email.Texto);
 
         var pedido = await contexto.PedidosRedefinicaoSenha.SingleAsync();

@@ -20,7 +20,7 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (!ronuUsuarioLogado()) {
-    window.location.href = 'login.html';
+    window.location.href = 'entrar.html';
     return;
   }
 
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     const completo = ronuCadastroJaCompleto() || await ronuChecarCadastroCompleto();
     if (completo) {
-      window.location.href = 'dashboard.html';
+      window.location.href = 'minha-dieta.html';
       return;
     }
   } catch (erro) {
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // cadastro está completo, refazer o perfil poderia sobrescrever dados. O
     // dashboard tem a tela de erro com "Tentar novamente".
     if (erro.message !== 'Sessão expirada.') {
-      window.location.href = 'dashboard.html';
+      window.location.href = 'minha-dieta.html';
     }
     return;
   }
@@ -926,7 +926,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const dados = await resposta.json().catch(() => null);
         throw new Error(dados?.mensagem || 'Não foi possível gerar sua dieta agora. Tente novamente em alguns instantes.');
       }
-      window.location.href = 'dashboard.html';
+      window.location.href = 'minha-dieta.html';
     } catch (falha) {
       if (falha.message === 'Sessão expirada.') return;
       gerando.hidden = true;

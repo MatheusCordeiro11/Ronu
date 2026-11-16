@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ronu — Informar estado</title>
-  <meta name="description" content="Informe seu estado para o Ronu adaptar sua dieta à sua região.">
+  <title>Ronu — Autorização dos dados de saúde</title>
+  <meta name="description" content="Autorize o Ronu a usar seus dados de saúde para calcular sua meta e montar sua dieta.">
 
   <!-- Antes do CSS: aplica o modo escuro/claro antes da primeira pintura. -->
   <script src="js/base/tema.js"></script>
@@ -21,11 +21,11 @@
 <body>
   <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
 
-  <div class="entrada-pagina entrada-senha entrada-estado-uf">
+  <div class="entrada-pagina entrada-senha">
 
     <main class="entrada-form-area" id="conteudo">
       <div class="entrada-topo">
-        <a class="logo" href="landing/v1/" aria-label="Ronu, página inicial">
+        <a class="logo" href="./" aria-label="Ronu, página inicial">
           <svg class="logo-marca" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><defs><clipPath id="logo-recorte"><path d="M2.5 20H37.5C37.5 30.2 29.7 37.5 20 37.5C10.3 37.5 2.5 30.2 2.5 20Z"/></clipPath></defs><path d="M6.2 20.2C5.6 15.6 8.6 12.6 12.2 13.2C13.2 9.4 17.2 7.6 20 8.8C22.8 7.6 26.8 9.4 27.8 13.2C31.4 12.6 34.4 15.6 33.8 20.2Z" fill="var(--logo-arroz)" stroke="var(--texto)" stroke-width="2" stroke-linejoin="round"/><path d="M2.5 20H37.5C37.5 30.2 29.7 37.5 20 37.5C10.3 37.5 2.5 30.2 2.5 20Z" fill="var(--acento)"/><g clip-path="url(#logo-recorte)"><rect x="0" y="24.2" width="40" height="5" fill="var(--logo-faixa)"/><path d="M18 30 L13.6 37.6 L17 38.4 L19.8 30.6Z M22 30 L26.4 37.6 L23 38.4 L20.2 30.6Z" fill="var(--logo-faixa)"/></g><rect x="16.6" y="22.6" width="6.8" height="8.2" rx="1.6" fill="var(--logo-faixa)"/></svg>
           <span class="logo-nome" aria-hidden="true">ronu</span>
         </a>
@@ -37,92 +37,44 @@
         </div>
       </div>
 
-      <!-- Oculto até estado.js confirmar que o usuário realmente precisa
-           informar o estado — evita a tela piscar antes de um redirecionamento. -->
-      <div class="entrada-form entrada-form-larga" id="estado-conteudo" hidden>
+      <!-- Escondido até a API dizer se a pessoa já aceitou: quem já aceitou
+           segue direto, sem ver o formulário piscar (js/consentimento.js). -->
+      <div class="entrada-form entrada-form-larga" id="consentimento-conteudo" hidden>
         <div class="entrada-cabeca entra">
-          <span class="rotulo rotulo-acento">Só falta isso</span>
-          <h1>Em que estado <span class="destaque">você mora?</span></h1>
-          <p class="texto-2">Usamos para os nomes dos alimentos e para contar o seu dia no fuso certo.</p>
+          <span class="rotulo rotulo-acento" id="consentimento-rotulo">Antes de continuar</span>
+          <h1>Seus dados <span class="destaque">de saúde.</span></h1>
+          <p class="texto-2" id="consentimento-intro">Para calcular a sua meta e montar a sua dieta, o Ronu precisa da sua autorização.</p>
         </div>
 
         <div class="aviso aviso-erro" id="form-error" role="alert" hidden></div>
 
-        <form id="estado-form" class="entrada-campos" novalidate>
-          <!-- Rádios de verdade (setas do teclado e "obrigatório" do próprio
-               navegador), com cara de botão. O valor é a sigla, como antes. -->
-          <fieldset class="uf-grupos entra" style="--atraso: 80ms">
-            <legend class="oculto-visual">Estado</legend>
-            <div class="uf-regiao">
-              <span class="uf-regiao-nome" aria-hidden="true">Norte</span>
-              <div class="uf-opcoes">
-                <label class="uf"><input type="radio" name="estado" value="AC" required><span>AC</span></label>
-                <label class="uf"><input type="radio" name="estado" value="AM"><span>AM</span></label>
-                <label class="uf"><input type="radio" name="estado" value="AP"><span>AP</span></label>
-                <label class="uf"><input type="radio" name="estado" value="PA"><span>PA</span></label>
-                <label class="uf"><input type="radio" name="estado" value="RO"><span>RO</span></label>
-                <label class="uf"><input type="radio" name="estado" value="RR"><span>RR</span></label>
-                <label class="uf"><input type="radio" name="estado" value="TO"><span>TO</span></label>
-              </div>
-            </div>
-            <div class="uf-regiao">
-              <span class="uf-regiao-nome" aria-hidden="true">Nordeste</span>
-              <div class="uf-opcoes">
-                <label class="uf"><input type="radio" name="estado" value="AL"><span>AL</span></label>
-                <label class="uf"><input type="radio" name="estado" value="BA"><span>BA</span></label>
-                <label class="uf"><input type="radio" name="estado" value="CE"><span>CE</span></label>
-                <label class="uf"><input type="radio" name="estado" value="MA"><span>MA</span></label>
-                <label class="uf"><input type="radio" name="estado" value="PB"><span>PB</span></label>
-                <label class="uf"><input type="radio" name="estado" value="PE"><span>PE</span></label>
-                <label class="uf"><input type="radio" name="estado" value="PI"><span>PI</span></label>
-                <label class="uf"><input type="radio" name="estado" value="RN"><span>RN</span></label>
-                <label class="uf"><input type="radio" name="estado" value="SE"><span>SE</span></label>
-              </div>
-            </div>
-            <div class="uf-regiao">
-              <span class="uf-regiao-nome" aria-hidden="true">Centro-Oeste</span>
-              <div class="uf-opcoes">
-                <label class="uf"><input type="radio" name="estado" value="DF"><span>DF</span></label>
-                <label class="uf"><input type="radio" name="estado" value="GO"><span>GO</span></label>
-                <label class="uf"><input type="radio" name="estado" value="MS"><span>MS</span></label>
-                <label class="uf"><input type="radio" name="estado" value="MT"><span>MT</span></label>
-              </div>
-            </div>
-            <div class="uf-regiao">
-              <span class="uf-regiao-nome" aria-hidden="true">Sudeste</span>
-              <div class="uf-opcoes">
-                <label class="uf"><input type="radio" name="estado" value="ES"><span>ES</span></label>
-                <label class="uf"><input type="radio" name="estado" value="MG"><span>MG</span></label>
-                <label class="uf"><input type="radio" name="estado" value="RJ"><span>RJ</span></label>
-                <label class="uf"><input type="radio" name="estado" value="SP"><span>SP</span></label>
-              </div>
-            </div>
-            <div class="uf-regiao">
-              <span class="uf-regiao-nome" aria-hidden="true">Sul</span>
-              <div class="uf-opcoes">
-                <label class="uf"><input type="radio" name="estado" value="PR"><span>PR</span></label>
-                <label class="uf"><input type="radio" name="estado" value="RS"><span>RS</span></label>
-                <label class="uf"><input type="radio" name="estado" value="SC"><span>SC</span></label>
-              </div>
-            </div>
-          </fieldset>
-
-          <!-- Prévia do cardápio e do fuso (estado.js), depois da escolha. -->
-          <div class="cartao uf-previa entra" id="estado-previa" aria-live="polite" style="--atraso: 160ms" hidden>
-            <span class="rotulo">Em <span id="previa-uf"></span>, o seu cardápio fica assim</span>
-            <div class="chips">
-              <span class="chip"><span id="previa-mandioca"></span> cozida</span>
-              <span class="chip"><span id="previa-feijao"></span> cozido</span>
-            </div>
-            <span class="apoio">Seu dia vira à meia-noite no fuso <span id="previa-fuso"></span>.</span>
+        <form id="consentimento-form" class="entrada-campos" novalidate>
+          <!-- Título, texto e versão vêm da API (js/base/aceite.js). Desmarcada sempre. -->
+          <div class="aceite entra" id="aceite" data-aceite data-logado="true" aria-busy="true" style="--atraso: 80ms">
+            <label class="aceite-marcar">
+              <input type="checkbox" id="aceite-caixa" name="aceite" aria-describedby="aceite-texto aceite-erro" disabled>
+              <span data-aceite-titulo>Carregando o texto da autorização...</span>
+            </label>
+            <div class="aceite-texto" id="aceite-texto" data-aceite-texto></div>
+            <span class="campo-erro" id="aceite-erro" data-aceite-erro role="alert" hidden></span>
           </div>
 
-          <button type="submit" class="botao botao-primario botao-grande botao-bloco entra" id="submit-btn" style="--atraso: 240ms">
+          <p class="campo-dica entra" style="--atraso: 120ms">Ao continuar, você aceita os <a href="termos.html" target="_blank" rel="noopener">Termos de uso</a>, confirma ter 18 anos ou mais e leu a <a href="privacidade.html" target="_blank" rel="noopener">Política de privacidade</a>.</p>
+
+          <button type="submit" class="botao botao-primario botao-grande botao-bloco entra" id="submit-btn" style="--atraso: 160ms">
             <span class="btn-label">Continuar</span>
           </button>
         </form>
 
-        <p class="entrada-alternar">Não é você? <button type="button" class="link-botao" id="sair-btn">Sair</button></p>
+        <section class="consentimento-recusar entra" aria-labelledby="recusar-titulo" style="--atraso: 220ms">
+          <h2 class="oculto-visual" id="recusar-titulo">Se preferir não autorizar</h2>
+          <p class="nota">Sem essa autorização o Ronu não consegue montar a sua dieta. Se preferir não autorizar, você pode sair ou apagar a conta.</p>
+          <div class="consentimento-recusar-acoes">
+            <button type="button" class="link-botao" id="sair-btn">Sair</button>
+            <button type="button" class="link-botao" id="apagar-btn">Apagar minha conta</button>
+          </div>
+        </section>
+
         <nav class="links-legais entrada-legais" aria-label="Documentos legais"><a href="privacidade.html">Privacidade</a><span class="links-legais-sep" aria-hidden="true">·</span><a href="termos.html">Termos</a></nav>
       </div>
     </main>
@@ -161,8 +113,8 @@
         </div>
       </div>
       <div class="cena-legenda">
-        <h2 class="cena-titulo">Cada região tem seu <span>feijão.</span></h2>
-        <p class="cena-texto">E a sua mandioca pode ser aipim ou macaxeira. O Ronu escreve o cardápio do jeito que se fala aí.</p>
+        <h2 class="cena-titulo">A ficha antes do <span>treino.</span></h2>
+        <p class="cena-texto">Peso, altura e treino entram na conta da sua meta. Você decide se o Ronu pode usar, e pode apagar tudo quando quiser.</p>
         <div class="cena-pontos"><i></i><i></i><i></i></div>
       </div>
     </aside>
@@ -171,6 +123,8 @@
   </div>
 
   <script src="js/auth.js"></script>
-  <script src="js/estado.js"></script>
+  <script src="js/base/aceite.js"></script>
+  <script src="js/base/conta.js"></script>
+  <script src="js/consentimento.js"></script>
 </body>
 </html>

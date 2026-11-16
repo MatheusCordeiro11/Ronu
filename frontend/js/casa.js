@@ -15,7 +15,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const usuario = ronuUsuarioLogado();
   if (!usuario) {
-    window.location.href = 'login.html';
+    window.location.href = 'entrar.html';
     return;
   }
 
@@ -504,7 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderizarRefeicoes();
     const nota = $('cs-nota-troca');
     const painel = criar('a', null, 'painel');
-    painel.href = 'dashboard.html';
+    painel.href = 'minha-dieta.html';
     nota.replaceChildren(
       casa.souDono
         ? 'Trocar aqui muda a panela de todo mundo. O substituto respeita o que cada um não come, e a porção de cada pessoa é recalculada. '

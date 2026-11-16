@@ -1,8 +1,27 @@
 {
   "cleanUrls": true,
   "redirects": [
-    { "source": "/", "destination": "/landing/v1/", "permanent": false },
-    { "source": "/landing/v1", "destination": "/landing/v1/", "permanent": false }
+    { "source": "/landing/v1", "destination": "/", "permanent": false },
+    { "source": "/landing/v1/", "destination": "/", "permanent": false },
+    { "source": "/landing/v1/index.html", "destination": "/", "permanent": false },
+    { "source": "/login", "destination": "/entrar", "permanent": false },
+    { "source": "/login.html", "destination": "/entrar", "permanent": false },
+    { "source": "/cadastro", "destination": "/criar-conta", "permanent": false },
+    { "source": "/cadastro.html", "destination": "/criar-conta", "permanent": false },
+    { "source": "/redefinir-senha", "destination": "/nova-senha", "permanent": false },
+    { "source": "/redefinir-senha.html", "destination": "/nova-senha", "permanent": false },
+    { "source": "/onboarding", "destination": "/primeiros-passos", "permanent": false },
+    { "source": "/onboarding.html", "destination": "/primeiros-passos", "permanent": false },
+    { "source": "/consentimento", "destination": "/autorizacao", "permanent": false },
+    { "source": "/consentimento.html", "destination": "/autorizacao", "permanent": false },
+    { "source": "/estado", "destination": "/seu-estado", "permanent": false },
+    { "source": "/estado.html", "destination": "/seu-estado", "permanent": false },
+    { "source": "/dashboard", "destination": "/minha-dieta", "permanent": false },
+    { "source": "/dashboard.html", "destination": "/minha-dieta", "permanent": false },
+    { "source": "/compras", "destination": "/lista-de-compras", "permanent": false },
+    { "source": "/compras.html", "destination": "/lista-de-compras", "permanent": false },
+    { "source": "/casa-convite", "destination": "/convite", "permanent": false },
+    { "source": "/casa-convite.html", "destination": "/convite", "permanent": false }
   ],
   "headers": [
     {

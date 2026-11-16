@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ronuMostrarErroFormulario(formError, 'Sua sessão expirou. Entre novamente.');
   }
 
-  // Vindo de redefinir-senha.html. O parâmetro sai da URL logo em seguida,
+  // Vindo de nova-senha.html. O parâmetro sai da URL logo em seguida,
   // para a faixa não voltar ao recarregar a página.
   // Vindo da exclusão da conta (Perfil ou consentimento): só um sinal, sem dado nenhum.
   if (parametros.get('conta') === 'apagada') {

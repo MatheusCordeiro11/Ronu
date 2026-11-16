@@ -120,7 +120,7 @@ public class ServicoRedefinicaoSenha
             });
             // No fragmento (#), não na query: o fragmento não vai ao servidor
             // nem no cabeçalho Referer para outros sites.
-            var link = $"{_urlBaseFrontend}/redefinir-senha.html#token={token}";
+            var link = $"{_urlBaseFrontend}/nova-senha.html#token={token}";
             mensagem = ModelosEmail.LinkRedefinicaoSenha(usuario.Email, usuario.Nome, link, (int)ValidadeLink.TotalMinutes);
         }
 

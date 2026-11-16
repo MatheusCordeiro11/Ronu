@@ -1,4 +1,4 @@
-// Ronu — Criar senha nova (link do email: redefinir-senha.html#token=...)
+// Ronu — Criar senha nova (link do email: nova-senha.html#token=...)
 // Fluxo: tira o token da URL, confere o link na API e só então mostra o
 // formulário. Link inválido, expirado ou usado vira um estado próprio, com o
 // próximo passo. Senha trocada: a sessão local sai (os tokens antigos já não
@@ -14,19 +14,19 @@ const RONU_LINK_PROBLEMAS = {
     titulo: 'Link inválido',
     texto: null,
     principal: { texto: 'Pedir um novo link', href: 'esqueci-senha.html' },
-    secundaria: { texto: 'Voltar para o login', href: 'login.html' }
+    secundaria: { texto: 'Voltar para o login', href: 'entrar.html' }
   },
   expirado: {
     titulo: 'Link expirado',
     texto: 'Os links valem por 30 minutos. Peça um novo: leva menos de um minuto.',
     principal: { texto: 'Pedir um novo link', href: 'esqueci-senha.html' },
-    secundaria: { texto: 'Voltar para o login', href: 'login.html' }
+    secundaria: { texto: 'Voltar para o login', href: 'entrar.html' }
   },
   // O mais provável é a pessoa já ter trocado a senha: "Entrar" vem primeiro.
   usado: {
     titulo: 'Link já usado',
     texto: 'Este link já criou uma senha nova. Se foi você, é só entrar.',
-    principal: { texto: 'Entrar', href: 'login.html' },
+    principal: { texto: 'Entrar', href: 'entrar.html' },
     secundaria: { texto: 'Pedir um novo link', href: 'esqueci-senha.html' }
   }
 };
@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
       await ronuRedefinirSenha(token, senha);
       sessionStorage.removeItem(RONU_TOKEN_REDEFINICAO_KEY);
       ronuLimparSessao();
-      window.location.replace('login.html?senha=redefinida');
+      window.location.replace('entrar.html?senha=redefinida');
     } catch (erro) {
       cancelarAvisoDeEspera();
       ronuDefinirCarregando(submitBtn, false);
