@@ -330,6 +330,23 @@
   display: none;
 }
 
+.ob-mods.no-fim {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+/* No computador não há como arrastar a fileira com o mouse: as modalidades
+   quebram em linhas e aparecem todas (revisão de 2026-11-16). */
+@media (min-width: 721px) {
+  .ob-mods {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+    overflow: visible;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
 .ob-mod {
   flex: 0 0 112px;
   scroll-snap-align: start;

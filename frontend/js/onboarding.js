@@ -506,6 +506,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       secao.append(titulo, chips);
       area.appendChild(secao);
+      // No celular a fileira rola de lado: o esmaecimento da direita some
+      // quando chega ao fim (ou quando cabe tudo), senão o último card fica
+      // sempre coberto.
+      const marcaFim = () => {
+        chips.classList.toggle('no-fim', chips.scrollLeft + chips.clientWidth >= chips.scrollWidth - 4);
+      };
+      chips.addEventListener('scroll', marcaFim, { passive: true });
+      window.addEventListener('resize', marcaFim);
+      marcaFim();
       indice += 1;
     });
     estado.catalogo.filter((mod) => estado.escolhidas.has(mod.id)).forEach(criarCartao);
