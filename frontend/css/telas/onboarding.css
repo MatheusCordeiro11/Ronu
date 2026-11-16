@@ -1,137 +1,29 @@
 /*
-  Ronu — Onboarding (tela aprovada: docs/redesign/telas/Onboarding, ...Mobile, ...Washi)
-  Depende de tokens, base, componentes e telas/entrada.css (painel e logo).
+  Ronu — Onboarding (redesign de nov/2026; protótipo "Entrada e onboarding").
+  Depende de tokens, base, componentes e telas/entrada.css (página, topo e
+  pontinhos do fundo).
 
-  Desktop: painel com o quimono (a faixa muda de cor a cada passo) e a conta
-  da meta se formando; à direita, as etapas, o passo atual e a navegação.
-  Celular: faixa com logo e a faixa atual; o resumo da meta vai para baixo
-  do passo e a navegação gruda no pé da tela.
+  Desktop: à esquerda, o logo, as etapas, o passo atual e a navegação; à
+  direita, o painel com o ícone 3D do passo, a faixa atual e a conta da meta
+  se formando (POST /api/metas/simulacao).
+  Celular: só a coluna do passo; o resumo da meta vai para baixo do passo e a
+  navegação gruda no pé da tela.
 */
-
-/* ---------- Faixa do quimono por passo ---------- */
-.ob-pagina { --faixa: var(--faixa-branca); }
-.ob-pagina[data-passo="1"] { --faixa: var(--faixa-azul); }
-.ob-pagina[data-passo="2"] { --faixa: var(--faixa-roxa); }
-.ob-pagina[data-passo="3"] { --faixa: var(--faixa-marrom); }
-.ob-pagina[data-passo="4"] { --faixa: var(--faixa-preta); }
-
-.ob-faixa {
-  fill: var(--faixa);
-  transition: fill 0.8s ease;
-}
-
-/* A branca precisa de contorno para não sumir no quimono claro. */
-.ob-pagina[data-passo="0"] .ob-faixa {
-  stroke: var(--quimono-faixa-borda);
-  stroke-width: 2;
-}
-
-/* ---------- Painel ---------- */
-.ob-painel {
-  min-height: 100svh;
-}
-
-.ob-arte {
-  position: absolute;
-  top: 110px;
-  left: 0;
-  right: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  pointer-events: none;
-}
-
-.ob-quimono {
-  width: 230px;
-  height: auto;
-}
-
-.ob-faixa-rotulo {
-  padding: 4px 10px;
-  border: 1px solid var(--borda);
-  border-radius: var(--raio-pilula);
-  background: var(--fundo);
-  font-size: var(--t-pequeno);
-  color: var(--texto-2);
-}
-
-.ob-meta {
-  position: relative;
-  z-index: 1;
-  max-width: 440px;
-  padding: 20px 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  background: var(--fundo);
-  border: 1px solid var(--borda);
-  border-radius: var(--raio-card);
-}
-
-.ob-meta h2 {
-  font-family: var(--fonte-corpo);
-}
-
-.ob-meta-linhas {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.ob-meta-linhas:empty {
-  display: none;
-}
-
-.ob-meta-linha {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--e-4);
-  font-size: var(--t-apoio);
-  font-variant-numeric: tabular-nums;
-}
-
-/* Só a linha que acabou de entrar anima, e a classe sai no fim (onboarding.js):
-   com a animação presa à linha, mesmo terminada, o Chrome a desenhava apagada. */
-.ob-meta-linha.ob-entrando {
-  animation: entra 0.5s var(--curva-saida) backwards;
-}
-
-.ob-meta-linha > span:first-child {
-  color: var(--texto-2);
-}
-
-/* A parte que a última resposta acrescentou. */
-.ob-meta-linha.ob-nova > span:last-child {
-  color: var(--acento-texto);
-  font-weight: 600;
-}
-
-.ob-meta-totais {
-  display: flex;
-  gap: 28px;
-  padding-top: var(--e-3);
-  border-top: 1px solid var(--borda);
-}
-
-.ob-meta-total {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.ob-meta-total .numero {
-  font-size: 1.75rem;
-}
 
 /* ---------- Coluna do passo ---------- */
 .ob-principal {
+  position: relative;
   min-width: 0;
-  padding: var(--e-8) var(--e-10) var(--e-9);
+  padding: 8px 8px 4px;
   display: flex;
   flex-direction: column;
-  gap: var(--e-8);
+  gap: 22px;
+}
+
+.ob-etapas {
+  max-width: 560px;
+  width: 100%;
+  margin: 8px auto 0;
 }
 
 .ob-centro {
@@ -143,6 +35,7 @@
 .ob-conteudo {
   width: 100%;
   max-width: 560px;
+  margin: 0 auto;
 }
 
 .ob-passo {
@@ -155,11 +48,13 @@
 .ob-cabeca {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .ob-cabeca h1 {
-  font-size: 2.5rem;
+  font-size: clamp(2rem, 3.2vw, 2.5rem);
+  letter-spacing: -0.045em;
+  line-height: 1.05;
 }
 
 .ob-cabeca h1:focus {
@@ -168,7 +63,7 @@
 
 .ob-cabeca p {
   font-size: var(--t-corpo-g);
-  line-height: 1.6;
+  line-height: 1.55;
   color: var(--texto-2);
 }
 
@@ -195,7 +90,171 @@
 }
 
 .ob-objetivos .opcao {
-  padding: 20px 22px;
+  padding: 18px 20px;
+}
+
+/* ---------- Painel da meta (direita) ---------- */
+.ob-painel {
+  position: sticky;
+  top: 16px;
+  align-self: start;
+  height: calc(100svh - 32px);
+  min-height: 580px;
+  max-height: 900px;
+  padding: 28px;
+  border-radius: 28px;
+  background: var(--superficie-2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+
+.ob-painel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(var(--ponto-grade) 1.2px, transparent 1.3px);
+  background-size: 18px 18px;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 30%, #000 0%, transparent 65%);
+  mask-image: radial-gradient(ellipse at 50% 30%, #000 0%, transparent 65%);
+  pointer-events: none;
+}
+
+/* O ícone 3D do passo atual (data-passo na página). */
+.ob-ilustra {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  animation: cena-boia 5s ease-in-out infinite;
+}
+
+.ob-ilustra img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: var(--sombra-icone);
+  opacity: 0;
+  transform: scale(0.6) rotate(-14deg);
+  transition: opacity 0.4s ease, transform 0.65s var(--curva-mola);
+}
+
+.ob-pagina[data-passo="0"] .ob-ilustra img[data-passo="0"],
+.ob-pagina[data-passo="1"] .ob-ilustra img[data-passo="1"],
+.ob-pagina[data-passo="2"] .ob-ilustra img[data-passo="2"],
+.ob-pagina[data-passo="3"] .ob-ilustra img[data-passo="3"],
+.ob-pagina[data-passo="4"] .ob-ilustra img[data-passo="4"] {
+  opacity: 1;
+  transform: none;
+}
+
+.ob-faixa-rotulo {
+  position: relative;
+  padding: 5px 12px;
+  border-radius: var(--raio-pilula);
+  background: var(--acento-suave);
+  color: var(--acento-texto);
+  font-size: var(--t-pequeno);
+  font-weight: 800;
+}
+
+.ob-meta {
+  position: relative;
+  width: min(420px, 100%);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-card);
+  box-shadow: var(--sombra);
+}
+
+.ob-meta h2 {
+  font-family: var(--fonte-corpo);
+  font-size: var(--t-h3);
+  letter-spacing: -0.02em;
+  color: var(--texto);
+  text-transform: none;
+}
+
+.ob-meta-linhas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ob-meta-linhas:empty {
+  display: none;
+}
+
+.ob-meta-linha {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e-4);
+  padding: 9px 12px;
+  border-radius: 12px;
+  background: var(--fundo);
+  font-size: var(--t-apoio);
+  font-weight: 600;
+}
+
+/* Só a linha que acabou de entrar anima, e a classe sai no fim (onboarding.js):
+   com a animação presa à linha, mesmo terminada, o Chrome a desenhava apagada. */
+.ob-meta-linha.ob-entrando {
+  animation: entra 0.5s var(--curva-saida) backwards;
+}
+
+.ob-meta-linha > span:first-child {
+  color: var(--texto-2);
+}
+
+/* A parte que a última resposta acrescentou. */
+.ob-meta-linha.ob-nova {
+  background: var(--acento-suave);
+}
+
+.ob-meta-linha.ob-nova > span:last-child {
+  color: var(--acento-texto);
+  font-weight: 800;
+}
+
+.ob-meta-totais {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding-top: var(--e-3);
+  border-top: 1px solid var(--borda);
+}
+
+.ob-meta-total {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--fundo);
+}
+
+.ob-meta-total:first-child {
+  background: var(--acento-suave);
+}
+
+.ob-meta-total .numero {
+  font-size: 1.75rem;
+}
+
+.ob-meta-rodape {
+  position: relative;
+  max-width: 30em;
+  text-align: center;
+  font-size: var(--t-pequeno);
+  color: var(--texto-2);
 }
 
 /* ---------- Treino ---------- */
@@ -203,24 +262,26 @@
   display: flex;
   flex-direction: column;
   gap: var(--e-3);
-  margin-bottom: var(--e-6);
+  margin-bottom: var(--e-4);
 }
 
 /* Largo como uma opção: a escolha "não treino" vale tanto quanto qualquer
-   modalidade, e não some no meio dos chips. */
+   modalidade, e não some no meio dos quadros. */
 .ob-sem-treino {
   align-self: stretch;
   justify-content: center;
+  min-height: 46px;
   border-style: dashed;
+  border-color: var(--borda-campo);
   border-radius: var(--raio-2);
+  background: transparent;
 }
 
-/* Marcado, não preenche a largura toda de vermelho (Regra do Carimbo): fica
-   no tom de superfície, com o contorno no acento. */
+/* Marcado, não preenche a largura toda de vermelho (Regra do Carimbo). */
 .ob-sem-treino[aria-pressed="true"] {
   border-style: solid;
   border-color: var(--acento);
-  background: var(--superficie-3);
+  background: var(--acento-suave);
   color: var(--texto);
 }
 
@@ -237,19 +298,77 @@
 .ob-catalogo {
   display: flex;
   flex-direction: column;
-  gap: var(--e-6);
-  margin-bottom: var(--e-6);
+  gap: var(--e-5);
+  margin-bottom: var(--e-5);
 }
 
 .ob-grupo {
   display: flex;
   flex-direction: column;
   gap: var(--e-3);
+  min-width: 0;
 }
 
 .ob-grupo-titulo {
   margin: 0;
   color: var(--texto-2);
+}
+
+/* Uma fileira por categoria, que rola de lado, com quadros de ícone 3D. */
+.ob-mods {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  padding: 4px 2px 8px;
+  -webkit-mask-image: linear-gradient(90deg, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, #000 92%, transparent);
+}
+
+.ob-mods::-webkit-scrollbar {
+  display: none;
+}
+
+.ob-mod {
+  flex: 0 0 112px;
+  scroll-snap-align: start;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border: 1.5px solid var(--borda);
+  border-radius: var(--raio-2);
+  background: var(--superficie);
+  color: var(--texto);
+  font-size: var(--t-apoio);
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--d-media) ease, background-color var(--d-media) ease,
+    transform var(--d-media) var(--curva-saida);
+}
+
+.ob-mod:hover {
+  transform: translateY(-2px);
+  border-color: var(--borda-hover);
+}
+
+.ob-mod img {
+  width: 56px;
+  height: 48px;
+  object-fit: contain;
+  filter: var(--sombra-icone);
+  transition: transform 0.45s var(--curva-mola);
+}
+
+.ob-mod[aria-pressed="true"] {
+  border-color: var(--acento);
+  background: color-mix(in srgb, var(--acento) 6%, var(--superficie));
+}
+
+.ob-mod[aria-pressed="true"] img {
+  transform: scale(1.12) rotate(-6deg);
 }
 
 .ob-escolhidas {
@@ -261,7 +380,7 @@
 .ob-escolhida {
   padding: 16px 18px;
   gap: var(--e-3);
-  animation: entra 0.5s var(--curva-saida) both;
+  animation: entra 0.5s var(--curva-mola) both;
 }
 
 .ob-escolhida-cabeca {
@@ -273,7 +392,7 @@
 }
 
 .ob-escolhida-nome {
-  font-weight: 600;
+  font-weight: 800;
 }
 
 .ob-duracao-linha {
@@ -287,34 +406,41 @@
 .ob-duracao {
   display: flex;
   align-items: center;
-  border: 1px solid var(--borda-campo);
-  border-radius: var(--raio);
+  gap: 6px;
+  padding: 5px;
+  border: 1.5px solid var(--borda-campo);
+  border-radius: 16px;
+  background: var(--fundo);
 }
 
 .ob-duracao button {
-  width: 42px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   padding: 0;
-  border: 0;
-  background: transparent;
+  border: 1px solid var(--borda);
+  border-radius: 11px;
+  background: var(--superficie);
   color: var(--texto);
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   line-height: 1;
+  transition: transform var(--d-rapida) ease;
+}
+
+.ob-duracao button:active:not(:disabled) {
+  transform: scale(0.9);
 }
 
 .ob-duracao button:disabled {
-  color: var(--texto-3);
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
 .ob-duracao output {
   min-width: 88px;
-  line-height: 40px;
-  border-left: 1px solid var(--borda);
-  border-right: 1px solid var(--borda);
   text-align: center;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 /* ---------- Alimentação ---------- */
@@ -325,15 +451,16 @@
 }
 
 #ob-comidas .chip[data-estado="gosto"] {
-  background: var(--superficie-3);
-  border-color: var(--acento);
+  background: color-mix(in srgb, var(--verde) 12%, var(--superficie));
+  border-color: var(--verde);
   color: var(--texto);
 }
 
 #ob-comidas .chip[data-estado="nao_como"] {
-  border-style: dashed;
-  border-color: var(--acento);
-  color: var(--acento-texto);
+  background: var(--erro-suave);
+  border-color: var(--erro);
+  color: var(--texto);
+  text-decoration: line-through;
 }
 
 .ob-chip-marca {
@@ -347,6 +474,7 @@
   gap: 18px;
   flex-wrap: wrap;
   font-size: var(--t-pequeno);
+  font-weight: 600;
   color: var(--texto-2);
 }
 
@@ -362,7 +490,7 @@
 }
 
 .ob-outro-tipo > button {
-  min-height: 48px;
+  min-height: 40px;
 }
 
 .ob-outro .botao {
@@ -385,7 +513,8 @@
 
 .ob-gerando-titulo {
   font-size: 2.25rem;
-  line-height: 1.15;
+  letter-spacing: -0.045em;
+  line-height: 1.1;
 }
 
 .ob-gerando-linhas {
@@ -398,11 +527,14 @@
 
 /* ---------- Navegação ---------- */
 .ob-nav {
+  max-width: 560px;
+  width: 100%;
+  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: var(--e-4);
-  padding-top: 22px;
+  padding: 18px 0 8px;
   border-top: 1px solid var(--borda);
 }
 
@@ -441,61 +573,21 @@
 /* ---------- Celular ---------- */
 @media (max-width: 960px) {
   .ob-painel {
-    min-height: 0;
-    padding: var(--e-4) var(--e-5);
-    gap: 0;
-  }
-
-  /* No celular só aparece o selinho da faixa, num chip ao lado do logo. */
-  .ob-arte {
-    position: static;
-    flex-direction: row;
-    justify-content: flex-start;
-    gap: 8px;
-    margin-top: 14px;
-  }
-
-  .ob-quimono {
-    width: 22px;
-    animation: none;
-  }
-
-  .ob-faixa-rotulo {
-    padding: 0;
-    border: 0;
-    background: none;
-  }
-
-  .ob-painel .carimbo,
-  .ob-painel .selo-legenda {
-    display: none;
-  }
-
-  .ob-meta {
     display: none;
   }
 
   .ob-principal {
-    padding: 0;
-    gap: 0;
-  }
-
-  .ob-etapas {
-    padding: 14px var(--e-5) 0;
+    gap: 14px;
   }
 
   .ob-centro {
-    padding: var(--e-6) var(--e-5);
+    padding: var(--e-4) 0 var(--e-5);
     align-items: flex-start;
-  }
-
-  .ob-cabeca {
-    gap: 8px;
   }
 
   .ob-cabeca h1 {
     font-size: 1.875rem;
-    line-height: 1.15;
+    line-height: 1.1;
   }
 
   .ob-tres {
@@ -507,14 +599,15 @@
   }
 
   .ob-meta-celular:not([hidden]) {
-    margin: 0 var(--e-5) var(--e-4);
-    padding: 14px;
+    margin: 0 0 var(--e-4);
+    padding: 14px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: var(--e-4);
     border: 1px solid var(--borda);
-    border-radius: var(--raio-card);
+    border-radius: 20px;
+    background: var(--superficie);
   }
 
   .ob-meta-celular-numeros {
@@ -537,7 +630,8 @@
     position: sticky;
     bottom: 0;
     z-index: 10;
-    padding: 14px var(--e-5) calc(18px + env(safe-area-inset-bottom));
+    max-width: none;
+    padding: 14px 0 calc(14px + env(safe-area-inset-bottom));
     background: var(--fundo);
   }
 

@@ -472,13 +472,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       titulo.id = `ob-grupo-${indice}`;
       titulo.textContent = categoria;
       const chips = document.createElement('div');
-      chips.className = 'chips';
+      chips.className = 'ob-mods';
 
       modalidades.forEach((mod) => {
+        // Quadro com o ícone 3D da modalidade (js/base/icones-modalidade.js).
         const botao = document.createElement('button');
         botao.type = 'button';
-        botao.className = 'chip';
-        botao.textContent = mod.nome;
+        botao.className = 'ob-mod';
+        const icone = document.createElement('img');
+        icone.src = window.RonuIconeModalidade ? window.RonuIconeModalidade(mod.nome) : '';
+        icone.alt = '';
+        icone.width = 56;
+        icone.height = 48;
+        icone.loading = 'lazy';
+        const nome = document.createElement('span');
+        nome.textContent = mod.nome;
+        botao.append(icone, nome);
         botao.setAttribute('aria-pressed', String(estado.escolhidas.has(mod.id)));
         botao.addEventListener('click', () => {
           if (estado.escolhidas.has(mod.id)) {
