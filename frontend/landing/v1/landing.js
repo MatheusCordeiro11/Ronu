@@ -404,7 +404,7 @@
      um leve atraso, ele pisca sozinho e reage a cada clique. Com movimento
      reduzido, os olhos vão direto e não há pulinho. */
   var mascote = $('mascote');
-  if (mascote) {
+  if (mascote && !mascote.hidden) { /* com hidden no HTML, o mascote fica desligado */
     var irises = mascote.querySelectorAll('.mascote-iris');
     var olhosSvg = mascote.querySelector('svg');
     var olhoAtual = [0, 0], olhoQuer = [0, 0], olhoRodando = false, tempoFeliz = null;
