@@ -38,7 +38,7 @@ public static class ExportacaoConta
 
         var modalidades = await contexto.UsuarioModalidades.AsNoTracking()
             .Where(m => m.UsuarioId == usuarioId).OrderBy(m => m.Id)
-            .Select(m => new { Modalidade = m.Modalidade.Nome, m.DiasSemana, m.DuracaoMediaHoras, HorarioInicio = RegrasHorario.Formatar(m.HorarioInicio) })
+            .Select(m => new { Modalidade = m.Modalidade.Nome, m.DiasSemana, m.DuracaoMediaHoras, HorarioInicio = RegrasHorario.Formatar(m.HorarioInicio), m.Intensidade })
             .ToListAsync();
 
         var preferencias = await contexto.PreferenciasAlimentares.AsNoTracking()

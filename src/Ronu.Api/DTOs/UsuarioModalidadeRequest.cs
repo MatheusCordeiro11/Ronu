@@ -19,4 +19,9 @@ public class UsuarioModalidadeRequest
     // "HH:mm", a hora de início em todos os dias. Ao atualizar um vínculo, ausente ou nulo mantém o salvo e vazio
     // apaga (RegrasHorario): a tela de treino que já existe não manda este campo.
     public string? HorarioInicio { get; set; }
+
+    // "Ritmo da aula": "tecnica", "normal" ou "sparring" (IntensidadeTreino). Vínculo novo sem o campo nasce
+    // "normal"; atualização sem o campo (ou nulo) mantém o salvo, porque as telas de antes não o mandam. Vazio ou
+    // fora dos três dá 400; diferente de "normal" numa modalidade sem blocos também.
+    public string? Intensidade { get; set; }
 }

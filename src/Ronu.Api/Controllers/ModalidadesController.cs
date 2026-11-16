@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Ronu.Api.Data;
 using Ronu.Api.DTOs;
 using Ronu.Api.Models;
+using Ronu.Api.Services.IA;
 using Ronu.Api.Validacao;
 using System.Security.Claims;
 
@@ -42,7 +43,9 @@ public class ModalidadesController : ControllerBase
                 Id = m.Id,
                 Nome = m.Nome,
                 MetReferencia = m.MetReferencia,
-                Categoria = m.Categoria
+                Categoria = m.Categoria,
+                MetBlocoLeve = m.MetBlocoLeve,
+                MetBlocoIntenso = m.MetBlocoIntenso
             })
             .ToListAsync();
 
@@ -64,10 +67,20 @@ public class ModalidadesController : ControllerBase
     [HttpPost("api/usuarios/modalidades")]
     public async Task<IActionResult> AdicionarModalidade(UsuarioModalidadeRequest request)
     {
-        bool modalidadeExiste = await _context.Modalidades.AnyAsync(m => m.Id == request.ModalidadeId);
-        if (!modalidadeExiste)
+        var modalidade = await _context.Modalidades
+            .Where(m => m.Id == request.ModalidadeId)
+            .Select(m => new { m.MetBlocoLeve, m.MetBlocoIntenso })
+            .FirstOrDefaultAsync();
+        if (modalidade is null)
         {
             return NotFound(new { mensagem = "Modalidade não encontrada." });
+        }
+
+        var erroIntensidade = IntensidadeTreino.Validar(
+            request.Intensidade, modalidade.MetBlocoLeve is not null && modalidade.MetBlocoIntenso is not null);
+        if (erroIntensidade is not null)
+        {
+            return BadRequest(new { mensagem = erroIntensidade });
         }
 
         if (request.DiasSemana.Any(d => d < 1 || d > 7))
@@ -96,6 +109,8 @@ public class ModalidadesController : ControllerBase
             usuarioModalidadeExistente.DiasSemana = request.DiasSemana;
             usuarioModalidadeExistente.DuracaoMediaHoras = request.DuracaoMediaHoras;
             usuarioModalidadeExistente.HorarioInicio = RegrasHorario.Aplicar(usuarioModalidadeExistente.HorarioInicio, horario);
+            // Ausente mantém o salvo: a tela de treino de antes reenvia o vínculo sem o campo.
+            usuarioModalidadeExistente.Intensidade = request.Intensidade ?? usuarioModalidadeExistente.Intensidade;
             usuarioModalidade = usuarioModalidadeExistente;
         }
         else
@@ -106,7 +121,8 @@ public class ModalidadesController : ControllerBase
                 ModalidadeId = request.ModalidadeId,
                 DiasSemana = request.DiasSemana,
                 DuracaoMediaHoras = request.DuracaoMediaHoras,
-                HorarioInicio = RegrasHorario.Aplicar(null, horario)
+                HorarioInicio = RegrasHorario.Aplicar(null, horario),
+                Intensidade = request.Intensidade ?? IntensidadeTreino.Padrao
             };
 
             _context.UsuarioModalidades.Add(usuarioModalidade);
@@ -120,7 +136,8 @@ public class ModalidadesController : ControllerBase
             usuarioModalidade.ModalidadeId,
             usuarioModalidade.DiasSemana,
             usuarioModalidade.DuracaoMediaHoras,
-            HorarioInicio = RegrasHorario.Formatar(usuarioModalidade.HorarioInicio)
+            HorarioInicio = RegrasHorario.Formatar(usuarioModalidade.HorarioInicio),
+            usuarioModalidade.Intensidade
         });
     }
 
@@ -141,12 +158,15 @@ public class ModalidadesController : ControllerBase
                 DiasSemana = um.DiasSemana,
                 DuracaoMediaHoras = um.DuracaoMediaHoras,
                 HorarioInicio = RegrasHorario.Formatar(um.HorarioInicio),
+                Intensidade = um.Intensidade,
                 Modalidade = new ModalidadeResponse
                 {
                     Id = um.Modalidade.Id,
                     Nome = um.Modalidade.Nome,
                     MetReferencia = um.Modalidade.MetReferencia,
-                    Categoria = um.Modalidade.Categoria
+                    Categoria = um.Modalidade.Categoria,
+                    MetBlocoLeve = um.Modalidade.MetBlocoLeve,
+                    MetBlocoIntenso = um.Modalidade.MetBlocoIntenso
                 }
             })
             .ToListAsync();

@@ -14,6 +14,9 @@ public class UsuarioModalidadeResponse
     // "HH:mm"; nulo = não informado.
     public string? HorarioInicio { get; set; }
 
+    // "Ritmo da aula": "tecnica", "normal" ou "sparring".
+    public required string Intensidade { get; set; }
+
     // Calculada a partir de DiasSemana.Length, nunca armazenada separadamente
     // — evita o risco de "quantos dias" e "quais dias" discordarem entre si.
     public int FrequenciaSemanal => DiasSemana.Length;

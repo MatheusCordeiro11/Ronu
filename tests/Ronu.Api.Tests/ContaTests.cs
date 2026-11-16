@@ -45,7 +45,7 @@ public class ContaTests
 
         var tokenHash = Convert.ToHexString(Guid.NewGuid().ToByteArray()) + Convert.ToHexString(Guid.NewGuid().ToByteArray());
         banco.ObjetivosUsuario.Add(new ObjetivoUsuario { UsuarioId = usuario.Id, Peso = peso, Objetivo = "perder peso", DataRegistro = DateTime.UtcNow });
-        banco.UsuarioModalidades.Add(new UsuarioModalidade { UsuarioId = usuario.Id, ModalidadeId = modalidade.Id, DiasSemana = [1, 3], DuracaoMediaHoras = 1.5m });
+        banco.UsuarioModalidades.Add(new UsuarioModalidade { UsuarioId = usuario.Id, ModalidadeId = modalidade.Id, DiasSemana = [1, 3], DuracaoMediaHoras = 1.5m, Intensidade = "sparring" });
         banco.PreferenciasAlimentares.Add(new PreferenciaAlimentar { UsuarioId = usuario.Id, Alimento = alimento, Tipo = "preferido" });
         banco.MetasDieta.Add(new MetaDieta { UsuarioId = usuario.Id, DietaIAId = dieta.Id, DataGeracao = dieta.DataGeracao, VersaoFormula = 3, MetasPorDia = [2000, 2000, 2000, 2000, 2000, 2000, 2000] });
         banco.ListaComprasMarcacoes.Add(new ListaComprasMarcacao { UsuarioId = usuario.Id, DietaIAId = dieta.Id, Chave = "arroz-branco", MarcadoEm = DateTime.UtcNow });
@@ -225,6 +225,7 @@ public class ContaTests
         Assert.Equal(175, raiz.GetProperty("perfil").GetProperty("altura").GetDecimal());
         Assert.Equal(81.5m, raiz.GetProperty("pesagens")[0].GetProperty("peso").GetDecimal());
         Assert.Equal("Judô", raiz.GetProperty("modalidades")[0].GetProperty("modalidade").GetString());
+        Assert.Equal("sparring", raiz.GetProperty("modalidades")[0].GetProperty("intensidade").GetString());
         Assert.Equal("banana", raiz.GetProperty("preferenciasAlimentares")[0].GetProperty("alimento").GetString());
         Assert.Equal(JsonValueKind.Object, raiz.GetProperty("dietas")[0].GetProperty("cardapio").ValueKind);
         Assert.Equal(7, raiz.GetProperty("metasDieta")[0].GetProperty("metasPorDia").GetArrayLength());
