@@ -10,8 +10,10 @@
 > Casa (plano família, etapa 8, 2026-11-14): seção "A Casa" e linhas novas nas tabelas, conferidas com o código da branch
 > `casa-commits`. Ainda não publicada: a data de "Vigente desde" e a da "Última mudança" são 2026-11-14 e mudam para o dia
 > do push do frontend.
+> Refeição feita (2026-11-16): item em "De saúde e do corpo", linha "Mostrar seu progresso", prazo de 35 dias e a
+> "Última mudança". Vigente desde 16 de novembro de 2026, dia do push.
 
-Vigente desde 14 de novembro de 2026.
+Vigente desde 16 de novembro de 2026.
 
 O Ronu monta uma dieta semanal a partir do seu treino, do seu corpo e do que você gosta de comer. Para isso, ele
 precisa de dados seus, alguns deles de saúde. Esta página explica, sem rodeios, quais dados são esses, para que servem,
@@ -39,6 +41,7 @@ Contato para qualquer assunto de privacidade: **ronu.appdono@gmail.com**.
 
 **De saúde e do corpo** (dados sensíveis, art. 5º, II da LGPD)
 - peso e cada pesagem que você registra, com o objetivo (perder, manter ou ganhar peso) e se você seguiu a dieta;
+- as refeições do cardápio que você marca como feitas, com o dia (só hoje e ontem podem ser marcados);
 - altura, sexo e data de nascimento;
 - como é o seu dia fora do treino (sentado, em pé, andando, braçal);
 - as modalidades que você treina, os dias e a duração;
@@ -77,7 +80,7 @@ alimento da nossa lista vai para a IA do jeito que você escreveu.
 | Calcular sua meta de calorias e macros | saúde e corpo | seu consentimento (art. 11, I) |
 | Montar o cardápio com a IA do Google (Gemini) | a meta de cada dia (calculada com seus dados de saúde e do corpo), se o dia é de déficit, manutenção ou superávit, os dias e horários de treino, seus horários de acordar e dormir, o estado (UF), o orçamento e os alimentos que você gosta, não come ou prefere evitar | seu consentimento (art. 11, I) |
 | Tirar do cardápio e das trocas os alimentos com as suas alergias, e marcá-los na lista de compras | as alergias marcadas | seu consentimento específico, dado à parte (art. 11, I) |
-| Mostrar seu progresso e ajustar a meta pelo que aconteceu de verdade | pesagens, metas, dietas | seu consentimento (art. 11, I) |
+| Mostrar seu progresso e ajustar a meta pelo que aconteceu de verdade | pesagens, metas, dietas, refeições marcadas como feitas | seu consentimento (art. 11, I) |
 | Montar a Casa, se você estiver numa: a semana do almoço e do jantar, a sua porção, a lista de compras da casa e as restrições da casa | seu primeiro nome; os alimentos que você não come ou prefere evitar e as alergias marcadas (para a lista da casa e as restrições da casa, sem dizer de quem); a sua meta de cada dia (só para calcular a sua porção, sem mostrar a ninguém); suas dietas (somadas na lista da casa) | seu consentimento específico para a casa, dado à parte (art. 11, I) |
 | Montar o almoço e o jantar da casa com a IA do Google (Gemini) | a lista de alimentos que todos da casa aceitam, os alimentos dessa lista que alguém prefere evitar (sem dizer de quem) e o orçamento da casa | seu consentimento (art. 11, I) e a autorização da casa |
 | Proteger o app contra abuso (limite de tentativas, registros técnicos) | endereço IP, identificador da conta | legítimo interesse (art. 7º, IX) |
@@ -201,6 +204,7 @@ as garantias contratuais que essas empresas oferecem.
 | Texto de rotina escrito antes de 13 de novembro de 2026 | até 60 dias depois de 13 de novembro de 2026, ou antes, se você apagar no app |
 | Dietas | as 3 mais recentes (a mais antiga sai quando você gera uma nova) |
 | Marcações "já tenho" da lista de compras | enquanto a dieta delas estiver entre as 3 |
+| Refeições marcadas como feitas | 35 dias depois do dia marcado |
 | Seus aceites de consentimento (inclusive o da casa, desfeito ao sair, que fica com a data em que você saiu) | enquanto a conta existir |
 | Sua participação numa casa | até você sair, ser tirado da casa ou apagar a conta |
 | A casa e o orçamento dela | enquanto houver alguém na casa |
@@ -282,7 +286,11 @@ de nascimento do perfil de quem vai entrar.
 Se esta política mudar, a data no topo muda. Se a mudança afetar o que você autorizou, pedimos seu consentimento de
 novo antes de continuar.
 
-Última mudança (14 de novembro de 2026): esta política passou a descrever a Casa, em que pessoas que moram juntas
+Última mudança (16 de novembro de 2026): você pode marcar no painel as refeições do cardápio que
+comeu, nas de hoje e de ontem. O Ronu guarda quais refeições você marcou e em que dia, por 35 dias, para mostrar seu dia
+e seu progresso. Essas marcações não vão para a IA, não aparecem para as pessoas da sua casa e saem com a conta.
+
+Mudança anterior (14 de novembro de 2026): esta política passou a descrever a Casa, em que pessoas que moram juntas
 dividem o almoço e o jantar da semana: o que a casa vê, o que fica só com você, a autorização própria da casa, os
 convites, os pedidos, o que acontece ao sair e o que vai para a IA na semana da casa. Quem não entra numa casa não muda
 nada.
