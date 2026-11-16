@@ -486,7 +486,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
    seguem o mouse (ou o último toque), pisca sozinho e, a cada clique, dá um
    pulinho com os olhos fechados sorrindo. É enfeite: aria-hidden e sem
    clique. Os olhos são SVG por cima do desenho, que vem sem eles. */
-.mascote { position: fixed; left: max(16px, env(safe-area-inset-left, 0px)); bottom: max(10px, env(safe-area-inset-bottom, 0px)); height: 90px; z-index: 30; pointer-events: none; filter: var(--mascote-contorno); transform: translateX(var(--mascote-x, 0px)); }
+.mascote { position: fixed; left: max(16px, env(safe-area-inset-left, 0px)); bottom: max(10px, env(safe-area-inset-bottom, 0px)); height: 90px; z-index: 30; pointer-events: none; filter: var(--mascote-contorno); transform: translate(var(--mascote-x, 0px), var(--mascote-y, 0px)); }
 .mascote-corpo { position: relative; height: 100%; aspect-ratio: 185 / 300; transform-origin: 50% 100%; animation: mascote-respira 3.4s ease-in-out infinite; }
 .mascote-corpo img, .mascote-corpo svg, .mascote-salto, .mascote-pernas, .mascote-tronco { position: absolute; inset: 0; width: 100%; height: 100%; }
 /* O pulo dobra as perninhas: o desenho (riso, 185 × 300) é partido na cintura
@@ -529,6 +529,67 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .mascote.andando .mascote-corpo { visibility: hidden; }
 .mascote.esquerda .mascote-lado { transform: scaleX(-1); }
 @keyframes mascote-passo { to { transform: translateX(-100%); } }
+/* salto grande até um bloco (o arco é feito no JS): agacha (.2s), voa (o
+   tempo vem do JS em --mascote-voo) e amortece na chegada, soltando fumaça.
+   A fumaça da saída é uma cópia que fica no chão (.mascote-rastro). */
+.mascote.salta .mascote-corpo { animation: none; }
+.mascote.agacha .mascote-pernas { animation: mascote-agacha-p .2s ease-out forwards; }
+.mascote.agacha .mascote-tronco { animation: mascote-agacha-t .2s ease-out forwards; }
+.mascote.voa .mascote-pernas { animation: mascote-voa-p var(--mascote-voo, .5s) linear forwards; }
+.mascote.voa .mascote-tronco { animation: mascote-voa-t var(--mascote-voo, .5s) linear forwards; }
+.mascote.pousa .mascote-pernas { animation: mascote-pousa-p .48s linear; }
+.mascote.pousa .mascote-tronco { animation: mascote-pousa-t .48s linear; }
+.mascote.pousa .fumaca-e { animation: mascote-pouso-e .5s ease-out; }
+.mascote.pousa .fumaca-d { animation: mascote-pouso-d .5s ease-out; }
+.mascote-rastro { position: fixed; z-index: 29; pointer-events: none; filter: var(--mascote-contorno); }
+.mascote-rastro .fumaca-e { animation: mascote-decola-e .45s ease-out forwards; }
+.mascote-rastro .fumaca-d { animation: mascote-decola-d .45s ease-out forwards; }
+@keyframes mascote-agacha-p { to { transform: scale(1.09, .68); } }
+@keyframes mascote-agacha-t { to { transform: translateY(7.89%); } }
+@keyframes mascote-voa-p {
+  0% { transform: scale(1.09, .68); animation-timing-function: ease-out; }
+  20% { transform: scale(.97, 1.08); }
+  55% { transform: scale(1, .9); }
+  100% { transform: scale(1, 1.02); }
+}
+@keyframes mascote-voa-t {
+  0% { transform: translateY(7.89%); animation-timing-function: ease-out; }
+  20% { transform: translateY(-1.97%); }
+  55% { transform: translateY(2.47%); }
+  100% { transform: translateY(-.49%); }
+}
+@keyframes mascote-pousa-p {
+  0% { transform: scale(1, 1.02); animation-timing-function: ease-out; }
+  25% { transform: scale(1.08, .72); animation-timing-function: ease-in-out; }
+  65% { transform: scale(.99, 1.03); }
+  100% { transform: scale(1, 1); }
+}
+@keyframes mascote-pousa-t {
+  0% { transform: translateY(-.49%); animation-timing-function: ease-out; }
+  25% { transform: translateY(6.91%); animation-timing-function: ease-in-out; }
+  65% { transform: translateY(-.74%); }
+  100% { transform: translateY(0); }
+}
+@keyframes mascote-pouso-e {
+  0% { opacity: 0; transform: translate(0, 0) scale(.3); }
+  12% { opacity: 1; transform: translate(-3px, 0) scale(.75); }
+  100% { opacity: 0; transform: translate(-15px, -5px) scale(1.35); }
+}
+@keyframes mascote-pouso-d {
+  0% { opacity: 0; transform: translate(0, 0) scale(.3); }
+  12% { opacity: 1; transform: translate(3px, 0) scale(.75); }
+  100% { opacity: 0; transform: translate(15px, -5px) scale(1.35); }
+}
+@keyframes mascote-decola-e {
+  0% { opacity: 0; transform: translate(0, 0) scale(.3); }
+  18% { opacity: .95; transform: translate(-2px, 0) scale(.65); }
+  100% { opacity: 0; transform: translate(-10px, -4px) scale(1.15); }
+}
+@keyframes mascote-decola-d {
+  0% { opacity: 0; transform: translate(0, 0) scale(.3); }
+  18% { opacity: .95; transform: translate(2px, 0) scale(.65); }
+  100% { opacity: 0; transform: translate(10px, -4px) scale(1.15); }
+}
 @keyframes mascote-respira { 50% { transform: translateY(-1.5px) scaleY(1.012); } }
 /* agacha (0–18%), sai do chão (28%), topo do pulo (46%), toca o chão (60%),
    amortece agachando (70%) e volta (86–100%) */

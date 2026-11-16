@@ -453,28 +453,148 @@
       var r = mascote.getBoundingClientRect(), base = r.left - andarX;
       return { base: base, largura: r.width, max: Math.max(0, innerWidth - base * 2 - r.width) };
     };
+    var depoisDeAndar = null;
     var passo = function (t) {
+      if (!andando) return;
       var dt = Math.min(0.05, (t - ultimoQuadro) / 1000); ultimoQuadro = t;
       var falta = andarAlvo - andarX, vel = innerWidth < 640 ? 170 : 250;
       if (Math.abs(falta) <= vel * dt) {
         andarX = andarAlvo; andando = false;
         mascote.style.setProperty('--mascote-x', andarX + 'px');
         mascote.classList.remove('andando', 'esquerda');
-        olhaParaVoce();
+        var depois = depoisDeAndar; depoisDeAndar = null;
+        if (depois) depois(); else olhaParaVoce();
         return;
       }
       andarX += Math.sign(falta) * vel * dt;
       mascote.style.setProperty('--mascote-x', andarX.toFixed(1) + 'px');
       requestAnimationFrame(passo);
     };
-    var vaiPara = function (x) {
-      var l = limiteAndar();
-      andarAlvo = Math.max(0, Math.min(l.max, x - l.base - l.largura / 2));
-      if (Math.abs(andarAlvo - andarX) < 8) { olhaParaVoce(); return; }
+    /* anda até a posição ax (em px de deslocamento) e, se houver, chama depois */
+    var andaAte = function (ax, depois) {
+      andarAlvo = ax; depoisDeAndar = depois || null;
+      if (Math.abs(andarAlvo - andarX) < 8) {
+        andarAlvo = andarX; andando = false; depoisDeAndar = null;
+        mascote.classList.remove('andando', 'esquerda');
+        if (depois) depois(); else olhaParaVoce();
+        return;
+      }
       if (lado && !lado.getAttribute('src')) lado.src = lado.dataset.src;
       mascote.classList.toggle('esquerda', andarAlvo < andarX);
       mascote.classList.add('andando');
       if (!andando) { andando = true; ultimoQuadro = performance.now(); requestAnimationFrame(passo); }
+    };
+    var vaiPara = function (x) {
+      var l = limiteAndar();
+      andaAte(Math.max(0, Math.min(l.max, x - l.base - l.largura / 2)));
+    };
+
+    /* etapa 2b: os blocos da página viram plataformas. Clicar num pedaço vazio
+       de um bloco faz ele ir até embaixo, saltar e pousar na borda de cima; lá
+       em cima ele acompanha a rolagem. Desce quando o bloco sai da tela (ou
+       passa por baixo do menu), ou quando o clique é fora do bloco. */
+    var PLATAFORMAS = '.card-num, .painel, .moldura, .vantagem, .celular, .card-grafico, .res-card, .sim-col, .escuro, .pergunta, .final';
+    var menu = document.querySelector('.menu');
+    var apoio = null, mascoteY = 0, saltando = false;
+    var poeY = function (y) { mascoteY = y; mascote.style.setProperty('--mascote-y', y.toFixed(1) + 'px'); };
+    /* linha do chão (os pés, sem deslocamento) e altura do ninja */
+    var chao = function () { var r = mascote.getBoundingClientRect(); return { y: r.bottom - mascoteY, altura: r.height }; };
+    var menuFundo = function () { return menu ? Math.max(0, menu.getBoundingClientRect().bottom) : 0; };
+    /* onde ele fica em cima do bloco: y (negativo, para cima) e a faixa de x */
+    var topoDe = function (p) {
+      var r = p.getBoundingClientRect(), c = chao(), l = limiteAndar(), m = l.largura * 0.6 + 6;
+      var min = r.left + m - l.base - l.largura / 2, max = r.right - m - l.base - l.largura / 2;
+      if (min > max) min = max = (min + max) / 2;
+      return { y: r.top - c.y + 2, min: min, max: max, cabe: r.top - c.altura > menuFundo() + 6 && r.top < c.y - 24 };
+    };
+    var limita = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
+    /* fumaça que fica no chão de onde ele saiu */
+    var fumacaOrig = mascote.querySelector('.mascote-fumaca');
+    var rastro = function () {
+      if (!fumacaOrig) return;
+      var r = mascote.getBoundingClientRect(), d = document.createElement('div');
+      d.className = 'mascote-rastro'; d.setAttribute('aria-hidden', 'true');
+      d.style.left = r.left + 'px'; d.style.top = r.top + 'px'; d.style.width = r.width + 'px'; d.style.height = r.height + 'px';
+      d.appendChild(fumacaOrig.cloneNode(true));
+      document.body.appendChild(d);
+      setTimeout(function () { d.remove(); }, 600);
+    };
+    /* salto em arco até ax, em cima do bloco p (ou no chão, se p for null) */
+    var salta = function (ax, p, depois) {
+      saltando = true; andando = false; depoisDeAndar = null;
+      clearTimeout(tempoAndar); clearTimeout(tempoFeliz);
+      mascote.classList.remove('andando', 'esquerda', 'pula', 'feliz', 'pousa');
+      mascote.classList.add('salta', 'agacha');
+      var l = limiteAndar();
+      if (!p) ax = limita(ax, 0, l.max);
+      setTimeout(function () {
+        var x0 = andarX, y0 = mascoteY;
+        var y1 = p ? topoDe(p).y : 0;
+        var voo = limita(0.38 + Math.abs(y1 - y0) / 1400 + Math.abs(ax - x0) / 2500, 0.4, 0.8) * 1000;
+        var altura = Math.max(30, (y0 - Math.min(y0, y1)) / 2 + 46);
+        mascote.style.setProperty('--mascote-voo', voo + 'ms');
+        rastro();
+        mascote.classList.remove('agacha'); mascote.classList.add('voa');
+        var inicio = performance.now();
+        var voa = function (t) {
+          var u = Math.min(1, (t - inicio) / voo);
+          var alvoY = p ? topoDe(p).y : 0; /* segue o bloco se a página rolar no meio */
+          andarX = x0 + (ax - x0) * u;
+          mascote.style.setProperty('--mascote-x', andarX.toFixed(1) + 'px');
+          poeY(y0 + (alvoY - y0) * u - altura * 4 * u * (1 - u));
+          if (u < 1) { requestAnimationFrame(voa); return; }
+          apoio = p;
+          mascote.classList.remove('voa'); mascote.classList.add('pousa');
+          setTimeout(function () {
+            mascote.classList.remove('pousa', 'salta');
+            saltando = false;
+            if (apoio) requestAnimationFrame(segue);
+            if (depois) depois(); else olhaParaVoce();
+          }, 480);
+        };
+        requestAnimationFrame(voa);
+      }, 200);
+    };
+    /* em cima de um bloco: acompanha a rolagem e desce quando não cabe mais */
+    var segue = function () {
+      if (!apoio || saltando) return;
+      if (!apoio.isConnected) { apoio = null; poeY(0); return; }
+      var t = topoDe(apoio);
+      if (t.y >= 0) { apoio = null; poeY(0); return; } /* o bloco desceu até o chão */
+      if (t.y < -innerHeight) { apoio = null; poeY(0); return; }
+      poeY(t.y);
+      if (!t.cabe) { salta(andarX, null); return; }
+      if (!andando && (andarX < t.min - 1 || andarX > t.max + 1)) { salta(andarX, null); return; }
+      requestAnimationFrame(segue);
+    };
+    /* decide o caminho até o clique em x, em cima do bloco p ou no chão */
+    var planeja = function (x, p) {
+      clearTimeout(tempoAndar);
+      var l = limiteAndar(), ax = x - l.base - l.largura / 2;
+      if (p) {
+        var t = topoDe(p), alvo = limita(ax, t.min, t.max);
+        if (apoio === p) { andaAte(alvo); return; }
+        if (apoio) { salta(alvo, p); return; }
+        /* do chão: chega até uns 140 px do ponto e salta na diagonal */
+        var pe = limita(andarX, alvo - 140, alvo + 140);
+        pe = limita(pe, 0, l.max);
+        andaAte(pe, function () {
+          if (topoDe(p).cabe) salta(limita(ax, topoDe(p).min, topoDe(p).max), p);
+          else olhaParaVoce();
+        });
+        return;
+      }
+      ax = limita(ax, 0, l.max);
+      if (apoio) {
+        var b = topoDe(apoio);
+        if (ax < b.min || ax > b.max) {
+          /* anda até a ponta do bloco e pula de lá */
+          var borda = ax < b.min ? b.min : b.max;
+          andaAte(borda, function () { salta(borda + (ax < borda ? -40 : 40), null, function () { andaAte(limita(ax, 0, limiteAndar().max)); }); });
+        } else salta(ax, null);
+        return;
+      }
+      andaAte(ax);
     };
     var olhaParaVoce = function () {
       clearTimeout(olhandoVoce);
@@ -488,8 +608,12 @@
     /* o clique (que não dispara ao rolar a página no celular) é que faz ele reagir */
     addEventListener('click', function (e) {
       var alvo = e.target instanceof Element ? e.target.closest(INTERATIVOS) : null;
-      if (andando) { if (!alvo) vaiPara(e.clientX); return; }
+      if (saltando) return;
+      var bloco = !alvo && !reduzido && e.target instanceof Element ? e.target.closest(PLATAFORMAS) : null;
+      if (bloco && !topoDe(bloco).cabe) bloco = null;
+      if (andando) { if (!alvo) { mira(e.clientX, e.clientY); planeja(e.clientX, bloco); } return; }
       mira(e.clientX, e.clientY);
+      if (!alvo && (bloco || apoio)) { planeja(e.clientX, bloco); return; }
       reage();
       if (alvo || reduzido) return;
       clearTimeout(tempoAndar);
