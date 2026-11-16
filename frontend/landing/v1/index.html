@@ -105,8 +105,8 @@
     <p>Uma conta para cada modalidade</p>
     <div class="letreiro">
       <div class="letreiro-trilho">
-        <ul><li>Jiu-jitsu</li><li>Muay thai</li><li>Boxe</li><li>Musculação</li><li>Corrida</li><li>Futebol</li><li>Natação</li><li>Ciclismo</li><li>Vôlei</li><li>Dança</li></ul>
-        <ul aria-hidden="true"><li>Jiu-jitsu</li><li>Muay thai</li><li>Boxe</li><li>Musculação</li><li>Corrida</li><li>Futebol</li><li>Natação</li><li>Ciclismo</li><li>Vôlei</li><li>Dança</li></ul>
+        <ul><li><button type="button" aria-pressed="true" data-met="7.8">Jiu-jitsu</button></li><li><button type="button" aria-pressed="false" data-met="7.8">Muay thai</button></li><li><button type="button" aria-pressed="false" data-met="6.8">Boxe</button></li><li><button type="button" aria-pressed="false" data-met="3.5">Musculação</button></li><li><button type="button" aria-pressed="false" data-met="7.5">Corrida</button></li><li><button type="button" aria-pressed="false" data-met="7.0">Futebol</button></li><li><button type="button" aria-pressed="false" data-met="5.8">Natação</button></li><li><button type="button" aria-pressed="false" data-met="8.0">Ciclismo</button></li><li><button type="button" aria-pressed="false" data-met="7.0">Vôlei</button></li><li><button type="button" aria-pressed="false" data-met="5.0">Dança</button></li></ul>
+        <ul aria-hidden="true"><li><button type="button" aria-pressed="true" data-met="7.8" tabindex="-1">Jiu-jitsu</button></li><li><button type="button" aria-pressed="false" data-met="7.8" tabindex="-1">Muay thai</button></li><li><button type="button" aria-pressed="false" data-met="6.8" tabindex="-1">Boxe</button></li><li><button type="button" aria-pressed="false" data-met="3.5" tabindex="-1">Musculação</button></li><li><button type="button" aria-pressed="false" data-met="7.5" tabindex="-1">Corrida</button></li><li><button type="button" aria-pressed="false" data-met="7.0" tabindex="-1">Futebol</button></li><li><button type="button" aria-pressed="false" data-met="5.8" tabindex="-1">Natação</button></li><li><button type="button" aria-pressed="false" data-met="8.0" tabindex="-1">Ciclismo</button></li><li><button type="button" aria-pressed="false" data-met="7.0" tabindex="-1">Vôlei</button></li><li><button type="button" aria-pressed="false" data-met="5.0" tabindex="-1">Dança</button></li></ul>
       </div>
     </div>
   </section>
@@ -118,7 +118,8 @@
       <div class="palco-maos">
         <div class="centro">
           <span class="kcal-grande num"><span id="conta-maos">816</span> kcal</span>
-          <h2 id="t-numero">por treino de jiu-jitsu.</h2>
+          <h2 id="t-numero">por treino de <span id="nome-maos">jiu-jitsu</span>.</h2>
+          <p class="so-leitor" id="aviso-maos" aria-live="polite"></p>
           <p>1 h 30 de treino, 80 kg. O gasto sai da modalidade e da duração, não de um “nível moderado”.</p>
         </div>
       </div>

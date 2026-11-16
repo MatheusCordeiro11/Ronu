@@ -338,6 +338,44 @@
     });
   });
 
+  /* faixa de modalidades escolhe o número grande (revisão de 2026-11-16):
+     mesma conta do app, (MET − 1) × 80 kg × 1,5 h. Passar o mouse já escolhe;
+     toque e teclado escolhem no clique. Toque ou foco pausam a faixa por 6s. */
+  var letreiro = document.querySelector('.letreiro');
+  var botoesMod = letreiro ? letreiro.querySelectorAll('button[data-met]') : [];
+  var gastoAtual = 816, fatorRolagem = 1, escolheu = false, animaGasto = null, pausaFaixa = null;
+  function escreveGasto() { $('conta-maos').textContent = fmt.format(Math.round(gastoAtual * fatorRolagem)); }
+  function escolheMod(nome, met) {
+    var alvo = Math.round((met - 1) * 80 * 1.5);
+    botoesMod.forEach(function (b) { b.setAttribute('aria-pressed', b.textContent === nome ? 'true' : 'false'); });
+    if ($('nome-maos').textContent === nome.toLowerCase()) return;
+    fatorRolagem = 1; escolheu = true; /* depois da escolha, a contagem da rolagem não mexe mais no número */
+    $('nome-maos').textContent = nome.toLowerCase();
+    $('aviso-maos').textContent = fmt.format(alvo) + ' kcal por treino de ' + nome.toLowerCase() + '.';
+    if (animaGasto) cancelAnimationFrame(animaGasto);
+    if (reduzido) { gastoAtual = alvo; escreveGasto(); return; }
+    var de = gastoAtual, t0 = performance.now();
+    (function passo(t) {
+      var k = suave(lim((t - t0) / 600));
+      gastoAtual = de + (alvo - de) * k; escreveGasto();
+      animaGasto = k < 1 ? requestAnimationFrame(passo) : null;
+    })(t0);
+  }
+  function pausa() {
+    letreiro.classList.add('pausa');
+    clearTimeout(pausaFaixa);
+    pausaFaixa = setTimeout(function () { letreiro.classList.remove('pausa'); }, 6000);
+  }
+  botoesMod.forEach(function (b) {
+    var met = +b.dataset.met;
+    b.addEventListener('click', function () { escolheMod(b.textContent, met); });
+    b.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') escolheMod(b.textContent, met); });
+  });
+  if (letreiro) {
+    letreiro.addEventListener('pointerdown', function (e) { if (e.pointerType !== 'mouse') pausa(); });
+    letreiro.addEventListener('focusin', pausa);
+  }
+
   if (reduzido) return;
   raiz.classList.add('js');
 
@@ -361,7 +399,7 @@
   var cenas = [
     { el: $('moldura'), de: function (t, vh) { return t - vh * 0.98; }, ate: function (t, vh) { return t - vh * 0.35; } },
     { el: document.querySelector('.numero-grande'), de: function (t, vh) { return t - vh; }, ate: function (t, vh) { return t - vh * 0.22; }, apos: function (p) {
-        $('conta-maos').textContent = fmt.format(Math.round(816 * suave(lim((p - 0.25) / 0.75)))); } },
+        if (escolheu) return; fatorRolagem = suave(lim((p - 0.25) / 0.75)); escreveGasto(); } },
     { el: $('celular'), de: function (t, vh) { return t - vh * 1.05; }, ate: function (t, vh) { return t - vh * 0.3; } },
     { el: $('card-grafico'), de: function (t, vh) { return t - vh * 0.85; }, ate: function (t, vh) { return t - vh * 0.25; }, apos: revelaGrafico },
     { el: $('final'), de: function (t, vh) { return t - vh; }, ate: function (t, vh) { return t - vh * 0.3; } }
