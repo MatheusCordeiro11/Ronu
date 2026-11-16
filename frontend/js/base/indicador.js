@@ -23,7 +23,7 @@
     if (grupo.classList.contains('nav-principal')) {
       return grupo.querySelector('a[aria-current="page"]');
     }
-    return grupo.querySelector(':scope > [aria-checked="true"], :scope > [aria-selected="true"]');
+    return grupo.querySelector(':scope > [aria-checked="true"], :scope > [aria-selected="true"], :scope > [aria-current="page"]');
   }
 
   function mover(grupo, alvo, semAnimar) {

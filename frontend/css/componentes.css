@@ -169,7 +169,571 @@
   box-shadow: none;
 }
 
-.nav-principal /* A pílula é o ::before do grupo (js/base/indicador.js põe as variáveis). */
+.nav-principal a[data-pagina="casa"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Contador de pedidos da casa (só o dono): pílula no acento, com o número. */
+.nav-contador {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--raio-pilula);
+  background: var(--acento);
+  color: var(--sobre-acento);
+  font-family: var(--fonte-corpo);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* ---------- Abas do celular (6, com ícone; decisão S1 do plano família) ---------- */
+.abas {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .nav-principal {
+    display: none;
+  }
+
+  .cabecalho-linha {
+    padding-left: 14px;
+  }
+
+  .abas {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 2px;
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+    background: color-mix(in srgb, var(--superficie) 92%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid var(--borda);
+  }
+
+  .abas a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 2px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--texto-2);
+    text-decoration: none;
+    border-radius: 14px;
+    transition: background-color var(--d-media) ease, color var(--d-media) ease;
+  }
+
+  .abas a svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .abas-icone {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .abas .nav-rotulo {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Na aba, a pílula senta no canto do ícone da casa, com a cor das abas como recorte. */
+  .abas .nav-contador {
+    position: absolute;
+    top: -6px;
+    left: 12px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    font-size: 10px;
+    outline: 2px solid var(--superficie);
+  }
+
+  .abas a[aria-current="page"] {
+    color: var(--acento-texto);
+    background: var(--acento-suave);
+  }
+
+  /* Espaço para o conteúdo não ficar embaixo das abas. */
+  .com-abas {
+    padding-bottom: calc(var(--altura-abas) + 12px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 560px) {
+  .cabecalho .avatar,
+  .cabecalho .botao-tema {
+    width: 36px;
+    height: 36px;
+  }
+
+  .cabecalho-linha {
+    min-height: 54px;
+  }
+
+  .logo-marca {
+    width: 30px;
+    height: 30px;
+  }
+
+  .logo-nome {
+    font-size: 20px;
+  }
+}
+
+/* ---------- Faixa de título (topo de cada tela) ----------
+   Rótulo no acento, h1 com uma palavra no acento (<span>), frase e ações. */
+.faixa-titulo {
+  position: relative;
+}
+
+.faixa-titulo-conteudo {
+  padding-top: 36px;
+  padding-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--e-6);
+  flex-wrap: wrap;
+}
+
+.faixa-titulo-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 640px;
+}
+
+.faixa-titulo-texto h1 span {
+  color: var(--acento);
+}
+
+.faixa-titulo-texto p {
+  color: var(--texto-2);
+  font-size: var(--t-corpo);
+  line-height: 1.55;
+}
+
+.faixa-titulo .rotulo {
+  color: var(--acento-texto);
+}
+
+/* Herança do quadriculado: a malha não aparece mais atrás do texto. */
+.sobre-grade {
+  background: none;
+}
+
+@media (max-width: 720px) {
+  .faixa-titulo-conteudo {
+    padding-top: 28px;
+    padding-bottom: 18px;
+  }
+}
+
+/* ---------- Fundo de pontinhos (painel das telas de entrada) ----------
+   Substitui a grade quadriculada que deslizava. Nas faixas de título não há
+   fundo nenhum. */
+.grade {
+  background-image: radial-gradient(var(--ponto-grade) 1.2px, transparent 1.3px);
+  background-size: 22px 22px;
+}
+
+.faixa-titulo.grade {
+  background-image: none;
+}
+
+/* ---------- Botões ----------
+   Redesign: pílula, peso 700, o principal com sombra da própria cor. */
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-2);
+  min-height: 46px;
+  padding: 12px 20px;
+  border: 1px solid transparent;
+  border-radius: var(--raio-pilula);
+  font-family: var(--fonte-corpo);
+  font-size: var(--t-corpo);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  position: relative;
+  transition: transform var(--d-media) var(--curva-saida), box-shadow var(--d-media) ease,
+    border-color var(--d-rapida) ease, background-color var(--d-rapida) ease, color var(--d-rapida) ease;
+}
+
+.botao:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.botao-primario {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--sobre-acento);
+  box-shadow: 0 10px 22px -12px var(--acento);
+}
+
+.botao-primario:hover {
+  color: var(--sobre-acento);
+  transform: translateY(-1px);
+  box-shadow: 0 16px 30px -14px var(--acento);
+}
+
+/* Contorno: pílula na superfície, com borda. */
+.botao-fantasma {
+  background: var(--superficie);
+  border-color: var(--borda);
+  color: var(--texto);
+}
+
+.botao-fantasma:hover {
+  color: var(--texto);
+  border-color: var(--borda-hover);
+}
+
+/* Seta que anda no hover: <span class="seta" aria-hidden="true">→</span>. */
+.botao .seta {
+  transition: transform var(--d-media) var(--curva-saida);
+}
+
+.botao:hover .seta {
+  transform: translateX(3px);
+}
+
+/* Ação discreta: link no acento ("Pular por agora", "Cancelar"). */
+.botao-texto {
+  min-height: 44px;
+  padding: 0 var(--e-2);
+  background: transparent;
+  border: 0;
+  color: var(--acento-texto);
+  font-size: var(--t-corpo);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+  cursor: pointer;
+}
+
+.botao-texto:hover {
+  color: var(--texto);
+}
+
+.botao-grande {
+  min-height: 54px;
+  padding: 16px 28px;
+  font-size: var(--t-corpo-g);
+}
+
+.botao-pequeno {
+  min-height: 38px;
+  padding: 8px 14px;
+  font-size: var(--t-apoio);
+}
+
+.botao-bloco {
+  width: 100%;
+}
+
+.botao:disabled,
+.botao[aria-disabled="true"] {
+  background: var(--superficie-2);
+  border-color: transparent;
+  color: var(--texto-3);
+  box-shadow: none;
+  transform: none;
+  cursor: not-allowed;
+}
+
+/* Carregando: o texto continua (o JS troca por "Entrando..." etc.) e um giro
+   aparece ao lado. data-loading é o que o ronuDefinirCarregando (js/auth.js)
+   marca no botão. */
+.botao[aria-busy="true"],
+.botao[data-loading="true"] {
+  cursor: progress;
+}
+
+.botao[aria-busy="true"]::before,
+.botao[data-loading="true"]::before {
+  content: '';
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border-radius: 50%;
+  border: 2.4px solid currentColor;
+  border-top-color: transparent;
+  opacity: 0.8;
+  animation: botao-girando 0.8s linear infinite;
+}
+
+@keyframes botao-girando {
+  to { transform: rotate(360deg); }
+}
+
+/* ---------- Campos ---------- */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  min-width: 0;
+}
+
+.campo-rotulo {
+  font-size: var(--t-apoio);
+  font-weight: 700;
+  color: var(--texto);
+}
+
+.campo-linha-rotulo {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--e-3);
+}
+
+.entrada {
+  width: 100%;
+  min-height: 48px;
+  padding: 13px 15px;
+  background: var(--superficie);
+  border: 1.5px solid var(--borda-campo);
+  border-radius: var(--raio);
+  color: var(--texto);
+  font-size: var(--t-corpo-g);
+  line-height: 1.4;
+  transition: border-color var(--d-rapida) ease, background-color var(--d-rapida) ease, box-shadow var(--d-media) ease;
+}
+
+/* Campo sobre card (Progresso, Perfil, Alimentação): fundo da página. */
+.entrada-no-card {
+  background: var(--fundo);
+}
+
+.entrada::placeholder {
+  color: var(--texto-3);
+  opacity: 1;
+}
+
+.entrada:hover {
+  border-color: var(--borda-forte);
+}
+
+.entrada:focus,
+.entrada:focus-visible {
+  outline: none;
+  border-color: var(--acento);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--acento) 14%, transparent);
+}
+
+/* .field-error é a classe que o ronuMarcarCampoInvalido (js/auth.js) põe no
+   bloco do campo; aria-invalid, para quem marca o próprio campo. */
+.entrada[aria-invalid="true"],
+.field-error .entrada {
+  border-color: var(--erro);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--erro) 12%, transparent);
+  animation: campo-tremer 0.35s;
+}
+
+@keyframes campo-tremer {
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+textarea.entrada {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* Campos de data e de hora: no celular (iOS e alguns Androids) o navegador dá
+   ao campo uma largura mínima própria e o texto passa da caixa. Aqui ele
+   obedece à coluna, com a mesma altura dos outros campos. */
+.entrada[type="date"],
+.entrada[type="time"] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  padding-left: 12px;
+  padding-right: 10px;
+}
+
+@media (max-width: 380px) {
+  .entrada[type="date"],
+  .entrada[type="time"] {
+    font-size: 0.9375rem;
+  }
+}
+
+.entrada[type="date"]::-webkit-date-and-time-value,
+.entrada[type="time"]::-webkit-date-and-time-value {
+  min-width: 0;
+  text-align: left;
+}
+
+.entrada[type="date"]::-webkit-datetime-edit,
+.entrada[type="date"]::-webkit-datetime-edit-fields-wrapper,
+.entrada[type="time"]::-webkit-datetime-edit,
+.entrada[type="time"]::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+/* Campo de senha com o botão de olho (js/base/senha.js monta a caixa). */
+.senha-caixa {
+  position: relative;
+}
+
+.senha-caixa .entrada {
+  padding-right: 52px;
+}
+
+/* O Edge desenha um olho próprio: fica só o nosso. */
+.senha-caixa .entrada::-ms-reveal {
+  display: none;
+}
+
+.botao-ver-senha {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  width: 44px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--texto-2);
+  transform: translateY(-50%);
+  cursor: pointer;
+  transition: color var(--d-rapida) ease;
+}
+
+.botao-ver-senha:hover {
+  color: var(--texto);
+}
+
+.botao-ver-senha:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: -2px;
+}
+
+.botao-ver-senha svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* O ícone mostra a ação: olho para mostrar, olho riscado para esconder. */
+.botao-ver-senha .icone-ocultar,
+.botao-ver-senha[aria-pressed="true"] .icone-mostrar {
+  display: none;
+}
+
+.botao-ver-senha[aria-pressed="true"] .icone-ocultar {
+  display: block;
+}
+
+select.entrada {
+  appearance: none;
+  padding-right: 40px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--texto-2) 50%),
+    linear-gradient(135deg, var(--texto-2) 50%, transparent 50%);
+  background-position: calc(100% - 20px) 52%, calc(100% - 15px) 52%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.campo-dica {
+  font-size: var(--t-pequeno);
+  color: var(--texto-2);
+  line-height: 1.5;
+}
+
+.campo-erro {
+  font-size: var(--t-pequeno);
+  font-weight: 600;
+  color: var(--erro);
+  line-height: 1.5;
+}
+
+/* ---------- Segmentado (Masculino | Feminino, períodos, versões) ----------
+   Trilho em pílula. Sem JS, a escolha já aparece (fundo no próprio botão);
+   com o js/base/indicador.js, uma pílula desliza até a escolha (.com-ind). */
+.segmentado {
+  position: relative;
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  border-radius: var(--raio-pilula);
+  background: var(--superficie-2);
+}
+
+.segmentado > button {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: var(--raio-pilula);
+  background: transparent;
+  color: var(--texto-2);
+  font-size: var(--t-apoio);
+  font-weight: 700;
+  white-space: nowrap;
+  transition: color var(--d-media) ease, background-color var(--d-rapida) ease;
+}
+
+.segmentado > button:hover {
+  color: var(--texto);
+}
+
+.segmentado > button[aria-checked="true"],
+.segmentado > button[aria-selected="true"] {
+  background: var(--superficie);
+  color: var(--texto);
+  box-shadow: var(--sombra-leve);
+}
+
+/* Variante cheia: a escolha fica no acento (sexo, objetivo, orçamento). */
+.segmentado-acento > button[aria-checked="true"],
+.segmentado-acento > button[aria-selected="true"] {
+  background: var(--acento);
+  color: var(--sobre-acento);
+  box-shadow: 0 8px 18px -10px var(--acento);
+}
+
+/* Com o indicador: o botão escolhido fica transparente e a pílula desliza. */
+.segmentado.com-ind > button[aria-checked="true"],
+.segmentado.com-ind > button[aria-selected="true"] {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* A pílula é o ::before do grupo (js/base/indicador.js põe as variáveis). */
 .com-ind::before {
   content: '';
   position: absolute;
