@@ -757,6 +757,7 @@ a.pf-conta-item:focus-visible {
 }
 
 .pf-avatar-iniciais {
+  inset: 14px; /* (132 − 104) / 2: o inset de 10px do visual antigo deixava o círculo fora do centro */
   width: 104px;
   height: 104px;
   border-radius: 50%;
