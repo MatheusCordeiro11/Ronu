@@ -29,7 +29,9 @@ public static class MetsCompendio2024
     /// <summary>
     /// PREMISSA (não vem do Compêndio): fração do tempo da aula no bloco
     /// intenso (rola/sparring); o resto é aquecimento e técnica. 0,5 = metade
-    /// do tempo em cada bloco.
+    /// do tempo em cada bloco. É o ritmo "normal" da aula; os outros dois
+    /// ritmos (0,3 "mais técnica" e 0,7 "muito sparring") são premissas do
+    /// mesmo tipo, em Services/IA/IntensidadeTreino.cs.
     /// </summary>
     public const decimal FracaoTempoBlocoIntenso = 0.5m;
 
@@ -87,12 +89,43 @@ public static class MetsCompendio2024
     public static readonly Codigo Yoga = new("02175", "Yoga, General", 2.3m);
     public static readonly Codigo Pilates = new("02105", "Pilates, general", 2.8m);
 
-    /// <summary>MET de uma aula com um bloco leve e um intenso, pela premissa de tempo.</summary>
-    public static decimal Aula(Codigo blocoLeve, Codigo blocoIntenso) =>
-        Math.Round((1 - FracaoTempoBlocoIntenso) * blocoLeve.Met + FracaoTempoBlocoIntenso * blocoIntenso.Met, 2);
+    /// <summary>
+    /// MET de uma aula com um bloco leve e um intenso: (1 − f) × leve + f × intenso,
+    /// com f a fração do tempo no bloco intenso (a premissa de 50/50, se não vier).
+    /// </summary>
+    public static decimal Aula(Codigo blocoLeve, Codigo blocoIntenso, decimal fracaoBlocoIntenso = FracaoTempoBlocoIntenso) =>
+        Aula(blocoLeve.Met, blocoIntenso.Met, fracaoBlocoIntenso);
+
+    /// <summary>A mesma conta com os METs já lidos (do banco: Modalidades.MetBlocoLeve/MetBlocoIntenso).</summary>
+    public static decimal Aula(decimal metBlocoLeve, decimal metBlocoIntenso, decimal fracaoBlocoIntenso) =>
+        Math.Round((1 - fracaoBlocoIntenso) * metBlocoLeve + fracaoBlocoIntenso * metBlocoIntenso, 2);
 
     /// <summary>Média simples de dois códigos (sem premissa de tempo).</summary>
     public static decimal Media(Codigo a, Codigo b) => Math.Round((a.Met + b.Met) / 2, 2);
+
+    /// <summary>
+    /// As modalidades modeladas como aula em dois blocos (leve e intenso), por
+    /// nome. Só elas têm o seletor "Ritmo da aula": as colunas
+    /// "Modalidades"."MetBlocoLeve"/"MetBlocoIntenso" (migration
+    /// AdicionaIntensidadeTreino) saem daqui, e nas outras 15 ficam nulas. O
+    /// Vôlei não entra: os dois códigos dele são duas superfícies (quadra e
+    /// areia), não dois ritmos.
+    /// </summary>
+    public static IReadOnlyDictionary<string, (Codigo Leve, Codigo Intenso)> BlocosPorModalidade =>
+        new Dictionary<string, (Codigo Leve, Codigo Intenso)>
+        {
+            ["Jiu-jitsu"] = (ArtesMarciaisTecnica, ArtesMarciaisRola),
+            ["Muay Thai"] = (ArtesMarciaisTecnica, ArtesMarciaisRola),
+            ["Boxe"] = (BoxeSacoDePancadas, BoxeSparring),
+            ["Judô"] = (ArtesMarciaisTecnica, ArtesMarciaisRola),
+            ["Karatê"] = (ArtesMarciaisTecnica, ArtesMarciaisRola),
+            ["MMA"] = (ArtesMarciaisTecnica, ArtesMarciaisRola),
+            ["Wrestling"] = (ArtesMarciaisTecnica, ArtesMarciaisRola),
+            ["Taekwondo"] = (ArtesMarciaisTecnica, ArtesMarciaisRola),
+            ["Kickboxing"] = (ArtesMarciaisTecnica, ArtesMarciaisRola),
+            ["Capoeira"] = (ArtesMarciaisTecnica, ArtesMarciaisRola),
+            ["Treino funcional"] = (Musculacao, Circuito)
+        };
 
     /// <summary>
     /// MET por nome de modalidade, como gravado em "Modalidades"."Nome".
