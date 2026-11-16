@@ -22,9 +22,10 @@ namespace Ronu.Api.Data;
 /// Não mexe em BaseNutricional.VersaoBase: nenhum valor nutricional muda aqui. VersaoConversao é só
 /// informativa, porque a lista é recalculada a cada consulta e nada dela é gravado.
 /// </summary>
-public static class ConversaoCompras
+public static partial class ConversaoCompras
 {
-    public const int VersaoConversao = 1;
+    // 2 (2026-11-16): as embalagens (ConversaoComprasEmbalagens.cs). As quantidades em g, ml e unidades não mudaram.
+    public const int VersaoConversao = 2;
 
     /// <summary>O que se compra, um por linha da lista.</summary>
     public static IReadOnlyList<ItemCompra> Itens { get; }

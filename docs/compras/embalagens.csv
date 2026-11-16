@@ -1,0 +1,129 @@
+chave,grupo,tamanho,unidade,rotulo,nome_singular,nome_plural,tipo_fonte,referencia,n_amostra,n_tamanho,motivo
+alface,granel,,,,,,,,,,Hortifrúti vendido por peso ou pelo pé: sem embalagem padrão.
+rucula,granel,,,,,,,,,,Hortifrúti vendido por peso ou pelo maço: sem embalagem padrão.
+agriao,granel,,,,,,,,,,Hortifrúti vendido por peso ou pelo maço: sem embalagem padrão.
+couve,granel,,,,,,,,,,Hortifrúti vendido por peso ou pelo maço: sem embalagem padrão.
+repolho,granel,,,,,,,,,,Hortifrúti vendido por peso ou pela cabeça: sem embalagem padrão.
+repolho-roxo,granel,,,,,,,,,,Hortifrúti vendido por peso ou pela cabeça: sem embalagem padrão.
+acelga,granel,,,,,,,,,,Hortifrúti vendido por peso: sem embalagem padrão.
+tomate,contavel,,,,,,,,,,Já sai em unidades pela POF: no hortifrúti se compra a unidade.
+pepino,contavel,,,,,,,,,,Já sai em unidades pela POF: no hortifrúti se compra a unidade.
+cebola,contavel,,,,,,,,,,Já sai em unidades pela POF: no hortifrúti se compra a unidade.
+cenoura,contavel,,,,,,,,,,Já sai em unidades pela POF: no hortifrúti se compra a unidade.
+beterraba,granel,,,,,,,,,,Hortifrúti vendido por peso: sem embalagem padrão.
+brocolis,granel,,,,,,,,,,Hortifrúti vendido por peso ou pelo maço: sem embalagem padrão.
+couve-flor,granel,,,,,,,,,,Hortifrúti vendido por peso ou pela cabeça: sem embalagem padrão.
+abobrinha,granel,,,,,,,,,,Hortifrúti vendido por peso: sem embalagem padrão.
+chuchu,granel,,,,,,,,,,Hortifrúti vendido por peso: sem embalagem padrão.
+abobora,granel,,,,,,,,,,Hortifrúti vendido por peso: sem embalagem padrão.
+berinjela,granel,,,,,,,,,,Hortifrúti vendido por peso: sem embalagem padrão.
+abobrinha-refogada,pronto,,,,,,,,,,Quantidade do prato pronto: sem fonte para converter.
+couve-refogada,pronto,,,,,,,,,,Quantidade do prato pronto: sem fonte para converter.
+espinafre-refogado,pronto,,,,,,,,,,Quantidade do prato pronto: sem fonte para converter.
+batata,granel,,,,,,,,,,Hortifrúti vendido por peso: sem embalagem padrão.
+batata-doce,granel,,,,,,,,,,Hortifrúti vendido por peso: sem embalagem padrão.
+mandioca,granel,,,,,,,,,,Hortifrúti vendido por peso: sem embalagem padrão.
+mandioquinha,granel,,,,,,,,,,Hortifrúti vendido por peso: sem embalagem padrão.
+cara,granel,,,,,,,,,,Hortifrúti vendido por peso: sem embalagem padrão.
+banana-prata,contavel,,,,,,,,,,Já sai em unidades pela POF: no hortifrúti se compra a unidade.
+banana-nanica,granel,,,,,,,,,,Hortifrúti vendido por peso: sem embalagem padrão.
+maca,contavel,,,,,,,,,,Já sai em unidades pela POF: no hortifrúti se compra a unidade.
+pera,contavel,,,,,,,,,,Já sai em unidades pela POF: no hortifrúti se compra a unidade.
+laranja,contavel,,,,,,,,,,Já sai em unidades pela POF: no hortifrúti se compra a unidade.
+tangerina,contavel,,,,,,,,,,Já sai em unidades pela POF: no hortifrúti se compra a unidade.
+kiwi,contavel,,,,,,,,,,Já sai em unidades pela POF: no hortifrúti se compra a unidade.
+goiaba,contavel,,,,,,,,,,Já sai em unidades pela POF: no hortifrúti se compra a unidade.
+mamao-papaia,granel,,,,,,,,,,Fruta grande: sem peça mínima na v1 (decisão de 2026-11-16).
+mamao-formosa,granel,,,,,,,,,,Fruta grande: sem peça mínima na v1 (decisão de 2026-11-16).
+abacaxi,granel,,,,,,,,,,Fruta grande: sem peça mínima na v1 (decisão de 2026-11-16).
+melancia,granel,,,,,,,,,,Fruta grande: sem peça mínima na v1 (decisão de 2026-11-16).
+melao,granel,,,,,,,,,,Fruta grande: sem peça mínima na v1 (decisão de 2026-11-16).
+morango,granel,,,,,,,,,,Hortifrúti vendido por peso ou em bandeja de peso variável: sem embalagem padrão.
+uva,granel,,,,,,,,,,Hortifrúti vendido por peso: sem embalagem padrão.
+manga,granel,,,,,,,,,,Hortifrúti vendido por peso: sem embalagem padrão.
+abacate,granel,,,,,,,,,,Hortifrúti vendido por peso: sem embalagem padrão.
+patinho,granel,,,,,,,,,,Açougue: sai a quantidade pedida no balcão; bandeja de peso variável.
+patinho-moido,granel,,,,,,,,,,Açougue: sai a quantidade pedida no balcão; bandeja de peso variável.
+acem-moido,granel,,,,,,,,,,Açougue: sai a quantidade pedida no balcão; bandeja de peso variável.
+acem,granel,,,,,,,,,,Açougue: sai a quantidade pedida no balcão; bandeja de peso variável.
+alcatra,granel,,,,,,,,,,Açougue: sai a quantidade pedida no balcão; bandeja de peso variável.
+contrafile,granel,,,,,,,,,,Açougue: sai a quantidade pedida no balcão; bandeja de peso variável.
+coxao-mole,granel,,,,,,,,,,Açougue: sai a quantidade pedida no balcão; bandeja de peso variável.
+lagarto,granel,,,,,,,,,,Açougue: sai a quantidade pedida no balcão; bandeja de peso variável.
+musculo,granel,,,,,,,,,,Açougue: sai a quantidade pedida no balcão; bandeja de peso variável.
+maminha,granel,,,,,,,,,,Açougue: sai a quantidade pedida no balcão; bandeja de peso variável.
+file-mignon,granel,,,,,,,,,,Açougue: sai a quantidade pedida no balcão; bandeja de peso variável.
+peito-de-frango,granel,,,,,,,,,,Açougue: sai a quantidade pedida no balcão; bandeja de peso variável.
+coxa-de-frango,granel,,,,,,,,,,Açougue: sai a quantidade pedida no balcão; bandeja de peso variável.
+sobrecoxa-de-frango,granel,,,,,,,,,,Açougue: sai a quantidade pedida no balcão; bandeja de peso variável.
+frango-inteiro,peca,1000,g,1 kg ou mais,peça,peças,calibracao,lacunas-conhecidas.md (teste de 2026-10-26),,,"Calibração do projeto (2026-11-16): o frango inteiro é vendido por peça, de 1 kg ou mais. Abaixo disso a lista mostra a peça. Sem fonte pública para o peso mínimo da peça."
+lombo,granel,,,,,,,,,,Açougue: sai a quantidade pedida no balcão; bandeja de peso variável.
+bisteca,granel,,,,,,,,,,Açougue: sai a quantidade pedida no balcão; bandeja de peso variável.
+pernil,granel,,,,,,,,,,Açougue: sai a quantidade pedida no balcão; bandeja de peso variável.
+tilapia,granel,,,,,,,,,,Peixaria: sai a quantidade pedida no balcão; bandeja de peso variável.
+salmao,granel,,,,,,,,,,Peixaria: sai a quantidade pedida no balcão; bandeja de peso variável.
+sardinha,granel,,,,,,,,,,Peixaria: sai a quantidade pedida no balcão; bandeja de peso variável.
+merluza,granel,,,,,,,,,,Peixaria: sai a quantidade pedida no balcão; bandeja de peso variável.
+corvina,granel,,,,,,,,,,Peixaria: sai a quantidade pedida no balcão; bandeja de peso variável.
+ovos,embalagem,12,unidades,,dúzia,dúzias,convencao,Dúzia,,,Convenção de contagem: não precisa de fonte. As bandejas de 20 e 30 ficam de fora: o Open Food Facts traz o peso dos ovos e não a contagem (só 10 de 40 produtos com a contagem no nome ou na quantidade).
+leite-integral,embalagem,1000,ml,1 L,caixa,caixas,off,"busca ""leite integral""",35,34,Moda: 34 de 35 embalagens.
+leite-desnatado,embalagem,1000,ml,1 L,caixa,caixas,off,"busca ""leite desnatado""",21,19,Moda: 19 de 21 embalagens.
+iogurte-natural,embalagem,,,,,,,,,,"Fora da v1: amostra pequena no Open Food Facts (4 a 5 embalagens, abaixo do mínimo de 10)."
+iogurte-natural-desnatado,embalagem,170,g,170 g,pote,potes,off,"busca ""iogurte natural desnatado""",48,14,"Moda: 14 de 48 embalagens. O segundo tamanho (500 g: 7 de 48) fica abaixo de 15%. Limite: o filtro de nome pede iogurte desnatado, light ou zero, sem exigir natural (a amostra pode ter iogurtes com sabor)."
+queijo-minas-frescal,embalagem,,,,,,,,,,Fora da v1: peça embalada de peso variável (cada peça com etiqueta de peso).
+queijo-mucarela,embalagem,,,,,,,,,,"Fora da v1: também vendido fatiado no balcão de frios, por peso (decisão de 2026-11-16)."
+queijo-prato,embalagem,,,,,,,,,,"Fora da v1: também vendido fatiado no balcão de frios, por peso (decisão de 2026-11-16)."
+queijo-parmesao,embalagem,50,g,50 g,pacote,pacotes,off,"busca ""queijo parmesão ralado""",37,10,Moda: 10 de 37 embalagens.
+queijo-parmesao,embalagem,100,g,100 g,pacote,pacotes,off,"busca ""queijo parmesão ralado""",37,6,Segundo tamanho: 6 de 37 embalagens.
+ricota,embalagem,,,,,,,,,,"Fora da v1: peça de peso variável; no Open Food Facts, 6 embalagens, cada uma de um tamanho."
+requeijao,embalagem,200,g,200 g,pote,potes,off,"busca ""requeijão cremoso""",84,28,Moda: 28 de 84 embalagens.
+requeijao,embalagem,400,g,400 g,pote,potes,off,"busca ""requeijão cremoso""",84,13,Segundo tamanho: 13 de 84 embalagens.
+manteiga,embalagem,200,g,200 g,pote,potes,off,"busca ""manteiga com sal""",53,34,Moda: 34 de 53 embalagens.
+manteiga,embalagem,500,g,500 g,pote,potes,off,"busca ""manteiga com sal""",53,10,Segundo tamanho: 10 de 53 embalagens.
+pao-frances,contavel,,,,,,,,,,Já sai em unidades pela POF: na padaria se compra a unidade.
+pao-de-forma,embalagem,16,fatias,400 g,pacote,pacotes,off,"busca ""pão de forma integral""",60,21,"Moda: 21 de 60 embalagens, vendidas em gramas. 400 g ÷ 25 g por fatia (POF 8001401, p. 395, a mesma fatia da base) = 16 fatias. Limite: o filtro de nome não exige integral."
+pao-de-forma,embalagem,20,fatias,500 g,pacote,pacotes,off,"busca ""pão de forma integral""",60,13,"Segundo tamanho: 13 de 60 embalagens. 500 g ÷ 25 g por fatia (POF 8001401, p. 395) = 20 fatias."
+arroz-branco,embalagem,1000,g,1 kg,pacote,pacotes,off,"busca ""arroz""",74,26,Moda: 26 de 74 embalagens.
+arroz-branco,embalagem,5000,g,5 kg,pacote,pacotes,off,"busca ""arroz""",74,13,Segundo tamanho: 13 de 74 embalagens.
+arroz-integral,embalagem,500,g,500 g,pacote,pacotes,off,"busca ""arroz integral""",33,5,Segundo tamanho: 5 de 33 embalagens.
+arroz-integral,embalagem,1000,g,1 kg,pacote,pacotes,off,"busca ""arroz integral""",33,18,Moda: 18 de 33 embalagens.
+macarrao,embalagem,500,g,500 g,pacote,pacotes,off,"busca ""macarrão""",96,80,Moda: 80 de 96 embalagens.
+flocao,embalagem,,,,,,,,,,"Fora da v1: amostra pequena no Open Food Facts (7 embalagens, abaixo do mínimo de 10)."
+fecula-de-mandioca,embalagem,,,,,,,,,,"Fora da v1: amostra pequena no Open Food Facts (6 embalagens, abaixo do mínimo de 10)."
+farinha-de-mandioca,embalagem,500,g,500 g,pacote,pacotes,off,"busca ""farinha de mandioca""",12,6,Moda: 6 de 12 embalagens.
+farinha-de-mandioca,embalagem,1000,g,1 kg,pacote,pacotes,off,"busca ""farinha de mandioca""",12,5,Segundo tamanho: 5 de 12 embalagens.
+aveia,embalagem,500,g,500 g,pacote,pacotes,off,"busca ""aveia em flocos""",69,18,Moda: 18 de 69 embalagens. Os outros tamanhos (170 g: 9; 250 g: 8) ficam abaixo de 15%.
+milho-em-conserva,embalagem,,,,,,,,,,"Fora da v1: a lista conta o peso drenado, e o Open Food Facts mistura peso líquido e drenado no mesmo campo. Precisa do drenado do rótulo."
+feijao-carioca,embalagem,500,g,500 g,pacote,pacotes,off,"busca ""feijão carioca""",16,4,Segundo tamanho: 4 de 16 embalagens.
+feijao-carioca,embalagem,1000,g,1 kg,pacote,pacotes,off,"busca ""feijão carioca""",16,10,Moda: 10 de 16 embalagens.
+feijao-preto,embalagem,,,,,,,,,,"Fora da v1: amostra pequena no Open Food Facts (9 embalagens, abaixo do mínimo de 10)."
+feijao-fradinho,embalagem,,,,,,,,,,"Fora da v1: amostra pequena no Open Food Facts (6 embalagens, abaixo do mínimo de 10)."
+lentilha,embalagem,,,,,,,,,,"Fora da v1: amostra pequena no Open Food Facts (7 embalagens, abaixo do mínimo de 10)."
+atum,embalagem,,,,,,,,,,"Fora da v1: a lista conta o peso drenado, e o Open Food Facts mistura peso líquido e drenado no mesmo campo (120 g, 170 g e 180 g). Precisa do drenado do rótulo."
+pasta-de-amendoim,embalagem,500,g,500 g,pote,potes,off,"busca ""pasta de amendoim""",41,17,Moda: 17 de 41 embalagens. O de 1 kg (6 de 41) fica abaixo de 15%.
+amendoim,embalagem,,,,,,,,,,"Fora da v1: também vendido a granel, por peso (decisão de 2026-11-16)."
+castanha-de-caju,embalagem,,,,,,,,,,"Fora da v1: também vendida a granel, por peso (decisão de 2026-11-16)."
+castanha-do-para,embalagem,,,,,,,,,,"Fora da v1: também vendida a granel, por peso (decisão de 2026-11-16)."
+amendoa,embalagem,,,,,,,,,,"Fora da v1: também vendida a granel, por peso, como as castanhas (decisão de 2026-11-16)."
+noz,embalagem,,,,,,,,,,"Fora da v1: também vendida a granel, por peso, como as castanhas (decisão de 2026-11-16)."
+linhaca,embalagem,200,g,200 g,pacote,pacotes,off,"busca ""linhaça""",19,5,Moda: 5 de 19 embalagens.
+azeite,embalagem,,,,,,,,,,"Fora da v1: a lista está em gramas e a garrafa em ml; falta a densidade do arquivo WEIGHT do USDA SR28, que ainda não foi extraída."
+oleo-de-soja,embalagem,,,,,,,,,,"Fora da v1: a lista está em gramas e a garrafa em ml; falta a densidade do arquivo WEIGHT do USDA SR28, que ainda não foi extraída."
+acucar-refinado,embalagem,,,,,,,,,,"Fora da v1: amostra pequena no Open Food Facts (7 embalagens, abaixo do mínimo de 10)."
+acucar-mascavo,embalagem,500,g,500 g,pacote,pacotes,off,"busca ""açúcar mascavo""",14,9,Moda: 9 de 14 embalagens.
+mel,embalagem,300,g,300 g,pote,potes,off,"busca ""mel""",40,17,Moda: 17 de 40 embalagens.
+mel,embalagem,500,g,500 g,pote,potes,off,"busca ""mel""",40,15,Segundo tamanho: 15 de 40 embalagens.
+cafe-em-po,embalagem,250,g,250 g,pacote,pacotes,off,"busca ""café torrado e moído""",76,21,Segundo tamanho: 21 de 76 embalagens.
+cafe-em-po,embalagem,500,g,500 g,pacote,pacotes,off,"busca ""café torrado e moído""",76,42,Moda: 42 de 76 embalagens.
+cha-mate,embalagem,,,,,,,,,,"Fora da v1: a lista conta sachês, e o Open Food Facts traz o peso da caixa (a contagem aparece em 4 de 14 produtos)."
+cha-preto,embalagem,,,,,,,,,,"Fora da v1: amostra pequena no Open Food Facts (3 a 4 embalagens), sem a contagem de sachês."
+cha-de-erva-doce,embalagem,,,,,,,,,,"Fora da v1: a lista conta sachês, e o Open Food Facts traz o peso da caixa (a contagem aparece em 2 de 15 produtos)."
+suco-de-laranja,pronto,,,,,,,,,,Quantidade do prato pronto: sem fonte para converter.
+agua-de-coco,embalagem,200,ml,200 ml,caixinha,caixinhas,off,"busca ""água de coco""",22,14,Moda: 14 de 22 embalagens.
+agua-de-coco,embalagem,1000,ml,1 L,caixa,caixas,off,"busca ""água de coco""",22,6,Segundo tamanho: 6 de 22 embalagens.
+refrigerante-de-cola,embalagem,2000,ml,2 L,garrafa,garrafas,off,"busca ""refrigerante cola""",42,7,"Moda: 7 de 42 embalagens. A lata de 350 ml (6 de 42, 14%) fica abaixo de 15%."
+refrigerante-de-guarana,embalagem,350,ml,350 ml,lata,latas,off,"busca ""refrigerante guaraná""",43,11,Segundo tamanho: 11 de 43 embalagens.
+refrigerante-de-guarana,embalagem,2000,ml,2 L,garrafa,garrafas,off,"busca ""refrigerante guaraná""",43,16,Moda: 16 de 43 embalagens.
+cerveja-pilsen,embalagem,350,ml,350 ml,lata,latas,off,"busca ""cerveja pilsen""",16,4,Moda: 4 de 16 embalagens.
+acai,embalagem,,,,,,,,,,"Fora da v1: a busca mistura polpa, sorvete e creme (moda em ml), e a lista está em gramas."
+pao-de-queijo,embalagem,,,,,,,,,,"Fora da v1: a lista conta unidades pelo peso assado da POF, e o pacote é vendido pelo peso da massa crua."

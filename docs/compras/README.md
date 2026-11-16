@@ -13,6 +13,8 @@ desta pasta.
 | `taco-trechos.csv` | Trechos de texto da TACO: as receitas do café, dos chás e do cuscuz (capítulo de procedimentos) e a lista de espécies que mostra que a corvina grande e a corvina do mar são a mesma espécie. |
 | `usda-sr28.csv` | As 16 linhas do USDA SR Legacy usadas: os pares do macarrão e da tilápia, o descarte (casca, osso, caroço) e o peso da clara de um ovo grande. |
 | `scripts/extrair_fontes_compras.py` | Gera os três CSVs a partir das fontes. Não calcula nada: só separa as colunas. |
+| `embalagens.csv` | Desde 2026-11-16: o grupo de cada um dos 116 itens de compra (embalagem, granel, contável, pronto ou peça) e os tamanhos de embalagem, um por linha, com a fonte (Open Food Facts, convenção ou calibração), a amostra e o motivo. Conferido pelo `ConversaoComprasEmbalagensTests`. Método e licença em `docs/fontes-nutricionais.md`, seção "Embalagens". |
+| `scripts/moda_embalagens_off.py` | Conta os tamanhos de embalagem da base brasileira do Open Food Facts (consulta à API, sem gravar os produtos). `python -I docs/compras/scripts/moda_embalagens_off.py` |
 
 ## Fontes
 
