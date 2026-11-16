@@ -104,12 +104,12 @@ Desmarca um chip. Quando não sobra nenhum, as linhas já saíram e o aceite do 
 
 ### `POST /api/objetivos`
 **Recebe:** `peso` (kg, de 20 a 300), `objetivo` (`perder peso`, `manter peso` ou `ganhar peso`), `aderencia` (opcional: `seguiu`, `comeu_mais`, `comeu_menos` ou `nao_seguiu`; nulo ou vazio = sem resposta)
-**Devolve:** `id`, `peso`, `objetivo`, `dataRegistro`, `aderencia`, `registradoHoje`, `temDieta`, `progressoAjuste` (mesmo formato do `GET /api/objetivos/atual`)
+**Devolve:** `id`, `peso`, `objetivo`, `dataRegistro`, `aderencia`, `registradoHoje`, `temDieta`, `progressoAjuste`, `refeicoesFeitasDesdePesagem` (mesmo formato do `GET /api/objetivos/atual`)
 *(`dataRegistro` é preenchida automaticamente pela API, em UTC, não vem do cliente. Se já existe um registro do usuário no mesmo dia — o dia no fuso do estado (UF) do usuário; sem estado, horário de Brasília —, ele é atualizado em vez de criar outro, inclusive a `aderencia`, que volta a nulo se não for enviada)*
 **Erros:** 400 `{ mensagem }` se a `aderencia` ou o `objetivo` não forem um dos valores aceitos, ou se o peso estiver fora da faixa.
 
 ### `GET /api/objetivos/atual`
-**Devolve:** o registro mais recente de `ObjetivoUsuario` do usuário logado (`id`, `peso`, `objetivo`, `dataRegistro`, `aderencia`), mais `registradoHoje` (se esse registro é o de hoje, no fuso do estado do usuário, que o próximo POST vai sobrescrever — a mesma regra de "hoje" do POST) e `temDieta` (se o usuário já tem alguma dieta gerada). `progressoAjuste` diz quanto da janela da meta adaptativa já está preenchido agora, pela mesma regra da geração da dieta: `pesagens` (as que contariam: últimos 28 dias, desde a primeira dieta, no objetivo atual, sem "não deu pra seguir"), `diasCobertos` (entre a primeira e a última delas, arredondado para baixo), `suficiente` (se a próxima dieta já teria dados para ajustar) e os limites `minimoPesagens` (5), `minimoDias` (14) e `janelaDias` (28). Sem dieta gerada, tudo zero.
+**Devolve:** o registro mais recente de `ObjetivoUsuario` do usuário logado (`id`, `peso`, `objetivo`, `dataRegistro`, `aderencia`), mais `registradoHoje` (se esse registro é o de hoje, no fuso do estado do usuário, que o próximo POST vai sobrescrever — a mesma regra de "hoje" do POST) e `temDieta` (se o usuário já tem alguma dieta gerada). `progressoAjuste` diz quanto da janela da meta adaptativa já está preenchido agora, pela mesma regra da geração da dieta: `pesagens` (as que contariam: últimos 28 dias, desde a primeira dieta, no objetivo atual, sem "não deu pra seguir"), `diasCobertos` (entre a primeira e a última delas, arredondado para baixo), `suficiente` (se a próxima dieta já teria dados para ajustar) e os limites `minimoPesagens` (5), `minimoDias` (14) e `janelaDias` (28). Sem dieta gerada, tudo zero. `refeicoesFeitasDesdePesagem`: quantas refeições a pessoa marcou como feitas (seção Refeições feitas) desde a pesagem a que a pergunta de aderência se refere (a anterior à de hoje, se `registradoHoje`; senão, a mais recente), do dia dela no fuso da UF em diante, inclusive; nulo sem essa pesagem. Só o número, sem total: a tela do Progresso mostra "você marcou X refeições como feitas" sem sugerir resposta. As marcações duram 35 dias, então uma pesagem mais antiga conta só as dos últimos 35.
 **Erros:** 404 se o usuário ainda não registrou nenhum objetivo.
 
 ### `GET /api/objetivos/tendencia`
@@ -313,6 +313,31 @@ Dois toques ao mesmo tempo no mesmo item (PC e celular) são barrados pelo índi
 
 ---
 
+## Refeições feitas
+
+"Comi esta refeição do plano": um toque por refeição, gravado na conta (tabela `RefeicoesFeitas`). A marcação diz só isso; a falta dela não diz se a pessoa pulou, comeu outra coisa ou esqueceu. Vale sempre para a dieta atual (a mais recente do usuário do token, a mesma regra do `GET /api/dietas/atual`), também para as dietas que a semana da casa criou (`origem: casa`): a marcação é pessoal, não aparece para os outros membros nem entra na lista da casa. Dá para marcar **hoje e ontem**, no fuso da UF da conta (`FusoHorarioEstado`), e nunca antes do dia local em que a dieta foi gerada (na dieta gerada hoje, só hoje). Separado do `GET /api/dietas/atual` de propósito: a resposta dele é reaproveitada nas trocas. Marcar não sobe a `revisao` da dieta (uma folha de troca aberta em outra aba não leva 409 por causa de um toque), e a troca de alimento não apaga a marcação (a posição da refeição não muda). Dieta nova começa sem marcações; as da dieta anterior continuam no banco (sem chave estrangeira para a `DietaIA`, como a `MetasDieta`) até o prazo de 35 dias da limpeza automática. Hoje a marcação não entra na meta adaptativa (decisão de 2026-11-16: decidir com 3 a 4 semanas de dados, `docs/lacunas-conhecidas.md`). As duas rotas exigem o consentimento geral (403 `motivo: "consentimento"`, como as outras rotas logadas). **429** `{ "mensagem": "Muitas marcações em pouco tempo. Espere um minuto e tente de novo." }` acima de 120 leituras ou de 60 marcações por minuto do mesmo usuário (em memória).
+
+### `GET /api/dietas/atual/refeicoes-feitas`
+**Recebe:** nada
+**Devolve:** `dietaId` (o que o `PUT` manda de volta), `hoje` (`AAAA-MM-DD`, o dia de hoje no fuso da UF: o painel abre nele) e `dias`, só as datas marcáveis, da mais antiga para a mais nova (hoje sempre vem, mesmo sem marcação), cada uma com `data` (`AAAA-MM-DD`), `indiceDia` (a posição do dia em `dieta.dias`, casada pelo **nome** do dia da semana, porque a lista da IA pode vir em outra ordem; nulo se a dieta não tem esse dia) e `marcadas` (as posições das refeições marcadas como feitas nesse dia, em `dieta.dias[indiceDia].refeicoes`, em ordem)
+**Erros:** 404 `{ "mensagem": "Nenhuma dieta gerada ainda." }` sem dieta.
+
+### `PUT /api/dietas/atual/refeicoes-feitas/{data}/{refeicao}`
+Marca (`feita: true`) ou desmarca (`feita: false`) a refeição na posição `{refeicao}` do dia `{data}` (`AAAA-MM-DD`). Idempotente: marcar o que já está marcado, ou desmarcar o que não está, dá 204 do mesmo jeito. Desmarcar apaga a linha (é o "desfazer" do toque, não um histórico). As kcal da refeição e a quantidade de refeições do dia são lidas da dieta no servidor, no momento do toque, e gravadas junto (a troca de alimento muda as kcal depois).
+**Recebe:** `dietaId` (a dieta que estava aberta na tela), `feita` (booleano)
+**Devolve:** 204 sem corpo
+**Erros** (corpo sempre `{ "mensagem" }`):
+- **400** `"Data inválida. Use o formato AAAA-MM-DD."`: `{data}` mal formada ou inexistente
+- **400** `"Refeição não encontrada na dieta."`: `{refeicao}` fora das refeições daquele dia na dieta
+- **400** `"Informe a dieta."` ou `"Informe se a refeição foi feita."`: falta `dietaId` ou `feita` no corpo
+- **404** `"Nenhuma dieta gerada ainda."`: o usuário não tem dieta
+- **409** `"Sua dieta mudou desde que a tela foi aberta. Atualize e tente de novo."`: o `dietaId` não é o da dieta atual (outra dieta foi gerada com a tela aberta, por exemplo em outro aparelho ou pela semana da casa). Um id de dieta de outra pessoa também cai aqui, e nada é gravado
+- **422** `"Só dá para marcar as refeições de hoje e de ontem da dieta atual."`: data no futuro, anterior a ontem, ou anterior ao dia em que a dieta foi gerada
+
+Dois toques ao mesmo tempo na mesma refeição (PC e celular) são barrados pelo índice único (`UsuarioId`, `Data`, `DietaIAId`, `RefeicaoIndice`); só a violação de chave única do PostgreSQL é tratada como "já marcada" (204), como na lista de compras.
+
+---
+
 ## Metas (simulação)
 
 ### `POST /api/metas/simulacao`
@@ -355,7 +380,7 @@ As três rotas exigem login, mas não o consentimento: valem também para quem n
 
 ### `GET /api/conta/exportacao`
 "Baixar meus dados" (art. 18, II e V).
-**Devolve:** um arquivo JSON (`application/json`, anexo `ronu-dados-AAAA-MM-DD.json`, com `Cache-Control: no-store`), formato `ronu-exportacao-v1`: `geradoEm`, `conta` (nome, email, UF, datas, se tem senha e se tem Google vinculado, com o `googleId`), `perfil` (com os horários de acordar e dormir), `pesagens`, `modalidades` (com a hora de início e o ritmo da aula, `intensidade`), `preferenciasAlimentares`, `alergias` (`codigo`, `marcadoEm`), `dietas` (com o cardápio como JSON e a `origem`: `pessoa` ou `casa`, a dieta que a semana da casa criou, com o almoço e o jantar da casa na porção da pessoa), `metasDieta`, `listaComprasMarcacoes`, `consentimentos` (todos os tipos, com `revogadoEm`), `pedidosRedefinicaoSenha`, `casa` (`papel`, `entrouEm`, `transferenciaOferecidaEm`; nulo sem casa, e nada dos outros membros) e `convitesCasa` (os convites que a pessoa gerou: `criadoEm`, `expiraEm`, `usadoEm`, `revogadoEm`). Montado campo a campo, nunca serializando as entidades: ficam de fora o hash da senha, o hash do token de redefinição e o do convite, e um campo novo no modelo só entra se alguém o escrever em `ExportacaoConta`
+**Devolve:** um arquivo JSON (`application/json`, anexo `ronu-dados-AAAA-MM-DD.json`, com `Cache-Control: no-store`), formato `ronu-exportacao-v1`: `geradoEm`, `conta` (nome, email, UF, datas, se tem senha e se tem Google vinculado, com o `googleId`), `perfil` (com os horários de acordar e dormir), `pesagens`, `modalidades` (com a hora de início e o ritmo da aula, `intensidade`), `preferenciasAlimentares`, `alergias` (`codigo`, `marcadoEm`), `dietas` (com o cardápio como JSON e a `origem`: `pessoa` ou `casa`, a dieta que a semana da casa criou, com o almoço e o jantar da casa na porção da pessoa), `metasDieta`, `listaComprasMarcacoes`, `refeicoesFeitas` (`data`, `dietaId`, `refeicao` (a posição no dia), `kcal`, `refeicoesNoDia`, `marcadaEm`), `consentimentos` (todos os tipos, com `revogadoEm`), `pedidosRedefinicaoSenha`, `casa` (`papel`, `entrouEm`, `transferenciaOferecidaEm`; nulo sem casa, e nada dos outros membros) e `convitesCasa` (os convites que a pessoa gerou: `criadoEm`, `expiraEm`, `usadoEm`, `revogadoEm`). Montado campo a campo, nunca serializando as entidades: ficam de fora o hash da senha, o hash do token de redefinição e o do convite, e um campo novo no modelo só entra se alguém o escrever em `ExportacaoConta`
 **Erros:** 404 "Conta não encontrada."; **429** acima de 5 exportações por hora do mesmo usuário.
 
 ### `DELETE /api/conta`
@@ -369,7 +394,8 @@ O `ServicoLimpezaRetencao` roda a `LimpezaRetencao` 1 minuto depois de a API sub
 - pedidos de redefinição de senha com mais de 30 dias;
 - convites da casa usados, vencidos ou revogados há mais de 30 dias;
 - pedidos e avisos da casa com mais de 30 dias (rede de segurança: eles já saem ao ser dispensados, atendidos ou quando chega uma semana nova);
-- contas com mais de 30 dias que nunca aceitaram nenhuma versão do consentimento e não têm nenhum dado além de nome e email (estar numa casa conta como dado). Contas com `CriadoEm` nulo (anteriores ao campo) nunca entram.
+- refeições marcadas como feitas com mais de 35 dias (a janela da meta adaptativa é de 28 dias, mais uma folga), pela `data` da marcação;
+- contas com mais de 30 dias que nunca aceitaram nenhuma versão do consentimento e não têm nenhum dado além de nome e email (estar numa casa ou ter uma refeição marcada como feita conta como dado). Contas com `CriadoEm` nulo (anteriores ao campo) nunca entram.
 
 ---
 
