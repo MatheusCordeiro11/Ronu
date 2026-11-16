@@ -486,7 +486,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
    seguem o mouse (ou o último toque), pisca sozinho e, a cada clique, dá um
    pulinho com os olhos fechados sorrindo. É enfeite: aria-hidden e sem
    clique. Os olhos são SVG por cima do desenho, que vem sem eles. */
-.mascote { position: fixed; left: max(16px, env(safe-area-inset-left, 0px)); bottom: max(10px, env(safe-area-inset-bottom, 0px)); height: 90px; z-index: 30; pointer-events: none; filter: var(--mascote-contorno); }
+.mascote { position: fixed; left: max(16px, env(safe-area-inset-left, 0px)); bottom: max(10px, env(safe-area-inset-bottom, 0px)); height: 90px; z-index: 30; pointer-events: none; filter: var(--mascote-contorno); transform: translateX(var(--mascote-x, 0px)); }
 .mascote-corpo { position: relative; height: 100%; aspect-ratio: 185 / 300; transform-origin: 50% 100%; animation: mascote-respira 3.4s ease-in-out infinite; }
 .mascote-corpo img, .mascote-corpo svg, .mascote-salto, .mascote-pernas, .mascote-tronco { position: absolute; inset: 0; width: 100%; height: 100%; }
 /* O pulo dobra as perninhas: o desenho (riso, 185 × 300) é partido na cintura
@@ -520,6 +520,15 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .mascote.pula .mascote-tronco { animation: mascote-tronco .8s linear; }
 .mascote.pula .fumaca-e { animation: mascote-fumaca-e .8s ease-out; }
 .mascote.pula .fumaca-d { animation: mascote-fumaca-d .8s ease-out; }
+/* etapa 2: andando, troca o desenho de frente pela tira de 4 quadros de lado
+   (200 × 300 cada; o centro da cabeça fica em x = 115, alinhado com o do
+   desenho de frente, em 66,9 de 185). Para a esquerda, espelha na cabeça. */
+.mascote-lado { position: absolute; bottom: 0; left: -26%; width: 108.1%; height: 100%; overflow: hidden; display: none; transform-origin: 57.5% 100%; }
+.mascote-lado img { position: absolute; left: 0; top: 0; width: 400%; max-width: none; height: 100%; animation: mascote-passo .56s steps(4) infinite; }
+.mascote.andando .mascote-lado { display: block; }
+.mascote.andando .mascote-corpo { visibility: hidden; }
+.mascote.esquerda .mascote-lado { transform: scaleX(-1); }
+@keyframes mascote-passo { to { transform: translateX(-100%); } }
 @keyframes mascote-respira { 50% { transform: translateY(-1.5px) scaleY(1.012); } }
 /* agacha (0–18%), sai do chão (28%), topo do pulo (46%), toca o chão (60%),
    amortece agachando (70%) e volta (86–100%) */

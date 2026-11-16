@@ -443,8 +443,64 @@
       }
       setTimeout(pisca, 2600 + Math.random() * 3400);
     };
-    addEventListener('pointermove', function (e) { if (e.pointerType === 'mouse') mira(e.clientX, e.clientY); }, { passive: true });
-    addEventListener('pointerdown', function (e) { mira(e.clientX, e.clientY); reage(); }, { passive: true });
+    /* etapa 2: clicar num espaço vazio faz ele pular e depois andar pela
+       parte de baixo até ficar embaixo do clique. Ao chegar, vira de frente e
+       olha para você por um instante. Botões e links só fazem ele pular. */
+    var lado = mascote.querySelector('.mascote-lado img');
+    var andarX = 0, andarAlvo = 0, andando = false, ultimoQuadro = 0, tempoAndar = null, olhandoVoce = null;
+    var INTERATIVOS = 'a, button, input, select, textarea, label, summary, [role="button"], [tabindex]';
+    var limiteAndar = function () {
+      var r = mascote.getBoundingClientRect(), base = r.left - andarX;
+      return { base: base, largura: r.width, max: Math.max(0, innerWidth - base * 2 - r.width) };
+    };
+    var passo = function (t) {
+      var dt = Math.min(0.05, (t - ultimoQuadro) / 1000); ultimoQuadro = t;
+      var falta = andarAlvo - andarX, vel = innerWidth < 640 ? 170 : 250;
+      if (Math.abs(falta) <= vel * dt) {
+        andarX = andarAlvo; andando = false;
+        mascote.style.setProperty('--mascote-x', andarX + 'px');
+        mascote.classList.remove('andando', 'esquerda');
+        olhaParaVoce();
+        return;
+      }
+      andarX += Math.sign(falta) * vel * dt;
+      mascote.style.setProperty('--mascote-x', andarX.toFixed(1) + 'px');
+      requestAnimationFrame(passo);
+    };
+    var vaiPara = function (x) {
+      var l = limiteAndar();
+      andarAlvo = Math.max(0, Math.min(l.max, x - l.base - l.largura / 2));
+      if (Math.abs(andarAlvo - andarX) < 8) { olhaParaVoce(); return; }
+      if (lado && !lado.getAttribute('src')) lado.src = lado.dataset.src;
+      mascote.classList.toggle('esquerda', andarAlvo < andarX);
+      mascote.classList.add('andando');
+      if (!andando) { andando = true; ultimoQuadro = performance.now(); requestAnimationFrame(passo); }
+    };
+    var olhaParaVoce = function () {
+      clearTimeout(olhandoVoce);
+      olhoQuer = [0, 0.4];
+      if (!olhoRodando) { olhoRodando = true; requestAnimationFrame(andaOlho); }
+      olhandoVoce = setTimeout(function () { olhandoVoce = null; }, 1600);
+    };
+    addEventListener('pointermove', function (e) { if (e.pointerType === 'mouse' && !olhandoVoce) mira(e.clientX, e.clientY); }, { passive: true });
+    /* no toque, os olhos seguem o dedo já no começo do toque */
+    addEventListener('pointerdown', function (e) { if (e.pointerType !== 'mouse' && !olhandoVoce) mira(e.clientX, e.clientY); }, { passive: true });
+    /* o clique (que não dispara ao rolar a página no celular) é que faz ele reagir */
+    addEventListener('click', function (e) {
+      var alvo = e.target instanceof Element ? e.target.closest(INTERATIVOS) : null;
+      if (andando) { if (!alvo) vaiPara(e.clientX); return; }
+      mira(e.clientX, e.clientY);
+      reage();
+      if (alvo || reduzido) return;
+      clearTimeout(tempoAndar);
+      var x = e.clientX;
+      if (lado && !lado.getAttribute('src')) lado.src = lado.dataset.src;
+      tempoAndar = setTimeout(function () { vaiPara(x); }, 800); /* depois do pulo */
+    });
+    addEventListener('resize', function () {
+      var l = limiteAndar();
+      if (andarX > l.max) { andarX = andarAlvo = l.max; mascote.style.setProperty('--mascote-x', andarX + 'px'); }
+    });
     setTimeout(pisca, 2200);
   }
 
