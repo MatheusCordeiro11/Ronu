@@ -45,17 +45,24 @@
           <p>Sua dieta, seu peso e o ajuste da sua meta continuam onde você deixou.</p>
         </div>
 
-        <nav class="segmentado segmentado-acento entrada-abas entra" style="--atraso: 40ms" aria-label="Entrar ou criar conta">
+        <nav class="entrada-abas entra" style="--atraso: 40ms" aria-label="Entrar ou criar conta">
+          <span class="entrada-abas-ind" aria-hidden="true"></span>
           <a href="login.html" aria-current="page">Entrar</a>
           <a href="cadastro.html">Criar conta</a>
         </nav>
+
+        <!-- Botão oficial do Google (js/base/google.js), no tema do modo atual. -->
+        <div id="google-signin-button" class="entrada-google entra" style="--atraso: 80ms"></div>
+        <p class="entrada-google-status" id="google-status" role="status" aria-live="polite"></p>
+
+        <div class="separador-ou entra" style="--atraso: 120ms">ou com e-mail</div>
 
         <div class="aviso aviso-sucesso" id="form-success" role="status" hidden></div>
         <div class="aviso aviso-erro" id="form-error" role="alert" hidden></div>
 
         <form id="login-form" class="entrada-campos" novalidate>
           <div class="campo entra" style="--atraso: 80ms">
-            <label class="campo-rotulo" for="email">Email</label>
+            <label class="campo-rotulo" for="email">E-mail</label>
             <input class="entrada" type="email" id="email" name="email" autocomplete="username" placeholder="voce@email.com" required>
           </div>
 
@@ -69,15 +76,11 @@
 
           <button type="submit" class="botao botao-primario botao-grande botao-bloco entra" id="submit-btn" style="--atraso: 240ms">
             <span class="btn-label">Entrar</span>
+            <span class="seta" aria-hidden="true">→</span>
           </button>
         </form>
 
-        <div class="separador-ou entra" style="--atraso: 300ms">ou</div>
-        <!-- Botão oficial do Google (js/base/google.js), no tema do modo atual. -->
-        <div id="google-signin-button" class="entrada-google entra" style="--atraso: 360ms"></div>
-        <p class="entrada-google-status" id="google-status" role="status" aria-live="polite"></p>
-
-        <p class="entrada-alternar entra" style="--atraso: 420ms">Ainda não tem conta? <a href="cadastro.html">Criar conta</a></p>
+        <p class="entrada-alternar entra" style="--atraso: 420ms">Ainda não tem conta? <a href="cadastro.html">Criar conta grátis</a></p>
         <nav class="links-legais entrada-legais" aria-label="Documentos legais"><a href="privacidade.html">Privacidade</a><span class="links-legais-sep" aria-hidden="true">·</span><a href="termos.html">Termos</a></nav>
       </div>
     </main>

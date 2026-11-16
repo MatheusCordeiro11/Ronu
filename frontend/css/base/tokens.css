@@ -54,6 +54,7 @@
 
   /* ---------- Estados ---------- */
   --verde: #7BB878;               /* já tenho, salvo, ritmo bom */
+  --amarelo: #D98A2B;             /* senha razoável (medidor de força) */
   --erro: #F07A62;
   --erro-suave: #2A1512;
   --erro-borda: #7A2E22;
@@ -174,6 +175,7 @@
   --sobre-acento: #FFFFFF;        /* 5,3:1 */
 
   --verde: #2F7A4A;
+  --amarelo: #D98A2B;
   --erro: #B23A24;
   --erro-suave: #FBE4DE;
   --erro-borda: #E9B6A9;

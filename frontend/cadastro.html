@@ -45,18 +45,25 @@
           <p>Crie a conta e, em quatro passos curtos, o Ronu monta a sua primeira semana.</p>
         </div>
 
-        <nav class="segmentado segmentado-acento entrada-abas entra" style="--atraso: 40ms" aria-label="Entrar ou criar conta">
+        <nav class="entrada-abas entra" style="--atraso: 40ms" aria-label="Entrar ou criar conta">
+          <span class="entrada-abas-ind" aria-hidden="true"></span>
           <a href="login.html">Entrar</a>
           <a href="cadastro.html" aria-current="page">Criar conta</a>
         </nav>
 
-        <ol class="etapas entrada-etapas entra" style="--atraso: 80ms" aria-label="Etapas até a primeira dieta">
-          <li class="feita" aria-current="step">Conta</li>
+        <ol class="entrada-etapas entra" style="--atraso: 80ms" aria-label="Etapas até a primeira dieta">
+          <li aria-current="step">Conta</li>
           <li>Perfil</li>
           <li>Objetivo</li>
           <li>Treino</li>
           <li>Comida</li>
         </ol>
+
+        <!-- Botão oficial do Google (js/base/google.js), no tema do modo atual. -->
+        <div id="google-signin-button" class="entrada-google entra" style="--atraso: 120ms"></div>
+        <p class="entrada-google-status" id="google-status" role="status" aria-live="polite"></p>
+
+        <div class="separador-ou entra" style="--atraso: 160ms">ou com e-mail</div>
 
         <div class="aviso aviso-erro" id="form-error" role="alert" hidden></div>
 
@@ -66,15 +73,15 @@
             <input class="entrada" type="text" id="nome" name="nome" autocomplete="name" placeholder="Como você quer ser chamado" required>
           </div>
 
-          <div class="entrada-linha entra" style="--atraso: 120ms">
-            <div class="campo">
-              <label class="campo-rotulo" for="email">Email</label>
-              <input class="entrada" type="email" id="email" name="email" autocomplete="email" placeholder="voce@email.com" required>
-            </div>
-            <div class="campo">
-              <label class="campo-rotulo" for="estado">Estado</label>
-              <select class="entrada" id="estado" name="estado" autocomplete="address-level1" aria-describedby="estado-dica" required>
-                <option value="" disabled selected>UF</option>
+          <div class="campo entra" style="--atraso: 120ms">
+            <label class="campo-rotulo" for="email">E-mail</label>
+            <input class="entrada" type="email" id="email" name="email" autocomplete="email" placeholder="voce@email.com" required>
+          </div>
+
+          <div class="campo entra" style="--atraso: 150ms">
+            <label class="campo-rotulo" for="estado">Estado</label>
+            <select class="entrada" id="estado" name="estado" autocomplete="address-level1" aria-describedby="estado-dica" required>
+                <option value="" disabled selected>Selecione a UF</option>
                 <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option>
                 <option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option>
                 <option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
@@ -83,22 +90,21 @@
                 <option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
                 <option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
               </select>
-            </div>
+            <span class="campo-dica" id="estado-dica">O cardápio usa os nomes de comida da sua região: aipim, mandioca ou macaxeira.</span>
           </div>
 
           <div class="campo entra" style="--atraso: 180ms">
             <label class="campo-rotulo" for="senha">Senha</label>
             <input class="entrada" type="password" id="senha" name="senha" autocomplete="new-password" minlength="8" maxlength="64" aria-describedby="senha-dica" required>
-            <span class="campo-dica" id="senha-dica">De 8 a 64 caracteres.</span>
+            <div class="forca" data-forca-de="senha" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+            <div class="forca-linha"><span id="senha-dica">De 8 a 64 caracteres</span><span class="num" data-forca-conta aria-hidden="true">0/64</span></div>
           </div>
 
           <div class="campo entra" id="field-confirmar-senha" style="--atraso: 240ms">
             <label class="campo-rotulo" for="confirmar-senha">Confirmar senha</label>
-            <input class="entrada" type="password" id="confirmar-senha" name="confirmar-senha" autocomplete="new-password" aria-describedby="confirmar-senha-error" required>
+            <input class="entrada" type="password" id="confirmar-senha" name="confirmar-senha" data-confirma="senha" autocomplete="new-password" aria-describedby="confirmar-senha-error" required>
             <span class="campo-erro" id="confirmar-senha-error" hidden></span>
           </div>
-
-          <p class="campo-dica entra" id="estado-dica" style="--atraso: 280ms">O estado serve para o cardápio usar os nomes de alimentos da sua região e para contar os dias no seu fuso.</p>
 
           <!-- Título, texto e versão vêm da API (js/base/aceite.js). Desmarcada sempre. -->
           <div class="aceite entra" id="aceite" data-aceite aria-busy="true" style="--atraso: 300ms">
@@ -106,21 +112,17 @@
               <input type="checkbox" id="aceite-caixa" name="aceite" aria-describedby="aceite-texto aceite-erro" disabled>
               <span data-aceite-titulo>Carregando o texto da autorização...</span>
             </label>
-            <div class="aceite-texto" id="aceite-texto" data-aceite-texto></div>
+            <button type="button" class="aceite-ler" data-aceite-ler aria-expanded="false" aria-controls="aceite-texto">Ler o que isso inclui</button>
+            <div class="aceite-texto aceite-recolhido" id="aceite-texto" data-aceite-texto></div>
             <span class="campo-erro" id="aceite-erro" data-aceite-erro role="alert" hidden></span>
           </div>
 
-          <p class="campo-dica entra" style="--atraso: 310ms">Ao criar a conta, você aceita os <a href="termos.html" target="_blank" rel="noopener">Termos de uso</a>, confirma ter 18 anos ou mais e leu a <a href="privacidade.html" target="_blank" rel="noopener">Política de privacidade</a>.</p>
-
           <button type="submit" class="botao botao-primario botao-grande botao-bloco entra" id="submit-btn" style="--atraso: 320ms">
             <span class="btn-label">Criar conta</span>
+            <span class="seta" aria-hidden="true">→</span>
           </button>
+          <p class="entrada-legal entra" style="--atraso: 340ms">Ao criar a conta, você aceita os <a href="termos.html" target="_blank" rel="noopener">Termos de uso</a>, confirma ter 18 anos ou mais e leu a <a href="privacidade.html" target="_blank" rel="noopener">Política de privacidade</a>.</p>
         </form>
-
-        <div class="separador-ou entra" style="--atraso: 380ms">ou</div>
-        <!-- Botão oficial do Google (js/base/google.js), no tema do modo atual. -->
-        <div id="google-signin-button" class="entrada-google entra" style="--atraso: 440ms"></div>
-        <p class="entrada-google-status" id="google-status" role="status" aria-live="polite"></p>
 
         <p class="entrada-alternar entra" style="--atraso: 500ms">Já tem conta? <a href="login.html">Entrar</a></p>
       </div>
@@ -173,6 +175,7 @@
   <script src="js/base/aceite.js"></script>
   <script src="js/cadastro.js"></script>
   <script src="js/base/senha.js"></script>
+  <script src="js/base/forca-senha.js"></script>
   <script src="js/base/google.js"></script>
 </body>
 </html>

@@ -502,28 +502,165 @@
   font-size: var(--t-corpo-g);
 }
 
-/* Entrar | Criar conta: segmentado de links (o indicador desliza até a página atual). */
+/* Entrar | Criar conta (protótipo): trilho creme, a aba atual numa pílula
+   clara. Login e cadastro são páginas diferentes; a pílula desliza de uma para
+   a outra pela View Transition entre páginas (@view-transition, no fim deste
+   arquivo). Sem esse recurso (Firefox), a troca acontece sem o deslize. */
 .entrada-abas {
-  align-self: stretch;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--superficie-2);
+}
+
+.entrada-abas-ind {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  border-radius: 11px;
+  background: var(--superficie);
+  box-shadow: 0 4px 14px -6px rgba(40, 24, 12, 0.3);
+  view-transition-name: aba-entrada;
+}
+
+.entrada-cadastro .entrada-abas-ind {
+  transform: translateX(100%);
 }
 
 .entrada-abas > a {
   position: relative;
   z-index: 1;
-  flex: 1;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--raio-pilula);
+  padding: 10px;
+  border-radius: 11px;
   color: var(--texto-2);
   font-size: var(--t-corpo);
   font-weight: 700;
+  text-align: center;
   text-decoration: none;
+  transition: color 0.3s ease;
 }
 
+.entrada-abas > a:hover,
 .entrada-abas > a[aria-current="page"] {
-  color: var(--sobre-acento);
+  color: var(--texto);
+}
+
+/* Etapas do cadastro (protótipo): bolinhas com tracinhos, a atual no acento. */
+.entrada-etapas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--texto-3);
+}
+
+.entrada-etapas li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.entrada-etapas li::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--borda);
+}
+
+.entrada-etapas li:not(:last-child)::after {
+  content: '';
+  width: 14px;
+  height: 1px;
+  margin-left: 6px;
+  background: var(--borda);
+}
+
+.entrada-etapas li[aria-current="step"] {
+  color: var(--acento-texto);
+}
+
+.entrada-etapas li[aria-current="step"]::before {
+  background: var(--acento);
+  box-shadow: 0 0 0 4px var(--acento-suave);
+}
+
+/* "ou com e-mail" e o texto legal embaixo do botão (protótipo). */
+.entrada-form .separador-ou {
+  font-weight: 500;
+  color: var(--texto-3);
+}
+
+.entrada-legal {
+  text-align: center;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--texto-2);
+}
+
+.entrada-legal a {
+  color: var(--texto);
+  font-weight: 600;
+}
+
+/* Medidor de força da senha (js/base/forca-senha.js). */
+.forca {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+}
+
+.forca i {
+  height: 4px;
+  border-radius: var(--raio-pilula);
+  background: var(--borda);
+  transition: background-color 0.35s ease;
+}
+
+.forca[data-n="1"] i:nth-child(-n+1) { background: var(--erro); }
+.forca[data-n="2"] i:nth-child(-n+2) { background: var(--amarelo); }
+.forca[data-n="3"] i:nth-child(-n+3) { background: var(--verde); }
+.forca[data-n="4"] i { background: var(--verde); }
+
+.forca-linha {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--texto-2);
+}
+
+.entrada.ok {
+  border-color: var(--verde);
+}
+
+/* "Ler o que isso inclui": o texto da autorização recolhido (protótipo). */
+.aceite-ler {
+  justify-self: start;
+  margin-left: calc(22px + var(--e-3));
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--acento-texto);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+
+.aceite-ler:hover {
+  text-decoration: underline;
+}
+
+.aceite-texto.aceite-recolhido {
+  display: none;
 }
 
 .entrada-campos {
@@ -1051,7 +1188,27 @@
   }
 }
 
-/* Sem o indicador (sem JS), a aba atual fica cheia no acento. */
-.entrada-abas:not(.com-ind) > a[aria-current="page"] {
-  background: var(--acento);
+/* Troca entre login e cadastro: a pílula da aba desliza de uma página para a
+   outra (View Transition entre páginas do mesmo site). O resto da página só
+   cruza rápido. Com movimento reduzido, nada anima. */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-group(aba-entrada) {
+  animation-duration: 0.45s;
+  animation-timing-function: var(--curva-saida);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.2s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
 }
