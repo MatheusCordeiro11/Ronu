@@ -12,7 +12,9 @@
 //
 // Os números (kcal por sessão, gasto por dia, total da semana) vêm do
 // POST /metas/simulacao com a lista em edição, a mesma conta da dieta, com o
-// peso de tendência salvo.
+// peso de tendência salvo. São estimativas (Compêndio e ritmo da aula), por
+// isso levam o "~". O "Ritmo da aula" (js/base/ritmo-aula.js) só aparece nas
+// modalidades com os dois blocos e grava junto com dias e duração.
 
 document.addEventListener('DOMContentLoaded', async () => {
   const usuario = ronuUsuarioLogado();
@@ -134,7 +136,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const numero = ++pedidoSimulacao;
     const modalidades = itens
       .filter((item) => item.dias.size > 0)
-      .map((item) => ({ modalidadeId: item.modalidade.id, diasSemana: diasOrdenados(item), duracaoMediaHoras: item.duracao / 60 }));
+      .map((item) => ({
+        modalidadeId: item.modalidade.id, diasSemana: diasOrdenados(item), duracaoMediaHoras: item.duracao / 60,
+        intensidade: item.intensidade
+      }));
     try {
       const resposta = await ronuFetchAutenticado('/metas/simulacao', {
         method: 'POST',
@@ -154,10 +159,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     atualizarNumeros();
   }
 
-  function kcalSessao(item) {
+  function simulada(item) {
     if (!simulacao || item.dias.size === 0) return null;
-    const sim = simulacao.modalidades.find((m) => m.modalidadeId === item.modalidade.id);
+    return simulacao.modalidades.find((m) => m.modalidadeId === item.modalidade.id) || null;
+  }
+
+  function kcalSessao(item) {
+    const sim = simulada(item);
     return sim ? sim.kcalSessao : null;
+  }
+
+  // Número de treino com o "~" de estimativa na frente (o gasto vem do Compêndio e do ritmo da aula).
+  function estimado(valor) {
+    const fragmento = document.createDocumentFragment();
+    fragmento.append(criar('span', 'aprox', '~'), formatarNumero(valor));
+    return fragmento;
   }
 
   // ---------- Card de cada modalidade ----------
@@ -257,6 +273,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const acoes = criar('div', 'tr-acoes');
     linha.append(tempos, acoes);
 
+    // Ritmo da aula: só nas modalidades com os dois blocos (lutas e treino funcional).
+    const ritmo = RonuRitmoAula.temRitmo(item.modalidade)
+      ? RonuRitmoAula.criar(item.modalidade, item.intensidade, (nivel) => { item.intensidade = nivel; aoMudar(item); })
+      : null;
+    if (ritmo) ritmo.el.classList.add('tr-bloco', 'tr-ritmo');
+
     const aviso = criar('div', 'tr-aviso');
     aviso.id = `tr-aviso-${id}`;
     aviso.setAttribute('role', 'status');
@@ -264,10 +286,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Conta da sessão
     const conta = criar('div', 'tr-conta');
     const rotuloConta = criar('span', 'rotulo tr-conta-rotulo');
-    rotuloConta.append(criar('span', 'tr-so-largo', 'Como o gasto da sessão é calculado'), criar('span', 'tr-so-celular', 'Gasto da sessão'));
+    rotuloConta.append(
+      criar('span', 'tr-so-largo', 'Como o gasto estimado da sessão é calculado'),
+      criar('span', 'tr-so-celular', 'Gasto estimado da sessão')
+    );
+    const composicao = criar('span', 'tr-conta-composicao');
+    composicao.hidden = true;
     conta.append(
       rotuloConta,
       criar('span', 'tr-conta-formula num'),
+      composicao,
       criar('span', 'apoio', 'O “− 1” tira o que você já gastaria parado, que entra na conta do dia a dia.')
     );
 
@@ -275,10 +303,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     status.id = `tr-status-${id}`;
     status.setAttribute('role', 'status');
 
-    corpo.append(blocoDias, linha, aviso, conta, status);
+    corpo.append(...[blocoDias, linha, ritmo && ritmo.el, aviso, conta, status].filter(Boolean));
     card.append(cabeca, corpo);
 
-    item.el = { card, cabeca, resumo, kcal, corpo, grupoDias, valor, menos, mais, horario, aviso, acoes, formula: conta.querySelector('.tr-conta-formula'), status };
+    item.el = {
+      card, cabeca, resumo, kcal, corpo, grupoDias, valor, menos, mais, horario, aviso, acoes, ritmo, composicao,
+      formula: conta.querySelector('.tr-conta-formula'), status
+    };
     renderizarAcoes(item);
     return card;
   }
@@ -321,11 +352,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function atualizarCard(item) {
-    const { resumo, kcal, grupoDias, valor, menos, mais, horario, aviso, formula } = item.el;
+    const { resumo, kcal, grupoDias, valor, menos, mais, horario, aviso, formula, ritmo, composicao } = item.el;
     const dias = diasOrdenados(item);
     const nomesDias = dias.map((d) => DIAS[d - 1].curto).join(', ');
-    resumo.textContent = [dias.length ? nomesDias : 'Nenhum dia escolhido', formatarDuracao(item.duracao), item.horario]
+    // O ritmo só entra no resumo quando não é "Normal".
+    resumo.textContent = [dias.length ? nomesDias : 'Nenhum dia escolhido', formatarDuracao(item.duracao), item.horario,
+      RonuRitmoAula.resumo(item.modalidade, item.intensidade)]
       .filter(Boolean).join(' · ');
+    if (ritmo) ritmo.definir(item.intensidade);
     if (horario.value !== item.horario) horario.value = item.horario;
     // Só o aviso do treino: o de "poucas horas acordado" é da tela de Alimentação.
     const avisos = RonuHorarios.avisos(horariosDoDia.acordar, horariosDoDia.dormir,
@@ -340,10 +374,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     menos.disabled = item.duracao <= DURACAO_MIN;
     mais.disabled = item.duracao >= DURACAO_MAX;
 
-    const k = kcalSessao(item);
-    kcal.textContent = k == null ? '—' : formatarNumero(k);
+    const sim = simulada(item);
+    const k = sim ? sim.kcalSessao : null;
+    if (k == null) kcal.textContent = '—';
+    else kcal.replaceChildren(estimado(k));
+    // O MET da conta é o efetivo, pelo ritmo da aula; o metReferencia (o de "normal") fica só de reserva.
+    const metEfetivo = sim ? (sim.metEfetivo ?? item.modalidade.metReferencia) : null;
+    // O ritmo da própria resposta: até a simulação nova chegar, a conta inteira é a da anterior.
+    const textoComposicao = sim
+      ? RonuRitmoAula.composicao(item.modalidade, sim.intensidade ?? item.intensidade, metEfetivo)
+      : null;
+    composicao.textContent = textoComposicao || '';
+    composicao.hidden = !textoComposicao;
     if (k != null && simulacao) {
-      const met = formatarDecimal(item.modalidade.metReferencia);
+      const met = formatarDecimal(metEfetivo);
       // No celular sem a palavra "intensidade", como no canvas, para caber.
       formula.replaceChildren(
         '(',
@@ -400,6 +444,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return item.salvo
       && item.salvo.duracao === item.duracao
       && item.salvo.horario === item.horario
+      && item.salvo.intensidade === item.intensidade
       && JSON.stringify(item.salvo.dias) === JSON.stringify(diasOrdenados(item));
   }
 
@@ -420,6 +465,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const dias = diasOrdenados(item);
     const duracao = item.duracao;
     const horario = item.horario;
+    const intensidade = item.intensidade;
     mostrarStatus(item, 'Salvando...');
     ronuOcultarErroFormulario(elErro);
 
@@ -427,7 +473,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const resposta = await ronuFetchAutenticado('/usuarios/modalidades', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ modalidadeId: item.modalidade.id, diasSemana: dias, duracaoMediaHoras: duracao / 60, horarioInicio: horario })
+        body: JSON.stringify({
+          modalidadeId: item.modalidade.id, diasSemana: dias, duracaoMediaHoras: duracao / 60, horarioInicio: horario, intensidade
+        })
       });
       if (!resposta.ok) {
         const corpo = await resposta.json().catch(() => null);
@@ -435,7 +483,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       const salvo = await resposta.json();
       item.vinculoId = salvo.id;
-      item.salvo = { dias, duracao, horario };
+      item.salvo = { dias, duracao, horario, intensidade };
       mudou = true;
       atualizarAvisoGerar();
       mostrarStatus(item, igualAoSalvo(item) ? 'Salvo' : '', 'ok');
@@ -763,7 +811,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Entra na tela aberta e sem dia; só vai para a API com o primeiro dia.
   function adicionar(modalidade) {
-    const item = { modalidade, vinculoId: null, dias: new Set(), duracao: 60, horario: '', salvo: null };
+    const item = { modalidade, vinculoId: null, dias: new Set(), duracao: 60, horario: '', intensidade: RonuRitmoAula.PADRAO, salvo: null };
     criarCard(item);
     itens.push(item);
     aberta = modalidade.id;
@@ -787,7 +835,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     elBarras.replaceChildren(...porDia.map(({ dia, total, daAberta }, i) => {
       const coluna = criar('div', 'tr-coluna');
-      const valor = criar('span', 'tr-coluna-valor num tr-so-largo', total ? formatarNumero(total) : '—');
+      const valor = criar('span', 'tr-coluna-valor num tr-so-largo');
+      if (total) valor.append(estimado(total));
+      else valor.textContent = '—';
       const trilho = criar('div', `tr-coluna-trilho${total ? '' : ' tr-coluna-descanso'}`);
       trilho.style.height = `${Math.max(4, (total / maior) * 100)}%`;
       if (total) {
@@ -805,7 +855,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       valor.setAttribute('aria-hidden', 'true');
       coluna.setAttribute('role', 'img');
       coluna.setAttribute('aria-label', total
-        ? `${dia.nome}: ${formatarNumero(total)} kcal de treino`
+        ? `${dia.nome}: cerca de ${formatarNumero(total)} kcal de treino`
         : `${dia.nome}: descanso`);
       coluna.append(valor, area, nome);
       return coluna;
@@ -817,7 +867,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderizarBarras();
     renderizarCatalogo();
     const total = simulacao ? simulacao.dias.reduce((soma, d) => soma + d.treinoKcal, 0) : null;
-    $('tr-total-semana').textContent = total == null ? '—' : formatarNumero(total);
+    if (total == null || total === 0) $('tr-total-semana').textContent = total == null ? '—' : '0';
+    else $('tr-total-semana').replaceChildren(estimado(total));
     $('tr-sessoes').textContent = String(itens.reduce((soma, i) => soma + i.dias.size, 0));
   }
 
@@ -845,7 +896,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const dias = [...vinculo.diasSemana].sort((a, b) => a - b);
         const duracao = horasParaMinutos(vinculo.duracaoMediaHoras);
         const horario = vinculo.horarioInicio ?? '';
-        const item = { modalidade, vinculoId: vinculo.id, dias: new Set(dias), duracao, horario, salvo: { dias, duracao, horario } };
+        const intensidade = RonuRitmoAula.valido(vinculo.intensidade);
+        const item = {
+          modalidade, vinculoId: vinculo.id, dias: new Set(dias), duracao, horario, intensidade,
+          salvo: { dias, duracao, horario, intensidade }
+        };
         criarCard(item);
         return item;
       });

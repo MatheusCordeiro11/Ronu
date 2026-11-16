@@ -291,6 +291,13 @@
   color: var(--acento-texto);
 }
 
+/* De onde veio a intensidade (só nas modalidades com ritmo da aula). */
+.tr-conta-composicao {
+  font-size: var(--t-pequeno);
+  line-height: 1.45;
+  color: var(--texto-2);
+}
+
 .tr-status {
   font-size: var(--t-pequeno);
   color: var(--texto-2);

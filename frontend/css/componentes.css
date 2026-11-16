@@ -768,6 +768,49 @@ select.entrada {
   outline-offset: -3px;
 }
 
+/* ---------- Ritmo da aula (js/base/ritmo-aula.js) ----------
+   Segmentado neutro com três opções e a dica do nível. Até 340px de
+   largura do bloco, os rótulos largos ("Muito sparring") não cabem: entra a
+   forma curta ("Sparring"), com o nome completo no aria-label do botão. */
+.ritmo {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ritmo-seg > button {
+  padding-inline: 10px;
+}
+
+.ritmo-curto {
+  display: none;
+}
+
+@container (max-width: 340px) {
+  .ritmo-largo {
+    display: none;
+  }
+
+  .ritmo-curto {
+    display: inline;
+  }
+}
+
+.ritmo-dica {
+  margin: 0;
+  font-size: var(--t-pequeno);
+  line-height: 1.45;
+  color: var(--texto-2);
+}
+
+/* "~" das estimativas de treino: no tom da unidade, sem brigar com o algarismo. */
+.aprox {
+  font-weight: 500;
+  color: var(--texto-2);
+  margin-right: 0.08em;
+}
+
 /* ---------- Opção em card (objetivo, aderência) ---------- */
 .opcao {
   display: flex;
