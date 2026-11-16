@@ -151,7 +151,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const PREPAROS = ['cozido', 'cozida', 'grelhado', 'grelhada', 'assado', 'assada', 'refogado', 'refogada', 'frito', 'frita'];
 
+  // ---------- Embalagem (2026-11-16) ----------
+  // A API manda `embalagem` só quando o item tem um tamanho comum e cabe em até 4 embalagens. Sem o campo (API
+  // antiga, granel, contáveis, prontos, mais de 4), a linha fica como sempre. A conta continua em `item.texto`.
+
+  function embalagemDe(item) {
+    const emb = item.embalagem;
+    return emb && emb.nome && emb.texto ? emb : null;
+  }
+
   function linhaDeApoio(item) {
+    const emb = embalagemDe(item);
+    // A peça (frango inteiro) tem peso variável: o "~" diz que o uso é aproximado diante dela.
+    if (emb) return `você usa ${emb.tipo === 'peca' ? '~' : ''}${item.texto}`;
+
     const origens = item.detalhe.origens;
     if (item.pronto) return 'quantidade do prato pronto';
     if (origens.length > 1) return `de ${origens.length} itens da dieta`;
@@ -234,8 +247,33 @@ document.addEventListener('DOMContentLoaded', () => {
     det.appendChild(criar('span', 'lc-resultado',
       `Exato: ${formatarNumero(exato)} ${unidadeDoItem(item, exato)} → ${item.texto}, sempre para cima.`));
 
+    const emb = embalagemDe(item);
+    if (emb) det.appendChild(montarEmbalagem(item, emb));
+
     item.detalhe.observacoes.forEach((obs) => det.appendChild(criar('p', 'nota', obs)));
     return det;
+  }
+
+  // O último passo da conta: o que pegar na prateleira, a sobra e de onde vem o tamanho.
+  function montarEmbalagem(item, emb) {
+    const bloco = criar('div', 'lc-embalagem');
+    const peca = emb.tipo === 'peca';
+    let sobra = ' Sem sobra.';
+    if (emb.sobraTexto) sobra = peca ? ` Sobram pelo menos ${emb.sobraTexto}.` : ` Sobram cerca de ${emb.sobraTexto}.`;
+    bloco.appendChild(criar('span', 'lc-resultado', `Na prateleira: ${emb.texto}.${sobra}`));
+    if (emb.fonte) bloco.appendChild(criar('span', null, emb.fonte));
+
+    if (visao === 'casa') {
+      bloco.appendChild(criar('span', null, 'Na casa, a embalagem é calculada sobre o total da casa.'));
+    } else if (peca) {
+      // Só na lista individual: na da casa, o frango pode ser da porção de outra pessoa.
+      bloco.appendChild(criar('span', null,
+        `Se preferir comprar só o que usa, troque o ${item.nome.toLowerCase()} por outro alimento no painel.`));
+      const link = criar('a', 'botao-texto lc-embalagem-trocar', 'Trocar no painel');
+      link.href = 'minha-dieta.html';
+      bloco.appendChild(link);
+    }
+    return bloco;
   }
 
   // ---------- Render ----------
@@ -284,8 +322,13 @@ document.addEventListener('DOMContentLoaded', () => {
     texto.appendChild(criar('span', 'lc-item-apoio', linhaDeApoio(item)));
     if (item.nota) texto.appendChild(criar('span', 'nota lc-item-nota', item.nota));
 
-    const qtd = criar('span', 'lc-item-qtd');
-    qtd.appendChild(criar('span', 'numero lc-qtd', item.texto));
+    // Com embalagem, duas camadas: a contagem ("1 pacote") no lugar do número e o tamanho ("de 1 kg") embaixo.
+    // Cada camada fica numa linha só, e a coluna não aperta o nome a 390 px.
+    const emb = embalagemDe(item);
+    const qtd = criar('span', emb ? 'lc-item-qtd lc-item-qtd-embalagem' : 'lc-item-qtd');
+    qtd.appendChild(criar('span', 'numero lc-qtd', emb ? `${emb.quantidade} ${emb.nome}` : item.texto));
+    // O espaço entre as camadas não aparece (contêiner flex), mas o leitor de tela lê "1 pacote de 1 kg".
+    if (emb && emb.rotulo) qtd.append(' ', criar('span', 'lc-qtd-tamanho', `de ${emb.rotulo}`));
     if (item.pronto) qtd.appendChild(criar('span', 'lc-pronto', 'pronto'));
 
     const seta = svg('m4 6 4 4 4-4');
@@ -473,7 +516,8 @@ document.addEventListener('DOMContentLoaded', () => {
       algum = true;
       linhas.push('', secao.nome.toUpperCase());
       faltam.forEach((i) => {
-        let linha = `• ${i.nome}: ${i.texto}`;
+        // Com embalagem, só ela ("1 pacote de 1 kg"): quem recebe vai ao mercado.
+        let linha = `• ${i.nome}: ${embalagemDe(i)?.texto ?? i.texto}`;
         if (i.pronto) linha += ' (pronto)';
         if (i.nota) linha += ` (${i.nota.split(' · ')[0]})`;
         linhas.push(linha);
