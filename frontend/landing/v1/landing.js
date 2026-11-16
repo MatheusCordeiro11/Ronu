@@ -36,6 +36,54 @@
   var aoRolarMenu = function () { menu.classList.toggle('rolou', window.scrollY > 40); };
   addEventListener('scroll', aoRolarMenu, { passive: true }); aoRolarMenu();
 
+  /* ---------- título do hero: a última palavra se digita sozinha ---------- */
+  (function () {
+    var el = $('hero-palavra');
+    var cursor = document.querySelector('.hero h1 .cursor');
+    if (!el || !cursor || reduzido) return;
+    // No celular só entram palavras que cabem na linha de "hoje tem" (senão o
+    // título pula de duas para três linhas a cada troca); na tela larga, as longas também.
+    var PALAVRAS = window.matchMedia('(min-width: 720px)').matches
+      ? ['treino', 'luta', 'jiu-jitsu', 'boxe', 'dança', 'muay thai', 'judô', 'corrida', 'karatê', 'yoga']
+      : ['treino', 'luta', 'boxe', 'dança', 'judô', 'karatê', 'yoga', 'vôlei', 'futsal'];
+    var i = 0;
+    var espera = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+    // Aba escondida: os timers do navegador ficam lentos e a animação embola;
+    // espera a aba voltar antes do próximo passo.
+    var visivel = function () {
+      if (!document.hidden) return Promise.resolve();
+      return new Promise(function (r) {
+        document.addEventListener('visibilitychange', function f() {
+          if (!document.hidden) { document.removeEventListener('visibilitychange', f); r(); }
+        });
+      });
+    };
+    function apaga() {
+      cursor.classList.add('digitando');
+      return (function passo() {
+        if (!el.textContent.length) return espera(320);
+        el.textContent = el.textContent.slice(0, -1);
+        return espera(55).then(passo);
+      })();
+    }
+    function digita(palavra) {
+      var n = 0;
+      return (function passo() {
+        if (n >= palavra.length) { cursor.classList.remove('digitando'); return Promise.resolve(); }
+        n += 1; el.textContent = palavra.slice(0, n);
+        return espera(85 + Math.random() * 60).then(passo);
+      })();
+    }
+    function ciclo() {
+      return espera(2200).then(visivel).then(apaga).then(function () {
+        i = (i + 1) % PALAVRAS.length;
+        return digita(PALAVRAS[i]);
+      }).then(ciclo);
+    }
+    // Começa depois da entrada do título.
+    espera(1200).then(ciclo);
+  })();
+
   /* ---------- mockup do hero: a semana passa sozinha ---------- */
   var NOMES_DIA = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'];
   var TREINO = [true, false, true, false, true, false, false];

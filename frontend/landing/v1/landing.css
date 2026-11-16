@@ -447,3 +447,12 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   footer nav a { position: relative; }
   footer nav a::after { content: ''; position: absolute; inset: -12px -6px; }
 }
+
+/* Título do hero: a última palavra é apagada e digitada de novo (landing.js),
+   com um cursor de texto piscando. Com movimento reduzido, fica "treino" e o
+   cursor some. */
+.hero h1 .digita { white-space: nowrap; }
+.hero h1 .cursor { display: inline-block; width: .06em; height: .86em; margin: 0 .03em 0 .05em; vertical-align: -.06em; border-radius: 2px; background: currentColor; animation: cursor-pisca 1.05s steps(1, end) infinite; }
+.hero h1 .cursor.digitando { animation: none; opacity: 1; }
+@keyframes cursor-pisca { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .hero h1 .cursor { display: none; } }
