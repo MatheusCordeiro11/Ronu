@@ -728,3 +728,59 @@
     min-height: 52px;
   }
 }
+
+/* ==========================================================================
+   Redesign de nov/2026: acabamentos do protótipo "Alimentação".
+   ========================================================================== */
+
+.al-orcamento {
+  position: relative;
+  overflow: hidden;
+}
+
+.al-orc-img {
+  position: absolute;
+  right: 8px;
+  top: 6px;
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  filter: var(--sombra-icone);
+  transform: rotate(8deg);
+  transition: transform 0.6s var(--curva-mola);
+}
+
+.al-orcamento:hover .al-orc-img {
+  transform: rotate(-4deg) scale(1.06);
+}
+
+.al-orcamento-nome {
+  font-size: 22px;
+  letter-spacing: -0.03em;
+}
+
+.al-pratos {
+  border-block: 1px solid var(--borda);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.al-pratos-trilha span {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--texto-3);
+}
+
+.al-lista .al-cabeca h2,
+.al-horarios .al-cabeca h2 {
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+
+.al-nomes-chips .chip {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--sobre-acento);
+  font-weight: 800;
+}

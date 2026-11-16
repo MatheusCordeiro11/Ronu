@@ -611,3 +611,88 @@
     transition: none;
   }
 }
+
+/* ==========================================================================
+   Redesign de nov/2026: o visual do protótipo "Lista de compras" sobre as
+   classes do compras.js. Cada seção é um card com as linhas dentro; o "já
+   tenho" é um círculo que fica verde, com o visto desenhado.
+   ========================================================================== */
+
+.lc-secao {
+  gap: 0;
+  padding: 6px 10px 8px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-card);
+  background: var(--superficie);
+}
+
+.lc-secao-cabeca {
+  padding: 12px 12px 8px;
+}
+
+.lc-secao-cabeca h2 {
+  font-size: 19px;
+  letter-spacing: -0.02em;
+}
+
+.lc-itens {
+  gap: 0;
+}
+
+.lc-item {
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.lc-item + .lc-item {
+  border-top: 1px solid var(--borda);
+}
+
+.lc-check-caixa {
+  border: 2px solid var(--borda-campo);
+  border-radius: 50%;
+  transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.45s var(--curva-mola);
+}
+
+.lc-check:hover .lc-check-caixa {
+  border-color: var(--verde);
+}
+
+.lc-check[aria-pressed="true"] .lc-check-caixa {
+  background: var(--verde);
+  border-color: var(--verde);
+  color: #FFFFFF;
+  transform: scale(1.06);
+}
+
+.lc-andamento {
+  position: relative;
+  overflow: hidden;
+}
+
+.lc-sacola {
+  position: absolute;
+  right: 6px;
+  top: 4px;
+  width: 84px;
+  height: 84px;
+  object-fit: contain;
+  filter: var(--sombra-icone);
+  transform: rotate(8deg);
+}
+
+.lc-faltam {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  padding-right: 80px;
+}
+
+.lc-andamento .trilho {
+  height: 10px;
+}
+
+.lc-andamento .preenche {
+  background: var(--verde);
+}
