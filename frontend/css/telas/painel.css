@@ -1189,3 +1189,311 @@ button.db-trocado:hover {
     width: 100%;
   }
 }
+
+/* ==========================================================================
+   Redesign de nov/2026: o visual do protótipo "Painel da dieta" sobre as
+   classes que o dashboard.js já gera. Vem por último para valer sobre as
+   regras de cima; o comportamento (estados, troca, versões) não muda.
+   ========================================================================== */
+
+.db-main {
+  padding-bottom: 64px;
+}
+
+.db-grade {
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 24px;
+}
+
+.db-coluna,
+.db-lateral {
+  gap: 18px;
+}
+
+/* Meta do dia: anel grosso, número grande e macros em trilhos. */
+.db-meta {
+  gap: 18px;
+}
+
+.db-anel svg {
+  width: 132px;
+  height: 132px;
+}
+
+.db-anel .anel-fundo,
+.db-anel .anel-valor {
+  stroke-width: 7;
+}
+
+.db-anel .anel-fundo {
+  stroke: var(--superficie-2);
+}
+
+.db-meta-numero .rotulo {
+  color: var(--texto-2);
+}
+
+.db-meta-kcal {
+  font-size: clamp(2.5rem, 4vw, 3.375rem);
+  letter-spacing: -0.055em;
+}
+
+.db-macro-linha {
+  font-size: 13.5px;
+  color: var(--texto-2);
+}
+
+.db-macro-linha dd {
+  color: var(--texto);
+  font-weight: 700;
+}
+
+.db-macros .trilho {
+  height: 8px;
+  margin-top: 6px;
+}
+
+.db-ajuste {
+  border-top: 1px solid var(--borda);
+  padding-top: 14px;
+}
+
+.db-ajuste summary {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.db-ajuste-traco {
+  display: none;
+}
+
+.db-ajuste-mensagem {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.db-ajuste-mais {
+  font-size: 13px;
+  color: var(--texto-2);
+}
+
+/* Dias: colunas soltas com a barra da meta; o dia aberto vira um card claro. */
+.db-dias {
+  gap: 8px;
+}
+
+.db-dia {
+  align-items: center;
+  gap: 4px;
+  padding: 12px 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 18px;
+  background: none;
+  color: var(--texto-2);
+  text-align: center;
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.db-dia:hover {
+  border-color: transparent;
+  color: var(--texto);
+}
+
+.db-dia[aria-selected="true"] {
+  background: var(--superficie);
+  border-color: var(--borda);
+  box-shadow: var(--sombra-leve);
+  color: var(--texto);
+}
+
+.db-dia-nome {
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.db-dia-kcal {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.db-dia-trilho {
+  width: 26px;
+  height: 64px;
+  margin-top: 4px;
+  border-radius: 8px;
+  background: var(--superficie-2);
+  overflow: hidden;
+}
+
+.db-dia-barra {
+  border-radius: 8px;
+  background: var(--texto-3);
+}
+
+.db-legenda {
+  font-size: 13px;
+  color: var(--texto-2);
+}
+
+.db-marca {
+  border: 0;
+  background: var(--borda-campo);
+}
+
+.db-marca-treino {
+  background: var(--acento);
+}
+
+/* Refeições: um card por refeição, horário em pílula, total no rodapé. */
+.db-refeicoes {
+  gap: 12px;
+}
+
+.db-refeicao {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  padding: 22px;
+  animation: entra 0.5s var(--curva-saida) backwards;
+}
+
+.db-refeicao-titulo {
+  flex: none;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.db-refeicao-hora {
+  padding: 3px 10px;
+  border-radius: var(--raio-pilula);
+  background: var(--superficie-2);
+  font-family: var(--fonte-corpo);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--texto-2);
+}
+
+.db-refeicao-nome,
+.db-refeicao-titulo > .db-refeicao-nome:first-child {
+  font-family: var(--fonte-titulo);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--texto);
+}
+
+.db-alimentos {
+  flex: none;
+  gap: 0;
+}
+
+.db-alimentos li {
+  align-items: center;
+  padding: 10px 2px;
+  border-bottom: 0;
+  border-top: 1px solid var(--borda);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.db-alimentos li:first-child {
+  border-top: 0;
+}
+
+.db-alimento-qtd {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texto-2);
+}
+
+.db-refeicao-totais {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding-top: 12px;
+  border-top: 1px solid var(--borda);
+  font-size: 13px;
+  color: var(--texto-2);
+}
+
+.db-refeicao-kcal {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--texto);
+}
+
+.db-trocar {
+  border-radius: var(--raio-pilula);
+  border: 1px solid var(--borda);
+  background: var(--superficie);
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.db-trocar[aria-pressed="true"] {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--sobre-acento);
+}
+
+/* Lateral: cards com o rótulo neutro e o link no acento. */
+.db-lateral .cartao-cabeca .rotulo {
+  font-size: 12px;
+  letter-spacing: 0.07em;
+  color: var(--texto-2);
+}
+
+.db-lateral-titulo {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.db-peso {
+  font-size: 36px;
+  letter-spacing: -0.05em;
+}
+
+.db-peso-variacao {
+  padding: 3px 9px;
+  border-radius: var(--raio-pilula);
+  background: color-mix(in srgb, var(--verde) 13%, transparent);
+  color: var(--verde);
+  font-weight: 700;
+}
+
+.db-conta-total {
+  border-top: 1px solid var(--borda);
+}
+
+@media (max-width: 1060px) {
+  .db-grade {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .db-dias {
+    gap: 2px;
+  }
+
+  .db-dia {
+    padding-inline: 2px;
+  }
+
+  .db-dia-kcal {
+    font-size: 11px;
+  }
+
+  .db-dia-trilho {
+    width: 18px;
+    height: 48px;
+  }
+}

@@ -108,7 +108,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const hora = new Date().getHours();
     const periodo = hora < 5 ? 'Boa noite' : hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
     const primeiroNome = (usuario.nome || '').trim().split(/\s+/)[0];
-    $('db-saudacao').textContent = primeiroNome ? `${periodo}, ${primeiroNome}.` : `${periodo}.`;
+    // Redesign: o nome vai no acento, como no protótipo ("Boa noite, Matheus.").
+    if (primeiroNome) {
+      const destaque = document.createElement('span');
+      destaque.textContent = `${primeiroNome}.`;
+      $('db-saudacao').replaceChildren(`${periodo}, `, destaque);
+    } else {
+      $('db-saudacao').textContent = `${periodo}.`;
+    }
   }
 
   saudacao();
