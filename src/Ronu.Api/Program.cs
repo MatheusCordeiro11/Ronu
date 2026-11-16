@@ -28,7 +28,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(FrontendCorsPolicy, policy =>
     {
         policy
-            .WithOrigins("http://localhost:5500", "http://127.0.0.1:5500", "https://ronu-frontend.vercel.app")
+            .WithOrigins("http://localhost:5500", "http://127.0.0.1:5500", "https://ronu.vercel.app", "https://ronu-frontend.vercel.app")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
