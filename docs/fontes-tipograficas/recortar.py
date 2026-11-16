@@ -1,35 +1,32 @@
-"""Recorta as fontes do site para os caracteres que ele usa.
+"""Recorta a fonte do site para os caracteres que ele usa.
 
-As fontes saem do próprio site (frontend/fontes/) em vez do Google Fonts: assim
-o navegador de quem abre o Ronu não manda o IP para o Google só para baixar
-fonte (LGPD base, etapa 6). A Shippori Mincho B1 tem o japonês inteiro (~15 MB
-por peso); o site usa só alguns kanji, então cada fonte é recortada para:
+A fonte sai do próprio site (frontend/fontes/) em vez do Google Fonts: assim o
+navegador de quem abre o Ronu não manda o IP para o Google só para baixar fonte
+(LGPD base, etapa 6), e a CSP de produção libera só `font-src 'self'`.
+
+Desde o redesign de nov/2026 o site usa uma família só, a Fustat (variável,
+pesos 400 a 800). Ela é recortada para:
 
   - o latim das faixas "latin" e "latin-ext" do Google Fonts, que cobre o
     português e nomes digitados com acentos de outras línguas;
   - todo caractere fora dessas faixas que aparece nos .html, .js e .css de
-    frontend/ (os kanji das modalidades em js/treino.js, setas, sinais).
+    frontend/ e que a Fustat tenha (setas, sinais).
 
-Os kanji vêm só do frontend: a API e o seed das modalidades não têm nenhum
-(conferido em 2026-11-02). Modalidade nova sem kanji no mapa de treino.js usa
-技, que já está no arquivo. Ao acrescentar um kanji ou símbolo novo no
-frontend, rode o script de novo.
+A Fustat não tem kanji: o que sobrar de kanji no frontend aparece na fonte de
+reserva do sistema, e o script avisa quais são. Ao acrescentar um símbolo novo
+no frontend, rode o script de novo.
 
-Os originais (OFL 1.1) vêm de https://github.com/google/fonts e não ficam no
+O original (OFL 1.1) vem de https://github.com/google/fonts e não fica no
 repositório:
-  ofl/shipporiminchob1/ShipporiMinchoB1-SemiBold.ttf
-  ofl/shipporiminchob1/ShipporiMinchoB1-ExtraBold.ttf
-  ofl/shipporiminchob1/OFL.txt
-  ofl/ibmplexsans/IBMPlexSans[wdth,wght].ttf
-  ofl/ibmplexsans/OFL.txt
-  ofl/ibmplexmono/IBMPlexMono-Medium.ttf
+  ofl/fustat/Fustat[wght].ttf
+  ofl/fustat/OFL.txt
 
 Saída em WOFF2, que precisa do módulo brotli além do fontTools:
   pip install fonttools brotli
 
 Uso (da raiz do repositório):
   python docs/fontes-tipograficas/recortar.py <pasta-dos-originais>
-A pasta tem as subpastas shippori/ e plex/, cada uma com seus .ttf e o OFL.txt.
+A pasta tem a subpasta fustat/, com o .ttf e o OFL.txt.
 """
 
 import io
@@ -104,11 +101,8 @@ def main():
 
     unicodes = latim() | extras
     trabalhos = [
-        ('shippori/ShipporiMinchoB1-SemiBold.ttf', 'shippori-mincho-b1-600.woff2', None),
-        ('shippori/ShipporiMinchoB1-ExtraBold.ttf', 'shippori-mincho-b1-800.woff2', None),
-        # Variável: só os pesos que o CSS usa (400 a 600) e a largura normal.
-        ('plex/IBMPlexSans[wdth,wght].ttf', 'ibm-plex-sans-400-600.woff2', {'wght': (400, 600), 'wdth': 100}),
-        ('plex/IBMPlexMono-Medium.ttf', 'ibm-plex-mono-500.woff2', None),
+        # Variável: só os pesos que o CSS usa (400 a 800).
+        ('fustat/Fustat[wght].ttf', 'fustat-400-800.woff2', {'wght': (400, 800)}),
     ]
     for origem, nome, eixos in trabalhos:
         fonte = TTFont(originais / origem)
@@ -125,8 +119,7 @@ def main():
         aviso = f' (sem glifo para: {"".join(chr(c) for c in faltam)})' if faltam else ''
         print(f'{nome}: {tamanho / 1024:.1f} KB{aviso}')
 
-    shutil.copyfile(originais / 'shippori/OFL.txt', SAIDA / 'OFL-shippori-mincho-b1.txt')
-    shutil.copyfile(originais / 'plex/OFL.txt', SAIDA / 'OFL-ibm-plex.txt')
+    shutil.copyfile(originais / 'fustat/OFL.txt', SAIDA / 'OFL-fustat.txt')
 
 
 if __name__ == '__main__':

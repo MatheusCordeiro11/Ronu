@@ -1,10 +1,24 @@
 /* Ronu — Fontes servidas pelo próprio site
    Antes vinham do Google Fonts, que recebia o IP de quem abria qualquer página.
-   Os arquivos são recortes para os caracteres do site (latim + os kanji e
-   símbolos do frontend), gerados por docs/fontes-tipograficas/recortar.py:
-   rode de novo ao acrescentar um kanji ou símbolo. Licença OFL 1.1, em
-   fontes/OFL-*.txt. Só os pesos que o CSS usa; o navegador baixa cada arquivo
-   apenas quando a página usa aquela fonte (o mono, só a landing). */
+   Os arquivos são recortes para os caracteres do site, gerados por
+   docs/fontes-tipograficas/recortar.py: rode de novo ao acrescentar um símbolo.
+   Licença OFL 1.1, em fontes/OFL-*.txt. O navegador baixa cada arquivo apenas
+   quando a página usa aquela fonte.
+
+   Redesign de nov/2026: a família do site é a Fustat. A Shippori Mincho B1 e a
+   IBM Plex ficam só enquanto as telas antigas ainda têm o logo 浪, o carimbo
+   浪人 e os kanji do Treino: elas vêm depois da Fustat nas pilhas de
+   tokens.css, então só são baixadas quando aparece um caractere que a Fustat
+   não tem. Saem quando a última tela com kanji for migrada. */
+
+/* Variável: um arquivo só para os pesos 400 a 800. */
+@font-face {
+  font-family: 'Fustat';
+  src: url('../../fontes/fustat-400-800.woff2') format('woff2');
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
 
 @font-face {
   font-family: 'Shippori Mincho B1';
