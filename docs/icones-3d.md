@@ -59,7 +59,8 @@ halter com a mão fechada (hammer grip), porque pendurado ele ficava estranho.
 
 O `recorta-icone-3d.py` não serve para elas: o fundo branco preso entre os dedos fica no recorte. Elas foram
 recortadas tirando também as manchas brancas internas grandes (a partir de 400 px) e encolhendo o alfa 1 px para
-não sobrar halo, com lado máximo de 900 px.
+não sobrar halo. Depois, 24% da largura do lado esquerdo (o braço) foi cortado e a imagem ampliada de novo para
+900 px de largura, para a mão ficar do tamanho da `mao-tigela`; a do halter não tem esse corte.
 
 ## O envelope em camadas
 
