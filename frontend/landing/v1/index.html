@@ -1,467 +1,319 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ronu — Dieta que sabe que hoje tem treino</title>
-  <meta name="description" content="O Ronu calcula o gasto de cada sessão de treino, monta a semana de cardápios com IA e ajusta a meta conforme a balança responde.">
-
-  <!-- Antes do CSS: aplica o modo escuro/claro antes da primeira pintura. -->
-  <script src="../../js/base/tema.js"></script>
-  <script src="../../js/base/indicador.js" defer></script>
-  <!-- Liga a rolagem guiada antes da primeira pintura (sem pulo de layout);
-       com movimento reduzido, as seções ficam como blocos comuns. Sem defer:
-       precisa rodar aqui, antes do CSS. -->
-  <script src="rolagem-guiada.js"></script>
-
-  <link rel="stylesheet" href="../../css/base/fontes.css">
-
-  <link rel="stylesheet" href="../../css/base/tokens.css">
-  <link rel="stylesheet" href="../../css/base/base.css">
-  <link rel="stylesheet" href="../../css/componentes.css">
-  <link rel="stylesheet" href="landing.css">
-
-  <script src="landing.js" defer></script>
-  <!-- auth.js só traz o RONU_CONFIG (endereço da API, local ou produção):
-       o modalidades.js usa para ler o catálogo. -->
-  <script src="../../js/auth.js" defer></script>
-  <script src="modalidades.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Ronu — Dieta que sabe que hoje tem treino</title>
+<meta name="description" content="O Ronu calcula o gasto de cada sessão de treino, monta a semana de cardápios com IA e ajusta a meta conforme a balança responde.">
+<!-- Antes do CSS: aplica o modo escuro/claro antes da primeira pintura. -->
+<script src="../../js/base/tema.js"></script>
+<link rel="stylesheet" href="../../css/base/fontes.css">
+<link rel="stylesheet" href="landing.css">
+<script src="landing.js" defer></script>
 </head>
 <body>
-  <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<clipPath id="tigela-recorte"><path d="M2.5 20H37.5C37.5 30.2 29.7 37.5 20 37.5C10.3 37.5 2.5 30.2 2.5 20Z"/></clipPath>
+<symbol id="marca" viewBox="0 0 40 40">
+<path d="M6.2 20.2C5.6 15.6 8.6 12.6 12.2 13.2C13.2 9.4 17.2 7.6 20 8.8C22.8 7.6 26.8 9.4 27.8 13.2C31.4 12.6 34.4 15.6 33.8 20.2Z" fill="var(--logo-arroz)" stroke="var(--texto)" stroke-width="2" stroke-linejoin="round"/>
+<path d="M2.5 20H37.5C37.5 30.2 29.7 37.5 20 37.5C10.3 37.5 2.5 30.2 2.5 20Z" fill="var(--acento)"/>
+<g clip-path="url(#tigela-recorte)"><rect x="0" y="24.2" width="40" height="5" fill="var(--logo-faixa)"/>
+<path d="M18 30 L13.6 37.6 L17 38.4 L19.8 30.6Z M22 30 L26.4 37.6 L23 38.4 L20.2 30.6Z" fill="var(--logo-faixa)"/></g>
+<rect x="16.6" y="22.6" width="6.8" height="8.2" rx="1.6" fill="var(--logo-faixa)"/>
+</symbol></defs></svg>
 
-  <header class="lp-topo">
-    <div class="conteiner lp-topo-linha">
-      <a class="logo" href="./" aria-label="Ronu, início">
-        <svg class="logo-marca" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><defs><clipPath id="logo-recorte"><path d="M2.5 20H37.5C37.5 30.2 29.7 37.5 20 37.5C10.3 37.5 2.5 30.2 2.5 20Z"/></clipPath></defs><path d="M6.2 20.2C5.6 15.6 8.6 12.6 12.2 13.2C13.2 9.4 17.2 7.6 20 8.8C22.8 7.6 26.8 9.4 27.8 13.2C31.4 12.6 34.4 15.6 33.8 20.2Z" fill="var(--logo-arroz)" stroke="var(--texto)" stroke-width="2" stroke-linejoin="round"/><path d="M2.5 20H37.5C37.5 30.2 29.7 37.5 20 37.5C10.3 37.5 2.5 30.2 2.5 20Z" fill="var(--acento)"/><g clip-path="url(#logo-recorte)"><rect x="0" y="24.2" width="40" height="5" fill="var(--logo-faixa)"/><path d="M18 30 L13.6 37.6 L17 38.4 L19.8 30.6Z M22 30 L26.4 37.6 L23 38.4 L20.2 30.6Z" fill="var(--logo-faixa)"/></g><rect x="16.6" y="22.6" width="6.8" height="8.2" rx="1.6" fill="var(--logo-faixa)"/></svg>
-        <span class="logo-nome" aria-hidden="true">ronu</span>
-      </a>
-      <nav class="lp-nav" aria-label="Seções">
-        <a href="#sec-treino">Treino</a>
-        <a href="#sec-meta">A meta</a>
-        <a href="#sec-semana">A semana</a>
-        <a href="#sec-balanca">Progresso</a>
+<header class="menu" id="menu">
+  <div class="conteiner">
+    <div class="barra">
+      <a class="logo" href="#topo" aria-label="Ronu, início"><svg class="logo-marca" aria-hidden="true"><use href="#marca"/></svg>ronu</a>
+      <nav class="links" aria-label="Seções">
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#semana">A semana</a>
+        <a href="#balanca">A balança</a>
+        <a href="#simulador">Simular</a>
+        <a href="#duvidas">Dúvidas</a>
       </nav>
-      <div class="lp-topo-acoes">
-        <button type="button" class="botao-tema" data-alternar-tema aria-label="Mudar para o modo claro">
-          <svg class="icone-sol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></svg>
-          <svg class="icone-lua" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+      <div class="menu-acoes">
+        <button class="botao-tema" id="tema" type="button" data-alternar-tema aria-label="Trocar entre claro e escuro">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></svg>
         </button>
-        <a class="lp-entrar" href="../../login.html">Entrar</a>
-        <a class="botao botao-primario botao-pequeno lp-topo-cta" href="../../cadastro.html">Criar conta grátis</a>
+        <a class="entrar" href="../../login.html">Entrar</a>
+        <a class="botao botao-primario botao-pequeno" href="../../cadastro.html">Criar conta grátis</a>
       </div>
     </div>
-  </header>
+  </div>
+</header>
 
-  <main id="conteudo">
-
-    <!-- ---------- Hero ---------- -->
-    <section class="lp-hero grade" aria-labelledby="t-hero">
-      <div class="conteiner lp-hero-grade">
-        <div class="lp-hero-texto">
-          <span class="mono lp-kicker sobre-grade">Dieta para quem treina luta</span>
-          <h1 id="t-hero" class="lp-hero-titulo lp-bloco-fundo">Sua dieta sabe que hoje tem treino.</h1>
-          <p class="lp-hero-lede"><span class="sobre-grade">O Ronu calcula quanto você gasta em cada sessão, monta a semana com comida de verdade e ajusta a meta conforme a balança responde.</span></p>
-          <div class="lp-hero-acoes">
-            <a class="botao botao-primario botao-grande" href="../../cadastro.html">Criar minha dieta</a>
-            <a class="botao botao-fantasma botao-grande lp-fundo" href="#sec-treino">Ver como funciona</a>
-          </div>
-          <!-- Sem número no HTML inicial: o modalidades.js troca "outras" por
-               "mais N" com o total do catálogo (GET /api/modalidades). Se a
-               chamada falhar, fica este texto, que vale sempre. -->
-          <p class="apoio lp-modalidades"><span class="sobre-grade" id="lp-apoio-modalidades" data-nomes="4">Grátis · Jiu-jitsu, corrida, vôlei, dança e outras modalidades</span></p>
-        </div>
-
-        <!-- A ilustração troca sozinha entre nove modalidades do catálogo, para
-             mostrar que o Ronu não é só jiu-jitsu (landing/v1/modalidades.js).
-             Cores só pelos tokens do quimono. -->
-        <div class="lp-hero-arte" id="lp-modalidades">
-          <div class="quimono lp-hero-quimono lp-ilustracoes">
-            <svg class="lp-ilustracao lp-ilustracao-atual" viewBox="0 0 400 460" role="img" aria-label="Quimono de jiu-jitsu" focusable="false">
-              <path class="q-corpo" d="M150 30 L40 62 L0 192 L70 218 L110 142 L110 440 L290 440 L290 142 L330 218 L400 192 L360 62 L250 30 Q200 52 150 30 Z"/>
-              <path class="q-sombra-1" d="M150 30 L176 30 L256 232 L238 252 Z"/>
-              <path class="q-sombra-2" d="M250 30 L224 30 L150 220 L162 252 Z"/>
-              <path class="q-costura" d="M40 62 L70 218 M360 62 L330 218 M200 280 L200 440"/>
-              <path class="q-faixa" d="M110 250 L290 250 L290 282 L110 282 Z"/>
-              <path class="q-faixa" d="M188 282 L166 376 L184 379 L201 286 Z"/>
-              <path class="q-faixa" d="M212 282 L240 368 L222 373 L203 286 Z"/>
-              <rect class="q-etiqueta" x="232" y="262" width="22" height="9"/>
-            </svg>
-            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Tênis de corrida" focusable="false">
-              <path class="il-traco-costura" d="M20 250 L70 250 M8 285 L60 285 M28 215 L80 215" stroke-width="6" stroke-linecap="round" fill="none"/>
-              <path class="il-papel" d="M78 318 C76 262 92 222 128 208 L196 196 C226 228 266 248 324 266 C354 276 370 296 366 318 Z"/>
-              <path class="il-sombra" d="M78 318 C74 270 84 238 108 226 L118 300 Z"/>
-              <path class="il-traco-tinta" d="M150 214 L176 240 M168 208 L196 234 M186 204 L214 230" stroke-width="6" stroke-linecap="round" fill="none"/>
-              <path class="il-traco-acento" d="M128 292 C190 268 250 276 340 290" stroke-width="12" fill="none" stroke-linecap="round"/>
-              <path class="il-sombra" d="M62 318 L370 318 L366 336 L66 336 Z"/>
-              <path class="il-tinta" d="M66 336 L366 336 C374 336 376 352 364 356 L76 356 C62 356 58 342 66 336 Z"/>
-            </svg>
-            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Bola de vôlei" focusable="false">
-              <!-- Id único na página: o recorte dos painéis da bola. -->
-              <defs><clipPath id="lp-recorte-bola-volei"><circle cx="200" cy="230" r="150"/></clipPath></defs>
-              <circle class="il-papel" cx="200" cy="230" r="150"/>
-              <g clip-path="url(#lp-recorte-bola-volei)">
-                <path class="il-acento" d="M40 150 C130 118 230 150 320 270 L360 240 C266 108 140 80 40 108 Z"/>
-                <path class="il-tinta" d="M100 400 C116 300 186 226 320 196 L340 236 C222 256 160 316 150 410 Z"/>
-                <path class="il-traco-costura" d="M200 80 C150 150 140 250 190 390" stroke-width="6" fill="none"/>
-              </g>
-              <circle class="il-traco-costura" cx="200" cy="230" r="150" fill="none" stroke-width="4"/>
-              <path class="il-traco-costura" d="M120 410 L280 410" stroke-width="8" stroke-linecap="round"/>
-            </svg>
-            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Luvas de boxe" focusable="false">
-              <g transform="translate(110 40)">
-                <path class="il-sombra" d="M70 120 C70 60 190 50 205 110 C222 170 212 250 186 280 L186 330 L84 330 L84 285 C52 252 48 180 70 120 Z"/>
-                <rect class="il-tinta" x="82" y="292" width="106" height="74" rx="8"/>
-                <rect class="il-acento" x="82" y="312" width="106" height="10"/>
-              </g>
-              <g transform="translate(20 70)">
-                <path class="il-papel" d="M70 120 C70 60 190 50 205 110 C222 170 212 250 186 280 L186 330 L84 330 L84 285 C52 252 48 180 70 120 Z"/>
-                <path class="il-sombra-2" d="M74 196 C32 186 30 252 80 258 Z"/>
-                <path class="il-traco-costura" d="M100 120 C120 100 160 98 182 118" stroke-width="3" fill="none"/>
-                <rect class="il-tinta" x="82" y="292" width="106" height="74" rx="8"/>
-                <rect class="il-acento" x="82" y="312" width="106" height="10"/>
-              </g>
-            </svg>
-            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Par de sapatilhas de ponta" focusable="false">
-              <path class="il-traco-acento" d="M120 200 C130 140 170 100 200 76 M190 200 C196 150 198 110 200 76 M216 222 C210 160 204 110 200 76 M290 214 C276 150 236 104 200 76" stroke-width="7" fill="none" stroke-linecap="round"/>
-              <g transform="translate(112 196) rotate(-9 40 100)">
-                <path class="il-papel" d="M0 0 C-10 44 -12 112 4 160 C10 182 22 196 40 198 C58 196 70 182 76 160 C92 112 90 44 80 0 Z"/>
-                <path class="il-sombra-2" d="M0 0 C-10 44 -12 112 4 160 C10 182 22 196 40 198 C22 170 14 110 16 6 Z"/>
-                <path class="il-traco-costura" d="M6 74 C24 86 56 86 74 74" stroke-width="3" fill="none"/>
-                <path class="il-traco-costura" d="M40 86 L40 190" stroke-width="2" fill="none"/>
-                <ellipse class="il-sombra" cx="40" cy="194" rx="15" ry="5"/>
-                <ellipse class="il-sombra" cx="40" cy="2" rx="40" ry="12"/>
-                <ellipse class="il-costura" cx="40" cy="5" rx="29" ry="7"/>
-              </g>
-              <g transform="translate(214 214) rotate(9 40 100)">
-                <path class="il-papel" d="M0 0 C-10 44 -12 112 4 160 C10 182 22 196 40 198 C58 196 70 182 76 160 C92 112 90 44 80 0 Z"/>
-                <path class="il-sombra-2" d="M0 0 C-10 44 -12 112 4 160 C10 182 22 196 40 198 C22 170 14 110 16 6 Z"/>
-                <path class="il-traco-costura" d="M6 74 C24 86 56 86 74 74" stroke-width="3" fill="none"/>
-                <path class="il-traco-costura" d="M40 86 L40 190" stroke-width="2" fill="none"/>
-                <ellipse class="il-sombra" cx="40" cy="194" rx="15" ry="5"/>
-                <ellipse class="il-sombra" cx="40" cy="2" rx="40" ry="12"/>
-                <ellipse class="il-costura" cx="40" cy="5" rx="29" ry="7"/>
-              </g>
-              <path class="il-acento" d="M200 76 C170 50 150 58 160 76 C168 90 188 84 200 76 Z M200 76 C230 50 250 58 240 76 C232 90 212 84 200 76 Z"/>
-              <path class="il-traco-acento" d="M196 82 C186 110 180 130 172 150 M204 82 C214 112 224 128 236 146" stroke-width="7" fill="none" stroke-linecap="round"/>
-              <circle class="il-tinta" cx="200" cy="77" r="9"/>
-              <ellipse class="il-costura" cx="200" cy="432" rx="96" ry="8" opacity=".5"/>
-            </svg>
-            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Bola de futebol" focusable="false">
-              <!-- Id único na página: o recorte dos gomos da bola. -->
-              <defs><clipPath id="lp-recorte-bola-futebol"><circle cx="200" cy="230" r="150"/></clipPath></defs>
-              <circle class="il-papel" cx="200" cy="230" r="150"/>
-              <g class="il-tinta" clip-path="url(#lp-recorte-bola-futebol)">
-                <polygon points="200,182 245.6,215.2 228.2,268.8 171.8,268.8 154.4,215.2"/>
-                <circle cx="288" cy="108" r="52"/><circle cx="343" cy="276" r="52"/><circle cx="200" cy="384" r="52"/><circle cx="57" cy="276" r="52"/><circle cx="112" cy="108" r="52"/>
-              </g>
-              <path class="il-traco-costura" d="M200 182 L200 132 M245.6 215.2 L292 198 M228.2 268.8 L258 310 M171.8 268.8 L142 310 M154.4 215.2 L108 198" stroke-width="5" stroke-linecap="round"/>
-              <circle class="il-traco-costura" cx="200" cy="230" r="150" fill="none" stroke-width="4"/>
-              <path class="il-traco-acento" d="M120 410 L280 410" stroke-width="8" stroke-linecap="round"/>
-            </svg>
-            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Bicicleta" focusable="false">
-              <g class="il-traco-costura" stroke-width="2" fill="none">
-                <path d="M110 220 L110 380 M30 300 L190 300 M53 243 L167 357 M53 357 L167 243"/>
-                <path d="M290 220 L290 380 M210 300 L370 300 M233 243 L347 357 M233 357 L347 243"/>
-              </g>
-              <circle class="il-traco-papel" cx="110" cy="300" r="80" fill="none" stroke-width="14"/>
-              <circle class="il-traco-papel" cx="290" cy="300" r="80" fill="none" stroke-width="14"/>
-              <path class="il-traco-acento" d="M110 300 L186 300 L162 196 Z M162 196 L256 200 L186 300 M256 200 L290 300" stroke-width="12" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
-              <path class="il-traco-tinta" d="M162 196 L156 172" stroke-width="10" stroke-linecap="round" fill="none"/>
-              <path class="il-traco-tinta" d="M132 168 L182 168" stroke-width="14" stroke-linecap="round" fill="none"/>
-              <path class="il-traco-tinta" d="M256 200 L266 164 L298 158" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-              <circle class="il-tinta" cx="186" cy="300" r="16"/>
-              <path class="il-traco-tinta" d="M186 300 L206 330 M196 330 L218 330" stroke-width="8" stroke-linecap="round" fill="none"/>
-              <circle class="il-costura" cx="110" cy="300" r="9"/><circle class="il-costura" cx="290" cy="300" r="9"/>
-            </svg>
-            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Halter de musculação" focusable="false">
-              <g transform="rotate(-18 200 230)">
-                <rect class="il-costura" x="70" y="218" width="260" height="24" rx="4"/>
-                <rect class="il-papel" x="40" y="140" width="44" height="180" rx="8"/>
-                <rect class="il-sombra" x="84" y="162" width="30" height="136" rx="6"/>
-                <rect class="il-papel" x="316" y="140" width="44" height="180" rx="8"/>
-                <rect class="il-sombra" x="286" y="162" width="30" height="136" rx="6"/>
-                <rect class="il-acento" x="114" y="208" width="14" height="44" rx="3"/>
-                <rect class="il-acento" x="272" y="208" width="14" height="44" rx="3"/>
-                <path class="il-traco-tinta" d="M160 222 L160 238 M176 222 L176 238 M192 222 L192 238 M208 222 L208 238 M224 222 L224 238 M240 222 L240 238" stroke-width="3"/>
-              </g>
-            </svg>
-            <svg class="lp-ilustracao" viewBox="0 0 400 460" role="img" aria-label="Óculos de natação" focusable="false">
-              <path class="il-traco-costura" d="M78 222 C20 222 12 292 60 300 M322 222 C380 222 388 292 340 300" stroke-width="12" fill="none" stroke-linecap="round"/>
-              <ellipse class="il-tinta il-traco-papel" cx="138" cy="230" rx="64" ry="48" stroke-width="14"/>
-              <ellipse class="il-tinta il-traco-papel" cx="262" cy="230" rx="64" ry="48" stroke-width="14"/>
-              <rect class="il-papel" x="190" y="222" width="20" height="14" rx="4"/>
-              <path class="il-traco-acento" d="M108 212 C118 200 136 196 150 200 M232 212 C242 200 260 196 274 200" stroke-width="6" fill="none" stroke-linecap="round"/>
-              <path class="il-traco-acento" d="M30 372 q35 -24 70 0 t70 0 t70 0 t70 0 t70 0" stroke-width="8" fill="none" stroke-linecap="round"/>
-              <path class="il-traco-costura" d="M30 404 q35 -24 70 0 t70 0 t70 0 t70 0 t70 0" stroke-width="6" fill="none" stroke-linecap="round"/>
-            </svg>
-          </div>
-
-          <div class="lp-modalidades-controles">
-            <span class="mono lp-modalidade-nome" id="lp-modalidade-nome" aria-live="polite">Jiu-jitsu</span>
-            <div class="lp-pontos" role="group" aria-label="Modalidades">
-              <button type="button" class="lp-ponto" aria-label="Mostrar Jiu-jitsu" aria-pressed="true"><span></span></button>
-              <button type="button" class="lp-ponto" aria-label="Mostrar Corrida" aria-pressed="false"><span></span></button>
-              <button type="button" class="lp-ponto" aria-label="Mostrar Vôlei" aria-pressed="false"><span></span></button>
-              <button type="button" class="lp-ponto" aria-label="Mostrar Boxe" aria-pressed="false"><span></span></button>
-              <button type="button" class="lp-ponto" aria-label="Mostrar Dança" aria-pressed="false"><span></span></button>
-              <button type="button" class="lp-ponto" aria-label="Mostrar Futebol" aria-pressed="false"><span></span></button>
-              <button type="button" class="lp-ponto" aria-label="Mostrar Ciclismo" aria-pressed="false"><span></span></button>
-              <button type="button" class="lp-ponto" aria-label="Mostrar Musculação" aria-pressed="false"><span></span></button>
-              <button type="button" class="lp-ponto" aria-label="Mostrar Natação" aria-pressed="false"><span></span></button>
-            </div>
-          </div>
-
-          <!-- Números do exemplo, pela fórmula real (ver landing.js). -->
-          <div class="flutua lp-flutua-1" aria-hidden="true">
-            <span class="mono lp-flutua-rotulo lp-flutua-acento">Hoje · dia de treino</span>
-            <span class="numero lp-flutua-numero">2.851 kcal</span>
-          </div>
-          <div class="flutua lp-flutua-2" aria-hidden="true">
-            <span class="mono lp-flutua-rotulo">Amanhã · descanso</span>
-            <span class="numero lp-flutua-numero texto-2">2.035 kcal</span>
-          </div>
-          <div class="selo lp-hero-carimbo">
-            <p class="selo-legenda"><span class="selo-nome">Ronin</span><span class="selo-texto">No Japão feudal, o samurai sem mestre, que seguia o próprio caminho. Daí vem o nome Ronu.</span></p>
-            <div class="carimbo carimbo-pequeno" aria-hidden="true"><span>浪</span><span>人</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="conteiner lp-hero-rodape">
-        <a class="mono lp-rolar sobre-grade" href="#sec-treino">
-          <svg class="lp-rolar-seta" viewBox="0 0 12 16" width="12" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 1v13M1.5 9.5L6 14l4.5-4.5"/></svg>
-          Role e veja em 4 passos
-        </a>
-        <ol class="mono lp-indice sobre-grade" aria-label="Os 4 passos">
-          <li><a href="#sec-treino">01 Treino</a></li>
-          <li><a href="#sec-meta">02 A meta</a></li>
-          <li><a href="#sec-semana">03 A semana</a></li>
-          <li><a href="#sec-balanca">04 A balança</a></li>
-        </ol>
-      </div>
-    </section>
-
-    <p class="conteiner apoio lp-exemplo">Os números das cenas a seguir são de um exemplo, calculados pela mesma conta do app: homem de 30 anos, 80 kg e 1,78 m, que treina jiu-jitsu por 1 h 30 e quer perder peso.</p>
-
-    <!-- ---------- 01 · Treino ----------
-         Cada seção gruda na tela e a rolagem controla a cena por --p (0 a 1),
-         escrita pelo landing.js com suavização. Sem JS ou com movimento
-         reduzido, --p fica em 1 e a seção vira um bloco comum, já no estado final. -->
-    <section class="lp-secao" id="sec-treino" data-secao="treino" aria-labelledby="t-treino">
-      <div class="lp-palco">
-        <div class="conteiner lp-palco-grade">
-          <div class="lp-texto">
-            <span class="mono lp-numero-secao">01 / 04 · Treino</span>
-            <h2 id="t-treino" class="lp-titulo-secao">Conta como você treina.</h2>
-            <p class="lp-texto-secao">Nada de “nível de atividade: moderado”. Você diz a modalidade, os dias e quanto tempo dura, e o Ronu calcula o gasto de cada sessão.</p>
-            <ol class="lp-passos" style="--n: 3">
-              <li style="--j: 0"><span class="lp-passo-nome">Modalidade</span><span class="lp-passo-desc">Lutas, musculação e outros esportes, com a intensidade de cada um.</span></li>
-              <li style="--j: 1"><span class="lp-passo-nome">Dias</span><span class="lp-passo-desc">Os dias de treino ganham mais comida que os de descanso.</span></li>
-              <li style="--j: 2"><span class="lp-passo-nome">Duração</span><span class="lp-passo-desc">Peso, tempo e intensidade viram as kcal da sessão.</span></li>
-            </ol>
-            <div class="lp-trilho" aria-hidden="true"><span></span></div>
-            <div class="mono lp-marcos" aria-hidden="true" style="--n: 3"><span style="--j: 0">00:00 Modalidade</span><span style="--j: 1">00:05 Dias</span><span style="--j: 2">00:10 Duração</span></div>
-          </div>
-
-          <div class="lp-cena-area">
-            <div class="lp-cena lp-cartao">
-              <span class="mono lp-etiqueta" data-etiqueta>00:15 · kcal da sessão</span>
-              <span class="lp-cartao-titulo">Seu treino</span>
-              <div class="chips lp-mods">
-                <span class="chip lp-mod-ativa">Jiu-jitsu</span>
-                <span class="chip lp-mod">Muay thai</span>
-                <span class="chip lp-mod">Boxe</span>
-                <span class="chip lp-mod">Musculação</span>
-              </div>
-              <div class="dias lp-dias">
-                <span class="lp-dia" style="--a: 0.36">Seg</span><span>Ter</span><span class="lp-dia" style="--a: 0.44">Qua</span><span>Qui</span><span class="lp-dia" style="--a: 0.52">Sex</span><span>Sáb</span><span>Dom</span>
-              </div>
-              <div class="lp-cartao-rodape lp-surge" style="--a: 0.66; --b: 0.76">
-                <div class="lp-par"><span class="apoio">Duração</span><span class="lp-duracao">1 h 30 min</span></div>
-                <div class="lp-par lp-par-fim"><span class="numero lp-kcal-grande" data-contador="treino">816</span><span class="apoio">kcal por sessão</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ---------- 02 · A meta ---------- -->
-    <section class="lp-secao" id="sec-meta" data-secao="meta" aria-labelledby="t-meta">
-      <div class="lp-palco">
-        <div class="conteiner lp-palco-grade">
-          <div class="lp-texto">
-            <span class="mono lp-numero-secao">02 / 04 · A meta</span>
-            <h2 id="t-meta" class="lp-titulo-secao">A meta sai da sua rotina, não de tabela.</h2>
-            <p class="lp-texto-secao">Cada parte da conta aparece aberta. Você vê de onde vem cada caloria.</p>
-            <ol class="lp-passos" style="--n: 4">
-              <li style="--j: 0"><span class="lp-passo-nome">Gasto parado</span><span class="lp-passo-desc">O que o seu corpo gasta sem fazer nada.</span></li>
-              <li style="--j: 1"><span class="lp-passo-nome">Dia a dia</span><span class="lp-passo-desc">Trabalho, estudo, andar pela casa.</span></li>
-              <li style="--j: 2"><span class="lp-passo-nome">Treino</span><span class="lp-passo-desc">A sessão do dia, calculada no passo anterior.</span></li>
-              <li style="--j: 3"><span class="lp-passo-nome">Objetivo</span><span class="lp-passo-desc">Perder, manter ou ganhar peso.</span></li>
-            </ol>
-            <div class="lp-trilho" aria-hidden="true"><span></span></div>
-            <div class="mono lp-marcos" aria-hidden="true" style="--n: 4"><span style="--j: 0">00:00 Gasto parado</span><span style="--j: 1">00:04 Dia a dia</span><span style="--j: 2">00:08 Treino</span><span style="--j: 3">00:11 Objetivo</span></div>
-          </div>
-
-          <div class="lp-cena-area">
-            <div class="lp-cena lp-cartao">
-              <span class="mono lp-etiqueta" data-etiqueta>00:15 · objetivo: perder peso</span>
-              <span class="lp-cartao-titulo">Como sua meta é calculada</span>
-              <div class="lp-conta">
-                <!-- --ini: soma das partes anteriores; --v: valor absoluto; --neg: 1 se desconta. -->
-                <div class="lp-conta-linha" style="--a: 0.04; --ini: 0; --v: 1768; --neg: 0">
-                  <div class="lp-conta-cabeca"><span class="texto-2">Gasto parado</span><span class="num" data-contador="meta-0">1.768</span></div>
-                  <div class="lp-conta-trilho"><span class="lp-conta-barra lp-barra-texto"></span></div>
-                </div>
-                <div class="lp-conta-linha" style="--a: 0.26; --ini: 1768; --v: 707; --neg: 0">
-                  <div class="lp-conta-cabeca"><span class="texto-2">Dia a dia</span><span class="num" data-contador="meta-1">+ 707</span></div>
-                  <div class="lp-conta-trilho"><span class="lp-conta-barra lp-barra-texto"></span></div>
-                </div>
-                <div class="lp-conta-linha" style="--a: 0.48; --ini: 2475; --v: 816; --neg: 0">
-                  <div class="lp-conta-cabeca"><span class="texto-2">Treino de jiu-jitsu</span><span class="num" data-contador="meta-2">+ 816</span></div>
-                  <div class="lp-conta-trilho"><span class="lp-conta-barra lp-barra-acento"></span></div>
-                </div>
-                <div class="lp-conta-linha" style="--a: 0.70; --ini: 3291; --v: 440; --neg: 1">
-                  <div class="lp-conta-cabeca"><span class="texto-2">Objetivo: perder peso</span><span class="num" data-contador="meta-3">− 440</span></div>
-                  <div class="lp-conta-trilho"><span class="lp-conta-barra lp-barra-negativa"></span></div>
-                </div>
-              </div>
-              <div class="lp-conta-total">
-                <span class="apoio">Meta no dia de treino</span>
-                <span class="numero lp-kcal-grande"><span data-contador="meta-total">2.851</span> <span class="numero-unidade">kcal</span></span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ---------- 03 · A semana ---------- -->
-    <section class="lp-secao" id="sec-semana" data-secao="semana" aria-labelledby="t-semana">
-      <div class="lp-palco">
-        <div class="conteiner lp-palco-grade">
-          <div class="lp-texto">
-            <span class="mono lp-numero-secao">03 / 04 · A semana</span>
-            <h2 id="t-semana" class="lp-titulo-secao">Sua semana pronta em segundos.</h2>
-            <p class="lp-texto-secao">Sete dias de cardápio com comida que você gosta, no seu orçamento e com os nomes que você usa.</p>
-            <ol class="lp-passos" style="--n: 3">
-              <li style="--j: 0"><span class="lp-passo-nome">Gera</span><span class="lp-passo-desc">A IA monta os sete dias em cima da sua meta.</span></li>
-              <li style="--j: 1"><span class="lp-passo-nome">Treino ou descanso</span><span class="lp-passo-desc">Cada dia tem a sua conta e o seu cardápio.</span></li>
-              <li style="--j: 2"><span class="lp-passo-nome">Do seu jeito</span><span class="lp-passo-desc">Mandioca, aipim ou macaxeira: depende de onde você mora.</span></li>
-            </ol>
-            <div class="lp-trilho" aria-hidden="true"><span></span></div>
-            <div class="mono lp-marcos" aria-hidden="true" style="--n: 3"><span style="--j: 0">00:00 Gera</span><span style="--j: 1">00:05 Treino ou descanso</span><span style="--j: 2">00:10 Do seu jeito</span></div>
-          </div>
-
-          <div class="lp-cena-area">
-            <div class="lp-cena lp-celular-area">
-              <span class="mono lp-etiqueta" data-etiqueta>00:15 · nome regional</span>
-              <div class="lp-celular">
-                <div class="lp-celular-tela">
-                  <div class="lp-celular-topo">
-                    <span class="lp-celular-marca">RONU</span>
-                    <span class="mono lp-chip-estado">Rio de Janeiro</span>
-                  </div>
-                  <div class="lp-celular-dias" aria-hidden="true">
-                    <span class="lp-dia-seg">S</span><span class="lp-dia-ter">T</span><span>Q</span><span>Q</span><span>S</span><span>S</span><span>D</span>
-                  </div>
-                  <div class="lp-celular-meta">
-                    <div class="lp-pilha">
-                      <span class="apoio lp-camada-seg">Segunda · jiu-jitsu</span>
-                      <span class="apoio lp-camada-ter">Terça · descanso</span>
-                    </div>
-                    <div class="lp-celular-kcal"><span class="numero" data-contador="semana">2.851</span><span class="apoio">kcal</span></div>
-                  </div>
-                  <!-- Dois cardápios empilhados: segunda (treino) e terça (descanso). -->
-                  <div class="lp-pilha">
-                    <ul class="lp-refeicoes lp-camada-seg">
-                      <li style="--i: 0"><span class="mono">07:00</span>Cuscuz com ovo e café</li>
-                      <li style="--i: 1"><span class="mono">12:30</span>Arroz, feijão e frango grelhado</li>
-                      <li style="--i: 2"><span class="mono">17:30</span>Banana com aveia antes do treino</li>
-                      <li style="--i: 3"><span class="mono">21:30</span><span><span class="lp-regional" data-contador="regional">Aipim</span> cozida com carne moída</span></li>
-                    </ul>
-                    <ul class="lp-refeicoes lp-camada-ter" aria-hidden="true">
-                      <li style="--i: 0"><span class="mono">07:00</span>Pão francês com ovo mexido</li>
-                      <li style="--i: 1"><span class="mono">12:30</span>Arroz, feijão e peixe assado</li>
-                      <li style="--i: 2"><span class="mono">16:00</span>Iogurte com fruta</li>
-                      <li style="--i: 3"><span class="mono">20:00</span>Omelete com salada</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ---------- 04 · A balança ---------- -->
-    <section class="lp-secao" id="sec-balanca" data-secao="balanca" aria-labelledby="t-balanca">
-      <div class="lp-palco">
-        <div class="conteiner lp-palco-grade">
-          <div class="lp-texto">
-            <span class="mono lp-numero-secao">04 / 04 · A balança</span>
-            <h2 id="t-balanca" class="lp-titulo-secao">A meta aprende com a balança.</h2>
-            <p class="lp-texto-secao">Se o peso não anda como esperado, o Ronu ajusta a meta aos poucos, sem mudanças bruscas.</p>
-            <ol class="lp-passos" style="--n: 3">
-              <li style="--j: 0"><span class="lp-passo-nome">Você se pesa</span><span class="lp-passo-desc">A linha de tendência ignora as oscilações do dia a dia.</span></li>
-              <li style="--j: 1"><span class="lp-passo-nome">Diz como foi</span><span class="lp-passo-desc">Seguiu a dieta? Comeu mais? Uma resposta opcional.</span></li>
-              <li style="--j: 2"><span class="lp-passo-nome">O Ronu ajusta</span><span class="lp-passo-desc">Até 5% por vez, e só com dados suficientes.</span></li>
-            </ol>
-            <div class="lp-trilho" aria-hidden="true"><span></span></div>
-            <div class="mono lp-marcos" aria-hidden="true" style="--n: 3"><span style="--j: 0">00:00 Você se pesa</span><span style="--j: 1">00:05 Diz como foi</span><span style="--j: 2">00:10 O Ronu ajusta</span></div>
-          </div>
-
-          <div class="lp-cena-area">
-            <div class="lp-cena lp-cartao">
-              <span class="mono lp-etiqueta" data-etiqueta>00:15 · meta ajustada</span>
-              <div class="lp-balanca-topo">
-                <div class="lp-par"><span class="apoio">Peso de tendência</span><span class="numero lp-peso">79,5 <span class="numero-unidade">kg</span></span></div>
-                <span class="apoio">últimas 4 semanas</span>
-              </div>
-              <!-- Série de exemplo: 14 pesagens caindo devagar, com o ruído do
-                   dia a dia, e a tendência suavizada. Geometria fixa. -->
-              <svg class="lp-grafico" viewBox="-6 0 532 200" role="img" aria-label="Exemplo: pesagens oscilando e a linha de tendência caindo devagar de 80,7 para 79,5 kg">
-                <path class="lp-grafico-guia" d="M0 20 L520 20 M0 100 L520 100 M0 180 L520 180" vector-effect="non-scaling-stroke"/>
-                <g class="lp-pontos">
-                  <circle style="--j: 0" cx="0" cy="41.8" r="4"/><circle style="--j: 1" cx="40" cy="84" r="4"/><circle style="--j: 2" cx="80" cy="68" r="4"/><circle style="--j: 3" cx="120" cy="102.9" r="4"/><circle style="--j: 4" cx="160" cy="72.4" r="4"/><circle style="--j: 5" cx="200" cy="92.7" r="4"/><circle style="--j: 6" cx="240" cy="105.8" r="4"/><circle style="--j: 7" cx="280" cy="86.2" r="4"/><circle style="--j: 8" cx="320" cy="121.1" r="4"/><circle style="--j: 9" cx="360" cy="101.5" r="4"/><circle style="--j: 10" cx="400" cy="140" r="4"/><circle style="--j: 11" cx="440" cy="124" r="4"/><circle style="--j: 12" cx="480" cy="122.5" r="4"/><circle style="--j: 13" cx="520" cy="146.5" r="4"/>
-                </g>
-                <path class="lp-grafico-linha" pathLength="1" vector-effect="non-scaling-stroke" d="M0.0 41.8 L40.0 54.5 L80.0 58.5 L120.0 71.8 L160.0 72.0 L200.0 78.2 L240.0 86.5 L280.0 86.4 L320.0 96.8 L360.0 98.2 L400.0 110.7 L440.0 114.7 L480.0 117.1 L520.0 125.9"/>
-              </svg>
-              <div class="lp-balanca-rodape">
-                <span class="chip chip-pequeno lp-surge" style="--a: 0.45; --b: 0.55">Desde a pesagem anterior: segui a dieta</span>
-                <span class="lp-meta-ajustada lp-surge" style="--a: 0.74; --b: 0.8">Meta do dia de treino: <strong class="num"><span data-contador="balanca">2.765</span> kcal</strong></span>
-              </div>
-              <div class="lp-carimbo-ajuste" aria-hidden="true">Meta 3% menor</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ---------- Chamada final ---------- -->
-    <section class="lp-final grade" aria-labelledby="t-final">
-      <div class="conteiner lp-final-conteudo">
-        <span class="mono lp-kicker sobre-grade">Seu primeiro dia</span>
-        <h2 id="t-final" class="lp-final-titulo lp-bloco-fundo">Faixa branca também começa com plano.</h2>
-        <p class="lp-hero-lede"><span class="sobre-grade">Conta, quatro perguntas e a sua primeira semana sai pronta.</span></p>
-        <a class="botao botao-primario botao-grande" href="../../cadastro.html">Criar conta grátis</a>
-      </div>
-    </section>
-  </main>
-
-  <footer class="rodape">
-    <div class="conteiner rodape-linha">
-      <span>Ronu · dieta para quem treina</span>
-      <span>O cardápio é gerado por IA e não substitui acompanhamento profissional.</span>
-      <nav class="links-legais" aria-label="Documentos legais"><a href="../../privacidade.html">Privacidade</a><span class="links-legais-sep" aria-hidden="true">·</span><a href="../../termos.html">Termos</a></nav>
+<main id="topo">
+  <section class="hero conteiner" aria-labelledby="t-hero">
+    <span class="selo entra" style="--d:0"><b>IA</b>Dieta semanal para quem treina luta</span>
+    <h1 id="t-hero"><span class="linha"><span style="--d:1">Sua dieta sabe que</span></span><span class="linha"><span class="destaque" style="--d:2">hoje tem treino.</span></span></h1>
+    <p class="lede entra" style="--d:4">O Ronu calcula quanto você gasta em cada sessão, monta a semana com comida de verdade e ajusta a meta conforme a balança responde.</p>
+    <div class="hero-acoes entra" style="--d:5">
+      <a class="botao botao-primario" href="#simulador">Criar minha dieta <span class="seta" aria-hidden="true">→</span></a>
+      <a class="botao botao-contorno" href="#como-funciona">Ver como funciona</a>
     </div>
-    <div class="conteiner rodape-linha lp-creditos">
-      <span>Desenvolvido por <span class="lp-autor">Matheus Cordeiro</span> · <a href="https://www.linkedin.com/in/matheuscberto/" target="_blank" rel="noopener noreferrer">LinkedIn</a> · <a href="https://github.com/MatheusCordeiro11" target="_blank" rel="noopener noreferrer">GitHub</a></span>
-      <span>Tem uma sugestão? <a href="mailto:matheus.berto04@gmail.com?subject=Sugest%C3%A3o%20Ronu">Escreva para mim</a>.</span>
+    <p class="modalidades-curtas entra" style="--d:6">Grátis · jiu-jitsu, muay thai, boxe, musculação, corrida e outras modalidades</p>
+
+    <div class="palco-mockup" id="palco-mockup">
+      <div class="flutuante f1" aria-hidden="true"><span class="ic verde"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Almoço registrado<small>890 kcal · arroz, feijão e frango</small></span></div>
+      <div class="flutuante f2" aria-hidden="true"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-3.5 2-5.5 1 1 1.5 2 1.5 3 1.5-1.5 2-4.5 1.5-7.5z"/></svg></span><span>Treino de hoje<small>Jiu-jitsu · 816 kcal</small></span></div>
+      <div class="flutuante f3" aria-hidden="true"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 7l6 6 4-4 6 6M20 10v5h-5"/></svg></span><span>Meta ajustada<small>−3% · 2.765 kcal</small></span></div>
+      <div class="moldura" id="moldura">
+        <div class="app" aria-label="Exemplo da tela de dieta do app">
+          <div class="lateral" aria-hidden="true">
+            <span class="logo"><svg class="logo-marca" aria-hidden="true"><use href="#marca"/></svg>ronu</span>
+            <span class="ativo">Dieta</span><span>Progresso</span><span>Treino</span><span>Alimentação</span><span>Lista de compras</span><span>Casa</span><span>Perfil</span>
+          </div>
+          <div class="painel">
+            <div class="painel-topo">
+              <div><small id="mk-dia" class="troca-dia">Segunda-feira · dia de treino</small><h3>Sua semana</h3></div>
+              <div class="dias" id="mk-dias" role="group" aria-label="Dias da semana; segunda, quarta e sexta têm treino">
+                <button type="button" class="treino hoje" aria-pressed="true">Seg</button><button type="button" aria-pressed="false">Ter</button><button type="button" class="treino" aria-pressed="false">Qua</button><button type="button" aria-pressed="false">Qui</button><button type="button" class="treino" aria-pressed="false">Sex</button><button type="button" aria-pressed="false">Sáb</button><button type="button" aria-pressed="false">Dom</button>
+              </div>
+            </div>
+            <div class="cards-num">
+              <div class="card-num" id="mk-card-meta"><small>Meta do dia</small><span class="valor num"><span id="mk-meta">2.851</span><em>kcal</em></span><span class="obs acento troca-dia" id="mk-meta-obs">Treino de jiu-jitsu, 1 h 30</span></div>
+              <div class="card-num" id="mk-card-treino"><small>Gasto do treino</small><span class="valor num"><span id="mk-treino">816</span><em>kcal</em></span><span class="obs troca-dia" id="mk-treino-obs">Calculado pela modalidade</span></div>
+              <div class="card-num"><small>Peso de tendência</small><span class="valor num"><span id="mk-peso">79,5</span><em>kg</em></span><span class="obs verde">↓ 1,2 kg em 4 semanas</span><svg class="faisca" viewBox="0 0 84 32" aria-hidden="true"><path class="faisca-area" id="faisca-area" d=""/><path class="faisca-linha" id="faisca-linha" pathLength="1" d=""/><circle class="faisca-ponto" id="faisca-ponto" r="3" cx="84" cy="28"/></svg></div>
+            </div>
+            <div class="linha-baixo">
+              <div class="refeicoes" id="mk-ref-card">
+                <div class="ref-topo"><h4>Refeições do dia</h4><span class="num"><b id="mk-consumido">0</b> de <span id="mk-total">2.851</span> kcal</span></div>
+                <div class="consumo"><i id="mk-consumo"></i></div>
+                <div id="mk-refeicoes">
+                  <div class="refeicao"><span class="check"></span><span class="hora num">07:00</span><span class="nome">Cuscuz com ovo e café</span><span class="kcal num">620 kcal</span></div>
+                  <div class="refeicao"><span class="check"></span><span class="hora num">12:30</span><span class="nome">Arroz, feijão e frango grelhado</span><span class="kcal num">890 kcal</span></div>
+                  <div class="refeicao"><span class="check"></span><span class="hora num">17:30</span><span class="nome">Banana com aveia antes do treino</span><span class="kcal num">410 kcal</span></div>
+                  <div class="refeicao"><span class="check"></span><span class="hora num">21:30</span><span class="nome">Aipim cozido com carne moída</span><span class="kcal num">931 kcal</span></div>
+                </div>
+              </div>
+              <div class="macros">
+                <h4>Macros do dia</h4>
+                <div class="macro"><div><span>Proteína</span><b class="num" id="mk-p">160 g</b></div><div class="trilho"><i id="mk-pb" style="--w:62%; --c:var(--acento); --d:0"></i></div></div>
+                <div class="macro"><div><span>Carboidrato</span><b class="num" id="mk-c">360 g</b></div><div class="trilho"><i id="mk-cb" style="--w:85%; --d:1"></i></div></div>
+                <div class="macro"><div><span>Gordura</span><b class="num" id="mk-g">85 g</b></div><div class="trilho"><i id="mk-gb" style="--w:40%; --c:var(--texto-3); --d:2"></i></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </footer>
+  </section>
+
+  <section class="faixa" aria-label="Modalidades">
+    <p>Uma conta para cada modalidade</p>
+    <div class="letreiro">
+      <div class="letreiro-trilho">
+        <ul><li>Jiu-jitsu</li><li>Muay thai</li><li>Boxe</li><li>Musculação</li><li>Corrida</li><li>Futebol</li><li>Natação</li><li>Ciclismo</li><li>Vôlei</li><li>Dança</li></ul>
+        <ul aria-hidden="true"><li>Jiu-jitsu</li><li>Muay thai</li><li>Boxe</li><li>Musculação</li><li>Corrida</li><li>Futebol</li><li>Natação</li><li>Ciclismo</li><li>Vôlei</li><li>Dança</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="numero-grande" id="como-funciona" data-rolagem="maos" aria-labelledby="t-numero">
+    <div class="conteiner">
+      <img class="mao mao-esq" src="../../img/landing/mao-faixa.webp" alt="" width="900" height="659">
+      <img class="mao mao-dir" src="../../img/landing/mao-tigela.webp" alt="" width="900" height="614">
+      <div class="palco-maos">
+        <div class="centro">
+          <span class="kcal-grande num"><span id="conta-maos">816</span> kcal</span>
+          <h2 id="t-numero">por treino de jiu-jitsu.</h2>
+          <p>1 h 30 de treino, 80 kg. O gasto sai da modalidade e da duração, não de um “nível moderado”.</p>
+        </div>
+      </div>
+      <div class="vantagens">
+        <div class="vantagem revela" style="--i:0"><img class="icone" style="--i:0" src="../../img/icones/luva.webp" alt="" width="112" height="96"><p>Gasto por modalidade, duração e dias reais.</p></div>
+        <div class="vantagem revela" style="--i:1"><img class="icone" style="--i:1" src="../../img/icones/calendario.webp" alt="" width="112" height="96"><p>Dia de treino come mais que dia de descanso.</p></div>
+        <div class="vantagem revela" style="--i:2"><img class="icone" style="--i:2" src="../../img/icones/balanca.webp" alt="" width="112" height="96"><p>A meta se ajusta conforme a balança responde.</p></div>
+        <div class="vantagem revela" style="--i:3"><img class="icone" style="--i:3" src="../../img/icones/sacola.webp" alt="" width="112" height="96"><p>Lista de compras da semana, já somada.</p></div>
+      </div>
+      <div class="cta-centro revela">
+        <a class="botao botao-primario" href="#simulador">Calcular a minha meta <span class="seta" aria-hidden="true">→</span></a>
+        <span class="nota-cta">Grátis. Conta, quatro perguntas e a primeira semana sai pronta.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="conteiner dupla" id="semana" aria-labelledby="t-semana">
+    <div class="visual visual-celular revela" id="visual-celular">
+      <div class="celular-cena">
+        <div class="celular" id="celular" aria-label="Celular com o cardápio de segunda-feira">
+          <div class="espessura" aria-hidden="true"><span style="--z:2"></span><span style="--z:4"></span><span style="--z:6"></span><span style="--z:8"></span><span style="--z:10"></span><span style="--z:12"></span></div>
+          <span class="botao-lado bl1" aria-hidden="true"></span><span class="botao-lado bl2" aria-hidden="true"></span><span class="botao-lado bl3" aria-hidden="true"></span>
+          <div class="celular-corpo">
+            <div class="tela">
+              <span class="ilha" aria-hidden="true"></span>
+              <div class="status" aria-hidden="true"><span>9:41</span><span class="status-icones"><svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 16 12"><path d="M8 11.5 5.6 9a3.4 3.4 0 0 1 4.8 0zM3.4 6.8a6.5 6.5 0 0 1 9.2 0l-1.5 1.5a4.4 4.4 0 0 0-6.2 0zM.9 4.3a10 10 0 0 1 14.2 0l-1.5 1.5a7.9 7.9 0 0 0-11.2 0z"/></svg><svg viewBox="0 0 27 12"><rect x=".5" y=".5" width="22" height="11" rx="3.5" fill="none" stroke="currentColor" opacity=".4"/><rect x="2.5" y="2.5" width="16" height="7" rx="2"/><rect x="24" y="4" width="2" height="4" rx="1" opacity=".4"/></svg></span></div>
+              <div class="tela-cab"><small>Segunda · jiu-jitsu</small><span class="tela-chip">Rio de Janeiro</span></div>
+              <div class="tela-meta">
+                <div><span class="grande num">2.851<em>kcal</em></span><small id="cel-consumido">0 kcal comidas hoje</small></div>
+                <div class="anel-caixa"><svg class="anel" viewBox="0 0 60 60" aria-hidden="true"><circle class="anel-fundo" cx="30" cy="30" r="25"/><circle class="anel-valor" id="cel-anel" cx="30" cy="30" r="25" pathLength="1"/></svg><span class="anel-rotulo num" id="cel-pct">0%</span></div>
+              </div>
+              <ul id="refeicoes-celular">
+                <li style="--i:0"><span class="check"><svg viewBox="0 0 12 12"><path d="M2.5 6.2 5 8.5 9.5 3.5"/></svg></span><span class="hora num">07:00</span><span>Cuscuz com ovo e café</span></li>
+                <li style="--i:1"><span class="check"><svg viewBox="0 0 12 12"><path d="M2.5 6.2 5 8.5 9.5 3.5"/></svg></span><span class="hora num">12:30</span><span>Arroz, feijão e frango</span></li>
+                <li style="--i:2"><span class="check"><svg viewBox="0 0 12 12"><path d="M2.5 6.2 5 8.5 9.5 3.5"/></svg></span><span class="hora num">17:30</span><span>Banana com aveia</span></li>
+                <li style="--i:3"><span class="check"><svg viewBox="0 0 12 12"><path d="M2.5 6.2 5 8.5 9.5 3.5"/></svg></span><span class="hora num">21:30</span><span><span class="regional" id="regional">Aipim</span> cozido com carne moída</span></li>
+              </ul>
+              <div class="tela-aviso"><span class="ponto-vivo" aria-hidden="true"></span><span>Treino de jiu-jitsu às <b>19:00</b></span></div>
+              <div class="abas-app" aria-hidden="true"><span class="ativa">Dieta</span><span>Progresso</span><span>Treino</span><span>Perfil</span></div>
+              <span class="indicador-home" aria-hidden="true"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="texto revela" style="--i:1">
+      <h2 id="t-semana">Sua semana <span class="destaque">pronta em segundos.</span></h2>
+      <p>Sete dias de cardápio feitos pela IA em cima da sua meta. Dia de treino e dia de descanso têm conta e cardápio próprios, com a comida que você gosta e o nome que se usa onde você mora.</p>
+      <div class="chips" id="chips-regionais" aria-label="Nomes regionais"><span class="chip ativo">Aipim</span><span class="chip">Mandioca</span><span class="chip">Macaxeira</span></div>
+      <div class="botoes"><a class="botao botao-primario" href="#simulador">Montar a minha semana <span class="seta" aria-hidden="true">→</span></a><a class="botao botao-contorno" href="#semana">Ver um exemplo</a></div>
+    </div>
+  </section>
+
+  <section class="conteiner dupla inverte" id="balanca" aria-labelledby="t-balanca">
+    <div class="texto revela">
+      <h2 id="t-balanca">Uma meta que <span class="destaque">aprende</span> com a balança.</h2>
+      <p>Você se pesa quando quiser. A linha de tendência ignora a oscilação do dia a dia e, se o peso não anda como esperado, o Ronu ajusta a meta aos poucos: até 5% por vez, e só com dados suficientes.</p>
+    </div>
+    <div class="visual revela" style="--i:1">
+      <div class="card-grafico" id="card-grafico">
+        <div class="cg-topo">
+          <div><small>Peso de tendência</small><div class="cg-valor"><span class="grande num"><span id="peso-tendencia">79,5</span><em>kg</em></span><span class="delta num" id="peso-delta">↓ 1,2 kg</span></div></div>
+          <div class="periodos" id="periodos" role="group" aria-label="Período do gráfico"><button type="button" data-periodo="4s" aria-pressed="true">4 sem</button><button type="button" data-periodo="3m" aria-pressed="false">3 meses</button><button type="button" data-periodo="6m" aria-pressed="false">6 meses</button></div>
+        </div>
+        <div class="grafico-area" id="grafico-area">
+          <svg class="grafico" id="grafico" viewBox="0 0 480 214" role="img" aria-label="Exemplo: pesagens oscilando e a linha de tendência do peso caindo devagar">
+            <defs>
+              <linearGradient id="grad-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color: var(--acento); stop-opacity: .26"/><stop offset="1" style="stop-color: var(--acento); stop-opacity: 0"/></linearGradient>
+              <clipPath id="revela-grafico"><rect id="revela-rect" x="-12" y="-20" width="504" height="250"/></clipPath>
+            </defs>
+            <g id="grade"></g>
+            <g clip-path="url(#revela-grafico)"><path class="area" id="area" d=""/></g>
+            <g id="pontos"></g>
+            <path class="tendencia" id="tendencia" pathLength="1" d=""/>
+            <line class="mira" id="mira" x1="0" x2="0" y1="12" y2="176"/>
+            <circle class="pulso" id="pulso" r="7" cx="440" cy="120"/>
+            <circle class="fim" id="fim" r="6" cx="440" cy="120"/>
+          </svg>
+          <div class="dica" id="dica" aria-hidden="true"><span id="dica-v">79,5 kg</span><small id="dica-q">tendência hoje</small></div>
+        </div>
+        <div class="cg-rodape"><div class="meta-troca"><small>Meta do dia de treino</small><s class="num">2.851</s><span aria-hidden="true">→</span><span class="num"><span id="meta-nova">2.851</span> kcal</span></div><span class="pilula acento espera" id="selo-ajuste">−3% · ajuste automático</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="escuro-externo" id="simulador" aria-labelledby="t-sim">
+    <div class="conteiner">
+      <div class="escuro">
+        <h2 id="t-sim" class="revela">Simule a sua <span>meta de hoje.</span></h2>
+        <p class="revela" style="--i:1">Escolha a modalidade e a duração. A conta é a mesma do app, aberta parte por parte.</p>
+        <div class="simulador revela" style="--i:2">
+          <div class="sim-col">
+            <div>
+              <div class="sim-rotulo"><span>Objetivo</span></div>
+              <div class="abas" role="group" aria-label="Objetivo" id="abas">
+                <span class="indicador" aria-hidden="true"></span>
+                <button type="button" aria-pressed="true" data-objetivo="perder">Perder peso</button>
+                <button type="button" aria-pressed="false" data-objetivo="manter">Manter</button>
+                <button type="button" aria-pressed="false" data-objetivo="ganhar">Ganhar peso</button>
+              </div>
+            </div>
+            <div>
+              <div class="sim-rotulo"><span>Modalidade</span></div>
+              <div class="opcoes" id="sim-mods" role="group" aria-label="Modalidade">
+                <button type="button" aria-pressed="true" data-met="7.8">Jiu-jitsu</button><button type="button" aria-pressed="false" data-met="7.8">Muay thai</button><button type="button" aria-pressed="false" data-met="6.8">Boxe</button><button type="button" aria-pressed="false" data-met="7.0">Futebol</button><button type="button" aria-pressed="false" data-met="5.8">Natação</button><button type="button" aria-pressed="false" data-met="3.5">Musculação</button>
+              </div>
+            </div>
+            <div>
+              <div class="sim-rotulo"><span>Duração do treino</span></div>
+              <div class="opcoes" id="sim-dur" role="group" aria-label="Duração do treino">
+                <button type="button" aria-pressed="false" data-h="0.5">30 min</button><button type="button" aria-pressed="false" data-h="1">1 h</button><button type="button" aria-pressed="true" data-h="1.5">1 h 30</button><button type="button" aria-pressed="false" data-h="2">2 h</button>
+              </div>
+            </div>
+            <div>
+              <div class="sim-rotulo"><span>Peso</span></div>
+              <div class="peso-controle">
+                <button type="button" class="passo" data-passo="-1" aria-label="Diminuir o peso">−</button>
+                <output id="sim-peso-valor" class="num" for="sim-peso">80 kg</output>
+                <button type="button" class="passo" data-passo="1" aria-label="Aumentar o peso">+</button>
+                <input type="range" id="sim-peso" min="50" max="120" step="1" value="80" aria-label="Peso em kg">
+              </div>
+            </div>
+            <div>
+              <div class="sim-rotulo"><span>Dias de treino</span><span id="sim-n-dias">3 por semana</span></div>
+              <div class="semana-dias" id="sim-dias" role="group" aria-label="Dias de treino">
+                <button type="button" aria-pressed="true" aria-label="Segunda">S</button><button type="button" aria-pressed="false" aria-label="Terça">T</button><button type="button" aria-pressed="true" aria-label="Quarta">Q</button><button type="button" aria-pressed="false" aria-label="Quinta">Q</button><button type="button" aria-pressed="true" aria-label="Sexta">S</button><button type="button" aria-pressed="false" aria-label="Sábado">S</button><button type="button" aria-pressed="false" aria-label="Domingo">D</button>
+              </div>
+            </div>
+          </div>
+          <div class="sim-col" aria-live="polite">
+            <div class="res-cards">
+              <div class="res-card treino"><small>Dia de treino</small><span class="v num"><span id="sim-total">2.851</span><em>kcal</em></span></div>
+              <div class="res-card"><small>Dia de descanso</small><span class="v num"><span id="sim-desc">2.035</span><em>kcal</em></span></div>
+            </div>
+            <div>
+              <div class="sim-rotulo"><span>Sua semana</span><span>kcal por dia</span></div>
+              <div class="barras" id="sim-barras" aria-hidden="true">
+                <div class="sim-barra"><b></b><i class="col"></i><span>Seg</span></div><div class="sim-barra"><b></b><i class="col"></i><span>Ter</span></div><div class="sim-barra"><b></b><i class="col"></i><span>Qua</span></div><div class="sim-barra"><b></b><i class="col"></i><span>Qui</span></div><div class="sim-barra"><b></b><i class="col"></i><span>Sex</span></div><div class="sim-barra"><b></b><i class="col"></i><span>Sáb</span></div><div class="sim-barra"><b></b><i class="col"></i><span>Dom</span></div>
+              </div>
+              <div class="media"><span>Média da semana</span><b class="num"><span id="sim-media">2.385</span> kcal</b></div>
+            </div>
+            <div>
+              <div class="sim-rotulo"><span>Como sai a meta do dia de treino</span></div>
+              <div class="barra-meta" aria-hidden="true"><i id="b0" style="background:var(--noite-texto-2)"></i><i id="b1" style="background:var(--noite-texto-2);opacity:.55"></i><i id="b2" style="background:var(--acento-noite)"></i></div>
+              <div class="partes">
+                <div class="parte"><span><span class="marca" style="background:var(--noite-texto-2)"></span>Gasto parado</span><b class="num" id="p0">1.768</b></div>
+                <div class="parte"><span><span class="marca" style="background:var(--noite-texto-2);opacity:.55"></span>Dia a dia</span><b class="num" id="p1">+ 707</b></div>
+                <div class="parte"><span><span class="marca" style="background:var(--acento-noite)"></span><span id="p2-nome">Treino de jiu-jitsu</span></span><b class="num" id="p2">+ 816</b></div>
+                <div class="parte"><span><span class="marca" style="background:transparent;border:1px solid var(--noite-texto-2)"></span><span id="p3-nome">Objetivo: perder peso</span></span><b class="num" id="p3">− 440</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cta-centro revela" style="--i:3">
+          <a class="botao botao-primario" href="../../cadastro.html">Criar a minha dieta <span class="seta" aria-hidden="true">→</span></a>
+          <span class="nota-cta">Exemplo: homem de 30 anos e 1,78 m. No app, a conta usa os seus dados.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="conteiner duvidas" id="duvidas" aria-labelledby="t-duvidas">
+    <div class="texto revela">
+      <h2 id="t-duvidas"><span class="destaque">Dúvidas?</span><br>A gente responde.</h2>
+      <p>As perguntas que mais aparecem. Faltou alguma? Escreva para a gente.</p>
+      <a class="botao botao-contorno" href="mailto:matheus.berto04@gmail.com?subject=Sugest%C3%A3o%20Ronu">Falar com o Ronu</a>
+    </div>
+    <div class="perguntas" id="perguntas">
+      <div class="pergunta aberta revela" style="--i:0"><button type="button" aria-expanded="true">O Ronu é grátis?<span class="mais" aria-hidden="true"></span></button><div class="resposta"><div><p>Sim. Você cria a conta, responde quatro perguntas e a primeira semana sai pronta.</p></div></div></div>
+      <div class="pergunta revela" style="--i:1"><button type="button" aria-expanded="false">Serve só para jiu-jitsu?<span class="mais" aria-hidden="true"></span></button><div class="resposta"><div><p>Não. Jiu-jitsu é o exemplo da página, mas cada modalidade do catálogo tem o próprio gasto: lutas, musculação, corrida, futebol, natação e outras.</p></div></div></div>
+      <div class="pergunta revela" style="--i:2"><button type="button" aria-expanded="false">Substitui um nutricionista?<span class="mais" aria-hidden="true"></span></button><div class="resposta"><div><p>Não. O cardápio é gerado por IA e não substitui acompanhamento profissional, principalmente para quem tem alguma condição de saúde.</p></div></div></div>
+      <div class="pergunta revela" style="--i:3"><button type="button" aria-expanded="false">Como a IA monta o cardápio?<span class="mais" aria-hidden="true"></span></button><div class="resposta"><div><p>Primeiro o Ronu calcula a sua meta de cada dia. A IA recebe essa meta, o que você gosta e o que evita, e monta os sete dias com alimentos de uma base nutricional própria.</p></div></div></div>
+      <div class="pergunta revela" style="--i:4"><button type="button" aria-expanded="false">Posso dizer o que não como ou tenho alergia?<span class="mais" aria-hidden="true"></span></button><div class="resposta"><div><p>Pode. Você marca os alimentos que prefere evitar e as alergias, e eles ficam fora do cardápio e da lista de compras.</p></div></div></div>
+    </div>
+  </section>
+
+  <section class="final-externo" aria-labelledby="t-final">
+    <div class="conteiner">
+      <div class="final" id="final" data-rolagem="final">
+        <h2 id="t-final" class="revela">Faixa branca também<br><span class="destaque">começa com plano.</span></h2>
+        <p class="revela" style="--i:1">Conta, quatro perguntas e a sua primeira semana sai pronta.</p>
+        <a class="botao botao-primario revela" style="--i:2" href="../../cadastro.html">Criar conta grátis <span class="seta" aria-hidden="true">→</span></a>
+        <img class="final-arte" src="../../img/landing/onda.webp" alt="Homenagem à Grande Onda de Hokusai: duas ondas cercam uma tigela de arroz amarrada com uma faixa preta" width="1792" height="638">
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="conteiner rodape">
+  <div class="rodape-linha">
+    <span class="logo"><svg class="logo-marca" aria-hidden="true"><use href="#marca"/></svg>ronu</span>
+    <nav aria-label="Rodapé"><a href="../../privacidade.html">Privacidade</a><a href="../../termos.html">Termos</a><a href="https://www.linkedin.com/in/matheuscberto/" target="_blank" rel="noopener noreferrer">LinkedIn</a><a href="https://github.com/MatheusCordeiro11" target="_blank" rel="noopener noreferrer">GitHub</a><a href="mailto:matheus.berto04@gmail.com?subject=Sugest%C3%A3o%20Ronu">Sugestões</a></nav>
+  </div>
+  <hr>
+  <div class="rodape-linha pequeno"><span>Ronu · dieta para quem treina · desenvolvido por Matheus Cordeiro</span><span>O cardápio é gerado por IA e não substitui acompanhamento profissional.</span></div>
+</footer>
 </body>
 </html>
