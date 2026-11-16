@@ -20,6 +20,14 @@ namespace Ronu.Api.Services.IA;
 /// Modelo "absoluto e sem memória": o ajuste é refeito do zero a cada dieta,
 /// com amortecimento de 50% e teto de ±5% — na prática, uma correção
 /// permanente de metade do erro (ver docs/lacunas-conhecidas.md).
+///
+/// Os dias são os do calendário no fuso da UF da pessoa (FusoHorarioEstado),
+/// desde 2026-11-16: a dieta ativa em cada dia, o dia da semana da meta, o
+/// intervalo que cada pesagem fecha e o início da janela. Antes eram os dias
+/// em UTC, e uma pesagem às 22h de Brasília contava como do dia seguinte. Sem
+/// fuso (nulo), os dias continuam em UTC: é o que os testes antigos usam.
+/// Diferenças entre instantes (os últimos 28 dias, a inclinação em dias)
+/// continuam em horas corridas, que não dependem do fuso.
 /// </summary>
 public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
 {
@@ -76,7 +84,8 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
         decimal metaBaseMediaDiaria,
         IReadOnlyList<decimal> manutencaoAtualPorDia,
         DateTime agoraUtc,
-        decimal fatorAtividadeAtual = CalculadoraManutencao.FatorPadrao)
+        decimal fatorAtividadeAtual = CalculadoraManutencao.FatorPadrao,
+        TimeZoneInfo? fuso = null)
     {
         if (historico.Count == 0 || metasDietas.Count == 0 || metaBaseMediaDiaria <= 0)
         {
@@ -101,7 +110,7 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
             return SemAjuste(MotivoAjusteAdaptativo.HistoricoInsuficiente, pontos: 0);
         }
 
-        var indicesUsados = IndicesDaJanela(ordenado, inicioJanela.Value, objetivoAtual, agoraUtc);
+        var indicesUsados = IndicesDaJanela(ordenado, inicioJanela.Value, objetivoAtual, agoraUtc, fuso);
 
         if (!JanelaSuficiente(ordenado, indicesUsados))
         {
@@ -126,19 +135,19 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
         // Ingestão e manutenção dia a dia, do dia da primeira pesagem usada até
         // a véspera da última (o peso de um dia reflete o que se comeu antes).
         var pontosUsados = indicesUsados.Select(i => ordenado[i]).ToList();
-        var primeiroDia = pontosUsados[0].Data.Date;
-        var ultimoDia = pontosUsados[^1].Data.Date;
+        var primeiroDia = DiaLocal(pontosUsados[0].Data, fuso);
+        var ultimoDia = DiaLocal(pontosUsados[^1].Data, fuso);
         decimal somaIngestao = 0m, somaManutencao = 0m, somaMetaPrescrita = 0m;
         var dias = 0;
 
         for (var dia = primeiroDia; dia < ultimoDia; dia = dia.AddDays(1))
         {
             // Dieta ativa: a mais recente gerada até aquele dia (inclusive).
-            var dieta = dietas.Last(m => m.DataGeracao.Date <= dia);
+            var dieta = dietas.Last(m => DiaLocal(m.DataGeracao, fuso) <= dia);
             var indiceSemana = ((int)dia.DayOfWeek + 6) % 7; // 0 = segunda
 
             // Aderência: a da pesagem que fecha o intervalo daquele dia.
-            var fechamento = pontosUsados.First(p => p.Data.Date > dia);
+            var fechamento = pontosUsados.First(p => DiaLocal(p.Data, fuso) > dia);
             var multiplicador = MultiplicadorIngestao.GetValueOrDefault(fechamento.Aderencia ?? "", 1.00m);
 
             // Manutenção comparável só da mesma versão da fórmula; senão, a
@@ -218,7 +227,8 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
     /// tela nunca contar diferente da dieta.
     /// </summary>
     public static List<int> IndicesDaJanela(
-        IReadOnlyList<RegistroPesoAderenciaDto> ordenado, DateTime inicioDaJanela, string objetivoAtual, DateTime agoraUtc)
+        IReadOnlyList<RegistroPesoAderenciaDto> ordenado, DateTime inicioDaJanela, string objetivoAtual, DateTime agoraUtc,
+        TimeZoneInfo? fuso = null)
     {
         // Início do período do objetivo atual: volta do registro mais recente
         // até a última troca de objetivo.
@@ -228,10 +238,12 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
             inicioObjetivoAtual = i;
         }
 
-        // Últimos 28 dias, mas nunca antes do dia (UTC) da dieta em que a janela
-        // começa: a dieta gerada num dia já vale para aquele dia.
+        // Últimos 28 dias, mas nunca antes do dia (no fuso) da dieta em que a
+        // janela começa: a dieta gerada num dia já vale para aquele dia. O dia
+        // volta a ser um instante UTC (a meia-noite local), para comparar com
+        // as datas das pesagens, que estão em UTC.
         var inicioJanela = agoraUtc.AddDays(-JanelaDias);
-        var diaInicio = inicioDaJanela.Date;
+        var diaInicio = InicioDoDiaEmUtc(DiaLocal(inicioDaJanela, fuso), fuso);
         if (inicioJanela < diaInicio)
         {
             inicioJanela = diaInicio;
@@ -255,12 +267,13 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
     /// ainda. <paramref name="inicioDaJanela"/> vem de <see cref="InicioDaJanela"/>.
     /// </summary>
     public static ProgressoAjusteDto ResumirJanela(
-        IReadOnlyList<RegistroPesoAderenciaDto> historico, DateTime? inicioDaJanela, string objetivoAtual, DateTime agoraUtc)
+        IReadOnlyList<RegistroPesoAderenciaDto> historico, DateTime? inicioDaJanela, string objetivoAtual, DateTime agoraUtc,
+        TimeZoneInfo? fuso = null)
     {
         var ordenado = historico.OrderBy(r => r.Data).ToList();
         var indices = inicioDaJanela is null
             ? new List<int>()
-            : IndicesDaJanela(ordenado, inicioDaJanela.Value, objetivoAtual, agoraUtc);
+            : IndicesDaJanela(ordenado, inicioDaJanela.Value, objetivoAtual, agoraUtc, fuso);
 
         return new ProgressoAjusteDto
         {
@@ -270,6 +283,24 @@ public class CalculadoraAjusteAdaptativo : ICalculadoraAjusteAdaptativo
             Suficiente = JanelaSuficiente(ordenado, indices)
         };
     }
+
+    /// <summary>
+    /// O dia do calendário (meia-noite, sem fuso) de um instante UTC, no fuso
+    /// informado. Sem fuso, o dia em UTC (o comportamento anterior).
+    /// </summary>
+    public static DateTime DiaLocal(DateTime instanteUtc, TimeZoneInfo? fuso)
+    {
+        var utc = DateTime.SpecifyKind(instanteUtc, DateTimeKind.Utc);
+        return fuso is null
+            ? DateTime.SpecifyKind(utc.Date, DateTimeKind.Unspecified)
+            : TimeZoneInfo.ConvertTimeFromUtc(utc, fuso).Date;
+    }
+
+    // A meia-noite local de um dia, como instante UTC.
+    private static DateTime InicioDoDiaEmUtc(DateTime dia, TimeZoneInfo? fuso) =>
+        fuso is null
+            ? DateTime.SpecifyKind(dia, DateTimeKind.Utc)
+            : TimeZoneInfo.ConvertTimeToUtc(DateTime.SpecifyKind(dia, DateTimeKind.Unspecified), fuso);
 
     private static AjusteAdaptativoDto SemAjuste(MotivoAjusteAdaptativo motivo, int pontos) =>
         new()

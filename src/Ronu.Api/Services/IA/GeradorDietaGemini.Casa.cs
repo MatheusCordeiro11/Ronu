@@ -47,9 +47,10 @@ public partial class GeradorDietaGemini : IGeradorSemanaCasa
         var manutencaoPorDia = CalculadoraManutencao.ManutencaoPorDia(contexto, _calculadora);
         var metaBaseMedia = caloriasBasePorDia.Values.Average();
         var fatorAtividade = CalculadoraManutencao.FatorDoNivel(contexto.NivelAtividade);
+        // Os dias da janela no fuso da UF, o mesmo "hoje" do registro de peso (FusoHorarioEstado).
         var ajuste = _calculadoraAjuste.Calcular(
             contexto.HistoricoPeso, contexto.HistoricoMetas, contexto.Objetivo, metaBaseMedia, manutencaoPorDia,
-            DateTime.UtcNow, fatorAtividade);
+            DateTime.UtcNow, fatorAtividade, FusoHorarioEstado.Fuso(contexto.Estado));
         RegistrarAjusteAdaptativo(ajuste, metaBaseMedia);
         var metasPorDia = MontarMetasPorDia(caloriasBasePorDia, ajuste.Percentual, contexto.Peso, contexto.Altura);
         var composicaoPorDia = MontarComposicaoPorDia(contexto, _calculadora, ajuste.Percentual, metasPorDia);

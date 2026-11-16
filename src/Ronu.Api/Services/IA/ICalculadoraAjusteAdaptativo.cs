@@ -19,6 +19,7 @@ public interface ICalculadoraAjusteAdaptativo
     /// <param name="manutencaoAtualPorDia">Manutenção da fórmula atual por dia (índice 0 = segunda), para os períodos sem manutenção comparável.</param>
     /// <param name="agoraUtc">Momento do cálculo (define a janela dos últimos 28 dias).</param>
     /// <param name="fatorAtividadeAtual">Fator de atividade fora do treino da fórmula atual. A janela só conta dietas geradas com este mesmo fator (CalculadoraAjusteAdaptativo.InicioDaJanela).</param>
+    /// <param name="fuso">Fuso da UF da pessoa (FusoHorarioEstado.Fuso), que define o dia do calendário de cada pesagem e de cada dieta. Nulo = dias em UTC (só os testes antigos).</param>
     AjusteAdaptativoDto Calcular(
         IReadOnlyList<RegistroPesoAderenciaDto> historico,
         IReadOnlyList<MetaDietaRegistroDto> metasDietas,
@@ -26,5 +27,6 @@ public interface ICalculadoraAjusteAdaptativo
         decimal metaBaseMediaDiaria,
         IReadOnlyList<decimal> manutencaoAtualPorDia,
         DateTime agoraUtc,
-        decimal fatorAtividadeAtual = CalculadoraManutencao.FatorPadrao);
+        decimal fatorAtividadeAtual = CalculadoraManutencao.FatorPadrao,
+        TimeZoneInfo? fuso = null);
 }

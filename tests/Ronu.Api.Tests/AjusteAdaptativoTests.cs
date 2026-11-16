@@ -272,7 +272,7 @@ public class AjusteAdaptativoTests
         public AjusteAdaptativoDto Calcular(
             IReadOnlyList<RegistroPesoAderenciaDto> historico, IReadOnlyList<MetaDietaRegistroDto> metasDietas, string objetivoAtual,
             decimal metaBaseMediaDiaria, IReadOnlyList<decimal> manutencaoAtualPorDia, DateTime agoraUtc,
-            decimal fatorAtividadeAtual = CalculadoraManutencao.FatorPadrao) =>
+            decimal fatorAtividadeAtual = CalculadoraManutencao.FatorPadrao, TimeZoneInfo? fuso = null) =>
             new() { Percentual = percentual, Motivo = MotivoAjusteAdaptativo.PesoAcimaDoEsperado };
     }
 

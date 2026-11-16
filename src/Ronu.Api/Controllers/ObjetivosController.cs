@@ -168,10 +168,11 @@ public class ObjetivosController : ControllerBase
             .OrderBy(m => m.DataGeracao)
             .Select(m => new { m.DataGeracao, m.FatorAtividade })
             .ToListAsync();
-        var nivelAtividade = await _context.Usuarios
+        var usuario = await _context.Usuarios
             .Where(u => u.Id == UsuarioIdLogado)
-            .Select(u => u.NivelAtividade)
+            .Select(u => new { u.NivelAtividade, u.Estado })
             .FirstOrDefaultAsync();
+        var nivelAtividade = usuario?.NivelAtividade;
         var inicioDaJanela = CalculadoraAjusteAdaptativo.InicioDaJanela(
             dietas.Select(d => (d.DataGeracao, d.FatorAtividade)).ToList(),
             CalculadoraManutencao.FatorDoNivel(nivelAtividade));
@@ -191,7 +192,9 @@ public class ObjetivosController : ControllerBase
             Aderencia = objetivo.Aderencia,
             RegistradoHoje = objetivoDeHoje?.Id == objetivo.Id,
             TemDieta = temDieta,
-            ProgressoAjuste = CalculadoraAjusteAdaptativo.ResumirJanela(historico, inicioDaJanela, objetivoMaisRecente, DateTime.UtcNow)
+            // No fuso da UF, como a geração (GeradorDietaGemini.CalcularMetas): a tela nunca conta diferente da dieta.
+            ProgressoAjuste = CalculadoraAjusteAdaptativo.ResumirJanela(
+                historico, inicioDaJanela, objetivoMaisRecente, DateTime.UtcNow, FusoHorarioEstado.Fuso(usuario?.Estado))
         };
     }
 
