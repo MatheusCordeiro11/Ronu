@@ -609,7 +609,8 @@
        para ele. Só com mouse: no toque não existe "passar por cima". O menu
        fica de fora, para ele não correr a cada link do topo. */
     var BOTOES = 'a.botao, .faixa button, .pergunta > button, .simulador button';
-    var apontaImg = mascote.querySelector('.mascote-aponta img');
+    var apontaImgs = mascote.querySelectorAll('.mascote-aponta img');
+    var carregaPoses = function () { apontaImgs.forEach(function (i) { if (!i.getAttribute('src')) i.src = i.dataset.src; }); };
     var botaoSob = null, botaoAlvo = null, tempoBotao = null;
     var temMouse = matchMedia('(hover: hover) and (pointer: fine)').matches;
     var desaponta = function () {
@@ -621,12 +622,17 @@
       var r = b.getBoundingClientRect(), m = mascote.getBoundingClientRect();
       clearTimeout(olhandoVoce); olhandoVoce = null;
       mascote.classList.remove('pula', 'feliz');
-      mascote.classList.toggle('aponta-esq', r.left + r.width / 2 < m.left + m.width / 2);
+      /* a pose sai do ângulo entre o ombro dele e o meio do botão */
+      var ox = m.left + m.width * 66 / 185, oy = m.bottom - m.height * 0.55;
+      var dx = r.left + r.width / 2 - ox, dy = oy - (r.top + r.height / 2);
+      var ang = Math.atan2(dy, Math.abs(dx)) * 180 / Math.PI;
+      mascote.dataset.pose = ang > 67.5 ? 'cima' : ang > 22.5 ? 'cima-diag' : ang > -22.5 ? 'reto' : ang > -67.5 ? 'baixo-diag' : 'baixo';
+      mascote.classList.toggle('aponta-esq', dx < 0);
       mascote.classList.add('aponta');
     };
     var vaiAoBotao = function (b) {
       if (saltando) { tempoBotao = setTimeout(function () { vaiAoBotao(b); }, 300); return; }
-      if (apontaImg && !apontaImg.getAttribute('src')) apontaImg.src = apontaImg.dataset.src;
+      carregaPoses();
       botaoAlvo = b;
       var r = b.getBoundingClientRect(), l = limiteAndar();
       var p = b.closest(PLATAFORMAS);
@@ -636,8 +642,8 @@
       var c = chao(), pisoY = p ? p.getBoundingClientRect().top : c.y;
       var noNivel = r.bottom > pisoY - c.altura * 1.3 && r.top < pisoY;
       if (!noNivel) {
-        /* botão estreito (os dias, as durações): só fica olhando para ele */
-        if (r.width < l.largura * 2.2 || !topoDe(b).cabe) { botaoAlvo = null; return; }
+        /* botão estreito (os dias, as durações): aponta de onde está */
+        if (r.width < l.largura * 2.2 || !topoDe(b).cabe) { if (!andando) aponta(b); return; }
         p = b;
       }
       var faixa = p ? topoDe(p) : { min: 0, max: l.max }, ax;
@@ -654,7 +660,7 @@
       planeja(ax + l.base + l.largura / 2, p, function () { if (botaoAlvo === b) aponta(b); else olhaParaVoce(); });
     };
     if (temMouse && !reduzido) {
-      if (apontaImg) apontaImg.src = apontaImg.dataset.src;
+      carregaPoses();
       document.addEventListener('pointerover', function (e) {
         if (e.pointerType !== 'mouse') return;
         var b = e.target instanceof Element ? e.target.closest(BOTOES) : null;
