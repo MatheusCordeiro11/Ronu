@@ -49,6 +49,7 @@ public class ContaTests
         banco.PreferenciasAlimentares.Add(new PreferenciaAlimentar { UsuarioId = usuario.Id, Alimento = alimento, Tipo = "preferido" });
         banco.MetasDieta.Add(new MetaDieta { UsuarioId = usuario.Id, DietaIAId = dieta.Id, DataGeracao = dieta.DataGeracao, VersaoFormula = 3, MetasPorDia = [2000, 2000, 2000, 2000, 2000, 2000, 2000] });
         banco.ListaComprasMarcacoes.Add(new ListaComprasMarcacao { UsuarioId = usuario.Id, DietaIAId = dieta.Id, Chave = "arroz-branco", MarcadoEm = DateTime.UtcNow });
+        banco.RefeicoesFeitas.Add(new RefeicaoFeita { UsuarioId = usuario.Id, DietaIAId = dieta.Id, Data = DateOnly.FromDateTime(DateTime.UtcNow), RefeicaoIndice = 2, Kcal = 512.5m, RefeicoesNoDia = 5, MarcadaEm = DateTime.UtcNow });
         banco.Consentimentos.Add(new Consentimento { UsuarioId = usuario.Id, Tipo = "geral", Versao = 1, AceitoEm = DateTime.UtcNow });
         banco.Consentimentos.Add(new Consentimento { UsuarioId = usuario.Id, Tipo = "alergias", Versao = 1, AceitoEm = DateTime.UtcNow });
         banco.AlergiasUsuario.Add(new AlergiaUsuario { UsuarioId = usuario.Id, Codigo = "soja", MarcadoEm = DateTime.UtcNow });
@@ -134,9 +135,9 @@ public class ContaTests
         var resultado = await Controller(banco, apagar.Id).Apagar(new ExclusaoContaRequest { Senha = Senha });
 
         Assert.IsType<NoContentResult>(resultado);
-        // A conferência viu as 12 tabelas (11 com UsuarioId: AlergiasUsuario desde a 2c, MembroCasa e ConviteCasa desde o
-        // plano família; e a conta), e a conta tinha linha em todas.
-        Assert.Equal(12, antes.Count);
+        // A conferência viu as 13 tabelas (12 com UsuarioId: AlergiasUsuario desde a 2c, MembroCasa e ConviteCasa desde o
+        // plano família, RefeicaoFeita desde a marcação de refeição feita; e a conta), e a conta tinha linha em todas.
+        Assert.Equal(13, antes.Count);
         Assert.All(antes, t => Assert.True(t.Value > 0, $"a conta de teste deveria ter linha em {t.Key}"));
         Assert.All(LinhasDe(banco, apagar.Id), t => Assert.True(t.Value == 0, $"sobrou {t.Value} linha(s) em {t.Key}"));
         Assert.Equal(outroAntes, LinhasDe(banco, outro.Id));
@@ -230,6 +231,15 @@ public class ContaTests
         Assert.Equal(JsonValueKind.Object, raiz.GetProperty("dietas")[0].GetProperty("cardapio").ValueKind);
         Assert.Equal(7, raiz.GetProperty("metasDieta")[0].GetProperty("metasPorDia").GetArrayLength());
         Assert.Equal("arroz-branco", raiz.GetProperty("listaComprasMarcacoes")[0].GetProperty("chave").GetString());
+        // As refeições marcadas como feitas, campo a campo.
+        var refeicaoFeita = raiz.GetProperty("refeicoesFeitas")[0];
+        Assert.Equal(DateOnly.FromDateTime(DateTime.UtcNow).ToString("yyyy-MM-dd"), refeicaoFeita.GetProperty("data").GetString());
+        Assert.Equal(2, refeicaoFeita.GetProperty("refeicao").GetInt32());
+        Assert.Equal(512.5m, refeicaoFeita.GetProperty("kcal").GetDecimal());
+        Assert.Equal(5, refeicaoFeita.GetProperty("refeicoesNoDia").GetInt32());
+        Assert.True(refeicaoFeita.TryGetProperty("dietaId", out _));
+        Assert.True(refeicaoFeita.TryGetProperty("marcadaEm", out _));
+        Assert.Equal(1, raiz.GetProperty("refeicoesFeitas").GetArrayLength());
         Assert.Equal("geral", raiz.GetProperty("consentimentos")[0].GetProperty("tipo").GetString());
         // TACO 2c: os chips e o aceite do tipo "alergias".
         Assert.Equal("soja", raiz.GetProperty("alergias")[0].GetProperty("codigo").GetString());
@@ -338,6 +348,7 @@ public class ContaTests
     [InlineData("meta")]
     [InlineData("alergia")]
     [InlineData("casa")]
+    [InlineData("refeicao-feita")]
     public async Task Conta_Nova_Com_Qualquer_Dado_Ou_Aceite_Nao_E_Apagada(string dado)
     {
         using var banco = BancoEmMemoria.NovoContexto();
@@ -364,6 +375,10 @@ public class ContaTests
             case "casa":
                 banco.MembrosCasa.Add(new MembroCasa { Casa = new Casa { CriadaEm = Agora.AddDays(-89) }, UsuarioId = conta.Id, Papel = MembroCasa.PapelDono, EntrouEm = Agora.AddDays(-89) });
                 break;
+            // Recente: a de mais de 35 dias sai pelo prazo dela antes de a conta ser olhada.
+            case "refeicao-feita":
+                banco.RefeicoesFeitas.Add(new RefeicaoFeita { UsuarioId = conta.Id, DietaIAId = 1, Data = DateOnly.FromDateTime(Agora).AddDays(-1), RefeicaoIndice = 0, Kcal = 400, RefeicoesNoDia = 5, MarcadaEm = Agora.AddDays(-1) });
+                break;
         }
         await banco.SaveChangesAsync();
 
@@ -388,5 +403,24 @@ public class ContaTests
         Assert.Equal(1, resultado.PedidosApagados);
         Assert.Equal(Agora.AddDays(-29), (await banco.PedidosRedefinicaoSenha.SingleAsync()).CriadoEm);
         Assert.True(await banco.Usuarios.AnyAsync(u => u.Id == conta.Id));
+    }
+
+    [Fact]
+    public async Task Refeicoes_Feitas_Com_Mais_De_35_Dias_Saem_E_As_Outras_Ficam()
+    {
+        using var banco = BancoEmMemoria.NovoContexto();
+        var conta = await ContaSoNomeEEmail(banco, "conta@exemplo.test", criadoEm: null);
+        var hoje = DateOnly.FromDateTime(Agora);
+        foreach (var diasAtras in new[] { 36, 35, 34, 0 })
+        {
+            banco.RefeicoesFeitas.Add(new RefeicaoFeita { UsuarioId = conta.Id, DietaIAId = 7, Data = hoje.AddDays(-diasAtras), RefeicaoIndice = 0, Kcal = 400, RefeicoesNoDia = 5, MarcadaEm = Agora.AddDays(-diasAtras) });
+        }
+        await banco.SaveChangesAsync();
+
+        var resultado = await LimpezaRetencao.ExecutarAsync(banco, Agora);
+
+        Assert.Equal(1, resultado.RefeicoesFeitasApagadas);
+        Assert.Equal(new[] { hoje.AddDays(-35), hoje.AddDays(-34), hoje },
+            await banco.RefeicoesFeitas.OrderBy(r => r.Data).Select(r => r.Data).ToListAsync());
     }
 }

@@ -68,6 +68,12 @@ public static class ExportacaoConta
             .Select(m => new { DietaId = m.DietaIAId, m.Chave, m.MarcadoEm })
             .ToListAsync();
 
+        // As refeições marcadas como feitas (guardadas por 35 dias). Refeicao é a posição da refeição no dia da dieta.
+        var refeicoesFeitas = await contexto.RefeicoesFeitas.AsNoTracking()
+            .Where(r => r.UsuarioId == usuarioId).OrderBy(r => r.Data).ThenBy(r => r.RefeicaoIndice)
+            .Select(r => new { r.Data, DietaId = r.DietaIAId, Refeicao = r.RefeicaoIndice, r.Kcal, r.RefeicoesNoDia, r.MarcadaEm })
+            .ToListAsync();
+
         // TACO 2c: os chips de alergia (o aceite do tipo "alergias" já sai junto com os outros, em Consentimentos).
         var alergias = await contexto.AlergiasUsuario.AsNoTracking()
             .Where(a => a.UsuarioId == usuarioId).OrderBy(a => a.MarcadoEm)
@@ -121,6 +127,7 @@ public static class ExportacaoConta
             Dietas = dietas,
             MetasDieta = metas,
             ListaComprasMarcacoes = marcacoes,
+            RefeicoesFeitas = refeicoesFeitas,
             Consentimentos = consentimentos,
             PedidosRedefinicaoSenha = pedidos,
             Casa = casa,

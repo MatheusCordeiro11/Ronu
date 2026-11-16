@@ -56,8 +56,8 @@ public class ServicoLimpezaRetencao : BackgroundService
 
             // Só as contagens: nem ids nem emails das contas, nem o texto das rotinas. A data da rotina vai junto para
             // dar para conferir no log que a configuração chegou (vazia = a limpeza da rotina ainda não está ligada).
-            _logger.LogInformation("Limpeza de retenção: {Pedidos} pedidos de redefinição de senha, {Convites} convites da casa, {PedidosCasa} pedidos da casa, {Contas} contas sem aceite e {Rotinas} rotinas em texto apagados (rotina fora da tela desde: {RotinaForaDaTelaEm})",
-                resultado.PedidosApagados, resultado.ConvitesCasaApagados, resultado.PedidosCasaApagados, resultado.ContasApagadas, resultado.RotinasApagadas,
+            _logger.LogInformation("Limpeza de retenção: {Pedidos} pedidos de redefinição de senha, {Convites} convites da casa, {PedidosCasa} pedidos da casa, {RefeicoesFeitas} refeições feitas, {Contas} contas sem aceite e {Rotinas} rotinas em texto apagados (rotina fora da tela desde: {RotinaForaDaTelaEm})",
+                resultado.PedidosApagados, resultado.ConvitesCasaApagados, resultado.PedidosCasaApagados, resultado.RefeicoesFeitasApagadas, resultado.ContasApagadas, resultado.RotinasApagadas,
                 _rotinaForaDaTelaEm?.ToString("yyyy-MM-dd") ?? "não configurado");
         }
         catch (Exception ex)

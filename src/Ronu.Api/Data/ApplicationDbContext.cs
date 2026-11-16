@@ -31,6 +31,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<SemanaCasa> SemanasCasa { get; set; }
     public DbSet<PedidoCasa> PedidosCasa { get; set; }
     public DbSet<ListaCasaMarcacao> ListaCasaMarcacoes { get; set; }
+    public DbSet<RefeicaoFeita> RefeicoesFeitas { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -119,6 +120,11 @@ public class ApplicationDbContext : DbContext
             marcacao.HasOne(m => m.Casa).WithMany().HasForeignKey(m => m.CasaId).OnDelete(DeleteBehavior.Cascade);
             marcacao.HasOne(m => m.SemanaCasa).WithMany().HasForeignKey(m => m.SemanaCasaId).OnDelete(DeleteBehavior.Cascade);
         });
+
+        // A refeição marcada como feita sai com a conta. Sem chave estrangeira para a DietaIA, de propósito (como a
+        // MetaDieta): a regra das 3 dietas apaga a DietaIA, e a marcação continua valendo para a meta adaptativa.
+        modelBuilder.Entity<RefeicaoFeita>()
+            .HasOne(r => r.Usuario).WithMany().HasForeignKey(r => r.UsuarioId).OnDelete(DeleteBehavior.Cascade);
 
         // As dietas que existem antes da casa são todas de geração individual.
         modelBuilder.Entity<DietaIA>()

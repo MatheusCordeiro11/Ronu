@@ -41,6 +41,7 @@ public static class ExclusaoConta
         contexto.ListaComprasMarcacoes.RemoveRange(await contexto.ListaComprasMarcacoes.Where(m => m.UsuarioId == usuarioId).ToListAsync());
         contexto.PedidosRedefinicaoSenha.RemoveRange(await contexto.PedidosRedefinicaoSenha.Where(p => p.UsuarioId == usuarioId).ToListAsync());
         contexto.MetasDieta.RemoveRange(await contexto.MetasDieta.Where(m => m.UsuarioId == usuarioId).ToListAsync());
+        contexto.RefeicoesFeitas.RemoveRange(await contexto.RefeicoesFeitas.Where(r => r.UsuarioId == usuarioId).ToListAsync());
         contexto.DietasIA.RemoveRange(await contexto.DietasIA.Where(d => d.UsuarioId == usuarioId).ToListAsync());
         contexto.PreferenciasAlimentares.RemoveRange(await contexto.PreferenciasAlimentares.Where(p => p.UsuarioId == usuarioId).ToListAsync());
         contexto.UsuarioModalidades.RemoveRange(await contexto.UsuarioModalidades.Where(m => m.UsuarioId == usuarioId).ToListAsync());

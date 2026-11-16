@@ -501,6 +501,44 @@ namespace Ronu.Api.Migrations
                     b.ToTable("PreferenciasAlimentares");
                 });
 
+            modelBuilder.Entity("Ronu.Api.Models.RefeicaoFeita", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateOnly>("Data")
+                        .HasColumnType("date");
+
+                    b.Property<int>("DietaIAId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Kcal")
+                        .HasPrecision(7, 1)
+                        .HasColumnType("numeric(7,1)");
+
+                    b.Property<DateTime>("MarcadaEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("RefeicaoIndice")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RefeicoesNoDia")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId", "Data", "DietaIAId", "RefeicaoIndice")
+                        .IsUnique();
+
+                    b.ToTable("RefeicoesFeitas");
+                });
+
             modelBuilder.Entity("Ronu.Api.Models.SemanaCasa", b =>
                 {
                     b.Property<int>("Id")
@@ -803,6 +841,17 @@ namespace Ronu.Api.Migrations
                 {
                     b.HasOne("Ronu.Api.Models.Usuario", "Usuario")
                         .WithMany("PreferenciasAlimentares")
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("Ronu.Api.Models.RefeicaoFeita", b =>
+                {
+                    b.HasOne("Ronu.Api.Models.Usuario", "Usuario")
+                        .WithMany()
                         .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

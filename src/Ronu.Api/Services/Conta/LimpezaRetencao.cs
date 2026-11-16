@@ -17,7 +17,9 @@ namespace Ronu.Api.Services.Conta;
 ///   ela (decisão de 2026-11-02, "opção A"): o texto não é mais usado desde os horários estruturados, e guardar dado
 ///   sem uso vai contra a necessidade (art. 6º, III). Os 60 dias dão tempo de a pessoa ver o texto na Alimentação e
 ///   baixá-lo na exportação. A data de início vem da configuração (ChaveRotinaForaDaTelaEm), porque a publicação
-///   ainda não aconteceu; sem ela, esta parte não roda.
+///   ainda não aconteceu; sem ela, esta parte não roda;
+/// - refeições marcadas como feitas com mais de 35 dias saem (decisão de 2026-11-16): a janela da meta adaptativa é de
+///   28 dias, e os 7 a mais são folga. Revisar se um histórico de consistência for aprovado.
 /// </summary>
 public static class LimpezaRetencao
 {
@@ -41,7 +43,11 @@ public static class LimpezaRetencao
     // Etapa 6: o "já tenho" da casa (ListaCasaMarcacoes) não tem prazo próprio. Vale para uma semana e sai com ela (a
     // casa guarda só 2), e as semanas saem com a casa; não guarda quem marcou nem nenhum dado de pessoa.
 
-    public record Resultado(int PedidosApagados, int ContasApagadas, int RotinasApagadas = 0, int ConvitesCasaApagados = 0, int PedidosCasaApagados = 0);
+    // Refeições feitas: o corte é pela Data (o dia local em que a refeição foi marcada), comparada com o dia UTC de
+    // agora. A diferença de fuso desloca o corte em no máximo um dia, dentro da folga.
+    public static readonly TimeSpan PrazoRefeicoesFeitas = TimeSpan.FromDays(35);
+
+    public record Resultado(int PedidosApagados, int ContasApagadas, int RotinasApagadas = 0, int ConvitesCasaApagados = 0, int PedidosCasaApagados = 0, int RefeicoesFeitasApagadas = 0);
 
     /// <summary>
     /// Lê a data de ChaveRotinaForaDaTelaEm como o início do dia em UTC. Nulo se ausente ou vazia; exceção se o
@@ -84,6 +90,12 @@ public static class LimpezaRetencao
         contexto.PedidosCasa.RemoveRange(pedidosCasa);
         await contexto.SaveChangesAsync();
 
+        // Carrega e apaga pelo EF (não ExecuteDelete) para valer também no banco em memória dos testes.
+        var limiteRefeicoes = DateOnly.FromDateTime(agora).AddDays(-(int)PrazoRefeicoesFeitas.TotalDays);
+        var refeicoesFeitas = await contexto.RefeicoesFeitas.Where(r => r.Data < limiteRefeicoes).ToListAsync();
+        contexto.RefeicoesFeitas.RemoveRange(refeicoesFeitas);
+        await contexto.SaveChangesAsync();
+
         var limiteContas = agora - PrazoContaSemAceite;
         var contas = await contexto.Usuarios
             .Where(u => u.CriadoEm != null && u.CriadoEm < limiteContas)
@@ -96,6 +108,7 @@ public static class LimpezaRetencao
                 && !contexto.DietasIA.Any(x => x.UsuarioId == u.Id)
                 && !contexto.MetasDieta.Any(x => x.UsuarioId == u.Id)
                 && !contexto.ListaComprasMarcacoes.Any(x => x.UsuarioId == u.Id)
+                && !contexto.RefeicoesFeitas.Any(x => x.UsuarioId == u.Id)
                 // Na prática, quem tem alergia já tem o aceite "alergias" e nem chega aqui; fica pela regra de "nenhuma
                 // linha em outra tabela", para não depender disso.
                 && !contexto.AlergiasUsuario.Any(x => x.UsuarioId == u.Id)
@@ -128,6 +141,6 @@ public static class LimpezaRetencao
             rotinasApagadas = comRotina.Count;
         }
 
-        return new Resultado(pedidos.Count, apagadas, rotinasApagadas, convites.Count, pedidosCasa.Count);
+        return new Resultado(pedidos.Count, apagadas, rotinasApagadas, convites.Count, pedidosCasa.Count, refeicoesFeitas.Count);
     }
 }
