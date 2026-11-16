@@ -434,7 +434,7 @@
       if (!reduzido) mascote.classList.add('pula');
       mascote.classList.add('feliz');
       clearTimeout(tempoFeliz);
-      tempoFeliz = setTimeout(function () { mascote.classList.remove('feliz', 'pula'); }, 750);
+      tempoFeliz = setTimeout(function () { mascote.classList.remove('feliz', 'pula'); }, 850);
     };
     var pisca = function () {
       if (!document.hidden && !mascote.classList.contains('feliz')) {

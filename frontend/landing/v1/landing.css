@@ -24,6 +24,7 @@
   --mascote-esclera: #F4E8D8; --mascote-traco: #2A140A; --mascote-iris-1: #7A4220;
   --mascote-iris-2: #1C0C05; --mascote-pupila: #0E0603; --mascote-brilho: #FFFFFF;
   --mascote-contorno: drop-shadow(0 0 1.5px rgba(240, 233, 221, .6)) drop-shadow(0 8px 10px rgba(0, 0, 0, .55));
+  --mascote-fumaca: #E9E1D3; --mascote-fumaca-traco: #8A8072;
 
   color-scheme: dark;
 }
@@ -41,6 +42,7 @@
   --marca: "Shippori Mincho B1", Georgia, serif;
   --ease: cubic-bezier(.22, .8, .24, 1);
   --mascote-contorno: drop-shadow(0 8px 10px rgba(70, 45, 20, .2));
+  --mascote-fumaca: #FFFFFF; --mascote-fumaca-traco: #BDB09B;
   color-scheme: light;
 }
 * { box-sizing: border-box; }
@@ -486,7 +488,16 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
    clique. Os olhos são SVG por cima do desenho, que vem sem eles. */
 .mascote { position: fixed; left: max(16px, env(safe-area-inset-left, 0px)); bottom: max(10px, env(safe-area-inset-bottom, 0px)); height: 90px; z-index: 30; pointer-events: none; filter: var(--mascote-contorno); }
 .mascote-corpo { position: relative; height: 100%; aspect-ratio: 213 / 300; transform-origin: 50% 100%; animation: mascote-respira 3.4s ease-in-out infinite; }
-.mascote-corpo img, .mascote-corpo svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mascote-corpo img, .mascote-corpo svg, .mascote-salto, .mascote-pernas, .mascote-tronco { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* O pulo dobra as perninhas: o desenho é partido na cintura (linha 232 de 300,
+   abaixo das mãos e das pontas do cinto). As pernas agacham e esticam a partir
+   do chão, e o tronco desce o mesmo tanto (22,67% × quanto a perna encolheu). */
+.mascote-pernas { transform-origin: 33% 100%; }
+.mascote-pernas img { clip-path: inset(77% 0 0 0); }
+.mascote-tronco img { clip-path: inset(0 0 22.33% 0); }
+.mascote-fumaca { position: absolute; left: 33%; bottom: -5px; width: 105%; transform: translateX(-50%); overflow: visible; }
+.mascote-fumaca circle { fill: var(--mascote-fumaca); stroke: var(--mascote-fumaca-traco); stroke-width: 1.2; }
+.mascote-fumaca g { opacity: 0; transform-box: fill-box; transform-origin: 50% 100%; }
 .mascote-olho { transform-box: fill-box; transform-origin: center; transition: transform .08s ease, opacity .12s ease; }
 .mascote .esclera { fill: var(--mascote-esclera); stroke: var(--mascote-traco); stroke-width: 1.4; }
 .mascote .cilio, .mascote .feliz-traco { fill: none; stroke: var(--mascote-traco); stroke-width: 2.6; stroke-linecap: round; }
@@ -498,7 +509,55 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .mascote.pisca .mascote-olho { transform: scaleY(.08); }
 .mascote.feliz .mascote-olho { opacity: 0; }
 .mascote.feliz .mascote-feliz { opacity: 1; }
-.mascote.pula .mascote-corpo { animation: mascote-pula .55s var(--ease); }
+.mascote.pula .mascote-corpo { animation: none; }
+.mascote.pula .mascote-salto { animation: mascote-salto .8s linear; }
+.mascote.pula .mascote-pernas { animation: mascote-pernas .8s linear; }
+.mascote.pula .mascote-tronco { animation: mascote-tronco .8s linear; }
+.mascote.pula .fumaca-e { animation: mascote-fumaca-e .8s ease-out; }
+.mascote.pula .fumaca-d { animation: mascote-fumaca-d .8s ease-out; }
 @keyframes mascote-respira { 50% { transform: translateY(-1.5px) scaleY(1.012); } }
-@keyframes mascote-pula { 0% { transform: translateY(0) scaleY(.94); } 35% { transform: translateY(-16px) scaleY(1.04); } 70% { transform: translateY(0) scaleY(.97); } 100% { transform: none; } }
+/* agacha (0–18%), sai do chão (28%), topo do pulo (46%), toca o chão (60%),
+   amortece agachando (70%) e volta (86–100%) */
+@keyframes mascote-salto {
+  0%, 20% { transform: translateY(0); animation-timing-function: cubic-bezier(.2, .7, .4, 1); }
+  46% { transform: translateY(-24%); animation-timing-function: cubic-bezier(.6, 0, .8, .4); }
+  60%, 100% { transform: translateY(0); }
+}
+@keyframes mascote-pernas {
+  0% { transform: scale(1, 1); animation-timing-function: ease-out; }
+  18% { transform: scale(1.09, .68); animation-timing-function: ease-in; }
+  28% { transform: scale(.97, 1.08); }
+  46% { transform: scale(1, .9); }
+  60% { transform: scale(1, 1.02); animation-timing-function: ease-out; }
+  70% { transform: scale(1.08, .72); animation-timing-function: ease-in-out; }
+  86% { transform: scale(.99, 1.03); }
+  100% { transform: scale(1, 1); }
+}
+@keyframes mascote-tronco {
+  0% { transform: translateY(0); animation-timing-function: ease-out; }
+  18% { transform: translateY(7.25%); animation-timing-function: ease-in; }
+  28% { transform: translateY(-1.81%); }
+  46% { transform: translateY(2.27%); }
+  60% { transform: translateY(-.45%); animation-timing-function: ease-out; }
+  70% { transform: translateY(6.35%); animation-timing-function: ease-in-out; }
+  86% { transform: translateY(-.68%); }
+  100% { transform: translateY(0); }
+}
+/* fumacinha no chão: uma na saída (22–44%) e outra maior na chegada (60–92%) */
+@keyframes mascote-fumaca-e {
+  0%, 21% { opacity: 0; transform: translate(0, 0) scale(.3); }
+  25% { opacity: .95; transform: translate(-2px, 0) scale(.65); }
+  44% { opacity: 0; transform: translate(-10px, -4px) scale(1.15); }
+  59% { opacity: 0; transform: translate(0, 0) scale(.3); }
+  64% { opacity: 1; transform: translate(-3px, 0) scale(.75); }
+  92%, 100% { opacity: 0; transform: translate(-15px, -5px) scale(1.35); }
+}
+@keyframes mascote-fumaca-d {
+  0%, 21% { opacity: 0; transform: translate(0, 0) scale(.3); }
+  25% { opacity: .95; transform: translate(2px, 0) scale(.65); }
+  44% { opacity: 0; transform: translate(10px, -4px) scale(1.15); }
+  59% { opacity: 0; transform: translate(0, 0) scale(.3); }
+  64% { opacity: 1; transform: translate(3px, 0) scale(.75); }
+  92%, 100% { opacity: 0; transform: translate(15px, -5px) scale(1.35); }
+}
 @media (max-width: 640px) { .mascote { height: 64px; left: max(10px, env(safe-area-inset-left, 0px)); } }
