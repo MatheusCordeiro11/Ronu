@@ -188,6 +188,10 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .numero-grande { --p: 1; padding-block: 96px 40px; position: relative; overflow: hidden; }
 .palco-maos { display: grid; justify-items: center; align-items: center; min-height: 340px; position: relative; z-index: 1; }
 .mao { position: absolute; top: 56px; width: min(500px, 33vw); height: auto; max-width: 100%; pointer-events: none; will-change: transform; }
+.mao-esq { transition: opacity .15s ease; }
+.mao-esq.trocando { opacity: 0; }
+/* o halter vai até a borda da imagem e encostaria no título: essa mão é menor */
+@media (min-width: 641px) { .mao-esq[data-mao="musculacao"] { width: min(420px, 27vw); } }
 .mao-esq { left: 0; transform-origin: 0 50%; transform: translateX(calc((1 - var(--p)) * -105%)) rotate(calc((1 - var(--p)) * -10deg)); }
 .mao-dir { right: 0; top: 96px; transform-origin: 100% 50%; transform: translateX(calc((1 - var(--p)) * 105%)) rotate(calc((1 - var(--p)) * 10deg)); }
 .centro { text-align: center; display: grid; gap: 12px; justify-items: center; }

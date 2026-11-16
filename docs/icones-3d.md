@@ -11,7 +11,7 @@ originais em resolução cheia ficam nesse arquivo do Figma; o repositório guar
 | `img/icones/` | os ícones da base: balança, bandagem, calendário, halter, luva, óculos de natação, quimono, sacola |
 | `img/modalidades/` | um ícone por modalidade que não usa um da base |
 | `img/envelope/` | o envelope das telas de senha, em camadas: `aba`, `interior`, `bolso` e a `chave` da carta |
-| `img/landing/` | as ilustrações em gravura da landing: `mao-faixa`, `mao-tigela` e `onda` |
+| `img/landing/` | as ilustrações em gravura da landing: `mao-faixa`, `mao-tigela`, `onda` e uma mão por modalidade da faixa (`mao-muay-thai`, `mao-boxe`, `mao-musculacao`, `mao-corrida`, `mao-futebol`, `mao-natacao`, `mao-ciclismo`, `mao-volei`, `mao-danca`) |
 
 Cinco modalidades usam um ícone da base: Jiu-jitsu → `quimono`, Muay thai → `bandagem`, Boxe → `luva`,
 Musculação → `halter` e Natação → `oculos`. As outras 21 têm o arquivo com o nome da modalidade, sem acento
@@ -38,6 +38,28 @@ python tools/recorta-icone-3d.py ícone-bruto.png frontend/img/modalidades/nome.
 ```
 
 Confira o recorte sobre o fundo escuro (`#151311`) e sobre o claro (`#FBF8F3`) antes de usar.
+
+## As mãos da faixa de modalidades
+
+Na landing, escolher uma modalidade na faixa troca a mão da esquerda (a da faixa preta, `mao-faixa`, é o
+jiu-jitsu). As outras nove foram geradas em nov/2026 com este prompt, trocando só o objeto pendurado no pulso:
+
+> Close-up hand-colored engraving illustration, detailed etching with dense fine cross-hatching, like a vintage
+> anatomical print colored with warm watercolor. A thick, muscular, veiny forearm of **[quem treina]** enters from the
+> left edge of the image (cut off by the frame) and the large hand fills the right half of the image: wrist slightly
+> raised, back of the hand facing the viewer, palm facing down, fingers relaxed and curled loosely, index and middle
+> fingers pointing down and to the right, as if about to take something. Deep tanned bronze skin with ochre, sienna
+> and burnt orange hatching, prominent tendons and knuckles, weathered. **[objeto, em muted brick red (#C23B22),
+> pendurado no pulso por uma alça enrolada duas vezes, drawn with the same engraved hatching]**. Exactly one arm.
+> The arm and hand fill most of the frame. Isolated on a plain flat pure white background, no outline around the
+> figure, no shadow, no text, no other objects.
+
+Exceções: a dança é uma mão feminina (slender, graceful feminine forearm of a ballerina), e a musculação segura o
+halter com a mão fechada (hammer grip), porque pendurado ele ficava estranho.
+
+O `recorta-icone-3d.py` não serve para elas: o fundo branco preso entre os dedos fica no recorte. Elas foram
+recortadas tirando também as manchas brancas internas grandes (a partir de 400 px) e encolhendo o alfa 1 px para
+não sobrar halo, com lado máximo de 900 px.
 
 ## O envelope em camadas
 

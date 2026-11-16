@@ -345,11 +345,35 @@
   var botoesMod = letreiro ? letreiro.querySelectorAll('button[data-met]') : [];
   var gastoAtual = 816, fatorRolagem = 1, escolheu = false, animaGasto = null, pausaFaixa = null;
   function escreveGasto() { $('conta-maos').textContent = fmt.format(Math.round(gastoAtual * fatorRolagem)); }
-  function escolheMod(nome, met) {
+  /* a mão da esquerda troca pela da modalidade: baixa só quando escolhida,
+     esmaece a antiga e mostra a nova; vale só a última escolha */
+  var maoImg = $('mao-modalidade'), maoPedida = null, maoTempo = null;
+  function trocaMao(arquivo) {
+    if (!maoImg || !arquivo) return;
+    var src = '../../img/landing/mao-' + arquivo + '.webp';
+    maoPedida = src;
+    var nova = new Image();
+    nova.onload = function () {
+      if (maoPedida !== src) return;
+      if (reduzido) { maoImg.src = src; maoImg.dataset.mao = arquivo; return; }
+      clearTimeout(maoTempo);
+      maoImg.classList.add('trocando');
+      maoTempo = setTimeout(function () {
+        if (maoPedida !== src) return;
+        maoImg.src = src; maoImg.dataset.mao = arquivo;
+        var mostra = function () { if (maoPedida === src) maoImg.classList.remove('trocando'); };
+        if (maoImg.decode) maoImg.decode().then(mostra, mostra); else mostra();
+      }, 150);
+    };
+    nova.src = src;
+  }
+  function escolheMod(nome, met, arquivo) {
     var alvo = Math.round((met - 1) * 80 * 1.5);
     botoesMod.forEach(function (b) { b.setAttribute('aria-pressed', b.textContent === nome ? 'true' : 'false'); });
+    /* depois de qualquer escolha, a contagem da rolagem não mexe mais no número */
+    if (!escolheu) { escolheu = true; fatorRolagem = 1; if (!animaGasto) escreveGasto(); }
     if ($('nome-maos').textContent === nome.toLowerCase()) return;
-    fatorRolagem = 1; escolheu = true; /* depois da escolha, a contagem da rolagem não mexe mais no número */
+    trocaMao(arquivo);
     $('nome-maos').textContent = nome.toLowerCase();
     $('aviso-maos').textContent = fmt.format(alvo) + ' kcal por treino de ' + nome.toLowerCase() + '.';
     if (animaGasto) cancelAnimationFrame(animaGasto);
@@ -367,9 +391,9 @@
     pausaFaixa = setTimeout(function () { letreiro.classList.remove('pausa'); }, 6000);
   }
   botoesMod.forEach(function (b) {
-    var met = +b.dataset.met;
-    b.addEventListener('click', function () { escolheMod(b.textContent, met); });
-    b.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') escolheMod(b.textContent, met); });
+    var met = +b.dataset.met, arquivo = b.dataset.mao;
+    b.addEventListener('click', function () { escolheMod(b.textContent, met, arquivo); });
+    b.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') escolheMod(b.textContent, met, arquivo); });
   });
   if (letreiro) {
     letreiro.addEventListener('pointerdown', function (e) { if (e.pointerType !== 'mouse') pausa(); });
