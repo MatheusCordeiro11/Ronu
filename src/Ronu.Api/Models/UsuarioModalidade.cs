@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using Ronu.Api.Services.IA;
+
 namespace Ronu.Api.Models;
 
 /// <summary>
@@ -23,4 +26,10 @@ public class UsuarioModalidade
 
     // Hora de início do treino, a mesma em todos os DiasSemana (RegrasHorario). Nula = não informada.
     public TimeOnly? HorarioInicio { get; set; }
+
+    // "Ritmo da aula": "tecnica", "normal" ou "sparring" (IntensidadeTreino). Só muda o MET nas modalidades com
+    // blocos; nas outras fica sempre "normal". Default "normal" também no banco (ApplicationDbContext), para as
+    // linhas de antes da coluna e para o insert de um backend que não conhece o campo.
+    [MaxLength(16)]
+    public string Intensidade { get; set; } = IntensidadeTreino.Padrao;
 }

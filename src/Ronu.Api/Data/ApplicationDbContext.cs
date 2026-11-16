@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Ronu.Api.Models;
+using Ronu.Api.Services.IA;
 
 namespace Ronu.Api.Data;
 
@@ -123,5 +124,10 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<DietaIA>()
             .Property(d => d.Origem)
             .HasDefaultValue(DietaIA.OrigemPessoa);
+
+        // Os vínculos de antes do "Ritmo da aula" ficam em "normal": o MET e a meta de ninguém mudam.
+        modelBuilder.Entity<UsuarioModalidade>()
+            .Property(m => m.Intensidade)
+            .HasDefaultValue(IntensidadeTreino.Padrao);
     }
 }

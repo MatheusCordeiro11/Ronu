@@ -42,6 +42,24 @@ public class CatalogoModalidadesTests
         Assert.All(antigos, a => Assert.Equal(a.Value, MetsCompendio2024.PorModalidade[a.Key]));
     }
 
+    // Ritmo da aula: os blocos escritos na migration AdicionaIntensidadeTreino batem com a fonte no código; só as 11
+    // aulas em blocos os têm (o Vôlei, média de quadra e areia, fica sem), e o MetReferencia de cada uma é a aula
+    // com a premissa de 50/50.
+    [Fact]
+    public void Blocos_Da_Migration_Batem_Com_MetsCompendio2024()
+    {
+        var naMigration = AdicionaIntensidadeTreino.Blocos.ToDictionary(b => b.Nome, b => (b.Leve, b.Intenso));
+        var noCodigo = MetsCompendio2024.BlocosPorModalidade.ToDictionary(b => b.Key, b => (b.Value.Leve.Met, b.Value.Intenso.Met));
+
+        Assert.Equal(11, naMigration.Count);
+        Assert.Equal(noCodigo.OrderBy(b => b.Key), naMigration.OrderBy(b => b.Key));
+        Assert.All(naMigration.Keys, nome => Assert.Contains(nome, MetsCompendio2024.PorModalidade.Keys));
+        Assert.DoesNotContain("Vôlei", naMigration.Keys);
+        Assert.Equal(15, MetsCompendio2024.PorModalidade.Keys.Count(n => !naMigration.ContainsKey(n)));
+        Assert.All(MetsCompendio2024.BlocosPorModalidade, b => Assert.Equal(
+            MetsCompendio2024.PorModalidade[b.Key], MetsCompendio2024.Aula(b.Value.Leve, b.Value.Intenso, 0.5m)));
+    }
+
     /// <summary>
     /// Banco descartável no Postgres LOCAL: aplica as migrations até a anterior,
     /// grava o catálogo antigo do seed e um vínculo de usuário, aplica a nova e
@@ -98,6 +116,23 @@ public class CatalogoModalidadesTests
             Assert.Equal(antes, depois.Take(7).Select(l => l.Take(3).ToArray()).ToList());
             Assert.All(depois, l => Assert.Contains((string)l[3], CategoriasModalidade.Ordem));
             Assert.All(depois, l => Assert.Equal(MetsCompendio2024.PorModalidade[(string)l[1]], (decimal)l[2]));
+
+            // AdicionaIntensidadeTreino: blocos só nas 11 aulas em blocos; os vínculos de antes ficam em "normal".
+            var blocos = await Ler(teste.ConnectionString,
+                "SELECT \"Nome\", \"MetBlocoLeve\", \"MetBlocoIntenso\" FROM \"Modalidades\";");
+            Assert.All(blocos, l =>
+            {
+                if (MetsCompendio2024.BlocosPorModalidade.TryGetValue((string)l[0], out var b))
+                {
+                    Assert.Equal((b.Leve.Met, b.Intenso.Met), ((decimal)l[1], (decimal)l[2]));
+                }
+                else
+                {
+                    Assert.Equal((DBNull.Value, DBNull.Value), (l[1], l[2]));
+                }
+            });
+            var intensidades = await Ler(teste.ConnectionString, "SELECT \"Intensidade\" FROM \"UsuarioModalidades\";");
+            Assert.All(intensidades, l => Assert.Equal("normal", l[0]));
 
             var vinculosDepois = await Ler(teste.ConnectionString,
                 "SELECT \"Id\", \"UsuarioId\", \"ModalidadeId\", \"DuracaoMediaHoras\" FROM \"UsuarioModalidades\" ORDER BY \"Id\";");

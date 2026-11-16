@@ -14,7 +14,11 @@
 --
 -- Aula de luta = composição de dois códigos, pelo tempo de cada bloco.
 -- PREMISSA (não vem do Compêndio): 50% do tempo em aquecimento/técnica e 50%
--- em rola/sparring (MetsCompendio2024.FracaoTempoBlocoIntenso).
+-- em rola/sparring (MetsCompendio2024.FracaoTempoBlocoIntenso). É o ritmo
+-- "normal" do seletor "Ritmo da aula"; os outros dois níveis (30% e 70% no
+-- bloco intenso, também premissa de produto) ficam em IntensidadeTreino e usam
+-- os METs dos blocos, gravados em "MetBlocoLeve"/"MetBlocoIntenso" (UPDATEs no
+-- fim deste arquivo). O "MetReferencia" continua sendo o MET de "normal".
 --   Jiu-jitsu e Muay Thai = 0,5 × 5,3 (15425, "Martial Arts, different types,
 --     slower pace, novice performers, practice") + 0,5 × 10,3 (15430, "Martial
 --     Arts, different types, moderate pace (e.g., judo, jujitsu, karate, kick
@@ -35,3 +39,16 @@ INSERT INTO "Modalidades" ("Nome", "MetReferencia") VALUES ('Musculação', 3.5)
 INSERT INTO "Modalidades" ("Nome", "MetReferencia") VALUES ('Futebol', 7.0);
 INSERT INTO "Modalidades" ("Nome", "MetReferencia") VALUES ('Basquete', 7.5);
 INSERT INTO "Modalidades" ("Nome", "MetReferencia") VALUES ('Natação', 5.8);
+
+-- Ritmo da aula (migration AdicionaIntensidadeTreino, 2026-11-16): METs dos dois
+-- blocos nas 11 aulas em blocos. As 19 modalidades do catálogo ampliado entram
+-- pela migration AmpliaCatalogoModalidades (este seed tem só as 7 originais);
+-- os UPDATEs pelo nome valem para as que existirem. As outras 15 (Vôlei
+-- incluído: quadra e areia são superfícies, não ritmos) ficam com as colunas nulas.
+--   Lutas (exceto boxe): 5,3 (15425) / 10,3 (15430)
+--   Boxe: 5,8 (15110) / 7,8 (15120)
+--   Treino funcional: 3,5 (02054, força) / 7,5 (02040, "Circuit training")
+UPDATE "Modalidades" SET "MetBlocoLeve" = 5.3, "MetBlocoIntenso" = 10.3
+    WHERE "Nome" IN ('Jiu-jitsu', 'Muay Thai', 'Judô', 'Karatê', 'MMA', 'Wrestling', 'Taekwondo', 'Kickboxing', 'Capoeira');
+UPDATE "Modalidades" SET "MetBlocoLeve" = 5.8, "MetBlocoIntenso" = 7.8 WHERE "Nome" = 'Boxe';
+UPDATE "Modalidades" SET "MetBlocoLeve" = 3.5, "MetBlocoIntenso" = 7.5 WHERE "Nome" = 'Treino funcional';

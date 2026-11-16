@@ -344,6 +344,12 @@ namespace Ronu.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<decimal?>("MetBlocoIntenso")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal?>("MetBlocoLeve")
+                        .HasColumnType("numeric");
+
                     b.Property<decimal>("MetReferencia")
                         .HasColumnType("numeric");
 
@@ -617,6 +623,13 @@ namespace Ronu.Api.Migrations
 
                     b.Property<TimeOnly?>("HorarioInicio")
                         .HasColumnType("time without time zone");
+
+                    b.Property<string>("Intensidade")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasDefaultValue("normal");
 
                     b.Property<int>("ModalidadeId")
                         .HasColumnType("integer");
