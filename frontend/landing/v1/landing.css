@@ -19,6 +19,11 @@
   --noite: #1A1816; --noite-2: #211E1B; --noite-3: #2A2622; --noite-borda: #3A3631;
   --sombra: 0 24px 60px -24px rgba(0, 0, 0, .7); --sombra-leve: 0 10px 30px -14px rgba(0, 0, 0, .6);
   --sombra-icone: drop-shadow(0 16px 14px rgba(0, 0, 0, .6)) drop-shadow(0 3px 3px rgba(0, 0, 0, .45));
+  /* mascote ninja: cores dos olhos (fixas, são do desenho) e o contorno que
+     separa a roupa preta do fundo escuro */
+  --mascote-esclera: #F4E8D8; --mascote-traco: #2A140A; --mascote-iris-1: #7A4220;
+  --mascote-iris-2: #1C0C05; --mascote-pupila: #0E0603; --mascote-brilho: #FFFFFF;
+  --mascote-contorno: drop-shadow(0 0 1.5px rgba(240, 233, 221, .6)) drop-shadow(0 8px 10px rgba(0, 0, 0, .55));
 
   color-scheme: dark;
 }
@@ -35,6 +40,7 @@
   --fonte: "Fustat", "Segoe UI", system-ui, -apple-system, sans-serif;
   --marca: "Shippori Mincho B1", Georgia, serif;
   --ease: cubic-bezier(.22, .8, .24, 1);
+  --mascote-contorno: drop-shadow(0 8px 10px rgba(70, 45, 20, .2));
   color-scheme: light;
 }
 * { box-sizing: border-box; }
@@ -473,3 +479,26 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .hero h1 .cursor.digitando { animation: none; opacity: 1; }
 @keyframes cursor-pisca { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .hero h1 .cursor { display: none; } }
+
+/* Mascote ninja (etapa 1, 2026-11-16): parado no canto de baixo, os olhos
+   seguem o mouse (ou o último toque), pisca sozinho e, a cada clique, dá um
+   pulinho com os olhos fechados sorrindo. É enfeite: aria-hidden e sem
+   clique. Os olhos são SVG por cima do desenho, que vem sem eles. */
+.mascote { position: fixed; left: max(16px, env(safe-area-inset-left, 0px)); bottom: max(10px, env(safe-area-inset-bottom, 0px)); height: 90px; z-index: 30; pointer-events: none; filter: var(--mascote-contorno); }
+.mascote-corpo { position: relative; height: 100%; aspect-ratio: 213 / 300; transform-origin: 50% 100%; animation: mascote-respira 3.4s ease-in-out infinite; }
+.mascote-corpo img, .mascote-corpo svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mascote-olho { transform-box: fill-box; transform-origin: center; transition: transform .08s ease, opacity .12s ease; }
+.mascote .esclera { fill: var(--mascote-esclera); stroke: var(--mascote-traco); stroke-width: 1.4; }
+.mascote .cilio, .mascote .feliz-traco { fill: none; stroke: var(--mascote-traco); stroke-width: 2.6; stroke-linecap: round; }
+.mascote .pupila { fill: var(--mascote-pupila); }
+.mascote .brilho { fill: var(--mascote-brilho); }
+.mascote .iris-1 { stop-color: var(--mascote-iris-1); }
+.mascote .iris-2 { stop-color: var(--mascote-iris-2); }
+.mascote-feliz { opacity: 0; transition: opacity .12s ease; }
+.mascote.pisca .mascote-olho { transform: scaleY(.08); }
+.mascote.feliz .mascote-olho { opacity: 0; }
+.mascote.feliz .mascote-feliz { opacity: 1; }
+.mascote.pula .mascote-corpo { animation: mascote-pula .55s var(--ease); }
+@keyframes mascote-respira { 50% { transform: translateY(-1.5px) scaleY(1.012); } }
+@keyframes mascote-pula { 0% { transform: translateY(0) scaleY(.94); } 35% { transform: translateY(-16px) scaleY(1.04); } 70% { transform: translateY(0) scaleY(.97); } 100% { transform: none; } }
+@media (max-width: 640px) { .mascote { height: 64px; left: max(10px, env(safe-area-inset-left, 0px)); } }

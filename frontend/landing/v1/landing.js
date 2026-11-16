@@ -400,6 +400,54 @@
     letreiro.addEventListener('focusin', pausa);
   }
 
+  /* mascote ninja (etapa 1): as íris seguem o mouse (ou o último toque) com
+     um leve atraso, ele pisca sozinho e reage a cada clique. Com movimento
+     reduzido, os olhos vão direto e não há pulinho. */
+  var mascote = $('mascote');
+  if (mascote) {
+    var irises = mascote.querySelectorAll('.mascote-iris');
+    var olhosSvg = mascote.querySelector('svg');
+    var olhoAtual = [0, 0], olhoQuer = [0, 0], olhoRodando = false, tempoFeliz = null;
+    var desenhaOlho = function () {
+      var t = 'translate(' + olhoAtual[0].toFixed(2) + ' ' + olhoAtual[1].toFixed(2) + ')';
+      irises.forEach(function (g) { g.setAttribute('transform', t); });
+    };
+    var andaOlho = function () {
+      olhoAtual[0] += (olhoQuer[0] - olhoAtual[0]) * 0.18;
+      olhoAtual[1] += (olhoQuer[1] - olhoAtual[1]) * 0.18;
+      desenhaOlho();
+      if (Math.abs(olhoQuer[0] - olhoAtual[0]) + Math.abs(olhoQuer[1] - olhoAtual[1]) > 0.02) requestAnimationFrame(andaOlho);
+      else olhoRodando = false;
+    };
+    var mira = function (x, y) {
+      var r = olhosSvg.getBoundingClientRect();
+      /* ponto entre os dois olhos, no desenho de 213 × 300 */
+      var dx = x - (r.left + r.width * 70 / 213), dy = y - (r.top + r.height * 91 / 300);
+      var d = Math.hypot(dx, dy) || 1, k = Math.min(1, d / 220) * 3.4;
+      olhoQuer = [dx / d * k, dy / d * k];
+      if (reduzido) { olhoAtual = olhoQuer.slice(); desenhaOlho(); return; }
+      if (!olhoRodando) { olhoRodando = true; requestAnimationFrame(andaOlho); }
+    };
+    var reage = function () {
+      mascote.classList.remove('pula');
+      void mascote.offsetWidth; /* reinicia o pulinho se clicar de novo */
+      if (!reduzido) mascote.classList.add('pula');
+      mascote.classList.add('feliz');
+      clearTimeout(tempoFeliz);
+      tempoFeliz = setTimeout(function () { mascote.classList.remove('feliz', 'pula'); }, 750);
+    };
+    var pisca = function () {
+      if (!document.hidden && !mascote.classList.contains('feliz')) {
+        mascote.classList.add('pisca');
+        setTimeout(function () { mascote.classList.remove('pisca'); }, 140);
+      }
+      setTimeout(pisca, 2600 + Math.random() * 3400);
+    };
+    addEventListener('pointermove', function (e) { if (e.pointerType === 'mouse') mira(e.clientX, e.clientY); }, { passive: true });
+    addEventListener('pointerdown', function (e) { mira(e.clientX, e.clientY); reage(); }, { passive: true });
+    setTimeout(pisca, 2200);
+  }
+
   if (reduzido) return;
   raiz.classList.add('js');
 
