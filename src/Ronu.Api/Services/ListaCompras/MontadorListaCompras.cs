@@ -102,6 +102,7 @@ public static class MontadorListaCompras
             Texto = Texto(quantidade, compra),
             Pronto = compra.Pronto,
             Nota = compra.NotaNaLinha,
+            Embalagem = Embalagem(exato, compra),
             Detalhe = new DetalheItemListaComprasDto
             {
                 QuantidadeExata = Math.Round(exato, 2),
@@ -139,6 +140,104 @@ public static class MontadorListaCompras
     };
 
     private static string Numero(decimal valor) => valor.ToString("#,0.##", PtBr);
+
+    // ---------- Embalagens (2026-11-16) ----------
+
+    /// <summary>
+    /// O que se compra em embalagens, a partir da quantidade exata da semana (antes do arredondamento da lista:
+    /// com um pote de 170 g, 165 g exatos arredondados dariam 200 g e pediriam 2 potes). Para cada tamanho, o menor
+    /// número de embalagens que cobre o exato; ficam só os de até LimiteEmbalagens embalagens, e entre eles o de
+    /// menor total e, no empate, o de menos embalagens (31 ovos: 3 dúzias). Sem nenhum, nulo: a linha fica como
+    /// sempre. Tamanhos diferentes não se combinam ("1 kg + 500 g"). Frango inteiro abaixo da peça mínima: a peça.
+    /// </summary>
+    public static EmbalagemListaComprasDto? Embalagem(decimal exato, ItemCompra compra)
+    {
+        if (!ConversaoCompras.Embalagens.TryGetValue(compra.Chave, out var doItem) || doItem.Tamanhos.Count == 0)
+        {
+            return null;
+        }
+
+        // O mesmo arredondamento do Arredondar: sem ele, 12 ovos com resto na 28ª casa virariam 2 dúzias.
+        var x = Math.Round(exato, 6);
+        if (x <= 0m)
+        {
+            return null;
+        }
+
+        if (doItem.Grupo == GrupoEmbalagem.Peca)
+        {
+            var peca = doItem.Tamanhos[0];
+            return x < peca.Quantidade ? MontarEmbalagem("peca", 1, peca, x, compra) : null;
+        }
+
+        if (doItem.Grupo != GrupoEmbalagem.Embalagem)
+        {
+            return null;
+        }
+
+        var escolha = doItem.Tamanhos
+            .Select(t => (Tamanho: t, Quantas: Math.Max(1m, Math.Ceiling(Math.Round(x / t.Quantidade, 6)))))
+            .Where(c => c.Quantas <= ConversaoCompras.LimiteEmbalagens)
+            .OrderBy(c => c.Quantas * c.Tamanho.Quantidade)
+            .ThenBy(c => c.Quantas)
+            .Select(c => ((TamanhoEmbalagem Tamanho, decimal Quantas)?)c)
+            .FirstOrDefault();
+
+        return escolha is { } e ? MontarEmbalagem("embalagem", (int)e.Quantas, e.Tamanho, x, compra) : null;
+    }
+
+    private static EmbalagemListaComprasDto MontarEmbalagem(string tipo, int quantas, TamanhoEmbalagem tamanho, decimal exato, ItemCompra compra)
+    {
+        var total = quantas * tamanho.Quantidade;
+        var nome = quantas == 1 ? tamanho.Singular : tamanho.Plural;
+        return new EmbalagemListaComprasDto
+        {
+            Tipo = tipo,
+            Texto = string.IsNullOrEmpty(tamanho.Rotulo) ? $"{quantas} {nome}" : $"{quantas} {nome} de {tamanho.Rotulo}",
+            Quantidade = quantas,
+            Nome = nome,
+            Rotulo = tamanho.Rotulo,
+            TamanhoTotal = total,
+            Sobra = Math.Round(total - exato, 2),
+            // Na peça a tela diz "sobram pelo menos …": para baixo, para não prometer mais do que o mínimo.
+            SobraTexto = TextoSobra(total - exato, compra, paraBaixo: tipo == "peca"),
+            Fonte = FonteEmbalagem(tamanho, compra)
+        };
+    }
+
+    /// <summary>"390 g", "1,3 L", "4 fatias"; "" quando não sobra nada que valha dizer.</summary>
+    public static string TextoSobra(decimal sobra, ItemCompra compra, bool paraBaixo = false)
+    {
+        var q = compra.Unidade is UnidadeCompra.Gramas or UnidadeCompra.Mililitros
+            ? (paraBaixo ? Math.Floor(Math.Round(sobra, 6) / 10m) : Math.Round(sobra / 10m, MidpointRounding.AwayFromZero)) * 10m
+            : Math.Floor(Math.Round(sobra, 6));
+        return q <= 0m ? "" : Texto(q, compra);
+    }
+
+    private static string FonteEmbalagem(TamanhoEmbalagem tamanho, ItemCompra compra)
+    {
+        var fonte = tamanho.Fonte switch
+        {
+            Data.FonteEmbalagem.OpenFoodFacts =>
+                $"Tamanho comum na base brasileira do Open Food Facts ({tamanho.DoTamanho} de {tamanho.Amostra} embalagens, "
+                + $"consulta de {DateOnly.Parse(ConversaoCompras.DataConsultaOff, CultureInfo.InvariantCulture).ToString("dd/MM/yyyy", PtBr)}, "
+                + "licença ODbL, openfoodfacts.org). Calibração do projeto, não é tamanho oficial.",
+            Data.FonteEmbalagem.Convencao => "Dúzia: convenção de contagem.",
+            _ => $"Vendido por peça, de {Texto(tamanho.Quantidade, compra)} ou mais (calibração do projeto, sem fonte pública para o peso mínimo)."
+        };
+
+        if (compra.Unidade == UnidadeCompra.Fatias)
+        {
+            // O pacote é vendido em gramas; a fatia é a mesma da conversão da lista (POF).
+            var fatia = ConversaoCompras.PorAlimento.Values
+                .Where(c => c.ChaveCompra == compra.Chave)
+                .SelectMany(c => c.Passos.OfType<PassoUnidade>())
+                .First();
+            fonte += $" {tamanho.Rotulo} ÷ {Valor(fatia.Gramas)} g por fatia ({fatia.Fonte}) = {Numero(tamanho.Quantidade)} fatias.";
+        }
+
+        return fonte;
+    }
 
     private static string SiglaUnidade(UnidadeCompra unidade) => unidade switch
     {

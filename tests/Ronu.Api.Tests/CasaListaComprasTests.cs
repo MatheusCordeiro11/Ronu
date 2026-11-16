@@ -256,6 +256,33 @@ public class CasaListaComprasTests
         Assert.Equal(Json(lista.Secoes), Json(ListaDaCasa(banco, c).Secoes));
     }
 
+    // Embalagens (2026-11-16): calculadas uma vez, sobre o total da casa (uma compra só), e não somando as de cada um.
+    [Fact]
+    public async Task Embalagem_Da_Casa_E_Calculada_Sobre_O_Total_Da_Casa()
+    {
+        using var banco = Banco();
+        var (a, b, c) = await CasaDeTres(banco);
+        var dietas = new[] { a, b, c }.Select(p => DietaAtual(banco, p)).ToArray();
+
+        var lista = ListaDaCasa(banco, b);
+        var juntas = MontadorListaCompras.Montar(new DietaSemanalDto { Dias = dietas.SelectMany(d => d.Dias).ToList() }, "SP");
+
+        var itens = lista.Secoes.SelectMany(s => s.Itens).ToList();
+        Assert.Equal(Json(juntas.Secoes.SelectMany(s => s.Itens).Select(i => new { i.Chave, i.Embalagem })),
+            Json(itens.Select(i => new { i.Chave, i.Embalagem })));
+        Assert.Contains(itens, i => i.Embalagem is not null);
+
+        // O arroz da casa é de todos: a embalagem cobre o exato da casa, e o texto e a quantidade da linha não mudam.
+        var arroz = ItemDa(lista, "arroz-branco");
+        Assert.NotNull(arroz.Embalagem);
+        Assert.True(arroz.Embalagem!.TamanhoTotal >= arroz.Detalhe.QuantidadeExata);
+        Assert.Equal(MontadorListaCompras.Texto(arroz.Quantidade, ConversaoCompras.Itens.Single(i => i.Chave == "arroz-branco")), arroz.Texto);
+
+        // A marca da casa continua pela quantidade da linha (em gramas), como antes.
+        Assert.IsType<NoContentResult>(await Marcar(banco, b, arroz, lista.SemanaId));
+        Assert.True(ItemDa(ListaDaCasa(banco, a), "arroz-branco").Tenho);
+    }
+
     [Fact]
     public async Task So_A_Minha_Parte_E_A_Lista_Individual_De_Hoje_Com_As_Marcacoes_Individuais()
     {
@@ -491,7 +518,9 @@ public class CasaListaComprasTests
             "semanaId", "geradaEm", "tituloCompartilhar", "versaoConversao", "disponivel", "motivo", "avisoOleo", "completa",
             "secoes", "chave", "nome", "itens", "quantidade", "unidade", "texto", "pronto", "nota", "tenho", "temAlergeno",
             "alergias", "detalhe", "quantidadeExata", "origens", "alimentoId", "quantidadeNaDieta", "medida", "fator",
-            "convertido", "passos", "tipo", "descricao", "observacoes"
+            "convertido", "passos", "tipo", "descricao", "observacoes",
+            // Embalagens (2026-11-16): calculadas sobre o total da casa, como a quantidade.
+            "embalagem", "rotulo", "tamanhoTotal", "sobra", "sobraTexto", "fonte"
         };
         Assert.All(campos, campo => Assert.Contains(campo, permitidos));
         foreach (var proibido in new[] { "Sobrenome", "exemplo.test", "usuario", "membro", "dietaId", "kcal", "calorias", "objetivo", "email", "macros" })
