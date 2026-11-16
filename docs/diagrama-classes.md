@@ -24,6 +24,8 @@ public class Modalidade
     public int Id { get; set; }
     public string Nome { get; set; }
     public decimal MetReferencia { get; set; }
+    public decimal? MetBlocoLeve { get; set; }    // aula em dois blocos; nulo = MET único
+    public decimal? MetBlocoIntenso { get; set; }
     public ICollection<UsuarioModalidade> UsuarioModalidades { get; set; }
 }
 
@@ -35,6 +37,7 @@ public class UsuarioModalidade
     public int ModalidadeId { get; set; }
     public Modalidade Modalidade { get; set; }
     public int FrequenciaSemanal { get; set; }
+    public string Intensidade { get; set; }        // "Ritmo da aula": tecnica, normal (padrão) ou sparring
 }
 
 public class ObjetivoUsuario
