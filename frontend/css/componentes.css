@@ -3,16 +3,17 @@
   Depende de base/tokens.css e base/base.css. Nenhuma cor escrita direto.
 
   Índice: logo · tema · avatar · cabeçalho · abas do celular · faixa de título
-  · grade · botões · campos · segmentado · opções · chips · dias · cards
+  · fundo de pontinhos · botões · campos · segmentado · opções · chips · dias · cards
   · avisos · nota · carimbo · quimono · etapas · barras e anéis · carregando
   · vazio · tabela · rodapé · gráficos que se desenham · entrada · folha (diálogo)
 */
 
-/* ---------- Logo: quadrado com 浪 + RONU ---------- */
+/* ---------- Logo: a tigela de arroz com a faixa preta + "ronu" ----------
+   O SVG vai inline (não <img>) para ler as variáveis do tema. */
 .logo {
   display: inline-flex;
   align-items: center;
-  gap: var(--e-3);
+  gap: 8px;
   color: var(--texto);
   text-decoration: none;
   flex: none;
@@ -22,26 +23,18 @@
   color: var(--texto);
 }
 
-.logo-selo {
-  width: 30px;
-  height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--acento);
-  color: var(--sobre-acento);
-  border-radius: var(--raio);
-  font-family: var(--fonte-titulo);
-  font-weight: 800;
-  font-size: 16px;
-  line-height: 1;
+.logo-marca {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  display: block;
 }
 
 .logo-nome {
   font-family: var(--fonte-titulo);
   font-weight: 800;
   font-size: 22px;
-  letter-spacing: 0.04em;
+  letter-spacing: -0.03em;
   line-height: 1;
 }
 
@@ -54,26 +47,21 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  background: transparent;
-  color: var(--texto-2);
+  background: var(--superficie);
+  color: var(--texto);
   border: 1px solid var(--borda);
   border-radius: 50%;
-  transition: color var(--d-rapida) ease, border-color var(--d-rapida) ease;
+  transition: transform var(--d-media) var(--curva-saida), border-color var(--d-rapida) ease;
 }
 
 .botao-tema:hover {
-  color: var(--texto);
   border-color: var(--borda-hover);
+  transform: rotate(20deg);
 }
 
 .botao-tema svg {
   width: 18px;
   height: 18px;
-  transition: transform var(--d-media) var(--curva-saida);
-}
-
-.botao-tema:active svg {
-  transform: rotate(-25deg) scale(0.9);
 }
 
 /* O ícone mostra para onde o clique leva: no escuro, o sol; no claro, a lua. */
@@ -95,59 +83,75 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: var(--superficie-3);
-  border: 1px solid var(--acento);
-  color: var(--acento-texto);
-  font-weight: 600;
-  font-size: var(--t-apoio);
+  background: var(--acento);
+  border: 0;
+  color: var(--sobre-acento);
+  font-weight: 800;
+  font-size: var(--t-corpo);
   text-decoration: none;
-  transition: background-color var(--d-rapida) ease;
+  transition: transform var(--d-media) var(--curva-mola);
 }
 
 .avatar:hover {
-  color: var(--acento-texto);
-  border-color: var(--texto);
+  color: var(--sobre-acento);
+  transform: scale(1.06);
 }
 
-/* ---------- Cabeçalho das telas logadas ---------- */
+/* ---------- Cabeçalho das telas logadas ----------
+   Uma barra em pílula que flutua no topo, com fundo translúcido. */
 .cabecalho {
-  border-bottom: 1px solid var(--borda);
-  background: var(--fundo);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  padding-top: 14px;
 }
 
 .cabecalho-linha {
-  min-height: var(--altura-cabecalho);
+  min-height: 62px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--e-6);
+  gap: var(--e-5);
+  padding: 8px 8px 8px 18px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-pilula);
+  background: color-mix(in srgb, var(--superficie) 86%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--sombra-leve);
 }
 
 .cabecalho-esquerda {
-  display: flex;
-  align-items: center;
-  gap: var(--e-8);
-  min-width: 0;
+  display: contents;
 }
 
 .cabecalho-acoes {
   display: flex;
   align-items: center;
-  gap: var(--e-3);
+  gap: 10px;
 }
 
+/* Nav em segmentado: um indicador claro desliza até o item sob o mouse
+   (js/base/indicador.js). Sem JS, o item atual fica marcado do mesmo jeito. */
 .nav-principal {
+  position: relative;
   display: flex;
-  gap: var(--e-1);
+  gap: 2px;
+  padding: 4px;
+  border-radius: var(--raio-pilula);
+  background: var(--superficie-2);
   font-size: var(--t-apoio);
 }
 
 .nav-principal a {
-  padding: 10px 14px;
-  border-radius: var(--raio);
+  position: relative;
+  z-index: 1;
+  padding: 8px 14px;
+  border-radius: var(--raio-pilula);
   color: var(--texto-2);
+  font-weight: 600;
   text-decoration: none;
-  transition: color var(--d-rapida) ease, background-color var(--d-rapida) ease;
+  transition: color var(--d-media) ease, background-color var(--d-rapida) ease;
 }
 
 .nav-principal a:hover {
@@ -156,540 +160,44 @@
 
 .nav-principal a[aria-current="page"] {
   color: var(--texto);
-  background: var(--superficie-3);
+  background: var(--superficie);
+  box-shadow: var(--sombra-leve);
 }
 
-.nav-principal a[data-pagina="casa"] {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-/* Contador de pedidos da casa (só o dono): pílula no acento, com o número. É
-   o único carimbo da nav, e só aparece com pedido aberto. */
-.nav-contador {
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--raio-pilula);
-  background: var(--acento);
-  color: var(--sobre-acento);
-  font-family: var(--fonte-corpo);
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1;
-}
-
-/* ---------- Abas do celular (6, com ícone; decisão S1 do plano família) ---------- */
-.abas {
-  display: none;
-}
-
-@media (max-width: 720px) {
-  .nav-principal {
-    display: none;
-  }
-
-  .cabecalho-linha .logo-selo {
-    width: 28px;
-    height: 28px;
-    font-size: 15px;
-  }
-
-  .cabecalho-linha .logo-nome {
-    font-size: 20px;
-  }
-
-  .cabecalho .avatar,
-  .cabecalho .botao-tema {
-    width: 36px;
-    height: 36px;
-  }
-
-  .abas {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 20;
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    padding: 6px 2px calc(6px + env(safe-area-inset-bottom));
-    background: var(--superficie);
-    border-top: 1px solid var(--borda);
-  }
-
-  .abas a {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    padding: 8px 0;
-    font-size: 11px;
-    color: var(--texto-2);
-    text-decoration: none;
-    border-radius: var(--raio);
-  }
-
-  .abas a svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .abas-icone {
-    position: relative;
-    display: inline-flex;
-  }
-
-  .abas .nav-rotulo {
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  /* Na aba, a pílula senta no canto do ícone da casa, com a cor das abas como recorte. */
-  .abas .nav-contador {
-    position: absolute;
-    top: -6px;
-    left: 12px;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 5px;
-    font-size: 10px;
-    outline: 2px solid var(--superficie);
-  }
-
-  .abas a[aria-current="page"] {
-    color: var(--acento-texto);
-    font-weight: 600;
-  }
-
-  /* Espaço para o conteúdo não ficar embaixo das abas. */
-  .com-abas {
-    padding-bottom: calc(var(--altura-abas) + env(safe-area-inset-bottom));
-  }
-}
-
-/* ---------- Faixa de título (topo de cada tela, sobre a grade) ---------- */
-.faixa-titulo {
-  border-bottom: 1px solid var(--borda);
-  position: relative;
-  overflow: hidden;
-}
-
-.faixa-titulo-conteudo {
-  padding-top: var(--e-9);
-  padding-bottom: var(--e-9);
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: var(--e-6);
-  flex-wrap: wrap;
-}
-
-.faixa-titulo-texto {
-  display: flex;
-  flex-direction: column;
-  gap: var(--e-3);
-  max-width: 640px;
-}
-
-.faixa-titulo-texto p {
-  color: var(--texto-2);
-  font-size: var(--t-corpo-g);
-  line-height: 1.6;
-}
-
-/* Texto sobre a grade ganha o fundo atrás, para a malha não cruzar as letras. */
-.sobre-grade {
-  background: var(--fundo);
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
-}
-
-/* Nas faixas de título das telas logadas a grade passa inteira por trás do
-   texto (pedido do usuário, 2026-10-18): os retângulos de fundo cortavam as
-   linhas e, com a grade deslizando, os quadrados pareciam desalinhados. As
-   linhas são apagadas o bastante (--grade) para não atrapalhar a leitura. */
-.faixa-titulo .sobre-grade {
-  background: none;
-}
-
-@media (max-width: 720px) {
-  .faixa-titulo-conteudo {
-    padding-top: var(--e-7);
-    padding-bottom: var(--e-7);
-  }
-}
-
-/* ---------- Grade quadriculada que desliza (enfeite) ---------- */
-.grade {
-  background-image:
-    linear-gradient(var(--grade) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grade) 1px, transparent 1px);
-  background-size: 40px 40px;
-  animation: grade-desliza 18s linear infinite;
-}
-
-@keyframes grade-desliza {
-  to {
-    background-position: 40px 40px, 40px 40px;
-  }
-}
-
-/* ---------- Botões ---------- */
-.botao {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--e-2);
-  min-height: 44px;
-  padding: 12px 22px;
-  border: 1px solid transparent;
-  border-radius: var(--raio);
-  font-family: var(--fonte-corpo);
-  font-size: var(--t-corpo);
-  font-weight: 600;
-  line-height: 1.2;
-  text-align: center;
-  text-decoration: none;
-  white-space: nowrap;
-  cursor: pointer;
-  position: relative;
-  transition: filter var(--d-rapida) ease, border-color var(--d-rapida) ease,
-    background-color var(--d-rapida) ease, color var(--d-rapida) ease, transform var(--d-rapida) ease;
-}
-
-.botao:active:not(:disabled) {
-  transform: translateY(1px);
-}
-
-.botao-primario {
-  background: var(--acento);
-  border-color: var(--acento);
-  color: var(--sobre-acento);
-}
-
-.botao-primario:hover {
-  color: var(--sobre-acento);
-  filter: brightness(1.08);
-}
-
-:root[data-tema="claro"] .botao-primario:hover {
-  filter: brightness(0.92);
-}
-
-.botao-fantasma {
+.nav-principal.com-ind a[aria-current="page"] {
   background: transparent;
-  border-color: var(--linha);
-  color: var(--texto);
-  font-weight: 500;
+  box-shadow: none;
 }
 
-.botao-fantasma:hover {
-  color: var(--texto);
-  border-color: var(--borda-forte);
-}
-
-/* Ação discreta: só texto sublinhado ("Pular por agora", "Cancelar"). */
-.botao-texto {
-  min-height: 44px;
-  padding: 0 var(--e-2);
-  background: transparent;
-  border: 0;
-  color: var(--texto-2);
-  font-size: var(--t-corpo);
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-  cursor: pointer;
-}
-
-.botao-texto:hover {
-  color: var(--texto);
-}
-
-.botao-grande {
-  min-height: 52px;
-  padding: 16px 28px;
-  font-size: var(--t-corpo-g);
-}
-
-.botao-pequeno {
-  min-height: 40px;
-  padding: 10px 16px;
-  font-size: var(--t-apoio);
-}
-
-.botao-bloco {
-  width: 100%;
-}
-
-.botao:disabled,
-.botao[aria-disabled="true"] {
-  opacity: 0.5;
-  cursor: not-allowed;
-  filter: none;
-}
-
-/* Carregando: o texto continua (o JS troca por "Entrando..." etc.) e uma
-   linha corre embaixo do botão, para o estado ser visível sem girar nada. */
-/* data-loading é o que o ronuDefinirCarregando (js/auth.js) marca no botão. */
-.botao[aria-busy="true"],
-.botao[data-loading="true"] {
-  cursor: progress;
-  opacity: 0.85;
-}
-
-.botao[aria-busy="true"]::after,
-.botao[data-loading="true"]::after {
+.nav-principal /* A pílula é o ::before do grupo (js/base/indicador.js põe as variáveis). */
+.com-ind::before {
   content: '';
   position: absolute;
-  left: 12%;
-  right: 12%;
-  bottom: 7px;
-  height: 2px;
-  border-radius: 1px;
-  background: currentColor;
-  opacity: 0.6;
-  transform-origin: left;
-  animation: botao-carregando 1.2s var(--curva-suave) infinite;
-}
-
-@keyframes botao-carregando {
-  0% { transform: scaleX(0); }
-  60% { transform: scaleX(1); opacity: 0.6; }
-  100% { transform: scaleX(1); opacity: 0; }
-}
-
-/* ---------- Campos ---------- */
-.campo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--e-2);
-  min-width: 0;
-}
-
-.campo-rotulo {
-  font-size: var(--t-apoio);
-  font-weight: 500;
-  color: var(--texto);
-}
-
-.campo-linha-rotulo {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--e-3);
-}
-
-.entrada {
-  width: 100%;
-  min-height: 48px;
-  padding: 13px 15px;
+  z-index: 0;
+  top: 0;
+  left: 0;
+  width: var(--ind-w, 0);
+  height: var(--ind-h, 0);
+  transform: translate(var(--ind-x, 0), var(--ind-y, 0));
+  border-radius: var(--raio-pilula);
   background: var(--superficie);
-  border: 1px solid var(--borda-campo);
-  border-radius: var(--raio);
-  color: var(--texto);
-  font-size: var(--t-corpo-g);
-  line-height: 1.4;
-  transition: border-color var(--d-rapida) ease, background-color var(--d-rapida) ease;
+  box-shadow: var(--sombra-leve);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.55s var(--curva-mola), width 0.55s var(--curva-mola), height 0.3s ease, opacity 0.2s ease;
 }
 
-/* Campo sobre card (Progresso, Perfil, Alimentação): fundo da página. */
-.entrada-no-card {
-  background: var(--fundo);
-}
-
-.entrada::placeholder {
-  color: var(--texto-3);
+.com-ind.ind-visivel::before {
   opacity: 1;
 }
 
-.entrada:hover {
-  border-color: var(--borda-forte);
+.com-ind.ind-sem-animar::before {
+  transition: none;
 }
 
-.entrada:focus,
-.entrada:focus-visible {
-  outline: none;
-  border-color: var(--acento);
-}
-
-/* .field-error é a classe que o ronuMarcarCampoInvalido (js/auth.js) põe no
-   bloco do campo; aria-invalid, para quem marca o próprio campo. */
-.entrada[aria-invalid="true"],
-.field-error .entrada {
-  border-color: var(--erro-campo);
-}
-
-textarea.entrada {
-  resize: vertical;
-  line-height: 1.5;
-}
-
-/* Campos de data e de hora: no celular (iOS e alguns Androids) o navegador dá
-   ao campo uma largura mínima própria e o texto passa da caixa. Aqui ele
-   obedece à coluna, com a mesma altura dos outros campos. */
-.entrada[type="date"],
-.entrada[type="time"] {
-  -webkit-appearance: none;
-  appearance: none;
-  display: block;
-  min-width: 0;
-  max-width: 100%;
-  padding-left: 12px;
-  padding-right: 10px;
-}
-
-@media (max-width: 380px) {
-  .entrada[type="date"],
-  .entrada[type="time"] {
-    font-size: 0.9375rem;
-  }
-}
-
-.entrada[type="date"]::-webkit-date-and-time-value,
-.entrada[type="time"]::-webkit-date-and-time-value {
-  min-width: 0;
-  text-align: left;
-}
-
-.entrada[type="date"]::-webkit-datetime-edit,
-.entrada[type="date"]::-webkit-datetime-edit-fields-wrapper,
-.entrada[type="time"]::-webkit-datetime-edit,
-.entrada[type="time"]::-webkit-datetime-edit-fields-wrapper {
-  padding: 0;
-}
-
-/* Campo de senha com o botão de olho (js/base/senha.js monta a caixa). */
-.senha-caixa {
-  position: relative;
-}
-
-.senha-caixa .entrada {
-  padding-right: 52px;
-}
-
-/* O Edge desenha um olho próprio: fica só o nosso. */
-.senha-caixa .entrada::-ms-reveal {
-  display: none;
-}
-
-.botao-ver-senha {
-  position: absolute;
-  top: 50%;
-  right: 4px;
-  width: 44px;
-  height: 40px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: 0;
-  border-radius: var(--raio);
-  background: transparent;
-  color: var(--texto-2);
-  transform: translateY(-50%);
-  cursor: pointer;
-  transition: color var(--d-rapida) ease;
-}
-
-.botao-ver-senha:hover {
-  color: var(--texto);
-}
-
-.botao-ver-senha:focus-visible {
-  outline: 2px solid var(--acento);
-  outline-offset: -2px;
-}
-
-.botao-ver-senha svg {
-  width: 20px;
-  height: 20px;
-}
-
-/* O ícone mostra a ação: olho para mostrar, olho riscado para esconder. */
-.botao-ver-senha .icone-ocultar,
-.botao-ver-senha[aria-pressed="true"] .icone-mostrar {
-  display: none;
-}
-
-.botao-ver-senha[aria-pressed="true"] .icone-ocultar {
-  display: block;
-}
-
-select.entrada {
-  appearance: none;
-  padding-right: 40px;
-  background-image:
-    linear-gradient(45deg, transparent 50%, var(--texto-2) 50%),
-    linear-gradient(135deg, var(--texto-2) 50%, transparent 50%);
-  background-position: calc(100% - 20px) 52%, calc(100% - 15px) 52%;
-  background-size: 5px 5px, 5px 5px;
-  background-repeat: no-repeat;
-}
-
-.campo-dica {
-  font-size: var(--t-pequeno);
-  color: var(--texto-2);
-  line-height: 1.5;
-}
-
-.campo-erro {
-  font-size: var(--t-pequeno);
-  color: var(--acento-texto);
-  line-height: 1.5;
-}
-
-/* ---------- Segmentado (Masculino | Feminino, períodos, versões) ---------- */
-.segmentado {
-  display: flex;
-  border: 1px solid var(--borda);
-  border-radius: var(--raio);
-  overflow: hidden;
-  background: var(--fundo);
-}
-
-.segmentado > button {
-  flex: 1;
-  min-height: 46px;
-  padding: 10px 16px;
-  border: 0;
-  background: transparent;
-  color: var(--texto-2);
-  font-size: var(--t-apoio);
-  white-space: nowrap;
-  transition: background-color var(--d-rapida) ease, color var(--d-rapida) ease;
-}
-
-.segmentado > button + button {
-  border-left: 1px solid var(--borda);
-}
-
-.segmentado > button:hover {
-  color: var(--texto);
-}
-
-.segmentado > button[aria-checked="true"],
-.segmentado > button[aria-selected="true"] {
-  background: var(--superficie-3);
-  color: var(--texto);
-}
-
-/* Variante cheia: a escolha fica no acento (sexo, objetivo no registro). */
-.segmentado-acento > button {
-  color: var(--texto);
-  font-size: var(--t-corpo);
-}
-
-.segmentado-acento > button[aria-checked="true"] {
+.segmentado-acento.com-ind::before {
   background: var(--acento);
-  color: var(--sobre-acento);
-  font-weight: 600;
+  box-shadow: 0 8px 18px -10px var(--acento);
 }
 
 .segmentado > button:focus-visible {
@@ -703,29 +211,32 @@ select.entrada {
   align-items: center;
   gap: var(--e-4);
   width: 100%;
-  padding: 18px 20px;
-  background: transparent;
-  border: 1px solid var(--borda);
+  padding: 16px 18px;
+  background: var(--superficie);
+  border: 1.5px solid var(--borda);
   border-radius: var(--raio-2);
   color: var(--texto);
   text-align: left;
-  transition: border-color var(--d-rapida) ease, background-color var(--d-rapida) ease;
+  transition: border-color var(--d-media) ease, background-color var(--d-media) ease,
+    transform var(--d-media) var(--curva-mola);
 }
 
 .opcao:hover {
   border-color: var(--borda-hover);
+  transform: translateY(-2px);
 }
 
 .opcao[aria-checked="true"],
 .opcao[aria-pressed="true"] {
-  background: var(--superficie-3);
+  background: color-mix(in srgb, var(--acento) 6%, var(--superficie));
   border-color: var(--acento);
 }
 
 .opcao-titulo {
   font-family: var(--fonte-titulo);
   font-weight: 800;
-  font-size: 1.25rem;
+  font-size: 1.0625rem;
+  letter-spacing: -0.01em;
   line-height: 1.2;
 }
 
@@ -758,11 +269,11 @@ select.entrada {
 }
 
 .nivel-opcao .opcao-titulo {
-  font-size: 1.05rem;
+  font-size: 1rem;
 }
 
 .field-error .nivel-opcao {
-  border-color: var(--erro-campo);
+  border-color: var(--erro);
 }
 
 @media (max-width: 640px) {
@@ -779,17 +290,28 @@ select.entrada {
   gap: var(--e-1);
   min-height: 36px;
   padding: 6px 14px;
-  border: 1px solid var(--linha);
+  border: 1.5px solid var(--linha);
   border-radius: var(--raio-pilula);
-  background: transparent;
+  background: var(--superficie);
   color: var(--texto);
-  font-size: var(--t-corpo);
+  font-size: var(--t-apoio);
+  font-weight: 700;
   line-height: 1.3;
-  transition: border-color var(--d-rapida) ease, background-color var(--d-rapida) ease, color var(--d-rapida) ease;
+  transition: border-color var(--d-rapida) ease, background-color var(--d-rapida) ease, color var(--d-rapida) ease,
+    transform var(--d-media) var(--curva-mola);
+  animation: chip-brotar 0.45s var(--curva-mola) backwards;
+}
+
+@keyframes chip-brotar {
+  from { opacity: 0; transform: scale(0.7); }
 }
 
 button.chip:hover {
-  border-color: var(--borda-forte);
+  border-color: var(--borda-hover);
+}
+
+button.chip:active {
+  transform: scale(0.95);
 }
 
 .chip-pequeno {
@@ -803,20 +325,20 @@ button.chip:hover {
   background: var(--acento);
   border-color: var(--acento);
   color: var(--sobre-acento);
-  font-weight: 600;
 }
 
+/* "Gosto de comer": verde, como no protótipo da Alimentação. */
 .chip-gosto {
-  background: var(--superficie-3);
-  border-color: var(--acento);
+  background: color-mix(in srgb, var(--verde) 8%, var(--superficie));
+  border-color: color-mix(in srgb, var(--verde) 45%, var(--linha));
 }
 
 /* "Não como": tracejado no acento, para não depender só da cor. A classe guarda o nome de antes da etapa 3,
    quando o bloqueio se chamava "Prefiro evitar". */
 .chip-evitar {
-  border-style: dashed;
-  border-color: var(--acento);
-  color: var(--acento-texto);
+  border-color: color-mix(in srgb, var(--acento) 40%, var(--linha));
+  background: var(--acento-suave);
+  color: var(--texto);
 }
 
 /* "Prefiro evitar" leve (etapa 3): o mesmo tracejado, sem o acento (o item ainda pode aparecer). */
@@ -827,7 +349,16 @@ button.chip:hover {
 
 .chip-sugestao {
   border-style: dashed;
-  transition: transform var(--d-media) var(--curva-saida), border-color var(--d-rapida) ease;
+  border-color: var(--borda-campo);
+  background: transparent;
+  color: var(--texto-2);
+  transition: transform var(--d-media) var(--curva-mola), border-color var(--d-rapida) ease, color var(--d-rapida) ease;
+}
+
+.chip-sugestao:hover {
+  color: var(--texto);
+  border-style: solid;
+  border-color: var(--verde);
 }
 
 .chip-sugestao:hover {
@@ -854,7 +385,7 @@ button.chip:hover {
 
 .chip-remover:hover {
   opacity: 1;
-  background: var(--superficie-3);
+  background: var(--superficie-2);
 }
 
 .chip-remover svg {
@@ -874,11 +405,13 @@ button.chip:hover {
 .etiqueta-alergia {
   display: inline-flex;
   align-items: center;
-  padding: 1px 8px;
-  border: 1px solid var(--erro-campo);
+  padding: 2px 9px;
+  border: 1px solid color-mix(in srgb, var(--erro) 45%, transparent);
   border-radius: var(--raio-pilula);
+  background: var(--erro-suave);
   color: var(--acento-texto);
   font-size: var(--t-pequeno);
+  font-weight: 700;
   line-height: 1.4;
 }
 
@@ -889,17 +422,26 @@ button.chip:hover {
   flex: none;
   display: inline-flex;
   align-items: center;
-  padding: 1px 8px;
-  border: 1px solid var(--linha);
+  gap: 5px;
+  padding: 3px 10px;
+  border: 0;
   border-radius: var(--raio-pilula);
-  color: var(--texto-2);
+  background: var(--acento-suave);
+  color: var(--acento-texto);
   font-family: var(--fonte-corpo);
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 11.5px;
+  font-weight: 800;
   line-height: 1.5;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
   white-space: nowrap;
+}
+
+.pilula-casa::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 /* ---------- Dias da semana (7 botões) ---------- */
@@ -911,16 +453,17 @@ button.chip:hover {
 
 .dias > button,
 .dias > span {
-  min-height: 40px;
-  padding: 8px 0;
-  border: 1px solid var(--borda);
+  min-height: 42px;
+  padding: 9px 0;
+  border: 1.5px solid var(--borda);
   border-radius: var(--raio);
-  background: transparent;
-  color: var(--texto);
+  background: var(--superficie);
+  color: var(--texto-2);
   font-size: var(--t-pequeno);
-  font-weight: 600;
+  font-weight: 800;
   text-align: center;
-  transition: background-color var(--d-rapida) ease, border-color var(--d-rapida) ease, color var(--d-rapida) ease;
+  transition: background-color var(--d-media) ease, border-color var(--d-media) ease, color var(--d-media) ease,
+    transform var(--d-lenta) var(--curva-mola);
 }
 
 .dias > span {
@@ -937,7 +480,8 @@ button.chip:hover {
   background: var(--acento);
   border-color: var(--acento);
   color: var(--sobre-acento);
-  font-weight: 600;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 18px -12px var(--acento);
 }
 
 /* ---------- Cards ---------- */
@@ -945,11 +489,19 @@ button.chip:hover {
   background: var(--superficie);
   border: 1px solid var(--borda);
   border-radius: var(--raio-card);
-  padding: var(--e-6);
+  padding: 22px;
   display: flex;
   flex-direction: column;
   gap: var(--e-4);
   min-width: 0;
+  transition: transform var(--d-media) var(--curva-saida), box-shadow var(--d-media) ease, border-color var(--d-media) ease;
+}
+
+@media (max-width: 560px) {
+  .cartao {
+    padding: 18px;
+    border-radius: 20px;
+  }
 }
 
 .cartao-cabeca {
@@ -961,63 +513,61 @@ button.chip:hover {
 }
 
 .cartao-link {
-  font-size: var(--t-pequeno);
+  font-size: var(--t-apoio);
+  font-weight: 700;
   color: var(--acento-texto);
 }
 
-/* Zoom leve no hover, como nas telas aprovadas. Só em ponteiro fino. */
+/* Card que sobe no hover, com sombra leve. Só em ponteiro fino. */
 @media (hover: hover) and (pointer: fine) {
-  .ergue {
-    transition: transform var(--d-media) var(--curva-saida), border-color var(--d-media) ease;
-  }
-
   .ergue:hover {
-    transform: scale(1.012);
-    border-color: var(--borda-hover);
+    transform: translateY(-3px);
+    box-shadow: var(--sombra-leve);
   }
 }
 
 /* ---------- Avisos de formulário ---------- */
 .aviso {
-  padding: 14px 16px;
+  padding: 12px 16px;
   border: 1px solid var(--borda);
-  border-radius: var(--raio);
-  font-size: var(--t-corpo);
+  border-radius: 16px;
+  font-size: var(--t-apoio);
+  font-weight: 600;
   line-height: 1.5;
   color: var(--texto);
+  animation: aviso-abrir 0.4s var(--curva-saida);
+}
+
+@keyframes aviso-abrir {
+  from { opacity: 0; transform: translateY(-6px); }
 }
 
 .aviso-erro {
-  border-color: var(--erro-borda);
-  background: var(--erro-fundo);
+  border-color: color-mix(in srgb, var(--erro) 35%, transparent);
+  background: var(--erro-suave);
 }
 
 .aviso-sucesso {
-  border-color: var(--sucesso-borda);
-  background: var(--sucesso-fundo);
+  border-color: color-mix(in srgb, var(--verde) 35%, transparent);
+  background: color-mix(in srgb, var(--verde) 10%, var(--superficie));
+  color: var(--verde);
 }
 
 /* ---------- Nota: traço curto no acento antes do texto ---------- */
+/* Nota: caixa suave na segunda superfície (o traço de antes saiu no redesign). */
 .nota {
-  display: flex;
-  align-items: baseline;
-  gap: var(--e-3);
+  display: block;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--superficie-2);
   font-size: var(--t-apoio);
   line-height: 1.55;
   color: var(--texto-2);
 }
 
-.nota::before {
-  content: '';
-  flex: none;
-  width: 14px;
-  height: 1px;
-  background: var(--acento);
-  transform: translateY(-0.3em);
-}
-
 .nota-forte {
   color: var(--texto);
+  font-weight: 600;
 }
 
 /* ---------- Aceite: a caixa do consentimento (cadastro e consentimento.html) ----------
@@ -1027,19 +577,21 @@ button.chip:hover {
   display: flex;
   flex-direction: column;
   gap: var(--e-3);
-  padding: var(--e-4);
-  border: 1px solid var(--borda-campo);
-  border-radius: var(--raio-2);
+  padding: 14px 16px;
+  border: 1px solid var(--borda);
+  border-radius: 16px;
   background: var(--superficie);
-  transition: border-color var(--d-rapida) ease;
+  transition: border-color var(--d-media) ease, background-color var(--d-media) ease;
 }
 
 .aceite:has(input:checked) {
-  border-color: var(--acento);
+  border-color: color-mix(in srgb, var(--verde) 55%, var(--borda));
+  background: color-mix(in srgb, var(--verde) 6%, var(--superficie));
 }
 
 .aceite[aria-invalid="true"] {
-  border-color: var(--erro-campo);
+  border-color: var(--erro);
+  animation: campo-tremer 0.35s;
 }
 
 .aceite-marcar {
@@ -1061,9 +613,9 @@ button.chip:hover {
   margin: 0;
   display: grid;
   place-content: center;
-  border: 1px solid var(--borda-campo);
-  border-radius: var(--raio);
-  background: var(--fundo);
+  border: 1.5px solid var(--borda-campo);
+  border-radius: 7px;
+  background: var(--superficie);
   cursor: pointer;
   transition: background-color var(--d-rapida) ease, border-color var(--d-rapida) ease;
 }
@@ -1073,15 +625,15 @@ button.chip:hover {
   content: '';
   width: 6px;
   height: 11px;
-  border: solid var(--sobre-acento);
+  border: solid #FFFFFF;
   border-width: 0 2px 2px 0;
   transform: translateY(-1px) rotate(45deg) scale(0);
   transition: transform var(--d-rapida) var(--curva-saida);
 }
 
 .aceite-marcar input:checked {
-  background: var(--acento);
-  border-color: var(--acento);
+  background: var(--verde);
+  border-color: var(--verde);
 }
 
 .aceite-marcar input:checked::after {
@@ -1135,8 +687,9 @@ button.chip:hover {
 }
 
 .alg-chip[data-estado="pendente"] {
-  background: var(--superficie-3);
+  background: var(--acento-suave);
   border-color: var(--acento);
+  border-style: dashed;
   color: var(--texto);
 }
 
@@ -1157,7 +710,8 @@ button.chip:hover {
 
 /* Coberto: não marcado, mas já sai junto com o par (Amendoim e Castanhas). */
 .alg-chip[data-coberto] {
-  background: var(--superficie-3);
+  background: var(--acento-suave);
+  border-color: color-mix(in srgb, var(--acento) 45%, var(--linha));
 }
 
 .alg-chip-com {
@@ -1215,15 +769,26 @@ button.chip:hover {
 }
 
 /* ---------- Ação que apaga: tom de erro, nunca o vermelho do botão principal ---------- */
+/* No Washi o erro é escuro o bastante para texto branco (5,6:1); no Dojo
+   Noturno ele é claro, então o texto fica escuro (--fundo, 7:1). */
 .botao-perigo {
-  background: var(--erro-fundo);
-  border-color: var(--erro-campo);
-  color: var(--texto);
+  background: var(--erro);
+  border-color: var(--erro);
+  color: var(--fundo);
+  box-shadow: none;
+}
+
+:root[data-tema="claro"] .botao-perigo {
+  color: #FFFFFF;
 }
 
 .botao-perigo:hover:not(:disabled) {
-  color: var(--texto);
-  border-color: var(--acento);
+  color: var(--fundo);
+  box-shadow: 0 10px 22px -12px var(--erro);
+}
+
+:root[data-tema="claro"] .botao-perigo:hover:not(:disabled) {
+  color: #FFFFFF;
 }
 
 /* ---------- Carimbo 浪人 ---------- */
@@ -1354,9 +919,9 @@ button.chip:hover {
 
 .etapas li::before {
   content: '';
-  height: 3px;
-  border-radius: 2px;
-  background: var(--linha);
+  height: 4px;
+  border-radius: var(--raio-pilula);
+  background: var(--superficie-2);
   transition: background-color 0.4s ease, opacity 0.4s ease;
 }
 
@@ -1369,8 +934,8 @@ button.chip:hover {
 }
 
 .etapas [aria-current="step"] {
-  color: var(--texto);
-  font-weight: 600;
+  color: var(--acento-texto);
+  font-weight: 800;
 }
 
 .etapas [aria-current="step"]::before {
@@ -1381,15 +946,14 @@ button.chip:hover {
 /* ---------- Barras e anéis ---------- */
 .trilho {
   position: relative;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--borda);
+  height: 6px;
+  border-radius: var(--raio-pilula);
+  background: var(--superficie-2);
   overflow: hidden;
 }
 
 .trilho-g {
-  height: 6px;
-  background: var(--superficie-3);
+  height: 8px;
 }
 
 .preenche {
@@ -1397,7 +961,7 @@ button.chip:hover {
   top: 0;
   left: 0;
   height: 100%;
-  border-radius: 2px;
+  border-radius: var(--raio-pilula);
   background: var(--acento);
 }
 
@@ -1414,7 +978,7 @@ button.chip:hover {
 }
 
 .anel-fundo {
-  stroke: var(--borda);
+  stroke: var(--superficie-2);
   fill: none;
 }
 
@@ -1426,9 +990,9 @@ button.chip:hover {
 
 /* ---------- Carregando (barra que corre) ---------- */
 .carregando {
-  height: 3px;
-  border-radius: 2px;
-  background: var(--borda);
+  height: 6px;
+  border-radius: var(--raio-pilula);
+  background: var(--superficie-2);
   overflow: hidden;
 }
 
@@ -1436,6 +1000,7 @@ button.chip:hover {
   content: '';
   display: block;
   height: 100%;
+  border-radius: inherit;
   background: var(--acento);
   transform-origin: left;
   animation: carregando 2.4s ease-in-out infinite;
@@ -1450,7 +1015,7 @@ button.chip:hover {
 /* ---------- Estado vazio ---------- */
 .vazio {
   padding: var(--e-7);
-  border: 1px dashed var(--linha);
+  border: 1.5px dashed var(--borda-campo);
   border-radius: var(--raio-card);
   color: var(--texto-2);
   line-height: 1.6;
@@ -1484,8 +1049,8 @@ button.chip:hover {
   padding: 14px 12px;
   text-align: left;
   font-size: var(--t-rotulo);
-  font-weight: 500;
-  letter-spacing: 0.12em;
+  font-weight: 800;
+  letter-spacing: var(--rastreio-rotulo);
   text-transform: uppercase;
   color: var(--texto-2);
 }
@@ -1648,9 +1213,10 @@ button.chip:hover {
   max-width: none;
   max-height: none;
   padding: 0;
-  border: 1px solid var(--linha);
+  border: 1px solid var(--borda);
   background: var(--superficie);
   color: var(--texto);
+  box-shadow: var(--sombra);
 }
 
 .folha[open] {
@@ -1659,7 +1225,9 @@ button.chip:hover {
 }
 
 .folha::backdrop {
-  background: color-mix(in srgb, var(--fundo) 72%, transparent);
+  background: rgba(10, 8, 6, 0.5);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
 }
 
 body:has(.folha[open]) {
@@ -1684,9 +1252,10 @@ body:has(.folha[open]) {
 }
 
 .folha-titulo {
-  font-size: var(--t-h3);
+  font-size: var(--t-h2);
   font-weight: 800;
-  line-height: 1.2;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
   text-wrap: balance;
 }
 
@@ -1707,17 +1276,17 @@ body:has(.folha[open]) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
-  border: 1px solid var(--borda);
-  border-radius: var(--raio);
+  background: var(--superficie-2);
+  border: 0;
+  border-radius: 50%;
   color: var(--texto-2);
   cursor: pointer;
-  transition: color var(--d-rapida) ease, border-color var(--d-rapida) ease;
+  transition: color var(--d-rapida) ease, transform var(--d-media) var(--curva-mola);
 }
 
 .folha-fechar:hover {
   color: var(--texto);
-  border-color: var(--borda-hover);
+  transform: rotate(90deg);
 }
 
 .folha-fechar svg {
