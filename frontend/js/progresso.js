@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const elAderenciaData = $('aderencia-data');
   const btnLimparAderencia = $('aderencia-limpar');
   const elObjetivoAlterado = $('aderencia-objetivo-alterado');
+  const elRefeicoesFeitas = $('aderencia-refeicoes');
 
   // Abaixo de 720 px o formulário fica sempre aberto (canvas ProgressoMobile).
   const celular = window.matchMedia('(max-width: 720px)');
@@ -65,6 +66,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // regra de "hoje" do upsert — o front nunca compara datas para isso.
   let aderenciaSalva = null;
   let registradoHoje = false;
+  // Refeições marcadas como feitas desde a pesagem da pergunta (GET /objetivos/atual); nulo sem ela.
+  let refeicoesFeitas = null;
   let temDieta = false;
 
   // ---------- Formatação ----------
@@ -530,6 +533,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     registradoHoje = objetivo.registradoHoje === true;
     temDieta = objetivo.temDieta === true;
     progressoAjuste = objetivo.progressoAjuste || null;
+    refeicoesFeitas = Number.isInteger(objetivo.refeicoesFeitasDesdePesagem) ? objetivo.refeicoesFeitasDesdePesagem : null;
+  }
+
+  // "Desde essa pesagem, você marcou 17 refeições como feitas." Só informa: nenhuma resposta vem marcada por causa
+  // dele. Sem nenhuma marcada, a linha some (um "0" soaria como cobrança para quem não usa a marcação).
+  function atualizarRefeicoesFeitas() {
+    const mostrar = refeicoesFeitas != null && refeicoesFeitas > 0;
+    elRefeicoesFeitas.hidden = !mostrar;
+    if (!mostrar) return;
+    const numero = criar('strong', 'num', refeicoesFeitas.toLocaleString('pt-BR'));
+    elRefeicoesFeitas.replaceChildren(
+      'Desde essa pesagem, você marcou ', numero,
+      refeicoesFeitas === 1 ? ' refeição como feita.' : ' refeições como feitas.');
   }
 
   // Se o registro de hoje já existe, o último ponto é ele mesmo — a
@@ -547,6 +563,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const objetivoAlterado = disponivel && Boolean(objetivoMarcado) && objetivoMarcado.value !== objetivoAtual;
 
     if (disponivel) elAderenciaData.textContent = formatarDataPorExtenso(dataAnterior);
+    atualizarRefeicoesFeitas();
 
     // Só esconde (não desmarca): voltando ao objetivo salvo, a resposta
     // continua lá.

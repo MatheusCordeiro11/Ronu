@@ -215,6 +215,19 @@ fieldset.campo legend {
   color: var(--texto);
 }
 
+/* Refeição feita: quantas foram marcadas desde a pesagem. Neutro: nenhuma cor muda com o número. */
+.pg-refeicoes-feitas {
+  margin: 0;
+  font-size: var(--t-apoio);
+  line-height: 1.45;
+  color: var(--texto-2);
+}
+
+.pg-refeicoes-feitas strong {
+  font-weight: 800;
+  color: var(--texto);
+}
+
 .pg-aderencia-opcoes {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

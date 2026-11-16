@@ -83,12 +83,15 @@
           <!-- Aderência à dieta desde a pesagem anterior (opcional). O
                progresso.js decide quando mostrar: só com dieta gerada, com
                pesagem anterior e com o mesmo objetivo já salvo. -->
-          <fieldset class="pg-aderencia" id="aderencia-fieldset" aria-describedby="aderencia-apoio" hidden>
+          <fieldset class="pg-aderencia" id="aderencia-fieldset" aria-describedby="aderencia-apoio aderencia-refeicoes" hidden>
             <div class="pg-aderencia-cabeca">
               <legend class="pg-aderencia-pergunta">Desde a pesagem de <span id="aderencia-data"></span>, como foi com a dieta?</legend>
               <span class="apoio" id="aderencia-apoio">Opcional. Ajuda o Ronu a ajustar suas calorias.</span>
               <button type="button" class="botao-texto pg-limpar" id="aderencia-limpar" hidden>Limpar resposta</button>
             </div>
+            <!-- Refeição feita (etapa 5): só informa quantas refeições a pessoa marcou desde essa pesagem, sem total e
+                 sem pré-selecionar resposta. Só aparece com pelo menos uma marcada. -->
+            <p class="pg-refeicoes-feitas" id="aderencia-refeicoes" hidden></p>
             <div class="pg-aderencia-opcoes">
               <label class="pg-opcao"><input type="radio" name="peso-registrar-aderencia" value="seguiu"><span class="pg-opcao-titulo">Segui a dieta</span><span class="pg-opcao-dica">Comi o que a dieta pedia</span></label>
               <label class="pg-opcao"><input type="radio" name="peso-registrar-aderencia" value="comeu_mais"><span class="pg-opcao-titulo">Comi um pouco mais</span><span class="pg-opcao-dica">Passei um pouco</span></label>
