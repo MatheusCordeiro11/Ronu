@@ -166,7 +166,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .faixa { padding-block: 96px 24px; text-align: center; }
 .faixa p { font-size: 14px; font-weight: 500; color: var(--texto-2); }
 .letreiro { margin-top: 22px; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
-.letreiro-trilho { display: flex; width: max-content; animation: letreiro 32s linear infinite; }
+.letreiro-trilho { display: flex; width: max-content; animation: letreiro 64s linear infinite; /* 4 cópias: metade (2) cobre telas até ~2600 px */ }
 .letreiro:hover .letreiro-trilho { animation-play-state: paused; }
 .letreiro ul { display: flex; gap: 48px; padding: 0 24px; margin: 0; list-style: none; }
 .letreiro li { white-space: nowrap; }
