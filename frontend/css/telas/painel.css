@@ -1359,6 +1359,14 @@ button.db-trocado:hover {
   animation: entra 0.5s var(--curva-saida) backwards;
 }
 
+/* Com o card em coluna, as bases de 280px e 150px do visual antigo (feitas
+   para a linha) viravam altura e deixavam um vazio no card (2026-11-16). */
+.db-refeicao > .db-refeicao-lista,
+.db-refeicao > .db-alimentos,
+.db-refeicao > .db-refeicao-totais {
+  flex: none;
+}
+
 .db-refeicao-titulo {
   flex: none;
   flex-direction: row;
@@ -1412,6 +1420,7 @@ button.db-trocado:hover {
 
 .db-refeicao-totais {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 14px;
   flex-wrap: wrap;
@@ -1435,6 +1444,11 @@ button.db-trocado:hover {
   padding: 7px 14px;
   font-size: 13px;
   font-weight: 700;
+}
+
+/* No rodapé em linha, a troca fica na ponta direita, como no celular. */
+.db-refeicao-totais .db-trocar {
+  margin: 0 0 0 auto;
 }
 
 .db-trocar[aria-pressed="true"] {
