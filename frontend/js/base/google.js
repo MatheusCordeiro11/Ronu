@@ -20,7 +20,7 @@
     window.google.accounts.id.renderButton(slot, {
       theme: modo === 'claro' ? 'outline' : 'filled_black',
       size: 'large',
-      shape: 'rectangular',
+      shape: 'pill',
       width: largura,
       text: texto,
       locale: 'pt-BR'
