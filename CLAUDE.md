@@ -1,7 +1,7 @@
 # Ronu
 
 Projeto de portfólio. App web que gera dietas semanais com IA (Gemini) para quem treina
-artes marciais e esportes de combate, a partir do gasto calórico real de cada modalidade.
+artes marciais, esportes e condicionamento (26 modalidades), a partir do gasto calórico real de cada modalidade.
 
 ## Stack e hospedagem
 
@@ -15,7 +15,7 @@ artes marciais e esportes de combate, a partir do gasto calórico real de cada m
 - Responder sempre em português (pt-BR).
 - O usuário não escreve código: ele decide e testa.
 - Nunca editar um arquivo sem antes ler o conteúdo atual.
-- Mudança visual nova: rodar `$impeccable shape` seguindo o design system "Dojo Noturno" (`DESIGN.md`, com os modos escuro e Washi) e ter o shape aprovado antes de escrever código. Toda cor sai das variáveis de `frontend/css/base/tokens.css`, e cada tela é conferida nos dois modos.
+- Mudança visual nova: rodar `$impeccable shape` seguindo o design system "Dojo Noturno" (`DESIGN.md`, com os modos escuro e Washi) e ter o shape aprovado antes de escrever código. Toda cor, sombra e fonte sai das variáveis de `frontend/css/base/tokens.css`, e cada tela é conferida nos dois modos. O `DESIGN.md` já descreve o redesign de nov/2026 (os protótipos de referência estão listados nele), mas o código ainda está no visual antigo: a migração vai em etapas, registrada em `docs/lacunas-conhecidas.md`.
 - Mudança não visual complexa: investigar e apresentar uma proposta antes de escrever código.
 - Nunca fazer commit, push ou deploy sem pedido explícito. Todo commit vem só depois do teste manual do usuário.
 - Problemas encontrados no caminho devem ser sinalizados, mas não resolvidos sem aprovação.
@@ -91,6 +91,6 @@ Migration (se houver) → backend no Azure → push do frontend que depende dele
 
 ## Documentação
 
-- `docs/`: `design-api.md`, `lacunas-conhecidas.md` (status de features e pendências ficam **só** aqui), `user-stories.md`, `diagrama-classes.md`, `fluxogramas.md`, DER e fluxos em PNG, `seed-modalidades.sql`, `fontes-nutricionais.md` (fontes, licenças e método da base nutricional própria e da conversão para a lista de compras), `compras/` (linhas da TACO e do USDA usadas na lista de compras, com o script de extração).
-- `DESIGN.md`: design system "Dojo Noturno", com os modos escuro e Washi.
+- `docs/`: `design-api.md`, `lacunas-conhecidas.md` (status de features e pendências ficam **só** aqui), `user-stories.md`, `diagrama-classes.md`, `fluxogramas.md`, DER e fluxos em PNG, `seed-modalidades.sql`, `fontes-nutricionais.md` (fontes, licenças e método da base nutricional própria e da conversão para a lista de compras), `compras/` (linhas da TACO e do USDA usadas na lista de compras, com o script de extração), `icones-3d.md` (onde fica cada ícone 3D e ilustração de `frontend/img/`, o prompt do Figma para gerar um novo, o recorte com `tools/recorta-icone-3d.py` e as camadas do envelope).
+- `DESIGN.md`: design system "Dojo Noturno", com os modos escuro e Washi, já no visual do redesign de nov/2026 (com a tabela de migração dos tokens).
 - `PRODUCT.md`: contexto de produto.
