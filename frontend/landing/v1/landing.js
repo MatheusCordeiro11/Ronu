@@ -125,6 +125,7 @@
     $('mk-meta-obs').classList.toggle('acento', t);
     trocaTexto($('mk-treino-obs'), t ? 'Calculado pela modalidade' : 'Dia de descanso');
     conta($('mk-meta'), meta, 800); conta($('mk-treino'), t ? 816 : 0, 800);
+    $('mk-treino-aprox').hidden = !t; // "~0" não faz sentido no descanso
     $('mk-total').textContent = fmt.format(meta);
     ['mk-card-meta', 'mk-card-treino'].forEach(function (id) { var c = $(id); c.classList.add('pulsa'); setTimeout(function () { c.classList.remove('pulsa'); }, 700); });
     ['p', 'c', 'g'].forEach(function (k, i) { $('mk-' + k).textContent = m[i] + ' g'; $('mk-' + k + 'b').style.width = (m[i] / MAX_M[i] * 100) + '%'; });

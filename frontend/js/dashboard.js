@@ -708,7 +708,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const passos = [
       ['Gasto em repouso', c.gastoRepouso],
       [rotuloDiaADia(c), c.atividadeForaDoTreino],
-      ...c.treino.map((t) => [`${t.nome}, ${formatarDecimal(t.horas, 2)} h`, t.kcal])
+      // O ritmo da aula só aparece quando não é "normal" (nulo nas dietas de antes do seletor).
+      ...c.treino.map((t) => [
+        [`${t.nome}, ${formatarDecimal(t.horas, 2)} h`, RonuRitmoAula.resumoPorNome(t.nome, t.intensidade)].filter(Boolean).join(' · '),
+        t.kcal
+      ])
     ];
     if (c.objetivo !== 0) {
       passos.push([`Objetivo: ${c.objetivo < 0 ? 'perder peso' : 'ganhar peso'}`, c.objetivo]);
@@ -734,6 +738,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         valor < 0 ? 'negativa' : '', i * 140);
     });
     linhas.push(criarLinhaConta('Meta do dia', `${formatarNumero(c.meta)} kcal`, 0, c.meta / topo, 'total', passos.length * 140));
+    // As parcelas somam a meta exata, então o treino fica sem "~": a nota diz que ele é estimado.
+    if (c.treino.length > 0) {
+      linhas.push(criar('p', 'nota db-conta-nota',
+        'O gasto do treino é uma estimativa, pelo Compêndio de Atividades Físicas e pelo ritmo da aula que você escolheu.'));
+    }
 
     $('db-conta').replaceChildren(...linhas);
   }
@@ -1088,7 +1097,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const cabeca = criar('div', 'db-treino-cabeca');
       cabeca.append(
         criar('span', 'db-treino-nome', um.modalidade.nome),
-        criar('span', 'apoio num', `${formatarDecimal(um.duracaoMediaHoras, 2)} h por sessão`)
+        criar('span', 'apoio num', [`${formatarDecimal(um.duracaoMediaHoras, 2)} h por sessão`,
+          RonuRitmoAula.resumo(um.modalidade, um.intensidade)].filter(Boolean).join(' · '))
       );
 
       const dias = criar('div', 'dias db-treino-dias');

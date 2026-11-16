@@ -830,6 +830,12 @@ button.db-trocado:hover {
   gap: var(--e-3);
 }
 
+/* O treino é estimado: a nota fica embaixo das parcelas, que somam a meta exata. */
+.db-conta-nota {
+  margin: 4px 0 0;
+  font-size: var(--t-pequeno);
+}
+
 .db-conta-linha {
   display: flex;
   flex-direction: column;
